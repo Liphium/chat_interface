@@ -1,8 +1,6 @@
 
 import 'package:chat_interface/connection/impl/message_listener.dart';
-import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/initialization/initialization_page.dart';
-import 'package:chat_interface/util/web.dart';
+import 'package:chat_interface/pages/status/initialization_page.dart';
 import 'package:get/get.dart';
 import 'package:get/route_manager.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -48,9 +46,9 @@ class Connector {
 
 Connector connector = Connector();
 
-void startConnection(String connectionToken) async {
+void startConnection(String node, String connectionToken) async {
   if(connector.initialized) return;
-  connector.connect("ws://localhost:8080/ws", connectionToken);
+  connector.connect("ws://$node/gateway", connectionToken);
 
   setupMessageListeners();
 }

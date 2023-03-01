@@ -1,8 +1,6 @@
-import 'package:chat_interface/pages/initialization/login/login_page.dart';
+import 'package:chat_interface/pages/status/starting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'pages/chat/chat_page.dart';
 
 class ChatApp extends StatelessWidget {
   const ChatApp({super.key});
@@ -14,9 +12,8 @@ class ChatApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'fj.chat',
       theme: ThemeData.dark(useMaterial3: true),
-      home: const LoginPage(),
+      home: const StartingPage(),
       debugShowCheckedModeBanner: false,
-      
     );
   }
 }

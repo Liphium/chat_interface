@@ -23,7 +23,7 @@ Uri server(String path) {
   return Uri.parse('http://localhost:3000$path');
 }
 
-Future<Response> postRq(String path, Map<String, String> body) async {
+Future<Response> postRq(String path, Map<String, dynamic> body) async {
   return await post(
     server(path),
     headers: <String, String>{

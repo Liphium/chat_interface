@@ -1,4 +1,3 @@
-import 'package:chat_interface/connection/connection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -16,8 +15,6 @@ class _InitializationPageState extends State<InitializationPage> {
 
   @override
   Widget build(BuildContext context) {
-    startConnection("");
-
     return Scaffold(
       body: Center(
         child: Column(

@@ -1,7 +1,6 @@
 import 'package:chat_interface/pages/chat/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ChatPage extends StatefulWidget {
 
@@ -17,8 +16,8 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
 
       body: Row(
-        children: [
-          const SizedBox(
+        children: const [
+          SizedBox(
             width: 350,
             child: Sidebar(),
           ),

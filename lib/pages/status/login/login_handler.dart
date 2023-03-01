@@ -32,5 +32,6 @@ void login(String email, String password, {Function()? success, Function(String)
     return;
   }
 
+  loadTokensFromPayload(body);
   success?.call();
 }

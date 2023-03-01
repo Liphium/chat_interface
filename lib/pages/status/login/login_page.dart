@@ -1,9 +1,7 @@
-import 'package:chat_interface/pages/initialization/initialization_page.dart';
+import 'package:chat_interface/pages/status/initialization_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:animations/animations.dart';
 
 import 'login_handler.dart';
 
@@ -70,9 +68,6 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     if(_loading.value) return;
                     _loading.value = true;
-
-                    Get.off(const InitializationPage(), transition: Transition.fadeIn, duration: const Duration(milliseconds: 250));
-                    return;
                 
                     if (_emailController.text == '') {
                       _emailError.value = 'input.email'.tr;
@@ -90,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                     _emailError.value = '';
                 
                     login(_emailController.text, _passwordController.text,
-                      success: () => Get.off(const InitializationPage(), transition: Transition.size),
+                      success: () => Get.off(const InitializationPage(), transition: Transition.fadeIn),
                       failure: (msg) {
                         Get.snackbar("login.failed".tr, msg.tr);
                 
