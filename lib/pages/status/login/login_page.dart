@@ -1,5 +1,7 @@
-import 'package:chat_interface/pages/status/initialization_page.dart';
+import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -85,7 +87,10 @@ class _LoginPageState extends State<LoginPage> {
                     _emailError.value = '';
                 
                     login(_emailController.text, _passwordController.text,
-                      success: () => Get.off(const InitializationPage(), transition: Transition.fadeIn),
+                      success: () async {
+                        await db.into(db.setting).insert(SettingData(key: "profile", value: tokensToPayload()));
+                        setupManager.next();
+                      },
                       failure: (msg) {
                         Get.snackbar("login.failed".tr, msg.tr);
                 
@@ -116,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text('login.forgot.text'.tr),
                   horizontalSpacing(defaultSpacing),
                   TextButton(
-                    onPressed: () => Get.off(const InitializationPage(), transition: Transition.fadeIn),
+                    onPressed: () => setupManager.restart(),
                     child: Text('login.forgot'.tr),
                   ),
                 ],
@@ -127,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text('login.no_account.text'.tr),
                   horizontalSpacing(defaultSpacing),
                   TextButton(
-                    onPressed: () => Get.off(const InitializationPage(), transition: Transition.fadeIn),
+                    onPressed: () => setupManager.restart(),
                     child: Text('login.no_account'.tr),
                   ),
                 ],

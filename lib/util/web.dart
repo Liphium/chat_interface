@@ -19,8 +19,10 @@ String tokensToPayload() {
   return jsonEncode(payload);
 }
 
+String basePath = 'http://localhost:3000';
+
 Uri server(String path) {
-  return Uri.parse('http://localhost:3000$path');
+  return Uri.parse('$basePath$path');
 }
 
 Future<Response> postRq(String path, Map<String, dynamic> body) async {
@@ -28,6 +30,17 @@ Future<Response> postRq(String path, Map<String, dynamic> body) async {
     server(path),
     headers: <String, String>{
       'Content-Type': 'application/json',
+    },
+    body: jsonEncode(body),
+  );
+}
+
+Future<Response> postRqAuthorized(String path, Map<String, dynamic> body) async {
+  return await post(
+    server(path),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $sessionToken'
     },
     body: jsonEncode(body),
   );

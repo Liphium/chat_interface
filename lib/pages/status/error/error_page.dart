@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -7,14 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-class ServerOfflinePage extends StatefulWidget {
-  const ServerOfflinePage({super.key});
+class ErrorPage extends StatefulWidget {
+
+  final String title;
+
+  const ErrorPage({super.key, required this.title});
 
   @override
-  State<ServerOfflinePage> createState() => _ServerOfflinePageState();
+  State<ErrorPage> createState() => _ErrorPageState();
 }
 
-class _ServerOfflinePageState extends State<ServerOfflinePage> {
+class _ErrorPageState extends State<ErrorPage> {
+
   Timer? _timer;
   var _start = 30.0;
   final _progress = 0.0.obs;
@@ -55,7 +58,7 @@ class _ServerOfflinePageState extends State<ServerOfflinePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('server.offline'.tr),
+              Text(widget.title.tr),
               verticalSpacing(defaultSpacing * 2),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -1,11 +1,12 @@
 
 import 'package:chat_interface/connection/impl/message_listener.dart';
-import 'package:chat_interface/pages/status/initialization_page.dart';
-import 'package:get/get.dart';
-import 'package:get/route_manager.dart';
+import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'messaging.dart';
+
+int nodeId = 0;
+String nodeDomain = "";
 
 class Connector {
 
@@ -19,12 +20,14 @@ class Connector {
 
     connection.stream.listen((msg) {
         Event event = Event.fromJson(msg);
+
+        if(_handlers[event.name] == null) return;
         _handlers[event.name]!(event);
       },
       cancelOnError: false,
       onDone: () {
         initialized = false;
-        Get.offAll(const InitializationPage());
+        setupManager.restart();
       },
     );
   }

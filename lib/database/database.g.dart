@@ -771,7 +771,7 @@ class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {key};
   @override
   SettingData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';

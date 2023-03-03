@@ -15,7 +15,9 @@ class _StartingPageState extends State<StartingPage> {
 
   @override
   void initState() {
-    setupManager.next();
+    if(setupManager.current == -1) {
+      setupManager.next(open: false);
+    }
 
     super.initState();
   }
@@ -27,15 +29,21 @@ class _StartingPageState extends State<StartingPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          const SizedBox(
+            width: 300,
+            child: LinearProgressIndicator(minHeight: 10,)
+          ),
+          /*
           Image.asset(
             "assets/img/logo.png",
             width: 200.0,
-          ),
+          ), */
           verticalSpacing(defaultSpacing),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Obx(() => Text(setupManager.message.value.tr)),
+              /*
               horizontalSpacing(defaultSpacing * 2),
               const SizedBox(
                 width: 20.0,
@@ -43,7 +51,7 @@ class _StartingPageState extends State<StartingPage> {
                 child: CircularProgressIndicator(
                   strokeWidth: 2.0,
                 )
-              ),
+              ), */
             ],
           )
         ],

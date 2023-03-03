@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,8 @@ class _SidebarState extends State<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
+
+    FriendController controller = Get.find();
 
     ThemeData theme = Theme.of(context);
 
@@ -43,10 +46,6 @@ class _SidebarState extends State<Sidebar> {
                 ),
                 ElevatedButton(
                   onPressed: () => {}, 
-                  child: Text('chat.groups'.tr)
-                ),
-                ElevatedButton(
-                  onPressed: () => {}, 
                   child: Text('chat.requests'.tr)
                 ),
               ],
@@ -55,25 +54,26 @@ class _SidebarState extends State<Sidebar> {
 
           Expanded(
             child: ListView.builder(
-              itemCount: 5,
+              itemCount: controller.friends.length,
               itemBuilder: (context, index) {
+
+                Friend friend = controller.friends[index];
+
                 return ListTile(
-                  leading: Icon(
-                    [Icons.person, Icons.group, Icons.person_2, Icons.person_4, Icons.person_3][index],
+                  leading: const Icon(
+                    Icons.person,
                     size: 55
                   ),
-                  title: Text('chat.@type'.trParams(
-                    {'type': ['title', 'group', 'title', 'title', 'title'][index]}
-                  )),
+                  title: Text("${friend.name}#${friend.tag}"),
                   subtitle: Text('chat.lastMessage'.tr),
-                  trailing: index <= 1 ? Container(
+                  trailing: Container(
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
-                  ) : null,
+                  ),
                 );
               },
             ),

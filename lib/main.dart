@@ -14,6 +14,9 @@ void main() async {
 
   db = Database(NativeDatabase.memory(logStatements: true));
 
+  // Create tables
+  var _ = await (db.select(db.setting)).get();
+
   // Initialize controllers
   initializeControllers();
 
