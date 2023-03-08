@@ -60,7 +60,7 @@ class _MessageFeedState extends State<MessageFeed> {
             child: Material(
               elevation: 10,
               color: Colors.black,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(10),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: defaultSpacing,

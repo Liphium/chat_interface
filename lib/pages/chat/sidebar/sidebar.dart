@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
+import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/conversations_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/friends_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/requests_page.dart';
@@ -29,7 +30,7 @@ class _SidebarState extends State<Sidebar> {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
+        color: theme.colorScheme.background,
         border: Border(right: BorderSide(color: theme.hoverColor)),
         boxShadow: [
           BoxShadow(
@@ -40,40 +41,52 @@ class _SidebarState extends State<Sidebar> {
         ],
       ),
       child: Column(children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: Obx(() => Wrap(
-            alignment: WrapAlignment.center,
-            spacing: defaultSpacing * 0.5,
-            runSpacing: defaultSpacing * 0.5,
-            children: [
-              SidebarButton(
-                selected: selected.value == 'chat.all',
-                onTap: () {
-                  selected.value = 'chat.all';
-                },
-                label: 'chat.all',
-              ),
-              SidebarButton(
-                selected: selected.value == 'chat.friends',
-                onTap: () {
-                  selected.value = 'chat.friends';
-                },
-                label: 'chat.friends',
-              ),
-              SidebarButton(
-                selected: selected.value == 'chat.requests',
-                onTap: () {
-                  selected.value = 'chat.requests';
-                },
-                label: 'chat.requests',
-              ),
-            ],
-          )),
+        RepaintBoundary(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: defaultSpacing),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: defaultSpacing * 0.5,
+              runSpacing: defaultSpacing * 0.5,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: defaultSpacing * 0.5),
+                  child: Icon(
+                    Icons.forum,
+                    color: theme.colorScheme.primary,
+                    size: 27,
+                  ),
+                ),
+                SidebarButton(
+                  selected: selected,
+                  onTap: () {
+                    selected.value = 'chat.all';
+                  },
+                  label: 'chat.all',
+                ),
+                SidebarButton(
+                  selected: selected,
+                  onTap: () {
+                    selected.value = 'chat.friends';
+                  },
+                  label: 'chat.friends',
+                ),
+                SidebarButton(
+                  selected: selected,
+                  onTap: () {
+                    selected.value = 'chat.requests';
+                  },
+                  label: 'chat.requests',
+                ),
+              ],
+            ),
+          ),
         ),
         Expanded(
           child: Obx(() => map[selected.value]!),
-        )
+        ),
+        const SidebarProfile()
       ]),
     );
   }

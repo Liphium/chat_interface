@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 
 class FriendController extends GetxController {
   
-  final friends = <Friend>[].obs;
+  final friends = <Friend>[Friend(1, "Test", "tag"),Friend(1, "Test", "tag"),Friend(1, "Test", "tag")].obs;
 
 }
 

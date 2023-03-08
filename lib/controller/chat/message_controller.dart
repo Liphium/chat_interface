@@ -4,6 +4,7 @@ import '../../database/database.dart';
 
 class MessageController extends GetxController {
 
+  final loaded = false.obs;
   final selectedConversation = 0.obs;
   final messages = <MessageData>[].obs;
 
@@ -12,6 +13,11 @@ class MessageController extends GetxController {
 
     // Load messages
     messages.value = await (db.select(db.message)..where((tbl) => tbl.conversationId.equals(value))).get();
+  }
+
+  void newMessages() async {
+    
+    
   }
 
 }

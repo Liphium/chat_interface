@@ -18,7 +18,7 @@ class _ChatPageState extends State<ChatPage> {
       body: Row(
         children: const [
           SizedBox(
-            width: 350,
+            width: 380,
             child: Sidebar(),
           ),
           Expanded(
