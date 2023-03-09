@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/controller/chat/conversation_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +13,7 @@ class ConversationsPage extends StatefulWidget {
 class _ConversationsPageState extends State<ConversationsPage> {
   @override
   Widget build(BuildContext context) {
-    FriendController controller = Get.find();
+    ConversationController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
     return Column(
@@ -51,12 +51,12 @@ class _ConversationsPageState extends State<ConversationsPage> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-            child: ListView.builder(
-              itemCount: controller.friends.length,
+            child: Obx(() => controller.conversations.isNotEmpty ? ListView.builder(
+              itemCount: controller.conversations.length,
               addRepaintBoundaries: true,
               padding: const EdgeInsets.only(top: defaultSpacing),
               itemBuilder: (context, index) {
-                Friend friend = controller.friends[index];
+                Conversation conversation = controller.conversations[index];
 
                 final hover = false.obs;
                   
@@ -84,7 +84,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text("${friend.name}#${friend.tag}", style: theme.textTheme.titleMedium),
+                                    Text(conversation.data, style: theme.textTheme.titleMedium),
                                     Text("test", style: theme.textTheme.bodySmall),
                                   ],
                                 ),
@@ -110,7 +110,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   ),
                 );
               },
-            ),
+            ) : Center(child: Text("conversations.empty".tr))),
           ),
         ),
       ],

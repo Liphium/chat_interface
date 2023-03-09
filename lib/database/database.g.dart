@@ -18,19 +18,19 @@ class $ConversationTable extends Conversation
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+  late final GeneratedColumn<BigInt> updatedAt = GeneratedColumn<BigInt>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, title, description];
+  List<GeneratedColumn> get $columns => [id, data, updatedAt];
   @override
   String get aliasedName => _alias ?? 'conversation';
   @override
@@ -43,17 +43,17 @@ class $ConversationTable extends Conversation
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('title')) {
+    if (data.containsKey('data')) {
       context.handle(
-          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
     } else if (isInserting) {
-      context.missing(_titleMeta);
+      context.missing(_dataMeta);
     }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
     }
     return context;
   }
@@ -66,10 +66,10 @@ class $ConversationTable extends Conversation
     return ConversationData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
     );
   }
 
@@ -82,28 +82,24 @@ class $ConversationTable extends Conversation
 class ConversationData extends DataClass
     implements Insertable<ConversationData> {
   final int id;
-  final String title;
-  final String? description;
+  final String data;
+  final BigInt updatedAt;
   const ConversationData(
-      {required this.id, required this.title, this.description});
+      {required this.id, required this.data, required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['title'] = Variable<String>(title);
-    if (!nullToAbsent || description != null) {
-      map['description'] = Variable<String>(description);
-    }
+    map['data'] = Variable<String>(data);
+    map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
   }
 
   ConversationCompanion toCompanion(bool nullToAbsent) {
     return ConversationCompanion(
       id: Value(id),
-      title: Value(title),
-      description: description == null && nullToAbsent
-          ? const Value.absent()
-          : Value(description),
+      data: Value(data),
+      updatedAt: Value(updatedAt),
     );
   }
 
@@ -112,8 +108,8 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConversationData(
       id: serializer.fromJson<int>(json['id']),
-      title: serializer.fromJson<String>(json['title']),
-      description: serializer.fromJson<String?>(json['description']),
+      data: serializer.fromJson<String>(json['data']),
+      updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
   }
   @override
@@ -121,73 +117,71 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'title': serializer.toJson<String>(title),
-      'description': serializer.toJson<String?>(description),
+      'data': serializer.toJson<String>(data),
+      'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
   }
 
-  ConversationData copyWith(
-          {int? id,
-          String? title,
-          Value<String?> description = const Value.absent()}) =>
+  ConversationData copyWith({int? id, String? data, BigInt? updatedAt}) =>
       ConversationData(
         id: id ?? this.id,
-        title: title ?? this.title,
-        description: description.present ? description.value : this.description,
+        data: data ?? this.data,
+        updatedAt: updatedAt ?? this.updatedAt,
       );
   @override
   String toString() {
     return (StringBuffer('ConversationData(')
           ..write('id: $id, ')
-          ..write('title: $title, ')
-          ..write('description: $description')
+          ..write('data: $data, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, description);
+  int get hashCode => Object.hash(id, data, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationData &&
           other.id == this.id &&
-          other.title == this.title &&
-          other.description == this.description);
+          other.data == this.data &&
+          other.updatedAt == this.updatedAt);
 }
 
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<int> id;
-  final Value<String> title;
-  final Value<String?> description;
+  final Value<String> data;
+  final Value<BigInt> updatedAt;
   const ConversationCompanion({
     this.id = const Value.absent(),
-    this.title = const Value.absent(),
-    this.description = const Value.absent(),
+    this.data = const Value.absent(),
+    this.updatedAt = const Value.absent(),
   });
   ConversationCompanion.insert({
     this.id = const Value.absent(),
-    required String title,
-    this.description = const Value.absent(),
-  }) : title = Value(title);
+    required String data,
+    required BigInt updatedAt,
+  })  : data = Value(data),
+        updatedAt = Value(updatedAt);
   static Insertable<ConversationData> custom({
     Expression<int>? id,
-    Expression<String>? title,
-    Expression<String>? description,
+    Expression<String>? data,
+    Expression<BigInt>? updatedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (title != null) 'title': title,
-      if (description != null) 'description': description,
+      if (data != null) 'data': data,
+      if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
 
   ConversationCompanion copyWith(
-      {Value<int>? id, Value<String>? title, Value<String?>? description}) {
+      {Value<int>? id, Value<String>? data, Value<BigInt>? updatedAt}) {
     return ConversationCompanion(
       id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
+      data: data ?? this.data,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -197,11 +191,11 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (title.present) {
-      map['title'] = Variable<String>(title.value);
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
     }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<BigInt>(updatedAt.value);
     }
     return map;
   }
@@ -210,8 +204,8 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   String toString() {
     return (StringBuffer('ConversationCompanion(')
           ..write('id: $id, ')
-          ..write('title: $title, ')
-          ..write('description: $description')
+          ..write('data: $data, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -489,6 +483,13 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
       'content', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _senderMeta = const VerificationMeta('sender');
+  @override
+  late final GeneratedColumn<int> sender = GeneratedColumn<int>(
+      'sender', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: 'REFERENCES friends(id)');
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -503,9 +504,20 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       $customConstraints: 'REFERENCES conversations(id)');
+  static const VerificationMeta _editedMeta = const VerificationMeta('edited');
+  @override
+  late final GeneratedColumn<bool> edited =
+      GeneratedColumn<bool>('edited', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: true,
+          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+            SqlDialect.sqlite: 'CHECK ("edited" IN (0, 1))',
+            SqlDialect.mysql: '',
+            SqlDialect.postgres: '',
+          }));
   @override
   List<GeneratedColumn> get $columns =>
-      [id, content, createdAt, conversationId];
+      [id, content, sender, createdAt, conversationId, edited];
   @override
   String get aliasedName => _alias ?? 'message';
   @override
@@ -526,6 +538,10 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
     } else if (isInserting) {
       context.missing(_contentMeta);
     }
+    if (data.containsKey('sender')) {
+      context.handle(_senderMeta,
+          sender.isAcceptableOrUnknown(data['sender']!, _senderMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -537,6 +553,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           _conversationIdMeta,
           conversationId.isAcceptableOrUnknown(
               data['conversation_id']!, _conversationIdMeta));
+    }
+    if (data.containsKey('edited')) {
+      context.handle(_editedMeta,
+          edited.isAcceptableOrUnknown(data['edited']!, _editedMeta));
+    } else if (isInserting) {
+      context.missing(_editedMeta);
     }
     return context;
   }
@@ -551,10 +573,14 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      sender: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sender']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       conversationId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}conversation_id']),
+      edited: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
     );
   }
 
@@ -567,22 +593,30 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
 class MessageData extends DataClass implements Insertable<MessageData> {
   final String id;
   final String content;
+  final int? sender;
   final DateTime createdAt;
   final int? conversationId;
+  final bool edited;
   const MessageData(
       {required this.id,
       required this.content,
+      this.sender,
       required this.createdAt,
-      this.conversationId});
+      this.conversationId,
+      required this.edited});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['content'] = Variable<String>(content);
+    if (!nullToAbsent || sender != null) {
+      map['sender'] = Variable<int>(sender);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || conversationId != null) {
       map['conversation_id'] = Variable<int>(conversationId);
     }
+    map['edited'] = Variable<bool>(edited);
     return map;
   }
 
@@ -590,10 +624,13 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageCompanion(
       id: Value(id),
       content: Value(content),
+      sender:
+          sender == null && nullToAbsent ? const Value.absent() : Value(sender),
       createdAt: Value(createdAt),
       conversationId: conversationId == null && nullToAbsent
           ? const Value.absent()
           : Value(conversationId),
+      edited: Value(edited),
     );
   }
 
@@ -603,8 +640,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
       content: serializer.fromJson<String>(json['content']),
+      sender: serializer.fromJson<int?>(json['sender']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       conversationId: serializer.fromJson<int?>(json['conversationId']),
+      edited: serializer.fromJson<bool>(json['edited']),
     );
   }
   @override
@@ -613,89 +652,115 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'content': serializer.toJson<String>(content),
+      'sender': serializer.toJson<int?>(sender),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'conversationId': serializer.toJson<int?>(conversationId),
+      'edited': serializer.toJson<bool>(edited),
     };
   }
 
   MessageData copyWith(
           {String? id,
           String? content,
+          Value<int?> sender = const Value.absent(),
           DateTime? createdAt,
-          Value<int?> conversationId = const Value.absent()}) =>
+          Value<int?> conversationId = const Value.absent(),
+          bool? edited}) =>
       MessageData(
         id: id ?? this.id,
         content: content ?? this.content,
+        sender: sender.present ? sender.value : this.sender,
         createdAt: createdAt ?? this.createdAt,
         conversationId:
             conversationId.present ? conversationId.value : this.conversationId,
+        edited: edited ?? this.edited,
       );
   @override
   String toString() {
     return (StringBuffer('MessageData(')
           ..write('id: $id, ')
           ..write('content: $content, ')
+          ..write('sender: $sender, ')
           ..write('createdAt: $createdAt, ')
-          ..write('conversationId: $conversationId')
+          ..write('conversationId: $conversationId, ')
+          ..write('edited: $edited')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, content, createdAt, conversationId);
+  int get hashCode =>
+      Object.hash(id, content, sender, createdAt, conversationId, edited);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageData &&
           other.id == this.id &&
           other.content == this.content &&
+          other.sender == this.sender &&
           other.createdAt == this.createdAt &&
-          other.conversationId == this.conversationId);
+          other.conversationId == this.conversationId &&
+          other.edited == this.edited);
 }
 
 class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> id;
   final Value<String> content;
+  final Value<int?> sender;
   final Value<DateTime> createdAt;
   final Value<int?> conversationId;
+  final Value<bool> edited;
   const MessageCompanion({
     this.id = const Value.absent(),
     this.content = const Value.absent(),
+    this.sender = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.conversationId = const Value.absent(),
+    this.edited = const Value.absent(),
   });
   MessageCompanion.insert({
     required String id,
     required String content,
+    this.sender = const Value.absent(),
     required DateTime createdAt,
     this.conversationId = const Value.absent(),
+    required bool edited,
   })  : id = Value(id),
         content = Value(content),
-        createdAt = Value(createdAt);
+        createdAt = Value(createdAt),
+        edited = Value(edited);
   static Insertable<MessageData> custom({
     Expression<String>? id,
     Expression<String>? content,
+    Expression<int>? sender,
     Expression<DateTime>? createdAt,
     Expression<int>? conversationId,
+    Expression<bool>? edited,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (content != null) 'content': content,
+      if (sender != null) 'sender': sender,
       if (createdAt != null) 'created_at': createdAt,
       if (conversationId != null) 'conversation_id': conversationId,
+      if (edited != null) 'edited': edited,
     });
   }
 
   MessageCompanion copyWith(
       {Value<String>? id,
       Value<String>? content,
+      Value<int?>? sender,
       Value<DateTime>? createdAt,
-      Value<int?>? conversationId}) {
+      Value<int?>? conversationId,
+      Value<bool>? edited}) {
     return MessageCompanion(
       id: id ?? this.id,
       content: content ?? this.content,
+      sender: sender ?? this.sender,
       createdAt: createdAt ?? this.createdAt,
       conversationId: conversationId ?? this.conversationId,
+      edited: edited ?? this.edited,
     );
   }
 
@@ -708,11 +773,17 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     if (content.present) {
       map['content'] = Variable<String>(content.value);
     }
+    if (sender.present) {
+      map['sender'] = Variable<int>(sender.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (conversationId.present) {
       map['conversation_id'] = Variable<int>(conversationId.value);
+    }
+    if (edited.present) {
+      map['edited'] = Variable<bool>(edited.value);
     }
     return map;
   }
@@ -722,8 +793,10 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return (StringBuffer('MessageCompanion(')
           ..write('id: $id, ')
           ..write('content: $content, ')
+          ..write('sender: $sender, ')
           ..write('createdAt: $createdAt, ')
-          ..write('conversationId: $conversationId')
+          ..write('conversationId: $conversationId, ')
+          ..write('edited: $edited')
           ..write(')'))
         .toString();
   }

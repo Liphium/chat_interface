@@ -38,8 +38,9 @@ class FriendsSetup extends Setup {
     var body = jsonDecode(res.body);
 
     if(body["success"]) {
-      var friends = body["friends"] as List<dynamic>;
-      print("Friends: ${friends.length}");
+      var friends = body["friends"];
+      if (friends == null) return null;
+
       FriendController controller = Get.find();
 
       // Add new friends

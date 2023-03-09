@@ -3,6 +3,7 @@ import 'package:chat_interface/connection/impl/message_listener.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'impl/setup_listener.dart';
 import 'messaging.dart';
 
 int nodeId = 0;
@@ -54,4 +55,5 @@ void startConnection(String node, String connectionToken) async {
   connector.connect("ws://$node/gateway", connectionToken);
 
   setupMessageListeners();
+  setupSetupListeners();
 }
