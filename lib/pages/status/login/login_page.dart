@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                 
                     login(_emailController.text, _passwordController.text,
                       success: () async {
-                        await db.into(db.setting).insert(SettingData(key: "profile", value: tokensToPayload()));
+                        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
                         setupManager.next();
                       },
                       failure: (msg) {

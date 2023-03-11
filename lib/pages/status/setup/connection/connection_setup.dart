@@ -11,7 +11,7 @@ import '../../../../util/web.dart';
 import 'cluster_setup.dart';
 
 class ConnectionSetup extends Setup {
-  ConnectionSetup() : super('loading.connection');
+  ConnectionSetup() : super('loading.connection', false);
 
   @override
   Future<Widget?> load() async {

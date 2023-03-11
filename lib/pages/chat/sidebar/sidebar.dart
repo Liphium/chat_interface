@@ -28,6 +28,7 @@ class _SidebarState extends State<Sidebar> {
     ThemeData theme = Theme.of(context);
     var selected = 'chat.all'.obs;
 
+    //* Sidebar
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.background,
@@ -40,6 +41,8 @@ class _SidebarState extends State<Sidebar> {
           ),
         ],
       ),
+
+      //* Sidebar content
       child: Column(children: [
         RepaintBoundary(
           child: Padding(
@@ -50,6 +53,8 @@ class _SidebarState extends State<Sidebar> {
               runSpacing: defaultSpacing * 0.5,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+
+                //* Conversations
                 SidebarButton(
                   selected: selected,
                   onTap: () {
@@ -57,6 +62,8 @@ class _SidebarState extends State<Sidebar> {
                   },
                   label: 'chat.all',
                 ),
+
+                //* Friends
                 SidebarButton(
                   selected: selected,
                   onTap: () {
@@ -64,6 +71,8 @@ class _SidebarState extends State<Sidebar> {
                   },
                   label: 'chat.friends',
                 ),
+
+                //* Requests
                 SidebarButton(
                   selected: selected,
                   onTap: () {
@@ -75,6 +84,8 @@ class _SidebarState extends State<Sidebar> {
             ),
           ),
         ),
+
+        //* Selected tab
         Expanded(
           child: Obx(() => map[selected.value]!),
         ),

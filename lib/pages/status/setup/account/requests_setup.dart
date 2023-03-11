@@ -12,7 +12,7 @@ import '../../error/server_offline_page.dart';
 
 class RequestSetup extends Setup {
   
-  RequestSetup() : super("loading.requests");
+  RequestSetup() : super("loading.requests", false);
 
   @override
   Future<Widget?> load() async {
@@ -29,6 +29,8 @@ class RequestSetup extends Setup {
     var body = jsonDecode(res.body);
 
     RequestController controller = Get.find();
+    controller.reset();
+
     if(body["success"]) {
 
       var friends = body["friends"];

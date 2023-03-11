@@ -18,10 +18,15 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+
+  /// Loading state for remove button
+  final removeLoading = false.obs;
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
+    //* Context menu
     return Stack(
       children: [
         Positioned(
@@ -38,6 +43,8 @@ class _ProfileState extends State<Profile> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+
+                      //* Profile info
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -48,6 +55,8 @@ class _ProfileState extends State<Profile> {
                           .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.primary)),
                         ],
                       ),
+
+                      //* Call button
                       LoadingIconButton(
                         loading: false.obs,
                         onTap: () => {},
@@ -57,23 +66,32 @@ class _ProfileState extends State<Profile> {
                   ),
                   Text(widget.friend.status.value, style: theme.textTheme.bodyMedium),
                   const Divider(),
+
+                  //* Create conversation
                   ProfileButton(
                     icon: Icons.message,
                     label: 'friends.message'.tr,
                     onTap: () => {},
+                    loading: false.obs
                   ),
+
+                  //* Add to call
                   ProfileButton(
                     icon: Icons.add_call,
                     label: 'friends.add_to_call'.tr,
                     onTap: () => {},
+                    loading: true.obs
                   ),
                   const Divider(),
+
+                  //* Remove friend
                   ProfileButton(
                     icon: Icons.person_remove,
                     label: 'friends.remove'.tr,
-                    onTap: () => {},
+                    onTap: () => widget.friend.remove(removeLoading),
                     iconColor: Colors.red.shade300,
-                    color: Colors.red.shade900.withAlpha(25)
+                    color: Colors.red.shade900.withAlpha(25),
+                    loading: removeLoading
                   ),
                 ],
               ),

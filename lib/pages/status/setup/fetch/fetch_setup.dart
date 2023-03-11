@@ -6,7 +6,7 @@ import '../../../../database/database.dart';
 late DateTime lastFetchTime;
 
 class FetchSetup extends Setup {
-  FetchSetup() : super('loading.fetch');
+  FetchSetup() : super('loading.fetch', false);
 
   @override
   Future<Widget?> load() async {

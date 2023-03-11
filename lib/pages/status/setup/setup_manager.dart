@@ -1,5 +1,6 @@
 import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/status/setup/account/requests_setup.dart';
+import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/cluster_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/connection_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
@@ -17,8 +18,10 @@ import 'account/account_setup.dart';
 
 abstract class Setup {
   final String name;
+  final bool once;
+  bool executed = false;
   
-  Setup(this.name);
+  Setup(this.name, this.once);
 
   Future<Widget?> load();
 }
@@ -37,6 +40,7 @@ class SetupManager {
 
     // Setup app
     _steps.add(UpdateSetup());
+    _steps.add(InstanceSetup());
     _steps.add(ServerSetup());
     
     // Start fetching
@@ -71,15 +75,30 @@ class SetupManager {
     current++;
     if (current < _steps.length) {
       final setup = _steps[current];
-      message.value = setup.name;
+      if(setup.executed && setup.once) {
+        next(open: false);
+        return;
+      }
 
-      final ready = await setup.load();
+      message.value = setup.name;
+      print("Setup: ${setup.name} (${current + 1}/${_steps.length})");
+
+      Widget? ready;
+      try {
+        ready = await setup.load();
+      } catch (e) {
+        error(e.toString());
+        return;
+      }
+
       if (ready != null) {
         Get.offAll(ready, transition: Transition.fade, duration: const Duration(milliseconds: 500));
         return;
       }
 
+      setup.executed = true;
       next(open: false);
+      
     } else {
       Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
     }

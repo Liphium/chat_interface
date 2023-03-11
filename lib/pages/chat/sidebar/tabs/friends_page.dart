@@ -22,6 +22,8 @@ class _FriendsPageState extends State<FriendsPage> {
 
     return Column(
       children: [
+
+        //* Search bar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: Material(
@@ -42,6 +44,8 @@ class _FriendsPageState extends State<FriendsPage> {
             ),
           ),
         ),
+        
+        //* Friends list
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(defaultSpacing),
@@ -49,6 +53,7 @@ class _FriendsPageState extends State<FriendsPage> {
             itemBuilder: (context, index) {
               Friend friend = controller.friends[index];
 
+              //* Friend item
               return Padding(
                 padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                 child: Material(
@@ -62,7 +67,11 @@ class _FriendsPageState extends State<FriendsPage> {
                           .secondaryContainer
                           .withAlpha(100),
                       splashColor: Theme.of(context).hoverColor,
+
+                      //* Show profile
                       onTap: () => Get.dialog(Profile(position: position.value, friend: friend,), transitionDuration: 200.ms),
+
+                      //* Friend info
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: defaultSpacing,
@@ -81,8 +90,12 @@ class _FriendsPageState extends State<FriendsPage> {
                                   Text(friend.name, style: theme.textTheme.titleMedium),
                                 ],
                               ),
+
+                              //* Friend actions
                               Row(
                                 children: [
+
+                                  //* Add to call
                                   IconButton(
                                     icon: Icon(Icons.add_call,
                                         color: Theme.of(context)
@@ -91,6 +104,8 @@ class _FriendsPageState extends State<FriendsPage> {
                                     onPressed: () {},
                                   ),
                                   horizontalSpacing(defaultSpacing * 0.5),
+
+                                  //* Open conversation
                                   IconButton(
                                     icon: Icon(Icons.message,
                                         color: Theme.of(context)

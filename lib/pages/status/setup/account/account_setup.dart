@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AccountSetup extends Setup {
-  AccountSetup() : super('loading.account');
+  AccountSetup() : super('loading.account', false);
   
   @override
   Future<Widget?> load() async {

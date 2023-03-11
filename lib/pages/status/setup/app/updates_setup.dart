@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class UpdateSetup extends Setup {
-  UpdateSetup() : super('loading.update');
+  UpdateSetup() : super('loading.update', true);
   
   @override
   Future<Widget?> load() async {

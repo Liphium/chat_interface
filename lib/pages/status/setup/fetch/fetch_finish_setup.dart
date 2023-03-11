@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../database/database.dart';
 
 class FetchFinishSetup extends Setup {
-  FetchFinishSetup() : super('loading.fetch.finish');
+  FetchFinishSetup() : super('loading.fetch.finish', false);
 
   @override
   Future<Widget?> load() async {

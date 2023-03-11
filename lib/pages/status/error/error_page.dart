@@ -58,7 +58,7 @@ class _ErrorPageState extends State<ErrorPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(widget.title.tr),
+              Text(widget.title.tr, textAlign: TextAlign.center,),
               verticalSpacing(defaultSpacing * 2),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -75,7 +75,7 @@ class _ErrorPageState extends State<ErrorPage> {
                         ),
                       ),
                       horizontalSpacing(defaultSpacing * 2),
-                      Text('retry.text.1'.tr),
+                      Text('retry.text.1'.tr,),
                       Text('${_start.toInt()}'),
                       Text('retry.text.2'.tr),
                     ],

@@ -11,7 +11,7 @@ import '../../../../util/vertical_spacing.dart';
 var connectedCluster = Cluster(0, "name", "country");
 
 class ClusterSetup extends Setup {
-  ClusterSetup() : super('loading.cluster');
+  ClusterSetup() : super('loading.cluster', false);
 
   @override
   Future<Widget?> load() async {

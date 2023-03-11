@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProfileSetup extends Setup {
-  ProfileSetup() : super('loading.profile');
+  ProfileSetup() : super('loading.profile', false);
   
   @override
   Future<Widget?> load() async {

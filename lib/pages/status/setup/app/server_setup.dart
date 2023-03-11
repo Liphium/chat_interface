@@ -3,16 +3,11 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 
-bool serverChosen = false;
-
 class ServerSetup extends Setup {
-  ServerSetup() : super('loading.server');
+  ServerSetup() : super('loading.server', true);
 
   @override
   Future<Widget?> load() async {
-    if (serverChosen) return null;
-
-    serverChosen = true;
     return const ServerSelectorPage();
   }
 }

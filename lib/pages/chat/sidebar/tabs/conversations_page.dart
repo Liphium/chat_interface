@@ -51,6 +51,8 @@ class _ConversationsPageState extends State<ConversationsPage> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+
+            //* Conversation list
             child: Obx(() => controller.conversations.isNotEmpty ? ListView.builder(
               itemCount: controller.conversations.length,
               addRepaintBoundaries: true,
@@ -59,7 +61,8 @@ class _ConversationsPageState extends State<ConversationsPage> {
                 Conversation conversation = controller.conversations[index];
 
                 final hover = false.obs;
-                  
+                
+                //* Conversation item
                 return Padding(
                   padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                   child: Material(
@@ -71,12 +74,18 @@ class _ConversationsPageState extends State<ConversationsPage> {
                       onHover: (value) {
                         hover.value = value;
                       },
+
+                      //* When conversation is tapped
                       onTap: () {},
+
+                      //* Conversation item content
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+
+                            //* Conversation info
                             Row(
                               children: [
                                 Icon(Icons.group, size: 35, color: theme.colorScheme.primary),
@@ -90,6 +99,8 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                 ),
                               ],
                             ),
+
+                            //* Call button (only visible on hover)
                             Obx(() =>
                               SizedBox(
                                 width: 40,
@@ -110,7 +121,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   ),
                 );
               },
-            ) : Center(child: Text("conversations.empty".tr))),
+            ) : Center(child: Text('conversations.empty'.tr, style: theme.textTheme.titleMedium))),
           ),
         ),
       ],
