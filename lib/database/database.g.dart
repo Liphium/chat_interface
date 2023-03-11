@@ -972,16 +972,216 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
   }
 }
 
+class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FriendTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _tagMeta = const VerificationMeta('tag');
+  @override
+  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
+      'tag', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, tag];
+  @override
+  String get aliasedName => _alias ?? 'friend';
+  @override
+  String get actualTableName => 'friend';
+  @override
+  VerificationContext validateIntegrity(Insertable<FriendData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('tag')) {
+      context.handle(
+          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
+    } else if (isInserting) {
+      context.missing(_tagMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FriendData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FriendData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      tag: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+    );
+  }
+
+  @override
+  $FriendTable createAlias(String alias) {
+    return $FriendTable(attachedDatabase, alias);
+  }
+}
+
+class FriendData extends DataClass implements Insertable<FriendData> {
+  final int id;
+  final String name;
+  final String tag;
+  const FriendData({required this.id, required this.name, required this.tag});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['tag'] = Variable<String>(tag);
+    return map;
+  }
+
+  FriendCompanion toCompanion(bool nullToAbsent) {
+    return FriendCompanion(
+      id: Value(id),
+      name: Value(name),
+      tag: Value(tag),
+    );
+  }
+
+  factory FriendData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FriendData(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      tag: serializer.fromJson<String>(json['tag']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'tag': serializer.toJson<String>(tag),
+    };
+  }
+
+  FriendData copyWith({int? id, String? name, String? tag}) => FriendData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        tag: tag ?? this.tag,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('FriendData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('tag: $tag')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, tag);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FriendData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.tag == this.tag);
+}
+
+class FriendCompanion extends UpdateCompanion<FriendData> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> tag;
+  const FriendCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.tag = const Value.absent(),
+  });
+  FriendCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String tag,
+  })  : name = Value(name),
+        tag = Value(tag);
+  static Insertable<FriendData> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? tag,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (tag != null) 'tag': tag,
+    });
+  }
+
+  FriendCompanion copyWith(
+      {Value<int>? id, Value<String>? name, Value<String>? tag}) {
+    return FriendCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      tag: tag ?? this.tag,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (tag.present) {
+      map['tag'] = Variable<String>(tag.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FriendCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('tag: $tag')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   late final $ConversationTable conversation = $ConversationTable(this);
   late final $MemberTable member = $MemberTable(this);
   late final $MessageTable message = $MessageTable(this);
   late final $SettingTable setting = $SettingTable(this);
+  late final $FriendTable friend = $FriendTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [conversation, member, message, setting];
+      [conversation, member, message, setting, friend];
 }

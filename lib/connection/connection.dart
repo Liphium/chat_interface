@@ -1,5 +1,5 @@
 
-import 'package:chat_interface/connection/impl/message_listener.dart';
+import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -20,6 +20,7 @@ class Connector {
     connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
 
     connection.stream.listen((msg) {
+        print(msg);
         Event event = Event.fromJson(msg);
 
         if(_handlers[event.name] == null) return;

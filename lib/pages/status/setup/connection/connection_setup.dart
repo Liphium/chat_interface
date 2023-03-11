@@ -7,7 +7,7 @@ import 'package:chat_interface/pages/status/error/server_offline_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:flutter/material.dart';
 
-import '../../../util/web.dart';
+import '../../../../util/web.dart';
 import 'cluster_setup.dart';
 
 class ConnectionSetup extends Setup {

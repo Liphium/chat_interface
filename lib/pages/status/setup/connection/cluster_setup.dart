@@ -5,8 +5,8 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../database/database.dart';
-import '../../../util/vertical_spacing.dart';
+import '../../../../database/database.dart';
+import '../../../../util/vertical_spacing.dart';
 
 var connectedCluster = Cluster(0, "name", "country");
 

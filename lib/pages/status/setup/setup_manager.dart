@@ -1,16 +1,19 @@
 import 'package:chat_interface/pages/chat/chat_page.dart';
-import 'package:chat_interface/pages/status/setup/cluster_setup.dart';
-import 'package:chat_interface/pages/status/setup/connection_setup.dart';
-import 'package:chat_interface/pages/status/setup/friends_setup.dart';
-import 'package:chat_interface/pages/status/setup/profile_setup.dart';
-import 'package:chat_interface/pages/status/setup/server_setup.dart';
-import 'package:chat_interface/pages/status/setup/updates_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/requests_setup.dart';
+import 'package:chat_interface/pages/status/setup/connection/cluster_setup.dart';
+import 'package:chat_interface/pages/status/setup/connection/connection_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/profile_setup.dart';
+import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
+import 'package:chat_interface/pages/status/setup/app/updates_setup.dart';
+import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
+import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/pages/status/starting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../error/error_page.dart';
-import 'account_setup.dart';
+import 'account/account_setup.dart';
 
 abstract class Setup {
   final String name;
@@ -31,12 +34,25 @@ class SetupManager {
   SetupManager() {
 
     // Initialize setups
+
+    // Setup app
     _steps.add(UpdateSetup());
     _steps.add(ServerSetup());
+    
+    // Start fetching
+    _steps.add(FetchSetup());
+
+    // Setup account
     _steps.add(ProfileSetup());
-    _steps.add(ClusterSetup());
     _steps.add(AccountSetup());
     _steps.add(FriendsSetup());
+    _steps.add(RequestSetup());
+
+    // Finish fetching
+    _steps.add(FetchFinishSetup());
+
+    // Setup connection
+    _steps.add(ClusterSetup());
     _steps.add(ConnectionSetup());
   }
 
@@ -56,10 +72,8 @@ class SetupManager {
     if (current < _steps.length) {
       final setup = _steps[current];
       message.value = setup.name;
-      print(setup.name);
 
       final ready = await setup.load();
-      print(ready);
       if (ready != null) {
         Get.offAll(ready, transition: Transition.fade, duration: const Duration(milliseconds: 500));
         return;

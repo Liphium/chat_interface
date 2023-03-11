@@ -1,7 +1,13 @@
+import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+part 'requests_actions.dart';
 
 class RequestsPage extends StatefulWidget {
   const RequestsPage({super.key});
@@ -11,6 +17,17 @@ class RequestsPage extends StatefulWidget {
 }
 
 class _RequestsPageState extends State<RequestsPage> {
+
+  final loading = false.obs;
+  final TextEditingController _controller = TextEditingController();
+  final value = ''.obs;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     FriendController controller = Get.find();
@@ -31,6 +48,7 @@ class _RequestsPageState extends State<RequestsPage> {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: _controller,
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         prefixIcon: Icon(Icons.person, color: theme.colorScheme.primary),
@@ -38,9 +56,10 @@ class _RequestsPageState extends State<RequestsPage> {
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => {},
-                    icon: const Icon(Icons.person_add, color: Colors.white),
+                  LoadingIconButton(
+                    onTap: () => _addButton(_controller.text, loading),
+                    loading: loading,
+                    icon: Icons.person_add,
                   )
                 ]
               ),

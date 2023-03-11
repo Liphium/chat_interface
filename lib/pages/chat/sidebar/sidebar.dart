@@ -2,7 +2,7 @@ import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/conversations_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/friends_page.dart';
-import 'package:chat_interface/pages/chat/sidebar/tabs/requests_page.dart';
+import 'package:chat_interface/pages/chat/sidebar/tabs/requests/requests_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -50,14 +50,6 @@ class _SidebarState extends State<Sidebar> {
               runSpacing: defaultSpacing * 0.5,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: defaultSpacing * 0.5),
-                  child: Icon(
-                    Icons.forum,
-                    color: theme.colorScheme.primary,
-                    size: 27,
-                  ),
-                ),
                 SidebarButton(
                   selected: selected,
                   onTap: () {
