@@ -30,14 +30,10 @@ class Request {
   void accept({required Function() success}) {
     loading.value = true;
 
-    connector.sendActionAndListen(Message("fr_rq", <String, dynamic>{
+    connector.sendAction(Message("fr_rq", <String, dynamic>{
       "name": name,
       "tag": tag,
-    }), (event) {
-      loading.value = false;
-      
-      
-    });
+    }), waiter: () => loading.value = false);
   }
 
   Friend get friend => Friend(id, name, tag);

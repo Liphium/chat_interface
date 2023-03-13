@@ -1,9 +1,10 @@
 
+import 'package:chat_interface/connection/impl/friends/friend_listener.dart';
 import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'impl/setup_listener.dart';
+import 'impl/setup/setup_listener.dart';
 import 'messaging.dart';
 
 int nodeId = 0;
@@ -13,6 +14,7 @@ class Connector {
 
   late WebSocketChannel connection;
   final _handlers = <String, Function(Event)>{};
+  final _waiters = <String, Function()>{};
   bool initialized = false;
 
   void connect(String url, String token) {
@@ -20,11 +22,12 @@ class Connector {
     connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
 
     connection.stream.listen((msg) {
-        print(msg);
         Event event = Event.fromJson(msg);
 
         if(_handlers[event.name] == null) return;
+        print("Received event: ${event.name}");
         _handlers[event.name]!(event);
+        _waiters[event.name]?.call();
       },
       cancelOnError: false,
       onDone: () {
@@ -42,8 +45,16 @@ class Connector {
     _handlers[event] = handler;
   }
 
-  void sendActionAndListen(Message message, Function(Event) handler) {
-    listen(message.action, handler);
+  void sendAction(Message message, {Function(Event)? handler, Function()? waiter}) {
+
+    if(handler != null) {
+      _handlers[message.action] = handler;
+    }
+
+    if(waiter != null) {
+      _waiters[message.action] = waiter;
+    }
+    
     sendMessage(message.toJson());
   }
 
@@ -57,4 +68,5 @@ void startConnection(String node, String connectionToken) async {
 
   setupMessageListeners();
   setupSetupListeners();
+  setupFriendListeners();
 }

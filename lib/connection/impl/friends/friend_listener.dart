@@ -5,4 +5,5 @@ import 'friend_request_listener.dart' as requests;
 
 void setupFriendListeners() {
   connector.listen("fr_rq:l", requests.friendRequest);
+  connector.listen("fr_rq", requests.friendRequestStatus);
 }

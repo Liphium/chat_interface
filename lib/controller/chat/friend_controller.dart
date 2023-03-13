@@ -38,9 +38,9 @@ class Friend {
     loading.value = true;
 
     // Send action to server
-    connector.sendActionAndListen(Message("fr_rem", <String, dynamic>{
+    connector.sendAction(Message("fr_rem", <String, dynamic>{
       "id": id,
-    }), (event) async {
+    }), handler: (event) async {
       loading.value = false;
 
       if(event.data["success"] as bool) {
