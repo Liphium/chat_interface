@@ -11,6 +11,7 @@ class ConversationSetup extends Setup {
   Future<Widget?> load() async {
 
     ConversationController controller = Get.find();
+    controller.conversations.clear();
 
     // Get conversations from database
     final list = await (db.select(db.conversation)).get();
