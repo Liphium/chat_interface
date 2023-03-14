@@ -18,7 +18,7 @@ class MessageController extends GetxController {
     }
   }
 
-  void newMessages(dynamic messages) async {
+  void newMessages(dynamic messages) {
     loaded.value = true;
     if(messages == null) {
       return;

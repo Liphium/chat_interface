@@ -5,6 +5,8 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../pages/chat/sidebar/tabs/friends/friends_page.dart';
+
 class Profile extends StatefulWidget {
 
   final Offset position;
@@ -19,7 +21,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
 
-  /// Loading state for remove button
+  //* Loading state for buttons
   final removeLoading = false.obs;
 
   @override
@@ -71,8 +73,8 @@ class _ProfileState extends State<Profile> {
                   ProfileButton(
                     icon: Icons.message,
                     label: 'friends.message'.tr,
-                    onTap: () => {},
-                    loading: false.obs
+                    onTap: () => openConversation(widget.friend.openConversationLoading, widget.friend.name, [widget.friend.id]),
+                    loading: widget.friend.openConversationLoading
                   ),
 
                   //* Add to call

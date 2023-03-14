@@ -1,3 +1,4 @@
+import 'package:chat_interface/database/database.dart';
 import 'package:get/get.dart';
 
 class ConversationController extends GetxController {
@@ -5,7 +6,7 @@ class ConversationController extends GetxController {
   final loaded = false.obs;
   final conversations = <Conversation>[].obs;
 
-  void newConversations(dynamic conversations) async {
+  void newConversations(dynamic conversations) {
     loaded.value = true;
     if(conversations == null) {
       return;
@@ -27,4 +28,6 @@ class Conversation {
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json["id"],
         data = json["data"];
+
+  Conversation.fromData(ConversationData data) : this(data.id, data.data);
 }

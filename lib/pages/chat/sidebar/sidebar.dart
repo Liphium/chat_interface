@@ -1,7 +1,7 @@
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
-import 'package:chat_interface/pages/chat/sidebar/tabs/conversations_page.dart';
-import 'package:chat_interface/pages/chat/sidebar/tabs/friends_page.dart';
+import 'package:chat_interface/pages/chat/sidebar/tabs/conversations/conversations_page.dart';
+import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friends_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/requests/requests_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

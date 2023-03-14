@@ -25,6 +25,9 @@ class Friend {
   var status = "test.status".obs;
   var online = false.obs;
 
+  /// Loading state for open conversation buttons
+  final openConversationLoading = false.obs;
+
   Friend(this.id, this.name, this.tag);
   Friend.fromJson(Map<String, dynamic> json)
       : id = json["id"],

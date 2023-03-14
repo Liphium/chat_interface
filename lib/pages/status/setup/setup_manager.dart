@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/chat/chat_page.dart';
+import 'package:chat_interface/pages/status/setup/account/conversation_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/requests_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/cluster_setup.dart';
@@ -51,6 +52,7 @@ class SetupManager {
     _steps.add(AccountSetup());
     _steps.add(FriendsSetup());
     _steps.add(RequestSetup());
+    _steps.add(ConversationSetup());
 
     // Finish fetching
     _steps.add(FetchFinishSetup());

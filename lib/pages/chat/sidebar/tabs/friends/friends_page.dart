@@ -1,9 +1,14 @@
+import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+
+part 'friend_actions.dart';
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -47,7 +52,7 @@ class _FriendsPageState extends State<FriendsPage> {
         
         //* Friends list
         Expanded(
-          child: ListView.builder(
+          child: Obx(() => controller.friends.isNotEmpty ? ListView.builder(
             padding: const EdgeInsets.all(defaultSpacing),
             itemCount: controller.friends.length,
             itemBuilder: (context, index) {
@@ -106,12 +111,11 @@ class _FriendsPageState extends State<FriendsPage> {
                                   horizontalSpacing(defaultSpacing * 0.5),
 
                                   //* Open conversation
-                                  IconButton(
-                                    icon: Icon(Icons.message,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary),
-                                    onPressed: () {},
+                                  LoadingIconButton(
+                                    icon: Icons.message,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    loading: friend.openConversationLoading,
+                                    onTap: () => openConversation(friend.openConversationLoading, friend.name, [friend.id]),
                                   ),
                                 ],
                               ),
@@ -122,7 +126,12 @@ class _FriendsPageState extends State<FriendsPage> {
                 ),
               );
             },
-          ),
+          ) :
+          
+          //* No friends
+          Center(
+            child: Text('friends.empty'.tr, style: theme.textTheme.titleMedium),
+          )),
         ),
       ],
     );

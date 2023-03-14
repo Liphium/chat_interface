@@ -1,8 +1,8 @@
 import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/main.dart';
+
+import 'conversation_listener.dart';
 
 void setupMessageListeners() {
-  connector.listen("ping", (event) {
-    logger.i("Ping received");
-  });
+  connector.listen("conv_open:l", conversationOpen);
+  connector.listen("conv_open", conversationOpenStatus);
 }
