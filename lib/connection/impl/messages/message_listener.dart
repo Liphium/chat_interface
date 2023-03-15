@@ -1,4 +1,5 @@
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/impl/messages/typing_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart' as chat;
@@ -11,6 +12,10 @@ void setupMessageListeners() {
   connector.listen("conv_open:l", conversationOpen);
   connector.listen("conv_open", conversationOpenStatus);
   connector.listen("conv_msg", message);
+
+  // Typing status
+  connector.listen("conv_t", typingStatus);
+  connector.listen("conv_t_s", typingStatus);
 }
 
 // Action: conv_msg
@@ -25,5 +30,7 @@ void message(Event event) async {
 
   // Add to chat history
   chat.MessageController controller = Get.find();
-  controller.messages.insert(0, message);
+  if (controller.selectedConversation.value.id == message.conversation) {
+    controller.messages.insert(0, message);
+  }
 }

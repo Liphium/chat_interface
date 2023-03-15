@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/message_bar.dart';
 import 'package:chat_interface/pages/chat/message_renderer.dart';
+import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -67,69 +68,27 @@ class _MessageFeedState extends State<MessageFeed> {
                   itemBuilder: (context, index) {
                       
                     if(index == 0) {
-                      return verticalSpacing(defaultSpacing * 9);
+                      return verticalSpacing(defaultSpacing * 12);
                     }
                       
                     final message = controller.messages[index - 1];
                     final sender = friendController.friends[message.sender];
                     final self = statusController.id.value == message.sender;
+
+                    bool last = false;
+                    if(index != controller.messages.length) {
+                      final lastMessage = controller.messages[index];
+                      last = lastMessage.sender == message.sender;
+                    }
                       
-                    return MessageRenderer(message: message, self: self, sender: self ? Friend(1, statusController.name.value, statusController.tag.value) : sender);
+                    return MessageRenderer(message: message, self: self, last: last,
+                    sender: self ? Friend(1, statusController.name.value, statusController.tag.value) : sender);
                   },
                 ),
               ),
 
               //* Message input
-              Padding(
-                padding: const EdgeInsets.all(defaultSpacing * 2),
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Material(
-                    elevation: 10,
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: defaultSpacing,
-                        vertical: defaultSpacing * 0.1,
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: () => {},
-                            icon: const Icon(Icons.add),
-                            tooltip: "soon",
-                          ),
-                          horizontalSpacing(defaultSpacing),
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'chat.message'.tr,
-                              ),
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(1000),
-                              ],
-                              controller: _message,
-                              maxLines: null,
-                              keyboardType: TextInputType.multiline,
-                            ),
-                          ),
-                          horizontalSpacing(defaultSpacing),
-                          LoadingIconButton(
-                            onTap: () => sendMessage(loading, controller.selectedConversation.value.id, _message.text, () {
-                              _message.clear();
-                              loading.value = false;
-                            }),
-                            icon: Icons.send,
-                            loading: loading,
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              const MessageInput()
             ],
           ),
         ),

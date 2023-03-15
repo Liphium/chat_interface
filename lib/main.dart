@@ -10,7 +10,7 @@ const bool isDebug = true;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   // Initialize controllers
   initializeControllers();
 

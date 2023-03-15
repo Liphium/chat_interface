@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 Widget verticalSpacing(double height) {
     return SizedBox(height: height);
@@ -10,3 +11,14 @@ Widget horizontalSpacing(double width) {
 }
 
 const defaultSpacing = 8.0;
+
+String formatTime(DateTime time) {
+  final now = DateTime.now();
+
+  if(time.day == now.day) {
+    return "time.now".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0")});
+  } else {
+    return "time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0"),
+    "day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+  }
+}

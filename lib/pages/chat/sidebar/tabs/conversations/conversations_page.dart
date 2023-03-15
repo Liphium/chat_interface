@@ -1,3 +1,4 @@
+import 'package:chat_interface/connection/impl/messages/typing_listener.dart';
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -18,6 +19,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
   @override
   Widget build(BuildContext context) {
 
+    MessageController messageController = Get.find();
     StatusController statusController = Get.find();
     FriendController friendController = Get.find();
     ConversationController controller = Get.find();
@@ -73,8 +75,10 @@ class _ConversationsPageState extends State<ConversationsPage> {
                 //* Conversation item
                 return Padding(
                   padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                  child: Material(
+                  child: Obx(() => 
+                  Material(
                     borderRadius: BorderRadius.circular(10),
+                    color: messageController.selectedConversation.value == conversation ? theme.colorScheme.secondaryContainer.withAlpha(100) : Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
                       hoverColor: theme.colorScheme.secondaryContainer.withAlpha(100),
@@ -84,8 +88,10 @@ class _ConversationsPageState extends State<ConversationsPage> {
                       },
 
                       //* When conversation is tapped (open conversation)
-                      onTap: () { 
-                        Get.find<MessageController>().selectConversation(conversation);
+                      onTap: () {
+                        if(messageController.selectedConversation.value == conversation) return;
+                        stopTyping();
+                        messageController.selectConversation(conversation);
                       },
 
                       //* Conversation item content
@@ -133,7 +139,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                         ),
                       ),
                     ),
-                  ),
+                  )),
                 );
               },
             ) :

@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
+import 'package:chat_interface/controller/chat/writing_controller.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +12,8 @@ class MessageController extends GetxController {
   final messages = <Message>[].obs;
 
   void selectConversation(Conversation conversation) async {
+
+    Get.find<WritingController>().init(conversation.id);
     selectedConversation.value = conversation;
 
     // Load messages
@@ -22,14 +25,14 @@ class MessageController extends GetxController {
     }
   }
 
-  void newMessages(dynamic messages) {
+  void newMessages(dynamic messages) async {
     loaded.value = true;
     if(messages == null) {
       return;
     }
 
     for (var message in messages) {
-      this.messages.add(Message.fromJson(message));
+      await db.into(db.message).insertOnConflictUpdate(Message.fromJson(message).entity);
     }
   }
 
