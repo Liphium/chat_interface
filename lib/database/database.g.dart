@@ -13,11 +13,7 @@ class $ConversationTable extends Conversation
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
   late final GeneratedColumn<String> data = GeneratedColumn<String>(
@@ -216,6 +212,11 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $MemberTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -242,7 +243,7 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
       type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [name, conversationId, accountId, roleId];
+      [id, name, conversationId, accountId, roleId];
   @override
   String get aliasedName => _alias ?? 'member';
   @override
@@ -252,6 +253,9 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
     if (data.containsKey('name')) {
       context.handle(
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
@@ -280,11 +284,13 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   MemberData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MemberData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       conversationId: attachedDatabase.typeMapping
@@ -303,18 +309,21 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
 }
 
 class MemberData extends DataClass implements Insertable<MemberData> {
+  final int id;
   final String name;
   final int? conversationId;
   final int accountId;
   final int roleId;
   const MemberData(
-      {required this.name,
+      {required this.id,
+      required this.name,
       this.conversationId,
       required this.accountId,
       required this.roleId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || conversationId != null) {
       map['conversation_id'] = Variable<int>(conversationId);
@@ -326,6 +335,7 @@ class MemberData extends DataClass implements Insertable<MemberData> {
 
   MemberCompanion toCompanion(bool nullToAbsent) {
     return MemberCompanion(
+      id: Value(id),
       name: Value(name),
       conversationId: conversationId == null && nullToAbsent
           ? const Value.absent()
@@ -339,6 +349,7 @@ class MemberData extends DataClass implements Insertable<MemberData> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MemberData(
+      id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       conversationId: serializer.fromJson<int?>(json['conversationId']),
       accountId: serializer.fromJson<int>(json['accountId']),
@@ -349,6 +360,7 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'conversationId': serializer.toJson<int?>(conversationId),
       'accountId': serializer.toJson<int>(accountId),
@@ -357,11 +369,13 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   }
 
   MemberData copyWith(
-          {String? name,
+          {int? id,
+          String? name,
           Value<int?> conversationId = const Value.absent(),
           int? accountId,
           int? roleId}) =>
       MemberData(
+        id: id ?? this.id,
         name: name ?? this.name,
         conversationId:
             conversationId.present ? conversationId.value : this.conversationId,
@@ -371,6 +385,7 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   @override
   String toString() {
     return (StringBuffer('MemberData(')
+          ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('conversationId: $conversationId, ')
           ..write('accountId: $accountId, ')
@@ -380,11 +395,12 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   }
 
   @override
-  int get hashCode => Object.hash(name, conversationId, accountId, roleId);
+  int get hashCode => Object.hash(id, name, conversationId, accountId, roleId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MemberData &&
+          other.id == this.id &&
           other.name == this.name &&
           other.conversationId == this.conversationId &&
           other.accountId == this.accountId &&
@@ -392,17 +408,20 @@ class MemberData extends DataClass implements Insertable<MemberData> {
 }
 
 class MemberCompanion extends UpdateCompanion<MemberData> {
+  final Value<int> id;
   final Value<String> name;
   final Value<int?> conversationId;
   final Value<int> accountId;
   final Value<int> roleId;
   const MemberCompanion({
+    this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.accountId = const Value.absent(),
     this.roleId = const Value.absent(),
   });
   MemberCompanion.insert({
+    this.id = const Value.absent(),
     required String name,
     this.conversationId = const Value.absent(),
     required int accountId,
@@ -411,12 +430,14 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
         accountId = Value(accountId),
         roleId = Value(roleId);
   static Insertable<MemberData> custom({
+    Expression<int>? id,
     Expression<String>? name,
     Expression<int>? conversationId,
     Expression<int>? accountId,
     Expression<int>? roleId,
   }) {
     return RawValuesInsertable({
+      if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (conversationId != null) 'conversation_id': conversationId,
       if (accountId != null) 'account_id': accountId,
@@ -425,11 +446,13 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
   }
 
   MemberCompanion copyWith(
-      {Value<String>? name,
+      {Value<int>? id,
+      Value<String>? name,
       Value<int?>? conversationId,
       Value<int>? accountId,
       Value<int>? roleId}) {
     return MemberCompanion(
+      id: id ?? this.id,
       name: name ?? this.name,
       conversationId: conversationId ?? this.conversationId,
       accountId: accountId ?? this.accountId,
@@ -440,6 +463,9 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
@@ -458,6 +484,7 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
   @override
   String toString() {
     return (StringBuffer('MemberCompanion(')
+          ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('conversationId: $conversationId, ')
           ..write('accountId: $accountId, ')
@@ -482,6 +509,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   @override
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
       'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _certificateMeta =
+      const VerificationMeta('certificate');
+  @override
+  late final GeneratedColumn<String> certificate = GeneratedColumn<String>(
+      'certificate', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _senderMeta = const VerificationMeta('sender');
   @override
@@ -517,7 +550,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           }));
   @override
   List<GeneratedColumn> get $columns =>
-      [id, content, sender, createdAt, conversationId, edited];
+      [id, content, certificate, sender, createdAt, conversationId, edited];
   @override
   String get aliasedName => _alias ?? 'message';
   @override
@@ -537,6 +570,14 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           content.isAcceptableOrUnknown(data['content']!, _contentMeta));
     } else if (isInserting) {
       context.missing(_contentMeta);
+    }
+    if (data.containsKey('certificate')) {
+      context.handle(
+          _certificateMeta,
+          certificate.isAcceptableOrUnknown(
+              data['certificate']!, _certificateMeta));
+    } else if (isInserting) {
+      context.missing(_certificateMeta);
     }
     if (data.containsKey('sender')) {
       context.handle(_senderMeta,
@@ -573,6 +614,8 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      certificate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}certificate'])!,
       sender: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}sender']),
       createdAt: attachedDatabase.typeMapping
@@ -593,6 +636,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
 class MessageData extends DataClass implements Insertable<MessageData> {
   final String id;
   final String content;
+  final String certificate;
   final int? sender;
   final DateTime createdAt;
   final int? conversationId;
@@ -600,6 +644,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   const MessageData(
       {required this.id,
       required this.content,
+      required this.certificate,
       this.sender,
       required this.createdAt,
       this.conversationId,
@@ -609,6 +654,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['content'] = Variable<String>(content);
+    map['certificate'] = Variable<String>(certificate);
     if (!nullToAbsent || sender != null) {
       map['sender'] = Variable<int>(sender);
     }
@@ -624,6 +670,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageCompanion(
       id: Value(id),
       content: Value(content),
+      certificate: Value(certificate),
       sender:
           sender == null && nullToAbsent ? const Value.absent() : Value(sender),
       createdAt: Value(createdAt),
@@ -640,6 +687,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
       content: serializer.fromJson<String>(json['content']),
+      certificate: serializer.fromJson<String>(json['certificate']),
       sender: serializer.fromJson<int?>(json['sender']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       conversationId: serializer.fromJson<int?>(json['conversationId']),
@@ -652,6 +700,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'content': serializer.toJson<String>(content),
+      'certificate': serializer.toJson<String>(certificate),
       'sender': serializer.toJson<int?>(sender),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'conversationId': serializer.toJson<int?>(conversationId),
@@ -662,6 +711,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   MessageData copyWith(
           {String? id,
           String? content,
+          String? certificate,
           Value<int?> sender = const Value.absent(),
           DateTime? createdAt,
           Value<int?> conversationId = const Value.absent(),
@@ -669,6 +719,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       MessageData(
         id: id ?? this.id,
         content: content ?? this.content,
+        certificate: certificate ?? this.certificate,
         sender: sender.present ? sender.value : this.sender,
         createdAt: createdAt ?? this.createdAt,
         conversationId:
@@ -680,6 +731,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return (StringBuffer('MessageData(')
           ..write('id: $id, ')
           ..write('content: $content, ')
+          ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')
@@ -689,14 +741,15 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, content, sender, createdAt, conversationId, edited);
+  int get hashCode => Object.hash(
+      id, content, certificate, sender, createdAt, conversationId, edited);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageData &&
           other.id == this.id &&
           other.content == this.content &&
+          other.certificate == this.certificate &&
           other.sender == this.sender &&
           other.createdAt == this.createdAt &&
           other.conversationId == this.conversationId &&
@@ -706,6 +759,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
 class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> id;
   final Value<String> content;
+  final Value<String> certificate;
   final Value<int?> sender;
   final Value<DateTime> createdAt;
   final Value<int?> conversationId;
@@ -713,6 +767,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   const MessageCompanion({
     this.id = const Value.absent(),
     this.content = const Value.absent(),
+    this.certificate = const Value.absent(),
     this.sender = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.conversationId = const Value.absent(),
@@ -721,17 +776,20 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   MessageCompanion.insert({
     required String id,
     required String content,
+    required String certificate,
     this.sender = const Value.absent(),
     required DateTime createdAt,
     this.conversationId = const Value.absent(),
     required bool edited,
   })  : id = Value(id),
         content = Value(content),
+        certificate = Value(certificate),
         createdAt = Value(createdAt),
         edited = Value(edited);
   static Insertable<MessageData> custom({
     Expression<String>? id,
     Expression<String>? content,
+    Expression<String>? certificate,
     Expression<int>? sender,
     Expression<DateTime>? createdAt,
     Expression<int>? conversationId,
@@ -740,6 +798,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (content != null) 'content': content,
+      if (certificate != null) 'certificate': certificate,
       if (sender != null) 'sender': sender,
       if (createdAt != null) 'created_at': createdAt,
       if (conversationId != null) 'conversation_id': conversationId,
@@ -750,6 +809,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   MessageCompanion copyWith(
       {Value<String>? id,
       Value<String>? content,
+      Value<String>? certificate,
       Value<int?>? sender,
       Value<DateTime>? createdAt,
       Value<int?>? conversationId,
@@ -757,6 +817,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return MessageCompanion(
       id: id ?? this.id,
       content: content ?? this.content,
+      certificate: certificate ?? this.certificate,
       sender: sender ?? this.sender,
       createdAt: createdAt ?? this.createdAt,
       conversationId: conversationId ?? this.conversationId,
@@ -772,6 +833,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
+    }
+    if (certificate.present) {
+      map['certificate'] = Variable<String>(certificate.value);
     }
     if (sender.present) {
       map['sender'] = Variable<int>(sender.value);
@@ -793,6 +857,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return (StringBuffer('MessageCompanion(')
           ..write('id: $id, ')
           ..write('content: $content, ')
+          ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')

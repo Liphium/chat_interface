@@ -52,80 +52,75 @@ class _FriendsPageState extends State<FriendsPage> {
         
         //* Friends list
         Expanded(
-          child: Obx(() => controller.friends.isNotEmpty ? ListView.builder(
-            padding: const EdgeInsets.all(defaultSpacing),
-            itemCount: controller.friends.length,
-            itemBuilder: (context, index) {
-              Friend friend = controller.friends[index];
+          child: Obx(() => controller.friends.isNotEmpty ? 
+          
+          Obx(() => 
+            ListView.builder(
+              padding: const EdgeInsets.all(defaultSpacing),
+              itemCount: controller.friends.length,
+              itemBuilder: (context, index) {
+                Friend friend = controller.friends.values.elementAt(index);
 
-              //* Friend item
-              return Padding(
-                padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                child: Material(
-                  borderRadius: BorderRadius.circular(10),
-                  child: MouseRegion(
-                    onHover: (event) => position.value = event.position,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(10),
-                      hoverColor: Theme.of(context)
-                          .colorScheme
-                          .secondaryContainer
-                          .withAlpha(100),
-                      splashColor: Theme.of(context).hoverColor,
+                //* Friend item
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                  child: Material(
+                    borderRadius: BorderRadius.circular(10),
+                    child: MouseRegion(
+                      onHover: (event) => position.value = event.position,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        hoverColor: Theme.of(context)
+                            .colorScheme
+                            .secondaryContainer
+                            .withAlpha(100),
+                        splashColor: Theme.of(context).hoverColor,
 
-                      //* Show profile
-                      onTap: () => Get.dialog(Profile(position: position.value, friend: friend,), transitionDuration: 200.ms),
+                        //* Show profile
+                        onTap: () => Get.dialog(Profile(position: position.value, friend: friend,), transitionDuration: 200.ms),
 
-                      //* Friend info
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: defaultSpacing,
-                            vertical: defaultSpacing * 0.5),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.person,
-                                      size: 30,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                  const SizedBox(width: 10),
-                                  Text(friend.name, style: theme.textTheme.titleMedium),
-                                ],
-                              ),
-
-                              //* Friend actions
-                              Row(
-                                children: [
-
-                                  //* Add to call
-                                  IconButton(
-                                    icon: Icon(Icons.add_call,
+                        //* Friend info
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: defaultSpacing,
+                              vertical: defaultSpacing * 0.5),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.person,
+                                        size: 30,
                                         color: Theme.of(context)
                                             .colorScheme
                                             .primary),
-                                    onPressed: () {},
-                                  ),
-                                  horizontalSpacing(defaultSpacing * 0.5),
+                                    const SizedBox(width: 10),
+                                    Text(friend.name, style: theme.textTheme.titleMedium),
+                                  ],
+                                ),
 
-                                  //* Open conversation
-                                  LoadingIconButton(
-                                    icon: Icons.message,
-                                    color: Theme.of(context).colorScheme.primary,
-                                    loading: friend.openConversationLoading,
-                                    onTap: () => openConversation(friend.openConversationLoading, friend.name, [friend.id]),
-                                  ),
-                                ],
-                              ),
-                            ]),
+                                //* Friend actions
+                                Row(
+                                  children: [
+
+                                    //* Add to call
+                                    IconButton(
+                                      icon: Icon(Icons.add_call,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                                      onPressed: () {},
+                                    ),
+                                  ],
+                                ),
+                              ]),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            )
           ) :
           
           //* No friends

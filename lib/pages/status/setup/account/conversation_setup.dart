@@ -15,7 +15,10 @@ class ConversationSetup extends Setup {
 
     // Get conversations from database
     final list = await (db.select(db.conversation)).get();
-    controller.conversations.addAll(list.map((e) => Conversation.fromData(e)));
+
+    for(var conversation in list) {
+      controller.add(Conversation.fromData(conversation));
+    }
 
     return null;
   } 

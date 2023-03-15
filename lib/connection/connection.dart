@@ -25,9 +25,10 @@ class Connector {
         Event event = Event.fromJson(msg);
 
         if(_handlers[event.name] == null) return;
-        print("Received event: ${event.name}");
         _handlers[event.name]!(event);
+        
         _waiters[event.name]?.call();
+        _waiters.remove(event.name);
       },
       cancelOnError: false,
       onDone: () {
@@ -56,6 +57,10 @@ class Connector {
     }
     
     sendMessage(message.toJson());
+  }
+
+  void wait(String action, Function() waiter) {
+    _waiters[action] = waiter;
   }
 
 }

@@ -31,15 +31,7 @@ class _SidebarState extends State<Sidebar> {
     //* Sidebar
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.background,
-        border: Border(right: BorderSide(color: theme.hoverColor)),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor,
-            blurRadius: 5,
-            spreadRadius: -1,
-          ),
-        ],
+        color: theme.colorScheme.tertiaryContainer.withAlpha(15),
       ),
 
       //* Sidebar content

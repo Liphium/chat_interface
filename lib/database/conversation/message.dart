@@ -4,6 +4,7 @@ class Message extends Table {
   
     TextColumn get id => text()();
     TextColumn get content => text()();
+    TextColumn get certificate => text()();
     IntColumn get sender => integer().nullable().customConstraint('REFERENCES friends(id)')();
     DateTimeColumn get createdAt => dateTime()();
     IntColumn get conversationId => integer().nullable().customConstraint('REFERENCES conversations(id)')();

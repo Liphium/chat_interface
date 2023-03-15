@@ -1,7 +1,11 @@
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
+import 'package:chat_interface/controller/chat/message_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../../../controller/chat/friend_controller.dart';
 
 class ConversationsPage extends StatefulWidget {
   const ConversationsPage({super.key});
@@ -13,6 +17,9 @@ class ConversationsPage extends StatefulWidget {
 class _ConversationsPageState extends State<ConversationsPage> {
   @override
   Widget build(BuildContext context) {
+
+    StatusController statusController = Get.find();
+    FriendController friendController = Get.find();
     ConversationController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
@@ -53,12 +60,13 @@ class _ConversationsPageState extends State<ConversationsPage> {
             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
 
             //* Conversation list
-            child: Obx(() => controller.conversations.isNotEmpty ? ListView.builder(
+            child: Obx(() => controller.conversations.isNotEmpty && controller.newConvs == 0 ? 
+            ListView.builder(
               itemCount: controller.conversations.length,
               addRepaintBoundaries: true,
               padding: const EdgeInsets.only(top: defaultSpacing),
               itemBuilder: (context, index) {
-                Conversation conversation = controller.conversations[index];
+                Conversation conversation = controller.conversations.values.elementAt(index);
 
                 final hover = false.obs;
                 
@@ -75,8 +83,10 @@ class _ConversationsPageState extends State<ConversationsPage> {
                         hover.value = value;
                       },
 
-                      //* When conversation is tapped
-                      onTap: () {},
+                      //* When conversation is tapped (open conversation)
+                      onTap: () { 
+                        Get.find<MessageController>().selectConversation(conversation);
+                      },
 
                       //* Conversation item content
                       child: Padding(
@@ -88,13 +98,18 @@ class _ConversationsPageState extends State<ConversationsPage> {
                             //* Conversation info
                             Row(
                               children: [
-                                Icon(Icons.group, size: 35, color: theme.colorScheme.primary),
+                                Icon(conversation.isGroup ? Icons.group : Icons.person, size: 35, color: theme.colorScheme.primary),
                                 const SizedBox(width: 10),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(conversation.data, style: theme.textTheme.titleMedium),
-                                    Text("test", style: theme.textTheme.bodySmall),
+                                    // Conversation title
+                                    Text(conversation.getName(statusController, friendController), style: theme.textTheme.titleMedium),
+
+                                    // Conversation description
+                                    Text(conversation.isGroup ? "chat.members".trParams(<String, String>{
+                                      'count': conversation.members.length.toString()
+                                    }) : 'Online', style: theme.textTheme.bodySmall),
                                   ],
                                 ),
                               ],
@@ -121,7 +136,14 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   ),
                 );
               },
-            ) : Center(child: Text('conversations.empty'.tr, style: theme.textTheme.titleMedium))),
+            ) :
+            controller.loaded.value ?
+
+            //* Empty conversation list
+            Center(child: Text('conversations.empty'.tr, style: theme.textTheme.titleMedium)) :
+
+            //* Loading indicator
+            const Center(child: CircularProgressIndicator())),
           ),
         ),
       ],

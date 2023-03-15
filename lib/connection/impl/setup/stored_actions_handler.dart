@@ -11,7 +11,7 @@ void handleStoredAction(String action, String target) async {
     //* Handle removed friend
     case "fr_rem":
       
-      Get.find<FriendController>().friends.removeWhere((friend) => friend.id == int.parse(target));
+      Get.find<FriendController>().friends.removeWhere((id, friend) => id == int.parse(target));
       await db.delete(db.friend).delete(FriendCompanion(id: drift.Value(int.parse(target))));
 
       break;
@@ -20,6 +20,5 @@ void handleStoredAction(String action, String target) async {
     case "conv_rem":
       
       break;
-
   }
 }

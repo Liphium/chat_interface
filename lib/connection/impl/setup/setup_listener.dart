@@ -1,5 +1,6 @@
 
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/impl/setup/setup_member_listener.dart';
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart';
 import 'package:chat_interface/main.dart';
@@ -36,4 +37,7 @@ void setupSetupListeners() {
       handleStoredAction(action["action"], action["target"]);
     });
   });
+
+  //* New members
+  connector.listen("setup_mem", setupMemberListener);
 }

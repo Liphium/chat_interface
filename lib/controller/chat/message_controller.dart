@@ -1,3 +1,5 @@
+import 'package:chat_interface/controller/chat/conversation_controller.dart';
+import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 import '../../database/database.dart';
@@ -5,14 +7,16 @@ import '../../database/database.dart';
 class MessageController extends GetxController {
 
   final loaded = false.obs;
-  final selectedConversation = 0.obs;
+  final selectedConversation = Conversation(0, "data").obs;
   final messages = <Message>[].obs;
 
-  void selectConversation(int value) async {
-    selectedConversation.value = value;
+  void selectConversation(Conversation conversation) async {
+    selectedConversation.value = conversation;
 
     // Load messages
-    var loaded = await (db.select(db.message)..where((tbl) => tbl.conversationId.equals(value))).get();
+    messages.clear();
+    var loaded = await (db.select(db.message)..limit(60)..orderBy([(u) => OrderingTerm.desc(u.createdAt)])..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
+
     for (var message in loaded) {
       messages.add(Message.fromMessageData(message));
     }
@@ -35,26 +39,40 @@ class Message {
     
   final String id;
   final String content;
+  final String certificate;
   final int sender;
   final DateTime createdAt;
   final int conversation;
   final bool edited;
 
-  Message(this.id, this.content, this.sender, this.createdAt, this.conversation, this.edited);
+  Message(this.id, this.content, this.certificate, this.sender, this.createdAt, this.conversation, this.edited);
 
-  Message.fromJson(Map<String, dynamic> json)
-      : id = json["id"],
-        content = json["content"],
-        sender = json["sender"],
-        createdAt = json["createdAt"],
-        conversation = json["conversation"],
-        edited = json["edited"];
+  factory Message.fromJson(Map<String, dynamic> json) => Message(
+        json["id"],
+        json["data"],
+        json["certificate"],
+        json["sender"],
+        DateTime.fromMillisecondsSinceEpoch(json["creation"]),
+        json["conversation"],
+        json["edited"],
+      );
 
   Message.fromMessageData(MessageData messageData)
       : id = messageData.id,
         content = messageData.content,
+        certificate = messageData.certificate,
         sender = messageData.sender!,
         createdAt = messageData.createdAt,
         conversation = messageData.conversationId!,
         edited = messageData.edited;
+
+  MessageData get entity => MessageData(
+        id: id,
+        content: content,
+        certificate: certificate,
+        sender: sender,
+        createdAt: createdAt,
+        conversationId: conversation,
+        edited: edited,
+      );
 }

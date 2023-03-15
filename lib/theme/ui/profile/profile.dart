@@ -82,7 +82,7 @@ class _ProfileState extends State<Profile> {
                     icon: Icons.add_call,
                     label: 'friends.add_to_call'.tr,
                     onTap: () => {},
-                    loading: true.obs
+                    loading: false.obs
                   ),
                   const Divider(),
 

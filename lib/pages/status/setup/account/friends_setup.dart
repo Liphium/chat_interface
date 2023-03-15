@@ -31,6 +31,13 @@ class FriendsSetup extends Setup {
 
     FriendController controller = Get.find();
     controller.reset();
+
+    // Get friends from database
+    var friends = await (db.select(db.friend)..orderBy([(tbl) => OrderingTerm(expression: tbl.id)])).get();
+
+    for (var friend in friends) {
+      controller.add(Friend(friend.id, friend.name, friend.tag));
+    }
     
     if(body["success"]) {
 
@@ -39,16 +46,13 @@ class FriendsSetup extends Setup {
         // Add new friends
         for(var friend in friends) {
           var friendData = Friend.fromJson(friend as Map<String, dynamic>);
-          controller.insert(friendData);
+          final id = await db.into(db.friend).insertOnConflictUpdate(friendData.entity);
+          controller.add(Friend(id, friendData.name, friendData.tag));
         }
       }
     } else {
       return const ErrorPage(title: "server.error");
     }
-
-    // Get friends from database
-    var friends = await (db.select(db.friend)..orderBy([(tbl) => OrderingTerm(expression: tbl.id)])).get();
-    controller.friends.addAll(friends.map((e) => Friend(e.id, e.name, e.tag)));
 
     return null;
   }

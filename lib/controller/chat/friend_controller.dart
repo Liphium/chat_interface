@@ -7,14 +7,14 @@ import '../../database/database.dart';
 
 class FriendController extends GetxController {
   
-  final friends = <Friend>[].obs;
+  final friends = <int, Friend>{}.obs;
 
   void reset() {
     friends.clear();
   }
 
-  void insert(Friend friend) async {
-    await db.into(db.friend).insertOnConflictUpdate(friend.entity);
+  void add(Friend friend) {
+    friends[friend.id] = friend;
   }
 }
 
