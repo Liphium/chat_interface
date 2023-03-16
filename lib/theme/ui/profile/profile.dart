@@ -45,7 +45,7 @@ class _ProfileState extends State<Profile> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-
+            
                       //* Profile info
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -57,7 +57,7 @@ class _ProfileState extends State<Profile> {
                           .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.primary)),
                         ],
                       ),
-
+            
                       //* Call button
                       LoadingIconButton(
                         loading: false.obs,
@@ -68,7 +68,7 @@ class _ProfileState extends State<Profile> {
                   ),
                   Text(widget.friend.status.value, style: theme.textTheme.bodyMedium),
                   const Divider(),
-
+            
                   //* Create conversation
                   ProfileButton(
                     icon: Icons.message,
@@ -76,7 +76,7 @@ class _ProfileState extends State<Profile> {
                     onTap: () => openConversation(widget.friend.openConversationLoading, widget.friend.name, [widget.friend.id]),
                     loading: widget.friend.openConversationLoading
                   ),
-
+            
                   //* Add to call
                   ProfileButton(
                     icon: Icons.add_call,
@@ -85,7 +85,7 @@ class _ProfileState extends State<Profile> {
                     loading: false.obs
                   ),
                   const Divider(),
-
+            
                   //* Remove friend
                   ProfileButton(
                     icon: Icons.person_remove,

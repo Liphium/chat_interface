@@ -1,6 +1,5 @@
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/controller/chat/requests_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/snackbar.dart';

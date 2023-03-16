@@ -1,6 +1,4 @@
 import 'package:chat_interface/controller/chat/friend_controller.dart';
-import 'package:chat_interface/controller/chat/message_controller.dart';
-import 'package:chat_interface/controller/chat/writing_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -44,8 +42,6 @@ class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
       members = members.replaceRange(index, index+1, " ${"and".tr}");
     }
   
-    print("re-render | $members");
-
     return
     Animate(
 
@@ -54,8 +50,8 @@ class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
         MoveEffect(
           begin: const Offset(0, 50),
           end: const Offset(0, 0),
-          curve: Curves.elasticOut,
-          duration: 1000.ms,
+          curve: Curves.easeOutQuart,
+          duration: 250.ms,
         ),
       ],
       target: widget.writers.isEmpty ? 0 : 1,

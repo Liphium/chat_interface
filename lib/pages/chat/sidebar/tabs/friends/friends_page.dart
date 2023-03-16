@@ -1,12 +1,12 @@
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/friend_controller.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+
+import '../../../../../theme/dialog_route.dart';
 
 part 'friend_actions.dart';
 
@@ -77,7 +77,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         splashColor: Theme.of(context).hoverColor,
 
                         //* Show profile
-                        onTap: () => Get.dialog(Profile(position: position.value, friend: friend,), transitionDuration: 200.ms),
+                        onTap: () => Get.dialog(Profile(position: position.value, friend: friend)),
 
                         //* Friend info
                         child: Padding(
@@ -90,10 +90,10 @@ class _FriendsPageState extends State<FriendsPage> {
                                 Row(
                                   children: [
                                     Icon(Icons.person,
-                                        size: 30,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary),
+                                      size: 30,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
                                     const SizedBox(width: 10),
                                     Text(friend.name, style: theme.textTheme.titleMedium),
                                   ],

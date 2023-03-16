@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

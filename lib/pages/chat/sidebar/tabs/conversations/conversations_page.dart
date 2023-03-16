@@ -1,7 +1,9 @@
 import 'package:chat_interface/connection/impl/messages/typing_listener.dart';
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart';
+import 'package:chat_interface/controller/chat/writing_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/theme/ui/conversation_add/conversation_add_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,6 +18,9 @@ class ConversationsPage extends StatefulWidget {
 }
 
 class _ConversationsPageState extends State<ConversationsPage> {
+
+  final GlobalKey _addKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
 
@@ -23,6 +28,8 @@ class _ConversationsPageState extends State<ConversationsPage> {
     StatusController statusController = Get.find();
     FriendController friendController = Get.find();
     ConversationController controller = Get.find();
+    WritingController writingController = Get.find();
+
     ThemeData theme = Theme.of(context);
 
     return Column(
@@ -37,6 +44,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                 buildInput(theme),
                 horizontalSpacing(defaultSpacing),
                 SizedBox(
+                  key: _addKey,
                   width: 48,
                   height: 48,
                   child: Material(
@@ -45,7 +53,12 @@ class _ConversationsPageState extends State<ConversationsPage> {
                     elevation: 2.0,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
-                      onTap: () {},
+                      onTap: () {
+                        final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
+
+                        //* Open conversation add window
+                        Get.dialog(ConversationAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(defaultSpacing),
                         child: Icon(Icons.add, color: theme.colorScheme.primary),
@@ -121,13 +134,23 @@ class _ConversationsPageState extends State<ConversationsPage> {
                               ],
                             ),
 
-                            //* Call button (only visible on hover)
                             Obx(() =>
                               SizedBox(
                                 width: 40,
                                 height: 40,
                                 child: Visibility(
                                   visible: hover.value,
+
+                                  //* Writing indicator (only visible on not hover)
+                                  replacement: Obx(() =>
+                                    (writingController.writing[conversation.id] ?? []).isNotEmpty ?
+                                    const Padding(
+                                      padding: EdgeInsets.all(defaultSpacing * 1.2),
+                                      child: CircularProgressIndicator(strokeWidth: 3.0,)
+                                    ) : const SizedBox(),
+                                  ),
+
+                                  //* Call button (only visible on hover)
                                   child: IconButton(
                                     icon: Icon(Icons.call, color: theme.colorScheme.primary),
                                     onPressed: () {},

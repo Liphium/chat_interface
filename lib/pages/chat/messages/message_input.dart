@@ -41,6 +41,10 @@ class _MessageInputState extends State<MessageInput> {
       }
     });
 
+    Get.find<MessageController>().selectedConversation.listen((conversation) {
+      _message.clear();
+    });
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 2, vertical: defaultSpacing),
       child: Column(

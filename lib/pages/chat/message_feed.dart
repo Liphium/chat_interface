@@ -4,11 +4,9 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/message_bar.dart';
 import 'package:chat_interface/pages/chat/message_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:chat_interface/connection/messaging.dart' as messaging;
 

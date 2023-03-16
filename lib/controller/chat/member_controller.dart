@@ -13,7 +13,7 @@ class MemberController extends GetxController {
     members.clear();
     members.addAll(membersDb.map((e) => Member.fromData(e)));
 
-    //? old code for bigger conversations (maybe used for large chats in the future)      
+    //? old code for bigger conversations (maybe used for large chats in the future) (maybe move into isolate)
     // connector.sendAction(Message("conv_mem", <String, dynamic>{
     //   "id": id
     // }), handler: (event) async {
@@ -24,7 +24,6 @@ class MemberController extends GetxController {
     //     return;
     //   }
 
-    //   // TODO: Move into isolate
     //   members.clear();
     //   FriendController controller = Get.find();
 

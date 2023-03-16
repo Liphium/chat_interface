@@ -83,7 +83,6 @@ class SetupManager {
       }
 
       message.value = setup.name;
-      print("Setup: ${setup.name} (${current + 1}/${_steps.length})");
 
       Widget? ready;
       try {
