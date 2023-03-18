@@ -34,7 +34,7 @@ class ServerSelectorPage extends StatelessWidget {
               verticalSpacing(defaultSpacing),
               ElevatedButton(
                 onPressed: () {
-                  basePath = 'https://chat.app.fajurion.com';
+                  basePath = 'http://server.fajurion.com:3000';
                   setupManager.next();
                 },
                 child: const Text('Fajurion network'),

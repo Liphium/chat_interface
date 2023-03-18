@@ -59,29 +59,31 @@ class _MessageRendererState extends State<MessageRenderer> {
               horizontalSpacing(defaultSpacing),
 
               //* Message
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  //* Message info
-                  Visibility(
-                    visible: !widget.last,
-                    child: Row(
-                      children: [
-                        Text(sender.name, style: theme.textTheme.titleMedium),
-                        horizontalSpacing(defaultSpacing),
-                        Text(
-                          formatTime(widget.message.createdAt),
-                          style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.secondary)
-                        ),
-                      ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+              
+                    //* Message info
+                    Visibility(
+                      visible: !widget.last,
+                      child: Row(
+                        children: [
+                          Text(sender.name, style: theme.textTheme.titleMedium),
+                          horizontalSpacing(defaultSpacing),
+                          Text(
+                            formatTime(widget.message.createdAt),
+                            style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.secondary)
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  verticalSpacing(defaultSpacing * 0.1),
-
-                  //* Content
-                  Text(widget.message.content, style: theme.textTheme.bodyLarge),
-                ],
+                    verticalSpacing(defaultSpacing * 0.1),
+              
+                    //* Content
+                    Text(widget.message.content, style: theme.textTheme.bodyLarge),
+                  ],
+                ),
               )
             ],
           ),

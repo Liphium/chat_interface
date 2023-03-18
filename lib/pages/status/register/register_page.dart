@@ -1,33 +1,33 @@
-import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/register/register_page.dart';
+import 'package:chat_interface/pages/status/login/login_page.dart';
+import 'package:chat_interface/pages/status/register/register_handler.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'login_handler.dart';
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
 
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   final _loading = false.obs;
   final _passwordError = ''.obs;
   final _emailError = ''.obs;
+  final _usernameError = ''.obs;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _usernameController.dispose();
     super.dispose();
   }
 
@@ -41,8 +41,17 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("login.page".tr),
+              Text("register.page".tr),
               verticalSpacing(defaultSpacing),
+              Obx(() =>
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'input.username_tag'.tr,
+                    errorText: _usernameError.value == '' ? null : _usernameError.value,
+                  ),
+                  controller: _usernameController,
+                ),
+              ),
               Obx(() =>
                 TextField(
                   decoration: InputDecoration(
@@ -83,24 +92,23 @@ class _LoginPageState extends State<LoginPage> {
                       _loading.value = false;
                       return;
                     }
+
+                    if (_usernameController.text == '') {
+                      _usernameError.value = 'input.username_tag'.tr;
+                      _loading.value = false;
+                      return;
+                    }
                 
                     _passwordError.value = '';
                     _emailError.value = '';
                 
-                    login(_emailController.text, _passwordController.text,
+                    register(_emailController.text, _usernameController.text, _passwordController.text,
                       success: () async {
-                        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
-                        setupManager.next();
+                        Get.offAll(const LoginPage(), transition: Transition.fade);
+                        _loading.value = false;
                       },
                       failure: (msg) {
-                        Get.snackbar("login.failed".tr, msg.tr);
-                
-                        switch (msg) {
-                          case "invalid.password":
-                            _passwordError.value = msg.tr;
-                            _emailError.value = msg.tr;
-                            break;
-                        }
+                        Get.snackbar("register.failed".tr, msg.tr);
                         _loading.value = false;
                       });
                   },
@@ -119,25 +127,14 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('login.forgot.text'.tr),
+                  Text('register.account.text'.tr),
                   horizontalSpacing(defaultSpacing),
                   TextButton(
-                    onPressed: () => setupManager.restart(),
-                    child: Text('login.forgot'.tr),
+                    onPressed: () => Get.offAll(const LoginPage(), transition: Transition.fade),
+                    child: Text('register.login'.tr),
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('login.no_account.text'.tr),
-                  horizontalSpacing(defaultSpacing),
-                  TextButton(
-                    onPressed: () => Get.offAll(const RegisterPage(), transition: Transition.fade),
-                    child: Text('login.no_account'.tr),
-                  ),
-                ],
-              )
             ],
           ),
         ),
