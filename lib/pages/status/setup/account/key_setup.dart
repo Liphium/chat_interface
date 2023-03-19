@@ -4,11 +4,14 @@ import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:pointycastle/export.dart';
 
 import '../setup_manager.dart';
 
+late String keyPassRaw;
+late String keyPass;
 late AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> asymmetricKeyPair;
 
 class KeySetup extends Setup {
@@ -17,48 +20,58 @@ class KeySetup extends Setup {
   @override
   Future<Widget?> load() async {
 
+    // Get keys from the server
+    final publicRes = await postRqAuthorized("/account/keys/public/get", <String, dynamic>{});
+
+    if(publicRes.statusCode != 200) {
+      return const ErrorPage(title: "key.error");
+    }
+
+    final body = jsonDecode(publicRes.body);
     var privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
-    var publicKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("public_key"))).getSingleOrNull();
 
-    if(privateKey == null) {
+    if(!body["success"]) {
 
-      final pair = generateRSAKey();
+      final pair = await compute(generateRSAKey, 2048);
+
       final packagedPriv = packagePrivateKey(pair.privateKey);
+      final encryptedPriv = encryptPrivateKey(pair.privateKey, keyPassRaw);
       final packagedPub = packagePublicKey(pair.publicKey);
 
-      // Insert into database
-      await db.into(db.setting).insert(SettingCompanion.insert(key: "private_key", value: packagedPriv));
-      await db.into(db.setting).insert(SettingCompanion.insert(key: "public_key", value: packagedPub));
-
-      // Set on the server
-      await postRqAuthorized("/account/keys/public/set", <String, dynamic>{
+      // Set public key on the server
+      var res = await postRqAuthorized("/account/keys/public/set", <String, dynamic>{
+        "password": keyPass,
         "key": packagedPub
       });
 
-      privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
-      publicKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("public_key"))).getSingleOrNull();
+      if(res.statusCode != 200 || !jsonDecode(res.body)["success"]) {
+        return const ErrorPage(title: "key.error");
+      }
+
+      // Set private key on the server
+      res = await postRqAuthorized("/account/keys/private/set", <String, dynamic>{
+        "password": keyPass,
+        "key": encryptedPriv
+      });
+
+      if(res.statusCode != 200 || !jsonDecode(res.body)["success"]) {
+        return const ErrorPage(title: "key.error");
+      }
+
+      // Insert private key into the database
+      privateKey = SettingData(key: "private_key", value: packagedPriv);
+      await db.into(db.setting).insertOnConflictUpdate(privateKey);
+      body["key"] = packagedPub;
 
     } else {
 
-      // Verify keys
-      final res = await postRqAuthorized("/account/keys/public/get", <String, dynamic>{});
-      if(res.statusCode != 200) {
-        return const ErrorPage(title: "key.error");
-      }
-
-      final body = jsonDecode(res.body);
-
-      if(!body["success"]) {
-        return const ErrorPage(title: "key.error");
-      }
-
-      if(body["key"] != publicKey!.value) {
-        return const ErrorPage(title: "key.invalid");
+      if(privateKey == null) {
+        return const ErrorPage(title: "priv.error");
       }
 
     }
 
-    asymmetricKeyPair = toKeyPair(privateKey!.value, publicKey!.value);
+    asymmetricKeyPair = toKeyPair(body["key"], privateKey!.value);
 
     return null;
   }

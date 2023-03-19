@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart';
 
@@ -10,6 +11,9 @@ void login(String email, String password, {Function()? success, Function(String)
   // Encrypt to protect password
   var bytes = utf8.encode(password);
   var digest = sha256.convert(bytes);
+
+  keyPass = digest.toString();
+  keyPassRaw = password;
 
   Response res;
   try {

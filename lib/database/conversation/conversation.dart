@@ -4,6 +4,7 @@ class Conversation extends Table {
 
   IntColumn get id => integer()();
   TextColumn get data => text()();
+  TextColumn get key => text()();
   Int64Column get updatedAt => int64()();
 
   @override

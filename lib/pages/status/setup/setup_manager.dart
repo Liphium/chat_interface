@@ -16,6 +16,7 @@ import 'package:get/get.dart';
 
 import '../error/error_page.dart';
 import 'account/account_setup.dart';
+import 'account/key_setup.dart';
 
 abstract class Setup {
   final String name;
@@ -53,6 +54,7 @@ class SetupManager {
     _steps.add(FriendsSetup());
     _steps.add(RequestSetup());
     _steps.add(ConversationSetup());
+    _steps.add(KeySetup());
 
     // Finish fetching
     _steps.add(FetchFinishSetup());
@@ -88,6 +90,7 @@ class SetupManager {
       try {
         ready = await setup.load();
       } catch (e) {
+        e.printError();
         error(e.toString());
         return;
       }
