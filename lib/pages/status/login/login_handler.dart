@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart';
 

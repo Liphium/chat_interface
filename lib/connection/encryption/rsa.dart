@@ -56,7 +56,7 @@ AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> toKeyPair(String pub, String priv
   return AsymmetricKeyPair(unpackagePublicKey(pub), unpackagePrivateKey(priv));
 }
 
-String encryptPrivateKey(RSAPrivateKey key, String password) {
-  return encryptAES(packagePrivateKey(key), fillKey(password)).base64;
+String encryptPrivateKey(RSAPrivateKey key, String password, String username, String salt) {
+  return encryptAES(packagePrivateKey(key), generateSecureKey(password, username, salt)).base64;
 }
 

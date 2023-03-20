@@ -3,6 +3,21 @@ import 'package:get/get.dart';
 
 enum SnackbarType { success, error, warning, info }
 
+extension SnackbarColorExtension on SnackbarType {
+  Color get color {
+    switch (this) {
+      case SnackbarType.success:
+        return Colors.green;
+      case SnackbarType.error:
+        return Colors.red;
+      case SnackbarType.warning:
+        return Colors.orange;
+      case SnackbarType.info:
+        return Colors.blue;
+    }
+  }
+}
+
 void showSnackbar(SnackbarType type, String title, String message) {
   Get.snackbar(
     title.tr,

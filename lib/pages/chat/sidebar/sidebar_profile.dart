@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/current/notification_controller.dart' as nc;
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +59,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                   ),
                   horizontalSpacing(defaultSpacing * 0.5),
                   IconButton(
-                    onPressed: () => {},
+                    onPressed: () => Get.find<nc.NotificationController>().notifications.add(nc.Notification(message: "Hello World, Friends!")),
                     icon: const Icon(Icons.settings, color: Colors.white),
                   ),
                 ],

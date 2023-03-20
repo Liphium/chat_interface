@@ -9,7 +9,12 @@ Encrypted encryptAES(String data, String key) {
   return encrypter.encrypt(data, iv: iv);
 }
 
-String fillKey(String key) {
-  key = key.padRight(32, "!");
-  return key.substring(0, 32);
+String fill(String input, int length) {
+  input = input.padRight(length, "!");
+  return input.substring(0, length);
+}
+
+String generateSecureKey(String password, String username, String salt) {
+  String key = fill(password, 16) + fill(username, 8) + fill(salt, 8);
+  return key;
 }

@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
 import 'package:pointycastle/export.dart';
 
 import '../setup_manager.dart';
@@ -22,6 +24,7 @@ class KeySetup extends Setup {
 
     // Get keys from the server
     final publicRes = await postRqAuthorized("/account/keys/public/get", <String, dynamic>{});
+    final salt = await (db.select(db.setting)..where((tbl) => tbl.key.equals("salt"))).getSingleOrNull();
 
     if(publicRes.statusCode != 200) {
       return const ErrorPage(title: "key.error");
@@ -30,12 +33,14 @@ class KeySetup extends Setup {
     final body = jsonDecode(publicRes.body);
     var privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
 
+    StatusController controller = Get.find();
+
     if(!body["success"]) {
 
       final pair = await compute(generateRSAKey, 2048);
 
       final packagedPriv = packagePrivateKey(pair.privateKey);
-      final encryptedPriv = encryptPrivateKey(pair.privateKey, keyPassRaw);
+      final encryptedPriv = encryptPrivateKey(pair.privateKey, keyPassRaw, controller.name.value, salt!.value);
       final packagedPub = packagePublicKey(pair.publicKey);
 
       // Set public key on the server
@@ -71,7 +76,7 @@ class KeySetup extends Setup {
 
     }
 
-    asymmetricKeyPair = toKeyPair(body["key"], privateKey!.value);
+    asymmetricKeyPair = toKeyPair(body["key"], privateKey.value);
 
     return null;
   }
