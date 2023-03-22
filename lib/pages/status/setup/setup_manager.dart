@@ -58,7 +58,7 @@ class SetupManager {
 
     // Setup encryption
     _steps.add(SaltSetup());
-    //_steps.add(KeySetup());
+    _steps.add(KeySetup());
 
     // Finish fetching
     _steps.add(FetchFinishSetup());
@@ -89,6 +89,7 @@ class SetupManager {
       }
 
       message.value = setup.name;
+      print("Setup: ${setup.name}");
 
       Widget? ready;
       try {

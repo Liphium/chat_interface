@@ -21,9 +21,11 @@ class ProfileSetup extends Setup {
     // Load tokens from profile
     var profile = profiles.first;
     loadTokensFromPayload(jsonDecode(profile.value));
+    var session = getSessionFromJWT(sessionToken);
 
     // Refresh token
     var res = await postRqAuthorized("/auth/refresh", <String, dynamic>{
+      "session": session,
       "token": refreshToken,
     });
 
