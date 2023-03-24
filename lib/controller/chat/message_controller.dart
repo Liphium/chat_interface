@@ -8,7 +8,7 @@ import '../../database/database.dart';
 class MessageController extends GetxController {
 
   final loaded = false.obs;
-  final selectedConversation = Conversation(0, "data").obs;
+  final selectedConversation = Conversation(0, "data", "").obs;
   final messages = <Message>[].obs;
 
   void selectConversation(Conversation conversation) async {

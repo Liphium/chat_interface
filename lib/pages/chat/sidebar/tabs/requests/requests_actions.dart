@@ -13,9 +13,22 @@ void _addButton(String input, RxBool loading, {Function(String)? success}) async
     return;
   }
 
+  // Sign name of the user
+  final signedName = sign(asymmetricKeyPair.privateKey, values[0]);
+
   // Send friend request
   connector.sendAction(Message("fr_rq", <String, dynamic>{
     "username": values[0],
-    "tag": values[1]
+    "tag": values[1],
+    "signature": signedName,
   }), waiter: () => loading.value = false,);
+}
+
+void denyFriendRequest(int id, {RxBool? loading}) {
+
+  loading?.value = true;
+
+  connector.sendAction(Message("fr_rq_deny", <String, dynamic>{
+    "id": id,
+  }), waiter: () => loading?.value = false,);
 }

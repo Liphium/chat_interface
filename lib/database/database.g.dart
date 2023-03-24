@@ -19,6 +19,11 @@ class $ConversationTable extends Conversation
   late final GeneratedColumn<String> data = GeneratedColumn<String>(
       'data', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+      'key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
@@ -26,7 +31,7 @@ class $ConversationTable extends Conversation
       'updated_at', aliasedName, false,
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, data, updatedAt];
+  List<GeneratedColumn> get $columns => [id, data, key, updatedAt];
   @override
   String get aliasedName => _alias ?? 'conversation';
   @override
@@ -44,6 +49,12 @@ class $ConversationTable extends Conversation
           _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
     } else if (isInserting) {
       context.missing(_dataMeta);
+    }
+    if (data.containsKey('key')) {
+      context.handle(
+          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+    } else if (isInserting) {
+      context.missing(_keyMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
@@ -64,6 +75,8 @@ class $ConversationTable extends Conversation
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       data: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      key: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
     );
@@ -79,14 +92,19 @@ class ConversationData extends DataClass
     implements Insertable<ConversationData> {
   final int id;
   final String data;
+  final String key;
   final BigInt updatedAt;
   const ConversationData(
-      {required this.id, required this.data, required this.updatedAt});
+      {required this.id,
+      required this.data,
+      required this.key,
+      required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['data'] = Variable<String>(data);
+    map['key'] = Variable<String>(key);
     map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
   }
@@ -95,6 +113,7 @@ class ConversationData extends DataClass
     return ConversationCompanion(
       id: Value(id),
       data: Value(data),
+      key: Value(key),
       updatedAt: Value(updatedAt),
     );
   }
@@ -105,6 +124,7 @@ class ConversationData extends DataClass
     return ConversationData(
       id: serializer.fromJson<int>(json['id']),
       data: serializer.fromJson<String>(json['data']),
+      key: serializer.fromJson<String>(json['key']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
   }
@@ -114,14 +134,17 @@ class ConversationData extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'data': serializer.toJson<String>(data),
+      'key': serializer.toJson<String>(key),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
   }
 
-  ConversationData copyWith({int? id, String? data, BigInt? updatedAt}) =>
+  ConversationData copyWith(
+          {int? id, String? data, String? key, BigInt? updatedAt}) =>
       ConversationData(
         id: id ?? this.id,
         data: data ?? this.data,
+        key: key ?? this.key,
         updatedAt: updatedAt ?? this.updatedAt,
       );
   @override
@@ -129,54 +152,66 @@ class ConversationData extends DataClass
     return (StringBuffer('ConversationData(')
           ..write('id: $id, ')
           ..write('data: $data, ')
+          ..write('key: $key, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, data, updatedAt);
+  int get hashCode => Object.hash(id, data, key, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationData &&
           other.id == this.id &&
           other.data == this.data &&
+          other.key == this.key &&
           other.updatedAt == this.updatedAt);
 }
 
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<int> id;
   final Value<String> data;
+  final Value<String> key;
   final Value<BigInt> updatedAt;
   const ConversationCompanion({
     this.id = const Value.absent(),
     this.data = const Value.absent(),
+    this.key = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   ConversationCompanion.insert({
     this.id = const Value.absent(),
     required String data,
+    required String key,
     required BigInt updatedAt,
   })  : data = Value(data),
+        key = Value(key),
         updatedAt = Value(updatedAt);
   static Insertable<ConversationData> custom({
     Expression<int>? id,
     Expression<String>? data,
+    Expression<String>? key,
     Expression<BigInt>? updatedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (data != null) 'data': data,
+      if (key != null) 'key': key,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
 
   ConversationCompanion copyWith(
-      {Value<int>? id, Value<String>? data, Value<BigInt>? updatedAt}) {
+      {Value<int>? id,
+      Value<String>? data,
+      Value<String>? key,
+      Value<BigInt>? updatedAt}) {
     return ConversationCompanion(
       id: id ?? this.id,
       data: data ?? this.data,
+      key: key ?? this.key,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -190,6 +225,9 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     if (data.present) {
       map['data'] = Variable<String>(data.value);
     }
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<BigInt>(updatedAt.value);
     }
@@ -201,6 +239,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     return (StringBuffer('ConversationCompanion(')
           ..write('id: $id, ')
           ..write('data: $data, ')
+          ..write('key: $key, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -1052,13 +1091,18 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+      'key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _tagMeta = const VerificationMeta('tag');
   @override
   late final GeneratedColumn<String> tag = GeneratedColumn<String>(
       'tag', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, name, tag];
+  List<GeneratedColumn> get $columns => [id, name, key, tag];
   @override
   String get aliasedName => _alias ?? 'friend';
   @override
@@ -1076,6 +1120,12 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('key')) {
+      context.handle(
+          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+    } else if (isInserting) {
+      context.missing(_keyMeta);
     }
     if (data.containsKey('tag')) {
       context.handle(
@@ -1096,6 +1146,8 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      key: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
       tag: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
     );
@@ -1110,13 +1162,19 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
 class FriendData extends DataClass implements Insertable<FriendData> {
   final int id;
   final String name;
+  final String key;
   final String tag;
-  const FriendData({required this.id, required this.name, required this.tag});
+  const FriendData(
+      {required this.id,
+      required this.name,
+      required this.key,
+      required this.tag});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
+    map['key'] = Variable<String>(key);
     map['tag'] = Variable<String>(tag);
     return map;
   }
@@ -1125,6 +1183,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return FriendCompanion(
       id: Value(id),
       name: Value(name),
+      key: Value(key),
       tag: Value(tag),
     );
   }
@@ -1135,6 +1194,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return FriendData(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      key: serializer.fromJson<String>(json['key']),
       tag: serializer.fromJson<String>(json['tag']),
     );
   }
@@ -1144,13 +1204,16 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
+      'key': serializer.toJson<String>(key),
       'tag': serializer.toJson<String>(tag),
     };
   }
 
-  FriendData copyWith({int? id, String? name, String? tag}) => FriendData(
+  FriendData copyWith({int? id, String? name, String? key, String? tag}) =>
+      FriendData(
         id: id ?? this.id,
         name: name ?? this.name,
+        key: key ?? this.key,
         tag: tag ?? this.tag,
       );
   @override
@@ -1158,54 +1221,66 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return (StringBuffer('FriendData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('key: $key, ')
           ..write('tag: $tag')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, tag);
+  int get hashCode => Object.hash(id, name, key, tag);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is FriendData &&
           other.id == this.id &&
           other.name == this.name &&
+          other.key == this.key &&
           other.tag == this.tag);
 }
 
 class FriendCompanion extends UpdateCompanion<FriendData> {
   final Value<int> id;
   final Value<String> name;
+  final Value<String> key;
   final Value<String> tag;
   const FriendCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.key = const Value.absent(),
     this.tag = const Value.absent(),
   });
   FriendCompanion.insert({
     this.id = const Value.absent(),
     required String name,
+    required String key,
     required String tag,
   })  : name = Value(name),
+        key = Value(key),
         tag = Value(tag);
   static Insertable<FriendData> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<String>? key,
     Expression<String>? tag,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (key != null) 'key': key,
       if (tag != null) 'tag': tag,
     });
   }
 
   FriendCompanion copyWith(
-      {Value<int>? id, Value<String>? name, Value<String>? tag}) {
+      {Value<int>? id,
+      Value<String>? name,
+      Value<String>? key,
+      Value<String>? tag}) {
     return FriendCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      key: key ?? this.key,
       tag: tag ?? this.tag,
     );
   }
@@ -1219,6 +1294,9 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
     if (tag.present) {
       map['tag'] = Variable<String>(tag.value);
     }
@@ -1230,6 +1308,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     return (StringBuffer('FriendCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('key: $key, ')
           ..write('tag: $tag')
           ..write(')'))
         .toString();

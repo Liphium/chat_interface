@@ -80,7 +80,7 @@ class _MessageFeedState extends State<MessageFeed> {
                     }
                       
                     return MessageRenderer(message: message, self: self, last: last,
-                    sender: self ? Friend(1, statusController.name.value, statusController.tag.value) : sender);
+                    sender: self ? Friend(1, statusController.name.value, "", statusController.tag.value) : sender);
                   },
                 ),
               ),

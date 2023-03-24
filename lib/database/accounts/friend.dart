@@ -5,6 +5,7 @@ class Friend extends Table {
   
     IntColumn get id => integer()();
     TextColumn get name => text()();
+    TextColumn get key => text()();
     TextColumn get tag => text()();
   
     @override

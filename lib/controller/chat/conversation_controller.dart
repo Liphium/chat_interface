@@ -59,17 +59,19 @@ class ConversationController extends GetxController {
 class Conversation {
   
   final int id;
+  final String key;
   final String data;
 
   final membersLoading = false.obs;
   final members = <Member>[].obs;
 
-  Conversation(this.id, this.data);
+  Conversation(this.id, this.data, this.key);
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json["id"],
-        data = json["data"];
+        data = json["data"],
+        key = json["key"];
 
-  Conversation.fromData(ConversationData data) : this(data.id, data.data);
+  Conversation.fromData(ConversationData data) : this(data.id, data.data, data.key);
 
   String getName(StatusController statusController, FriendController friendController) {
 
@@ -82,5 +84,5 @@ class Conversation {
 
   bool get isGroup => members.length > 2;
 
-  ConversationData get entity => ConversationData(id: id, data: data, updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch));
+  ConversationData get entity => ConversationData(id: id, key: key, data: data, updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch));
 }

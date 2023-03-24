@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
@@ -36,18 +37,19 @@ class FriendsSetup extends Setup {
     var friends = await (db.select(db.friend)..orderBy([(tbl) => OrderingTerm(expression: tbl.id)])).get();
 
     for (var friend in friends) {
-      controller.add(Friend(friend.id, friend.name, friend.tag));
+      controller.add(Friend(friend.id, friend.name, friend.key, friend.tag));
     }
     
     if(body["success"]) {
 
       var friends = body["friends"];
       if (friends != null) {
+
         // Add new friends
         for(var friend in friends) {
           var friendData = Friend.fromJson(friend as Map<String, dynamic>);
           final id = await db.into(db.friend).insertOnConflictUpdate(friendData.entity);
-          controller.add(Friend(id, friendData.name, friendData.tag));
+          controller.add(Friend(id, friendData.name, friendData.key, friendData.tag));
         }
       }
     } else {

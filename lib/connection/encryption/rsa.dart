@@ -60,3 +60,26 @@ String encryptPrivateKey(RSAPrivateKey key, String password, String username, St
   return encryptAES(packagePrivateKey(key), generateSecureKey(password, username, salt)).base64;
 }
 
+String sign(RSAPrivateKey key, String digest) {
+
+  final signer = enc.Signer(enc.RSASigner(enc.RSASignDigest.SHA256, privateKey: key));
+  return signer.sign(digest).base64;
+}
+
+bool verifySignature(String signature, RSAPublicKey key, String digest) {
+
+  final verifier = enc.Signer(enc.RSASigner(enc.RSASignDigest.SHA256, publicKey: key));
+  return verifier.verify64(digest, signature);
+}
+
+String decryptRSA64(String encrypted, RSAPrivateKey key) {
+  
+  final encrypter = enc.Encrypter(enc.RSA(privateKey: key));
+  return encrypter.decrypt64(encrypted);
+}
+
+String encryptRSA64(String message, RSAPublicKey key) {
+  
+  final encrypter = enc.Encrypter(enc.RSA(publicKey: key));
+  return encrypter.encrypt(message).base64;
+}

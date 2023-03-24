@@ -1,4 +1,5 @@
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:get/get.dart';
 
@@ -18,13 +19,15 @@ class Request {
 
   final String name;
   final String tag;
+  final String key;
   final int id;
   final loading = false.obs;
 
-  Request(this.name, this.tag, this.id);
+  Request(this.name, this.tag, this.key, this.id);
   Request.fromJson(Map<String, dynamic> json)
       : name = json["name"],
         tag = json["tag"],
+        key = json["key"],
         id = json["id"];
 
   void accept({required Function() success}) {
@@ -36,6 +39,6 @@ class Request {
     }), waiter: () => loading.value = false);
   }
 
-  Friend get friend => Friend(id, name, tag);
+  Friend get friend => Friend(id, name, key, tag);
 
 }

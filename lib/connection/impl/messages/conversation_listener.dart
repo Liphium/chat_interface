@@ -1,7 +1,9 @@
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:get/get.dart';
 
 import '../../../controller/chat/member_controller.dart';
@@ -17,6 +19,7 @@ void conversationOpen(Event event) async {
     // Grab conversation data
     String conversationName = event.data["conversation"]["data"];
     int conversationId = event.data["conversation"]["id"];
+    String key = decryptRSA64(event.data["key"], asymmetricKeyPair.privateKey);
 
     // Show message
     showMessage(SnackbarType.info, "conv.opened".trParams(<String, String>{
@@ -26,6 +29,7 @@ void conversationOpen(Event event) async {
     // Add to database
     await db.into(db.conversation).insert(ConversationData(
       id: conversationId,
+      key: key,
       data: conversationName,
       updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch),      
     ));
@@ -35,7 +39,7 @@ void conversationOpen(Event event) async {
     // Add members to database
     for (var member in event.data["members"]) {
     
-      String name = (controller.friends[member["account"]] ?? Friend(0, "fj-${member["account"]}", "tag")).name;
+      String name = (controller.friends[member["account"]] ?? Friend(0, "fj-${member["account"]}", "", "tag")).name;
       final mem = Member.fromJson(name, member);
       await db.into(db.member).insertOnConflictUpdate(mem.toData(member["id"], conversationId));
     }

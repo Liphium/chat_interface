@@ -18,7 +18,7 @@ void setupMemberListener(Event event) async {
   final memberList = <Member>[];
   for (var member in event.data["members"]) {
     
-    String name = (controller.friends[member["account"]] ?? Friend(0, "fj-${member["account"]}", "tag")).name;
+    String name = (controller.friends[member["account"]] ?? Friend(0, "fj-${member["account"]}", "", "tag")).name;
     final mem = Member.fromJson(name, member);
     await db.into(db.member).insertOnConflictUpdate(mem.toData(member["id"], conversation));
 

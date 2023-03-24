@@ -1,7 +1,9 @@
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';
+import 'package:pointycastle/export.dart';
 
 import '../../database/database.dart';
 
@@ -22,19 +24,23 @@ class Friend {
   final int id;
   final String name;
   final String tag;
+  final String key;
   var status = "test.status".obs;
   var online = false.obs;
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, this.tag);
+  Friend(this.id, this.name, this.key, this.tag);
   Friend.fromJson(Map<String, dynamic> json)
       : id = json["id"],
         name = json["name"],
+        key = json["key"],
         tag = json["tag"];
 
-  FriendData get entity => FriendData(id: id, name: name, tag: tag);
+  FriendData get entity => FriendData(id: id, key: key, name: name, tag: tag);
+
+  RSAPublicKey get publicKey => unpackagePublicKey(key);
 
   //* Remove friend
   void remove(RxBool loading) {

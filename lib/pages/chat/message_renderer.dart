@@ -21,7 +21,7 @@ class _MessageRendererState extends State<MessageRenderer> {
   @override
   Widget build(BuildContext context) {
 
-    Friend sender = widget.sender ?? Friend(0, "System", "fjc");
+    Friend sender = widget.sender ?? Friend(0, "System", "", "fjc");
     ThemeData theme = Theme.of(context);
 
     return Padding(
