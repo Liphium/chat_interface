@@ -1,6 +1,8 @@
 
 import 'dart:convert';
 
+import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,9 +37,17 @@ class RequestSetup extends Setup {
 
       var friends = body["friends"];
       if (friends != null) {
+        var name = Get.find<StatusController>().name.value;
+
         // Add new friends
         for(var friend in friends) {
           var requestData = Request.fromJson(friend as Map<String, dynamic>);
+
+          // Verify signature
+          if(!verifySignature(friend["signature"], requestData.publicKey, name)) {
+            return const ErrorPage(title: "invalid_signature");
+          }
+
           controller.requests.add(requestData);
         }
       }

@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../util/vertical_spacing.dart';
 
@@ -44,9 +45,7 @@ class _MessageRendererState extends State<MessageRenderer> {
               //* Avatar
               Visibility(
                 visible: !widget.last,
-                replacement: const SizedBox(
-                  width: 40,
-                ),
+                replacement: const SizedBox(width: 40), //* Show timestamp instead
                 child: SizedBox(
                   width: 40,
                   height: 40,
@@ -83,6 +82,19 @@ class _MessageRendererState extends State<MessageRenderer> {
                     //* Content
                     Text(widget.message.content, style: theme.textTheme.bodyLarge),
                   ],
+                ),
+              ),
+
+              horizontalSpacing(defaultSpacing),
+
+              Visibility(
+                visible: !widget.message.verified,
+                child: Tooltip(
+                  message: "not.signed".tr,
+                  child: const Icon(
+                    Icons.warning_rounded,
+                    color: Colors.amber,
+                  ),
                 ),
               )
             ],

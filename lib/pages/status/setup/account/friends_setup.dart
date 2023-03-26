@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
@@ -44,10 +45,17 @@ class FriendsSetup extends Setup {
 
       var friends = body["friends"];
       if (friends != null) {
+        var name = Get.find<StatusController>().name.value;
 
         // Add new friends
         for(var friend in friends) {
           var friendData = Friend.fromJson(friend as Map<String, dynamic>);
+
+          // Verify signature
+          if(!verifySignature(friend["signature"], friendData.publicKey, name)) {
+            return const ErrorPage(title: "invalid_signature");
+          }
+
           final id = await db.into(db.friend).insertOnConflictUpdate(friendData.entity);
           controller.add(Friend(id, friendData.name, friendData.key, friendData.tag));
         }

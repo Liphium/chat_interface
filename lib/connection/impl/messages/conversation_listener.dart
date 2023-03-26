@@ -21,13 +21,16 @@ void conversationOpen(Event event) async {
     int conversationId = event.data["conversation"]["id"];
     String key = decryptRSA64(event.data["key"], asymmetricKeyPair.privateKey);
 
+    print("convo key: $key");
+
     // Show message
     showMessage(SnackbarType.info, "conv.opened".trParams(<String, String>{
       "name": conversationName,
     }));
 
     // Add to database
-    await db.into(db.conversation).insert(ConversationData(
+    ConversationData data;
+    await db.into(db.conversation).insert(data = ConversationData(
       id: conversationId,
       key: key,
       data: conversationName,
@@ -45,7 +48,7 @@ void conversationOpen(Event event) async {
     }
 
     // Add to UI
-    Get.find<ConversationController>().add(Conversation.fromJson(event.data["conversation"]));
+    Get.find<ConversationController>().add(Conversation.fromData(data));
   }
 
 }

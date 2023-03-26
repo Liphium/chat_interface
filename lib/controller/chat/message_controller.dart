@@ -1,6 +1,16 @@
+import 'dart:convert';
+
+import 'package:chat_interface/connection/encryption/aes.dart';
+import 'package:chat_interface/connection/encryption/hash.dart';
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
+import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/controller/chat/writing_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/main.dart';
+import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:drift/drift.dart';
+import 'package:encrypt/encrypt.dart';
 import 'package:get/get.dart';
 
 import '../../database/database.dart';
@@ -31,8 +41,23 @@ class MessageController extends GetxController {
       return;
     }
 
-    for (var message in messages) {
-      await db.into(db.message).insertOnConflictUpdate(Message.fromJson(message).entity);
+    final controller = Get.find<FriendController>();
+    final status = Get.find<StatusController>();
+    for (var msg in messages) {
+
+      final message = Message.fromJson(msg);
+      final conversation = Get.find<ConversationController>().conversations[message.conversation]!;
+      message.content = decryptAES(Encrypted.fromBase64(message.content), conversation.key);
+
+      // Parse content and check signature
+      final json = jsonDecode(message.content);
+      var key = message.sender == status.id.value ? asymmetricKeyPair.publicKey : controller.friends[message.sender]!.publicKey;
+
+      // Check signature
+      message.verified = verifySignature(json["s"], key, hashSha(json["c"]));
+      message.content = json["c"];
+
+      await db.into(db.message).insertOnConflictUpdate(message.entity);
     }
   }
 
@@ -41,14 +66,15 @@ class MessageController extends GetxController {
 class Message {
     
   final String id;
-  final String content;
+  String content;
+  bool verified;
   final String certificate;
   final int sender;
   final DateTime createdAt;
   final int conversation;
   final bool edited;
 
-  Message(this.id, this.content, this.certificate, this.sender, this.createdAt, this.conversation, this.edited);
+  Message(this.id, this.content, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, this.verified);
 
   factory Message.fromJson(Map<String, dynamic> json) => Message(
         json["id"],
@@ -58,6 +84,7 @@ class Message {
         DateTime.fromMillisecondsSinceEpoch(json["creation"]),
         json["conversation"],
         json["edited"],
+        false,
       );
 
   Message.fromMessageData(MessageData messageData)
@@ -67,7 +94,8 @@ class Message {
         sender = messageData.sender!,
         createdAt = messageData.createdAt,
         conversation = messageData.conversationId!,
-        edited = messageData.edited;
+        edited = messageData.edited,
+        verified = messageData.verified;
 
   MessageData get entity => MessageData(
         id: id,
@@ -77,5 +105,6 @@ class Message {
         createdAt: createdAt,
         conversationId: conversation,
         edited: edited,
+        verified: verified
       );
 }

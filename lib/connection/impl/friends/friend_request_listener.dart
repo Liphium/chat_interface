@@ -16,6 +16,7 @@ void friendRequest(Event event) {
   
   int friendId = event.data["id"] as int;
   String name = event.data["name"];
+  print("Friend request from $name ($friendId)");
   String signature = event.data["signature"];
   String publicKeyText = event.data["key"];
   RSAPublicKey publicKey = unpackagePublicKey(publicKeyText);

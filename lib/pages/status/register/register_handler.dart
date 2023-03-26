@@ -1,15 +1,11 @@
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
+import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:http/http.dart';
 
 import '../../../util/web.dart';
 
 void register(String email, String username, String password, {Function()? success, Function(String)? failure}) async {
-
-  // Encrypt to protect password
-  var bytes = utf8.encode(password);
-  var digest = sha256.convert(bytes);
 
   // Split username into tag and name
   var name = username.split("#")[0];
@@ -19,7 +15,7 @@ void register(String email, String username, String password, {Function()? succe
   try {
     res = await postRq("/auth/register", <String, String>{
       "email": email,
-      "password": digest.toString(),
+      "password": hashSha(password),
       "username": name,
       "tag": tag,
     });

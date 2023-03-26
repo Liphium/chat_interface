@@ -59,7 +59,7 @@ class ConversationController extends GetxController {
 class Conversation {
   
   final int id;
-  final String key;
+  String key;
   final String data;
 
   final membersLoading = false.obs;
@@ -69,12 +69,12 @@ class Conversation {
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json["id"],
         data = json["data"],
-        key = json["key"];
+        key = "key";
 
   Conversation.fromData(ConversationData data) : this(data.id, data.data, data.key);
 
   String getName(StatusController statusController, FriendController friendController) {
-
+    
     if(members.length == 2) {
       return members.firstWhere((element) => element.account != statusController.id.value).name;
     } 

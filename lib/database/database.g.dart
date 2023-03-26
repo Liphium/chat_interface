@@ -543,6 +543,18 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _verifiedMeta =
+      const VerificationMeta('verified');
+  @override
+  late final GeneratedColumn<bool> verified =
+      GeneratedColumn<bool>('verified', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: true,
+          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+            SqlDialect.sqlite: 'CHECK ("verified" IN (0, 1))',
+            SqlDialect.mysql: '',
+            SqlDialect.postgres: '',
+          }));
   static const VerificationMeta _contentMeta =
       const VerificationMeta('content');
   @override
@@ -588,8 +600,16 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
             SqlDialect.postgres: '',
           }));
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, content, certificate, sender, createdAt, conversationId, edited];
+  List<GeneratedColumn> get $columns => [
+        id,
+        verified,
+        content,
+        certificate,
+        sender,
+        createdAt,
+        conversationId,
+        edited
+      ];
   @override
   String get aliasedName => _alias ?? 'message';
   @override
@@ -603,6 +623,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('verified')) {
+      context.handle(_verifiedMeta,
+          verified.isAcceptableOrUnknown(data['verified']!, _verifiedMeta));
+    } else if (isInserting) {
+      context.missing(_verifiedMeta);
     }
     if (data.containsKey('content')) {
       context.handle(_contentMeta,
@@ -651,6 +677,8 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
     return MessageData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      verified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
       certificate: attachedDatabase.typeMapping
@@ -674,6 +702,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
 
 class MessageData extends DataClass implements Insertable<MessageData> {
   final String id;
+  final bool verified;
   final String content;
   final String certificate;
   final int? sender;
@@ -682,6 +711,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final bool edited;
   const MessageData(
       {required this.id,
+      required this.verified,
       required this.content,
       required this.certificate,
       this.sender,
@@ -692,6 +722,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    map['verified'] = Variable<bool>(verified);
     map['content'] = Variable<String>(content);
     map['certificate'] = Variable<String>(certificate);
     if (!nullToAbsent || sender != null) {
@@ -708,6 +739,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   MessageCompanion toCompanion(bool nullToAbsent) {
     return MessageCompanion(
       id: Value(id),
+      verified: Value(verified),
       content: Value(content),
       certificate: Value(certificate),
       sender:
@@ -725,6 +757,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
+      verified: serializer.fromJson<bool>(json['verified']),
       content: serializer.fromJson<String>(json['content']),
       certificate: serializer.fromJson<String>(json['certificate']),
       sender: serializer.fromJson<int?>(json['sender']),
@@ -738,6 +771,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'verified': serializer.toJson<bool>(verified),
       'content': serializer.toJson<String>(content),
       'certificate': serializer.toJson<String>(certificate),
       'sender': serializer.toJson<int?>(sender),
@@ -749,6 +783,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
 
   MessageData copyWith(
           {String? id,
+          bool? verified,
           String? content,
           String? certificate,
           Value<int?> sender = const Value.absent(),
@@ -757,6 +792,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           bool? edited}) =>
       MessageData(
         id: id ?? this.id,
+        verified: verified ?? this.verified,
         content: content ?? this.content,
         certificate: certificate ?? this.certificate,
         sender: sender.present ? sender.value : this.sender,
@@ -769,6 +805,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   String toString() {
     return (StringBuffer('MessageData(')
           ..write('id: $id, ')
+          ..write('verified: $verified, ')
           ..write('content: $content, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
@@ -780,13 +817,14 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, content, certificate, sender, createdAt, conversationId, edited);
+  int get hashCode => Object.hash(id, verified, content, certificate, sender,
+      createdAt, conversationId, edited);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageData &&
           other.id == this.id &&
+          other.verified == this.verified &&
           other.content == this.content &&
           other.certificate == this.certificate &&
           other.sender == this.sender &&
@@ -797,6 +835,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
 
 class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> id;
+  final Value<bool> verified;
   final Value<String> content;
   final Value<String> certificate;
   final Value<int?> sender;
@@ -805,6 +844,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<bool> edited;
   const MessageCompanion({
     this.id = const Value.absent(),
+    this.verified = const Value.absent(),
     this.content = const Value.absent(),
     this.certificate = const Value.absent(),
     this.sender = const Value.absent(),
@@ -814,6 +854,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   });
   MessageCompanion.insert({
     required String id,
+    required bool verified,
     required String content,
     required String certificate,
     this.sender = const Value.absent(),
@@ -821,12 +862,14 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.conversationId = const Value.absent(),
     required bool edited,
   })  : id = Value(id),
+        verified = Value(verified),
         content = Value(content),
         certificate = Value(certificate),
         createdAt = Value(createdAt),
         edited = Value(edited);
   static Insertable<MessageData> custom({
     Expression<String>? id,
+    Expression<bool>? verified,
     Expression<String>? content,
     Expression<String>? certificate,
     Expression<int>? sender,
@@ -836,6 +879,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (verified != null) 'verified': verified,
       if (content != null) 'content': content,
       if (certificate != null) 'certificate': certificate,
       if (sender != null) 'sender': sender,
@@ -847,6 +891,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
 
   MessageCompanion copyWith(
       {Value<String>? id,
+      Value<bool>? verified,
       Value<String>? content,
       Value<String>? certificate,
       Value<int?>? sender,
@@ -855,6 +900,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<bool>? edited}) {
     return MessageCompanion(
       id: id ?? this.id,
+      verified: verified ?? this.verified,
       content: content ?? this.content,
       certificate: certificate ?? this.certificate,
       sender: sender ?? this.sender,
@@ -869,6 +915,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (verified.present) {
+      map['verified'] = Variable<bool>(verified.value);
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
@@ -895,6 +944,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   String toString() {
     return (StringBuffer('MessageCompanion(')
           ..write('id: $id, ')
+          ..write('verified: $verified, ')
           ..write('content: $content, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -9,6 +11,7 @@ const appId = 0;
 const bool isDebug = true;
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize controllers

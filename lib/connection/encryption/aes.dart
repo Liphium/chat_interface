@@ -9,6 +9,14 @@ Encrypted encryptAES(String data, String key) {
   return encrypter.encrypt(data, iv: iv);
 }
 
+String decryptAES(Encrypted data, String key) {
+
+  final encrypter = Encrypter(AES(Key.fromUtf8(key), mode: AESMode.cbc));
+  final iv = IV.fromLength(16);
+
+  return encrypter.decrypt(data, iv: iv);
+}
+
 String fill(String input, int length) {
   input = input.padRight(length, "!");
   return input.substring(0, length);
@@ -17,4 +25,8 @@ String fill(String input, int length) {
 String generateSecureKey(String password, String username, String salt) {
   String key = fill(password, 16) + fill(username, 8) + fill(salt, 8);
   return key;
+}
+
+String randomAESKey() {
+  return SecureRandom(32).base64.substring(0, 32);
 }

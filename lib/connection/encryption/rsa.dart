@@ -75,11 +75,15 @@ bool verifySignature(String signature, RSAPublicKey key, String digest) {
 String decryptRSA64(String encrypted, RSAPrivateKey key) {
   
   final encrypter = enc.Encrypter(enc.RSA(privateKey: key));
-  return encrypter.decrypt64(encrypted);
+  final iv = enc.IV.fromLength(16);
+  
+  return encrypter.decrypt64(encrypted, iv: iv);
 }
 
 String encryptRSA64(String message, RSAPublicKey key) {
   
   final encrypter = enc.Encrypter(enc.RSA(publicKey: key));
-  return encrypter.encrypt(message).base64;
+  final iv = enc.IV.fromLength(16);
+
+  return encrypter.encrypt(message, iv: iv).base64;
 }
