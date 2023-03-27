@@ -1,11 +1,13 @@
 
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/impl/setup/setup_member_listener.dart';
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:get/get.dart';
 
+import '../friends/status_listener.dart';
 import 'stored_actions_handler.dart';
 
 void setupSetupListeners() {
@@ -40,4 +42,13 @@ void setupSetupListeners() {
 
   //* New members
   connector.listen("setup_mem", setupMemberListener);
+  connector.listen("setup_st", setupStatusListener);
+
+  //* Setup finished
+  connector.listen("setup_fin", (event) {
+    logger.i("Setup finished");
+
+    // Update status
+    connector.sendAction(msg.Message("acc_on", <String, dynamic>{}));
+  });
 }

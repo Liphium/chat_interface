@@ -82,6 +82,16 @@ class Conversation {
     return data;
   }
 
+  String status(StatusController statusController, FriendController friendController) {
+    
+    if(members.length == 2) {
+      int id = members.firstWhere((element) => element.account != statusController.id.value).account;
+      return friendController.friends[id]!.status.value;
+    } 
+
+    return "status.offline".tr;
+  }
+
   bool get isGroup => members.length > 2;
 
   ConversationData get entity => ConversationData(id: id, key: key, data: data, updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch));

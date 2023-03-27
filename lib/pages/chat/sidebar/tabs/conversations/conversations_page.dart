@@ -126,9 +126,18 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                     Text(conversation.getName(statusController, friendController), style: theme.textTheme.titleMedium),
 
                                     // Conversation description
-                                    Text(conversation.isGroup ? "chat.members".trParams(<String, String>{
-                                      'count': conversation.members.length.toString()
-                                    }) : 'Online', style: theme.textTheme.bodySmall),
+                                    Obx(() =>
+                                      Text(
+
+                                        //* Conversation status message
+                                        conversation.isGroup ? "chat.members".trParams(<String, String>{
+                                          'count': conversation.members.length.toString()
+                                        }) : 
+                                        conversation.status(statusController, friendController),
+
+                                        style: theme.textTheme.bodySmall
+                                      )
+                                    ),
                                   ],
                                 ),
                               ],
