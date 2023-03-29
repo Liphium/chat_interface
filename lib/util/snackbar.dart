@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/current/notification_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,15 +33,5 @@ void showSnackbar(SnackbarType type, String title, String message) {
 }
 
 void showMessage(SnackbarType type, String message) {
-
-  Get.snackbar(
-    message,
-    '',
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.grey[900],
-    colorText: Colors.white,
-    margin: const EdgeInsets.all(8),
-    borderRadius: 8,
-    duration: const Duration(seconds: 3),
-  );
+  Get.find<NotificationController>().set(type, message);
 }

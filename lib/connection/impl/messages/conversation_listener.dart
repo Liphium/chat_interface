@@ -21,8 +21,6 @@ void conversationOpen(Event event) async {
     int conversationId = event.data["conversation"]["id"];
     String key = decryptRSA64(event.data["key"], asymmetricKeyPair.privateKey);
 
-    print("convo key: $key");
-
     // Show message
     showMessage(SnackbarType.info, "conv.opened".trParams(<String, String>{
       "name": conversationName,
@@ -58,8 +56,6 @@ void conversationOpenStatus(Event event) async {
 
   if(!event.data["success"]) {
     showMessage(SnackbarType.error, "conv.${event.data["message"]}".tr);
-  } else {
-    showMessage(SnackbarType.success, "conv.created");
   }
 
 }

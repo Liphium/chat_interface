@@ -7,7 +7,6 @@ import 'package:chat_interface/controller/chat/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/controller/chat/writing_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:drift/drift.dart';
 import 'package:encrypt/encrypt.dart';
@@ -40,23 +39,10 @@ class MessageController extends GetxController {
     if(messages == null) {
       return;
     }
-
-    final controller = Get.find<FriendController>();
-    final status = Get.find<StatusController>();
+    
     for (var msg in messages) {
 
       final message = Message.fromJson(msg);
-      final conversation = Get.find<ConversationController>().conversations[message.conversation]!;
-      message.content = decryptAES(Encrypted.fromBase64(message.content), conversation.key);
-
-      // Parse content and check signature
-      final json = jsonDecode(message.content);
-      var key = message.sender == status.id.value ? asymmetricKeyPair.publicKey : controller.friends[message.sender]!.publicKey;
-
-      // Check signature
-      message.verified = verifySignature(json["s"], key, hashSha(json["c"]));
-      message.content = json["c"];
-
       await db.into(db.message).insertOnConflictUpdate(message.entity);
     }
   }
@@ -66,7 +52,9 @@ class MessageController extends GetxController {
 class Message {
     
   final String id;
+  String type; // text, audio, call, stream
   String content;
+  String attachments;
   bool verified;
   final String certificate;
   final int sender;
@@ -74,22 +62,47 @@ class Message {
   final int conversation;
   final bool edited;
 
-  Message(this.id, this.content, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, this.verified);
+  Message(this.id, this.type, this.content, this.attachments, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, this.verified);
 
-  factory Message.fromJson(Map<String, dynamic> json) => Message(
-        json["id"],
-        json["data"],
-        json["certificate"],
-        json["sender"],
-        DateTime.fromMillisecondsSinceEpoch(json["creation"]),
-        json["conversation"],
-        json["edited"],
-        false,
-      );
+  factory Message.fromJson(Map<String, dynamic> json) {
+
+    // Convert to message
+    final message = Message(
+      json["id"],
+      "",
+      json["data"],
+      "",
+      json["certificate"],
+      json["sender"],
+      DateTime.fromMillisecondsSinceEpoch(json["creation"]),
+      json["conversation"],
+      json["edited"],
+      false
+    );
+
+    // Decrypt content
+    final conversation = Get.find<ConversationController>().conversations[message.conversation]!;
+    message.content = decryptAES(Encrypted.fromBase64(message.content), conversation.key);
+
+    // Parse content and check signature
+    final contentJson = jsonDecode(message.content);
+    final status = Get.find<StatusController>();
+    var key = message.sender == status.id.value ? asymmetricKeyPair.publicKey : Get.find<FriendController>().friends[message.sender]!.publicKey;
+
+    // Check signature
+    message.verified = verifySignature(contentJson["s"], key, hashSha(contentJson["c"]));
+    message.content = contentJson["c"];
+    message.type = contentJson["t"] ?? "text";
+    message.attachments = contentJson["a"] ?? "";
+
+    return message;
+  }
 
   Message.fromMessageData(MessageData messageData)
       : id = messageData.id,
+        type = messageData.type,
         content = messageData.content,
+        attachments = messageData.attachments,
         certificate = messageData.certificate,
         sender = messageData.sender!,
         createdAt = messageData.createdAt,
@@ -99,7 +112,9 @@ class Message {
 
   MessageData get entity => MessageData(
         id: id,
+        type: type,
         content: content,
+        attachments: attachments,
         certificate: certificate,
         sender: sender,
         createdAt: createdAt,
@@ -107,4 +122,10 @@ class Message {
         edited: edited,
         verified: verified
       );
+
+  Map<String, dynamic> toJson() {
+  
+    return <String, dynamic>{};
+  }
 }
+      

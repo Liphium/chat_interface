@@ -33,14 +33,12 @@ class KeySetup extends Setup {
     final body = jsonDecode(publicRes.body);
     var privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
 
-    StatusController controller = Get.find();
-
     if(!body["success"]) {
 
       final pair = await compute(generateRSAKey, 2048);
 
       final packagedPriv = packagePrivateKey(pair.privateKey);
-      final encryptedPriv = encryptPrivateKey(pair.privateKey, keyPassRaw, controller.name.value, salt!.value);
+      final encryptedPriv = encryptPrivateKey(pair.privateKey, salt!.value);
       final packagedPub = packagePublicKey(pair.publicKey);
 
       // Set public key on the server

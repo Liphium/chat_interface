@@ -1,9 +1,8 @@
 import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../util/vertical_spacing.dart';
 
 class MessageRenderer extends StatefulWidget {
 

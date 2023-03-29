@@ -5,7 +5,6 @@ void openConversation(RxBool loading, String name, List<int> friends) {
 
   // Generate secure key
   var key = randomAESKey();
-  print("convo key: " + key);
 
   // Create encrypted payloads for friends
   var keys = <String, String>{};

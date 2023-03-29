@@ -22,11 +22,6 @@ String fill(String input, int length) {
   return input.substring(0, length);
 }
 
-String generateSecureKey(String password, String username, String salt) {
-  String key = fill(password, 16) + fill(username, 8) + fill(salt, 8);
-  return key;
-}
-
 String randomAESKey() {
   return SecureRandom(32).base64.substring(0, 32);
 }

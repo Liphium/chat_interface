@@ -1,3 +1,4 @@
+import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/impl/messages/typing_listener.dart';
 import 'package:chat_interface/controller/chat/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart';
@@ -5,8 +6,11 @@ import 'package:chat_interface/controller/chat/writing_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/ui/conversation_add/conversation_add_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:chat_interface/connection/messaging.dart' as msg;
+import 'package:livekit_client/livekit_client.dart';
 
 import '../../../../../controller/chat/friend_controller.dart';
 
@@ -115,32 +119,38 @@ class _ConversationsPageState extends State<ConversationsPage> {
                           children: [
 
                             //* Conversation info
-                            Row(
-                              children: [
-                                Icon(conversation.isGroup ? Icons.group : Icons.person, size: 35, color: theme.colorScheme.primary),
-                                const SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Conversation title
-                                    Text(conversation.getName(statusController, friendController), style: theme.textTheme.titleMedium),
-
-                                    // Conversation description
-                                    Obx(() =>
-                                      Text(
-
-                                        //* Conversation status message
-                                        conversation.isGroup ? "chat.members".trParams(<String, String>{
-                                          'count': conversation.members.length.toString()
-                                        }) : 
-                                        conversation.status(statusController, friendController),
-
-                                        style: theme.textTheme.bodySmall
-                                      )
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(conversation.isGroup ? Icons.group : Icons.person, size: 35, color: theme.colorScheme.primary),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Conversation title
+                                        Text(conversation.getName(statusController, friendController), style: theme.textTheme.titleMedium),
+                                                              
+                                        // Conversation description
+                                        Obx(() =>
+                                          Text(
+                                                              
+                                            //* Conversation status message
+                                            conversation.isGroup ? "chat.members".trParams(<String, String>{
+                                              'count': conversation.members.length.toString()
+                                            }) : 
+                                            conversation.status(statusController, friendController),
+                                                              
+                                            style: theme.textTheme.bodySmall,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          )
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ],
+                                  ),
+                                ],
+                              ),
                             ),
 
                             Obx(() =>

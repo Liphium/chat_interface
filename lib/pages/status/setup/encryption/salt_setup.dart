@@ -1,7 +1,7 @@
+import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,7 +18,7 @@ class SaltSetup extends Setup {
     var set = false;
 
     if(salt == null) {
-      encryptionSalt = SecureRandom(8).base64.substring(0, 8);
+      encryptionSalt = randomAESKey();
       await db.into(db.setting).insert(SettingCompanion.insert(key: "salt", value: encryptionSalt));
       set = true;
     } else {

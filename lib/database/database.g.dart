@@ -555,11 +555,22 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
             SqlDialect.mysql: '',
             SqlDialect.postgres: '',
           }));
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _contentMeta =
       const VerificationMeta('content');
   @override
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
       'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _attachmentsMeta =
+      const VerificationMeta('attachments');
+  @override
+  late final GeneratedColumn<String> attachments = GeneratedColumn<String>(
+      'attachments', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _certificateMeta =
       const VerificationMeta('certificate');
@@ -603,7 +614,9 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   List<GeneratedColumn> get $columns => [
         id,
         verified,
+        type,
         content,
+        attachments,
         certificate,
         sender,
         createdAt,
@@ -630,11 +643,25 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
     } else if (isInserting) {
       context.missing(_verifiedMeta);
     }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
     if (data.containsKey('content')) {
       context.handle(_contentMeta,
           content.isAcceptableOrUnknown(data['content']!, _contentMeta));
     } else if (isInserting) {
       context.missing(_contentMeta);
+    }
+    if (data.containsKey('attachments')) {
+      context.handle(
+          _attachmentsMeta,
+          attachments.isAcceptableOrUnknown(
+              data['attachments']!, _attachmentsMeta));
+    } else if (isInserting) {
+      context.missing(_attachmentsMeta);
     }
     if (data.containsKey('certificate')) {
       context.handle(
@@ -679,8 +706,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       verified: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      attachments: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!,
       certificate: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}certificate'])!,
       sender: attachedDatabase.typeMapping
@@ -703,7 +734,9 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
 class MessageData extends DataClass implements Insertable<MessageData> {
   final String id;
   final bool verified;
+  final String type;
   final String content;
+  final String attachments;
   final String certificate;
   final int? sender;
   final DateTime createdAt;
@@ -712,7 +745,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   const MessageData(
       {required this.id,
       required this.verified,
+      required this.type,
       required this.content,
+      required this.attachments,
       required this.certificate,
       this.sender,
       required this.createdAt,
@@ -723,7 +758,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['verified'] = Variable<bool>(verified);
+    map['type'] = Variable<String>(type);
     map['content'] = Variable<String>(content);
+    map['attachments'] = Variable<String>(attachments);
     map['certificate'] = Variable<String>(certificate);
     if (!nullToAbsent || sender != null) {
       map['sender'] = Variable<int>(sender);
@@ -740,7 +777,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageCompanion(
       id: Value(id),
       verified: Value(verified),
+      type: Value(type),
       content: Value(content),
+      attachments: Value(attachments),
       certificate: Value(certificate),
       sender:
           sender == null && nullToAbsent ? const Value.absent() : Value(sender),
@@ -758,7 +797,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
       verified: serializer.fromJson<bool>(json['verified']),
+      type: serializer.fromJson<String>(json['type']),
       content: serializer.fromJson<String>(json['content']),
+      attachments: serializer.fromJson<String>(json['attachments']),
       certificate: serializer.fromJson<String>(json['certificate']),
       sender: serializer.fromJson<int?>(json['sender']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -772,7 +813,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'verified': serializer.toJson<bool>(verified),
+      'type': serializer.toJson<String>(type),
       'content': serializer.toJson<String>(content),
+      'attachments': serializer.toJson<String>(attachments),
       'certificate': serializer.toJson<String>(certificate),
       'sender': serializer.toJson<int?>(sender),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -784,7 +827,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   MessageData copyWith(
           {String? id,
           bool? verified,
+          String? type,
           String? content,
+          String? attachments,
           String? certificate,
           Value<int?> sender = const Value.absent(),
           DateTime? createdAt,
@@ -793,7 +838,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       MessageData(
         id: id ?? this.id,
         verified: verified ?? this.verified,
+        type: type ?? this.type,
         content: content ?? this.content,
+        attachments: attachments ?? this.attachments,
         certificate: certificate ?? this.certificate,
         sender: sender.present ? sender.value : this.sender,
         createdAt: createdAt ?? this.createdAt,
@@ -806,7 +853,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return (StringBuffer('MessageData(')
           ..write('id: $id, ')
           ..write('verified: $verified, ')
+          ..write('type: $type, ')
           ..write('content: $content, ')
+          ..write('attachments: $attachments, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
           ..write('createdAt: $createdAt, ')
@@ -817,15 +866,17 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, verified, content, certificate, sender,
-      createdAt, conversationId, edited);
+  int get hashCode => Object.hash(id, verified, type, content, attachments,
+      certificate, sender, createdAt, conversationId, edited);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageData &&
           other.id == this.id &&
           other.verified == this.verified &&
+          other.type == this.type &&
           other.content == this.content &&
+          other.attachments == this.attachments &&
           other.certificate == this.certificate &&
           other.sender == this.sender &&
           other.createdAt == this.createdAt &&
@@ -836,7 +887,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
 class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> id;
   final Value<bool> verified;
+  final Value<String> type;
   final Value<String> content;
+  final Value<String> attachments;
   final Value<String> certificate;
   final Value<int?> sender;
   final Value<DateTime> createdAt;
@@ -845,7 +898,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   const MessageCompanion({
     this.id = const Value.absent(),
     this.verified = const Value.absent(),
+    this.type = const Value.absent(),
     this.content = const Value.absent(),
+    this.attachments = const Value.absent(),
     this.certificate = const Value.absent(),
     this.sender = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -855,7 +910,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   MessageCompanion.insert({
     required String id,
     required bool verified,
+    required String type,
     required String content,
+    required String attachments,
     required String certificate,
     this.sender = const Value.absent(),
     required DateTime createdAt,
@@ -863,14 +920,18 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required bool edited,
   })  : id = Value(id),
         verified = Value(verified),
+        type = Value(type),
         content = Value(content),
+        attachments = Value(attachments),
         certificate = Value(certificate),
         createdAt = Value(createdAt),
         edited = Value(edited);
   static Insertable<MessageData> custom({
     Expression<String>? id,
     Expression<bool>? verified,
+    Expression<String>? type,
     Expression<String>? content,
+    Expression<String>? attachments,
     Expression<String>? certificate,
     Expression<int>? sender,
     Expression<DateTime>? createdAt,
@@ -880,7 +941,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (verified != null) 'verified': verified,
+      if (type != null) 'type': type,
       if (content != null) 'content': content,
+      if (attachments != null) 'attachments': attachments,
       if (certificate != null) 'certificate': certificate,
       if (sender != null) 'sender': sender,
       if (createdAt != null) 'created_at': createdAt,
@@ -892,7 +955,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   MessageCompanion copyWith(
       {Value<String>? id,
       Value<bool>? verified,
+      Value<String>? type,
       Value<String>? content,
+      Value<String>? attachments,
       Value<String>? certificate,
       Value<int?>? sender,
       Value<DateTime>? createdAt,
@@ -901,7 +966,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return MessageCompanion(
       id: id ?? this.id,
       verified: verified ?? this.verified,
+      type: type ?? this.type,
       content: content ?? this.content,
+      attachments: attachments ?? this.attachments,
       certificate: certificate ?? this.certificate,
       sender: sender ?? this.sender,
       createdAt: createdAt ?? this.createdAt,
@@ -919,8 +986,14 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     if (verified.present) {
       map['verified'] = Variable<bool>(verified.value);
     }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
+    }
+    if (attachments.present) {
+      map['attachments'] = Variable<String>(attachments.value);
     }
     if (certificate.present) {
       map['certificate'] = Variable<String>(certificate.value);
@@ -945,7 +1018,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return (StringBuffer('MessageCompanion(')
           ..write('id: $id, ')
           ..write('verified: $verified, ')
+          ..write('type: $type, ')
           ..write('content: $content, ')
+          ..write('attachments: $attachments, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
           ..write('createdAt: $createdAt, ')

@@ -33,20 +33,8 @@ void setupMessageListeners() {
 void message(Event event) async {
   logger.i("received");
 
-  final message = chat.Message.fromJson(event.data["message"]);
-  final conversation = Get.find<ConversationController>().conversations[message.conversation]!;
-  message.content = decryptAES(Encrypted.fromBase64(message.content), conversation.key);
-
-  // Parse content and check signature
-  final json = jsonDecode(message.content);
-  final status = Get.find<StatusController>();
-  var key = message.sender == status.id.value ? asymmetricKeyPair.publicKey : Get.find<FriendController>().friends[message.sender]!.publicKey;
-
-  // Check signature
-  message.verified = verifySignature(json["s"], key, hashSha(json["c"]));
-  message.content = json["c"];
-
   // Insert into database
+  final message = chat.Message.fromJson(event.data["message"]);
   db.into(db.message).insert(message.entity);
 
   // Add to chat history

@@ -2,6 +2,7 @@ import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/status/setup/account/conversation_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/requests_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
+import 'package:chat_interface/pages/status/setup/app/settings_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/cluster_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/connection_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
@@ -55,6 +56,7 @@ class SetupManager {
     _steps.add(FriendsSetup());
     _steps.add(RequestSetup());
     _steps.add(ConversationSetup());
+    _steps.add(SettingsSetup());
 
     // Setup encryption
     _steps.add(SaltSetup());

@@ -1,7 +1,9 @@
-import 'package:chat_interface/controller/current/notification_controller.dart' as nc;
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/settings/settings_page.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class SidebarProfile extends StatefulWidget {
@@ -59,7 +61,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                   ),
                   horizontalSpacing(defaultSpacing * 0.5),
                   IconButton(
-                    onPressed: () => Get.find<nc.NotificationController>().notifications.add(nc.Notification(message: "Hello World, Friends!")),
+                    onPressed: () => Get.to(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
                     icon: const Icon(Icons.settings, color: Colors.white),
                   ),
                 ],

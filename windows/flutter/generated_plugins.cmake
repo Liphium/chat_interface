@@ -3,6 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  connectivity_plus
+  flutter_webrtc
+  flutter_window_close
+  livekit_client
   sqlite3_flutter_libs
 )
 
