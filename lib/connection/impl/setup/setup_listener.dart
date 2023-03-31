@@ -35,9 +35,10 @@ void setupSetupListeners() {
 
   //* New stored actions
   connector.listen("setup_act", (event) {
-    event.data["actions"].forEach((action) {
+
+    for(var action in event.data["actions"]) {
       handleStoredAction(action["action"], action["target"]);
-    });
+    }
   });
 
   //* New members

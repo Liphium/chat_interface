@@ -86,6 +86,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
               padding: const EdgeInsets.only(top: defaultSpacing),
               itemBuilder: (context, index) {
                 Conversation conversation = controller.conversations.values.elementAt(index);
+                conversation.refreshName(statusController, friendController);
 
                 final hover = false.obs;
                 
@@ -129,7 +130,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         // Conversation title
-                                        Text(conversation.getName(statusController, friendController), style: theme.textTheme.titleMedium),
+                                        Text(conversation.decrypted.value, style: theme.textTheme.titleMedium),
                                                               
                                         // Conversation description
                                         Obx(() =>

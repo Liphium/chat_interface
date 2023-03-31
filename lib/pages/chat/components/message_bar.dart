@@ -16,6 +16,8 @@ class MessageBar extends StatelessWidget {
 
     StatusController statusController = Get.find();
     FriendController friendController = Get.find();
+    
+    conversation.refreshName(statusController, friendController);
 
     return Material(
       color: Theme.of(context).colorScheme.tertiaryContainer.withAlpha(15),
@@ -30,7 +32,7 @@ class MessageBar extends StatelessWidget {
               children: [
                 Icon(conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.secondary),
                 horizontalSpacing(defaultSpacing),
-                Text(conversation.getName(statusController, friendController), style: Theme.of(context).textTheme.titleMedium),
+                Text(conversation.decrypted.value, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
 

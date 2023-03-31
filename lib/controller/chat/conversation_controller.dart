@@ -1,5 +1,7 @@
+import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:encrypt/encrypt.dart';
 import 'package:get/get.dart';
 
 import '../current/status_controller.dart';
@@ -21,7 +23,15 @@ class ConversationController extends GetxController {
     for (var conversation in conversations) {
 
       Conversation conv = Conversation.fromJson(conversation);
-      await db.into(db.conversation).insertOnConflictUpdate(conv.entity);
+      ConversationData? data = await (db.select(db.conversation)..where((tbl) => tbl.id.equals(conv.id))).getSingleOrNull();
+
+      if(data == null) {
+        await db.into(db.conversation).insertOnConflictUpdate(conv.entity);
+      } else {
+        conv.key = data.key;
+        await db.into(db.conversation).insertOnConflictUpdate(conv.entity);
+      }
+
       this.conversations[conv.id] = conv;
     }
 
@@ -59,13 +69,15 @@ class ConversationController extends GetxController {
 class Conversation {
   
   final int id;
+  final decrypted = "no".obs;
   String key;
-  final String data;
+  String data;
 
   final membersLoading = false.obs;
   final members = <Member>[].obs;
 
   Conversation(this.id, this.data, this.key);
+
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json["id"],
         data = json["data"],
@@ -73,13 +85,22 @@ class Conversation {
 
   Conversation.fromData(ConversationData data) : this(data.id, data.data, data.key);
 
-  String getName(StatusController statusController, FriendController friendController) {
+  String refreshName(StatusController statusController, FriendController friendController) {
     
     if(members.length == 2) {
-      return members.firstWhere((element) => element.account != statusController.id.value).name;
+      decrypted.value = members.firstWhere((element) => element.account != statusController.id.value).name;
+      return decrypted.value;
     } 
 
-    return data;
+    if(decrypted.value == "no" && key != "key") {
+      try {
+        decrypted.value = decryptAES(Encrypted.fromBase64(data), key);
+      } catch (e) {
+        decrypted.value = "no";
+      }
+    }
+
+    return decrypted.value == "no" ? "loading".tr : decrypted.value;
   }
 
   String status(StatusController statusController, FriendController friendController) {

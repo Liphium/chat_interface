@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
@@ -9,11 +10,12 @@ import 'package:chat_interface/controller/chat/friend_controller.dart';
 import 'package:chat_interface/controller/chat/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message_bar.dart';
+import 'package:chat_interface/pages/chat/components/renderer/message_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:crypto/crypto.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat_interface/connection/messaging.dart' as messaging;
@@ -90,6 +92,8 @@ class _MessageFeedState extends State<MessageFeed> {
                         return MessageRenderer(message: message, self: self, last: last,
                         sender: self ? Friend(1, statusController.name.value, "", statusController.tag.value) : sender);
                     }
+
+                    return null;
                   },
                 ),
               ),

@@ -59,6 +59,8 @@ class _MessageInputState extends State<MessageInput> {
           ),
           
           verticalSpacing(defaultSpacing * 0.5),
+
+          //* Input
           Material(
             elevation: 10,
             color: Colors.black,
