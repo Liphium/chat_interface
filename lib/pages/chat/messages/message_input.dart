@@ -1,7 +1,7 @@
 import 'package:chat_interface/connection/impl/messages/typing_listener.dart';
-import 'package:chat_interface/controller/chat/message_controller.dart';
-import 'package:chat_interface/controller/chat/writing_controller.dart';
-import 'package:chat_interface/pages/chat/components/message_feed.dart';
+import 'package:chat_interface/controller/chat/account/writing_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/messages/writing_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';

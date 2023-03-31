@@ -1,10 +1,11 @@
 import 'package:chat_interface/connection/encryption/aes.dart';
-import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:get/get.dart';
+import 'package:drift/drift.dart' as drift;
 
-import '../current/status_controller.dart';
 import 'member_controller.dart';
 
 class ConversationController extends GetxController {
@@ -23,14 +24,13 @@ class ConversationController extends GetxController {
     for (var conversation in conversations) {
 
       Conversation conv = Conversation.fromJson(conversation);
-      ConversationData? data = await (db.select(db.conversation)..where((tbl) => tbl.id.equals(conv.id))).getSingleOrNull();
 
-      if(data == null) {
-        await db.into(db.conversation).insertOnConflictUpdate(conv.entity);
-      } else {
-        conv.key = data.key;
-        await db.into(db.conversation).insertOnConflictUpdate(conv.entity);
-      }
+      await db.into(db.conversation).insertOnConflictUpdate(ConversationCompanion(
+        id: drift.Value(conv.id), 
+        key: const drift.Value.absent(), 
+        data: drift.Value(conv.data),
+        updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))
+      ));
 
       this.conversations[conv.id] = conv;
     }
@@ -83,7 +83,7 @@ class Conversation {
         data = json["data"],
         key = "key";
 
-  Conversation.fromData(ConversationData data) : this(data.id, data.data, data.key);
+  Conversation.fromData(ConversationData data) : this(data.id, data.data ?? "unknown", data.key ?? "key");
 
   String refreshName(StatusController statusController, FriendController friendController) {
     

@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';

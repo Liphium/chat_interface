@@ -1,13 +1,12 @@
-import 'package:chat_interface/controller/chat/conversation_controller.dart';
-import 'package:chat_interface/controller/chat/friend_controller.dart';
-import 'package:chat_interface/controller/chat/message_controller.dart';
-import 'package:chat_interface/controller/chat/writing_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/requests_controller.dart';
+import 'package:chat_interface/controller/chat/account/writing_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/notification_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:get/get.dart';
-
-import 'chat/requests_controller.dart';
 
 void initializeControllers() {
   

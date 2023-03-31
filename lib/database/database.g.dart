@@ -17,13 +17,13 @@ class $ConversationTable extends Conversation
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
   late final GeneratedColumn<String> data = GeneratedColumn<String>(
-      'data', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'data', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
   late final GeneratedColumn<String> key = GeneratedColumn<String>(
-      'key', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'key', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
@@ -47,14 +47,10 @@ class $ConversationTable extends Conversation
     if (data.containsKey('data')) {
       context.handle(
           _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
-    } else if (isInserting) {
-      context.missing(_dataMeta);
     }
     if (data.containsKey('key')) {
       context.handle(
           _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
-    } else if (isInserting) {
-      context.missing(_keyMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
@@ -74,9 +70,9 @@ class $ConversationTable extends Conversation
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       data: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}data']),
       key: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}key']),
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
     );
@@ -91,20 +87,21 @@ class $ConversationTable extends Conversation
 class ConversationData extends DataClass
     implements Insertable<ConversationData> {
   final int id;
-  final String data;
-  final String key;
+  final String? data;
+  final String? key;
   final BigInt updatedAt;
   const ConversationData(
-      {required this.id,
-      required this.data,
-      required this.key,
-      required this.updatedAt});
+      {required this.id, this.data, this.key, required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['data'] = Variable<String>(data);
-    map['key'] = Variable<String>(key);
+    if (!nullToAbsent || data != null) {
+      map['data'] = Variable<String>(data);
+    }
+    if (!nullToAbsent || key != null) {
+      map['key'] = Variable<String>(key);
+    }
     map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
   }
@@ -112,8 +109,8 @@ class ConversationData extends DataClass
   ConversationCompanion toCompanion(bool nullToAbsent) {
     return ConversationCompanion(
       id: Value(id),
-      data: Value(data),
-      key: Value(key),
+      data: data == null && nullToAbsent ? const Value.absent() : Value(data),
+      key: key == null && nullToAbsent ? const Value.absent() : Value(key),
       updatedAt: Value(updatedAt),
     );
   }
@@ -123,8 +120,8 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConversationData(
       id: serializer.fromJson<int>(json['id']),
-      data: serializer.fromJson<String>(json['data']),
-      key: serializer.fromJson<String>(json['key']),
+      data: serializer.fromJson<String?>(json['data']),
+      key: serializer.fromJson<String?>(json['key']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
   }
@@ -133,18 +130,21 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'data': serializer.toJson<String>(data),
-      'key': serializer.toJson<String>(key),
+      'data': serializer.toJson<String?>(data),
+      'key': serializer.toJson<String?>(key),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
   }
 
   ConversationData copyWith(
-          {int? id, String? data, String? key, BigInt? updatedAt}) =>
+          {int? id,
+          Value<String?> data = const Value.absent(),
+          Value<String?> key = const Value.absent(),
+          BigInt? updatedAt}) =>
       ConversationData(
         id: id ?? this.id,
-        data: data ?? this.data,
-        key: key ?? this.key,
+        data: data.present ? data.value : this.data,
+        key: key.present ? key.value : this.key,
         updatedAt: updatedAt ?? this.updatedAt,
       );
   @override
@@ -172,8 +172,8 @@ class ConversationData extends DataClass
 
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<int> id;
-  final Value<String> data;
-  final Value<String> key;
+  final Value<String?> data;
+  final Value<String?> key;
   final Value<BigInt> updatedAt;
   const ConversationCompanion({
     this.id = const Value.absent(),
@@ -183,12 +183,10 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   });
   ConversationCompanion.insert({
     this.id = const Value.absent(),
-    required String data,
-    required String key,
+    this.data = const Value.absent(),
+    this.key = const Value.absent(),
     required BigInt updatedAt,
-  })  : data = Value(data),
-        key = Value(key),
-        updatedAt = Value(updatedAt);
+  }) : updatedAt = Value(updatedAt);
   static Insertable<ConversationData> custom({
     Expression<int>? id,
     Expression<String>? data,
@@ -205,8 +203,8 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
 
   ConversationCompanion copyWith(
       {Value<int>? id,
-      Value<String>? data,
-      Value<String>? key,
+      Value<String?>? data,
+      Value<String?>? key,
       Value<BigInt>? updatedAt}) {
     return ConversationCompanion(
       id: id ?? this.id,

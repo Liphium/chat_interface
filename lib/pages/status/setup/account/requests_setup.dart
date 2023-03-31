@@ -2,12 +2,12 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/controller/chat/account/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../controller/chat/requests_controller.dart';
 import '../../../../util/web.dart';
 import '../../error/error_page.dart';
 import '../../error/server_offline_page.dart';

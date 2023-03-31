@@ -1,12 +1,12 @@
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/controller/chat/conversation_controller.dart';
-import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/member_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:get/get.dart';
 
-import '../../../controller/chat/member_controller.dart';
 import '../../../util/snackbar.dart';
 
 // Action: conv_open:l

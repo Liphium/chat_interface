@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friends_page.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/snackbar.dart';

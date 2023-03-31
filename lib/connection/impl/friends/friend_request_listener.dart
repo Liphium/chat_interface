@@ -1,13 +1,13 @@
 
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/requests/requests_page.dart';
 import 'package:get/get.dart';
 import 'package:pointycastle/export.dart';
 
-import '../../../controller/chat/friend_controller.dart';
-import '../../../controller/chat/requests_controller.dart';
 import '../../../util/snackbar.dart';
 
 // Action: fr_rq:l

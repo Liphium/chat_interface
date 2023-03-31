@@ -1,11 +1,10 @@
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';
 import 'package:pointycastle/export.dart';
-
-import '../../database/database.dart';
 
 class FriendController extends GetxController {
   

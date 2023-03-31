@@ -1,18 +1,13 @@
-import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/impl/messages/typing_listener.dart';
-import 'package:chat_interface/controller/chat/conversation_controller.dart';
-import 'package:chat_interface/controller/chat/message_controller.dart';
-import 'package:chat_interface/controller/chat/writing_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/writing_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/ui/conversation_add/conversation_add_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:chat_interface/connection/messaging.dart' as msg;
-import 'package:livekit_client/livekit_client.dart';
-
-import '../../../../../controller/chat/friend_controller.dart';
 
 class ConversationsPage extends StatefulWidget {
   const ConversationsPage({super.key});

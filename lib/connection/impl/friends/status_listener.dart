@@ -1,5 +1,5 @@
 import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/controller/chat/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:get/get.dart';
 
 // Action: setup_st

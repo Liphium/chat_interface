@@ -3,16 +3,16 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/controller/chat/conversation_controller.dart';
-import 'package:chat_interface/controller/chat/friend_controller.dart';
-import 'package:chat_interface/controller/chat/writing_controller.dart';
+import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/writing_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:drift/drift.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:get/get.dart';
 
-import '../../database/database.dart';
 
 class MessageController extends GetxController {
 

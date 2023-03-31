@@ -1,8 +1,8 @@
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
-import 'package:chat_interface/controller/chat/message_controller.dart';
-import 'package:chat_interface/controller/chat/writing_controller.dart';
+import 'package:chat_interface/controller/chat/account/writing_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
 import 'package:get/get.dart';
 
 void typingStatus(msg.Event event) {
