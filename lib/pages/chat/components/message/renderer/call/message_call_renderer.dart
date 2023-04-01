@@ -1,8 +1,14 @@
+import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:chat_interface/connection/messaging.dart' as msg;
+
+part 'call_actions.dart';
 
 class CallMessageRenderer extends StatefulWidget {
 
@@ -18,6 +24,9 @@ class CallMessageRenderer extends StatefulWidget {
 }
 
 class _CallMessageRendererState extends State<CallMessageRenderer> {
+
+  final loading = false.obs;
+
   @override
   Widget build(BuildContext context) {
 
@@ -66,10 +75,14 @@ class _CallMessageRendererState extends State<CallMessageRenderer> {
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(defaultSpacing),
                                 splashColor: theme.hoverColor,
-                                onTap: () => {},
+                                onTap: () {
+                                  if(loading.value) return;
+
+                                  joinCall(loading, widget.message.conversation, widget.message.attachments);
+                                },
                                 child: Padding(
                                   padding: const EdgeInsets.all(defaultSpacing),
-                                  child: Text("call.join".tr, style: theme.textTheme.labelLarge),
+                                  child: Text("join.call".tr, style: theme.textTheme.labelLarge),
                                 ),
                               ),
                             )

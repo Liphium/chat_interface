@@ -12,7 +12,7 @@ import 'package:chat_interface/controller/chat/conversation/message_controller.d
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/call/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/components/message/message_bar.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/message_call_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/call/message_call_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
@@ -24,6 +24,7 @@ import 'package:get/get.dart';
 import 'package:chat_interface/connection/messaging.dart' as messaging;
 
 part 'message_actions.dart';
+part 'call_start_action.dart';
 
 class MessageFeed extends StatefulWidget {
 
@@ -68,13 +69,33 @@ class _MessageFeedState extends State<MessageFeed> {
         Obx(() => MessageBar(conversation: controller.selectedConversation.value)),
 
         //* Call
-        Expanded(
-          flex: 1,
-          child: Obx(() => Visibility(
-            visible: callController.conversation.value == controller.selectedConversation.value.id,
-            child: const CallRectangle(),
-          )),
-        ),
+        Obx(() {
+
+          // Check if there is a call in the conversation
+          if(callController.conversation.value == controller.selectedConversation.value.id) {
+            
+            return Expanded(
+              flex: 1,
+              child: Obx(() {
+
+                // Check if the call is live
+                if(callController.livekit.value) {
+                  return const CallRectangle();
+                }
+
+                // Check if the call is not live
+                return const Material(
+                  color: Colors.black,
+                  child: Center(
+                    child: CircularProgressIndicator()
+                  )
+                );
+              })
+            );
+          }
+
+          return const SizedBox();
+        }),
 
         Expanded(
           flex: 2,

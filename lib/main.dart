@@ -1,7 +1,6 @@
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart' as log;
-import 'package:logging/logging.dart';
 
 import 'app.dart';
 
@@ -9,12 +8,9 @@ var logger = log.Logger();
 const appId = 0;
 const bool isDebug = true;
 
-void main() async {
+const liveKitURL = "wss://fj-chat-xc5qv7y8.livekit.cloud";
 
-  Logger.root.level = Level.FINE;
-  Logger.root.onRecord.listen((event) {
-    logger.d(event.message);
-  });
+void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   

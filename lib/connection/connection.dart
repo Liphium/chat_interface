@@ -1,4 +1,5 @@
 
+import 'package:chat_interface/connection/impl/calls/calls_listener.dart';
 import 'package:chat_interface/connection/impl/friends/friend_listener.dart';
 import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
@@ -74,4 +75,5 @@ void startConnection(String node, String connectionToken) async {
   setupMessageListeners();
   setupSetupListeners();
   setupFriendListeners();
+  setupCallListeners();
 }
