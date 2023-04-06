@@ -1,4 +1,6 @@
-import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/call_member_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/microphone_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -7,15 +9,16 @@ import 'package:livekit_client/livekit_client.dart';
 
 class CallController extends GetxController {
 
+  //* Call status
   final conversation = 0.obs;
   final livekit = false.obs;
   final connected = false.obs;
   final disconnecting = false.obs;
-  final room = Room().obs;
-  final friends = <Friend>[].obs;
-  final participants = <int, Participant>{}.obs;
 
-  late final EventsListener<RoomEvent> roomListener;
+  //* Call data
+  final room = Room().obs;
+
+  late EventsListener<RoomEvent> roomListener;
 
   // Open room without connection to Livekit (only for UI)
   void openWithoutLivekit(int conv) {
@@ -26,60 +29,47 @@ class CallController extends GetxController {
   void leaveCall() {
     conversation.value = 0;
     
+    // Tell other controllers about it
+    Get.find<CallMemberController>().onDisconnect();
+    Get.find<MicrophoneController>().endCall();
+
     if(livekit.value) {
       room.value.disconnect();
     }
     livekit.value = false;
-    participants.clear();
-    friends.clear();
+    roomListener.cancelAll();
   }
 
   // Join room using Livekit (for connection)
   void joinWithLivekit(int conv, String token) async {
     conversation.value = conv;
-    livekit.value = true;
-    disconnecting.value = true;
+    disconnecting.value = false;
     
+    // Join room
+    String output = Get.find<SettingController>().settings["audio.output"]!.getOr("def");
     final options = RoomOptions(
       adaptiveStream: true,
       dynacast: true,
 
-      //* Headphones
+      //* Default output
       defaultAudioOutputOptions: AudioOutputOptions(
-        deviceId: Get.find<SettingController>().settings["audio.output"]!.getValue(),
-      )
+        deviceId: output == "def" ? null : output,
+      ),
     );
 
-    // Microphone track
-    final microphone = await LocalAudioTrack.create(
-      AudioCaptureOptions(
-        deviceId: Get.find<SettingController>().settings["audio.microphone"]!.getValue(),
-      )
-    );
-
-    // Join room
     await room.value.connect(liveKitURL, token,
       roomOptions: options,
-
-      fastConnectOptions: FastConnectOptions(
-        microphone: TrackOption(
-          enabled: true,
-          track: microphone,
-        ),
-      )
     );
 
-    // Add all other friends
-    for(var participant in room.value.participants.values) {
-      final id = int.parse(participant.identity);
-      final replacer = Friend(0, "fj-${participant.identity}", "key", "tag");
-
-      friends.add(Get.find<FriendController>().friends[id] ?? replacer);
-      participants[id] = participant;
-    }
+    // Init other call related controllers
+    Get.find<CallMemberController>().onCall(room.value);
+    Get.find<MicrophoneController>().setupTracks(this);
 
     //* Listen to room events
     roomListener = room.value.createListener();
+
+    // Init listeners on other controllers
+    Get.find<PublicationController>().subscribeToStreams(roomListener);
   
     roomListener
       
@@ -100,24 +90,19 @@ class CallController extends GetxController {
 
       //* Add participant to list
       ..on<ParticipantConnectedEvent>((event) {
-        FriendController controller = Get.find();
-
-        final id = int.parse(event.participant.identity);
-        final replacer = Friend(0, "fj-${event.participant.identity}", "key", "tag");
-
-        friends.add(controller.friends[id] ?? replacer);
-        print("CONNECTED ${event.participant.identity}");
-        participants[id] = event.participant;
+        CallMemberController controller = Get.find();
+        controller.addMember(event.participant);
       })
 
       //* Remove participant from list
       ..on<ParticipantDisconnectedEvent>((event) {
-        friends.removeWhere((element) => element.id == int.parse(event.participant.identity));
-        print("DISCONNECTED ${event.participant.identity}");
-        participants.remove(int.parse(event.participant.identity));
+        CallMemberController controller = Get.find();
+        controller.disconnectMember(event.participant);
       })
 
       ;
 
+    // Show the call in the UI
+    livekit.value = true;
   }
 }

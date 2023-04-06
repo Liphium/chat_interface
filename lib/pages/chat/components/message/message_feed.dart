@@ -6,7 +6,7 @@ import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/call_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -74,15 +74,15 @@ class _MessageFeedState extends State<MessageFeed> {
           // Check if there is a call in the conversation
           if(callController.conversation.value == controller.selectedConversation.value.id) {
             
-            return Expanded(
-              flex: 1,
+            return ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 100),
               child: Obx(() {
-
+            
                 // Check if the call is live
                 if(callController.livekit.value) {
                   return const CallRectangle();
                 }
-
+            
                 // Check if the call is not live
                 return const Material(
                   color: Colors.black,
@@ -90,7 +90,7 @@ class _MessageFeedState extends State<MessageFeed> {
                     child: CircularProgressIndicator()
                   )
                 );
-              })
+              }),
             );
           }
 

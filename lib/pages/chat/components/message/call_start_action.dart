@@ -5,6 +5,8 @@ void startCall(RxBool loading, int conversation) {
   final controller = Get.find<CallController>();
 
   if(controller.livekit.value) {
+
+    loading.value = false;
     controller.leaveCall();
     showMessage(SnackbarType.error, "left.call");
     return;

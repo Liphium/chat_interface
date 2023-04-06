@@ -1,7 +1,10 @@
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/chat/account/requests_controller.dart';
 import 'package:chat_interface/controller/chat/account/writing_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/call_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/call_member_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/microphone_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/notification_controller.dart';
@@ -14,7 +17,12 @@ void initializeControllers() {
   // Conversation controls
   Get.put(MessageController());
   Get.put(ConversationController());
+
+  // Call controls
   Get.put(CallController());
+  Get.put(MicrophoneController());
+  Get.put(PublicationController());
+  Get.put(CallMemberController());
 
   // Account controls
   Get.put(RequestController());

@@ -1,4 +1,5 @@
 
+import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -117,7 +118,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
                   alignment: Alignment.center,
                 
                   onChanged: (String? newValue) {
-                    output.setValue(newValue!);
+                    Get.find<PublicationController>().changeOutputDevice(_outputs.firstWhere((element) => element.label == newValue!));
                   },
               
                   items: _outputs.map((element) => element.label)
