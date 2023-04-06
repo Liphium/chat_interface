@@ -28,10 +28,23 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
 
   @override
   void initState() {
+    SettingController controller = Get.find();
+
+    String currentMic = controller.settings["audio.microphone"]!.getValue();
+    String currentOutput = controller.settings["audio.output"]!.getValue();
+
     Hardware.instance.enumerateDevices(type: "audioinput").then((value) {
+      if(value.firstWhereOrNull((element) => element.deviceId == currentMic) == null) {
+        controller.settings["audio.microphone"]!.setValue("def");
+      }
+
       _microphones.addAll(value);
     });
     Hardware.instance.enumerateDevices(type: "audiooutput").then((value) {
+      if(value.firstWhereOrNull((element) => element.deviceId == currentOutput) == null) {
+        controller.settings["audio.output"]!.setValue("def");
+      }
+
       _outputs.addAll(value);
     });
     super.initState();

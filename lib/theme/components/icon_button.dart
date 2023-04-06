@@ -7,15 +7,16 @@ class LoadingIconButton extends StatelessWidget {
   final RxBool loading;
   final IconData icon;
   final Color? color;
+  final double iconSize;
   final Function() onTap;
 
-  const LoadingIconButton({super.key, required this.loading, required this.onTap, required this.icon, this.color});
+  const LoadingIconButton({super.key, required this.loading, required this.onTap, required this.icon, this.color, this.iconSize = 23});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 40,
-      height: 40,
+      width: iconSize+17,
+      height: iconSize+17,
       child: Material(
         borderRadius: BorderRadius.circular(50),
         color: Colors.transparent,
@@ -29,7 +30,7 @@ class LoadingIconButton extends StatelessWidget {
               padding: EdgeInsets.all(defaultSpacing * 0.25),
               child: CircularProgressIndicator(strokeWidth: 3.0,),
             ) : 
-            Icon(icon, color: color ?? Colors.white, size: 23),
+            Icon(icon, color: color ?? Colors.white, size: iconSize),
             ),
           ),
         ),
