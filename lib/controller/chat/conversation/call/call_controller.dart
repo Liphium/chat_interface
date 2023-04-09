@@ -55,6 +55,10 @@ class CallController extends GetxController {
       defaultAudioOutputOptions: AudioOutputOptions(
         deviceId: output == "def" ? null : output,
       ),
+      
+      defaultAudioPublishOptions: const AudioPublishOptions(
+        dtx: false,
+      )
     );
 
     await room.value.connect(liveKitURL, token,

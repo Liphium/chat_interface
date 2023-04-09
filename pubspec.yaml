@@ -52,6 +52,7 @@ dependencies:
   logging: ^1.1.1
   url_launcher: ^6.1.10
   flutter_webrtc: ^0.9.24
+  record: ^4.4.4
 
 dev_dependencies:
   flutter_test:

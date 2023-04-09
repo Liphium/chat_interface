@@ -1,5 +1,6 @@
 
 import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
+import 'package:chat_interface/pages/settings/app/speech/amplitude_graph.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -34,14 +35,14 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
     String currentOutput = controller.settings["audio.output"]!.getValue();
 
     Hardware.instance.enumerateDevices(type: "audioinput").then((value) {
-      if(value.firstWhereOrNull((element) => element.deviceId == currentMic) == null) {
+      if(value.firstWhereOrNull((element) => element.label == currentMic) == null) {
         controller.settings["audio.microphone"]!.setValue("def");
       }
 
       _microphones.addAll(value);
     });
     Hardware.instance.enumerateDevices(type: "audiooutput").then((value) {
-      if(value.firstWhereOrNull((element) => element.deviceId == currentOutput) == null) {
+      if(value.firstWhereOrNull((element) => element.label == currentOutput) == null) {
         controller.settings["audio.output"]!.setValue("def");
       }
 
@@ -144,6 +145,14 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
             ),
           ]
         ),
+
+        Obx(() =>
+          _microphones.isEmpty ? Container() :
+          SizedBox(
+            height: 300, 
+            child: AmplitudeGraph(device: _microphones[3])
+          )
+        )
       ],
     );
   }

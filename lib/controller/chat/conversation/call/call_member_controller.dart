@@ -60,7 +60,7 @@ class Member {
   
   final isSpeaking = false.obs;
   final isMuted = false.obs;
-  final hearsAudio = false.obs;
+  final isAudioMuted = false.obs;
 
   late EventsListener<ParticipantEvent> listener;
 
@@ -70,43 +70,16 @@ class Member {
     isMuted.value = participant.isMuted;
     
     // Subscribe to participant changes
-    listener = participant.createListener();
-
-    // Listen to events
-    listener
-      ..on<SpeakingChangedEvent>((event) {
-        isSpeaking.value = event.speaking;
-      })
-
-      // Listen to mute changes
-      ..on<TrackMutedEvent>((event) {
-        if(event.publication.kind == TrackType.AUDIO) {
-          isMuted.value = true;
-        }
-      })
-
-      ..on<TrackUnmutedEvent>((event) {
-        if(event.publication.kind == TrackType.AUDIO) {
-          isMuted.value = false;
-        }
-      })
-      
-      // Listen to track changes
-      ..on<TrackSubscribedEvent>((event) {
-        if(event.publication.kind == TrackType.AUDIO) {
-          hearsAudio.value = true;
-        }
-      })
-      
-      ..on<TrackUnsubscribedEvent>((event) {
-        if(event.publication.kind == TrackType.AUDIO) {
-          hearsAudio.value = false;
-        }
-      })
-      
-      ;
+    participant.addListener(_onChanged);
   }
 
-  void disconnect() => listener.cancelAll();
+  void _onChanged() {
+    isSpeaking.value = participant.isSpeaking;
+    isMuted.value = participant.isMuted;
+  }
+
+  void disconnect() {
+    participant.removeListener(_onChanged);
+  }
 
 }

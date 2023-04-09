@@ -70,7 +70,7 @@ class MicrophoneController extends GetxController {
       // Create new track
       final track = await LocalAudioTrack.create(AudioCaptureOptions(
         deviceId: device,
-        highPassFilter: true
+        highPassFilter: true,
       ));
 
       controller.room.value.localParticipant!.publishAudioTrack(track);
