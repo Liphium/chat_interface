@@ -1,16 +1,20 @@
 
-import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
-import 'package:chat_interface/pages/settings/app/speech/amplitude_graph.dart';
+import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
+import 'package:chat_interface/pages/settings/app/speech/microphone_tab.dart';
+import 'package:chat_interface/pages/settings/app/speech/output_tab.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:livekit_client/livekit_client.dart';
 
 void addSpeechSettings(SettingController controller) {
 
+  //* Microphone
   controller.settings["audio.microphone"] = Setting<String>("audio.microphone", "def");
+  controller.settings["audio.microphone.sensitivity"] = Setting<double>("audio.microphone.sensitivity", -40.0);
+
+  //* Output
   controller.settings["audio.output"] = Setting<String>("audio.output", "def");
 
 }
@@ -24,41 +28,23 @@ class AudioSettingsPage extends StatefulWidget {
 
 class _AudioSettingsPageState extends State<AudioSettingsPage> {
 
-  final _microphones = [].obs;
-  final _outputs = [].obs;
+  final _selected = "audio.microphone".obs;
+
+  // Tabs
+  final _tabs = <String, Widget>{
+    "audio.microphone": const MicrophoneTab(),
+    "audio.output": const OutputTab(),
+  };
 
   @override
   void initState() {
-    SettingController controller = Get.find();
-
-    String currentMic = controller.settings["audio.microphone"]!.getValue();
-    String currentOutput = controller.settings["audio.output"]!.getValue();
-
-    Hardware.instance.enumerateDevices(type: "audioinput").then((value) {
-      if(value.firstWhereOrNull((element) => element.label == currentMic) == null) {
-        controller.settings["audio.microphone"]!.setValue("def");
-      }
-
-      _microphones.addAll(value);
-    });
-    Hardware.instance.enumerateDevices(type: "audiooutput").then((value) {
-      if(value.firstWhereOrNull((element) => element.label == currentOutput) == null) {
-        controller.settings["audio.output"]!.setValue("def");
-      }
-
-      _outputs.addAll(value);
-    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
 
-    SettingController controller = Get.find();
     ThemeData theme = Theme.of(context);
-
-    Setting<String> microphone = controller.settings["audio.microphone"]! as Setting<String>;
-    Setting<String> output = controller.settings["audio.output"]! as Setting<String>;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -67,91 +53,29 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
         Text("settings.categories.audio".tr, style: theme.textTheme.headlineMedium),
         verticalSpacing(defaultSpacing),
 
-        //* Microphone
+        //* Tabs
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-        
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("audio.microphone".tr, style: theme.textTheme.titleMedium),
-                verticalSpacing(defaultSpacing * 0.5),
-                Text("audio.microphone.description".tr, style: theme.textTheme.bodyMedium),
-              ],
+            SidebarButton(
+              onTap: () => _selected.value = "audio.microphone",
+              label: "audio.microphone",
+              selected: _selected,
             ),
-
-            SizedBox(
-              height: 40,
-              child: Obx(() => 
-                DropdownButton<String>(
-                  value: _microphones.isEmpty ? "Loading.." : microphone.getWhenValue("def", _microphones[0].label),
-                  underline: Container(),
-                  elevation: 10,
-                  alignment: Alignment.center,
-                
-                  onChanged: (String? newValue) {
-                    microphone.setValue(newValue!);
-                  },
-              
-                  items: _microphones.map((element) => element.label)
-                  .map((e) => DropdownMenuItem<String>(
-                    value: e,
-                    child: Text(e, overflow: TextOverflow.ellipsis,maxLines: 1,),
-                  )).toList(),
-                )
-              ),
-            ),
+            horizontalSpacing(defaultSpacing),
+            SidebarButton(
+              onTap: () => _selected.value = "audio.output",
+              label: "audio.output",
+              selected: _selected,
+            )
           ]
         ),
+
         verticalSpacing(defaultSpacing),
 
-        //* Speakers
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-        
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("audio.output".tr, style: theme.textTheme.titleMedium),
-                verticalSpacing(defaultSpacing * 0.5),
-                Text("audio.output.description".tr, style: theme.textTheme.bodyMedium),
-              ],
-            ),
-
-            SizedBox(
-              height: 40,
-              child: Obx(() => 
-                DropdownButton<String>(
-                  value: _outputs.isEmpty ? "Loading." : output.getWhenValue("def", _outputs[0].label),
-                  underline: Container(),
-                  elevation: 10,
-                  alignment: Alignment.center,
-                
-                  onChanged: (String? newValue) {
-                    Get.find<PublicationController>().changeOutputDevice(_outputs.firstWhere((element) => element.label == newValue!));
-                  },
-              
-                  items: _outputs.map((element) => element.label)
-                  .map((e) => DropdownMenuItem<String>(
-                    value: e,
-                    child: Text(e),
-                  )).toList(),
-                )
-              ),
-            ),
-          ]
-        ),
-
+        //* Current tab
         Obx(() =>
-          _microphones.isEmpty ? Container() :
-          SizedBox(
-            height: 300, 
-            child: AmplitudeGraph(device: _microphones[3])
-          )
+          _tabs[_selected.value]!
         )
       ],
     );

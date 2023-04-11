@@ -87,7 +87,7 @@ class _SettingsPageState extends State<SettingsPage> {
             )
           ),
           SizedBox(
-            width: 700,
+            width: 900,
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
               child: Obx(() => currentCategory.value.widget ?? const Placeholder()),
