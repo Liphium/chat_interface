@@ -5,6 +5,8 @@ import 'package:chat_interface/controller/chat/conversation/call/call_controller
 import 'package:chat_interface/controller/chat/conversation/call/call_member_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/microphone_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/screenshare_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/sensitvity_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/notification_controller.dart';
@@ -18,12 +20,6 @@ void initializeControllers() {
   Get.put(MessageController());
   Get.put(ConversationController());
 
-  // Call controls
-  Get.put(CallController());
-  Get.put(MicrophoneController());
-  Get.put(PublicationController());
-  Get.put(CallMemberController());
-
   // Account controls
   Get.put(RequestController());
   Get.put(FriendController());
@@ -33,4 +29,12 @@ void initializeControllers() {
   Get.put(StatusController());
   Get.put(NotificationController());
   Get.put(SettingController());
+
+  // Call controls
+  Get.put(CallController());
+  Get.put(ScreenshareController());
+  Get.put(MicrophoneController());
+  Get.put(PublicationController());
+  Get.put(CallMemberController());
+  Get.put(SensitivityController());
 }

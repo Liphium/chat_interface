@@ -9,8 +9,16 @@ class PublicationController extends GetxController {
   final output = true.obs;
   final outputLoading = false.obs;
 
+  final currentScreenshare = Rx<RemoteTrackPublication<RemoteVideoTrack>?>(null);
+
   void changeOutputDevice(MediaDevice device) async {
-    await Get.find<CallController>().room.value.setAudioOutputDevice(device);
+    CallController controller = Get.find();
+
+    // Change output device
+    if(controller.livekit.value) {
+      controller.room.value.setAudioOutputDevice(device);
+    }
+
     Get.find<SettingController>().settings["audio.output"]!.setValue(device.label);
   }
 
@@ -25,7 +33,17 @@ class PublicationController extends GetxController {
         if(output.value) {
           event.publication.subscribe();
         }
+      } else if(event.publication.kind == TrackType.VIDEO) {
+
+        // Subscribe to screenshare
+        if(event.publication.isScreenShare && currentScreenshare.value == null) {
+          event.publication.subscribe();
+          currentScreenshare.value = event.publication as RemoteTrackPublication<RemoteVideoTrack>;
+        } else {
+          event.publication.subscribe();
+        }
       }
+
     });
   }
 

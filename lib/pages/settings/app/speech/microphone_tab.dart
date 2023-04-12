@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/chat/conversation/call/sensitvity_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
@@ -55,6 +57,8 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
   Widget build(BuildContext context) {
 
     SettingController controller = Get.find();
+    final sens = controller.settings["audio.microphone.sensitivity"]!;
+    SensitivityController sensitivity = Get.find();
     ThemeData theme = Theme.of(context);
 
     return Column(
@@ -114,20 +118,25 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         Text("audio.microphone.sensitivity".tr, style: theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing * 0.5),
 
-        Obx(() => 
-          Slider(
-            value: controller.settings["audio.microphone.sensitivity"]!.value.value,
-            min: -60,
-            max: 0,
-            divisions: 30,
-            secondaryTrackValue: -33,
-            secondaryActiveColor: Colors.amber,
-            label: "${controller.settings["audio.microphone.sensitivity"]!.value.value} dB",
-            onChanged: (value) => controller.settings["audio.microphone.sensitivity"]!.value.value = value,
-            onChangeEnd: (value) {
-              controller.settings["audio.microphone.sensitivity"]!.setValue(value);
-            },
-          )
+        Obx(() =>
+          Column(
+            children: [
+              SizedBox(height: 0, child: Opacity(opacity: 0, child: Text(sensitivity.current.value.toString(), overflow: TextOverflow.clip,))),
+              Slider(
+                value: sens.value.value,
+                min: -60,
+                max: 0,
+                divisions: 30,
+                label: "${sens.value.value} dB",
+                secondaryTrackValue: clampDouble(sensitivity.current.value, -60, 0),
+                secondaryActiveColor: theme.colorScheme.tertiary,
+                onChanged: (value) => sens.value.value = value,
+                onChangeEnd: (value) {
+                  sens.setValue(value);
+                },
+              ),
+            ],
+          ),
         ),
       
       ],

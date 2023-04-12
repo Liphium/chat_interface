@@ -45,6 +45,8 @@ class _MemberEntityState extends State<MemberEntity> {
             )
           )
         )),
+
+        //* Muted indicator
         Obx(() =>
           Visibility(
             visible: widget.member.isMuted.value,
@@ -68,6 +70,8 @@ class _MemberEntityState extends State<MemberEntity> {
             ),
           ),
         ),
+
+        //* Speaker indicator
         Obx(() =>
           Visibility(
             visible: widget.member.isAudioMuted.value,

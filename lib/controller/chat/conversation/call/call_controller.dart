@@ -14,6 +14,7 @@ class CallController extends GetxController {
   final livekit = false.obs;
   final connected = false.obs;
   final disconnecting = false.obs;
+  final expanded = false.obs;
 
   //* Call data
   final room = Room().obs;
@@ -57,7 +58,7 @@ class CallController extends GetxController {
       ),
       
       defaultAudioPublishOptions: const AudioPublishOptions(
-        dtx: false,
+        audioBitrate: AudioPreset.musicHighQualityStereo
       )
     );
 

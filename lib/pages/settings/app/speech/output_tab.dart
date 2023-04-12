@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -84,7 +85,7 @@ class _OutputTabState extends State<OutputTab> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         onTap: () {
-                          Get.find<SettingController>().settings["audio.output"]!.setValue(_outputs[index].label);
+                          Get.find<PublicationController>().changeOutputDevice(_outputs[index]);
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(defaultSpacing),

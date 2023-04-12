@@ -18,8 +18,11 @@ class InstanceSetup extends Setup {
   Future<Widget?> load() async {
 
     // Get list of instances
-    final path = await getApplicationSupportDirectory();
-    final instances = await path.list().toList();
+    final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
+    final dir = Directory(instanceFolder);
+
+    await dir.create();
+    final instances = await dir.list().toList();
 
     if(instances.isEmpty || !isDebug) {
       setupInstance("default");
@@ -34,9 +37,8 @@ class InstanceSetup extends Setup {
 void setupInstance(String name, {bool next = false}) async {
 
   // Initialize database
-  final dbFolder = await getApplicationSupportDirectory();
-  logger.i(dbFolder.path);
-  final file = File(path.join(dbFolder.path, '$name.db'));
+  final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
+  final file = File(path.join(dbFolder, '$name.db'));
   db = Database(NativeDatabase.createInBackground(file, logStatements: true));
 
   // Create tables

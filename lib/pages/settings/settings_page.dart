@@ -86,11 +86,13 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             )
           ),
-          SizedBox(
-            width: 900,
-            child: Padding(
-              padding: const EdgeInsets.all(defaultSpacing),
-              child: Obx(() => currentCategory.value.widget ?? const Placeholder()),
+          Flexible(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: Padding(
+                padding: const EdgeInsets.all(defaultSpacing),
+                child: Obx(() => currentCategory.value.widget ?? const Placeholder()),
+              ),
             ),
           ),
         ],

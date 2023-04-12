@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/microphone_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/screenshare_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
@@ -61,6 +63,8 @@ class _CallControlsState extends State<CallControls> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+
+            //* Microphone button
             GetX<MicrophoneController>(
               builder: (controller) {
                 return LoadingIconButton(
@@ -72,7 +76,10 @@ class _CallControlsState extends State<CallControls> {
                 ); 
               },
             ),
+
             horizontalSpacing(defaultSpacing * 0.5),
+
+            //* Audio output
             GetX<PublicationController>(
               builder: (controller) {
                 return LoadingIconButton(
@@ -84,10 +91,48 @@ class _CallControlsState extends State<CallControls> {
                 ); 
               },
             ),
+
             horizontalSpacing(defaultSpacing * 0.5),
+
+            //* Screenshare button
+            GetX<ScreenshareController>(
+              builder: (controller) {
+                return LoadingIconButton(
+                  loading: controller.sharingLoading,
+                  onTap: () {
+                    if (controller.isSharing.value) {
+                      controller.stopSharing();
+                    } else {
+                      controller.startSharing();
+                    }
+                  },
+                  icon: controller.isSharing.value ? Icons.cast_connected : Icons.cast,
+                  iconSize: 35,
+                  color: theme.colorScheme.primary
+                ); 
+              },
+            ),
+
+            //* Quality button
             LoadingIconButton(
               loading: false.obs,
-              onTap: () {},
+              onTap: () {
+                final controller = Get.find<PublicationController>();
+                controller.currentScreenshare.value!.setVideoFPS(30);
+                controller.currentScreenshare.value!.setVideoQuality(VideoQuality.HIGH);
+                controller.currentScreenshare.value!.sendUpdateTrackSettings();
+              },
+              icon: Icons.golf_course,
+              iconSize: 35,
+              color: theme.colorScheme.primary
+            ),
+
+            horizontalSpacing(defaultSpacing * 0.5),
+
+            //* End call button
+            LoadingIconButton(
+              loading: false.obs,
+              onTap: () => startCall(false.obs, Get.find<CallController>().conversation.value),
               icon: Icons.close,
               color: Colors.red.shade400,
               iconSize: 35,

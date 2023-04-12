@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/chat/conversation/call/sensitvity_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:flutter/widgets.dart';
@@ -14,6 +15,9 @@ class SettingsSetup extends Setup {
     for (var setting in controller.settings.values) {
       setting.grabFromDb();
     }
+
+    // Start listenting for sensitivity changes
+    Get.find<SensitivityController>().setup();
 
     return null;
   }

@@ -66,16 +66,16 @@ class Member {
 
   Member(this.friend, this.participant) {
 
-    isSpeaking.value = participant.isSpeaking;
-    isMuted.value = participant.isMuted;
+    isSpeaking.value = !participant.isMuted;
+    isMuted.value = false;
     
     // Subscribe to participant changes
     participant.addListener(_onChanged);
   }
 
   void _onChanged() {
-    isSpeaking.value = participant.isSpeaking;
-    isMuted.value = participant.isMuted;
+    isSpeaking.value = !participant.isMuted;
+    isMuted.value = false;
   }
 
   void disconnect() {
