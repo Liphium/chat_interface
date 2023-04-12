@@ -113,20 +113,6 @@ class _CallControlsState extends State<CallControls> {
               },
             ),
 
-            //* Quality button
-            LoadingIconButton(
-              loading: false.obs,
-              onTap: () {
-                final controller = Get.find<PublicationController>();
-                controller.currentScreenshare.value!.setVideoFPS(30);
-                controller.currentScreenshare.value!.setVideoQuality(VideoQuality.HIGH);
-                controller.currentScreenshare.value!.sendUpdateTrackSettings();
-              },
-              icon: Icons.golf_course,
-              iconSize: 35,
-              color: theme.colorScheme.primary
-            ),
-
             horizontalSpacing(defaultSpacing * 0.5),
 
             //* End call button

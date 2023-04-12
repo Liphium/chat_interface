@@ -5,7 +5,7 @@ import 'package:livekit_client/livekit_client.dart';
 
 class CallMemberController extends GetxController {
 
-  final members = <Member>[].obs;
+  final members = <int, Member>{}.obs;
 
   void onCall(Room room) {
 
@@ -20,7 +20,7 @@ class CallMemberController extends GetxController {
   void onDisconnect() {
 
     // Remove all listeners
-    for(var member in members) {
+    for(var member in members.values) {
       member.disconnect();
     }
 
@@ -34,21 +34,29 @@ class CallMemberController extends GetxController {
     if(participant is LocalParticipant) {
 
       StatusController controller = Get.find();
-      members.add(Member(Friend(controller.id.value, controller.name.value, "key", controller.tag.value), participant));
+      members[controller.id.value] = Member(Friend(controller.id.value, controller.name.value, "key", controller.tag.value), participant);
 
+      return;
+    }
+
+    // Check for self (sometimes happens when timing out)
+    if(participant.identity == "${Get.find<StatusController>().id.value}") {
       return;
     }
 
     final replacer = Friend(0, "fj-${participant.identity}", "key", "tag");
     final friend = Get.find<FriendController>().friends[int.parse(participant.identity)] ?? replacer;
 
-    members.add(Member(friend, participant));
+    members[friend.id] = Member(friend, participant);
   }
 
   void disconnectMember(Participant participant) {
-    final member = members.firstWhere((element) => element.participant.sid == participant.sid);
+    final member = members[int.parse(participant.identity)];
+    if(member == null) {
+      return;
+    }
     member.disconnect();
-    members.remove(member);
+    members.remove(member.friend.id);
   }
 
 }

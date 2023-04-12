@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/call_member_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
@@ -9,7 +13,7 @@ class PublicationController extends GetxController {
   final output = true.obs;
   final outputLoading = false.obs;
 
-  final currentScreenshare = Rx<RemoteTrackPublication<RemoteVideoTrack>?>(null);
+  final screenshares = <int, Screenshare>{}.obs;
 
   void changeOutputDevice(MediaDevice device) async {
     CallController controller = Get.find();
@@ -25,26 +29,51 @@ class PublicationController extends GetxController {
   void subscribeToStreams(EventsListener<RoomEvent> listener) {
 
     // Listen for new audio tracks
-    listener.on<TrackPublishedEvent>((event) {
+    listener
+      ..on<TrackPublishedEvent>((event) {
 
-      if(event.publication.kind == TrackType.AUDIO) {
+        if(event.publication.kind == TrackType.AUDIO) {
 
-        // Subscribe to track
-        if(output.value) {
-          event.publication.subscribe();
+          // Subscribe to track
+          if(output.value) {
+            event.publication.subscribe();
+          }
+        } else if(event.publication.kind == TrackType.VIDEO) {
+
+          // Subscribe to screenshare
+          if(event.publication.isScreenShare) {
+
+            final id = int.tryParse(event.participant.identity) ?? -1;
+            if(id == -1) return;
+
+            // Subscribe if only one
+            if(screenshares.isEmpty) {
+              event.publication.subscribe();
+            }
+
+            screenshares[id] = Screenshare(Get.find<CallMemberController>().members[id]!, event.publication as RemoteTrackPublication<RemoteVideoTrack>);
+          } else {
+            event.publication.subscribe();
+          }
         }
-      } else if(event.publication.kind == TrackType.VIDEO) {
 
-        // Subscribe to screenshare
-        if(event.publication.isScreenShare && currentScreenshare.value == null) {
-          event.publication.subscribe();
-          currentScreenshare.value = event.publication as RemoteTrackPublication<RemoteVideoTrack>;
-        } else {
-          event.publication.subscribe();
+      })
+
+      // Listen for removed audio tracks
+      ..on<TrackUnpublishedEvent>((event) {
+        if(event.publication.kind == TrackType.AUDIO) {
+
+          // Unsubscribe from track
+          event.publication.unsubscribe();
+        } else if(event.publication.kind == TrackType.VIDEO) {
+
+          // Unsubscribe from screenshare
+          if(event.publication.isScreenShare) {
+            event.publication.unsubscribe();
+            screenshares.remove(int.tryParse(event.participant.identity) ?? -1);
+          }
         }
-      }
-
-    });
+      });
   }
 
   void setOutput(bool speakers) async {
@@ -76,4 +105,22 @@ class PublicationController extends GetxController {
 
     outputLoading.value = false;
   }
+}
+
+class Screenshare {
+  final Member member;
+  final RemoteTrackPublication<RemoteVideoTrack> publication;
+  final loading = true.obs;
+
+  Screenshare(this.member, this.publication) {
+
+    // Wait for track to be ready
+    final timer = Timer.periodic(1000.ms, (timer) {
+      if(publication.track != null) {
+        loading.value = false;
+        timer.cancel();
+      }
+    });
+  }
+
 }
