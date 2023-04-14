@@ -40,11 +40,9 @@ class _CallMessageRendererState extends State<CallMessageRenderer> {
         splashColor: theme.hoverColor,
         onTap: () => {},
         child: Padding(
-          padding: const EdgeInsets.only(
-            top: defaultSpacing * 0.4,
-            bottom: defaultSpacing * 0.4,
-            right: defaultSpacing * 2,
-            left: defaultSpacing * 2
+          padding: const EdgeInsets.symmetric(
+            vertical: defaultSpacing * 0.4,
+            horizontal: defaultSpacing * 2,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

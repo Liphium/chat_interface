@@ -17,6 +17,10 @@ class CallController extends GetxController {
 
   //* Call layout
   final expanded = false.obs;
+  final fullScreen = false.obs;
+
+  // Cinema mode
+  final cinema = false.obs;
   final showMembers = false.obs;
   final hideOverlay = false.obs;
 

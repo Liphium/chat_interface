@@ -70,7 +70,7 @@ class _CallControlsState extends State<CallControls> {
                 return LoadingIconButton(
                   loading: controller.microphoneLoading,
                   onTap: () => controller.setMicrophone(!controller.microphone.value),
-                  icon: controller.microphone.value ? Icons.mic : Icons.mic_off,
+                  icon: controller.microphone.value ? Icons.mic_rounded : Icons.mic_off_rounded,
                   iconSize: 35,
                   color: theme.colorScheme.primary
                 ); 
@@ -85,7 +85,7 @@ class _CallControlsState extends State<CallControls> {
                 return LoadingIconButton(
                   loading: controller.outputLoading,
                   onTap: () => controller.setOutput(!controller.output.value),
-                  icon: controller.output.value ? Icons.volume_up : Icons.volume_off,
+                  icon: controller.output.value ? Icons.volume_up_rounded : Icons.volume_off_rounded,
                   iconSize: 35,
                   color: theme.colorScheme.primary
                 ); 
@@ -106,7 +106,7 @@ class _CallControlsState extends State<CallControls> {
                       controller.startSharing();
                     }
                   },
-                  icon: controller.isSharing.value ? Icons.cast_connected : Icons.cast,
+                  icon: controller.isSharing.value ? Icons.cast_connected_rounded : Icons.cast_rounded,
                   iconSize: 35,
                   color: theme.colorScheme.primary
                 ); 
@@ -119,7 +119,7 @@ class _CallControlsState extends State<CallControls> {
             LoadingIconButton(
               loading: false.obs,
               onTap: () => startCall(false.obs, Get.find<CallController>().conversation.value),
-              icon: Icons.close,
+              icon: Icons.close_rounded,
               color: Colors.red.shade400,
               iconSize: 35,
             )
