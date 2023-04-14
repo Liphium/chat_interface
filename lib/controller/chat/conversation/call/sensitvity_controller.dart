@@ -38,9 +38,6 @@ class SensitivityController extends GetxController {
     Get.find<SettingController>().settings["audio.microphone.sensitivity"]!.value.listen((value) {
       sensitivity.value = value;
     });
-
-    // Start listenting to microphone
-    startListening();
   }
 
   void _setupPaths() async {

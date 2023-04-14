@@ -1,6 +1,7 @@
-import 'package:chat_interface/controller/chat/conversation/call/call_member_controller.dart';
-import 'package:chat_interface/pages/chat/components/call/entities/member_entity.dart';
+import 'package:chat_interface/pages/chat/components/call/entities/circle_member_entity.dart';
+import 'package:chat_interface/pages/chat/components/call/entities/rectangle_member_entity.dart';
 import 'package:chat_interface/pages/chat/components/call/widgets/call_controls.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,71 +15,111 @@ class CallRectangle extends StatefulWidget {
 }
 
 class _CallRectangleState extends State<CallRectangle> {
+
+  final gridView = true.obs;
+  final cinema = true.obs;
+
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
 
     return Material(
       color: Colors.black,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(defaultSpacing * 2),
-            child: GetX<CallMemberController>(
-              builder: (controller) {
-            
-                // Compute all widgets
-                List<Widget> widgets = [];
-                for (Member member in controller.members.values) {
-                  widgets.addAll(renderMember(member));
-                }
-            
-                return Column(
-                  children: [
-                    SizedBox(
-                      height: 700,
-                      child: Row(
-                        children: [
-                    
-                          /* Screenshares
-                          Flexible(
-                            child: Obx(() => 
-                              Get.find<PublicationController>().currentScreenshare.value != null ? 
-                              VideoTrackRenderer(Get.find<PublicationController>().currentScreenshare.value!.track!) :
-                              const SizedBox.shrink()
-                            ),
-                          ), */
-                    
-                          //* Call participants
-                          RepaintBoundary(
-                            child: Wrap(
-                              spacing: defaultSpacing,
-                              runSpacing: defaultSpacing,
-                              direction: Axis.vertical,
-                              alignment: WrapAlignment.center,
-                              children: widgets,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    verticalSpacing(defaultSpacing * 2),
-                    const CallControls(),
-                  ],
-                );
-              },
-            )
+
+          //* Participants
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(defaultSpacing),
+              child: Obx(() =>
+                gridView.value ?
+                SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runAlignment: WrapAlignment.center,
+                    direction: Axis.horizontal,
+                    spacing: defaultSpacing,
+                    runSpacing: defaultSpacing,
+                    children: getParticipants(theme, 0, 0),
+                  ),
+                ) :
+                Row(
+                  children: getParticipants(theme, 0, 0),
+                )
+              ),
+            ),
           ),
-        ],
+
+          //* Controls
+          Padding(
+            padding: const EdgeInsets.all(defaultSpacing),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                LoadingIconButton(
+                  loading: false.obs,
+                  onTap: () => cinema.toggle(),
+                  icon: Icons.arrow_downward,
+                  iconSize: 35,
+                ),
+                const CallControls(),
+                LoadingIconButton(
+                  loading: false.obs,
+                  onTap: () => {},
+                  icon: Icons.fullscreen,
+                  iconSize: 35,
+                )
+              ],
+            ),
+          )
+
+        ]
       )
     );
   }
 
-  // Put into a method so we can add screenshares in the future
-  List<Widget> renderMember(Member member) {
+  List<Widget> getParticipants(ThemeData theme, double bottom, double right) {
     return [
-      MemberEntity(member: member),
+      Obx(() =>
+        cinema.value ?
+        RectangleMemberEntity(bottomPadding: bottom, rightPadding: right,) :
+        const CircleMemberEntity(),
+      ),
+      Obx(() =>
+        cinema.value ?
+        RectangleMemberEntity(bottomPadding: bottom, rightPadding: right,) :
+        const CircleMemberEntity(),
+      ),
+      Obx(() =>
+        cinema.value ?
+        RectangleMemberEntity(bottomPadding: bottom, rightPadding: right,) :
+        const CircleMemberEntity(),
+      ),
+      Obx(() =>
+        cinema.value ?
+        RectangleMemberEntity(bottomPadding: bottom, rightPadding: right,) :
+        const CircleMemberEntity(),
+      ),
+      Obx(() =>
+        cinema.value ?
+        RectangleMemberEntity(bottomPadding: bottom, rightPadding: right,) :
+        const CircleMemberEntity(),
+      ),
+      Obx(() =>
+        cinema.value ?
+        RectangleMemberEntity(bottomPadding: bottom, rightPadding: right,) :
+        const CircleMemberEntity(),
+      ),
+      Obx(() =>
+        cinema.value ?
+        RectangleMemberEntity(bottomPadding: bottom, rightPadding: right,) :
+        const CircleMemberEntity(),
+      ),
     ];
   }
 }

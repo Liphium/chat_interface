@@ -68,7 +68,11 @@ class _MessageFeedState extends State<MessageFeed> {
         //* Header
         Obx(() => MessageBar(conversation: controller.selectedConversation.value)),
 
-        //* Call
+        //* Call rectangle
+        const Expanded(
+          child: CallRectangle()
+        ),
+        /*
         Obx(() {
 
           // Check if there is a call in the conversation
@@ -95,7 +99,7 @@ class _MessageFeedState extends State<MessageFeed> {
           }
 
           return const SizedBox();
-        }),
+        }), */
 
         Expanded(
           flex: 2,

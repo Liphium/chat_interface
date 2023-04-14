@@ -13,8 +13,6 @@ class MicrophoneController extends GetxController {
   final microphoneLoading = false.obs;
   StreamSubscription<dynamic>? subscription, sensitivitySubscription;
 
-  LocalTrackPublication<LocalAudioTrack>? _pub;
-
   void setMicrophone(bool value) async {
     microphone.value = value;
     microphoneLoading.value = true;
@@ -26,13 +24,13 @@ class MicrophoneController extends GetxController {
       if(subscription == null) {
         await setupTracks(controller);
       } else {
-        await controller.room.value.localParticipant!.audioTracks[0].track!.unmute();
+        await controller.room.value.localParticipant!.setMicrophoneEnabled(true);
       }
 
     } else {
 
       // If microphone is turned off, mute track
-      await controller.room.value.localParticipant!.audioTracks[0].track!.mute();
+      await controller.room.value.localParticipant!.setMicrophoneEnabled(false);
     }
 
     microphoneLoading.value = false;
@@ -56,9 +54,9 @@ class MicrophoneController extends GetxController {
       if(!microphone.value) return; // If microphone is turned off, don't change status
 
       if(value) {
-        await controller.room.value.localParticipant!.audioTracks[0].track!.enable();
+        await controller.room.value.localParticipant!.setMicrophoneEnabled(true);
       } else {
-        await controller.room.value.localParticipant!.audioTracks[0].track!.disable();
+        await controller.room.value.localParticipant!.setMicrophoneEnabled(false);
       }
     });
   }
@@ -78,24 +76,21 @@ class MicrophoneController extends GetxController {
 
     // Check if there is already track
     if(controller.room.value.localParticipant!.hasAudio) {
-      List<MediaDevice> devices = await Hardware.instance.audioInputs();
-      Hardware.instance.selectedAudioInput = devices.firstWhere((element) => element.label == device);
 
-      // Change track
-      await _pub!.track!.setDeviceId(device);
+      // Change input device
+      await controller.room.value.setAudioInputDevice(await _getDevice(device));
     } else {
 
-      // Create new track
-      final track = await LocalAudioTrack.create(AudioCaptureOptions(
-        deviceId: device,
-      ));
-
-      _pub = await controller.room.value.localParticipant!.publishAudioTrack(
-        track, 
-      );
+      await controller.room.value.setAudioInputDevice(await _getDevice(device));
+      await controller.room.value.localParticipant!.setMicrophoneEnabled(true);
     }
 
     return;
+  }
+
+  Future<MediaDevice> _getDevice(String device) async {
+    final devices = await Hardware.instance.audioInputs();
+    return devices.firstWhere((element) => element.label == device);
   }
 
 }

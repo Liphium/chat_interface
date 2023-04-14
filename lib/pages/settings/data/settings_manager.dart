@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/settings/app/call/call_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/video/video_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
@@ -7,15 +8,11 @@ class SettingController extends GetxController {
 
   final settings = <String, Setting>{}; // label: Setting
 
-  String currentCategory = "";
-
   SettingController() {
-
-    currentCategory = "speech";
+    
     addSpeechSettings(this);
-
-    currentCategory = "video";
     addVideoSettings(this);
+    addCallAppearanceSettings(this);
     
   }
 

@@ -61,8 +61,10 @@ class CallController extends GetxController {
         deviceId: output == "def" ? null : output,
       ),
       
+      //* Setting default audio bitrate
       defaultAudioPublishOptions: const AudioPublishOptions(
-        audioBitrate: 128000
+        dtx: true,
+        audioBitrate: AudioPreset.musicHighQualityStereo,
       )
     );
 
