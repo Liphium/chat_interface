@@ -37,6 +37,7 @@ class _CallPreviewState extends State<CallPreview> {
                 )
               )
             ),
+            
             Expanded(
               flex: 3,
               child: Row(
@@ -50,11 +51,15 @@ class _CallPreviewState extends State<CallPreview> {
                         flex: 1,
                         child: Padding(
                           padding: const EdgeInsets.only(right: defaultSpacing),
-                          child: Column(children: _buildEntities(theme, defaultSpacing, 0))
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: _buildEntities(theme, defaultSpacing, 0)
+                          )
                         )
                       )
                     )
                   ),
+
                   Expanded(
                     flex: 3,
                     child: Container(
@@ -73,7 +78,10 @@ class _CallPreviewState extends State<CallPreview> {
                         flex: 1,
                         child: Padding(
                           padding: const EdgeInsets.only(left: defaultSpacing),
-                          child: Column(children: _buildEntities(theme, defaultSpacing, 0))
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: _buildEntities(theme, defaultSpacing, 0)
+                          )
                         )
                       )
                     )

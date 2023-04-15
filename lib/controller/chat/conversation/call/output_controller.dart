@@ -13,7 +13,8 @@ class PublicationController extends GetxController {
   final output = true.obs;
   final outputLoading = false.obs;
 
-  final screenshares = <int, Screenshare>{}.obs;
+  final screenshares = <int, Video>{}.obs;
+  final cameras = <int, Video>{}.obs;
 
   void changeOutputDevice(MediaDevice device) async {
     CallController controller = Get.find();
@@ -39,20 +40,25 @@ class PublicationController extends GetxController {
             event.publication.subscribe();
           }
         } else if(event.publication.kind == TrackType.VIDEO) {
+          Get.find<CallController>().hasVideo.value = true;
+
+          // Parse id
+          final id = int.tryParse(event.participant.identity) ?? -1;
+          if(id == -1) return;
 
           // Subscribe to screenshare
           if(event.publication.isScreenShare) {
-
-            final id = int.tryParse(event.participant.identity) ?? -1;
-            if(id == -1) return;
 
             // Subscribe if only one
             if(screenshares.isEmpty) {
               event.publication.subscribe();
             }
 
-            screenshares[id] = Screenshare(Get.find<CallMemberController>().members[id]!, event.publication as RemoteTrackPublication<RemoteVideoTrack>);
+            screenshares[id] = Video(Get.find<CallMemberController>().members[id]!, event.publication as RemoteTrackPublication<RemoteVideoTrack>);
           } else {
+
+            // Subscribe to camera
+            cameras[id] = Video(Get.find<CallMemberController>().members[id]!, event.publication as RemoteTrackPublication<RemoteVideoTrack>);
             event.publication.subscribe();
           }
         }
@@ -67,10 +73,13 @@ class PublicationController extends GetxController {
           event.publication.unsubscribe();
         } else if(event.publication.kind == TrackType.VIDEO) {
 
-          // Unsubscribe from screenshare
-          if(event.publication.isScreenShare) {
-            event.publication.unsubscribe();
-            screenshares.remove(int.tryParse(event.participant.identity) ?? -1);
+          // Unsubscribe from screenshare/camera
+          event.publication.unsubscribe();
+
+          (event.publication.isScreenShare ? screenshares : cameras).remove(int.tryParse(event.participant.identity) ?? -1);
+
+          if(screenshares.isEmpty && cameras.isEmpty) {
+            Get.find<CallController>().hasVideo.value = false;
           }
         }
       });
@@ -105,17 +114,42 @@ class PublicationController extends GetxController {
 
     outputLoading.value = false;
   }
+
+  void subscribeToScreenshare(Video video) async {
+    video.loading.value = true;
+    if(video is RemoteTrackPublication) {
+      if(video.publication.subscribed) {
+        return;
+      }
+    }
+
+    for(var ss in screenshares.values) {
+      if(ss.publication is RemoteTrackPublication) {
+        (ss.publication as RemoteTrackPublication).unsubscribe();
+      }
+    }
+
+    if(video.publication is RemoteTrackPublication) {
+      await (video.publication as RemoteTrackPublication).subscribe();
+    }
+
+    video.waitForTrack();
+  }
 }
 
-class Screenshare {
+class Video {
   final Member member;
-  final RemoteTrackPublication<RemoteVideoTrack> publication;
+  final TrackPublication<VideoTrack> publication;
   final loading = true.obs;
 
-  Screenshare(this.member, this.publication) {
+  Video(this.member, this.publication) {
+    waitForTrack();
+  }
+
+  void waitForTrack() {
 
     // Wait for track to be ready
-    final timer = Timer.periodic(1000.ms, (timer) {
+    Timer.periodic(1000.ms, (timer) {
       if(publication.track != null) {
         loading.value = false;
         timer.cancel();

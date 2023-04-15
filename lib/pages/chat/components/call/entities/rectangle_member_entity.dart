@@ -1,12 +1,17 @@
+import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/call_member_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class RectangleMemberEntity extends StatefulWidget {
+
+  final Member member;
 
   final double bottomPadding;
   final double rightPadding;
 
-  const RectangleMemberEntity({super.key, this.bottomPadding = 0, this.rightPadding = 0});
+  const RectangleMemberEntity({super.key, this.bottomPadding = 0, this.rightPadding = 0, required this.member});
 
   @override
   State<RectangleMemberEntity> createState() => _RectangleMemberEntityState();
@@ -21,26 +26,30 @@ class _RectangleMemberEntityState extends State<RectangleMemberEntity> {
       padding: EdgeInsets.only(bottom: widget.bottomPadding, right: widget.rightPadding),
       child: AspectRatio(
         aspectRatio: 16 / 9,
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.tertiaryContainer,
+        child: Material(
+          color: theme.colorScheme.tertiaryContainer,
+          borderRadius: BorderRadius.circular(defaultSpacing),
+          child: InkWell(
             borderRadius: BorderRadius.circular(defaultSpacing),
-            border: Border.all(color: Colors.green, width: 2),
-          ),
-          alignment: Alignment.bottomLeft,
-          child: SizedBox(
-            height: 25,
-            child: Padding(
-              padding: const EdgeInsets.all(defaultSpacing * 0.5),
-              child: Container(
-                width: 60,
+            splashFactory: NoSplash.splashFactory,
+            onTap: () {
+              Get.find<CallController>().cinema.toggle();
+            },
+            child: Obx(() => 
+              Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.circular(defaultSpacing),
-                )
-              )
-            ),
-          )
+                  border: widget.member.isSpeaking.value ? Border.all(color: Colors.green, width: 2) : null,
+                ),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(defaultSpacing),
+                    child: Text(widget.member.friend.name, style: theme.textTheme.titleLarge)
+                  )
+                ),
+              ),
+            )
+          ),
         ),
       ),
     );

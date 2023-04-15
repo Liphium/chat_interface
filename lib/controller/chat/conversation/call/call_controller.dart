@@ -2,8 +2,10 @@ import 'package:chat_interface/controller/chat/conversation/call/call_member_con
 import 'package:chat_interface/controller/chat/conversation/call/microphone_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/pages/chat/components/call/entities/video_entity.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/snackbar.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
@@ -18,8 +20,10 @@ class CallController extends GetxController {
   //* Call layout
   final expanded = false.obs;
   final fullScreen = false.obs;
+  final hasVideo = false.obs;
 
   // Cinema mode
+  final cinemaWidget = Rx<Widget?>(null);
   final cinema = false.obs;
   final showMembers = false.obs;
   final hideOverlay = false.obs;
@@ -119,5 +123,20 @@ class CallController extends GetxController {
 
     // Show the call in the UI
     livekit.value = true;
+  }
+  
+  void cinemaMode(Widget widget) {
+
+    if(cinema.value) {
+      cinema.value = false;
+      return;
+    }
+
+    if(widget is VideoEntity) {
+      Get.find<PublicationController>().subscribeToScreenshare(widget.video);
+    }
+    
+    cinemaWidget.value = widget;
+    cinema.value = true;
   }
 }

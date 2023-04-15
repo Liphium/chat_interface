@@ -115,6 +115,20 @@ class _CallControlsState extends State<CallControls> {
 
             horizontalSpacing(defaultSpacing * 0.5),
 
+            //* Hide overlay button
+            GetX<CallController>(
+              builder: (controller) {
+                return IconButton(
+                  onPressed: () => controller.hideOverlay.toggle(),
+                  icon: Icon(controller.hideOverlay.value ? Icons.unfold_more : Icons.unfold_less),
+                  iconSize: 35,
+                  color: theme.colorScheme.primary
+                );
+              },
+            ),
+
+            horizontalSpacing(defaultSpacing * 0.5),
+
             //* End call button
             LoadingIconButton(
               loading: false.obs,

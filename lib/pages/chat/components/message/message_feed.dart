@@ -69,17 +69,13 @@ class _MessageFeedState extends State<MessageFeed> {
         Obx(() => MessageBar(conversation: controller.selectedConversation.value)),
 
         //* Call rectangle
-        const Expanded(
-          child: CallRectangle()
-        ),
-        /*
         Obx(() {
 
           // Check if there is a call in the conversation
           if(callController.conversation.value == controller.selectedConversation.value.id) {
             
-            return ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 100),
+            return Expanded(
+              flex: callController.hasVideo.value ? 3 : 1,
               child: Obx(() {
             
                 // Check if the call is live
@@ -99,56 +95,53 @@ class _MessageFeedState extends State<MessageFeed> {
           }
 
           return const SizedBox();
-        }), */
+        }),
 
-        Obx(() =>
-          callController.expanded.value ? const SizedBox() :
-          Expanded(
-            flex: 2,
-            child: Stack(
-              children: [
+        Expanded(
+          flex: 2,
+          child: Stack(
+            children: [
 
-                //* Message list
-                Obx(() => 
-                  ListView.builder(
-                    itemCount: controller.messages.length + 1,
-                    reverse: true,
-                    itemBuilder: (context, index) {
-                        
-                      if(index == 0) {
-                        return verticalSpacing(defaultSpacing * 12);
-                      }
-                        
-                      final message = controller.messages[index - 1];
-                      final sender = friendController.friends[message.sender];
-                      final self = statusController.id.value == message.sender;
+              //* Message list
+              Obx(() => 
+                ListView.builder(
+                  itemCount: controller.messages.length + 1,
+                  reverse: true,
+                  itemBuilder: (context, index) {
+                      
+                    if(index == 0) {
+                      return verticalSpacing(defaultSpacing * 12);
+                    }
+                      
+                    final message = controller.messages[index - 1];
+                    final sender = friendController.friends[message.sender];
+                    final self = statusController.id.value == message.sender;
 
-                      bool last = false;
-                      if(index != controller.messages.length) {
-                        final lastMessage = controller.messages[index];
-                        last = lastMessage.sender == message.sender;
-                      }
-                        
-                      switch(message.type) {
-                        
-                        case "text":
-                          return MessageRenderer(message: message, self: self, last: last,
-                          sender: self ? Friend(1, statusController.name.value, "", statusController.tag.value) : sender);
+                    bool last = false;
+                    if(index != controller.messages.length) {
+                      final lastMessage = controller.messages[index];
+                      last = lastMessage.sender == message.sender;
+                    }
+                      
+                    switch(message.type) {
+                      
+                      case "text":
+                        return MessageRenderer(message: message, self: self, last: last,
+                        sender: self ? Friend(1, statusController.name.value, "", statusController.tag.value) : sender);
 
-                        case "call":
-                          return CallMessageRenderer(message: message, self: self, last: last,
-                          sender: self ? Friend(1, statusController.name.value, "", statusController.tag.value) : sender);
-                      }
+                      case "call":
+                        return CallMessageRenderer(message: message, self: self, last: last,
+                        sender: self ? Friend(1, statusController.name.value, "", statusController.tag.value) : sender);
+                    }
 
-                      return null;
-                    },
-                  ),
+                    return null;
+                  },
                 ),
+              ),
 
-                //* Message input
-                const MessageInput()
-              ],
-            ),
+              //* Message input
+              const MessageInput()
+            ],
           ),
         ),
       ],
