@@ -46,6 +46,7 @@ class MicrophoneController extends GetxController {
       // Listen for changes
       subscription = settingController.settings["audio.microphone"]!.value.listen((value) async {
         await _publishMicrophone(value, controller);
+        Get.find<SensitivityController>().restart();
       });
     }
 
@@ -54,9 +55,9 @@ class MicrophoneController extends GetxController {
       if(!microphone.value) return; // If microphone is turned off, don't change status
 
       if(value) {
-        await controller.room.value.localParticipant!.setMicrophoneEnabled(true);
+        await controller.room.value.localParticipant!.audioTracks[0].track!.unmute();
       } else {
-        await controller.room.value.localParticipant!.setMicrophoneEnabled(false);
+        await controller.room.value.localParticipant!.audioTracks[0].track!.mute();
       }
     });
   }

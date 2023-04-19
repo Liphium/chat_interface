@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/sensitvity_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -45,12 +46,20 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
     }
 
     _microphones.addAll(list);
+
+    if(!Get.find<CallController>().livekit.value) {
+      Get.find<SensitivityController>().startListening();
+    }
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
     super.dispose();
+
+    if(!Get.find<CallController>().livekit.value) {
+      Get.find<SensitivityController>().stopListening();
+    }
   }
 
   @override

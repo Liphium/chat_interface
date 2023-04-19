@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -46,20 +47,22 @@ class SensitivityController extends GetxController {
     await Directory(tempPath).create();
 
     _path1 = path.join(tempPath, "temp_sens${Random().nextInt(100000).toRadixString(16)}.opus");
-    await File(_path1).create();
-
     _path2 = path.join(tempPath, "temp_sens${Random().nextInt(100000).toRadixString(16)}.opus");
-    await File(_path2).create();
   }
 
   void startListening() async {
+    /*
     talking.value = false;
     _timer?.cancel();
     _renewTimer?.cancel();
 
     // Delete files
-    await File(_path1).delete();
-    await File(_path2).delete();
+    try {
+      await File(_path1).delete();
+      await File(_path2).delete();
+    } catch(e) {
+      logger.e(e);
+    }
 
     // Start recorder 1
     _useOne = true;
@@ -78,9 +81,11 @@ class SensitivityController extends GetxController {
     Get.find<SettingController>().settings["audio.microphone"]!.value.listen((value) async {
       restart();
     });
+    */
   }
 
   void restart() async {
+    /*
 
     // Switch recorders
     _timer?.cancel();
@@ -101,14 +106,17 @@ class SensitivityController extends GetxController {
 
     // Start new timer
     _timer = _talkingTimer();
+    */
 
   }
 
   void stopListening() {
+    /*
     talking.value = false;
     _timer?.cancel();
     _renewTimer?.cancel();
     _recorder.stop();
+    */
   }
 
   Timer _talkingTimer() {

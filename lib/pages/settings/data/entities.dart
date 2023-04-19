@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/app/call/call_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
+import 'package:chat_interface/pages/settings/app/video/video_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +15,7 @@ enum SettingLabel {
   ]),
 
   app("settings.tab.app", [
-    SettingCategory("video", Icons.photo_camera, null),
+    SettingCategory("video", Icons.photo_camera, VideoSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage()),
     SettingCategory("notifications", Icons.notifications, null),
   ]),

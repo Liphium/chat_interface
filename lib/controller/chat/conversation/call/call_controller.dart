@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/chat/conversation/call/call_member_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/microphone_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
+import 'package:chat_interface/controller/chat/conversation/call/sensitvity_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/call/entities/video_entity.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -42,6 +43,9 @@ class CallController extends GetxController {
   void leaveCall() {
     conversation.value = 0;
     
+    // Stop listening
+    Get.find<SensitivityController>().stopListening();
+
     // Tell other controllers about it
     Get.find<CallMemberController>().onDisconnect();
     Get.find<MicrophoneController>().endCall();
@@ -59,7 +63,10 @@ class CallController extends GetxController {
     disconnecting.value = false;
     
     // Join room
-    String output = Get.find<SettingController>().settings["audio.output"]!.getOr("def");
+    SettingController controller = Get.find();
+    String output = controller.settings["audio.output"]!.getOr("def");
+    String microphone = controller.settings["audio.microphone"]!.getOr("def");
+
     final options = RoomOptions(
       adaptiveStream: true,
       dynacast: true,
@@ -68,17 +75,24 @@ class CallController extends GetxController {
       defaultAudioOutputOptions: AudioOutputOptions(
         deviceId: output == "def" ? null : output,
       ),
+
+      defaultAudioCaptureOptions: AudioCaptureOptions(
+        deviceId: microphone == "def" ? null : microphone,
+      ),
       
       //* Setting default audio bitrate
       defaultAudioPublishOptions: const AudioPublishOptions(
         dtx: true,
-        audioBitrate: AudioPreset.musicHighQualityStereo,
+        audioBitrate: 128000,
       )
     );
 
     await room.value.connect(liveKitURL, token,
       roomOptions: options,
     );
+
+    // Start sensitivity
+    //Get.find<SensitivityController>().startListening();
 
     // Init other call related controllers
     Get.find<CallMemberController>().onCall(room.value);

@@ -37,11 +37,6 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
   };
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
 
     ThemeData theme = Theme.of(context);
