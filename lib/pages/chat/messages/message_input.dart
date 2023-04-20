@@ -94,10 +94,12 @@ class _MessageInputState extends State<MessageInput> {
                   ),
                   horizontalSpacing(defaultSpacing),
                   LoadingIconButton(
-                    onTap: () => sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, "", () {
-                      _message.clear();
-                      loading.value = false;
-                    }),
+                    onTap: () =>
+                      sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, "", () {
+                        _message.clear();
+                        loading.value = false;
+                      })
+                    ,
                     icon: Icons.send,
                     loading: loading,
                   )
