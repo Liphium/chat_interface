@@ -17,8 +17,8 @@ void handleStoredAction(String action, String target) async {
     //* Handle removed friend
     case "fr_rem":
       
-      Get.find<FriendController>().friends.removeWhere((id, friend) => id == int.parse(target));
-      await db.delete(db.friend).delete(FriendCompanion(id: drift.Value(int.parse(target))));
+      Get.find<FriendController>().friends.removeWhere((id, friend) => id == target);
+      await db.delete(db.friend).delete(FriendCompanion(id: drift.Value(target)));
 
       break;
 
@@ -32,13 +32,13 @@ void handleStoredAction(String action, String target) async {
       logger.i("CONVERSATION KEY");
 
       var args = target.split(":");
-      var id = int.parse(args[0]);
+      var id = args[0];
 
       ConversationController controller = Get.find();
       var data = await (db.select(db.conversation)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
 
       // Decrypt key
-      Conversation conv = Conversation.fromData(data ?? ConversationData(id: 0, data: "unknown", key: "key", updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch)));
+      Conversation conv = Conversation.fromData(data ?? ConversationData(id: "0", data: "unknown", key: "key", updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch)));
       conv.key = decryptRSA64(args[1], asymmetricKeyPair.privateKey);
 
       // Update conversation

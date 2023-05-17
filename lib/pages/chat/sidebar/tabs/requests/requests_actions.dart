@@ -24,7 +24,7 @@ void _addButton(String input, RxBool loading, {Function(String)? success}) async
   }), waiter: () => loading.value = false,);
 }
 
-void denyFriendRequest(int id, {RxBool? loading}) {
+void denyFriendRequest(String id, {RxBool? loading}) {
 
   loading?.value = true;
 

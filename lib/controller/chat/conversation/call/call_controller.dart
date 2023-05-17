@@ -13,7 +13,7 @@ import 'package:livekit_client/livekit_client.dart';
 class CallController extends GetxController {
 
   //* Call status
-  final conversation = 0.obs;
+  final conversation = "0".obs;
   final livekit = false.obs;
   final connected = false.obs;
   final disconnecting = false.obs;
@@ -35,13 +35,13 @@ class CallController extends GetxController {
   late EventsListener<RoomEvent> roomListener;
 
   // Open room without connection to Livekit (only for UI)
-  void openWithoutLivekit(int conv) {
+  void openWithoutLivekit(String conv) {
     conversation.value = conv;
     livekit.value = false;
   }
 
   void leaveCall() {
-    conversation.value = 0;
+    conversation.value = "0";
     
     // Stop listening
     Get.find<SensitivityController>().stopListening();
@@ -58,7 +58,7 @@ class CallController extends GetxController {
   }
 
   // Join room using Livekit (for connection)
-  void joinWithLivekit(int conv, String token) async {
+  void joinWithLivekit(String conv, String token) async {
     conversation.value = conv;
     disconnecting.value = false;
     

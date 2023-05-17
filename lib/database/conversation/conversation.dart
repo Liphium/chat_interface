@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 
 class Conversation extends Table {
 
-  IntColumn get id => integer()();
+  TextColumn get id => text()();
   TextColumn get data => text().nullable()();
   TextColumn get key => text().nullable()();
   Int64Column get updatedAt => int64()();
@@ -13,10 +13,10 @@ class Conversation extends Table {
 
 class Member extends Table {
   
-    IntColumn get id => integer()();
+    TextColumn get id => text()();
     TextColumn get name => text()();
-    IntColumn get conversationId => integer().nullable().customConstraint('REFERENCES conversations(id)')();
-    IntColumn get accountId => integer()();
+    TextColumn get conversationId => text().nullable()();
+    TextColumn get accountId => text()();
 
     // 1 - member, 2 - admin, 3 - owner
     IntColumn get roleId => integer()();

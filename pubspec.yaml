@@ -29,7 +29,6 @@ dependencies:
   url_launcher: ^6.1.10
   flutter_webrtc: ^0.9.24
   record:
-    path: ../record_package/record
 
 dev_dependencies:
   flutter_test:

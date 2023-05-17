@@ -18,7 +18,7 @@ void conversationOpen(Event event) async {
 
     // Grab conversation data
     String conversationName = event.data["conversation"]["data"];
-    int conversationId = event.data["conversation"]["id"];
+    String conversationId = event.data["conversation"]["id"];
     String key = decryptRSA64(event.data["key"], asymmetricKeyPair.privateKey);
 
     // Show message
@@ -40,7 +40,7 @@ void conversationOpen(Event event) async {
     // Add members to database
     for (var member in event.data["members"]) {
     
-      String name = (controller.friends[member["account"]] ?? Friend(0, "fj-${member["account"]}", "", "tag")).name;
+      String name = (controller.friends[member["account"]] ?? Friend("0", "fj-${member["account"]}", "", "tag")).name;
       final mem = Member.fromJson(name, member);
       await db.into(db.member).insertOnConflictUpdate(mem.toData(member["id"], conversationId));
     }

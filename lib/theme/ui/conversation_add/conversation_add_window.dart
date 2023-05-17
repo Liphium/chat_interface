@@ -22,7 +22,7 @@ class ConversationAddWindow extends StatefulWidget {
 
 class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
-  final _members = <int>[].obs;
+  final _members = <String>[].obs;
   final _length = 0.obs;
   final _conversationLoading = false.obs;
   final _errorText = "".obs;

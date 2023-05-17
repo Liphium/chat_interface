@@ -2,34 +2,37 @@ import 'package:get/get.dart';
 
 class WritingController extends GetxController {
 
-  final writing = <int, List<int>>{}.obs;
-  final writingUser = <int, int>{};
+  // Conversation: [Users]
+  final writing = <String, List<String>>{}.obs;
 
-  void init(int id) {
+  // User: Conversation
+  final writingUser = <String, String>{};
+
+  void init(String id) {
     if(writing[id] != null) return;
-    writing[id] = <int>[];
+    writing[id] = <String>[];
   }
 
-  void add(int id, int userId) {
+  void add(String id, String userId) {
     if(writingUser[userId] != null) {
       remove(writingUser[userId]!, userId);
     }
 
     if (writing[id] == null) {
-      writing[id] = <int>[userId];
+      writing[id] = <String>[userId];
     } else {
-      writing[id] = <int>[...writing[id]!, userId];
+      writing[id] = <String>[...writing[id]!, userId];
     }
 
     writingUser[userId] = id;
   }
 
-  void remove(int id, int userId) {
+  void remove(String id, String userId) {
     if (writing[id] == null) {
-      writing[id] = <int>[];
+      writing[id] = <String>[];
     } else {
       writing[id]!.remove(userId);
-      writing[id] = <int>[...writing[id]!];
+      writing[id] = <String>[...writing[id]!];
     }
 
     writingUser.remove(userId);

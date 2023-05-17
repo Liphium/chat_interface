@@ -56,8 +56,8 @@ class FriendsSetup extends Setup {
             return const ErrorPage(title: "invalid_signature");
           }
 
-          final id = await db.into(db.friend).insertOnConflictUpdate(friendData.entity);
-          controller.add(Friend(id, friendData.name, friendData.key, friendData.tag));
+          await db.into(db.friend).insertOnConflictUpdate(friendData.entity);
+          controller.add(Friend(friendData.id, friendData.name, friendData.key, friendData.tag));
         }
       }
     } else {

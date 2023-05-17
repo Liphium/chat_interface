@@ -30,7 +30,6 @@ class _CallMessageRendererState extends State<CallMessageRenderer> {
   @override
   Widget build(BuildContext context) {
 
-    Friend sender = widget.sender ?? Friend(0, "System", "", "fjc");
     ThemeData theme = Theme.of(context);
 
     return Padding(

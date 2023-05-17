@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
@@ -18,7 +17,6 @@ import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat_interface/connection/messaging.dart' as messaging;
@@ -28,7 +26,7 @@ part 'call_start_action.dart';
 
 class MessageFeed extends StatefulWidget {
 
-  final int? id;
+  final String? id;
 
   const MessageFeed({super.key, this.id});
 
@@ -52,7 +50,7 @@ class _MessageFeedState extends State<MessageFeed> {
 
     CallController callController = Get.find();
 
-    if(widget.id == null || widget.id == 0) {
+    if(widget.id == null || widget.id == "0") {
       return Center(
         child: Text('chat.welcome.1.0.0'.tr, style: Theme.of(context).textTheme.titleLarge),
       );
@@ -127,11 +125,11 @@ class _MessageFeedState extends State<MessageFeed> {
                       
                       case "text":
                         return MessageRenderer(message: message, self: self, last: last,
-                        sender: self ? Friend(1, statusController.name.value, "", statusController.tag.value) : sender);
+                        sender: self ? Friend("1", statusController.name.value, "", statusController.tag.value) : sender);
 
                       case "call":
                         return CallMessageRenderer(message: message, self: self, last: last,
-                        sender: self ? Friend(1, statusController.name.value, "", statusController.tag.value) : sender);
+                        sender: self ? Friend("1", statusController.name.value, "", statusController.tag.value) : sender);
                     }
 
                     return null;

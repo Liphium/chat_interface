@@ -11,9 +11,9 @@ class $ConversationTable extends Conversation
   $ConversationTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
   late final GeneratedColumn<String> data = GeneratedColumn<String>(
@@ -43,6 +43,8 @@ class $ConversationTable extends Conversation
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('data')) {
       context.handle(
@@ -68,7 +70,7 @@ class $ConversationTable extends Conversation
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ConversationData(
       id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       data: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}data']),
       key: attachedDatabase.typeMapping
@@ -86,7 +88,7 @@ class $ConversationTable extends Conversation
 
 class ConversationData extends DataClass
     implements Insertable<ConversationData> {
-  final int id;
+  final String id;
   final String? data;
   final String? key;
   final BigInt updatedAt;
@@ -95,7 +97,7 @@ class ConversationData extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+    map['id'] = Variable<String>(id);
     if (!nullToAbsent || data != null) {
       map['data'] = Variable<String>(data);
     }
@@ -119,7 +121,7 @@ class ConversationData extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConversationData(
-      id: serializer.fromJson<int>(json['id']),
+      id: serializer.fromJson<String>(json['id']),
       data: serializer.fromJson<String?>(json['data']),
       key: serializer.fromJson<String?>(json['key']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
@@ -129,7 +131,7 @@ class ConversationData extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<String>(id),
       'data': serializer.toJson<String?>(data),
       'key': serializer.toJson<String?>(key),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
@@ -137,7 +139,7 @@ class ConversationData extends DataClass
   }
 
   ConversationData copyWith(
-          {int? id,
+          {String? id,
           Value<String?> data = const Value.absent(),
           Value<String?> key = const Value.absent(),
           BigInt? updatedAt}) =>
@@ -171,46 +173,54 @@ class ConversationData extends DataClass
 }
 
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
-  final Value<int> id;
+  final Value<String> id;
   final Value<String?> data;
   final Value<String?> key;
   final Value<BigInt> updatedAt;
+  final Value<int> rowid;
   const ConversationCompanion({
     this.id = const Value.absent(),
     this.data = const Value.absent(),
     this.key = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   ConversationCompanion.insert({
-    this.id = const Value.absent(),
+    required String id,
     this.data = const Value.absent(),
     this.key = const Value.absent(),
     required BigInt updatedAt,
-  }) : updatedAt = Value(updatedAt);
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        updatedAt = Value(updatedAt);
   static Insertable<ConversationData> custom({
-    Expression<int>? id,
+    Expression<String>? id,
     Expression<String>? data,
     Expression<String>? key,
     Expression<BigInt>? updatedAt,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (data != null) 'data': data,
       if (key != null) 'key': key,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   ConversationCompanion copyWith(
-      {Value<int>? id,
+      {Value<String>? id,
       Value<String?>? data,
       Value<String?>? key,
-      Value<BigInt>? updatedAt}) {
+      Value<BigInt>? updatedAt,
+      Value<int>? rowid}) {
     return ConversationCompanion(
       id: id ?? this.id,
       data: data ?? this.data,
       key: key ?? this.key,
       updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -218,7 +228,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (data.present) {
       map['data'] = Variable<String>(data.value);
@@ -229,6 +239,9 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<BigInt>(updatedAt.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -238,7 +251,8 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
           ..write('id: $id, ')
           ..write('data: $data, ')
           ..write('key: $key, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -251,9 +265,9 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   $MemberTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -262,17 +276,15 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   static const VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   @override
-  late final GeneratedColumn<int> conversationId = GeneratedColumn<int>(
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
       'conversation_id', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES conversations(id)');
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _accountIdMeta =
       const VerificationMeta('accountId');
   @override
-  late final GeneratedColumn<int> accountId = GeneratedColumn<int>(
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
       'account_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _roleIdMeta = const VerificationMeta('roleId');
   @override
   late final GeneratedColumn<int> roleId = GeneratedColumn<int>(
@@ -292,6 +304,8 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -327,13 +341,13 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MemberData(
       id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       conversationId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}conversation_id']),
+          .read(DriftSqlType.string, data['${effectivePrefix}conversation_id']),
       accountId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}account_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
       roleId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}role_id'])!,
     );
@@ -346,10 +360,10 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
 }
 
 class MemberData extends DataClass implements Insertable<MemberData> {
-  final int id;
+  final String id;
   final String name;
-  final int? conversationId;
-  final int accountId;
+  final String? conversationId;
+  final String accountId;
   final int roleId;
   const MemberData(
       {required this.id,
@@ -360,12 +374,12 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+    map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || conversationId != null) {
-      map['conversation_id'] = Variable<int>(conversationId);
+      map['conversation_id'] = Variable<String>(conversationId);
     }
-    map['account_id'] = Variable<int>(accountId);
+    map['account_id'] = Variable<String>(accountId);
     map['role_id'] = Variable<int>(roleId);
     return map;
   }
@@ -386,10 +400,10 @@ class MemberData extends DataClass implements Insertable<MemberData> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MemberData(
-      id: serializer.fromJson<int>(json['id']),
+      id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      conversationId: serializer.fromJson<int?>(json['conversationId']),
-      accountId: serializer.fromJson<int>(json['accountId']),
+      conversationId: serializer.fromJson<String?>(json['conversationId']),
+      accountId: serializer.fromJson<String>(json['accountId']),
       roleId: serializer.fromJson<int>(json['roleId']),
     );
   }
@@ -397,19 +411,19 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'conversationId': serializer.toJson<int?>(conversationId),
-      'accountId': serializer.toJson<int>(accountId),
+      'conversationId': serializer.toJson<String?>(conversationId),
+      'accountId': serializer.toJson<String>(accountId),
       'roleId': serializer.toJson<int>(roleId),
     };
   }
 
   MemberData copyWith(
-          {int? id,
+          {String? id,
           String? name,
-          Value<int?> conversationId = const Value.absent(),
-          int? accountId,
+          Value<String?> conversationId = const Value.absent(),
+          String? accountId,
           int? roleId}) =>
       MemberData(
         id: id ?? this.id,
@@ -445,33 +459,38 @@ class MemberData extends DataClass implements Insertable<MemberData> {
 }
 
 class MemberCompanion extends UpdateCompanion<MemberData> {
-  final Value<int> id;
+  final Value<String> id;
   final Value<String> name;
-  final Value<int?> conversationId;
-  final Value<int> accountId;
+  final Value<String?> conversationId;
+  final Value<String> accountId;
   final Value<int> roleId;
+  final Value<int> rowid;
   const MemberCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.accountId = const Value.absent(),
     this.roleId = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   MemberCompanion.insert({
-    this.id = const Value.absent(),
+    required String id,
     required String name,
     this.conversationId = const Value.absent(),
-    required int accountId,
+    required String accountId,
     required int roleId,
-  })  : name = Value(name),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
         accountId = Value(accountId),
         roleId = Value(roleId);
   static Insertable<MemberData> custom({
-    Expression<int>? id,
+    Expression<String>? id,
     Expression<String>? name,
-    Expression<int>? conversationId,
-    Expression<int>? accountId,
+    Expression<String>? conversationId,
+    Expression<String>? accountId,
     Expression<int>? roleId,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -479,21 +498,24 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
       if (conversationId != null) 'conversation_id': conversationId,
       if (accountId != null) 'account_id': accountId,
       if (roleId != null) 'role_id': roleId,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   MemberCompanion copyWith(
-      {Value<int>? id,
+      {Value<String>? id,
       Value<String>? name,
-      Value<int?>? conversationId,
-      Value<int>? accountId,
-      Value<int>? roleId}) {
+      Value<String?>? conversationId,
+      Value<String>? accountId,
+      Value<int>? roleId,
+      Value<int>? rowid}) {
     return MemberCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       conversationId: conversationId ?? this.conversationId,
       accountId: accountId ?? this.accountId,
       roleId: roleId ?? this.roleId,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -501,19 +523,22 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
     if (conversationId.present) {
-      map['conversation_id'] = Variable<int>(conversationId.value);
+      map['conversation_id'] = Variable<String>(conversationId.value);
     }
     if (accountId.present) {
-      map['account_id'] = Variable<int>(accountId.value);
+      map['account_id'] = Variable<String>(accountId.value);
     }
     if (roleId.present) {
       map['role_id'] = Variable<int>(roleId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
@@ -525,7 +550,8 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
           ..write('name: $name, ')
           ..write('conversationId: $conversationId, ')
           ..write('accountId: $accountId, ')
-          ..write('roleId: $roleId')
+          ..write('roleId: $roleId, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -578,11 +604,9 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _senderMeta = const VerificationMeta('sender');
   @override
-  late final GeneratedColumn<int> sender = GeneratedColumn<int>(
+  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
       'sender', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES friends(id)');
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -592,11 +616,9 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   static const VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   @override
-  late final GeneratedColumn<int> conversationId = GeneratedColumn<int>(
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
       'conversation_id', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES conversations(id)');
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _editedMeta = const VerificationMeta('edited');
   @override
   late final GeneratedColumn<bool> edited =
@@ -713,11 +735,11 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       certificate: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}certificate'])!,
       sender: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}sender']),
+          .read(DriftSqlType.string, data['${effectivePrefix}sender']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       conversationId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}conversation_id']),
+          .read(DriftSqlType.string, data['${effectivePrefix}conversation_id']),
       edited: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
     );
@@ -736,9 +758,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final String content;
   final String attachments;
   final String certificate;
-  final int? sender;
+  final String? sender;
   final DateTime createdAt;
-  final int? conversationId;
+  final String? conversationId;
   final bool edited;
   const MessageData(
       {required this.id,
@@ -761,11 +783,11 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     map['attachments'] = Variable<String>(attachments);
     map['certificate'] = Variable<String>(certificate);
     if (!nullToAbsent || sender != null) {
-      map['sender'] = Variable<int>(sender);
+      map['sender'] = Variable<String>(sender);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || conversationId != null) {
-      map['conversation_id'] = Variable<int>(conversationId);
+      map['conversation_id'] = Variable<String>(conversationId);
     }
     map['edited'] = Variable<bool>(edited);
     return map;
@@ -799,9 +821,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       content: serializer.fromJson<String>(json['content']),
       attachments: serializer.fromJson<String>(json['attachments']),
       certificate: serializer.fromJson<String>(json['certificate']),
-      sender: serializer.fromJson<int?>(json['sender']),
+      sender: serializer.fromJson<String?>(json['sender']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      conversationId: serializer.fromJson<int?>(json['conversationId']),
+      conversationId: serializer.fromJson<String?>(json['conversationId']),
       edited: serializer.fromJson<bool>(json['edited']),
     );
   }
@@ -815,9 +837,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       'content': serializer.toJson<String>(content),
       'attachments': serializer.toJson<String>(attachments),
       'certificate': serializer.toJson<String>(certificate),
-      'sender': serializer.toJson<int?>(sender),
+      'sender': serializer.toJson<String?>(sender),
       'createdAt': serializer.toJson<DateTime>(createdAt),
-      'conversationId': serializer.toJson<int?>(conversationId),
+      'conversationId': serializer.toJson<String?>(conversationId),
       'edited': serializer.toJson<bool>(edited),
     };
   }
@@ -829,9 +851,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           String? content,
           String? attachments,
           String? certificate,
-          Value<int?> sender = const Value.absent(),
+          Value<String?> sender = const Value.absent(),
           DateTime? createdAt,
-          Value<int?> conversationId = const Value.absent(),
+          Value<String?> conversationId = const Value.absent(),
           bool? edited}) =>
       MessageData(
         id: id ?? this.id,
@@ -889,10 +911,11 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> content;
   final Value<String> attachments;
   final Value<String> certificate;
-  final Value<int?> sender;
+  final Value<String?> sender;
   final Value<DateTime> createdAt;
-  final Value<int?> conversationId;
+  final Value<String?> conversationId;
   final Value<bool> edited;
+  final Value<int> rowid;
   const MessageCompanion({
     this.id = const Value.absent(),
     this.verified = const Value.absent(),
@@ -904,6 +927,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.createdAt = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.edited = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   MessageCompanion.insert({
     required String id,
@@ -916,6 +940,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required DateTime createdAt,
     this.conversationId = const Value.absent(),
     required bool edited,
+    this.rowid = const Value.absent(),
   })  : id = Value(id),
         verified = Value(verified),
         type = Value(type),
@@ -931,10 +956,11 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     Expression<String>? content,
     Expression<String>? attachments,
     Expression<String>? certificate,
-    Expression<int>? sender,
+    Expression<String>? sender,
     Expression<DateTime>? createdAt,
-    Expression<int>? conversationId,
+    Expression<String>? conversationId,
     Expression<bool>? edited,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -947,6 +973,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       if (createdAt != null) 'created_at': createdAt,
       if (conversationId != null) 'conversation_id': conversationId,
       if (edited != null) 'edited': edited,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -957,10 +984,11 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<String>? content,
       Value<String>? attachments,
       Value<String>? certificate,
-      Value<int?>? sender,
+      Value<String?>? sender,
       Value<DateTime>? createdAt,
-      Value<int?>? conversationId,
-      Value<bool>? edited}) {
+      Value<String?>? conversationId,
+      Value<bool>? edited,
+      Value<int>? rowid}) {
     return MessageCompanion(
       id: id ?? this.id,
       verified: verified ?? this.verified,
@@ -972,6 +1000,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       createdAt: createdAt ?? this.createdAt,
       conversationId: conversationId ?? this.conversationId,
       edited: edited ?? this.edited,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -997,16 +1026,19 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       map['certificate'] = Variable<String>(certificate.value);
     }
     if (sender.present) {
-      map['sender'] = Variable<int>(sender.value);
+      map['sender'] = Variable<String>(sender.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (conversationId.present) {
-      map['conversation_id'] = Variable<int>(conversationId.value);
+      map['conversation_id'] = Variable<String>(conversationId.value);
     }
     if (edited.present) {
       map['edited'] = Variable<bool>(edited.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
@@ -1023,7 +1055,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
           ..write('sender: $sender, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')
-          ..write('edited: $edited')
+          ..write('edited: $edited, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1151,29 +1184,36 @@ class SettingData extends DataClass implements Insertable<SettingData> {
 class SettingCompanion extends UpdateCompanion<SettingData> {
   final Value<String> key;
   final Value<String> value;
+  final Value<int> rowid;
   const SettingCompanion({
     this.key = const Value.absent(),
     this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   SettingCompanion.insert({
     required String key,
     required String value,
+    this.rowid = const Value.absent(),
   })  : key = Value(key),
         value = Value(value);
   static Insertable<SettingData> custom({
     Expression<String>? key,
     Expression<String>? value,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (key != null) 'key': key,
       if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  SettingCompanion copyWith({Value<String>? key, Value<String>? value}) {
+  SettingCompanion copyWith(
+      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
     return SettingCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1186,6 +1226,9 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
     if (value.present) {
       map['value'] = Variable<String>(value.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1193,7 +1236,8 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
   String toString() {
     return (StringBuffer('SettingCompanion(')
           ..write('key: $key, ')
-          ..write('value: $value')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1206,9 +1250,9 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   $FriendTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -1237,6 +1281,8 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -1266,7 +1312,7 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return FriendData(
       id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       key: attachedDatabase.typeMapping
@@ -1283,7 +1329,7 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
 }
 
 class FriendData extends DataClass implements Insertable<FriendData> {
-  final int id;
+  final String id;
   final String name;
   final String key;
   final String tag;
@@ -1295,7 +1341,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+    map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
     map['key'] = Variable<String>(key);
     map['tag'] = Variable<String>(tag);
@@ -1315,7 +1361,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return FriendData(
-      id: serializer.fromJson<int>(json['id']),
+      id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       key: serializer.fromJson<String>(json['key']),
       tag: serializer.fromJson<String>(json['tag']),
@@ -1325,14 +1371,14 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'key': serializer.toJson<String>(key),
       'tag': serializer.toJson<String>(tag),
     };
   }
 
-  FriendData copyWith({int? id, String? name, String? key, String? tag}) =>
+  FriendData copyWith({String? id, String? name, String? key, String? tag}) =>
       FriendData(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -1363,48 +1409,56 @@ class FriendData extends DataClass implements Insertable<FriendData> {
 }
 
 class FriendCompanion extends UpdateCompanion<FriendData> {
-  final Value<int> id;
+  final Value<String> id;
   final Value<String> name;
   final Value<String> key;
   final Value<String> tag;
+  final Value<int> rowid;
   const FriendCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.key = const Value.absent(),
     this.tag = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   FriendCompanion.insert({
-    this.id = const Value.absent(),
+    required String id,
     required String name,
     required String key,
     required String tag,
-  })  : name = Value(name),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
         key = Value(key),
         tag = Value(tag);
   static Insertable<FriendData> custom({
-    Expression<int>? id,
+    Expression<String>? id,
     Expression<String>? name,
     Expression<String>? key,
     Expression<String>? tag,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (key != null) 'key': key,
       if (tag != null) 'tag': tag,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   FriendCompanion copyWith(
-      {Value<int>? id,
+      {Value<String>? id,
       Value<String>? name,
       Value<String>? key,
-      Value<String>? tag}) {
+      Value<String>? tag,
+      Value<int>? rowid}) {
     return FriendCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       key: key ?? this.key,
       tag: tag ?? this.tag,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1412,7 +1466,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1423,6 +1477,9 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     if (tag.present) {
       map['tag'] = Variable<String>(tag.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1432,7 +1489,8 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('key: $key, ')
-          ..write('tag: $tag')
+          ..write('tag: $tag, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }

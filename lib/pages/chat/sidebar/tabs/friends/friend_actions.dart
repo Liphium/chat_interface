@@ -1,6 +1,6 @@
 part of 'friends_page.dart';
 
-void openConversation(RxBool loading, String name, List<int> friends) {
+void openConversation(RxBool loading, String name, List<String> friends) {
   loading.value = true;
 
   // Generate secure key

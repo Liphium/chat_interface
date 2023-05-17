@@ -5,7 +5,7 @@ import 'package:livekit_client/livekit_client.dart';
 
 class CallMemberController extends GetxController {
 
-  final members = <int, Member>{}.obs;
+  final members = <String, Member>{}.obs;
 
   void onCall(Room room) {
 
@@ -44,7 +44,7 @@ class CallMemberController extends GetxController {
       return;
     }
 
-    final replacer = Friend(0, "fj-${participant.identity}", "key", "tag");
+    final replacer = Friend("0", "fj-${participant.identity}", "key", "tag");
     final friend = Get.find<FriendController>().friends[int.parse(participant.identity)] ?? replacer;
 
     members[friend.id] = Member(friend, participant);

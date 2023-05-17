@@ -1,10 +1,10 @@
 part of 'message_feed.dart';
 
-void sendTextMessage(RxBool loading, int conversation, String message, String attachments, Function() callback) async {
+void sendTextMessage(RxBool loading, String conversation, String message, String attachments, Function() callback) async {
   sendActualMessage(loading, conversation, "text", attachments, message, callback);
 }
 
-void sendActualMessage(RxBool loading, int conversation, String type, String attachments, String message, Function() callback) async {
+void sendActualMessage(RxBool loading, String conversation, String type, String attachments, String message, Function() callback) async {
   loading.value = true;
 
   // Encrypt message with signature

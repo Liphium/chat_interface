@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 
 class Friend extends Table {
   
-    IntColumn get id => integer()();
+    TextColumn get id => text()();
     TextColumn get name => text()();
     TextColumn get key => text()();
     TextColumn get tag => text()();

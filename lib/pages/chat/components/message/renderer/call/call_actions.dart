@@ -1,6 +1,6 @@
 part of 'message_call_renderer.dart';
 
-void joinCall(RxBool loading, int conversation, String token) {
+void joinCall(RxBool loading, String conversation, String token) {
   loading.value = true;
 
   connector.sendAction(msg.Message("c_j", <String, dynamic>{

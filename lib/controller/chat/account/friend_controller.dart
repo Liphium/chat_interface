@@ -8,7 +8,7 @@ import 'package:pointycastle/export.dart';
 
 class FriendController extends GetxController {
   
-  final friends = <int, Friend>{}.obs;
+  final friends = <String, Friend>{}.obs;
 
   void reset() {
     friends.clear();
@@ -20,7 +20,7 @@ class FriendController extends GetxController {
 }
 
 class Friend {
-  final int id;
+  final String id;
   final String name;
   final String tag;
   final String key;

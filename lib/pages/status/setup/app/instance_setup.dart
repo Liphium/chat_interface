@@ -18,6 +18,7 @@ class InstanceSetup extends Setup {
   Future<Widget?> load() async {
 
     // Get list of instances
+    print((await getApplicationSupportDirectory()).path);
     final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
     final dir = Directory(instanceFolder);
 

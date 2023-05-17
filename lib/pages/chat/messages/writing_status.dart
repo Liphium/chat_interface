@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 
 class WritingStatusNotifier extends StatefulWidget {
 
-  final List<int> writers;
+  final List<String> writers;
 
   const WritingStatusNotifier({super.key, required this.writers});
 
@@ -16,7 +16,7 @@ class WritingStatusNotifier extends StatefulWidget {
 
 class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
 
-  int lastWriter = -1;
+  String lastWriter = "-1";
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +30,9 @@ class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
       members += '${friendController.friends[member]!.name}, ';
     }
 
-    if(widget.writers.isEmpty && lastWriter != -1) {
+    if(widget.writers.isEmpty && lastWriter != "-1") {
       members = friendController.friends[lastWriter]!.name;
-    } else if(lastWriter != -1) {
+    } else if(lastWriter != "-1") {
       members = members.substring(0, members.length - 2);
     }
 

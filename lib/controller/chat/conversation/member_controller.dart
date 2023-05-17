@@ -5,7 +5,7 @@ class MemberController extends GetxController {
 
   final members = <Member>[].obs;
 
-  void loadConversation(RxBool loading, int id) async {
+  void loadConversation(RxBool loading, String id) async {
     loading.value = true;
 
     final membersDb = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(id))).get();
@@ -49,7 +49,7 @@ class MemberController extends GetxController {
 class Member {
 
   final String name;
-  final int account;
+  final String account;
   final int role;
 
   Member(this.name, this.account, this.role);
@@ -59,6 +59,6 @@ class Member {
   
   Member.fromData(MemberData data) : this(data.name, data.accountId, data.roleId);
 
-  MemberData toData(int id, int conversation) => MemberData(id: id, name: name, accountId: account, roleId: role, conversationId: conversation);
+  MemberData toData(String id, String conversation) => MemberData(id: id, name: name, accountId: account, roleId: role, conversationId: conversation);
 
 }

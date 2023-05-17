@@ -11,7 +11,7 @@ class Event {
   final Map<String, dynamic> data;
 
   /// ID of the sender
-  final int sender;
+  final String sender;
 
   Event(this.sender, this.name, this.data);
   Event.fromMap(Map<String, dynamic> map) : this(map['sender'], map['name'], map['data']);

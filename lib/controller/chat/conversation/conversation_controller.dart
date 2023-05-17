@@ -11,7 +11,7 @@ import 'member_controller.dart';
 class ConversationController extends GetxController {
 
   final loaded = false.obs;
-  final conversations = <int, Conversation>{}.obs;
+  final conversations = <String, Conversation>{}.obs;
   int newConvs = 0;
 
   void newConversations(dynamic conversations) async {
@@ -68,7 +68,7 @@ class ConversationController extends GetxController {
 
 class Conversation {
   
-  final int id;
+  final String id;
   final decrypted = "no".obs;
   String key;
   String data;
@@ -106,7 +106,7 @@ class Conversation {
   String status(StatusController statusController, FriendController friendController) {
     
     if(members.length == 2) {
-      int id = members.firstWhere((element) => element.account != statusController.id.value).account;
+      String id = members.firstWhere((element) => element.account != statusController.id.value).account;
       return friendController.friends[id]!.status.value;
     } 
 

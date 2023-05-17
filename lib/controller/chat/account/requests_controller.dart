@@ -21,7 +21,7 @@ class Request {
   final String name;
   final String tag;
   final String key;
-  final int id;
+  final String id;
   final loading = false.obs;
 
   Request(this.name, this.tag, this.key, this.id);

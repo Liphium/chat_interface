@@ -1,6 +1,6 @@
 part of 'message_feed.dart';
 
-void startCall(RxBool loading, int conversation) {
+void startCall(RxBool loading, String conversation) {
   loading.value = true;
   final controller = Get.find<CallController>();
 

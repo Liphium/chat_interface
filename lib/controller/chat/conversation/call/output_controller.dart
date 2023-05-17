@@ -13,8 +13,8 @@ class PublicationController extends GetxController {
   final output = true.obs;
   final outputLoading = false.obs;
 
-  final screenshares = <int, Video>{}.obs;
-  final cameras = <int, Video>{}.obs;
+  final screenshares = <String, Video>{}.obs;
+  final cameras = <String, Video>{}.obs;
 
   void changeOutputDevice(MediaDevice device) async {
     CallController controller = Get.find();
@@ -43,8 +43,7 @@ class PublicationController extends GetxController {
           Get.find<CallController>().hasVideo.value = true;
 
           // Parse id
-          final id = int.tryParse(event.participant.identity) ?? -1;
-          if(id == -1) return;
+          final id = event.participant.identity;
 
           // Subscribe to screenshare
           if(event.publication.isScreenShare) {

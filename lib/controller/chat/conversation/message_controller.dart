@@ -17,7 +17,7 @@ import 'package:get/get.dart';
 class MessageController extends GetxController {
 
   final loaded = false.obs;
-  final selectedConversation = Conversation(0, "data", "").obs;
+  final selectedConversation = Conversation("0", "data", "").obs;
   final messages = <Message>[].obs;
 
   void selectConversation(Conversation conversation) async {
@@ -57,9 +57,9 @@ class Message {
   String attachments;
   bool verified;
   final String certificate;
-  final int sender;
+  final String sender;
   final DateTime createdAt;
-  final int conversation;
+  final String conversation;
   final bool edited;
 
   Message(this.id, this.type, this.content, this.attachments, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, this.verified);

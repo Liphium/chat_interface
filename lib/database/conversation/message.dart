@@ -8,9 +8,9 @@ class Message extends Table {
   TextColumn get content => text()();
   TextColumn get attachments => text()();
   TextColumn get certificate => text()();
-  IntColumn get sender => integer().nullable().customConstraint('REFERENCES friends(id)')();
+  TextColumn get sender => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
-  IntColumn get conversationId => integer().nullable().customConstraint('REFERENCES conversations(id)')();
+  TextColumn get conversationId => text().nullable()();
   BoolColumn get edited => boolean()();
 
   @override
