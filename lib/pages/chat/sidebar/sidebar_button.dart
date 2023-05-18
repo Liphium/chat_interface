@@ -7,11 +7,13 @@ class SidebarButton extends StatefulWidget {
   final Function() onTap;
   final String label;
   final RxString selected;
+  final BorderRadius radius;
 
   const SidebarButton(
       {super.key,
       required this.onTap,
       required this.label,
+      this.radius = const BorderRadius.all(Radius.circular(defaultSpacing)),
       required this.selected});
 
   @override
@@ -45,11 +47,6 @@ class _SidebarButtonState extends State<SidebarButton> with TickerProviderStateM
       }
     });
 
-    const radius = BorderRadius.only(
-      topRight: Radius.circular(10),
-      bottomLeft: Radius.circular(10),
-    );
-
     return Animate(
       controller: _controller,
       effects: [
@@ -61,12 +58,12 @@ class _SidebarButtonState extends State<SidebarButton> with TickerProviderStateM
         )
       ],
       child: Obx(() => Material(
-            borderRadius: radius,
+            borderRadius: widget.radius,
             color: widget.selected.value == widget.label
                 ? Theme.of(context).colorScheme.secondaryContainer
                 : Theme.of(context).hoverColor,
             child: InkWell(
-              borderRadius: radius,
+              borderRadius: widget.radius,
               onTap: () {
                 widget.onTap();
               },

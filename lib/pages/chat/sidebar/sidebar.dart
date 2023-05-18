@@ -35,54 +35,68 @@ class _SidebarState extends State<Sidebar> {
       ),
 
       //* Sidebar content
-      child: Column(children: [
-        RepaintBoundary(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: defaultSpacing),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: defaultSpacing * 0.5,
-              runSpacing: defaultSpacing * 0.5,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-
-                //* Conversations
-                SidebarButton(
-                  selected: selected,
-                  onTap: () {
-                    selected.value = 'chat.all';
-                  },
-                  label: 'chat.all',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: RepaintBoundary(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: defaultSpacing),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: defaultSpacing * 0.5,
+                  runSpacing: defaultSpacing * 0.5,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+          
+                    //* Conversations
+                    SidebarButton(
+                      selected: selected,
+                      onTap: () {
+                        selected.value = 'chat.all';
+                      },
+                      label: 'chat.all',
+                      radius: const BorderRadius.only(
+                        topLeft: Radius.circular(defaultSpacing),
+                        bottomLeft: Radius.circular(defaultSpacing),
+                      )
+                    ),
+          
+                    //* Friends
+                    SidebarButton(
+                      selected: selected,
+                      onTap: () {
+                        selected.value = 'chat.friends';
+                      },
+                      label: 'chat.friends',
+                      radius: const BorderRadius.all(Radius.zero)
+                    ),
+          
+                    //* Requests
+                    SidebarButton(
+                      selected: selected,
+                      onTap: () {
+                        selected.value = 'chat.requests';
+                      },
+                      label: 'chat.requests',
+                      radius: const BorderRadius.only(
+                        topRight: Radius.circular(defaultSpacing),
+                        bottomRight: Radius.circular(defaultSpacing),
+                      )
+                    ),
+                  ],
                 ),
-
-                //* Friends
-                SidebarButton(
-                  selected: selected,
-                  onTap: () {
-                    selected.value = 'chat.friends';
-                  },
-                  label: 'chat.friends',
-                ),
-
-                //* Requests
-                SidebarButton(
-                  selected: selected,
-                  onTap: () {
-                    selected.value = 'chat.requests';
-                  },
-                  label: 'chat.requests',
-                ),
-              ],
+              ),
             ),
           ),
-        ),
 
-        //* Selected tab
-        Expanded(
-          child: Obx(() => map[selected.value]!),
-        ),
-        const SidebarProfile()
-      ]),
+          //* Selected tab
+          Expanded(
+            child: Obx(() => map[selected.value]!),
+          ),
+          const SidebarProfile()
+        ]
+      ),
     );
   }
 }

@@ -33,40 +33,43 @@ class _ConversationsPageState extends State<ConversationsPage> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: SizedBox(
-            height: 48,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                buildInput(theme),
-                horizontalSpacing(defaultSpacing),
-                SizedBox(
-                  key: _addKey,
-                  width: 48,
-                  height: 48,
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    color: theme.colorScheme.secondaryContainer,
-                    elevation: 2.0,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(10),
-                      onTap: () {
-                        final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
-
-                        //* Open conversation add window
-                        Get.dialog(ConversationAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(defaultSpacing),
-                        child: Icon(Icons.add, color: theme.colorScheme.primary),
-                      ),
-                    )
+        SizedBox(
+          height: 48,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              buildInput(theme),
+              horizontalSpacing(defaultSpacing),
+              SizedBox(
+                key: _addKey,
+                width: 48,
+                height: 48,
+                child: Material(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(defaultSpacing),
+                    bottomLeft: Radius.circular(defaultSpacing),
                   ),
+                  color: theme.colorScheme.secondaryContainer,
+                  elevation: 2.0,
+                  child: InkWell(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(defaultSpacing),
+                      bottomLeft: Radius.circular(defaultSpacing),
+                    ),
+                    onTap: () {
+                      final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
+
+                      //* Open conversation add window
+                      Get.dialog(ConversationAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(defaultSpacing),
+                      child: Icon(Icons.add, color: theme.colorScheme.primary),
+                    ),
+                  )
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         Expanded(
@@ -198,7 +201,10 @@ class _ConversationsPageState extends State<ConversationsPage> {
 Widget buildInput(ThemeData theme) {
   return Expanded(
     child: Material(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: const BorderRadius.only(
+        topRight: Radius.circular(defaultSpacing),
+        bottomRight: Radius.circular(defaultSpacing),
+      ),
       color: theme.colorScheme.secondaryContainer,
       elevation: 2.0,
       child: Padding(
