@@ -1,13 +1,11 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
 import 'package:pointycastle/export.dart';
 
 import '../setup_manager.dart';

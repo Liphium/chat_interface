@@ -50,7 +50,7 @@ String padBase64(String str) {
   return str.padRight(str.length + (4 - str.length % 4) % 4, '=');
 }
 
-int getSessionFromJWT(String token) {
+String getSessionFromJWT(String token) {
   final parts = token.split('.');
   final padded = padBase64(parts[1]);
   final decoded = utf8.decode(base64Decode(padded));

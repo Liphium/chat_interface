@@ -45,6 +45,11 @@ class _SidebarButtonState extends State<SidebarButton> with TickerProviderStateM
       }
     });
 
+    const radius = BorderRadius.only(
+      topRight: Radius.circular(10),
+      bottomLeft: Radius.circular(10),
+    );
+
     return Animate(
       controller: _controller,
       effects: [
@@ -56,12 +61,12 @@ class _SidebarButtonState extends State<SidebarButton> with TickerProviderStateM
         )
       ],
       child: Obx(() => Material(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: radius,
             color: widget.selected.value == widget.label
                 ? Theme.of(context).colorScheme.secondaryContainer
                 : Theme.of(context).hoverColor,
             child: InkWell(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: radius,
               onTap: () {
                 widget.onTap();
               },

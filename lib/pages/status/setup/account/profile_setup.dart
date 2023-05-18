@@ -24,7 +24,7 @@ class ProfileSetup extends Setup {
 
     print("session_tk: " + sessionToken);
 
-    var session = getSessionFromJWT(sessionToken);
+    String session = getSessionFromJWT(sessionToken);
 
     // Refresh token
     var res = await postRqAuthorized("/auth/refresh", <String, dynamic>{

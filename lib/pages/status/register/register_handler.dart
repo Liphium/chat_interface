@@ -32,6 +32,7 @@ void register(String email, String username, String password, {Function()? succe
   var body = jsonDecode(res.body);
 
   if(!body["success"]) {
+    print(body);
     failure?.call(body["error"]);
     return;
   }
