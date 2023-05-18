@@ -5,37 +5,37 @@ publish_to: 'none'
 version: 1.0.0-ALPHA
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
+  sdk: '>=2.19.2'
 
 dependencies:
   flutter:
     sdk: flutter
     
-  flutter_animate: ^4.1.0
-  get: ^4.6.5 
-  path_provider: ^2.0.13
-  path: ^1.8.2
-  drift: ^2.5.0
-  sqlite3_flutter_libs: ^0.5.13
-  logger: ^1.2.2
-  web_socket_channel: ^2.3.0
-  crypto: ^3.0.2
-  http: ^0.13.5
-  animations: ^2.0.7
-  encrypt: ^5.0.1
-  pointycastle: ^3.7.0
-  livekit_client: ^1.2.2
-  logging: ^1.1.1
-  url_launcher: ^6.1.10
-  flutter_webrtc: ^0.9.24
-  record:
+  flutter_animate: any
+  get: any
+  path_provider: any
+  path: any
+  drift: any
+  sqlite3_flutter_libs: any
+  logger: any
+  web_socket_channel: any
+  crypto: any
+  http: any
+  animations: any
+  encrypt: any
+  pointycastle: any
+  livekit_client: any
+  logging: any
+  url_launcher: any
+  flutter_webrtc: any
+  record: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  drift_dev: ^2.5.2
-  build_runner: ^2.3.3
-  flutter_lints: ^2.0.0
+  drift_dev: any
+  build_runner: any
+  flutter_lints: any
 
 flutter:
   uses-material-design: true
