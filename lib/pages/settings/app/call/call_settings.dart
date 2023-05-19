@@ -45,7 +45,10 @@ class _CallSettingsPageState extends State<CallSettingsPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("settings.categories.call_app".tr, style: Theme.of(context).textTheme.headlineMedium),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
+              child: Text("settings.categories.call_app".tr, style: Theme.of(context).textTheme.headlineMedium)
+            ),
             verticalSpacing(defaultSpacing),
       
             //* Preview
@@ -65,15 +68,24 @@ class _CallSettingsPageState extends State<CallSettingsPage> {
                 shrinkWrap: true,
                 itemCount: _expansionModes.length,
                 itemBuilder: (context, index) {
+
+                  final first = index == 0;
+                  final last = index == _expansionModes.length - 1;
+                  
+                  final radius = BorderRadius.vertical(
+                    top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                    bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+                  );
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                     child: Obx(() => 
                       Material(
                         color: controller.settings["call_app.expansionMode"]!.getWhenValue(0, 0) == index ? theme.colorScheme.secondaryContainer :
-                          theme.hoverColor,
-                        borderRadius: BorderRadius.circular(defaultSpacing),
+                          theme.colorScheme.background,
+                        borderRadius: radius,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          borderRadius: radius,
                           onTap: () {
                             controller.settings["call_app.expansionMode"]!.setValue(index);
                           },
@@ -105,15 +117,24 @@ class _CallSettingsPageState extends State<CallSettingsPage> {
                 shrinkWrap: true,
                 itemCount: _expansionPositions.length,
                 itemBuilder: (context, index) {
+
+                  final first = index == 0;
+                  final last = index == _expansionPositions.length - 1;
+                  
+                  final radius = BorderRadius.vertical(
+                    top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                    bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+                  );
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                     child: Obx(() => 
                       Material(
                         color: controller.settings["call_app.expansionPosition"]!.getWhenValue(0, 0) == index ? theme.colorScheme.secondaryContainer :
-                          theme.hoverColor,
-                        borderRadius: BorderRadius.circular(defaultSpacing),
+                          theme.colorScheme.background,
+                        borderRadius: radius,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          borderRadius: radius,
                           onTap: () {
                             controller.settings["call_app.expansionPosition"]!.setValue(index);
                           },

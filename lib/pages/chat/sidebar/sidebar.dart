@@ -31,7 +31,7 @@ class _SidebarState extends State<Sidebar> {
     //* Sidebar
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.tertiaryContainer.withAlpha(15),
+        color: theme.colorScheme.onBackground,
       ),
 
       //* Sidebar content
@@ -57,7 +57,6 @@ class _SidebarState extends State<Sidebar> {
                       },
                       label: 'chat.all',
                       radius: const BorderRadius.only(
-                        topLeft: Radius.circular(defaultSpacing),
                         bottomLeft: Radius.circular(defaultSpacing),
                       )
                     ),
@@ -81,7 +80,6 @@ class _SidebarState extends State<Sidebar> {
                       label: 'chat.requests',
                       radius: const BorderRadius.only(
                         topRight: Radius.circular(defaultSpacing),
-                        bottomRight: Radius.circular(defaultSpacing),
                       )
                     ),
                   ],

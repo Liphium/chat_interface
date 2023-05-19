@@ -118,7 +118,7 @@ class _CallPreviewState extends State<CallPreview> {
           aspectRatio: 16 / 9,
           child: Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.tertiaryContainer,
+              color: theme.colorScheme.tertiary,
               borderRadius: BorderRadius.circular(defaultSpacing),
               border: Border.all(color: Colors.green, width: 2),
             ),
@@ -130,7 +130,7 @@ class _CallPreviewState extends State<CallPreview> {
                 child: Container(
                   width: 60,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(defaultSpacing),
                   )
                 )
@@ -145,7 +145,7 @@ class _CallPreviewState extends State<CallPreview> {
           aspectRatio: 16 / 9,
           child: Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
+              color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(defaultSpacing),
             ),
             alignment: Alignment.bottomLeft,
@@ -156,7 +156,7 @@ class _CallPreviewState extends State<CallPreview> {
                 child: Container(
                   width: 50,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(defaultSpacing),
                   )
                 )
@@ -171,7 +171,7 @@ class _CallPreviewState extends State<CallPreview> {
           aspectRatio: 16 / 9,
           child: Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.errorContainer,
+              color: theme.colorScheme.error,
               borderRadius: BorderRadius.circular(defaultSpacing),
             ),
             alignment: Alignment.bottomLeft,
@@ -182,7 +182,7 @@ class _CallPreviewState extends State<CallPreview> {
                 child: Container(
                   width: 75,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(defaultSpacing),
                   )
                 )

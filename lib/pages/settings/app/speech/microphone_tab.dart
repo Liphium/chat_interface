@@ -86,16 +86,24 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 String current = _microphones[index].label;
+
+                final first = index == 0;
+                final last = index == _microphones.length - 1;
                 
+                final radius = BorderRadius.vertical(
+                  top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                  bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+                );
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.25, horizontal: defaultSpacing * 0.5),
                   child: Obx(() => 
                     Material(
                       color: controller.settings["audio.microphone"]!.getWhenValue("def", _microphones[0].label) == current ? theme.colorScheme.secondaryContainer :
                         theme.hoverColor,
-                      borderRadius: BorderRadius.circular(defaultSpacing),
+                      borderRadius: radius,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        borderRadius: radius,
                         onTap: () {
                           Get.find<SettingController>().settings["audio.microphone"]!.setValue(_microphones[index].label);
                         },
@@ -104,7 +112,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                           child: Row(
                             children: [
                               //* Icon
-                              Icon(Icons.mic, color: theme.colorScheme.onSecondaryContainer),
+                              Icon(Icons.mic, color: theme.colorScheme.primary),
 
                               horizontalSpacing(defaultSpacing * 0.5),
 

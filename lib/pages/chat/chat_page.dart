@@ -26,6 +26,7 @@ class _ChatPageState extends State<ChatPage> {
     ThemeData theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       body: Stack(
         children: [
           Row(

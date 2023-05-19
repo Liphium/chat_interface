@@ -74,6 +74,14 @@ class _OutputTabState extends State<OutputTab> {
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 String current = _outputs[index].label;
+
+                final first = index == 0;
+                final last = index == _outputs.length - 1;
+                
+                final radius = BorderRadius.vertical(
+                  top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                  bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+                );
                 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.25, horizontal: defaultSpacing * 0.5),
@@ -81,9 +89,9 @@ class _OutputTabState extends State<OutputTab> {
                     Material(
                       color: controller.settings["audio.output"]!.getWhenValue("def", _outputs[0].label) == current ? theme.colorScheme.secondaryContainer :
                         theme.hoverColor,
-                      borderRadius: BorderRadius.circular(defaultSpacing),
+                      borderRadius: radius,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        borderRadius: radius,
                         onTap: () {
                           Get.find<PublicationController>().changeOutputDevice(_outputs[index]);
                         },
@@ -92,7 +100,7 @@ class _OutputTabState extends State<OutputTab> {
                           child: Row(
                             children: [
                               //* Icon
-                              Icon(Icons.speaker, color: theme.colorScheme.onSecondaryContainer),
+                              Icon(Icons.speaker, color: theme.colorScheme.primary),
 
                               horizontalSpacing(defaultSpacing * 0.5),
 

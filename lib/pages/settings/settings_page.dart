@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/settings/data/entities.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,11 +13,13 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
 
+  final ThemeData theme = Get.theme;
   final currentCategory = SettingLabel.values[0].categories[0].obs;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.onBackground,
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -28,13 +31,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 itemCount: SettingLabel.values.length+1,
                 itemBuilder: (context, index) {
                   if(index == 0) {
-                    return ElevatedButton(
-                      onPressed: () => Get.back(),
+                    return FJElevatedButton(
+                      onTap: () => Get.back(),
                       child: Row(
                         children: [
-                          const Icon(Icons.arrow_back),
+                          Icon(Icons.arrow_back, color: theme.colorScheme.primary),
                           horizontalSpacing(defaultSpacing * 0.5),
-                          Text("back".tr, style: Theme.of(context).textTheme.bodyMedium),
+                          Text("back".tr, style: Theme.of(context).textTheme.bodyLarge),
                         ],
                       )
                     );
@@ -56,7 +59,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             Padding(
                               padding: const EdgeInsets.only(top: defaultSpacing * 0.5),
                               child: Obx(() => Material(
-                                color: currentCategory.value == element ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Colors.transparent,
+                                color: currentCategory.value == element ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5) : Colors.transparent,
                                 borderRadius: BorderRadius.circular(defaultSpacing),
                                 child: InkWell(
                                   onTap: () => currentCategory.value = element,

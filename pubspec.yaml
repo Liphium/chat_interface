@@ -40,5 +40,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  fonts:
+    - family: Alfa Slab One
+      fonts:
+        - asset: assets/AlfaSlabOne-Regular.ttf
+
   assets:
   - assets/img/

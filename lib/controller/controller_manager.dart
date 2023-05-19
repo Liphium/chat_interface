@@ -12,6 +12,7 @@ import 'package:chat_interface/controller/chat/conversation/message_controller.d
 import 'package:chat_interface/controller/current/notification_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:get/get.dart';
 
 void initializeControllers() {
@@ -29,6 +30,7 @@ void initializeControllers() {
   Get.put(StatusController());
   Get.put(NotificationController());
   Get.put(SettingController());
+  Get.put(ThemeManager());
 
   // Call controls
   Get.put(CallController());

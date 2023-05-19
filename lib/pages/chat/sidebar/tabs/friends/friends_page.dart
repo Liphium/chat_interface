@@ -36,9 +36,11 @@ class _FriendsPageState extends State<FriendsPage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: Material(
-            borderRadius: BorderRadius.circular(10),
-            color: theme.colorScheme.secondaryContainer,
-            elevation: 2.0,
+            color: theme.colorScheme.primaryContainer,
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(defaultSpacing * 1.5),
+              topRight: Radius.circular(defaultSpacing * 1.5),
+            ),
             child: Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),

@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -90,7 +91,10 @@ final _cameras = <MediaDevice>[].obs;
       crossAxisAlignment: CrossAxisAlignment.start,
       
       children: [
-        Text("settings.categories.video".tr, style: theme.textTheme.headlineMedium),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
+          child: Text("settings.categories.video".tr, style: theme.textTheme.headlineMedium),
+        ),
         verticalSpacing(defaultSpacing * 0.5),
       
         //* Device selection
@@ -109,8 +113,8 @@ final _cameras = <MediaDevice>[].obs;
                   padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.25, horizontal: defaultSpacing * 0.5),
                   child: Obx(() => 
                     Material(
-                      color: controller.settings["video.camera"]!.getWhenValue("def", _cameras[0].label) == current ? theme.colorScheme.secondaryContainer :
-                        theme.hoverColor,
+                      color: controller.settings["video.camera"]!.getWhenValue("def", _cameras[0].label) == current ? theme.colorScheme.primaryContainer :
+                        theme.colorScheme.background,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
@@ -127,7 +131,7 @@ final _cameras = <MediaDevice>[].obs;
                           child: Row(
                             children: [
                               //* Icon
-                              Icon(Icons.camera_alt, color: theme.colorScheme.onSecondaryContainer),
+                              Icon(Icons.camera_alt, color: theme.colorScheme.primary),
       
                               horizontalSpacing(defaultSpacing * 0.5),
       
@@ -161,8 +165,9 @@ final _cameras = <MediaDevice>[].obs;
               borderRadius: BorderRadius.circular(defaultSpacing),
               child: Obx(() => _cameraTrack.value == null ?
                 Center(
-                  child: ElevatedButton(
-                    onPressed: () async {
+                  child: FJElevatedButton(
+                    shadow: true,
+                    onTap: () async {
             
                       // Create new track
                       _startPreview(controller.settings["video.camera"]!.getWhenValue("def", _cameras[0].label));

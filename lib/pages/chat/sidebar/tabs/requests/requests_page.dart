@@ -41,37 +41,39 @@ class _RequestsPageState extends State<RequestsPage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: Material(
-            borderRadius: BorderRadius.circular(10),
-            color: Theme.of(context).colorScheme.secondaryContainer,
-            elevation: 2.0,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-
-                    //* Text field
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          prefixIcon: Icon(Icons.person,
-                              color: theme.colorScheme.primary),
-                          hintText: 'requests.placeholder'.tr,
-                        ),
+            color: Theme.of(context).colorScheme.primaryContainer,
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(defaultSpacing * 1.5),
+              topRight: Radius.circular(defaultSpacing * 1.5),
+            ),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+        
+                  //* Text field
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        prefixIcon: Icon(Icons.person,
+                            color: theme.colorScheme.primary),
+                        hintText: 'requests.placeholder'.tr,
                       ),
                     ),
-
-                    //* Add friend button
-                    LoadingIconButton(
+                  ),
+        
+                  //* Add friend button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                    child: LoadingIconButton(
+                      color: theme.colorScheme.primary,
                       onTap: () => _addButton(_controller.text, loading, success: (str) => _controller.clear()),
                       loading: loading,
                       icon: Icons.person_add,
-                    )
-                  ]),
-            ),
+                    ),
+                  )
+                ]),
           ),
         ),
 

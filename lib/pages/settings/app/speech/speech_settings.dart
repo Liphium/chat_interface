@@ -45,7 +45,10 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("settings.categories.audio".tr, style: theme.textTheme.headlineMedium),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
+          child: Text("settings.categories.audio".tr, style: theme.textTheme.headlineMedium),
+        ),
         verticalSpacing(defaultSpacing),
 
         //* Tabs
@@ -54,12 +57,18 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
           children: [
             SidebarButton(
               onTap: () => _selected.value = "audio.microphone",
+              radius: const BorderRadius.only(
+                bottomLeft: Radius.circular(defaultSpacing),
+              ),
               label: "audio.microphone",
               selected: _selected,
             ),
-            horizontalSpacing(defaultSpacing),
+            horizontalSpacing(defaultSpacing * 0.5),
             SidebarButton(
               onTap: () => _selected.value = "audio.output",
+              radius: const BorderRadius.only(
+                topRight: Radius.circular(defaultSpacing),
+              ),
               label: "audio.output",
               selected: _selected,
             )
