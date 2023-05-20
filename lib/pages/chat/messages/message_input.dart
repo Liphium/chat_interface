@@ -32,6 +32,7 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     MessageController controller = Get.find();
+    ThemeData theme = Theme.of(context);
 
     _message.addListener(() {
       if(_message.text.isNotEmpty) {
@@ -46,7 +47,11 @@ class _MessageInputState extends State<MessageInput> {
     });
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 2, vertical: defaultSpacing),
+      padding: const EdgeInsets.only(
+        right: defaultSpacing * 1.75,
+        left: defaultSpacing * 1.75,
+        bottom: defaultSpacing * 0.75
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         
@@ -62,9 +67,11 @@ class _MessageInputState extends State<MessageInput> {
 
           //* Input
           Material(
-            elevation: 10,
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(10),
+            color: theme.colorScheme.onBackground,
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(defaultSpacing * 1.5),
+              bottomLeft: Radius.circular(defaultSpacing * 1.5),
+            ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: defaultSpacing,
@@ -75,6 +82,7 @@ class _MessageInputState extends State<MessageInput> {
                   IconButton(
                     onPressed: () => {},
                     icon: const Icon(Icons.add),
+                    color: theme.colorScheme.primary,
                     tooltip: "soon",
                   ),
                   horizontalSpacing(defaultSpacing),
@@ -101,6 +109,7 @@ class _MessageInputState extends State<MessageInput> {
                       })
                     ,
                     icon: Icons.send,
+                    color: theme.colorScheme.primary,
                     loading: loading,
                   )
                 ],

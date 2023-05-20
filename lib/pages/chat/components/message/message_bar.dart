@@ -26,11 +26,12 @@ class _MessageBarState extends State<MessageBar> {
 
     StatusController statusController = Get.find();
     FriendController friendController = Get.find();
-    
+    ThemeData theme = Theme.of(context);
+
     widget.conversation.refreshName(statusController, friendController);
 
     return Material(
-      color: Theme.of(context).colorScheme.tertiaryContainer.withAlpha(15),
+      color: theme.colorScheme.onBackground,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
         child: Row(

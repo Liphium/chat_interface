@@ -31,7 +31,6 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     // Secondary color
     secondary: Color(0xFF99c1f1),
     secondaryContainer: Color(0xFF0d3b54),
-    onSecondaryContainer: Color(0xFF0d3b54),
 
     // Primary color
     primary: Color(0xFF99c1f1),
