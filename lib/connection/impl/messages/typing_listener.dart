@@ -3,11 +3,15 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/controller/chat/account/writing_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:get/get.dart';
 
 void typingStatus(msg.Event event) {
 
+  StatusController statusController = Get.find();
   WritingController controller = Get.find();
+
+  if(event.sender == statusController.id.value) return;
 
   switch(event.name) {
     case "conv_t":

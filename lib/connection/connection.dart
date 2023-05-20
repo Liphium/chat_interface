@@ -23,6 +23,7 @@ class Connector {
     connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
 
     connection.stream.listen((msg) {
+        print(msg);
         Event event = Event.fromJson(msg);
 
         if(_handlers[event.name] == null) return;
