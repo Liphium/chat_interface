@@ -93,9 +93,11 @@ class _CallSettingsPageState extends State<CallSettingsPage> {
                             padding: const EdgeInsets.all(defaultSpacing),
                             child: Row(
                               children: [
-                                Icon(_expansionIcons[index]),
+                                Icon(_expansionIcons[index], color: theme.colorScheme.primary),
                                 horizontalSpacing(defaultSpacing),
-                                Text(_expansionModes[index].tr, style: theme.textTheme.bodyMedium),
+                                Text(_expansionModes[index].tr, style: theme.textTheme.bodyMedium!.copyWith(
+                                  color: theme.colorScheme.onSurface
+                                )),
                               ],
                             ),
                           ),
@@ -142,9 +144,11 @@ class _CallSettingsPageState extends State<CallSettingsPage> {
                             padding: const EdgeInsets.all(defaultSpacing),
                             child: Row(
                               children: [
-                                Icon(_expansionPositionsIcons[index]),
+                                Icon(_expansionPositionsIcons[index], color: theme.colorScheme.primary),
                                 horizontalSpacing(defaultSpacing),
-                                Text(_expansionPositions[index].tr, style: theme.textTheme.bodyMedium),
+                                Text(_expansionPositions[index].tr, style: theme.textTheme.bodyMedium!.copyWith(
+                                  color: theme.colorScheme.onSurface
+                                )),
                               ],
                             ),
                           ),

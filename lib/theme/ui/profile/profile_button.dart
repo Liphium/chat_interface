@@ -18,7 +18,7 @@ class ProfileButton extends StatelessWidget {
   Widget build(BuildContext context) {
     
     ThemeData theme = Theme.of(context);
-    Color backgroundColor = color ?? theme.colorScheme.secondaryContainer.withAlpha(100);
+    Color backgroundColor = color ?? theme.colorScheme.secondaryContainer.withAlpha(150);
 
     return Material(
       borderRadius: BorderRadius.circular(defaultSpacing),

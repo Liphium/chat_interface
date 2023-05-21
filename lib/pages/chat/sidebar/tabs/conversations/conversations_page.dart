@@ -94,10 +94,10 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   child: Obx(() => 
                   Material(
                     borderRadius: BorderRadius.circular(10),
-                    color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primaryContainer.withAlpha(100) : Colors.transparent,
+                    color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primaryContainer.withAlpha(150) : Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
-                      hoverColor: theme.colorScheme.secondaryContainer.withAlpha(100),
+                      hoverColor: theme.colorScheme.secondaryContainer.withAlpha(150),
                       splashColor: theme.hoverColor,
                       onHover: (value) {
                         hover.value = value;
@@ -122,13 +122,15 @@ class _ConversationsPageState extends State<ConversationsPage> {
                               child: Row(
                                 children: [
                                   Icon(conversation.isGroup ? Icons.group : Icons.person, size: 35, color: theme.colorScheme.primary),
-                                  const SizedBox(width: 10),
+                                  horizontalSpacing(defaultSpacing * 0.75),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         // Conversation title
-                                        Text(conversation.decrypted.value, style: theme.textTheme.titleMedium),
+                                        Text(conversation.decrypted.value, style: theme.textTheme.titleMedium,
+                                          textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
+                                        ),
                                                               
                                         // Conversation description
                                         Obx(() =>

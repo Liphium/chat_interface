@@ -97,11 +97,11 @@ class _RequestsPageState extends State<RequestsPage> {
                             hoverColor: Theme.of(context)
                                 .colorScheme
                                 .secondaryContainer
-                                .withAlpha(100),
+                                .withAlpha(150),
                             splashColor: Theme.of(context)
                                 .colorScheme
                                 .secondaryContainer
-                                .withAlpha(100),
+                                .withAlpha(150),
                             onTap: () {},
 
                             //* Request item content

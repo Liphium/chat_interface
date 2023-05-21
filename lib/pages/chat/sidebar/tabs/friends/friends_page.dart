@@ -79,7 +79,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         hoverColor: Theme.of(context)
                             .colorScheme
                             .secondaryContainer
-                            .withAlpha(100),
+                            .withAlpha(150),
                         splashColor: Theme.of(context).hoverColor,
 
                         //* Show profile

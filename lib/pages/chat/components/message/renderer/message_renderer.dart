@@ -79,7 +79,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                     verticalSpacing(defaultSpacing * 0.1),
               
                     //* Content
-                    Text(widget.message.content, style: theme.textTheme.bodyLarge),
+                    Text(widget.message.content, style: theme.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.normal)),
                   ],
                 ),
               ),

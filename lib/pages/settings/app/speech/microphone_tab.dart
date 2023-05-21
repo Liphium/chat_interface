@@ -117,7 +117,9 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                               horizontalSpacing(defaultSpacing * 0.5),
 
                               //* Label
-                              Text(_microphones[index].label, style: theme.textTheme.bodyMedium),
+                              Text(_microphones[index].label, style: theme.textTheme.bodyMedium!.copyWith(
+                                color: theme.colorScheme.onSurface
+                              )),
                             ],
                           )
                         ),

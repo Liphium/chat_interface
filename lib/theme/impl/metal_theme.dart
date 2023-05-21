@@ -25,7 +25,7 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
 
     // Background color
     brightness: Brightness.dark, 
-    background: Color(0xFF262627),
+    background: Color(0xFF292929), 
     onBackground: Color(0xFF1c1c1c),
 
     // Secondary color
@@ -48,12 +48,40 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
 
     onPrimary: Color(0xFFE5E5E5),
     onSecondary: Color(0xFFE5E5E5),
-    surface: Color(0xFFE5E5E5),
-    onSurface: Color(0xFFE5E5E5),
+
+    // Unimportant font colors
+    surface: Color(0xFFbababa),
+
+    // Important font color
+    onSurface: Color(0xFFFFFFFF),
   ),
   textTheme: defaultDarkTheme.textTheme.copyWith(
     headlineMedium: defaultDarkTheme.textTheme.headlineMedium!.copyWith(
       fontFamily: 'Alfa Slab One'
+    ),
+    bodySmall: defaultDarkTheme.textTheme.bodySmall!.copyWith(
+      fontFamily: 'Open Sans',
+      fontWeight: FontWeight.w100,
+      color: const Color(0xFFbababa)
+    ),
+    bodyMedium: defaultDarkTheme.textTheme.bodyMedium!.copyWith(
+      fontFamily: 'Open Sans',
+      fontWeight: FontWeight.w100,
+      color: const Color(0xFFbababa),
+    ),
+    bodyLarge: defaultDarkTheme.textTheme.bodyLarge!.copyWith(
+      fontFamily: 'Open Sans',
+      fontWeight: FontWeight.w100,
+      color: const Color(0xFFbababa),
+    ),
+    labelLarge: defaultDarkTheme.textTheme.labelLarge!.copyWith(
+      fontFamily: 'Open Sans',
+    ),
+    labelMedium: defaultDarkTheme.textTheme.labelMedium!.copyWith(
+      fontFamily: 'Open Sans',
+    ),
+    labelSmall: defaultDarkTheme.textTheme.labelSmall!.copyWith(
+      fontFamily: 'Open Sans',
     ),
   )
 );

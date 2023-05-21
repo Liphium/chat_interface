@@ -105,7 +105,9 @@ class _OutputTabState extends State<OutputTab> {
                               horizontalSpacing(defaultSpacing * 0.5),
 
                               //* Label
-                              Text(_outputs[index].label, style: theme.textTheme.bodyMedium),
+                              Text(_outputs[index].label, style: theme.textTheme.bodyMedium!.copyWith(
+                                color: theme.colorScheme.onSurface
+                              )),
                             ],
                           )
                         ),

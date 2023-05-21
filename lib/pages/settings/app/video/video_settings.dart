@@ -136,7 +136,9 @@ final _cameras = <MediaDevice>[].obs;
                               horizontalSpacing(defaultSpacing * 0.5),
       
                               //* Label
-                              Text(_cameras[index].label, style: theme.textTheme.bodyMedium),
+                              Text(_cameras[index].label, style: theme.textTheme.bodyMedium!.copyWith(
+                                color: theme.colorScheme.onSurface
+                              )),
                             ],
                           )
                         ),
@@ -172,7 +174,9 @@ final _cameras = <MediaDevice>[].obs;
                       // Create new track
                       _startPreview(controller.settings["video.camera"]!.getWhenValue("def", _cameras[0].label));
                     },
-                    child: Text("video.camera.preview.start".tr),
+                    child: Text("video.camera.preview.start".tr, style: theme.textTheme.bodyMedium!.copyWith(
+                      color: theme.colorScheme.onSurface
+                    )),
                   )
                 ) : 
                 VideoTrackRenderer(

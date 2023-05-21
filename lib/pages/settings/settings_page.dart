@@ -37,7 +37,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         children: [
                           Icon(Icons.arrow_back, color: theme.colorScheme.primary),
                           horizontalSpacing(defaultSpacing * 0.5),
-                          Text("back".tr, style: Theme.of(context).textTheme.bodyLarge),
+                          Text("back".tr, style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: theme.colorScheme.onSurface
+                          )),
                         ],
                       )
                     );
@@ -73,7 +75,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                           color: Theme.of(context).colorScheme.primary,
                                         ),
                                         horizontalSpacing(defaultSpacing * 0.5),
-                                        Text(element.label, style: Theme.of(context).textTheme.bodyMedium),
+                                        Text(element.label, style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface
+                                        )),
                                       ],
                                     ),
                                   ),

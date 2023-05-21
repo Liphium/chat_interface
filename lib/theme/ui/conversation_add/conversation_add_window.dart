@@ -82,7 +82,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                             child: Obx(() => Material(
-                              color: _members.contains(friend.id) ? theme.colorScheme.secondaryContainer.withAlpha(100) : Colors.transparent,
+                              color: _members.contains(friend.id) ? theme.colorScheme.secondaryContainer.withAlpha(150) : Colors.transparent,
                               borderRadius: BorderRadius.circular(defaultSpacing),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(defaultSpacing),
@@ -149,7 +149,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                               target: _length.value > 1 ? 1 : 0,
                         
                               child: Material(
-                                color: theme.colorScheme.secondaryContainer.withAlpha(100),
+                                color: theme.colorScheme.secondaryContainer.withAlpha(150),
                                 borderRadius: BorderRadius.circular(defaultSpacing),
                                 child: TextField(
                                   controller: _controller,

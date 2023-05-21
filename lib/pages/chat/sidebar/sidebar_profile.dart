@@ -56,8 +56,12 @@ class _SidebarProfileState extends State<SidebarProfile> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(controller.name.value, style: theme.textTheme.titleMedium,),
-                                  Text("#${controller.tag.value}", style: theme.textTheme.bodyMedium,),
+                                  Text(controller.name.value, style: theme.textTheme.titleMedium, 
+                                    textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
+                                  ),
+                                  Text("#${controller.tag.value}", style: theme.textTheme.bodyMedium, 
+                                    textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
+                                  ),
                                 ],
                               ),
                             ],
