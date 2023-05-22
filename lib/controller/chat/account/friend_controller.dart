@@ -24,8 +24,8 @@ class Friend {
   final String name;
   final String tag;
   final String key;
-  var status = "status.offline".obs;
-  var online = false.obs;
+  var status = "-".obs;
+  final statusType = 0.obs;
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;

@@ -28,9 +28,11 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     background: Color(0xFF292929), 
     onBackground: Color(0xFF1c1c1c),
 
-    // Secondary color
-    secondary: Color(0xFF99c1f1),
-    secondaryContainer: Color(0xFF0d3b54),
+    // Online color
+    secondary: Color(0xFF7cda81),
+
+    // AFK color
+    secondaryContainer: Color(0xFFF5C211),
 
     // Primary color
     primary: Color(0xFF99c1f1),

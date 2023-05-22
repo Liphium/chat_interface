@@ -5,6 +5,7 @@ import 'package:chat_interface/controller/chat/conversation/conversation_control
 import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/ui/conversation_add/conversation_add_window.dart';
+import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -86,6 +87,12 @@ class _ConversationsPageState extends State<ConversationsPage> {
                 Conversation conversation = controller.conversations.values.elementAt(index);
                 conversation.refreshName(statusController, friendController);
 
+                Friend? friend;
+                if(!conversation.isGroup) {
+                  String id = conversation.members.firstWhere((element) => element.account != statusController.id.value).account;
+                  friend = friendController.friends[id]!;
+                }
+
                 final hover = false.obs;
                 
                 //* Conversation item
@@ -97,7 +104,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                     color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primaryContainer.withAlpha(150) : Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
-                      hoverColor: theme.colorScheme.secondaryContainer.withAlpha(150),
+                      hoverColor: theme.colorScheme.primaryContainer.withAlpha(150),
                       splashColor: theme.hoverColor,
                       onHover: (value) {
                         hover.value = value;
@@ -127,25 +134,55 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        // Conversation title
-                                        Text(conversation.decrypted.value, style: theme.textTheme.titleMedium,
-                                          textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
+
+
+                                        //* Conversation title
+                                        Obx(() =>
+                                          conversation.isGroup ?
+                                          Text(conversation.decrypted.value, style: theme.textTheme.titleMedium,
+                                            textHeightBehavior: noTextHeight,
+                                          ) :
+                                          Row(
+                                            children: [
+                                              Flexible(
+                                                child: Text(conversation.decrypted.value, style: theme.textTheme.titleMedium,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  textHeightBehavior: noTextHeight,
+                                                ),
+                                              ),
+                                              horizontalSpacing(defaultSpacing),
+                                              StatusRenderer(status: friend!.statusType.value),
+                                            ],
+                                          )
                                         ),
                                                               
                                         // Conversation description
                                         Obx(() =>
+                                          conversation.isGroup ?
                                           Text(
                                                               
                                             //* Conversation status message
-                                            conversation.isGroup ? "chat.members".trParams(<String, String>{
+                                            "chat.members".trParams(<String, String>{
                                               'count': conversation.members.length.toString()
-                                            }) : 
-                                            conversation.status(statusController, friendController),
+                                            }),
                                                               
                                             style: theme.textTheme.bodySmall,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                          )
+                                          ) :
+
+                                          //* Friend status message
+                                          Visibility(
+                                            visible: friend!.status.value != "-",
+                                            child: Text(
+                                              friend.status.value,
+                                              style: theme.textTheme.bodySmall,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textHeightBehavior: noTextHeight,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),

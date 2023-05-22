@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +26,7 @@ class _ProfileState extends State<OwnProfile> {
   final edit = false.obs;
 
   final TextEditingController _status = TextEditingController();
+  final statusMessage = "".obs;
   final FocusNode _statusFocus = FocusNode();
 
   @override
@@ -41,6 +43,7 @@ class _ProfileState extends State<OwnProfile> {
     ThemeData theme = Theme.of(context);
 
     _status.text = controller.status.value;
+    statusMessage.value = controller.status.value;
 
     //* Context menu
     return Stack(
@@ -73,8 +76,8 @@ class _ProfileState extends State<OwnProfile> {
                           .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.primary)),
                         ],
                       ),
-            
-                      //* Call button
+
+                      //* Copy button
                       LoadingIconButton(
                         loading: false.obs,
                         onTap: () => {},
@@ -82,6 +85,45 @@ class _ProfileState extends State<OwnProfile> {
                       )
                     ],
                   ),
+
+                  Divider(
+                    color: theme.dividerColor,
+                  ),
+
+                  //* Status
+
+                  //* Current status
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: List.generate(4, (index) {
+
+                      // Get details
+                      Color color = getStatusColor(theme, index);
+                      IconData icon = getStatusIcon(index);
+
+                      return Material(
+                        color: theme.colorScheme.onBackground,
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          onTap: () => {},
+                          child: Padding(
+                            padding: const EdgeInsets.all(defaultSpacing),
+                            child: Row(
+                              children: [
+                                //* Status icon
+                                Icon(icon, size: 13.0, color: color),
+                                horizontalSpacing(defaultSpacing),
+                                Text("status.${index.toString()}".tr, style: theme.textTheme.bodyMedium, textHeightBehavior: noTextHeight),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+
+                  //* Status message
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -97,11 +139,13 @@ class _ProfileState extends State<OwnProfile> {
                           child: Obx(() => 
                             Visibility(
                               visible: edit.value,
-                              replacement: Text(controller.status.value, style: theme.textTheme.bodyMedium,
+                              replacement: Text(controller.status.value == "-" ? 'status.message.add'.tr : controller.status.value,
+                                style: theme.textTheme.bodyMedium,
                                 textHeightBehavior: noTextHeight,
                               ),
                               child: TextField(
                                 focusNode: _statusFocus,
+                                onChanged: (value) => statusMessage.value = value,
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintStyle: theme.textTheme.bodyMedium!,
@@ -126,22 +170,34 @@ class _ProfileState extends State<OwnProfile> {
                       ),
             
                       //* Close button
-                      LoadingIconButton(
-                        loading: false.obs,
-                        onTap: () {
-                          edit.value = !edit.value;
-                        
-                          if(!edit.value) {
+                      Obx(() =>
+                        LoadingIconButton(
+                          loading: false.obs,
+                          onTap: () {
+                            if(controller.status.value == "-" && !edit.value) {
+                              edit.value = true;
+                              _status.text = "";
+                              _statusFocus.requestFocus();
+                              return;
+                            }
+
+                            if(!edit.value) {
+                              controller.setStatus("-");
+                              _status.text = "";
+                              return;
+                            }
+                          
+                            edit.value = false;
+                            _statusFocus.unfocus();
                             controller.setStatus(_status.text);
-                          } else {
-                            _statusFocus.requestFocus();
-                          }
-                        },
-                        icon: Icons.edit,
-                        color: theme.colorScheme.primary,
+                          },
+                          icon: statusMessage.value == "-" ? Icons.add : edit.value ? Icons.done : Icons.close,
+                          color: theme.colorScheme.primary,
+                        )
                       )
                     ],
                   ),
+
                   Divider(
                     color: theme.dividerColor,
                   ),

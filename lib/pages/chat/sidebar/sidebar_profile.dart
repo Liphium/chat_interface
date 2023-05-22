@@ -54,7 +54,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                 color: Theme.of(context).colorScheme.primary,
                                 size: 35,
                               ),
-                              horizontalSpacing(defaultSpacing),
+                              horizontalSpacing(defaultSpacing * 0.75),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
