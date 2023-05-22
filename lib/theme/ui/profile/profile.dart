@@ -67,7 +67,9 @@ class _ProfileState extends State<Profile> {
                     ],
                   ),
                   Text(widget.friend.status.value, style: theme.textTheme.bodyMedium),
-                  const Divider(),
+                  Divider(
+                    color: theme.dividerColor,
+                  ),
             
                   //* Create conversation
                   ProfileButton(
@@ -84,7 +86,9 @@ class _ProfileState extends State<Profile> {
                     onTap: () => {},
                     loading: false.obs
                   ),
-                  const Divider(),
+                  Divider(
+                    color: theme.dividerColor,
+                  ),
             
                   //* Remove friend
                   ProfileButton(

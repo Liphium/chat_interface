@@ -2,6 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+const noTextHeight = TextHeightBehavior(
+  applyHeightToFirstAscent: false,
+  applyHeightToLastDescent: false,
+);
+
 Widget verticalSpacing(double height) {
     return SizedBox(height: height);
 }

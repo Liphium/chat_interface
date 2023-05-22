@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
+import 'package:chat_interface/theme/ui/profile/own_profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -37,10 +38,11 @@ class _SidebarProfileState extends State<SidebarProfile> {
               child: Material(
                 color: theme.colorScheme.background,
                 child: InkWell(
-                  onTap: () => {},
-                  splashColor: theme.hoverColor.withAlpha(7),
+                  onTap: () => Get.dialog(const OwnProfile(position: Offset(defaultSpacing, 60))),
+                  splashColor: theme.hoverColor.withAlpha(10),
+                  splashFactory: NoSplash.splashFactory,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.3),
+                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -53,20 +55,23 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                 size: 35,
                               ),
                               horizontalSpacing(defaultSpacing),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(controller.name.value, style: theme.textTheme.titleMedium, 
-                                    textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
-                                  ),
-                                  Text("#${controller.tag.value}", style: theme.textTheme.bodyMedium, 
-                                    textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
-                                  ),
-                                ],
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(controller.name.value, style: theme.textTheme.titleMedium, 
+                                      textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
+                                    ),
+                                    Text(controller.status.value, style: theme.textTheme.bodyMedium, 
+                                      textHeightBehavior: noTextHeight, overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           )
                         ),
+                        horizontalSpacing(defaultSpacing),
                         Row(
                           children: [
                             IconButton(

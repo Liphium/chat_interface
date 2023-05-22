@@ -22,6 +22,7 @@ class ProfileButton extends StatelessWidget {
 
     return Material(
       borderRadius: BorderRadius.circular(defaultSpacing),
+      color: theme.colorScheme.onBackground,
       child: InkWell(
         borderRadius: BorderRadius.circular(defaultSpacing),
         hoverColor: backgroundColor,
@@ -50,7 +51,9 @@ class ProfileButton extends StatelessWidget {
 
               //* Label
               horizontalSpacing(defaultSpacing),
-              Text(label, style: theme.textTheme.bodyMedium)
+              Text(label, style: theme.textTheme.bodyMedium!.copyWith(
+                color: theme.colorScheme.onSurface
+              ))
             ],
           ),
         ),

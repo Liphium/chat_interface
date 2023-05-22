@@ -55,6 +55,7 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     // Important font color
     onSurface: Color(0xFFFFFFFF),
   ),
+  dividerColor: const Color(0xFF5c5c5c), 
   textTheme: defaultDarkTheme.textTheme.copyWith(
     headlineMedium: defaultDarkTheme.textTheme.headlineMedium!.copyWith(
       fontFamily: 'Alfa Slab One'
