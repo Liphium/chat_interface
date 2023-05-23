@@ -156,6 +156,11 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                             ],
                                           )
                                         ),
+
+                                        Visibility(
+                                          visible: conversation.isGroup || friend!.status.value != "-",
+                                          child: verticalSpacing(defaultSpacing * 0.25),
+                                        ),
                                                               
                                         // Conversation description
                                         Obx(() =>
@@ -174,7 +179,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
 
                                           //* Friend status message
                                           Visibility(
-                                            visible: friend!.status.value != "-",
+                                            visible: friend!.status.value != "-" && friend.statusType.value != statusOffline,
                                             child: Text(
                                               friend.status.value,
                                               style: theme.textTheme.bodySmall,

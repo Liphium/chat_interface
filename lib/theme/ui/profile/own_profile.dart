@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -41,6 +42,7 @@ class _ProfileState extends State<OwnProfile> {
 
     StatusController controller = Get.find();
     ThemeData theme = Theme.of(context);
+    ThemeManager manager = Get.find();
 
     _status.text = controller.status.value;
     statusMessage.value = controller.status.value;
@@ -92,35 +94,52 @@ class _ProfileState extends State<OwnProfile> {
 
                   //* Status
 
-                  //* Current status
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: List.generate(4, (index) {
-
-                      // Get details
-                      Color color = getStatusColor(theme, index);
-                      IconData icon = getStatusIcon(index);
-
-                      return Material(
-                        color: theme.colorScheme.onBackground,
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          onTap: () => {},
-                          child: Padding(
-                            padding: const EdgeInsets.all(defaultSpacing),
-                            child: Row(
-                              children: [
-                                //* Status icon
-                                Icon(icon, size: 13.0, color: color),
-                                horizontalSpacing(defaultSpacing),
-                                Text("status.${index.toString()}".tr, style: theme.textTheme.bodyMedium, textHeightBehavior: noTextHeight),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
+                  //* Current status type
+                  RepaintBoundary(
+                    child: GetX<StatusController>(
+                      builder: (statusController) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: List.generate(4, (index) {
+                                      
+                            // Get details
+                            Color color = getStatusColor(theme, index);
+                            IconData icon = getStatusIcon(index);
+                            final bool selected = statusController.type.value == index;
+                                      
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: defaultSpacing * 0.25),
+                              child: Material(
+                                color: selected ? theme.colorScheme.primaryContainer.withAlpha(150) : theme.colorScheme.onBackground,
+                                borderRadius: BorderRadius.circular(defaultSpacing),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(defaultSpacing),
+                                  onTap: () {
+                                    controller.setStatus(type: index, success: () => Get.back());
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(defaultSpacing),
+                                    child: Row(
+                                      children: [
+                                        //* Status icon
+                                        Icon(icon, size: 13.0, color: color),
+                                        horizontalSpacing(defaultSpacing),
+                                        Text("status.${index.toString()}".tr, 
+                                          style: theme.textTheme.bodyMedium!.copyWith(
+                                            color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface
+                                          ), 
+                                          textHeightBehavior: noTextHeight
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        );
+                      }
+                    ),
                   ),
 
                   //* Status message
@@ -141,6 +160,8 @@ class _ProfileState extends State<OwnProfile> {
                               visible: edit.value,
                               replacement: Text(controller.status.value == "-" ? 'status.message.add'.tr : controller.status.value,
                                 style: theme.textTheme.bodyMedium,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 textHeightBehavior: noTextHeight,
                               ),
                               child: TextField(
@@ -155,7 +176,8 @@ class _ProfileState extends State<OwnProfile> {
                                                 
                                 //* Save status
                                 onEditingComplete: () {
-                                  controller.setStatus(_status.text);
+                                  if(_status.text == "") _status.text = "-";
+                                  controller.setStatus(message: _status.text);
                                   edit.value = false;
                                 },
                                                 
@@ -172,7 +194,7 @@ class _ProfileState extends State<OwnProfile> {
                       //* Close button
                       Obx(() =>
                         LoadingIconButton(
-                          loading: false.obs,
+                          loading: controller.statusLoading,
                           onTap: () {
                             if(controller.status.value == "-" && !edit.value) {
                               edit.value = true;
@@ -182,14 +204,14 @@ class _ProfileState extends State<OwnProfile> {
                             }
 
                             if(!edit.value) {
-                              controller.setStatus("-");
+                              controller.setStatus(message: "-");
                               _status.text = "";
                               return;
                             }
                           
                             edit.value = false;
                             _statusFocus.unfocus();
-                            controller.setStatus(_status.text);
+                            controller.setStatus(message: _status.text);
                           },
                           icon: statusMessage.value == "-" ? Icons.add : edit.value ? Icons.done : Icons.close,
                           color: theme.colorScheme.primary,
@@ -208,6 +230,16 @@ class _ProfileState extends State<OwnProfile> {
                     label: 'profile.settings'.tr,
                     onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
                     loading: false.obs
+                  ),
+
+                  // Theme button
+                  Obx(() =>
+                    ProfileButton(
+                      icon: manager.brightness.value == Brightness.light ? Icons.dark_mode : Icons.light_mode,
+                      label: 'profile.theme.${manager.brightness.value.toString().split(".")[1]}'.tr, // profile.theme.light and profile.theme.dark
+                      onTap: () => manager.changeBrightness(manager.brightness.value == Brightness.light ? Brightness.dark : Brightness.light),
+                      loading: false.obs
+                    ),
                   ),
 
                   //* Hide profile

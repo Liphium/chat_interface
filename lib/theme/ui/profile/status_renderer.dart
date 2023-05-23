@@ -20,7 +20,7 @@ class StatusRenderer extends StatelessWidget {
         color: color.withAlpha(100),
         borderRadius: BorderRadius.circular(50),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.75, vertical: defaultSpacing * 0.5),
+      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5, vertical: defaultSpacing * 0.25),
       child: Row(
         children: [
           Icon(
