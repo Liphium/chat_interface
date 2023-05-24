@@ -1,7 +1,5 @@
 import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';
 

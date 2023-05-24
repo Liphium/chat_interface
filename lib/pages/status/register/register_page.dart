@@ -1,6 +1,5 @@
 import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/register/register_handler.dart';
-import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

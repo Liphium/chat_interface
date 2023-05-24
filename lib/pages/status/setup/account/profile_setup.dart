@@ -22,8 +22,6 @@ class ProfileSetup extends Setup {
     var profile = profiles.first;
     loadTokensFromPayload(jsonDecode(profile.value));
 
-    print("session_tk: " + sessionToken);
-
     String session = getSessionFromJWT(sessionToken);
 
     // Refresh token

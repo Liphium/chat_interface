@@ -16,7 +16,7 @@ class CallCinemaView extends StatefulWidget {
 class _CallCinemaViewState extends State<CallCinemaView> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = Theme.of(context); // Will be needed soon
 
     CallController callController = Get.find();
     SettingController controller = Get.find();

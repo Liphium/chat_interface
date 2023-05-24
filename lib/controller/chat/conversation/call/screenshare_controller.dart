@@ -30,7 +30,6 @@ class ScreenshareController extends GetxController {
         return;
       }
 
-      print('DesktopCapturerSource: ${source.id}');
       track.value = await LocalVideoTrack.createScreenShareTrack(
         ScreenShareCaptureOptions(
           sourceId: source.id,

@@ -1,10 +1,7 @@
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:get/get.dart';
-
-import '../../encryption/rsa.dart';
 
 // Action: setup_st
 void setupStatusListener(Event event) async {

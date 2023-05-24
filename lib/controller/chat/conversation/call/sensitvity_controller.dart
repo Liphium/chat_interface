@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -122,11 +121,9 @@ class SensitivityController extends GetxController {
   Timer _talkingTimer() {
     return Timer.periodic(const Duration(milliseconds: 25), (timer) async {
       
-      // Get the current amplitude
       final amplitude = await _recorder.getAmplitude();
       current.value = amplitude.max;
 
-      // Check if the amplitude is above the sensitivity
       if (amplitude.max >= sensitivity.value) {
         talking.value = true;
         _lastTime = DateTime.now().millisecondsSinceEpoch;

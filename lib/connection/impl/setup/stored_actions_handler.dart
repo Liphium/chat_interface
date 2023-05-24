@@ -48,8 +48,6 @@ void handleStoredAction(String action, String target) async {
       conversation.refreshName(Get.find<StatusController>(), Get.find<FriendController>());
       conv = conversation;
 
-      logger.i("CONVERSATION KEY | " + conv.key);
-
       // Insert into database
       controller.conversations[id] = conversation;
       await db.into(db.conversation).insertOnConflictUpdate(ConversationCompanion(

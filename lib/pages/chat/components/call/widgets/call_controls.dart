@@ -20,7 +20,7 @@ class CallControls extends StatefulWidget {
 
 class _CallControlsState extends State<CallControls> {
 
-  final _audioInputs = <MediaDevice>[].obs;
+  final _audioInputs = <MediaDevice>[].obs; // Will be used in the future
   final _audioOutputs = <MediaDevice>[].obs;
 
   StreamSubscription<dynamic>? subscription;

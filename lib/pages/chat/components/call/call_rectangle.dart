@@ -22,7 +22,6 @@ class CallRectangle extends StatefulWidget {
 
 class _CallRectangleState extends State<CallRectangle> {
 
-  final int _people = 5;
   final _show = false.obs;
 
   Timer? timer;

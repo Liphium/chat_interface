@@ -40,7 +40,7 @@ class CallMemberController extends GetxController {
     }
 
     // Check for self (sometimes happens when timing out)
-    if(participant.identity == "${Get.find<StatusController>().id.value}") {
+    if(participant.identity == Get.find<StatusController>().id.value) {
       return;
     }
 
