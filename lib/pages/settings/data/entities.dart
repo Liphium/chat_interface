@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/settings/app/call/call_settings.dart';
+import 'package:chat_interface/pages/settings/account/profile/profile_settings.dart';
+import 'package:chat_interface/pages/settings/appearance/call/call_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/video/video_settings.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:get/get.dart';
 enum SettingLabel {
   account("settings.tab.account", [
     SettingCategory("data", Icons.account_circle, null),
+    SettingCategory("profile", Icons.assignment, ProfileSettingsPage()),
     SettingCategory("security", Icons.security, null),
     SettingCategory("devices", Icons.phone_android, null),
   ]),
