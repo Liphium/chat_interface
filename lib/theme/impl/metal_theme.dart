@@ -65,7 +65,7 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     bodySmall: defaultDarkTheme.textTheme.bodySmall!.copyWith(
       fontFamily: 'Open Sans',
       fontWeight: FontWeight.w100,
-      color: const Color(0xFFbababa)
+      color: const Color(0xFFbababa),
     ),
     bodyMedium: defaultDarkTheme.textTheme.bodyMedium!.copyWith(
       fontFamily: 'Open Sans',

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/pages/settings/account/profile/profile_settings_status.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/theme/ui/text_renderer/text_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +64,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
           child: Text("settings.categories.profile".tr, style: theme.textTheme.headlineMedium),
         ),
         verticalSpacing(defaultSpacing),
+
+        //* Text renderer test
+        const TextRenderer(text: "This is a **bold** text, this is an *italic* text, this is an _underline_ text."),
 
         //* Status indicator
         Obx(() =>
