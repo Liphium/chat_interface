@@ -75,7 +75,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             description: "error.${error.value!}.text".tr
           ) :
 
-          ProfileSettingsStatus(enabled: enabled.value)
+          ProfileSettingsStatus(enabled: enabled)
         ),
       ],
     );
