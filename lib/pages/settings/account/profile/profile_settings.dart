@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:chat_interface/pages/settings/account/profile/profile_settings_status.dart';
+import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +15,38 @@ class ProfileSettingsPage extends StatefulWidget {
 }
 
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
+
+  final loading = true.obs;
+  final error = Rx<String?>("error.offline");
+  final enabled = false.obs;
+
+  @override
+  void initState() {
+
+    loadProfile();
+    super.initState();
+  }
+
+  void loadProfile() async {
+    
+    // Request data from server
+    final res = await postRqAuthorized("/account/profile/me", <String, dynamic>{});
+    loading.value = false;
+
+    if(res.statusCode != 200) {
+      return;
+    }
+
+    final body = jsonDecode(res.body);
+    if(!body["success"]) {
+      error.value = body["error"];
+      return;
+    }
+
+    enabled.value = body["enabled"];
+    error.value = null;
+  }
+ 
   @override
   Widget build(BuildContext context) {
 
@@ -20,13 +56,27 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+
+        //* Title
         Padding(
           padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
           child: Text("settings.categories.profile".tr, style: theme.textTheme.headlineMedium),
         ),
         verticalSpacing(defaultSpacing),
 
-        ProfileSettingsStatus()
+        //* Status indicator
+        Obx(() =>
+          loading.value ? 
+          const Center(child: CircularProgressIndicator()) :
+
+          error.value != null ?
+          ErrorContainer(
+            message: "error.${error.value!}".tr, 
+            description: "error.${error.value!}.text".tr
+          ) :
+
+          ProfileSettingsStatus(enabled: enabled.value)
+        ),
       ],
     );
   }

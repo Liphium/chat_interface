@@ -6,15 +6,16 @@ import '../../../../util/vertical_spacing.dart';
 
 class ProfileSettingsStatus extends StatefulWidget {
 
-  final enabled = false;
+  final bool enabled;
 
-  const ProfileSettingsStatus({super.key});
+  const ProfileSettingsStatus({super.key, required this.enabled});
 
   @override
   State<ProfileSettingsStatus> createState() => _ProfileSettingsStatusState();
 }
 
 class _ProfileSettingsStatusState extends State<ProfileSettingsStatus> {
+
   @override
   Widget build(BuildContext context) {
 
