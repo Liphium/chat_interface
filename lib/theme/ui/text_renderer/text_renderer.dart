@@ -12,7 +12,7 @@ class TextRenderer extends StatelessWidget {
     ThemeData theme = Theme.of(context);
 
     // Build text
-    List<ProcessedText> processed = textPatternManager.process(text, theme.textTheme.bodyMedium!);
+    List<ProcessedText> processed = textPatternManager.process(text, theme.textTheme.bodyMedium!, renderPatterns: false);
     List<TextSpan> spans = [];
     for (ProcessedText span in processed) {
       spans.add(TextSpan(text: span.text, style: span.style));      

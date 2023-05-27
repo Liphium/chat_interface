@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 import 'impl/formatting_patterns.dart';
 
@@ -16,9 +19,10 @@ class TextPatternManager {
     patterns.add(ItalicPattern());
     patterns.add(UnderlinePattern());
     patterns.add(StrokePattern());
+    patterns.add(TrollPattern());
   }
 
-  List<ProcessedText> process(String text, TextStyle style) {
+  List<ProcessedText> process(String text, TextStyle style, {bool renderPatterns = false}) {
     List<ProcessedText> spans = [];
 
     // Scan text for patterns
@@ -35,10 +39,13 @@ class TextPatternManager {
 
     // Sort patterns
     patternMap = Map.fromEntries(patternMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
-    print(patternMap);
+
+    // Remove double pattern
+
 
     // Process text
     int lastIndex = 0;
+    int lastLength = 0;
     int mapIndex = 0;
     Map<TextPattern, bool> patternState = {};
 
@@ -46,23 +53,42 @@ class TextPatternManager {
 
       // Grab current index
       int index;
+      int lengthAfter = 0;
       if(mapIndex >= patternMap.length) {
         index = text.length;
       } else {
         index = patternMap.keys.elementAt(mapIndex);
+        if(mapIndex != patternMap.length - 1) {
+          lengthAfter = patternMap[patternMap.keys.elementAt(mapIndex + 1)]!.first.pattern.length;
+        }
       }
 
       // Build style
       TextStyle currentStyle = style;
+      int length = 0;
       for (TextPattern pattern in patternState.keys) {
         if (patternState[pattern]!) {
           currentStyle = pattern.process(currentStyle);
+          if(pattern.pattern.length > length) {
+            length = pattern.pattern.length;
+          }
         }
       }
 
       // Check if span is nessecary
       if(lastIndex != index) {
-        spans.add(ProcessedText(text.substring((lastIndex != 0 || patternMap[0] != null ? lastIndex+1 : lastIndex), index), currentStyle));
+        if(currentStyle == style && !renderPatterns) {
+          spans.add(ProcessedText(
+            text.substring(lastIndex+lastLength, index-lengthAfter), 
+            currentStyle
+          ));
+        } else {
+          spans.add(ProcessedText(
+            text.substring(lastIndex, index), 
+            currentStyle
+          ));
+        }
+
       }
 
       // Check for patterns
@@ -77,6 +103,7 @@ class TextPatternManager {
       }
 
       lastIndex = index;
+      lastLength = length;
       mapIndex++;
     }
 
@@ -101,9 +128,11 @@ abstract class TextPattern {
 
   // scan returns a list of indices where the pattern is found in the text
   List<int> scan(String text) {
+    print(pattern);
     List<int> indices = [];
 
     int length = 0;
+    bool enable = false;
     while (length < text.length) {
 
       int index = text.indexOf(pattern, length);
@@ -111,7 +140,14 @@ abstract class TextPattern {
         break;
       }
 
-      indices.add(index);
+      // Prevent patterns right next to each other
+      if(index != length) {
+        indices.add(index+(!enable ? pattern.length : 0));
+        enable = !enable;
+      } else {
+        indices.remove(index + (enable ? pattern.length : 0) - 1);
+      }
+
       length = index + 1;
     }
 

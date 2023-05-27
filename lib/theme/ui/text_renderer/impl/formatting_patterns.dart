@@ -1,5 +1,6 @@
 
 import 'package:chat_interface/theme/ui/text_renderer/text_pattern_manager.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 
 class BoldPattern extends TextPattern {
@@ -46,6 +47,18 @@ class StrokePattern extends TextPattern {
       decoration: TextDecoration.lineThrough,
       decorationThickness: 4,
       decorationColor: style.color,
+    );
+  }
+}
+
+class TrollPattern extends TextPattern {
+  
+  TrollPattern() : super('---');
+
+  @override
+  TextStyle process(TextStyle style) {
+    return style.copyWith(
+      letterSpacing: defaultSpacing * 0.5,
     );
   }
 }
