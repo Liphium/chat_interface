@@ -66,7 +66,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         verticalSpacing(defaultSpacing),
 
         //* Text renderer test
-        const TextRenderer(text: "This is a **bold** text, this is an *italic* text, this is an _underline_ text."),
+        const TextRenderer(text: "~This is a **bold** text, this is an *italic* text, this is an _underline_ text.~"),
 
         //* Status indicator
         Obx(() =>

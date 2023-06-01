@@ -145,6 +145,7 @@ abstract class TextPattern {
         indices.add(index+(!enable ? pattern.length : 0));
         enable = !enable;
       } else {
+        print("Removed double pattern $index $length");
         indices.remove(index + (enable ? pattern.length : 0) - 1);
       }
 
