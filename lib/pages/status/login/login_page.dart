@@ -16,7 +16,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -33,30 +32,53 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return Scaffold(
       body: Center(
-        child: SizedBox(
-          width: 300,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(defaultSpacing * 1.5),
+              topRight: Radius.circular(defaultSpacing * 1.5),
+              bottomLeft: Radius.circular(defaultSpacing * 1.5),
+              bottomRight: Radius.circular(defaultSpacing * 1.5),
+            ),
+            color: theme.colorScheme.background,
+          ),
+          height: 350,
+          width: 350,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("login.page".tr),
+              Text("Login".tr,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w100,
+                    fontSize: 40,
+                  )),
               verticalSpacing(defaultSpacing),
-              Obx(() =>
-                TextField(
+              Obx(
+                () => TextField(
                   decoration: InputDecoration(
-                    hintText: 'input.email'.tr,
-                    errorText: _emailError.value == '' ? null : _emailError.value,
+                    hintText: 'example@example.com'.tr,
+                    errorText:
+                        _emailError.value == '' ? null : _emailError.value,
+                    filled: true,
+                    fillColor: theme.colorScheme.background,
                   ),
                   controller: _emailController,
                 ),
               ),
-              Obx(() =>
-                TextField(
+              Obx(
+                () => TextField(
                   decoration: InputDecoration(
-                    hintText: 'input.password'.tr,
-                    errorText: _passwordError.value == '' ? null : _passwordError.value,
+                    hintText: 'password123'.tr,
+                    errorText: _passwordError.value == ''
+                        ? null
+                        : _passwordError.value,
+                    filled: true,
+                    fillColor: theme.colorScheme.background,
                   ),
                   obscureText: true,
                   autocorrect: false,
@@ -66,35 +88,37 @@ class _LoginPageState extends State<LoginPage> {
               ),
               verticalSpacing(defaultSpacing * 1.5),
               SizedBox(
-                width: 300,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if(_loading.value) return;
-                    _loading.value = true;
-                
-                    if (_emailController.text == '') {
-                      _emailError.value = 'input.email'.tr;
-                      _loading.value = false;
-                      return;
-                    }
-                
-                    if (_passwordController.text == '') {
-                      _passwordError.value = 'input.password'.tr;
-                      _loading.value = false;
-                      return;
-                    }
-                
-                    _passwordError.value = '';
-                    _emailError.value = '';
-                
-                    login(_emailController.text, _passwordController.text,
-                      success: () async {
-                        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
+                  width: 180,
+                  child: ElevatedButton(
+                    decor
+                    onPressed: () {
+                      if (_loading.value) return;
+                      _loading.value = true;
+
+                      if (_emailController.text == '') {
+                        _emailError.value = 'input.email'.tr;
+                        _loading.value = false;
+                        return;
+                      }
+
+                      if (_passwordController.text == '') {
+                        _passwordError.value = 'input.password'.tr;
+                        _loading.value = false;
+                        return;
+                      }
+
+                      _passwordError.value = '';
+                      _emailError.value = '';
+
+                      login(_emailController.text, _passwordController.text,
+                          success: () async {
+                        await db.into(db.setting).insertOnConflictUpdate(
+                            SettingData(
+                                key: "profile", value: tokensToPayload()));
                         setupManager.next();
-                      },
-                      failure: (msg) {
+                      }, failure: (msg) {
                         Get.snackbar("login.failed".tr, msg.tr);
-                
+
                         switch (msg) {
                           case "invalid.password":
                             _passwordError.value = msg.tr;
@@ -103,18 +127,16 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         _loading.value = false;
                       });
-                  },
-                  child: Obx(() => _loading.value ? 
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.0,
-                    )
-                  ) : 
-                  Text('login.login'.tr)),
-                )
-              ),
+                    },
+                    child: Obx(() => _loading.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                            ))
+                        : Text('login.login'.tr)),
+                  )),
               verticalSpacing(defaultSpacing * 1.5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -133,7 +155,8 @@ class _LoginPageState extends State<LoginPage> {
                   Text('login.no_account.text'.tr),
                   horizontalSpacing(defaultSpacing),
                   TextButton(
-                    onPressed: () => Get.offAll(const RegisterPage(), transition: Transition.fade),
+                    onPressed: () => Get.offAll(const RegisterPage(),
+                        transition: Transition.fade),
                     child: Text('login.no_account'.tr),
                   ),
                 ],
