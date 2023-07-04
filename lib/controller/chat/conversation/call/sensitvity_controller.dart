@@ -22,7 +22,7 @@ class SensitivityController extends GetxController {
 
   // Record parameters
   late final String _path1, _path2;
-  bool _useOne = false;
+  final bool _useOne = false;
   int _lastTime = 0;
 
   SensitivityController() {

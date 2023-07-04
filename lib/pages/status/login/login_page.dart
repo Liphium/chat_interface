@@ -90,7 +90,6 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                   width: 180,
                   child: ElevatedButton(
-                    decor
                     onPressed: () {
                       if (_loading.value) return;
                       _loading.value = true;
