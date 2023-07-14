@@ -1,6 +1,7 @@
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/register/register_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -46,17 +47,15 @@ class _LoginPageState extends State<LoginPage> {
             ),
             color: theme.colorScheme.background,
           ),
-          height: 350,
+          padding: const EdgeInsets.all(defaultSpacing * 2),
           width: 350,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text("Login".tr,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w100,
-                    fontSize: 40,
-                  )),
+                  style: theme.textTheme.headlineMedium),
               verticalSpacing(defaultSpacing),
               Obx(
                 () => TextField(
@@ -89,8 +88,8 @@ class _LoginPageState extends State<LoginPage> {
               verticalSpacing(defaultSpacing * 1.5),
               SizedBox(
                   width: 180,
-                  child: ElevatedButton(
-                    onPressed: () {
+                  child: FJElevatedButton(
+                    onTap: () {
                       if (_loading.value) return;
                       _loading.value = true;
 
@@ -127,14 +126,16 @@ class _LoginPageState extends State<LoginPage> {
                         _loading.value = false;
                       });
                     },
-                    child: Obx(() => _loading.value
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                            ))
-                        : Text('login.login'.tr)),
+                    child: Center(
+                      child: Obx(() => _loading.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.0,
+                              ))
+                          : Text('login.login'.tr, style: theme.textTheme.labelLarge)),
+                    ),
                   )),
               verticalSpacing(defaultSpacing * 1.5),
               Row(
