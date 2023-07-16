@@ -37,6 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
     ThemeData theme = Theme.of(context);
     
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       body: Center(
         child: Container(
           decoration: BoxDecoration(
@@ -46,7 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
               bottomLeft: Radius.circular(defaultSpacing * 1.5),
               bottomRight: Radius.circular(defaultSpacing * 1.5),
             ),
-            color: theme.colorScheme.background,
+            color: theme.colorScheme.onBackground,
           ),
           padding: const EdgeInsets.all(defaultSpacing * 2),
           width: 370,

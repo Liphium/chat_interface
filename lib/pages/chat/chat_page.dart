@@ -22,7 +22,7 @@ class _ChatPageState extends State<ChatPage> {
     ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.onBackground,
       body: Stack(
         children: [
           Row(

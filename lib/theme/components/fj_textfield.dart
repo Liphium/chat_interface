@@ -31,7 +31,7 @@ class _FJTextFieldState extends State<FJTextField> {
 
     return Obx(() => Material(
       animationDuration: 200.ms,
-      color: _focus.value ? theme.colorScheme.primaryContainer : theme.colorScheme.onBackground,
+      color: _focus.value ? theme.colorScheme.primaryContainer : theme.colorScheme.background,
       borderRadius: BorderRadius.circular(defaultSpacing),
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing),
