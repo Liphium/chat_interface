@@ -1,5 +1,7 @@
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 
 class FJTextField extends StatefulWidget {
 
@@ -15,12 +17,21 @@ class FJTextField extends StatefulWidget {
 }
 
 class _FJTextFieldState extends State<FJTextField> {
+
+  final _node = FocusNode();
+  final _focus = false.obs;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return Material(
-      color: theme.colorScheme.onBackground,
+    _node.addListener(() {
+      _focus.value = _node.hasFocus;
+    });
+
+    return Obx(() => Material(
+      animationDuration: 200.ms,
+      color: _focus.value ? theme.colorScheme.primaryContainer : theme.colorScheme.onBackground,
       borderRadius: BorderRadius.circular(defaultSpacing),
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing),
@@ -29,16 +40,17 @@ class _FJTextFieldState extends State<FJTextField> {
             isDense: true,
             hintText: widget.hintText,
             errorText: widget.errorText,
-            filled: false,
-            border: InputBorder.none
+            border: InputBorder.none,
           ),
           style: theme.textTheme.labelLarge,
           obscureText: widget.obscureText,
           autocorrect: false,
           enableSuggestions: false,
           controller: widget.controller,
+          onTap: () => _focus.value = true,
+          focusNode: _node,
         ),
       ),
-    );
+    ));
   }
 }

@@ -35,7 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-
+    
     return Scaffold(
       body: Center(
         child: Container(
@@ -53,8 +53,11 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Create your new account.".tr,
-                  style: theme.textTheme.headlineMedium),
+              Hero(
+                tag: "title",
+                child: Text("register.title".tr, textAlign: TextAlign.left,
+                    style: theme.textTheme.headlineMedium),
+              ),
               verticalSpacing(defaultSpacing * 2),
               Obx(() =>
                 FJTextField(
@@ -65,76 +68,67 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               verticalSpacing(defaultSpacing),
               Obx(() =>
-                Hero(
-                  tag: "login_email",
-                  child: FJTextField(
-                    hintText: 'input.email'.tr,
-                    errorText: _emailError.value == '' ? null : _emailError.value,
-                    controller: _emailController,
-                  ),
+                FJTextField(
+                  hintText: 'input.email'.tr,
+                  errorText: _emailError.value == '' ? null : _emailError.value,
+                  controller: _emailController,
                 ),
               ),
               verticalSpacing(defaultSpacing),
               Obx(
-                () => Hero(
-                  tag: "login_password",
-                  child: FJTextField(
-                    hintText: 'input.password'.tr,
-                    obscureText: true,
-                    errorText: _passwordError.value == '' ? null : _passwordError.value,
-                    controller: _passwordController,
-                  ),
+                () => FJTextField(
+                  hintText: 'input.password'.tr,
+                  obscureText: true,
+                  errorText: _passwordError.value == '' ? null : _passwordError.value,
+                  controller: _passwordController,
                 ),
               ),
               verticalSpacing(defaultSpacing * 1.5),
-              Hero(
-                tag: "login_button",
-                child: FJElevatedButton(
-                  onTap: () {
-                    if(_loading.value) return;
-                    _loading.value = true;
-                
-                    if (_emailController.text == '') {
-                      _emailError.value = 'input.email'.tr;
-                      _loading.value = false;
-                      return;
-                    }
-                
-                    if (_passwordController.text == '') {
-                      _passwordError.value = 'input.password'.tr;
-                      _loading.value = false;
-                      return;
-                    }
+              FJElevatedButton(
+                onTap: () {
+                  if(_loading.value) return;
+                  _loading.value = true;
               
-                    if (_usernameController.text == '') {
-                      _usernameError.value = 'input.username_tag'.tr;
+                  if (_emailController.text == '') {
+                    _emailError.value = 'input.email'.tr;
+                    _loading.value = false;
+                    return;
+                  }
+              
+                  if (_passwordController.text == '') {
+                    _passwordError.value = 'input.password'.tr;
+                    _loading.value = false;
+                    return;
+                  }
+              
+                  if (_usernameController.text == '') {
+                    _usernameError.value = 'input.username_tag'.tr;
+                    _loading.value = false;
+                    return;
+                  }
+              
+                  _passwordError.value = '';
+                  _emailError.value = '';
+              
+                  register(_emailController.text, _usernameController.text, _passwordController.text,
+                    success: () async {
+                      Get.offAll(const LoginPage(), transition: Transition.fade);
                       _loading.value = false;
-                      return;
-                    }
-                
-                    _passwordError.value = '';
-                    _emailError.value = '';
-                
-                    register(_emailController.text, _usernameController.text, _passwordController.text,
-                      success: () async {
-                        Get.offAll(const LoginPage(), transition: Transition.fade);
-                        _loading.value = false;
-                      },
-                      failure: (msg) {
-                        Get.snackbar("register.failed".tr, msg.tr);
-                        _loading.value = false;
-                      });
-                  },
-                  child: Center(
-                    child: Obx(() => _loading.value
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                            ))
-                        : Text('register.register'.tr, style: theme.textTheme.labelLarge)
-                    ),
+                    },
+                    failure: (msg) {
+                      Get.snackbar("register.failed".tr, msg.tr);
+                      _loading.value = false;
+                    });
+                },
+                child: Center(
+                  child: Obx(() => _loading.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                          ))
+                      : Text('register.register'.tr, style: theme.textTheme.labelLarge)
                   ),
                 ),
               ),
@@ -145,7 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   Text('register.account.text'.tr),
                   horizontalSpacing(defaultSpacing),
                   TextButton(
-                    onPressed: () => Get.offAll(const LoginPage(), transition: Transition.fadeIn),
+                    onPressed: () => Get.offAll(const LoginPage(), transition: Transition.noTransition),
                     child: Text('register.login'.tr),
                   ),
                 ],

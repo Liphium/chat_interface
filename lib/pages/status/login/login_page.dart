@@ -53,82 +53,76 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Enter your credentials.".tr,
-                  style: theme.textTheme.headlineMedium),
+              Hero(
+                tag: "title",
+                child: Text("login.title".tr, textAlign: TextAlign.start,
+                    style: theme.textTheme.headlineMedium),
+              ),
               verticalSpacing(defaultSpacing * 2),
               Obx(
-                () => Hero(
-                  tag: "login_email",
-                  child: FJTextField(
-                    hintText: 'input.email'.tr,
-                    errorText: _emailError.value == '' ? null : _emailError.value,
-                    controller: _emailController,
-                  ),
+                () => FJTextField(
+                  hintText: 'input.email'.tr,
+                  errorText: _emailError.value == '' ? null : _emailError.value,
+                  controller: _emailController,
                 ),
               ),
               verticalSpacing(defaultSpacing),
               Obx(
-                () => Hero(
-                  tag: "login_password",
-                  child: FJTextField(
-                    hintText: 'input.password'.tr,
-                    obscureText: true,
-                    errorText: _passwordError.value == '' ? null : _passwordError.value,
-                    controller: _passwordController,
-                  ),
+                () => FJTextField(
+                  hintText: 'input.password'.tr,
+                  obscureText: true,
+                  errorText: _passwordError.value == '' ? null : _passwordError.value,
+                  controller: _passwordController,
                 ),
               ),
               verticalSpacing(defaultSpacing * 1.5),
-              Hero(
-                tag: "login_button",
-                child: FJElevatedButton(
-                  onTap: () {
-                    if (_loading.value) return;
-                    _loading.value = true;
+              FJElevatedButton(
+                onTap: () {
+                  if (_loading.value) return;
+                  _loading.value = true;
               
-                    if (_emailController.text == '') {
-                      _emailError.value = 'input.email'.tr;
-                      _loading.value = false;
-                      return;
+                  if (_emailController.text == '') {
+                    _emailError.value = 'input.email'.tr;
+                    _loading.value = false;
+                    return;
+                  }
+              
+                  if (_passwordController.text == '') {
+                    _passwordError.value = 'input.password'.tr;
+                    _loading.value = false;
+                    return;
+                  }
+              
+                  _passwordError.value = '';
+                  _emailError.value = '';
+              
+                  login(_emailController.text, _passwordController.text,
+                      success: () async {
+                    await db.into(db.setting).insertOnConflictUpdate(
+                        SettingData(
+                            key: "profile", value: tokensToPayload()));
+                    setupManager.next();
+                  }, failure: (msg) {
+                    Get.snackbar("login.failed".tr, msg.tr);
+              
+                    switch (msg) {
+                      case "invalid.password":
+                        _passwordError.value = msg.tr;
+                        _emailError.value = msg.tr;
+                        break;
                     }
-              
-                    if (_passwordController.text == '') {
-                      _passwordError.value = 'input.password'.tr;
-                      _loading.value = false;
-                      return;
-                    }
-              
-                    _passwordError.value = '';
-                    _emailError.value = '';
-              
-                    login(_emailController.text, _passwordController.text,
-                        success: () async {
-                      await db.into(db.setting).insertOnConflictUpdate(
-                          SettingData(
-                              key: "profile", value: tokensToPayload()));
-                      setupManager.next();
-                    }, failure: (msg) {
-                      Get.snackbar("login.failed".tr, msg.tr);
-              
-                      switch (msg) {
-                        case "invalid.password":
-                          _passwordError.value = msg.tr;
-                          _emailError.value = msg.tr;
-                          break;
-                      }
-                      _loading.value = false;
-                    });
-                  },
-                  child: Center(
-                    child: Obx(() => _loading.value
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                            ))
-                        : Text('login.login'.tr, style: theme.textTheme.labelLarge)),
-                  ),
+                    _loading.value = false;
+                  });
+                },
+                child: Center(
+                  child: Obx(() => _loading.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                          ))
+                      : Text('login.login'.tr, style: theme.textTheme.labelLarge)),
                 ),
               ),
               verticalSpacing(defaultSpacing * 1.5),
@@ -149,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text('login.no_account.text'.tr),
                   horizontalSpacing(defaultSpacing),
                   TextButton(
-                    onPressed: () => Get.offAll(const RegisterPage(), transition: Transition.fadeIn),
+                    onPressed: () => Get.offAll(const RegisterPage(), transition: Transition.noTransition),
                     child: Text('login.no_account'.tr),
                   ),
                 ],
