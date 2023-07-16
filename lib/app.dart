@@ -1,4 +1,3 @@
-import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/status/starting_page.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,7 @@ class ChatApp extends StatelessWidget {
         return GetMaterialApp(
           title: 'fj.chat',
           theme: manager.themes[manager.currentTheme.value].getData(manager.brightness.value),
-          home: const ChatPage(),
+          home: const StartingPage(),
           debugShowCheckedModeBanner: false,
         );
       }

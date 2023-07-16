@@ -16,6 +16,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
 
   final _usernameController = TextEditingController();
+  final _tagController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -23,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordError = ''.obs;
   final _emailError = ''.obs;
   final _usernameError = ''.obs;
+  final _tagError = ''.obs;
 
   @override
   void dispose() {
@@ -60,17 +62,40 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: theme.textTheme.headlineMedium),
               ),
               verticalSpacing(defaultSpacing * 2),
-              Obx(() =>
-                FJTextField(
-                  hintText: 'input.username'.tr,
-                  errorText: _usernameError.value == '' ? null : _usernameError.value,
-                  controller: _usernameController,
-                ),
+              LayoutBuilder(
+                builder: (context, size) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Obx(() =>
+                        SizedBox(
+                          width: size.maxWidth * 0.6,
+                          child: FJTextField(
+                            hintText: 'placeholder.username'.tr,
+                            errorText: _usernameError.value == '' ? null : _usernameError.value,
+                            controller: _usernameController,
+                          ),
+                        ),
+                      ),
+                      Text('#', style: theme.textTheme.headlineMedium),
+                      Obx(() =>
+                        SizedBox(
+                          width: size.maxWidth * 0.3,
+                          child: FJTextField(
+                            hintText: 'placeholder.tag'.tr,
+                            errorText: _tagError.value == '' ? null : _tagError.value,
+                            controller: _tagController,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
               ),
               verticalSpacing(defaultSpacing),
               Obx(() =>
                 FJTextField(
-                  hintText: 'input.email'.tr,
+                  hintText: 'placeholder.email'.tr,
                   errorText: _emailError.value == '' ? null : _emailError.value,
                   controller: _emailController,
                 ),
@@ -78,7 +103,7 @@ class _RegisterPageState extends State<RegisterPage> {
               verticalSpacing(defaultSpacing),
               Obx(
                 () => FJTextField(
-                  hintText: 'input.password'.tr,
+                  hintText: 'placeholder.password'.tr,
                   obscureText: true,
                   errorText: _passwordError.value == '' ? null : _passwordError.value,
                   controller: _passwordController,
@@ -103,7 +128,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   }
               
                   if (_usernameController.text == '') {
-                    _usernameError.value = 'input.username_tag'.tr;
+                    _usernameError.value = 'input.username'.tr;
+                    _loading.value = false;
+                    return;
+                  }
+
+                  if (_tagController.text == '') {
+                    _tagError.value = 'input.tag'.tr;
                     _loading.value = false;
                     return;
                   }
@@ -111,7 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   _passwordError.value = '';
                   _emailError.value = '';
               
-                  register(_emailController.text, _usernameController.text, _passwordController.text,
+                  register(_emailController.text, _usernameController.text, _tagController.text, _passwordController.text,
                     success: () async {
                       Get.offAll(const LoginPage(), transition: Transition.fade);
                       _loading.value = false;

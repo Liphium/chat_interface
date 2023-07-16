@@ -41,7 +41,6 @@ class KeySetup extends Setup {
 
       // Set public key on the server
       var res = await postRqAuthorized("/account/keys/public/set", <String, dynamic>{
-        "password": keyPass,
         "key": packagedPub
       });
 
@@ -51,7 +50,6 @@ class KeySetup extends Setup {
 
       // Set private key on the server
       res = await postRqAuthorized("/account/keys/private/set", <String, dynamic>{
-        "password": keyPass,
         "key": encryptedPriv
       });
 

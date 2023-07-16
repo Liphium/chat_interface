@@ -29,26 +29,46 @@ class _FJTextFieldState extends State<FJTextField> {
       _focus.value = _node.hasFocus;
     });
 
-    return Obx(() => Material(
-      animationDuration: 200.ms,
-      color: _focus.value ? theme.colorScheme.primaryContainer : theme.colorScheme.background,
-      borderRadius: BorderRadius.circular(defaultSpacing),
-      child: Padding(
-        padding: const EdgeInsets.all(defaultSpacing),
-        child: TextField(
-          decoration: InputDecoration(
-            isDense: true,
-            hintText: widget.hintText,
-            errorText: widget.errorText,
-            border: InputBorder.none,
+    return Obx(() => Animate(
+      effects: [
+        ScaleEffect(
+          end: const Offset(1.08, 1.08),
+          duration: 250.ms,
+          curve: Curves.ease
+        ),
+        CustomEffect(
+          begin: 0,
+          end: 1,
+          duration: 250.ms,
+          builder: (context, value, child) {
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: defaultSpacing * value),
+              child: child
+            );
+          },
+        )
+      ],
+      target: _focus.value ? 1 : 0,
+      child: Material(
+        color: theme.colorScheme.background,
+        borderRadius: BorderRadius.circular(defaultSpacing),
+        child: Padding(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: TextField(
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: widget.hintText,
+              errorText: widget.errorText,
+              border: InputBorder.none,
+            ),
+            style: theme.textTheme.labelLarge,
+            obscureText: widget.obscureText,
+            autocorrect: false,
+            enableSuggestions: false,
+            controller: widget.controller,
+            onTap: () => _focus.value = true,
+            focusNode: _node,
           ),
-          style: theme.textTheme.labelLarge,
-          obscureText: widget.obscureText,
-          autocorrect: false,
-          enableSuggestions: false,
-          controller: widget.controller,
-          onTap: () => _focus.value = true,
-          focusNode: _node,
         ),
       ),
     ));

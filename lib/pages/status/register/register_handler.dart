@@ -5,18 +5,14 @@ import 'package:http/http.dart';
 
 import '../../../util/web.dart';
 
-void register(String email, String username, String password, {Function()? success, Function(String)? failure}) async {
-
-  // Split username into tag and name
-  var name = username.split("#")[0];
-  var tag = username.split("#")[1];
+void register(String email, String username, String tag, String password, {Function()? success, Function(String)? failure}) async {
 
   Response res;
   try {
     res = await postRq("/auth/register", <String, String>{
       "email": email,
       "password": hashSha(password),
-      "username": name,
+      "username": username,
       "tag": tag,
     });
   } catch (e) {

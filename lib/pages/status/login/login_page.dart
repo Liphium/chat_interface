@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
               verticalSpacing(defaultSpacing * 2),
               Obx(
                 () => FJTextField(
-                  hintText: 'input.email'.tr,
+                  hintText: 'placeholder.email'.tr,
                   errorText: _emailError.value == '' ? null : _emailError.value,
                   controller: _emailController,
                 ),
@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
               verticalSpacing(defaultSpacing),
               Obx(
                 () => FJTextField(
-                  hintText: 'input.password'.tr,
+                  hintText: 'placeholder.password'.tr,
                   obscureText: true,
                   errorText: _passwordError.value == '' ? null : _passwordError.value,
                   controller: _passwordController,
