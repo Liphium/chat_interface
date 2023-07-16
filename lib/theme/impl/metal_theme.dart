@@ -60,7 +60,8 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
   dividerColor: const Color(0xFF5c5c5c), 
   textTheme: defaultDarkTheme.textTheme.copyWith(
     headlineMedium: defaultDarkTheme.textTheme.headlineMedium!.copyWith(
-      fontFamily: 'Alfa Slab One'
+      fontFamily: 'Roboto Mono',
+      fontWeight: FontWeight.bold,
     ),
     bodySmall: defaultDarkTheme.textTheme.bodySmall!.copyWith(
       fontFamily: 'Open Sans',

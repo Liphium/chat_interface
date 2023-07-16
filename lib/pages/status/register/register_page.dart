@@ -1,5 +1,7 @@
 import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/register/register_handler.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,51 +34,63 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
     return Scaffold(
       body: Center(
-        child: SizedBox(
-          width: 300,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(defaultSpacing * 1.5),
+              topRight: Radius.circular(defaultSpacing * 1.5),
+              bottomLeft: Radius.circular(defaultSpacing * 1.5),
+              bottomRight: Radius.circular(defaultSpacing * 1.5),
+            ),
+            color: theme.colorScheme.background,
+          ),
+          padding: const EdgeInsets.all(defaultSpacing * 2),
+          width: 370,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text("register.page".tr),
-              verticalSpacing(defaultSpacing),
+              Text("Create your new account.".tr,
+                  style: theme.textTheme.headlineMedium),
+              verticalSpacing(defaultSpacing * 2),
               Obx(() =>
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'input.username_tag'.tr,
-                    errorText: _usernameError.value == '' ? null : _usernameError.value,
-                  ),
+                FJTextField(
+                  hintText: 'input.username'.tr,
+                  errorText: _usernameError.value == '' ? null : _usernameError.value,
                   controller: _usernameController,
                 ),
               ),
+              verticalSpacing(defaultSpacing),
               Obx(() =>
-                TextField(
-                  decoration: InputDecoration(
+                Hero(
+                  tag: "login_email",
+                  child: FJTextField(
                     hintText: 'input.email'.tr,
                     errorText: _emailError.value == '' ? null : _emailError.value,
+                    controller: _emailController,
                   ),
-                  controller: _emailController,
                 ),
               ),
-              Obx(() =>
-                TextField(
-                  decoration: InputDecoration(
+              verticalSpacing(defaultSpacing),
+              Obx(
+                () => Hero(
+                  tag: "login_password",
+                  child: FJTextField(
                     hintText: 'input.password'.tr,
+                    obscureText: true,
                     errorText: _passwordError.value == '' ? null : _passwordError.value,
+                    controller: _passwordController,
                   ),
-                  obscureText: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  controller: _passwordController,
                 ),
               ),
               verticalSpacing(defaultSpacing * 1.5),
-              SizedBox(
-                width: 300,
-                child: ElevatedButton(
-                  onPressed: () {
+              Hero(
+                tag: "login_button",
+                child: FJElevatedButton(
+                  onTap: () {
                     if(_loading.value) return;
                     _loading.value = true;
                 
@@ -91,7 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       _loading.value = false;
                       return;
                     }
-
+              
                     if (_usernameController.text == '') {
                       _usernameError.value = 'input.username_tag'.tr;
                       _loading.value = false;
@@ -111,16 +125,18 @@ class _RegisterPageState extends State<RegisterPage> {
                         _loading.value = false;
                       });
                   },
-                  child: Obx(() => _loading.value ? 
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.0,
-                    )
-                  ) : 
-                  Text('login.login'.tr)),
-                )
+                  child: Center(
+                    child: Obx(() => _loading.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                            ))
+                        : Text('register.register'.tr, style: theme.textTheme.labelLarge)
+                    ),
+                  ),
+                ),
               ),
               verticalSpacing(defaultSpacing * 1.5),
               Row(
@@ -129,7 +145,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   Text('register.account.text'.tr),
                   horizontalSpacing(defaultSpacing),
                   TextButton(
-                    onPressed: () => Get.offAll(const LoginPage(), transition: Transition.fade),
+                    onPressed: () => Get.offAll(const LoginPage(), transition: Transition.fadeIn),
                     child: Text('register.login'.tr),
                   ),
                 ],

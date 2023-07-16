@@ -41,9 +41,9 @@ flutter:
   uses-material-design: true
 
   fonts:
-    - family: Alfa Slab One
+    - family: Roboto Mono
       fonts:
-        - asset: assets/AlfaSlabOne-Regular.ttf
+        - asset: assets/RobotoMono.ttf
     - family: Roboto
       fonts:
         - asset: assets/Roboto-Regular.ttf
