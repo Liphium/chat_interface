@@ -8,6 +8,23 @@ var logger = log.Logger();
 const appId = 0;
 const bool isDebug = true;
 
+// Authentication types
+enum AuthType {
+  password(0, "password"),
+  totp(1, "totp"),
+  recoveryCode(2, "recoveryCode"),
+  passkey(3, "passkey");
+
+  final int id;
+  final String name;
+
+  const AuthType(this.id, this.name);
+
+  static AuthType fromId(int id) {
+    return AuthType.values.firstWhere((element) => element.id == id);
+  }
+}
+
 const liveKitURL = "wss://fj-chat-xc5qv7y8.livekit.cloud";
 
 void main() async {

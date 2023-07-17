@@ -10,8 +10,6 @@ import 'package:pointycastle/export.dart';
 
 import '../setup_manager.dart';
 
-late String keyPassRaw;
-late String keyPass;
 late AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> asymmetricKeyPair;
 
 class KeySetup extends Setup {

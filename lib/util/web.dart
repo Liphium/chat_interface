@@ -35,6 +35,17 @@ Future<Response> postRq(String path, Map<String, dynamic> body) async {
   );
 }
 
+Future<Response> postRqAuth(String path, Map<String, dynamic> body, String token) async {
+  return await post(
+    server(path),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token'
+    },
+    body: jsonEncode(body),
+  );
+}
+
 Future<Response> postRqAuthorized(String path, Map<String, dynamic> body) async {
   return await post(
     server(path),

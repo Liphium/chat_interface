@@ -148,8 +148,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       _loading.value = false;
                     },
                     failure: (msg) {
-                      Get.snackbar("register.failed".tr, msg.tr);
                       _loading.value = false;
+
+                      switch (msg) {
+                        case 'email.invalid':
+                          _emailError.value = 'input.email'.tr;
+                          return;
+                      }
+
+                      Get.snackbar("register.failed".tr, msg.tr);
                     });
                 },
                 child: Center(

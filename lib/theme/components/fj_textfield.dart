@@ -58,6 +58,7 @@ class _FJTextFieldState extends State<FJTextField> {
             decoration: InputDecoration(
               isDense: true,
               hintText: widget.hintText,
+              labelStyle: theme.textTheme.labelLarge,
               errorText: widget.errorText,
               border: InputBorder.none,
             ),

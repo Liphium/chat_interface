@@ -10,14 +10,14 @@ import 'package:get/get.dart';
 
 import 'login_handler.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginStepPage extends StatefulWidget {
+  const LoginStepPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginStepPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginStepPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
