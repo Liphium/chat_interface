@@ -19,16 +19,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
 
   final _loading = false.obs;
-  final _passwordError = ''.obs;
   final _emailError = ''.obs;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -79,27 +76,16 @@ class _LoginPageState extends State<LoginPage> {
                     return;
                   }
               
-                  if (_passwordController.text == '') {
-                    _passwordError.value = 'input.password'.tr;
-                    _loading.value = false;
-                    return;
-                  }
-              
-                  _passwordError.value = '';
                   _emailError.value = '';
               
                   loginStart(_emailController.text,
                       success: () async {
-                    await db.into(db.setting).insertOnConflictUpdate(
-                        SettingData(
-                            key: "profile", value: tokensToPayload()));
-                    setupManager.next();
+                        _loading.value = false;
                   }, failure: (msg) {
                     Get.snackbar("login.failed".tr, msg.tr);
               
                     switch (msg) {
-                      case "invalid.password":
-                        _passwordError.value = msg.tr;
+                      case "invalid.email":
                         _emailError.value = msg.tr;
                         break;
                     }

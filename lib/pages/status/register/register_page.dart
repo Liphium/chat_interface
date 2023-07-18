@@ -143,7 +143,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   _emailError.value = '';
               
                   register(_emailController.text, _usernameController.text, _tagController.text, _passwordController.text,
-                    success: () async {
+                    success: () {
                       Get.offAll(const LoginPage(), transition: Transition.fade);
                       _loading.value = false;
                     },

@@ -8,8 +8,9 @@ import 'package:get/get.dart';
 class LoginChoosePage extends StatefulWidget {
 
   final List<AuthType> options;
+  final String token;
 
-  const LoginChoosePage(this.options, {super.key});
+  const LoginChoosePage(this.options, this.token, {super.key});
 
   @override
   State<LoginChoosePage> createState() => _LoginPageState();
@@ -54,7 +55,7 @@ class _LoginPageState extends State<LoginChoosePage> {
                     child: FJOptionButton(
                       text: "choose.${type.name}".tr,
                       onTap: () {
-                        Get.offAll(const LoginStepPage(), transition: Transition.noTransition);
+                        Get.offAll(LoginStepPage(type, widget.token, options: widget.options), transition: Transition.noTransition);
                       },
                     ),
                   );
