@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,37 +25,33 @@ class _StartingPageState extends State<StartingPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(
-            width: 300,
-            child: LinearProgressIndicator(minHeight: 10,)
+      backgroundColor: Get.theme.colorScheme.background,
+      body: Center(
+        child: TransitionContainer(
+          borderRadius: BorderRadius.circular(modelBorderRadius),
+          color: Get.theme.colorScheme.onBackground,
+          width: 370,
+          tag: "login",
+          child: Padding(
+            padding: const EdgeInsets.all(defaultSpacing * 2),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LinearProgressIndicator(
+                  minHeight: 10,
+                  color: Get.theme.colorScheme.primary,
+                  backgroundColor: Get.theme.colorScheme.primaryContainer,
+                ),
+                verticalSpacing(defaultSpacing),
+                Obx(() => Text(setupManager.message.value.tr, style: Get.textTheme.labelLarge, )),
+              ],
+            ),
           ),
-          /*
-          Image.asset(
-            "assets/img/logo.png",
-            width: 200.0,
-          ), */
-          verticalSpacing(defaultSpacing),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Obx(() => Text(setupManager.message.value.tr)),
-              /*
-              horizontalSpacing(defaultSpacing * 2),
-              const SizedBox(
-                width: 20.0,
-                height: 20.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                )
-              ), */
-            ],
-          )
-        ],
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/login/login_choose_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart' as g;
 import 'package:http/http.dart';
@@ -40,11 +41,11 @@ void loginStart(String email, {Function()? success, Function(String)? failure}) 
   success?.call();
   final methods = body["methods"] as List<dynamic>;
   if(methods.length == 1) {
-    g.Get.offAll(LoginStepPage(AuthType.fromId(methods[0] as int), body["token"]), transition: g.Transition.noTransition);
+    g.Get.find<TransitionController>().modelTransition(LoginStepPage(AuthType.fromId(methods[0] as int), body["token"]));
     return;
   }
 
-  g.Get.offAll(LoginChoosePage(methods.map((e) => AuthType.fromId(e as int)).toList(), body["token"]), transition: g.Transition.noTransition);
+  g.Get.find<TransitionController>().modelTransition(LoginChoosePage(methods.map((e) => AuthType.fromId(e as int)).toList(), body["token"]));
 }
 
 void loginStep(String token, String secret, AuthType type, {Function()? success, Function(String)? failure}) async {
@@ -84,11 +85,11 @@ void loginStep(String token, String secret, AuthType type, {Function()? success,
   success?.call();
   final methods = body["methods"] as List<dynamic>;
   if(methods.length == 1) {
-    g.Get.offAll(LoginStepPage(AuthType.fromId(methods[0] as int), body["token"]), transition: g.Transition.noTransition);
+    g.Get.find<TransitionController>().modelTransition(LoginStepPage(AuthType.fromId(methods[0] as int), body["token"]));
     return;
   }
 
-  g.Get.offAll(LoginChoosePage(methods.map((e) => AuthType.fromId(e as int)).toList(), body["token"]), transition: g.Transition.noTransition);
+  g.Get.find<TransitionController>().modelTransition(LoginChoosePage(methods.map((e) => AuthType.fromId(e as int)).toList(), body["token"]));
 }
 
 String _transformForAuth(String secret, AuthType type) {

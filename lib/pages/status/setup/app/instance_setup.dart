@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -74,48 +77,47 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      backgroundColor: Get.theme.colorScheme.background,
       body: Center(
-        child: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('setup.choose.instance'.tr),
-              verticalSpacing(defaultSpacing),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.instances.length,
-                itemBuilder: (context, index) {
-
-                  var instance = widget.instances[index];
-                  final base = path.basename(path.withoutExtension(instance.path));
-
-                  return ElevatedButton(
-                    onPressed: () => setupInstance(path.basename(path.withoutExtension(instance.path)), next: true),
-                    child: Text(base),
-                  );
-                },
-              ),
-              verticalSpacing(defaultSpacing),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: 'setup.instance.name'.tr,
-                      ),
-                    ),
-                  ),
-                  verticalSpacing(defaultSpacing),
-                  ElevatedButton(
-                    onPressed: () => setupInstance(_controller.text, next: true),
-                    child: const Text("Create"),
-                  )
-                ],
-              )
-            ],
+        child: TransitionContainer(
+          tag: "login",
+          borderRadius: BorderRadius.circular(modelBorderRadius),
+          width: 370,
+          child: Padding(
+            padding: const EdgeInsets.all(modelPadding),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("${'setup.choose.instance'.tr}.", style: Get.textTheme.headlineMedium,),
+                verticalSpacing(sectionSpacing),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.instances.length,
+                  itemBuilder: (context, index) {
+          
+                    var instance = widget.instances[index];
+                    final base = path.basename(path.withoutExtension(instance.path));
+          
+                    return FJElevatedButton(
+                      onTap: () => setupInstance(path.basename(path.withoutExtension(instance.path)), next: true),
+                      child: Center(child: Text(base, style: Get.textTheme.labelLarge)),
+                    );
+                  },
+                ),
+                verticalSpacing(sectionSpacing),
+                FJTextField(
+                  controller: _controller,
+                  hintText: 'setup.instance.name'.tr,
+                ),
+                verticalSpacing(defaultSpacing),
+                FJElevatedButton(
+                  onTap: () => setupInstance(_controller.text, next: true),
+                  child: Center(child: Text("Create", style: Get.textTheme.labelLarge)),
+                )
+              ],
+            ),
           )
         )
       )

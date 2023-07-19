@@ -13,6 +13,7 @@ import 'package:chat_interface/pages/status/setup/encryption/salt_setup.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/pages/status/starting_page.dart';
+import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -79,7 +80,7 @@ class SetupManager {
     if (_steps.isEmpty) return;
 
     if(open) {
-      Get.offAll(const StartingPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+      Get.find<TransitionController>().modelTransition(const StartingPage());
     }
 
     current++;
@@ -103,7 +104,7 @@ class SetupManager {
       }
 
       if (ready != null) {
-        Get.offAll(ready, transition: Transition.fade, duration: const Duration(milliseconds: 500));
+        Get.find<TransitionController>().modelTransition(ready);
         return;
       }
 
@@ -111,7 +112,7 @@ class SetupManager {
       next(open: false);
       
     } else {
-      Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+    Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
     }
   }
 

@@ -16,6 +16,9 @@ Widget horizontalSpacing(double width) {
 }
 
 const defaultSpacing = 8.0;
+const sectionSpacing = defaultSpacing * 2;
+const modelBorderRadius = defaultSpacing * 1.5;
+const modelPadding = defaultSpacing * 2;
 
 String formatTime(DateTime time) {
   final now = DateTime.now();

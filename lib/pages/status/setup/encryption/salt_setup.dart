@@ -1,6 +1,8 @@
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,32 +48,41 @@ class _SaltInfoPageState extends State<SaltInfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 300),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("copy.salt.title".tr, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center,),
-              verticalSpacing(defaultSpacing * 0.25),
-              Text("copy.salt".tr, textAlign: TextAlign.center),
-              verticalSpacing(defaultSpacing * 0.5),
-              SelectableText(widget.salt, style: Theme.of(context).textTheme.labelLarge),
-              verticalSpacing(defaultSpacing * 2),
-              
-              //* Copy button
-              ElevatedButton(
-                onPressed: () {
-                  if(copied.value) {
-                    setupManager.next();
-                    return;
-                  }
-              
-                  Clipboard.setData(ClipboardData(text: widget.salt));
-                  copied.value = true;
-                }, 
-                child: Obx(() => !copied.value ? Text("copy".tr) : Text("continue".tr))
-              ),
-            ]
+        child: TransitionContainer(
+          tag: "login",
+          borderRadius: BorderRadius.circular(modelBorderRadius),
+          width: 370,
+          child: Padding(
+            padding: const EdgeInsets.all(modelPadding),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("copy.salt.title".tr, style: Theme.of(context).textTheme.headlineMedium),
+                verticalSpacing(sectionSpacing),
+                Text("copy.salt".tr, textAlign: TextAlign.center, style: Get.textTheme.bodyMedium),
+                verticalSpacing(sectionSpacing),
+                SelectableText(widget.salt, style: Theme.of(context).textTheme.labelLarge),
+                verticalSpacing(defaultSpacing),
+                
+                //* Copy button
+                SizedBox(
+                  width: double.infinity,
+                  child: FJElevatedButton(
+                    onTap: () {
+                      if(copied.value) {
+                        setupManager.next();
+                        return;
+                      }
+                  
+                      Clipboard.setData(ClipboardData(text: widget.salt));
+                      copied.value = true;
+                    }, 
+                    child: Center(child: Obx(() => Text(!copied.value ? "copy".tr : "continue".tr, style: Get.textTheme.labelLarge)))
+                  ),
+                ),
+              ]
+            ),
           ),
         )
       ) 
