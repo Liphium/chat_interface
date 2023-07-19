@@ -7,7 +7,7 @@ class UpdateSetup extends Setup {
   
   @override
   Future<Widget?> load() async {
-    await Future.delayed(3000.ms);
+    await Future.delayed(100.ms);
     return null;
   }
 }

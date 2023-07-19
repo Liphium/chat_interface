@@ -7,7 +7,6 @@ class TransitionController extends GetxController {
 
   final transitionDuration = 500.ms; // constant
   final transition = false.obs;
-  final transitionOut = false.obs;
 
   Timer? currentTimer;
 
@@ -22,13 +21,11 @@ class TransitionController extends GetxController {
     }
 
     transition.value = true;
-    transitionOut.value = true;
 
     currentTimer = Timer(transitionDuration, () {
       goTo(page);
     
       currentTimer = Timer(transitionDuration, () {
-        transitionOut.value = false;
         transition.value = false;
       });
     });

@@ -52,7 +52,7 @@ class _AnimatedContainerState extends State<TransitionContainer> {
               color: widget.color ?? Theme.of(context).colorScheme.onBackground,
             ),
             child: Animate(
-              target: controller.transitionOut.value ? 0 : 1,
+              target: controller.transition.value ? 0 : 1,
               effects: [
                 mainEffect
               ],
