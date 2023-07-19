@@ -51,6 +51,8 @@ class SetupManager {
     // Start fetching
     _steps.add(FetchSetup());
 
+    _steps.add(UpdateSetup());
+
     // Setup account
     _steps.add(ProfileSetup());
     _steps.add(AccountSetup());
@@ -73,7 +75,7 @@ class SetupManager {
 
   void restart() {
     current = -1;
-    Get.offAll(const StartingPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+    Get.find<TransitionController>().modelTransition(const StartingPage());
   }
 
   void next({bool open = true})  async {

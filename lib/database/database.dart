@@ -8,6 +8,7 @@ import 'conversation/message.dart';
 
 part 'database.g.dart';
 
+bool databaseInitialized = false;
 late Database db;
 
 @DriftDatabase(tables: [Conversation, Member, Message, Setting, Friend])

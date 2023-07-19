@@ -16,6 +16,7 @@ class ProfileSetup extends Setup {
 
     // Get profile from database
     var profiles = await (db.select(db.setting)..where((tbl) => tbl.key.equals("profile"))).get();
+    print(profiles);
     if(profiles.isEmpty) return const LoginPage();
 
     // Load tokens from profile

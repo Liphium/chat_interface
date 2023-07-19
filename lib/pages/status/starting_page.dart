@@ -31,24 +31,28 @@ class _StartingPageState extends State<StartingPage> {
       body: Center(
         child: TransitionContainer(
           borderRadius: BorderRadius.circular(modelBorderRadius),
+          fade: true,
           color: Get.theme.colorScheme.onBackground,
-          width: 370,
+          width: 250,
           tag: "login",
-          child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing * 2),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                LinearProgressIndicator(
-                  minHeight: 10,
-                  color: Get.theme.colorScheme.primary,
-                  backgroundColor: Get.theme.colorScheme.primaryContainer,
-                ),
-                verticalSpacing(defaultSpacing),
-                Obx(() => Text(setupManager.message.value.tr, style: Get.textTheme.labelLarge, )),
-              ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(modelBorderRadius),
+            child: Padding(
+              padding: const EdgeInsets.all(0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LinearProgressIndicator(
+                    minHeight: 10,
+                    color: Get.theme.colorScheme.primary,
+                    backgroundColor: Get.theme.colorScheme.primaryContainer,
+                  ),
+                  //verticalSpacing(defaultSpacing),
+                  //Obx(() => Text(setupManager.message.value.tr, style: Get.textTheme.labelLarge, )),
+                ],
+              ),
             ),
           ),
         ),

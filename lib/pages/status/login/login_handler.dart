@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/hash.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/login/login_choose_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
@@ -77,6 +78,7 @@ void loginStep(String token, String secret, AuthType type, {Function()? success,
 
   if(body.containsKey("refresh_token")) {
     loadTokensFromPayload(body);
+    await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
     success?.call();
     setupManager.next(open: true);
     return;

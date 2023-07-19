@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,9 +42,13 @@ class InstanceSetup extends Setup {
 void setupInstance(String name, {bool next = false}) async {
 
   // Initialize database
+  if(databaseInitialized) {
+    await db.close();
+  }
   final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
   final file = File(path.join(dbFolder, '$name.db'));
   db = Database(NativeDatabase.createInBackground(file, logStatements: true));
+  databaseInitialized = true;
 
   // Create tables
   var _ = await (db.select(db.setting)).get();
