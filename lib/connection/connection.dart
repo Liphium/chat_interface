@@ -34,6 +34,7 @@ class Connector {
       },
       cancelOnError: false,
       onDone: () {
+        print("restarting..");
         initialized = false;
         setupManager.restart();
       },
@@ -41,6 +42,7 @@ class Connector {
   }
 
   void sendMessage(String message) {
+    print(message);
     connection.sink.add(message);
   }
 
