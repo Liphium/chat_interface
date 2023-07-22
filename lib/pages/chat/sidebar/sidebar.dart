@@ -31,7 +31,7 @@ class _SidebarState extends State<Sidebar> {
     //* Sidebar
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.onBackground,
+        color: theme.colorScheme.background,
       ),
 
       //* Sidebar content

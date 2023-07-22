@@ -99,8 +99,8 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                   padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.25, horizontal: defaultSpacing * 0.5),
                   child: Obx(() => 
                     Material(
-                      color: controller.settings["audio.microphone"]!.getWhenValue("def", _microphones[0].label) == current ? theme.colorScheme.secondaryContainer :
-                        theme.hoverColor,
+                      color: controller.settings["audio.microphone"]!.getWhenValue("def", _microphones[0].label) == current ? theme.colorScheme.primaryContainer :
+                        theme.colorScheme.onBackground,
                       borderRadius: radius,
                       child: InkWell(
                         borderRadius: radius,
@@ -148,7 +148,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                 divisions: 30,
                 label: "${sens.value.value} dB",
                 secondaryTrackValue: clampDouble(sensitivity.current.value, -60, 0),
-                secondaryActiveColor: theme.colorScheme.tertiary,
+                secondaryActiveColor: theme.colorScheme.secondary,
                 onChanged: (value) => sens.value.value = value,
                 onChangeEnd: (value) {
                   sens.setValue(value);

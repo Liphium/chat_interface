@@ -65,7 +65,7 @@ class _CallPreviewState extends State<CallPreview> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: theme.colorScheme.secondaryContainer,
+                        color: theme.colorScheme.primaryContainer,
                       ),
                     ),
                   ),

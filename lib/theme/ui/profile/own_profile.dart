@@ -56,7 +56,7 @@ class _ProfileState extends State<OwnProfile> {
           width: widget.size.toDouble(),
           child: Material(
             borderRadius: BorderRadius.circular(defaultSpacing),
-            color: theme.colorScheme.onBackground,
+            color: theme.colorScheme.background,
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
               child: Column(
@@ -110,7 +110,7 @@ class _ProfileState extends State<OwnProfile> {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: defaultSpacing * 0.25),
                               child: Material(
-                                color: selected ? theme.colorScheme.primaryContainer.withAlpha(150) : theme.colorScheme.onBackground,
+                                color: selected ? theme.colorScheme.primaryContainer : theme.colorScheme.background,
                                 borderRadius: BorderRadius.circular(defaultSpacing),
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(defaultSpacing),

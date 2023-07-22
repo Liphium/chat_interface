@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/settings/appearance/call/call_preview.dart';
+import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -26,18 +27,9 @@ class CallSettingsPage extends StatefulWidget {
 
 class _CallSettingsPageState extends State<CallSettingsPage> {
 
-  final _expansionModes = ["expansion.scroll_view", "expansion.talking_overlay", "expansion.none"];
-  final _expansionIcons = [Icons.view_list, Icons.people, Icons.close];
-
-  final _expansionPositions = ["expansion.top", "expansion.right", "expansion.bottom", "expansion.left"];
-  final _expansionPositionsIcons = [Icons.arrow_upward, Icons.arrow_forward, Icons.arrow_downward, Icons.arrow_back];
-
   @override
   Widget build(BuildContext context) {
-
-    ThemeData theme = Theme.of(context);
-    SettingController controller = Get.find();
-
+    
     return Align(
       alignment: Alignment.topLeft,
       child: SingleChildScrollView(
@@ -52,112 +44,37 @@ class _CallSettingsPageState extends State<CallSettingsPage> {
             verticalSpacing(defaultSpacing),
       
             //* Preview
-            Text("call_app.preview".tr, style: theme.textTheme.labelLarge),
+            Text("call_app.preview".tr, style: Get.theme.textTheme.labelLarge),
             verticalSpacing(defaultSpacing * 0.5),
       
             const CallPreview(),
             verticalSpacing(defaultSpacing),
 
             //* Expansion mode
-            Text("expansion.mode".tr, style: theme.textTheme.labelLarge),
+            Text("expansion.mode".tr, style: Get.theme.textTheme.labelLarge),
             verticalSpacing(defaultSpacing * 0.5),
 
-            Padding(
-              padding: const EdgeInsets.all(defaultSpacing * 0.5),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _expansionModes.length,
-                itemBuilder: (context, index) {
-
-                  final first = index == 0;
-                  final last = index == _expansionModes.length - 1;
-                  
-                  final radius = BorderRadius.vertical(
-                    top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
-                    bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
-                  );
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                    child: Obx(() => 
-                      Material(
-                        color: controller.settings["call_app.expansionMode"]!.getWhenValue(0, 0) == index ? theme.colorScheme.secondaryContainer :
-                          theme.colorScheme.background,
-                        borderRadius: radius,
-                        child: InkWell(
-                          borderRadius: radius,
-                          onTap: () {
-                            controller.settings["call_app.expansionMode"]!.setValue(index);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(defaultSpacing),
-                            child: Row(
-                              children: [
-                                Icon(_expansionIcons[index], color: theme.colorScheme.primary),
-                                horizontalSpacing(defaultSpacing),
-                                Text(_expansionModes[index].tr, style: theme.textTheme.bodyMedium!.copyWith(
-                                  color: theme.colorScheme.onSurface
-                                )),
-                              ],
-                            ),
-                          ),
-                        ),
-                      )
-                    ),
-                  );
-                },
-              ),
+            ListSelectionSetting(
+              settingName: "call_app.expansionMode",
+              items: <SelectableItem>[
+                SelectableItem("expansion.scroll_view".tr, Icons.view_list),
+                SelectableItem("expansion.talking_overlay".tr, Icons.people),
+                SelectableItem("expansion.none".tr, Icons.close),
+              ]
             ),
 
             //* Expansion positions
-            Text("expansion.position".tr, style: theme.textTheme.labelLarge),
+            Text("expansion.position".tr, style: Get.theme.textTheme.labelLarge),
             verticalSpacing(defaultSpacing * 0.5),
 
-            Padding(
-              padding: const EdgeInsets.all(defaultSpacing * 0.5),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _expansionPositions.length,
-                itemBuilder: (context, index) {
-
-                  final first = index == 0;
-                  final last = index == _expansionPositions.length - 1;
-                  
-                  final radius = BorderRadius.vertical(
-                    top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
-                    bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
-                  );
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                    child: Obx(() => 
-                      Material(
-                        color: controller.settings["call_app.expansionPosition"]!.getWhenValue(0, 0) == index ? theme.colorScheme.secondaryContainer :
-                          theme.colorScheme.background,
-                        borderRadius: radius,
-                        child: InkWell(
-                          borderRadius: radius,
-                          onTap: () {
-                            controller.settings["call_app.expansionPosition"]!.setValue(index);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(defaultSpacing),
-                            child: Row(
-                              children: [
-                                Icon(_expansionPositionsIcons[index], color: theme.colorScheme.primary),
-                                horizontalSpacing(defaultSpacing),
-                                Text(_expansionPositions[index].tr, style: theme.textTheme.bodyMedium!.copyWith(
-                                  color: theme.colorScheme.onSurface
-                                )),
-                              ],
-                            ),
-                          ),
-                        ),
-                      )
-                    ),
-                  );
-                },
-              ),
+            ListSelectionSetting(
+              settingName: "call_app.expansionPosition", 
+              items: <SelectableItem>[
+                SelectableItem("expansion.top".tr, Icons.arrow_upward),
+                SelectableItem("expansion.right".tr, Icons.arrow_forward),
+                SelectableItem("expansion.bottom".tr, Icons.arrow_downward),
+                SelectableItem("expansion.left".tr, Icons.arrow_back),
+              ]
             ),
       
           ],

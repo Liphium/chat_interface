@@ -1,3 +1,4 @@
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
@@ -11,7 +12,15 @@ class ServerSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    return const ServerSelectorPage();
+
+    final server = await (db.select(db.setting)..where((tbl) => tbl.key.equals("server"))).getSingleOrNull();
+
+    if(server == null) {
+      return const ServerSelectorPage();
+    } else {
+      basePath = server.value;
+      return null;
+    }
   }
 }
 
@@ -39,7 +48,7 @@ class ServerSelectorPage extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FJElevatedButton(
-                    onTap: () => setupManager.next(),
+                    onTap: () => chooseServer("http://localhost:3000"),
                     child: Center(child: Text("Localhost", style: Get.theme.textTheme.labelLarge)),
                   ),
                 ),
@@ -47,10 +56,7 @@ class ServerSelectorPage extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FJElevatedButton(
-                    onTap: () {
-                      basePath = 'http://server.fajurion.com:3000';
-                      setupManager.next();
-                    },
+                    onTap: () => chooseServer("https://chat.fajurion.com"),
                     child: Center(child: Text('Fajurion network', style: Get.theme.textTheme.labelLarge)),
                   ),
                 ),
@@ -60,5 +66,11 @@ class ServerSelectorPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void chooseServer(String path) {
+    basePath = path;
+    db.into(db.setting).insert(SettingCompanion.insert(key: "server", value: path));
+    setupManager.next();
   }
 }

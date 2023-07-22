@@ -22,7 +22,7 @@ class ProfileButton extends StatelessWidget {
 
     return Material(
       borderRadius: BorderRadius.circular(defaultSpacing),
-      color: theme.colorScheme.onBackground,
+      color: theme.colorScheme.background,
       child: InkWell(
         borderRadius: BorderRadius.circular(defaultSpacing),
         hoverColor: backgroundColor,
