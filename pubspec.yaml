@@ -29,6 +29,7 @@ dependencies:
   url_launcher: any
   flutter_webrtc: any
   record: any
+  sodium_libs: ^2.1.1+1
 
 dev_dependencies:
   flutter_test:

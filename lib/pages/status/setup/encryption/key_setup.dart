@@ -1,16 +1,15 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:pointycastle/export.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 import '../setup_manager.dart';
 
-late AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> asymmetricKeyPair;
+late KeyPair asymmetricKeyPair;
 
 class KeySetup extends Setup {
   KeySetup() : super("loading.keys", false);
@@ -20,7 +19,6 @@ class KeySetup extends Setup {
 
     // Get keys from the server
     final publicRes = await postRqAuthorized("/account/keys/public/get", <String, dynamic>{});
-    final salt = await (db.select(db.setting)..where((tbl) => tbl.key.equals("salt"))).getSingleOrNull();
 
     if(publicRes.statusCode != 200) {
       return const ErrorPage(title: "key.error");
@@ -31,10 +29,9 @@ class KeySetup extends Setup {
 
     if(!body["success"]) {
 
-      final pair = await compute(generateRSAKey, 2048);
+      final pair = generateAsymmetricKeyPair();
 
-      final packagedPriv = packagePrivateKey(pair.privateKey);
-      final encryptedPriv = encryptPrivateKey(pair.privateKey, salt!.value);
+      final packagedPriv = packagePrivateKey(pair.secretKey);
       final packagedPub = packagePublicKey(pair.publicKey);
 
       // Set public key on the server
@@ -45,11 +42,6 @@ class KeySetup extends Setup {
       if(res.statusCode != 200 || !jsonDecode(res.body)["success"]) {
         return const ErrorPage(title: "key.error");
       }
-
-      // Set private key on the server
-      res = await postRqAuthorized("/account/keys/private/set", <String, dynamic>{
-        "key": encryptedPriv
-      });
 
       if(res.statusCode != 200 || !jsonDecode(res.body)["success"]) {
         return const ErrorPage(title: "key.error");

@@ -48,10 +48,12 @@ class _ProfileSettingsStatusState extends State<ProfileSettingsStatus> {
                   if(loading.value) return;
                   loading.value = true;
 
+                  // TODO: Reimplement profile
+
                   // Request data from server
-                  final key = randomAESKey();
+                  //final key = randomAESKey();
                   final res = await postRqAuthorized("/account/profile/enable", <String, dynamic>{
-                    "key": encryptRSA64(key, asymmetricKeyPair.publicKey)
+                    "key": "hello world!"
                   });
 
                   loading.value = false;

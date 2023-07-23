@@ -9,7 +9,6 @@ import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/profile_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/updates_setup.dart';
-import 'package:chat_interface/pages/status/setup/encryption/salt_setup.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/pages/status/starting_page.dart';
@@ -62,7 +61,6 @@ class SetupManager {
     _steps.add(SettingsSetup());
 
     // Setup encryption
-    _steps.add(SaltSetup());
     _steps.add(KeySetup());
 
     // Finish fetching

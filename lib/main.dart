@@ -1,10 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart' as log;
+import 'package:sodium_libs/sodium_libs.dart';
 
 import 'app.dart';
 
 var logger = log.Logger();
+late final Sodium sodium;
 const appId = 0;
 const bool isDebug = true;
 
@@ -25,11 +29,14 @@ enum AuthType {
   }
 }
 
-const liveKitURL = "wss://fj-chat-xc5qv7y8.livekit.cloud";
+const liveKitURL = "";
 
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize sodium
+  sodium = await SodiumInit.init();
   
   // Initialize controllers
   initializeControllers();

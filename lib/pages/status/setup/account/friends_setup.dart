@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../error/server_offline_page.dart';
-import '../fetch/fetch_setup.dart';
 
 class FriendsSetup extends Setup {
   FriendsSetup() : super('loading.friends', false);
@@ -21,10 +20,7 @@ class FriendsSetup extends Setup {
   Future<Widget?> load() async {
 
     // Get new friends from server
-    var res = await postRqAuthorized("/account/friends/list", <String, dynamic>{
-      "request": false,
-      "since": lastFetchTime.millisecondsSinceEpoch,
-    });
+    var res = await postRqAuthorized("/account/friends/list", <String, dynamic>{});
 
     if(res.statusCode == 404) return const ServerOfflinePage();
     if(res.statusCode != 200) return const ErrorPage(title: "server.error");
