@@ -1,4 +1,6 @@
+
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/theme/ui/conversation_add/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +16,9 @@ class FriendsPage extends StatefulWidget {
 }
 
 class _FriendsPageState extends State<FriendsPage> {
+
   final position = const Offset(0, 0).obs;
+  final GlobalKey _addKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -24,26 +28,42 @@ class _FriendsPageState extends State<FriendsPage> {
     return Column(
       children: [
 
-        //* Search bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: Material(
-            color: theme.colorScheme.primaryContainer,
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(defaultSpacing * 1.5),
-              topRight: Radius.circular(defaultSpacing * 1.5),
-            ),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
-              child: TextField(
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  prefixIcon:
-                      Icon(Icons.search, color: theme.colorScheme.primary),
-                  hintText: 'friends.placeholder'.tr,
+        SizedBox(
+          height: 48,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                buildInput(theme),
+                horizontalSpacing(defaultSpacing * 0.5),
+                SizedBox(
+                  key: _addKey,
+                  width: 48,
+                  height: 48,
+                  child: Material(
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(defaultSpacing * 1.5),
+                    ),
+                    color: theme.colorScheme.primaryContainer,
+                    child: InkWell(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(defaultSpacing),
+                      ),
+                      onTap: () {
+                        final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
+          
+                        //* Open conversation add window
+                        Get.dialog(ConversationAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(defaultSpacing),
+                        child: Icon(Icons.add, color: theme.colorScheme.primary),
+                      ),
+                    )
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -127,6 +147,27 @@ class _FriendsPageState extends State<FriendsPage> {
           )),
         ),
       ],
+    );
+  }
+
+  Widget buildInput(ThemeData theme) {
+    return Expanded(
+      child: Material(
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(defaultSpacing * 1.5),
+        ),
+        color: theme.colorScheme.primaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
+          child: TextField(
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              prefixIcon: Icon(Icons.search, color: theme.colorScheme.primary),
+              hintText: 'friends.placeholder'.tr,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

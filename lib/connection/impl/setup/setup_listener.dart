@@ -1,12 +1,18 @@
 
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
-import '../friends/status_listener.dart';
+import 'package:get/get.dart';
 
 void setupSetupListeners() {
 
   //* New status
-  connector.listen("setup_st", setupStatusListener);
+  connector.listen("setup_st", (event) {
+    final data = event.data["data"]! as String;
+    final controller = Get.find<StatusController>();
+    controller.statusLoading.value = false;
+    controller.status.value = data;
+  });
 
   //* Setup finished
   connector.listen("setup_fin", (event) {

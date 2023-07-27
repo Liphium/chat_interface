@@ -19,7 +19,7 @@ class _SidebarState extends State<Sidebar> {
   var map = <String, Widget>{
     'chat.all': const ConversationsPage(),
     'chat.friends': const FriendsPage(),
-    'chat.requests': const RequestsPage(),
+    'chat.everyone': const RequestsPage(),
   };
 
   @override
@@ -70,14 +70,14 @@ class _SidebarState extends State<Sidebar> {
                       label: 'chat.friends',
                       radius: const BorderRadius.all(Radius.zero)
                     ),
-          
-                    //* Requests
+
+                    //* Everyone
                     SidebarButton(
                       selected: selected,
                       onTap: () {
-                        selected.value = 'chat.requests';
+                        selected.value = 'chat.everyone';
                       },
-                      label: 'chat.requests',
+                      label: 'chat.everyone',
                       radius: const BorderRadius.only(
                         topRight: Radius.circular(defaultSpacing),
                       )

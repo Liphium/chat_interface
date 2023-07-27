@@ -2,11 +2,6 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:get/get.dart';
 
-// Action: setup_st
-void setupStatusListener(Event event) async {
-
-}
-
 // Action: fr_st
 void friendStatusListener(Event event) async {
   FriendController controller = Get.find();

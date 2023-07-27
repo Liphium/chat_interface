@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,12 +33,18 @@ class InstanceSetup extends Setup {
       return null;
     }
 
+    if (instances.length == 1) {
+      print(path.basename(path.withoutExtension(instances.first.path)));
+      await setupInstance(path.basename(path.withoutExtension(instances.first.path)));
+      return null;
+    }
+
     // Open instance selection page
     return InstanceSelectionPage(instances: instances);
   }
 }
 
-void setupInstance(String name, {bool next = false}) async {
+Future<bool> setupInstance(String name, {bool next = false}) async {
 
   // Initialize database
   if(databaseInitialized) {
@@ -56,6 +61,8 @@ void setupInstance(String name, {bool next = false}) async {
   if(next) {
     setupManager.next(open: true);
   }
+
+  return true;
 }
 
 class InstanceSelectionPage extends StatefulWidget {
