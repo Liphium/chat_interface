@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
@@ -14,7 +10,6 @@ import 'package:chat_interface/pages/chat/components/message/message_bar.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/call/message_call_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

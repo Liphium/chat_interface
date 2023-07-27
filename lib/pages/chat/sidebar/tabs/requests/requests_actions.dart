@@ -13,8 +13,9 @@ void _addButton(String input, RxBool loading, {Function(String)? success}) async
     return;
   }
 
-  // Sign name of the user
-  final signedName = sign(asymmetricKeyPair.privateKey, values[0]);
+  // Sign name of the user TODO: Reimplement
+  const signedName = "dssfd";
+  //final signedName = sign(asymmetricKeyPair.privateKey, values[0]);
 
   // Send friend request
   connector.sendAction(Message("fr_rq", <String, dynamic>{

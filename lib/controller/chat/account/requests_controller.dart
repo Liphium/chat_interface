@@ -1,8 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:get/get.dart';
-import 'package:pointycastle/export.dart';
 
 import 'friend_controller.dart';
 
@@ -42,6 +43,6 @@ class Request {
 
   Friend get friend => Friend(id, name, key, tag);
 
-  RSAPublicKey get publicKey => unpackagePublicKey(key);
+  Uint8List get publicKey => unpackagePublicKey(key);
 
 }

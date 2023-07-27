@@ -1,4 +1,3 @@
-import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
@@ -92,9 +91,10 @@ class Conversation {
       return decrypted.value;
     } 
 
+    // TODO: Reimplement
     if(decrypted.value == "no" && key != "key") {
       try {
-        decrypted.value = decryptAES(Encrypted.fromBase64(data), key);
+        //decrypted.value = decryptAES(Encrypted.fromBase64(data), key);
       } catch (e) {
         decrypted.value = "no";
       }

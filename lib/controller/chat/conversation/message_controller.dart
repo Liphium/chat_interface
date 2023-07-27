@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/chat/account/writing_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
@@ -80,9 +78,11 @@ class Message {
       false
     );
 
+    // TODO: Reimplement
+
     // Decrypt content
     final conversation = Get.find<ConversationController>().conversations[message.conversation]!;
-    message.content = decryptAES(Encrypted.fromBase64(message.content), conversation.key);
+    //message.content = decryptAES(Encrypted.fromBase64(message.content), conversation.key);
 
     // Parse content and check signature
     final contentJson = jsonDecode(message.content);
@@ -90,7 +90,7 @@ class Message {
     var key = message.sender == status.id.value ? asymmetricKeyPair.publicKey : Get.find<FriendController>().friends[message.sender]!.publicKey;
 
     // Check signature
-    message.verified = verifySignature(contentJson["s"], key, hashSha(contentJson["c"]));
+    //message.verified = verifySignature(contentJson["s"], key, hashSha(contentJson["c"]));
     message.content = contentJson["c"];
     message.type = contentJson["t"] ?? "text";
     message.attachments = contentJson["a"] ?? "";

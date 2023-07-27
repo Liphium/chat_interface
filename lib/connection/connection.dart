@@ -1,7 +1,5 @@
 
 import 'package:chat_interface/connection/impl/calls/calls_listener.dart';
-import 'package:chat_interface/connection/impl/friends/friend_listener.dart';
-import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -75,8 +73,6 @@ void startConnection(String node, String connectionToken) async {
   if(connector.initialized) return;
   connector.connect("ws://$node/gateway", connectionToken);
 
-  setupMessageListeners();
   setupSetupListeners();
-  setupFriendListeners();
   setupCallListeners();
 }

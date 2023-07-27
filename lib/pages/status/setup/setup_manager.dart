@@ -118,6 +118,6 @@ class SetupManager {
 
 
   void error(String error) {
-    Get.offAll(ErrorPage(title: error), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+    Get.find<TransitionController>().modelTransition(ErrorPage(title: error));
   }
 }

@@ -1,10 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';
-import 'package:pointycastle/export.dart';
 
 class FriendController extends GetxController {
   
@@ -39,7 +40,7 @@ class Friend {
 
   FriendData get entity => FriendData(id: id, key: key, name: name, tag: tag);
 
-  RSAPublicKey get publicKey => unpackagePublicKey(key);
+  Uint8List get publicKey => unpackagePublicKey(key);
 
   //* Remove friend
   void remove(RxBool loading) {
