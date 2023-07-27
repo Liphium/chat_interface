@@ -1,11 +1,8 @@
 import 'package:chat_interface/pages/chat/chat_page.dart';
-import 'package:chat_interface/pages/status/setup/account/conversation_setup.dart';
-import 'package:chat_interface/pages/status/setup/account/requests_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/settings_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/cluster_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/connection_setup.dart';
-import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/profile_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/updates_setup.dart';
@@ -49,15 +46,11 @@ class SetupManager {
     
     // Start fetching
     _steps.add(FetchSetup());
-
     _steps.add(UpdateSetup());
 
     // Setup account
     _steps.add(ProfileSetup());
     _steps.add(AccountSetup());
-    _steps.add(FriendsSetup());
-    _steps.add(RequestSetup());
-    _steps.add(ConversationSetup());
     _steps.add(SettingsSetup());
 
     // Setup encryption
@@ -112,7 +105,8 @@ class SetupManager {
       next(open: false);
       
     } else {
-    Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+      print("opening");
+      Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
     }
   }
 

@@ -6,6 +6,7 @@ import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/error/server_offline_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../util/web.dart';
 import 'cluster_setup.dart';
@@ -37,6 +38,8 @@ class ConnectionSetup extends Setup {
 
     nodeId = body["id"];
     nodeDomain = body["domain"];
+
+    await Future.delayed(500.ms);
 
     return null;
   }
