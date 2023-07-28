@@ -1,3 +1,4 @@
+import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
@@ -5,6 +6,7 @@ import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -29,6 +31,8 @@ class _ProfileState extends State<OwnProfile> {
   final TextEditingController _status = TextEditingController();
   final statusMessage = "".obs;
   final FocusNode _statusFocus = FocusNode();
+
+  final testLoading = false.obs;
 
   @override
   void dispose() {
@@ -244,10 +248,20 @@ class _ProfileState extends State<OwnProfile> {
 
                   //* Hide profile
                   ProfileButton(
-                    icon: Icons.visibility_off,
-                    label: 'profile.hide'.tr,
-                    onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
-                    loading: false.obs
+                    icon: Icons.hardware,
+                    label: 'profile.test'.tr,
+                    onTap: () async {
+                      testLoading.value = true;
+
+                      await postRq("/node/test", <String, dynamic>{
+                        "node": nodeId,
+                        "account": Get.find<StatusController>().id.value,
+                        "message": "test",
+                      });
+                      testLoading.value = false;
+
+                    },
+                    loading: testLoading
                   ),
                 ],
               ),

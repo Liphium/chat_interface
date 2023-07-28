@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';
@@ -21,26 +22,36 @@ class FriendController extends GetxController {
 }
 
 class Friend {
-  final String id;
-  final String name;
-  final String tag;
-  final String key;
+  String id;
+  String name;
+  String tag;
+  Uint8List publicKey;
+  Uint8List friendKey;
   var status = "-".obs;
   final statusType = 0.obs;
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, this.key, this.tag);
-  Friend.fromJson(Map<String, dynamic> json)
-      : id = json["id"],
-        name = json["name"],
-        key = json["key"],
-        tag = json["tag"];
+  Friend(this.id, this.name, this.tag, this.publicKey, this.friendKey);
 
-  FriendData get entity => FriendData(id: id, key: key, name: name, tag: tag);
-
-  Uint8List get publicKey => unpackagePublicKey(key);
+  Friend.system() : id = "system", name = "System", tag = "fjc", publicKey = Uint8List(0), friendKey = Uint8List(0);
+  Friend.me()
+        : id = '',
+          name = '',
+          tag = '',
+          publicKey = Uint8List(0),
+          friendKey = Uint8List(0) {
+    final StatusController controller = Get.find();
+    id = controller.id.value;
+    name = controller.name.value;
+    tag = controller.tag.value;
+  }
+  Friend.unknown(this.id) 
+        : name = 'fj-$id',
+          tag = 'tag',
+          publicKey = Uint8List(0),
+          friendKey = Uint8List(0);
 
   //* Remove friend
   void remove(RxBool loading) {
@@ -54,8 +65,8 @@ class Friend {
 
       if(event.data["success"] as bool) {
         
-        // Remove from database
-        await db.delete(db.friend).delete(entity);
+        // Remove from database TODO: Reimplement
+        //await db.delete(db.friend).delete(entity);
         Get.find<FriendController>().friends.remove(this);
 
         showMessage(SnackbarType.success, "friends.removed".trParams({"name": name}));

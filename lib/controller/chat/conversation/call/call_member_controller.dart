@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
@@ -34,7 +35,7 @@ class CallMemberController extends GetxController {
     if(participant is LocalParticipant) {
 
       StatusController controller = Get.find();
-      members[controller.id.value] = Member(Friend(controller.id.value, controller.name.value, "key", controller.tag.value), participant);
+      members[controller.id.value] = Member(Friend.me(), participant);
 
       return;
     }
@@ -44,7 +45,7 @@ class CallMemberController extends GetxController {
       return;
     }
 
-    final replacer = Friend("0", "fj-${participant.identity}", "key", "tag");
+    final replacer = Friend.unknown(participant.identity);
     final friend = Get.find<FriendController>().friends[int.parse(participant.identity)] ?? replacer;
 
     members[friend.id] = Member(friend, participant);

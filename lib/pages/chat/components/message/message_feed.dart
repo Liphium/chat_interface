@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
@@ -120,11 +122,11 @@ class _MessageFeedState extends State<MessageFeed> {
                       
                       case "text":
                         return MessageRenderer(message: message, self: self, last: last,
-                        sender: self ? Friend("1", statusController.name.value, "", statusController.tag.value) : sender);
+                        sender: self ? Friend("1", statusController.name.value, statusController.tag.value, Uint8List(0), Uint8List(0)) : sender);
 
                       case "call":
                         return CallMessageRenderer(message: message, self: self, last: last,
-                        sender: self ? Friend("1", statusController.name.value, "", statusController.tag.value) : sender);
+                        sender: self ? Friend("1", statusController.name.value, statusController.tag.value, Uint8List(0), Uint8List(0)) : sender);
                     }
 
                     return null;

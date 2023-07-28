@@ -1,6 +1,7 @@
 
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
-import 'package:chat_interface/theme/ui/conversation_add/conversation_add_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/friend_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
           
                         //* Open conversation add window
-                        Get.dialog(ConversationAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                        Get.dialog(FriendAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(defaultSpacing),

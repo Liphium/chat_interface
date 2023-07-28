@@ -19,17 +19,19 @@ class RequestController extends GetxController {
 
 class Request {
 
+  final String id;
   final String name;
   final String tag;
-  final String key;
-  final String id;
+  final Uint8List publicKey;
+  final Uint8List friendKey;
   final loading = false.obs;
 
-  Request(this.name, this.tag, this.key, this.id);
+  Request(this.id, this.name, this.tag, this.publicKey, this.friendKey);
   Request.fromJson(Map<String, dynamic> json)
       : name = json["name"],
         tag = json["tag"],
-        key = json["key"],
+        publicKey = unpackagePublicKey(json["publicKey"]),
+        friendKey = unpackagePublicKey(json["friendKey"]),
         id = json["id"];
 
   void accept({required Function() success}) {
@@ -41,8 +43,6 @@ class Request {
     }), waiter: () => loading.value = false);
   }
 
-  Friend get friend => Friend(id, name, key, tag);
-
-  Uint8List get publicKey => unpackagePublicKey(key);
+  Friend get friend => Friend(id, name, tag, publicKey, friendKey);
 
 }

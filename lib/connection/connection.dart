@@ -32,6 +32,7 @@ class Connector {
       },
       cancelOnError: false,
       onDone: () {
+        // TODO: Limit connection attempts
         print("restarting..");
         initialized = false;
         setupManager.restart();

@@ -61,7 +61,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text("friends.add".tr, style: theme.textTheme.titleMedium),
+                        Text("chat.create".tr, style: theme.textTheme.titleMedium),
             
                         Obx(() =>
                           Text("${_members.length}/100", style: theme.textTheme.bodyMedium)

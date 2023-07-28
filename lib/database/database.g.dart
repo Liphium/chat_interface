@@ -1258,18 +1258,25 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _keyMeta = const VerificationMeta('key');
-  @override
-  late final GeneratedColumn<String> key = GeneratedColumn<String>(
-      'key', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _tagMeta = const VerificationMeta('tag');
   @override
   late final GeneratedColumn<String> tag = GeneratedColumn<String>(
       'tag', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _publicKeyMeta =
+      const VerificationMeta('publicKey');
   @override
-  List<GeneratedColumn> get $columns => [id, name, key, tag];
+  late final GeneratedColumn<String> publicKey = GeneratedColumn<String>(
+      'public_key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _friendKeyMeta =
+      const VerificationMeta('friendKey');
+  @override
+  late final GeneratedColumn<String> friendKey = GeneratedColumn<String>(
+      'friend_key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, tag, publicKey, friendKey];
   @override
   String get aliasedName => _alias ?? 'friend';
   @override
@@ -1290,17 +1297,23 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('key')) {
-      context.handle(
-          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
-    } else if (isInserting) {
-      context.missing(_keyMeta);
-    }
     if (data.containsKey('tag')) {
       context.handle(
           _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
     } else if (isInserting) {
       context.missing(_tagMeta);
+    }
+    if (data.containsKey('public_key')) {
+      context.handle(_publicKeyMeta,
+          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
+    } else if (isInserting) {
+      context.missing(_publicKeyMeta);
+    }
+    if (data.containsKey('friend_key')) {
+      context.handle(_friendKeyMeta,
+          friendKey.isAcceptableOrUnknown(data['friend_key']!, _friendKeyMeta));
+    } else if (isInserting) {
+      context.missing(_friendKeyMeta);
     }
     return context;
   }
@@ -1315,10 +1328,12 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      key: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
       tag: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+      publicKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}public_key'])!,
+      friendKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}friend_key'])!,
     );
   }
 
@@ -1331,20 +1346,23 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
 class FriendData extends DataClass implements Insertable<FriendData> {
   final String id;
   final String name;
-  final String key;
   final String tag;
+  final String publicKey;
+  final String friendKey;
   const FriendData(
       {required this.id,
       required this.name,
-      required this.key,
-      required this.tag});
+      required this.tag,
+      required this.publicKey,
+      required this.friendKey});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
-    map['key'] = Variable<String>(key);
     map['tag'] = Variable<String>(tag);
+    map['public_key'] = Variable<String>(publicKey);
+    map['friend_key'] = Variable<String>(friendKey);
     return map;
   }
 
@@ -1352,8 +1370,9 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return FriendCompanion(
       id: Value(id),
       name: Value(name),
-      key: Value(key),
       tag: Value(tag),
+      publicKey: Value(publicKey),
+      friendKey: Value(friendKey),
     );
   }
 
@@ -1363,8 +1382,9 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return FriendData(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      key: serializer.fromJson<String>(json['key']),
       tag: serializer.fromJson<String>(json['tag']),
+      publicKey: serializer.fromJson<String>(json['publicKey']),
+      friendKey: serializer.fromJson<String>(json['friendKey']),
     );
   }
   @override
@@ -1373,76 +1393,91 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'key': serializer.toJson<String>(key),
       'tag': serializer.toJson<String>(tag),
+      'publicKey': serializer.toJson<String>(publicKey),
+      'friendKey': serializer.toJson<String>(friendKey),
     };
   }
 
-  FriendData copyWith({String? id, String? name, String? key, String? tag}) =>
+  FriendData copyWith(
+          {String? id,
+          String? name,
+          String? tag,
+          String? publicKey,
+          String? friendKey}) =>
       FriendData(
         id: id ?? this.id,
         name: name ?? this.name,
-        key: key ?? this.key,
         tag: tag ?? this.tag,
+        publicKey: publicKey ?? this.publicKey,
+        friendKey: friendKey ?? this.friendKey,
       );
   @override
   String toString() {
     return (StringBuffer('FriendData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('key: $key, ')
-          ..write('tag: $tag')
+          ..write('tag: $tag, ')
+          ..write('publicKey: $publicKey, ')
+          ..write('friendKey: $friendKey')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, key, tag);
+  int get hashCode => Object.hash(id, name, tag, publicKey, friendKey);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is FriendData &&
           other.id == this.id &&
           other.name == this.name &&
-          other.key == this.key &&
-          other.tag == this.tag);
+          other.tag == this.tag &&
+          other.publicKey == this.publicKey &&
+          other.friendKey == this.friendKey);
 }
 
 class FriendCompanion extends UpdateCompanion<FriendData> {
   final Value<String> id;
   final Value<String> name;
-  final Value<String> key;
   final Value<String> tag;
+  final Value<String> publicKey;
+  final Value<String> friendKey;
   final Value<int> rowid;
   const FriendCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.key = const Value.absent(),
     this.tag = const Value.absent(),
+    this.publicKey = const Value.absent(),
+    this.friendKey = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FriendCompanion.insert({
     required String id,
     required String name,
-    required String key,
     required String tag,
+    required String publicKey,
+    required String friendKey,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
-        key = Value(key),
-        tag = Value(tag);
+        tag = Value(tag),
+        publicKey = Value(publicKey),
+        friendKey = Value(friendKey);
   static Insertable<FriendData> custom({
     Expression<String>? id,
     Expression<String>? name,
-    Expression<String>? key,
     Expression<String>? tag,
+    Expression<String>? publicKey,
+    Expression<String>? friendKey,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (key != null) 'key': key,
       if (tag != null) 'tag': tag,
+      if (publicKey != null) 'public_key': publicKey,
+      if (friendKey != null) 'friend_key': friendKey,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1450,14 +1485,16 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   FriendCompanion copyWith(
       {Value<String>? id,
       Value<String>? name,
-      Value<String>? key,
       Value<String>? tag,
+      Value<String>? publicKey,
+      Value<String>? friendKey,
       Value<int>? rowid}) {
     return FriendCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      key: key ?? this.key,
       tag: tag ?? this.tag,
+      publicKey: publicKey ?? this.publicKey,
+      friendKey: friendKey ?? this.friendKey,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1471,11 +1508,14 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (key.present) {
-      map['key'] = Variable<String>(key.value);
-    }
     if (tag.present) {
       map['tag'] = Variable<String>(tag.value);
+    }
+    if (publicKey.present) {
+      map['public_key'] = Variable<String>(publicKey.value);
+    }
+    if (friendKey.present) {
+      map['friend_key'] = Variable<String>(friendKey.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1488,8 +1528,9 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     return (StringBuffer('FriendCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('key: $key, ')
           ..write('tag: $tag, ')
+          ..write('publicKey: $publicKey, ')
+          ..write('friendKey: $friendKey, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
