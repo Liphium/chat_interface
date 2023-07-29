@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:chat_interface/connection/connection.dart';
@@ -6,6 +7,7 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/util/snackbar.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 part 'key_container.dart';
@@ -51,6 +53,20 @@ class Friend {
         : name = 'fj-$id',
           tag = 'tag',
           keyStorage = KeyStorageV1.empty();
+
+  // Convert to a stored payload for the server
+  String toStoredPayload() {
+
+    final reqPayload = <String, dynamic>{
+      "rq": false,
+      "id": id,
+      "name": name,
+      "tag": tag,
+    };
+    reqPayload.addAll(keyStorage.toJson());
+
+    return jsonEncode(reqPayload);
+  }
 
   //* Remove friend
   void remove(RxBool loading) {

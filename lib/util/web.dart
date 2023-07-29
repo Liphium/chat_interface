@@ -69,3 +69,14 @@ String getSessionFromJWT(String token) {
   return jsonDecode(decoded)['ses'];
 }
 
+// Creates a stored action with the given name and payload
+String storedAction(String name, Map<String, dynamic> payload) {
+
+  final prefixJson = <String, dynamic>{
+    "a": name,
+  };
+  prefixJson.addAll(payload);
+
+  return jsonEncode(prefixJson);
+}
+

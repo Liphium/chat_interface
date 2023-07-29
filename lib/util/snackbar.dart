@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/current/notification_controller.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/error_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,11 @@ void showMessage(SnackbarType type, String message) {
 
 void showErrorPopup(String title, String message) {
   Get.dialog(ErrorWindow(title: title.tr, error: message.tr));
+}
+
+Future<bool> showConfirmPopup(ConfirmWindow window) async {
+  await Get.dialog(window);
+  return true;
 }
 
 class NotificationRenderer extends StatefulWidget {
