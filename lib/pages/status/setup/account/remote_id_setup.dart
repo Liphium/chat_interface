@@ -40,6 +40,7 @@ class RemoteIDSetup extends Setup {
     // Generate 10 remote IDs
     for(int i = 0; i < 10; i++) {
       final res = await addNewRemoteID();
+      print(randomRemoteID());
       if(res != null) {
         return ErrorPage(title: res.tr);
       }

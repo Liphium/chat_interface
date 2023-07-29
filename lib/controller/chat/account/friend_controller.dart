@@ -8,6 +8,8 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';
 
+part 'key_container.dart';
+
 class FriendController extends GetxController {
   
   final friends = <String, Friend>{}.obs;
@@ -25,23 +27,21 @@ class Friend {
   String id;
   String name;
   String tag;
-  Uint8List publicKey;
-  Uint8List friendKey;
+  KeyStorage keyStorage;
   var status = "-".obs;
   final statusType = 0.obs;
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, this.tag, this.publicKey, this.friendKey);
+  Friend(this.id, this.name, this.tag, this.keyStorage);
 
-  Friend.system() : id = "system", name = "System", tag = "fjc", publicKey = Uint8List(0), friendKey = Uint8List(0);
+  Friend.system() : id = "system", name = "System", tag = "fjc", keyStorage = KeyStorageV1.empty();
   Friend.me()
         : id = '',
           name = '',
           tag = '',
-          publicKey = Uint8List(0),
-          friendKey = Uint8List(0) {
+          keyStorage = KeyStorageV1.empty() {
     final StatusController controller = Get.find();
     id = controller.id.value;
     name = controller.name.value;
@@ -50,8 +50,7 @@ class Friend {
   Friend.unknown(this.id) 
         : name = 'fj-$id',
           tag = 'tag',
-          publicKey = Uint8List(0),
-          friendKey = Uint8List(0);
+          keyStorage = KeyStorageV1.empty();
 
   //* Remove friend
   void remove(RxBool loading) {

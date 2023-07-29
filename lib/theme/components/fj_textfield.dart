@@ -6,11 +6,12 @@ import 'package:get/get.dart';
 class FJTextField extends StatefulWidget {
 
   final bool obscureText;
+  final bool animation;
   final String? hintText;
   final String? errorText;
   final TextEditingController? controller;
 
-  const FJTextField({super.key, this.controller, this.hintText, this.errorText, this.obscureText = false});
+  const FJTextField({super.key, this.controller, this.hintText, this.errorText, this.animation = true, this.obscureText = false});
 
   @override
   State<FJTextField> createState() => _FJTextFieldState();
@@ -48,7 +49,7 @@ class _FJTextFieldState extends State<FJTextField> {
           },
         )
       ],
-      target: _focus.value ? 1 : 0,
+      target: _focus.value && widget.animation ? 1 : 0,
       child: Material(
         color: theme.colorScheme.background,
         borderRadius: BorderRadius.circular(defaultSpacing),

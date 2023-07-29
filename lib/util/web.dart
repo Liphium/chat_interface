@@ -68,3 +68,4 @@ String getSessionFromJWT(String token) {
   
   return jsonDecode(decoded)['ses'];
 }
+

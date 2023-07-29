@@ -1,11 +1,8 @@
-import 'dart:ui';
-
-import 'package:chat_interface/controller/chat/account/friend_controller.dart';
-import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friends_page.dart';
-import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/controller/chat/account/requests_controller.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 import '../../../util/vertical_spacing.dart';
@@ -22,8 +19,6 @@ class FriendAddWindow extends StatefulWidget {
 
 class _ConversationAddWindowState extends State<FriendAddWindow> {
 
-  final _members = <String>[].obs;
-
   final _controller = TextEditingController();
 
   @override
@@ -35,8 +30,6 @@ class _ConversationAddWindowState extends State<FriendAddWindow> {
   @override
   Widget build(BuildContext context) {
 
-    ThemeData theme = Theme.of(context);
-
     return Stack(
       children: [
         Positioned(
@@ -46,30 +39,40 @@ class _ConversationAddWindowState extends State<FriendAddWindow> {
             width: 300,
             child: Material(
               elevation: 2.0,
-              borderRadius: BorderRadius.circular(defaultSpacing),
+              color: Get.theme.colorScheme.onBackground,
+              borderRadius: BorderRadius.circular(dialogBorderRadius),
               child: Padding(
-                padding: const EdgeInsets.all(defaultSpacing),
+                padding: const EdgeInsets.all(dialogPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
             
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text("friend.add".tr, style: theme.textTheme.titleMedium),
+                    Text("friend.add".tr, style: Get.theme.textTheme.titleMedium),
             
-                        Obx(() =>
-                          Text("${_members.length}/100", style: theme.textTheme.bodyMedium)
+                    verticalSpacing(sectionSpacing),
+            
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        FJTextField(
+                          controller: _controller,
+                          hintText: "input.username".tr,  
+                        ),
+                        verticalSpacing(defaultSpacing),
+                        FJElevatedLoadingButton(
+                          loading: requestsLoading,
+                          onTap: () {
+                            var args = _controller.text.split("#");
+                            if (args.length != 2) {
+                              showErrorPopup("request.not.found", "request.not.found.text");
+                              return;
+                            }
+
+                            newFriendRequest(args[0], args[1]);
+                          }, 
+                          label: "request.send",
                         )
                       ],
-                    ),
-            
-                    verticalSpacing(defaultSpacing * 0.5),
-            
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 300),
-                      child: const Placeholder()
                     )
                   ],
                 ),

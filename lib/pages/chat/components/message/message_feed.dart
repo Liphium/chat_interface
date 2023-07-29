@@ -122,11 +122,11 @@ class _MessageFeedState extends State<MessageFeed> {
                       
                       case "text":
                         return MessageRenderer(message: message, self: self, last: last,
-                        sender: self ? Friend("1", statusController.name.value, statusController.tag.value, Uint8List(0), Uint8List(0)) : sender);
+                        sender: self ? Friend.me() : sender);
 
                       case "call":
                         return CallMessageRenderer(message: message, self: self, last: last,
-                        sender: self ? Friend("1", statusController.name.value, statusController.tag.value, Uint8List(0), Uint8List(0)) : sender);
+                        sender: self ? Friend.me() : sender);
                     }
 
                     return null;

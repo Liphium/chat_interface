@@ -1,5 +1,6 @@
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class FJElevatedButton extends StatelessWidget {
 
@@ -31,6 +32,36 @@ class FJElevatedButton extends StatelessWidget {
           child: child,
         ),
       ),
+    );
+  }
+}
+
+class FJElevatedLoadingButton extends StatelessWidget {
+
+  final Function() onTap;
+  final String label;
+  final RxBool loading;
+
+  const FJElevatedLoadingButton({super.key, required this.onTap, required this.label, required this.loading});
+
+  @override
+  Widget build(BuildContext context) {
+    return FJElevatedButton(
+      onTap: () => loading.value ? null : onTap(), 
+      child: Center(
+        child: Obx(() => 
+        loading.value ? 
+        SizedBox(
+          height: Get.theme.textTheme.titleMedium!.fontSize! + defaultSpacing,
+          width: Get.theme.textTheme.titleMedium!.fontSize! + defaultSpacing,
+          child: const Padding(
+            padding: EdgeInsets.all(defaultSpacing * 0.25),
+            child: CircularProgressIndicator(strokeWidth: 3.0,),
+          ),
+        ) : 
+        Text(label, style: Get.theme.textTheme.titleMedium)
+      ),
+      )  
     );
   }
 }

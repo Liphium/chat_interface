@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
@@ -30,12 +31,6 @@ class InstanceSetup extends Setup {
 
     if(instances.isEmpty || !isDebug) {
       setupInstance("default");
-      return null;
-    }
-
-    if (instances.length == 1) {
-      print(path.basename(path.withoutExtension(instances.first.path)));
-      await setupInstance(path.basename(path.withoutExtension(instances.first.path)));
       return null;
     }
 
@@ -112,13 +107,16 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                     var instance = widget.instances[index];
                     final base = path.basename(path.withoutExtension(instance.path));
           
-                    return FJElevatedButton(
-                      onTap: () => setupInstance(path.basename(path.withoutExtension(instance.path)), next: true),
-                      child: Center(child: Text(base, style: Get.textTheme.labelLarge)),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: elementSpacing),
+                      child: FJElevatedButton(
+                        onTap: () => setupInstance(path.basename(path.withoutExtension(instance.path)), next: true),
+                        child: Center(child: Text(base, style: Get.textTheme.labelLarge)),
+                      ),
                     );
                   },
                 ),
-                verticalSpacing(sectionSpacing),
+                verticalSpacing(sectionSpacing - elementSpacing),
                 FJTextField(
                   controller: _controller,
                   hintText: 'setup.instance.name'.tr,

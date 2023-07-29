@@ -87,7 +87,7 @@ class Message {
     // Parse content and check signature
     final contentJson = jsonDecode(message.content);
     final status = Get.find<StatusController>();
-    var key = message.sender == status.id.value ? asymmetricKeyPair.publicKey : Get.find<FriendController>().friends[message.sender]!.publicKey;
+    //var key = message.sender == status.id.value ? asymmetricKeyPair.publicKey : Get.find<FriendController>().friends[message.sender]!.keyStorage;
 
     // Check signature
     //message.verified = verifySignature(contentJson["s"], key, hashSha(contentJson["c"]));

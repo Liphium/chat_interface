@@ -16,9 +16,12 @@ Widget horizontalSpacing(double width) {
 }
 
 const defaultSpacing = 8.0;
+const elementSpacing = defaultSpacing * 0.5;
 const sectionSpacing = defaultSpacing * 2;
 const modelBorderRadius = defaultSpacing * 1.5;
 const modelPadding = defaultSpacing * 2;
+const dialogBorderRadius = defaultSpacing * 1.5;
+const dialogPadding = defaultSpacing * 1.5;
 
 String formatTime(DateTime time) {
   final now = DateTime.now();
