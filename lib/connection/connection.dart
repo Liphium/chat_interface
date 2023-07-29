@@ -2,6 +2,7 @@
 import 'package:chat_interface/connection/impl/calls/calls_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'impl/setup_listener.dart';
@@ -22,7 +23,7 @@ class Connector {
     connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
 
     connection.stream.listen((msg) {
-        print(msg);
+        sendLog(msg);
         Event event = Event.fromJson(msg);
 
         if(_handlers[event.name] == null) return;
@@ -34,7 +35,7 @@ class Connector {
       cancelOnError: false,
       onDone: () {
         // TODO: Limit connection attempts
-        print("restarting..");
+        sendLog("restarting..");
         initialized = false;
         setupManager.restart();
       },
@@ -42,7 +43,7 @@ class Connector {
   }
 
   void sendMessage(String message) {
-    print(message);
+    sendLog(message);
     connection.sink.add(message);
   }
 

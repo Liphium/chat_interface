@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/message_controller.dart';

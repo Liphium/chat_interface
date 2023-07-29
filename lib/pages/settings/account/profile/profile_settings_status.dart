@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';

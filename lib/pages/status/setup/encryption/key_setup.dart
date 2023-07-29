@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/util/web.dart';
@@ -9,6 +10,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 
 import '../setup_manager.dart';
 
+late SecureKey profileKey;
 late KeyPair asymmetricKeyPair;
 
 class KeySetup extends Setup {
@@ -24,15 +26,16 @@ class KeySetup extends Setup {
       return const ErrorPage(title: "key.error");
     }
 
-    final body = jsonDecode(publicRes.body);
+    final pubBody = jsonDecode(publicRes.body);
     var privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
 
-    if(!body["success"]) {
+    if(!pubBody["success"]) {
 
       final pair = generateAsymmetricKeyPair();
 
       final packagedPriv = packagePrivateKey(pair.secretKey);
       final packagedPub = packagePublicKey(pair.publicKey);
+      final genProfileKey = randomSymmetricKey();
 
       // Set public key on the server
       var res = await postRqAuthorized("/account/keys/public/set", <String, dynamic>{
@@ -43,6 +46,10 @@ class KeySetup extends Setup {
         return const ErrorPage(title: "key.error");
       }
 
+      res = await postRqAuthorized("/account/keys/profile/set", <String, dynamic>{
+        "key": encryptAsymmetricAnonymous(pair.publicKey, packageSymmetricKey(genProfileKey))
+      });
+
       if(res.statusCode != 200 || !jsonDecode(res.body)["success"]) {
         return const ErrorPage(title: "key.error");
       }
@@ -50,7 +57,7 @@ class KeySetup extends Setup {
       // Insert private key into the database
       privateKey = SettingData(key: "private_key", value: packagedPriv);
       await db.into(db.setting).insertOnConflictUpdate(privateKey);
-      body["key"] = packagedPub;
+      pubBody["key"] = packagedPub;
 
     } else {
 
@@ -60,7 +67,20 @@ class KeySetup extends Setup {
 
     }
 
-    asymmetricKeyPair = toKeyPair(body["key"], privateKey.value);
+    // Grab profile key from server
+    final res = await postRqAuthorized("/account/keys/profile/get", <String, dynamic>{});
+
+    if(res.statusCode != 200) {
+      return const ErrorPage(title: "key.error");
+    }
+
+    final json = jsonDecode(res.body);
+    if(!json["success"]) {
+      return const ErrorPage(title: "key.error");
+    }
+
+    profileKey = unpackageSymmetricKey(decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, json["key"]));
+    asymmetricKeyPair = toKeyPair(pubBody["key"], privateKey.value);
 
     return null;
   }

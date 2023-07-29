@@ -1263,13 +1263,19 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   late final GeneratedColumn<String> tag = GeneratedColumn<String>(
       'tag', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _vaultIdMeta =
+      const VerificationMeta('vaultId');
+  @override
+  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+      'vault_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
       'keys', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, name, tag, keys];
+  List<GeneratedColumn> get $columns => [id, name, tag, vaultId, keys];
   @override
   String get aliasedName => _alias ?? 'friend';
   @override
@@ -1296,6 +1302,12 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
     } else if (isInserting) {
       context.missing(_tagMeta);
     }
+    if (data.containsKey('vault_id')) {
+      context.handle(_vaultIdMeta,
+          vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
+    } else if (isInserting) {
+      context.missing(_vaultIdMeta);
+    }
     if (data.containsKey('keys')) {
       context.handle(
           _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
@@ -1317,6 +1329,8 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       tag: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+      vaultId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
       keys: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
     );
@@ -1332,11 +1346,13 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   final String id;
   final String name;
   final String tag;
+  final String vaultId;
   final String keys;
   const FriendData(
       {required this.id,
       required this.name,
       required this.tag,
+      required this.vaultId,
       required this.keys});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1344,6 +1360,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
     map['tag'] = Variable<String>(tag);
+    map['vault_id'] = Variable<String>(vaultId);
     map['keys'] = Variable<String>(keys);
     return map;
   }
@@ -1353,6 +1370,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       id: Value(id),
       name: Value(name),
       tag: Value(tag),
+      vaultId: Value(vaultId),
       keys: Value(keys),
     );
   }
@@ -1364,6 +1382,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       tag: serializer.fromJson<String>(json['tag']),
+      vaultId: serializer.fromJson<String>(json['vaultId']),
       keys: serializer.fromJson<String>(json['keys']),
     );
   }
@@ -1374,15 +1393,22 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'tag': serializer.toJson<String>(tag),
+      'vaultId': serializer.toJson<String>(vaultId),
       'keys': serializer.toJson<String>(keys),
     };
   }
 
-  FriendData copyWith({String? id, String? name, String? tag, String? keys}) =>
+  FriendData copyWith(
+          {String? id,
+          String? name,
+          String? tag,
+          String? vaultId,
+          String? keys}) =>
       FriendData(
         id: id ?? this.id,
         name: name ?? this.name,
         tag: tag ?? this.tag,
+        vaultId: vaultId ?? this.vaultId,
         keys: keys ?? this.keys,
       );
   @override
@@ -1391,13 +1417,14 @@ class FriendData extends DataClass implements Insertable<FriendData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('tag: $tag, ')
+          ..write('vaultId: $vaultId, ')
           ..write('keys: $keys')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, tag, keys);
+  int get hashCode => Object.hash(id, name, tag, vaultId, keys);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1405,6 +1432,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
           other.id == this.id &&
           other.name == this.name &&
           other.tag == this.tag &&
+          other.vaultId == this.vaultId &&
           other.keys == this.keys);
 }
 
@@ -1412,12 +1440,14 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   final Value<String> id;
   final Value<String> name;
   final Value<String> tag;
+  final Value<String> vaultId;
   final Value<String> keys;
   final Value<int> rowid;
   const FriendCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.tag = const Value.absent(),
+    this.vaultId = const Value.absent(),
     this.keys = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1425,16 +1455,19 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     required String id,
     required String name,
     required String tag,
+    required String vaultId,
     required String keys,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
         tag = Value(tag),
+        vaultId = Value(vaultId),
         keys = Value(keys);
   static Insertable<FriendData> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? tag,
+    Expression<String>? vaultId,
     Expression<String>? keys,
     Expression<int>? rowid,
   }) {
@@ -1442,6 +1475,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (tag != null) 'tag': tag,
+      if (vaultId != null) 'vault_id': vaultId,
       if (keys != null) 'keys': keys,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1451,12 +1485,14 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
       {Value<String>? id,
       Value<String>? name,
       Value<String>? tag,
+      Value<String>? vaultId,
       Value<String>? keys,
       Value<int>? rowid}) {
     return FriendCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       tag: tag ?? this.tag,
+      vaultId: vaultId ?? this.vaultId,
       keys: keys ?? this.keys,
       rowid: rowid ?? this.rowid,
     );
@@ -1474,6 +1510,9 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     if (tag.present) {
       map['tag'] = Variable<String>(tag.value);
     }
+    if (vaultId.present) {
+      map['vault_id'] = Variable<String>(vaultId.value);
+    }
     if (keys.present) {
       map['keys'] = Variable<String>(keys.value);
     }
@@ -1489,6 +1528,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('tag: $tag, ')
+          ..write('vaultId: $vaultId, ')
           ..write('keys: $keys, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1501,17 +1541,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $RequestTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _selfMeta = const VerificationMeta('self');
-  @override
-  late final GeneratedColumn<bool> self =
-      GeneratedColumn<bool>('self', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: true,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("self" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }));
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -1527,13 +1556,30 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   late final GeneratedColumn<String> tag = GeneratedColumn<String>(
       'tag', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _selfMeta = const VerificationMeta('self');
+  @override
+  late final GeneratedColumn<bool> self =
+      GeneratedColumn<bool>('self', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: true,
+          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+            SqlDialect.sqlite: 'CHECK ("self" IN (0, 1))',
+            SqlDialect.mysql: '',
+            SqlDialect.postgres: '',
+          }));
+  static const VerificationMeta _vaultIdMeta =
+      const VerificationMeta('vaultId');
+  @override
+  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+      'vault_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
       'keys', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [self, id, name, tag, keys];
+  List<GeneratedColumn> get $columns => [id, name, tag, self, vaultId, keys];
   @override
   String get aliasedName => _alias ?? 'request';
   @override
@@ -1543,12 +1589,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('self')) {
-      context.handle(
-          _selfMeta, self.isAcceptableOrUnknown(data['self']!, _selfMeta));
-    } else if (isInserting) {
-      context.missing(_selfMeta);
-    }
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
@@ -1566,6 +1606,18 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
     } else if (isInserting) {
       context.missing(_tagMeta);
     }
+    if (data.containsKey('self')) {
+      context.handle(
+          _selfMeta, self.isAcceptableOrUnknown(data['self']!, _selfMeta));
+    } else if (isInserting) {
+      context.missing(_selfMeta);
+    }
+    if (data.containsKey('vault_id')) {
+      context.handle(_vaultIdMeta,
+          vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
+    } else if (isInserting) {
+      context.missing(_vaultIdMeta);
+    }
     if (data.containsKey('keys')) {
       context.handle(
           _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
@@ -1581,14 +1633,16 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   RequestData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RequestData(
-      self: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}self'])!,
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       tag: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+      self: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}self'])!,
+      vaultId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
       keys: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
     );
@@ -1601,34 +1655,38 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
 }
 
 class RequestData extends DataClass implements Insertable<RequestData> {
-  final bool self;
   final String id;
   final String name;
   final String tag;
+  final bool self;
+  final String vaultId;
   final String keys;
   const RequestData(
-      {required this.self,
-      required this.id,
+      {required this.id,
       required this.name,
       required this.tag,
+      required this.self,
+      required this.vaultId,
       required this.keys});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['self'] = Variable<bool>(self);
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
     map['tag'] = Variable<String>(tag);
+    map['self'] = Variable<bool>(self);
+    map['vault_id'] = Variable<String>(vaultId);
     map['keys'] = Variable<String>(keys);
     return map;
   }
 
   RequestCompanion toCompanion(bool nullToAbsent) {
     return RequestCompanion(
-      self: Value(self),
       id: Value(id),
       name: Value(name),
       tag: Value(tag),
+      self: Value(self),
+      vaultId: Value(vaultId),
       keys: Value(keys),
     );
   }
@@ -1637,10 +1695,11 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RequestData(
-      self: serializer.fromJson<bool>(json['self']),
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       tag: serializer.fromJson<String>(json['tag']),
+      self: serializer.fromJson<bool>(json['self']),
+      vaultId: serializer.fromJson<String>(json['vaultId']),
       keys: serializer.fromJson<String>(json['keys']),
     );
   }
@@ -1648,105 +1707,122 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'self': serializer.toJson<bool>(self),
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'tag': serializer.toJson<String>(tag),
+      'self': serializer.toJson<bool>(self),
+      'vaultId': serializer.toJson<String>(vaultId),
       'keys': serializer.toJson<String>(keys),
     };
   }
 
   RequestData copyWith(
-          {bool? self, String? id, String? name, String? tag, String? keys}) =>
+          {String? id,
+          String? name,
+          String? tag,
+          bool? self,
+          String? vaultId,
+          String? keys}) =>
       RequestData(
-        self: self ?? this.self,
         id: id ?? this.id,
         name: name ?? this.name,
         tag: tag ?? this.tag,
+        self: self ?? this.self,
+        vaultId: vaultId ?? this.vaultId,
         keys: keys ?? this.keys,
       );
   @override
   String toString() {
     return (StringBuffer('RequestData(')
-          ..write('self: $self, ')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('tag: $tag, ')
+          ..write('self: $self, ')
+          ..write('vaultId: $vaultId, ')
           ..write('keys: $keys')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(self, id, name, tag, keys);
+  int get hashCode => Object.hash(id, name, tag, self, vaultId, keys);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RequestData &&
-          other.self == this.self &&
           other.id == this.id &&
           other.name == this.name &&
           other.tag == this.tag &&
+          other.self == this.self &&
+          other.vaultId == this.vaultId &&
           other.keys == this.keys);
 }
 
 class RequestCompanion extends UpdateCompanion<RequestData> {
-  final Value<bool> self;
   final Value<String> id;
   final Value<String> name;
   final Value<String> tag;
+  final Value<bool> self;
+  final Value<String> vaultId;
   final Value<String> keys;
   final Value<int> rowid;
   const RequestCompanion({
-    this.self = const Value.absent(),
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.tag = const Value.absent(),
+    this.self = const Value.absent(),
+    this.vaultId = const Value.absent(),
     this.keys = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RequestCompanion.insert({
-    required bool self,
     required String id,
     required String name,
     required String tag,
+    required bool self,
+    required String vaultId,
     required String keys,
     this.rowid = const Value.absent(),
-  })  : self = Value(self),
-        id = Value(id),
+  })  : id = Value(id),
         name = Value(name),
         tag = Value(tag),
+        self = Value(self),
+        vaultId = Value(vaultId),
         keys = Value(keys);
   static Insertable<RequestData> custom({
-    Expression<bool>? self,
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? tag,
+    Expression<bool>? self,
+    Expression<String>? vaultId,
     Expression<String>? keys,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (self != null) 'self': self,
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (tag != null) 'tag': tag,
+      if (self != null) 'self': self,
+      if (vaultId != null) 'vault_id': vaultId,
       if (keys != null) 'keys': keys,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   RequestCompanion copyWith(
-      {Value<bool>? self,
-      Value<String>? id,
+      {Value<String>? id,
       Value<String>? name,
       Value<String>? tag,
+      Value<bool>? self,
+      Value<String>? vaultId,
       Value<String>? keys,
       Value<int>? rowid}) {
     return RequestCompanion(
-      self: self ?? this.self,
       id: id ?? this.id,
       name: name ?? this.name,
       tag: tag ?? this.tag,
+      self: self ?? this.self,
+      vaultId: vaultId ?? this.vaultId,
       keys: keys ?? this.keys,
       rowid: rowid ?? this.rowid,
     );
@@ -1755,9 +1831,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (self.present) {
-      map['self'] = Variable<bool>(self.value);
-    }
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
@@ -1766,6 +1839,12 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     }
     if (tag.present) {
       map['tag'] = Variable<String>(tag.value);
+    }
+    if (self.present) {
+      map['self'] = Variable<bool>(self.value);
+    }
+    if (vaultId.present) {
+      map['vault_id'] = Variable<String>(vaultId.value);
     }
     if (keys.present) {
       map['keys'] = Variable<String>(keys.value);
@@ -1779,10 +1858,11 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   @override
   String toString() {
     return (StringBuffer('RequestCompanion(')
-          ..write('self: $self, ')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('tag: $tag, ')
+          ..write('self: $self, ')
+          ..write('vaultId: $vaultId, ')
           ..write('keys: $keys, ')
           ..write('rowid: $rowid')
           ..write(')'))

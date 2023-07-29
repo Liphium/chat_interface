@@ -1,6 +1,5 @@
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 

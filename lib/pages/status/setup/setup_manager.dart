@@ -12,6 +12,7 @@ import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart'
 import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/pages/status/starting_page.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -89,7 +90,7 @@ class SetupManager {
       }
 
       message.value = setup.name;
-      print("Setup: ${setup.name}");
+      sendLog("Setup: ${setup.name}");
 
       Widget? ready;
       try {
@@ -109,7 +110,7 @@ class SetupManager {
       next(open: false);
       
     } else {
-      print("opening");
+      sendLog("opening");
       Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
     }
   }

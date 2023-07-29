@@ -1,6 +1,5 @@
 
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
-import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/friend_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

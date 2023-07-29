@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,7 +22,7 @@ class InstanceSetup extends Setup {
   Future<Widget?> load() async {
 
     // Get list of instances
-    print((await getApplicationSupportDirectory()).path);
+    sendLog((await getApplicationSupportDirectory()).path);
     final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
     final dir = Directory(instanceFolder);
 

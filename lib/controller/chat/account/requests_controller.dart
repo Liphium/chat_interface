@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -110,17 +112,19 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
   final encryptedPayload = encryptAsymmetricAnonymous(publicKey, storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
     "tag": controller.tag.value,
+    "s": asymmetricSignature(asymmetricKeyPair.secretKey, "$name#$tag"),
+    "pf": packageSymmetricKey(profileKey),
   }));
 
-  // Store in friends vault
-  final request = Request(id, name, tag, KeyStorageV1(publicKey));
-  print(encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, request.toStoredPayload()));
+  // Store in friends vault 
+  var request = Request(id, name, tag, "", KeyStorage(publicKey, profileKey));
+  sendLog(encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, request.toStoredPayload()));
   var res = await postRqAuthorized("/account/friends/add", <String, String>{
     "payload": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, request.toStoredPayload()), // Maybe use authenticated encryption here?
   });
 
   if (res.statusCode != 200) {
-    print("Error: ${res.body}");
+    sendLog("Error: ${res.body}");
     showErrorPopup("error.network", "error.network.text");
     requestsLoading.value = false;
     return;
@@ -132,6 +136,9 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
     requestsLoading.value = false;
     return;
   }
+
+  // This had me in a mental breakdown, but then I ended up fixing it in 10 minutes LMFAO
+  request.vaultId = json["id"];
 
   // Send stored action
   res = await postRqAuth("/account/stored_actions/send", <String, dynamic>{
@@ -166,20 +173,17 @@ class Request {
   final String id;
   final String name;
   final String tag;
+  String vaultId;
   final KeyStorage keyStorage;
   final loading = false.obs;
 
-  Request.empty() : id = "", name = "", tag = "", keyStorage = KeyStorageV1.empty();
-  Request(this.id, this.name, this.tag, this.keyStorage);
-  Request.fromJson(Map<String, dynamic> json)
-      : name = json["name"],
-        tag = json["tag"],
-        keyStorage = KeyStorageV1.fromJson(json),
-        id = json["id"];
+  Request.empty() : id = "", name = "", tag = "", vaultId = "", keyStorage = KeyStorage.empty();
+  Request(this.id, this.name, this.tag, this.vaultId, this.keyStorage);
   Request.fromEntity(RequestData data)
       : name = data.name,
         tag = data.tag,
-        keyStorage = KeyStorageV1.fromJson(jsonDecode(data.keys)),
+        vaultId = data.id,
+        keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
         id = data.id;
 
   // Convert to a payload for the friends vault (on the server)
@@ -200,10 +204,11 @@ class Request {
     id: id,
     name: name,
     tag: tag,
+    vaultId: vaultId,
     keys: jsonEncode(keyStorage.toJson()),
     self: self
   );
 
-  Friend get friend => Friend(id, name, tag, keyStorage);
+  Friend get friend => Friend(id, name, tag, vaultId, keyStorage);
 
 }

@@ -15,7 +15,7 @@ class FriendsSetup extends Setup {
     await Get.find<RequestController>().loadRequests();
     await Get.find<FriendController>().loadFriends();
 
-    // TODO: Load friend vault changes from server
+    // TODO: Pull all friends from vault on the server and do a on conflict update thingy
 
     return null;
   }
