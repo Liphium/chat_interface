@@ -3,7 +3,7 @@ import 'package:chat_interface/connection/impl/calls/calls_listener.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'impl/setup/setup_listener.dart';
+import 'impl/setup_listener.dart';
 import 'messaging.dart';
 
 int nodeId = 0;

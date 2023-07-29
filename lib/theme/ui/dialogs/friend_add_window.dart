@@ -1,8 +1,10 @@
 import 'package:chat_interface/controller/chat/account/requests_controller.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/ui/containers/success_container.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 import '../../../util/vertical_spacing.dart';
@@ -20,6 +22,7 @@ class FriendAddWindow extends StatefulWidget {
 class _ConversationAddWindowState extends State<FriendAddWindow> {
 
   final _controller = TextEditingController();
+  final revealSuccess = false.obs;
 
   @override
   void dispose() {
@@ -54,6 +57,33 @@ class _ConversationAddWindowState extends State<FriendAddWindow> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        Obx(() =>
+                          Animate(
+                            effects: [
+                              CustomEffect(
+                                duration: 250.ms,
+                                builder: (context, value, child) {
+                                  return SizedBox(
+                                    height: (50 + defaultSpacing) * value,
+                                    child: child,
+                                  );
+                                },
+                              ),
+                              ScaleEffect(
+                                begin: const Offset(0.0, 0.0),
+                                end: const Offset(1.0, 1.0),
+                                duration: 500.ms,
+                                curve: const ElasticOutCurve(0.9),
+                                delay: 250.ms,
+                              )
+                            ],
+                            target: revealSuccess.value ? 1 : 0,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: defaultSpacing),
+                              child: SuccessContainer(text: "request.sent".tr)
+                            ),
+                          )
+                        ),
                         FJTextField(
                           controller: _controller,
                           hintText: "input.username".tr,  
@@ -68,7 +98,10 @@ class _ConversationAddWindowState extends State<FriendAddWindow> {
                               return;
                             }
 
-                            newFriendRequest(args[0], args[1]);
+                            newFriendRequest(args[0], args[1], () {
+                              revealSuccess.value = true;
+                              _controller.clear();
+                            });
                           }, 
                           label: "request.send",
                         )

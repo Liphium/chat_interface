@@ -3,11 +3,13 @@ import 'dart:typed_data';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 import 'friend_controller.dart';
@@ -21,11 +23,33 @@ class RequestController extends GetxController {
     requests.clear();
   }
 
+  Future<bool> loadRequests() async {
+    for(RequestData data in await db.request.select().get()) {
+      if(data.self) {
+        requestsSent.add(Request.fromEntity(data));
+      } else {
+        requests.add(Request.fromEntity(data));
+      }
+    }
+
+    return true;
+  }
+
+  void addSentRequest(Request request) {
+    requestsSent.add(request);
+    db.request.insertOnConflictUpdate(request.entity(true));
+  }
+
+  void addRequest(Request request) {
+    requests.add(request);
+    db.request.insertOnConflictUpdate(request.entity(false));
+  }
+
 }
 
 final requestsLoading = false.obs;
 
-void newFriendRequest(String name, String tag) async {
+void newFriendRequest(String name, String tag, Function() success) async {
 
   requestsLoading.value = true;
 
@@ -69,7 +93,7 @@ void newFriendRequest(String name, String tag) async {
     }),
     onConfirm: () async {
       declined = false;
-      _sendFriendRequest(controller, name, tag, id, publicKey);
+      _sendFriendRequest(controller, name, tag, id, publicKey, success);
     },
     onDecline: () {
       declined = true;
@@ -81,7 +105,7 @@ void newFriendRequest(String name, String tag) async {
   return;
 }
 
-void _sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey) async {
+void _sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Function() success) async {
   
   // Encrypt friend request
   final encryptedPayload = encryptAsymmetricAnonymous(publicKey, storedAction("fr_rq", <String, dynamic>{
@@ -127,6 +151,10 @@ void _sendFriendRequest(StatusController controller, String name, String tag, St
     return;
   }
 
+  RequestController requestController = Get.find();
+  requestController.requestsSent.add(request);
+
+  success();
   requestsLoading.value = false;
   
   return;
@@ -146,6 +174,11 @@ class Request {
         tag = json["tag"],
         keyStorage = KeyStorageV1.fromJson(json),
         id = json["id"];
+  Request.fromEntity(RequestData data)
+      : name = data.name,
+        tag = data.tag,
+        keyStorage = KeyStorageV1.fromJson(jsonDecode(data.keys)),
+        id = data.id;
 
   // Convert to a payload for the friends vault (on the server)
   String toStoredPayload() {
@@ -160,6 +193,14 @@ class Request {
 
     return jsonEncode(reqPayload);
   }
+
+  RequestData entity(bool self) => RequestData(
+    id: id,
+    name: name,
+    tag: tag,
+    keys: jsonEncode(keyStorage.toJson()),
+    self: self
+  );
 
   Friend get friend => Friend(id, name, tag, keyStorage);
 
