@@ -29,9 +29,12 @@ class FriendController extends GetxController {
     friends.clear();
   }
 
+  // Add friend (also sends data to server vault)
   void add(Friend friend) {
     friends[friend.id] = friend;
     db.friend.insertOnConflictUpdate(friend.entity());
+
+    // TODO: Save in server vault
   }
 }
 
