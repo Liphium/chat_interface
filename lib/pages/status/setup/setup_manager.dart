@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/chat/chat_page.dart';
+import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/settings_setup.dart';
@@ -54,6 +55,7 @@ class SetupManager {
     _steps.add(AccountSetup());
     _steps.add(RemoteIDSetup());
     _steps.add(SettingsSetup());
+    _steps.add(FriendsSetup());
 
     // Setup encryption
     _steps.add(KeySetup());

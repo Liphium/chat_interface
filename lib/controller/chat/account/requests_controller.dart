@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -93,7 +92,7 @@ void newFriendRequest(String name, String tag, Function() success) async {
     }),
     onConfirm: () async {
       declined = false;
-      _sendFriendRequest(controller, name, tag, id, publicKey, success);
+      sendFriendRequest(controller, name, tag, id, publicKey, success);
     },
     onDecline: () {
       declined = true;
@@ -105,7 +104,7 @@ void newFriendRequest(String name, String tag, Function() success) async {
   return;
 }
 
-void _sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Function() success) async {
+void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Function() success) async {
   
   // Encrypt friend request
   final encryptedPayload = encryptAsymmetricAnonymous(publicKey, storedAction("fr_rq", <String, dynamic>{
@@ -115,11 +114,13 @@ void _sendFriendRequest(StatusController controller, String name, String tag, St
 
   // Store in friends vault
   final request = Request(id, name, tag, KeyStorageV1(publicKey));
-  var res = await postRqAuthorized("/account/friends/add", <String, dynamic>{
+  print(encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, request.toStoredPayload()));
+  var res = await postRqAuthorized("/account/friends/add", <String, String>{
     "payload": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, request.toStoredPayload()), // Maybe use authenticated encryption here?
   });
 
   if (res.statusCode != 200) {
+    print("Error: ${res.body}");
     showErrorPopup("error.network", "error.network.text");
     requestsLoading.value = false;
     return;
@@ -168,6 +169,7 @@ class Request {
   final KeyStorage keyStorage;
   final loading = false.obs;
 
+  Request.empty() : id = "", name = "", tag = "", keyStorage = KeyStorageV1.empty();
   Request(this.id, this.name, this.tag, this.keyStorage);
   Request.fromJson(Map<String, dynamic> json)
       : name = json["name"],

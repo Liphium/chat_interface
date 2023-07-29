@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
@@ -7,14 +6,24 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/util/snackbar.dart';
-import 'package:flutter/material.dart';
+import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 part 'key_container.dart';
 
 class FriendController extends GetxController {
   
+  // TODO: Implement database
+
   final friends = <String, Friend>{}.obs;
+
+  Future<bool> loadFriends() async {
+    for(FriendData data in await db.friend.select().get()) {
+      friends[data.id] = Friend.fromEntity(data);
+    }
+
+    return true;
+  }
 
   void reset() {
     friends.clear();
@@ -22,6 +31,7 @@ class FriendController extends GetxController {
 
   void add(Friend friend) {
     friends[friend.id] = friend;
+    db.friend.insertOnConflictUpdate(friend.entity());
   }
 }
 
@@ -53,6 +63,12 @@ class Friend {
         : name = 'fj-$id',
           tag = 'tag',
           keyStorage = KeyStorageV1.empty();
+
+  Friend.fromEntity(FriendData data)
+        : id = data.id,
+          name = data.name,
+          tag = data.tag,
+          keyStorage = KeyStorageV1.fromJson(jsonDecode(data.keys));
 
   // Convert to a stored payload for the server
   String toStoredPayload() {
@@ -90,4 +106,11 @@ class Friend {
       }
     });
   }
+
+  FriendData entity() => FriendData(
+    id: id,
+    name: name,
+    tag: tag,
+    keys: jsonEncode(keyStorage.toJson()),
+  );
 }

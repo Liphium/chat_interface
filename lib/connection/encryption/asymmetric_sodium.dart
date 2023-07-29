@@ -32,7 +32,7 @@ String decryptAsymmetricNormal(Uint8List publicKey, SecureKey secretKey, String 
     publicKey: publicKey,
     secretKey: secretKey,
   );
-  return decrypted.toString();
+  return String.fromCharCodes(decrypted);
 }
 
 String packagePublicKey(Uint8List publicKey) {
@@ -66,7 +66,7 @@ String decryptAsymmetricAnonymous(Uint8List publicKey, SecureKey secretKey, Stri
     publicKey: publicKey,
     secretKey: secretKey,
   );
-  return decrypted.toString();
+  return String.fromCharCodes(decrypted);
 }
 
 /// Sign a message using the given secret key
