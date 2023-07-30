@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -28,6 +29,7 @@ class KeySetup extends Setup {
 
     final pubBody = jsonDecode(publicRes.body);
     var privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
+    sendLog(privateKey);
 
     if(!pubBody["success"]) {
 
@@ -79,8 +81,8 @@ class KeySetup extends Setup {
       return const ErrorPage(title: "key.error");
     }
 
-    profileKey = unpackageSymmetricKey(decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, json["key"]));
     asymmetricKeyPair = toKeyPair(pubBody["key"], privateKey.value);
+    profileKey = unpackageSymmetricKey(decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, json["key"]));
 
     return null;
   }

@@ -7,7 +7,6 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -50,7 +49,7 @@ class RequestController extends GetxController {
 
 final requestsLoading = false.obs;
 
-void newFriendRequest(String name, String tag, Function() success) async {
+void newFriendRequest(String name, String tag, Function(String) success) async {
 
   requestsLoading.value = true;
 
@@ -83,14 +82,12 @@ void newFriendRequest(String name, String tag, Function() success) async {
   final id = json["account"];
   final publicKey = unpackagePublicKey(json["key"]);
 
-
   //* Prompt with confirm popup
   var declined = true;
   await showConfirmPopup(ConfirmWindow(
     title: "request.confirm.title".tr,
     text: "request.confirm.text".trParams(<String, String>{
-      "name": name,
-      "tag": tag,
+      "username": "$name#$tag",
     }),
     onConfirm: () async {
       declined = false;
@@ -106,42 +103,30 @@ void newFriendRequest(String name, String tag, Function() success) async {
   return;
 }
 
-void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Function() success) async {
+void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Function(String) success) async {
   
   // Encrypt friend request
   final encryptedPayload = encryptAsymmetricAnonymous(publicKey, storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
     "tag": controller.tag.value,
-    "s": asymmetricSignature(asymmetricKeyPair.secretKey, "$name#$tag"),
+    "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, "$name#$tag"),
     "pf": packageSymmetricKey(profileKey),
   }));
 
   // Store in friends vault 
   var request = Request(id, name, tag, "", KeyStorage(publicKey, profileKey));
-  sendLog(encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, request.toStoredPayload()));
-  var res = await postRqAuthorized("/account/friends/add", <String, String>{
-    "payload": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, request.toStoredPayload()), // Maybe use authenticated encryption here?
-  });
-
-  if (res.statusCode != 200) {
-    sendLog("Error: ${res.body}");
-    showErrorPopup("error.network", "error.network.text");
-    requestsLoading.value = false;
-    return;
-  }
-
-  var json = jsonDecode(res.body);
-  if(!json["success"]) {
-    showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
+  final vaultId = await storeInFriendsVault(request.toStoredPayload(), errorPopup: true, prefix: "request");
+  
+  if(vaultId == null) {
     requestsLoading.value = false;
     return;
   }
 
   // This had me in a mental breakdown, but then I ended up fixing it in 10 minutes LMFAO
-  request.vaultId = json["id"];
+  request.vaultId = vaultId;
 
   // Send stored action
-  res = await postRqAuth("/account/stored_actions/send", <String, dynamic>{
+  final res = await postRqAuth("/account/stored_actions/send", <String, dynamic>{
     "account": id,
     "payload": encryptedPayload,
   }, randomRemoteID());
@@ -152,19 +137,30 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
     return;
   }
 
-  json = jsonDecode(res.body);
+  final json = jsonDecode(res.body);
   if(!json["success"]) {
     showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
     requestsLoading.value = false;
     return;
   }
 
-  RequestController requestController = Get.find();
-  requestController.requestsSent.add(request);
+  // Accept friend request if there is one from the other user
+  final requestController = Get.find<RequestController>();
+  final requestSent = requestController.requests.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
+  if(requestSent.id != "hi") {
 
-  success();
-  requestsLoading.value = false;
-  
+    requestController.requests.removeWhere((element) => element.id == id);
+    Get.find<FriendController>().addFromRequest(request);
+    success("request.accepted");
+  } else {
+
+    // Add to sent requests
+    RequestController requestController = Get.find();
+    requestController.requestsSent.add(request);
+    success("request.sent");
+  }
+
+  requestsLoading.value = false;  
   return;
 }
 
@@ -177,7 +173,7 @@ class Request {
   final KeyStorage keyStorage;
   final loading = false.obs;
 
-  Request.empty() : id = "", name = "", tag = "", vaultId = "", keyStorage = KeyStorage.empty();
+  Request.mock(this.id) : name = "", tag = "", vaultId = "", keyStorage = KeyStorage.empty();
   Request(this.id, this.name, this.tag, this.vaultId, this.keyStorage);
   Request.fromEntity(RequestData data)
       : name = data.name,

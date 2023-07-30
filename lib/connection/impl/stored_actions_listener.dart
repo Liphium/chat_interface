@@ -65,20 +65,22 @@ Future<bool> _handleFriendRequestAction(Map<String, dynamic> json) async {
     return true;
   }
 
-  // Check signature
+  // Check "signature"
   final publicKey = unpackagePublicKey(resJson["key"]); 
   final statusController = Get.find<StatusController>();
   final signedMessage = "${statusController.name.value}#${statusController.tag.value}";
-  if(verifySignature(publicKey, signedMessage, json["s"])) {
+  final result = decryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, json["s"]);
+  if(!result.success || result.message != signedMessage) {
     sendLog("invalid friend request: invalid signature");
     return true;
   }
 
   // Check if the current account already sent this account a friend request (-> add friend)
   final id = resJson["account"];
-  var request = Get.find<RequestController>().requestsSent.firstWhere((element) => element.id == id, orElse: () => Request.empty());
+  var request = Get.find<RequestController>().requestsSent.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
+  sendLog("${request.id} | $id");
 
-  if(request != Request.empty()) {
+  if(request.id != "hi") {
 
     // Add friend
     final controller = Get.find<FriendController>();
@@ -93,6 +95,12 @@ Future<bool> _handleFriendRequestAction(Map<String, dynamic> json) async {
     return true;
   }
 
+  // Check if the guy is already a friend
+  if(Get.find<FriendController>().friends.values.any((element) => element.id == id)) {
+    sendLog("invalid friend request: already a friend");
+    return true;
+  }
+
   // Add friend request to vault
   final profileKey = unpackageSymmetricKey(json["pf"]);
   request = Request(
@@ -102,23 +110,15 @@ Future<bool> _handleFriendRequestAction(Map<String, dynamic> json) async {
     "",
     KeyStorage(publicKey, profileKey)
   );
-  res = await postRqAuthorized("/account/friends/add", <String, dynamic>{
-    "payload": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, request.toStoredPayload())
-  });
 
-  if(res.statusCode != 200) {
-    sendLog("couldn't store in vault: invalid request");
+  final vaultId = await storeInFriendsVault(request.toStoredPayload());
+  if(vaultId == null) {
+    sendLog("couldn't store in vault: something happened");
     return true;
   }
 
-  resJson = jsonDecode(res.body);
-  if(!resJson["success"]) {
-    sendLog("couldn't store in vault: ${json["error"]}");
-    return true;
-  }
-  
   // Add friend request
-  request.vaultId = resJson["id"];
+  request.vaultId = vaultId;
   Get.find<RequestController>().addRequest(request);
 
   return true;

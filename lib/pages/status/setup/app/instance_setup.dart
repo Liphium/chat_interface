@@ -6,6 +6,7 @@ import 'package:chat_interface/theme/components/transitions/transition_container
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -30,7 +31,7 @@ class InstanceSetup extends Setup {
     final instances = await dir.list().toList();
 
     if(instances.isEmpty || !isDebug) {
-      setupInstance("default");
+      await setupInstance("default");
       return null;
     }
 
@@ -48,7 +49,8 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
   final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
   final file = File(path.join(dbFolder, '$name.db'));
   db = Database(NativeDatabase.createInBackground(file, logStatements: true));
-  databaseInitialized = true;
+
+  sendLog("going on");
 
   // Create tables
   var _ = await (db.select(db.setting)).get();

@@ -22,7 +22,6 @@ dependencies:
   crypto: any
   http: any
   animations: any
-  encrypt: any
   pointycastle: any
   livekit_client: any
   logging: any
@@ -37,6 +36,7 @@ dev_dependencies:
   drift_dev: any
   build_runner: any
   flutter_lints: any
+  test: ^1.24.1
 
 flutter:
   uses-material-design: true

@@ -1,27 +1,29 @@
 import 'dart:convert';
 
 import 'package:chat_interface/main.dart';
-import 'package:encrypt/encrypt.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
-Encrypted encryptSymmetric(String data, String key) {
+String encryptSymmetric(String data, SecureKey key, [Sodium? sd]) {
 
-  final encrypter = Encrypter(AES(Key.fromUtf8(key), mode: AESMode.cbc));
-  final iv = IV.fromLength(16);
-
-  return encrypter.encrypt(data, iv: iv);
+  final sodium = sd ?? sodiumLib;
+  final nonce = sodium.randombytes.buf(sodium.crypto.secretBox.nonceBytes);
+  final plainTextBytes = data.toCharArray().unsignedView();
+  return base64Encode(nonce + sodium.crypto.secretBox.easy(key: key, nonce: nonce, message: plainTextBytes));
 }
 
-String decryptSymmetric(Encrypted data, String key) {
+String decryptSymmetric(String data, SecureKey key, [Sodium? sd]) {
 
-  final encrypter = Encrypter(AES(Key.fromUtf8(key), mode: AESMode.cbc));
-  final iv = IV.fromLength(16);
+  final sodium = sd ?? sodiumLib;
+  final byteData = base64Decode(data);
+  final nonce = byteData.sublist(0, sodium.crypto.secretBox.nonceBytes);
+  final encrypted = byteData.sublist(sodium.crypto.secretBox.nonceBytes);
 
-  return encrypter.decrypt(data, iv: iv);
+  return String.fromCharCodes(sodium.crypto.secretBox.openEasy(key: key, nonce: nonce, cipherText: encrypted));
 }
 
 
-SecureKey randomSymmetricKey() {
+SecureKey randomSymmetricKey([Sodium? sd]) {
+  final Sodium sodium = sd ?? sodiumLib;
   return sodium.crypto.secretBox.keygen();
 }
 
@@ -29,6 +31,7 @@ String packageSymmetricKey(SecureKey key) {
   return base64Encode(key.extractBytes());
 }
 
-SecureKey unpackageSymmetricKey(String key) {
+SecureKey unpackageSymmetricKey(String key, [Sodium? sd]) {
+  final Sodium sodium = sd ?? sodiumLib;
   return SecureKey.fromList(sodium, base64Decode(key));
 }

@@ -23,6 +23,7 @@ class _ConversationAddWindowState extends State<FriendAddWindow> {
 
   final _controller = TextEditingController();
   final revealSuccess = false.obs;
+  var message = "";
 
   @override
   void dispose() {
@@ -80,7 +81,7 @@ class _ConversationAddWindowState extends State<FriendAddWindow> {
                             target: revealSuccess.value ? 1 : 0,
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: defaultSpacing),
-                              child: SuccessContainer(text: "request.sent".tr)
+                              child: SuccessContainer(text: message.tr)
                             ),
                           )
                         ),
@@ -98,7 +99,8 @@ class _ConversationAddWindowState extends State<FriendAddWindow> {
                               return;
                             }
 
-                            newFriendRequest(args[0], args[1], () {
+                            newFriendRequest(args[0], args[1], (message) {
+                              this.message = message;
                               revealSuccess.value = true;
                               _controller.clear();
                             });

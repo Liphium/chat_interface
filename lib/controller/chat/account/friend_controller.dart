@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/account/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -14,6 +16,7 @@ import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 part 'key_container.dart';
+part 'friends_vault.dart';
 
 class FriendController extends GetxController {
   
@@ -35,39 +38,21 @@ class FriendController extends GetxController {
   Future<bool> addFromRequest(Request request) async {
 
     // Remove request from server
-    var res = await postRqAuthorized("/account/friends/remove", <String, dynamic>{
-      "id": request.vaultId,
-    });
-
-    if(res.statusCode != 200) {
+    if(!(await removeFromFriendsVault(request.vaultId))) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
       return false;
     }
 
-    var json = jsonDecode(res.body);
-    if(!json["success"]) {
-      add(request.friend);
-      return false;
-    }
-
     // Add friend to vault
-    res = await postRqAuthorized("/account/friends/add", <String, dynamic>{
-      "payload": request.friend.toStoredPayload(),
-    });
+    final id = await storeInFriendsVault(request.friend.toStoredPayload());
 
-    if(res.statusCode != 200) {
-      add(request.friend);
-      return false;
-    }
-
-    json = jsonDecode(res.body);
-    if(!json["success"]) {
-      add(request.friend);
+    if(id == null) {
+      add(request.friend); // probably already in the vault (from other device)
       return false;
     }
 
     // Add friend to database with vault id
-    request.friend.vaultId = json["id"];
+    request.friend.vaultId = id;
     add(request.friend);
 
     return true;
