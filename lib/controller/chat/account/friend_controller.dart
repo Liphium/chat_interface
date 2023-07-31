@@ -20,7 +20,9 @@ part 'friends_vault.dart';
 
 class FriendController extends GetxController {
   
-  final friends = <String, Friend>{}.obs;
+  final friends = <String, Friend>{
+    "system": Friend.system(),
+  }.obs;
 
   Future<bool> loadFriends() async {
     for(FriendData data in await db.friend.select().get()) {

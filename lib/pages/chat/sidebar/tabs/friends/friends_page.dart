@@ -1,5 +1,8 @@
 
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
+import 'package:chat_interface/controller/chat/account/requests_controller.dart';
+import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friend_button.dart';
+import 'package:chat_interface/pages/chat/sidebar/tabs/friends/request_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/friend_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -22,12 +25,11 @@ class _FriendsPageState extends State<FriendsPage> {
 
   @override
   Widget build(BuildContext context) {
-    FriendController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
     return Column(
       children: [
-
+    
         SizedBox(
           height: 48,
           child: Padding(
@@ -53,7 +55,7 @@ class _FriendsPageState extends State<FriendsPage> {
                       onTap: () {
                         final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
           
-                        //* Open conversation add window
+                        //* Open friend add window
                         Get.dialog(FriendAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
                       },
                       child: Padding(
@@ -70,81 +72,125 @@ class _FriendsPageState extends State<FriendsPage> {
         
         //* Friends list
         Expanded(
-          child: Obx(() => controller.friends.isNotEmpty ? 
-          
-          Obx(() => 
-            ListView.builder(
-              padding: const EdgeInsets.all(defaultSpacing),
-              itemCount: controller.friends.length,
-              itemBuilder: (context, index) {
-                Friend friend = controller.friends.values.elementAt(index);
-
-                //* Friend item
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(10),
-                    child: MouseRegion(
-                      onHover: (event) => position.value = event.position,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        hoverColor: Theme.of(context)
-                            .colorScheme
-                            .secondaryContainer
-                            .withAlpha(150),
-                        splashColor: Theme.of(context).hoverColor,
-
-                        //* Show profile
-                        onTap: () => Get.dialog(Profile(position: position.value, friend: friend)),
-
-                        //* Friend info
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: defaultSpacing,
-                              vertical: defaultSpacing * 0.5),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: RepaintBoundary(
+            child: GetX<FriendController>(
+              builder: (friendController) {
+                final friendsEmpty = friendController.friends.isEmpty;
+                return GetX<RequestController>(
+                  builder: (requestController) {
+                    final empty = requestController.requests.isEmpty && friendsEmpty && requestController.requestsSent.isEmpty;
+                    if(empty) {
+                      return Center(
+                        child: Text('friends.empty'.tr, style: theme.textTheme.titleMedium),
+                      );
+                    }
+            
+                    //* Friends, requests, sent requests list
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                      child: Column(
+                        children: [
+                          verticalSpacing(defaultSpacing),
+                          //* Requests
+                          Visibility(
+                            visible: requestController.requests.isNotEmpty,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.person,
-                                      size: 30,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                    const SizedBox(width: 10),
-                                    Text(friend.name, style: theme.textTheme.titleMedium),
-                                  ],
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                                  child: Text("friends.requests".tr, style: theme.textTheme.labelLarge),
                                 ),
-
-                                //* Friend actions
-                                Row(
-                                  children: [
-
-                                    //* Add to call
-                                    IconButton(
-                                      icon: Icon(Icons.add_call,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary),
-                                      onPressed: () {},
-                                    ),
-                                  ],
+                                verticalSpacing(elementSpacing),
+                                Builder(
+                                  builder: (context) {
+                                    if (requestController.requests.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: requestController.requests.map((request) {
+                                        return RequestButton(request: request);
+                                      }).toList(),
+                                    );
+                                  },
                                 ),
-                              ]),
-                        ),
+                                verticalSpacing(sectionSpacing),
+                              ],
+                            )
+                          ),
+                              
+                          //* Sent requests
+                          Visibility(
+                            visible: requestController.requestsSent.isNotEmpty,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                                  child: Text("friends.requestsSent".tr, style: theme.textTheme.labelLarge),
+                                ),                                
+                                verticalSpacing(elementSpacing),
+                                Builder(
+                                  builder: (context) {
+                                    if (requestController.requestsSent.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: requestController.requestsSent.map((request) {
+                                        return RequestButton(request: request);
+                                      }).toList(),
+                                    );
+                                  },
+                                ),
+                                verticalSpacing(sectionSpacing),
+                              ],
+                            )
+                          ),
+                              
+                          //* Friends
+                          Visibility(
+                            visible: friendController.friends.isNotEmpty,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                                  child: Text("friends".tr, style: theme.textTheme.labelLarge),
+                                ),
+                                verticalSpacing(elementSpacing),
+                                Builder(
+                                  builder: (context) {
+                                    if (friendController.friends.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: friendController.friends.values.map((friend) {
+                                        return FriendButton(friend: friend, position: position);
+                                      }).toList(),
+                                    );
+                                  },
+                                ),
+                                verticalSpacing(sectionSpacing),
+                              ],
+                            )
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
-            )
-          ) :
-          
-          //* No friends
-          Center(
-            child: Text('friends.empty'.tr, style: theme.textTheme.titleMedium),
-          )),
+            ),
+          ),
         ),
       ],
     );

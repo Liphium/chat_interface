@@ -16,8 +16,8 @@ import 'friend_controller.dart';
 
 class RequestController extends GetxController {
 
-  final requestsSent = <Request>[].obs;
-  final requests = <Request>[].obs;
+  final requestsSent = <Request>[Request.mock("test")].obs;
+  final requests = <Request>[Request.mock("deine")].obs;
 
   void reset() {
     requests.clear();
@@ -173,7 +173,7 @@ class Request {
   final KeyStorage keyStorage;
   final loading = false.obs;
 
-  Request.mock(this.id) : name = "", tag = "", vaultId = "", keyStorage = KeyStorage.empty();
+  Request.mock(this.id) : name = "fj-$id", tag = "tag", vaultId = "", keyStorage = KeyStorage.empty();
   Request(this.id, this.name, this.tag, this.vaultId, this.keyStorage);
   Request.fromEntity(RequestData data)
       : name = data.name,

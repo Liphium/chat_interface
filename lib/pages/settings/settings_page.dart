@@ -50,6 +50,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
                       final current = SettingLabel.values[index-1];
 
+                      //* Sidebar buttons
                       return Padding(
                         padding: const EdgeInsets.only(top: defaultSpacing),
                         child: Column(
@@ -96,6 +97,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 )
               ),
+
+              //* Content
               Flexible(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 900),

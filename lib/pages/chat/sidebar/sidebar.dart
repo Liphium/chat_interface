@@ -2,7 +2,7 @@ import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/conversations/conversations_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friends_page.dart';
-import 'package:chat_interface/pages/chat/sidebar/tabs/requests/requests_page.dart';
+import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,7 +19,7 @@ class _SidebarState extends State<Sidebar> {
   var map = <String, Widget>{
     'chat.all': const ConversationsPage(),
     'chat.friends': const FriendsPage(),
-    'chat.everyone': const RequestsPage(),
+    'chat.everyone': const SettingsPage(),
   };
 
   @override
