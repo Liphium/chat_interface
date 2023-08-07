@@ -22,7 +22,7 @@ void setupStoredActionListener() {
     final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, event.data["payload"]);
 
     try {
-      processStoredAction(payload);
+      processStoredAction(event.data["id"], payload);
     } catch(e) {
       sendLog("something weird happened: error while processing stored action payload");
       sendLog(e);
@@ -32,21 +32,21 @@ void setupStoredActionListener() {
 
 }
 
-Future<bool> processStoredAction(String payload) async {
+Future<bool> processStoredAction(String id, String payload) async {
   
   final json = jsonDecode(payload);
   switch(json["a"]) {
     
     // Handle friend requests
     case "fr_rq":
-      await _handleFriendRequestAction(json);
+      await _handleFriendRequestAction(id, json);
       break;
   }
 
   return true;
 }
 
-Future<bool> _handleFriendRequestAction(Map<String, dynamic> json) async {
+Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> json) async {
 
   // Get friend by name and tag
   var res = await postRqAuth("/account/stored_actions/details", {
@@ -108,6 +108,7 @@ Future<bool> _handleFriendRequestAction(Map<String, dynamic> json) async {
     json["name"],
     json["tag"],
     "",
+    actionId,
     KeyStorage(publicKey, profileKey)
   );
 
@@ -120,6 +121,26 @@ Future<bool> _handleFriendRequestAction(Map<String, dynamic> json) async {
   // Add friend request
   request.vaultId = vaultId;
   Get.find<RequestController>().addRequest(request);
+
+  return true;
+}
+
+Future<bool> deleteStoredAction(String id) async {
+  
+  final res = await postRqAuthorized("/account/stored_actions/delete", {
+    "id": id
+  });
+
+  if(res.statusCode != 200) {
+    sendLog("couldn't delete stored action: invalid request");
+    return false;
+  }
+
+  final json = jsonDecode(res.body);
+  if(!json["success"]) {
+    sendLog("couldn't delete stored action: ${json["error"]}");
+    return false;
+  }
 
   return true;
 }

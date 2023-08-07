@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
@@ -16,8 +17,8 @@ import 'friend_controller.dart';
 
 class RequestController extends GetxController {
 
-  final requestsSent = <Request>[Request.mock("test")].obs;
-  final requests = <Request>[Request.mock("deine")].obs;
+  final requestsSent = <Request>[].obs;
+  final requests = <Request>[].obs;
 
   void reset() {
     requests.clear();
@@ -43,6 +44,16 @@ class RequestController extends GetxController {
   void addRequest(Request request) {
     requests.add(request);
     db.request.insertOnConflictUpdate(request.entity(false));
+  }
+
+  void deleteSentRequest(Request request) {
+    requestsSent.remove(request);
+    db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
+  }
+
+  void deleteRequest(Request request) {
+    requests.remove(request);
+    db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
   }
 
 }
@@ -114,7 +125,7 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
   }));
 
   // Store in friends vault 
-  var request = Request(id, name, tag, "", KeyStorage(publicKey, profileKey));
+  var request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey));
   final vaultId = await storeInFriendsVault(request.toStoredPayload(), errorPopup: true, prefix: "request");
   
   if(vaultId == null) {
@@ -149,14 +160,14 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
   final requestSent = requestController.requests.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
   if(requestSent.id != "hi") {
 
-    requestController.requests.removeWhere((element) => element.id == id);
+    requestController.deleteRequest(requestSent);
     Get.find<FriendController>().addFromRequest(request);
     success("request.accepted");
   } else {
 
     // Add to sent requests
     RequestController requestController = Get.find();
-    requestController.requestsSent.add(request);
+    requestController.addSentRequest(request);
     success("request.sent");
   }
 
@@ -170,15 +181,17 @@ class Request {
   final String name;
   final String tag;
   String vaultId;
+  String storedActionId;
   final KeyStorage keyStorage;
   final loading = false.obs;
 
-  Request.mock(this.id) : name = "fj-$id", tag = "tag", vaultId = "", keyStorage = KeyStorage.empty();
-  Request(this.id, this.name, this.tag, this.vaultId, this.keyStorage);
+  Request.mock(this.id) : name = "fj-$id", tag = "tag", vaultId = "", storedActionId = "", keyStorage = KeyStorage.empty();
+  Request(this.id, this.name, this.tag, this.vaultId, this.storedActionId, this.keyStorage);
   Request.fromEntity(RequestData data)
       : name = data.name,
         tag = data.tag,
         vaultId = data.id,
+        storedActionId = data.storedActionId,
         keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
         id = data.id;
 
@@ -201,10 +214,42 @@ class Request {
     name: name,
     tag: tag,
     vaultId: vaultId,
+    storedActionId: storedActionId,
     keys: jsonEncode(keyStorage.toJson()),
     self: self
   );
 
   Friend get friend => Friend(id, name, tag, vaultId, keyStorage);
+
+  // Accept friend request
+  void accept(Function(String) success) {
+    sendFriendRequest(Get.find<StatusController>(), name, tag, id, keyStorage.publicKey, (msg) async {
+      await deleteStoredAction(storedActionId);
+      success(msg);
+    });
+  }
+
+  // Decline friend request
+  void ignore() async {
+    
+    // Delete from friends vault
+    await removeFromFriendsVault(vaultId);
+    await deleteStoredAction(storedActionId);
+
+    // Delete from requests
+    final requestController = Get.find<RequestController>();
+    requestController.deleteRequest(this);
+  }
+
+  // Cancel friend request (only for sent requests)
+  void cancel() async {
+
+    // Delete from friends vault
+    await removeFromFriendsVault(vaultId);
+
+    // Delete from sent requests
+    final requestController = Get.find<RequestController>();
+    requestController.deleteSentRequest(this);
+  }
 
 }

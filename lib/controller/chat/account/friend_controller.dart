@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/account/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -20,9 +21,7 @@ part 'friends_vault.dart';
 
 class FriendController extends GetxController {
   
-  final friends = <String, Friend>{
-    "system": Friend.system(),
-  }.obs;
+  final friends = <String, Friend>{}.obs;
 
   Future<bool> loadFriends() async {
     for(FriendData data in await db.friend.select().get()) {
@@ -45,6 +44,9 @@ class FriendController extends GetxController {
       return false;
     }
 
+    // Remove stored action from server
+    await deleteStoredAction(request.storedActionId);
+    
     // Add friend to vault
     final id = await storeInFriendsVault(request.friend.toStoredPayload());
 

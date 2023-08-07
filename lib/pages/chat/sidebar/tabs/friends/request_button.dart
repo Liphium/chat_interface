@@ -6,9 +6,10 @@ import 'package:get/get.dart';
 
 class RequestButton extends StatefulWidget {
   
+  final bool self; // If the request was sent by the user
   final Request request;
 
-  const RequestButton({super.key, required this.request});
+  const RequestButton({super.key, required this.request, required this.self});
 
   @override
   State<RequestButton> createState() => _RequestButtonState();
@@ -17,6 +18,30 @@ class RequestButton extends StatefulWidget {
 class _RequestButtonState extends State<RequestButton> {
   @override
   Widget build(BuildContext context) {
+
+    //* Accept/decline buttons
+    final children = <Widget>[
+      IconButton(
+        icon: Icon(Icons.close,
+            color: Theme.of(context)
+                .colorScheme
+                .primary),
+        onPressed: () => sendLog("request denied"),
+      )
+    ];
+
+    // Add accept button if request is for self
+    if(!widget.self) {
+      children.insert(0, horizontalSpacing(defaultSpacing * 0.5));
+      children.insert(0, IconButton(
+        icon: Icon(Icons.check,
+            color: Theme.of(context)
+                .colorScheme
+                .primary),
+        onPressed: () => sendLog("request accepted"),
+      ));
+    }
+
     return Material(
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
@@ -70,27 +95,7 @@ class _RequestButtonState extends State<RequestButton> {
 
                       //* Accept/decline
                       Row(
-                        children: [
-
-                          //* Accept request
-                          IconButton(
-                            icon: Icon(Icons.check,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary),
-                            onPressed: () => sendLog("request accepted"),
-                          ),
-                          horizontalSpacing(defaultSpacing * 0.5),
-
-                          //* Decline request
-                          IconButton(
-                            icon: Icon(Icons.close,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary),
-                            onPressed: () => sendLog("request denied"),
-                          ),
-                        ],
+                        children: children,
                       )),
                     ])),
         ),

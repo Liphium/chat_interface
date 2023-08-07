@@ -8,6 +8,7 @@ class Request extends Table {
     TextColumn get tag => text()();
     BoolColumn get self => boolean()(); // Whether the request is sent by the current user
     TextColumn get vaultId => text()();
+    TextColumn get storedActionId => text()();
     TextColumn get keys => text()();
 
     @override
