@@ -126,7 +126,7 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
 
   // Store in friends vault 
   var request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey));
-  final vaultId = await storeInFriendsVault(request.toStoredPayload(), errorPopup: true, prefix: "request");
+  final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
   
   if(vaultId == null) {
     requestsLoading.value = false;
@@ -195,13 +195,23 @@ class Request {
         keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
         id = data.id;
 
+  Request.fromStoredPayload(Map<String, dynamic> json)
+      : name = json["name"],
+        tag = json["tag"],
+        vaultId = "",
+        storedActionId = json["sai"],
+        keyStorage = KeyStorage.fromJson(json),
+        id = json["id"];
+
   // Convert to a payload for the friends vault (on the server)
-  String toStoredPayload() {
+  String toStoredPayload(bool self) {
 
     final reqPayload = <String, dynamic>{
       "rq": true,
       "id": id,
+      "self": self,
       "name": name,
+      "sai": storedActionId,
       "tag": tag,
     };
     reqPayload.addAll(keyStorage.toJson());
@@ -224,6 +234,7 @@ class Request {
   // Accept friend request
   void accept(Function(String) success) {
     sendFriendRequest(Get.find<StatusController>(), name, tag, id, keyStorage.publicKey, (msg) async {
+      await removeFromFriendsVault(vaultId);
       await deleteStoredAction(storedActionId);
       success(msg);
     });

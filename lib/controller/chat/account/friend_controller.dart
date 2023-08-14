@@ -56,8 +56,11 @@ class FriendController extends GetxController {
     }
 
     // Add friend to database with vault id
-    request.friend.vaultId = id;
+    request.vaultId = id;
     add(request.friend);
+
+    // Remove from requests controller
+    Get.find<RequestController>().deleteSentRequest(request);
 
     return true;
   }
@@ -107,6 +110,13 @@ class Friend {
           vaultId = data.vaultId,
           keyStorage = KeyStorage.fromJson(jsonDecode(data.keys));
 
+  Friend.fromStoredPayload(Map<String, dynamic> json) :
+        id = json["id"],
+        name = json["name"],
+        tag = json["tag"],
+        vaultId = "",
+        keyStorage = KeyStorage.fromJson(jsonDecode(json["keys"]));
+
   // Convert to a stored payload for the server
   String toStoredPayload() {
 
@@ -122,26 +132,14 @@ class Friend {
   }
 
   //* Remove friend
-  void remove(RxBool loading) {
-    loading.value = true;
+  Future<bool> remove(RxBool loading) async {
+    //loading.value = true;
 
-    // Send action to server
-    connector.sendAction(Message("fr_rem", <String, dynamic>{
-      "id": id,
-    }), handler: (event) async {
-      loading.value = false;
+    await removeFromFriendsVault(vaultId);
+    db.friend.deleteWhere((tbl) => tbl.id.equals(id));
+    Get.find<FriendController>().friends.remove(id);
 
-      if(event.data["success"] as bool) {
-        
-        // Remove from database TODO: Reimplement
-        //await db.delete(db.friend).delete(entity);
-        Get.find<FriendController>().friends.remove(this);
-
-        showMessage(SnackbarType.success, "friends.removed".trParams({"name": name}));
-      } else {
-        showMessage(SnackbarType.error, (event.data["message"] as String).tr);
-      }
-    });
+    return true;
   }
 
   // Check if vault id is known (this would require a restart of the app)

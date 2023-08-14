@@ -26,7 +26,7 @@ class _RequestButtonState extends State<RequestButton> {
             color: Theme.of(context)
                 .colorScheme
                 .primary),
-        onPressed: () => sendLog("request denied"),
+        onPressed: () => widget.self ? widget.request.cancel() : widget.request.ignore(),
       )
     ];
 
@@ -38,7 +38,7 @@ class _RequestButtonState extends State<RequestButton> {
             color: Theme.of(context)
                 .colorScheme
                 .primary),
-        onPressed: () => sendLog("request accepted"),
+        onPressed: () => widget.request.accept((p0) => sendLog("Request accepted")),
       ));
     }
 
@@ -48,12 +48,10 @@ class _RequestButtonState extends State<RequestButton> {
         borderRadius: BorderRadius.circular(10),
         hoverColor: Theme.of(context)
             .colorScheme
-            .secondaryContainer
-            .withAlpha(150),
+            .primaryContainer,
         splashColor: Theme.of(context)
             .colorScheme
-            .secondaryContainer
-            .withAlpha(150),
+            .primaryContainer,
         onTap: () {},
 
         //* Request item content

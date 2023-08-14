@@ -112,7 +112,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     KeyStorage(publicKey, profileKey)
   );
 
-  final vaultId = await storeInFriendsVault(request.toStoredPayload());
+  final vaultId = await storeInFriendsVault(request.toStoredPayload(false));
   if(vaultId == null) {
     sendLog("couldn't store in vault: something happened");
     return true;

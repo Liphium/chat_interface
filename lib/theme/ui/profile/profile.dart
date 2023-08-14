@@ -94,7 +94,10 @@ class _ProfileState extends State<Profile> {
                   ProfileButton(
                     icon: Icons.person_remove,
                     label: 'friends.remove'.tr,
-                    onTap: () => widget.friend.remove(removeLoading),
+                    onTap: () async {
+                      await widget.friend.remove(removeLoading);
+                      Get.back();
+                    },
                     iconColor: Colors.red.shade300,
                     color: Colors.red.shade900.withAlpha(25),
                     loading: removeLoading
