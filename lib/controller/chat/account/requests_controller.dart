@@ -263,4 +263,8 @@ class Request {
     requestController.deleteSentRequest(this);
   }
 
+  void save(bool self) {
+    db.request.insertOnConflictUpdate(entity(self));
+  }
+
 }

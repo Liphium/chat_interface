@@ -69,6 +69,11 @@ class FriendController extends GetxController {
     friends[friend.id] = friend;
     db.friend.insertOnConflictUpdate(friend.entity());
   }
+
+  void remove(Friend friend) {
+    friends.remove(friend.id);
+    db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id));
+  }
 }
 
 class Friend {
@@ -115,7 +120,7 @@ class Friend {
         name = json["name"],
         tag = json["tag"],
         vaultId = "",
-        keyStorage = KeyStorage.fromJson(jsonDecode(json["keys"]));
+        keyStorage = KeyStorage.fromJson(json);
 
   // Convert to a stored payload for the server
   String toStoredPayload() {

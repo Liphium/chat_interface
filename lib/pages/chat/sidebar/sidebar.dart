@@ -41,12 +41,9 @@ class _SidebarState extends State<Sidebar> {
           Center(
             child: RepaintBoundary(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: defaultSpacing),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: defaultSpacing * 0.5,
-                  runSpacing: defaultSpacing * 0.5,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                padding: const EdgeInsets.all(defaultSpacing),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
           
                     //* Conversations

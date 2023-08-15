@@ -29,8 +29,7 @@ class _FriendButtonState extends State<FriendButton> {
             borderRadius: BorderRadius.circular(10),
             hoverColor: Theme.of(context)
                 .colorScheme
-                .secondaryContainer
-                .withAlpha(150),
+                .primaryContainer,
             splashColor: Theme.of(context).hoverColor,
 
             //* Show profile

@@ -11,7 +11,7 @@ import 'app.dart';
 var logger = log.Logger();
 late final Sodium sodiumLib;
 const appId = 0;
-const bool isDebug = true;
+const bool isDebug = true; // TODO: Set to false before release
 
 // Authentication types
 enum AuthType {

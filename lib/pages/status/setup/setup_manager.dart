@@ -1,3 +1,4 @@
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
@@ -46,20 +47,21 @@ class SetupManager {
     _steps.add(UpdateSetup());
     _steps.add(InstanceSetup());
     _steps.add(ServerSetup());
-    
+
     // Start fetching
     _steps.add(FetchSetup());
-    _steps.add(UpdateSetup());
 
     // Setup account
     _steps.add(ProfileSetup());
     _steps.add(AccountSetup());
-    _steps.add(RemoteIDSetup());
-    _steps.add(SettingsSetup());
-    _steps.add(FriendsSetup());
 
     // Setup encryption
     _steps.add(KeySetup());
+
+    // Fetch data
+    _steps.add(RemoteIDSetup());
+    _steps.add(SettingsSetup());
+    _steps.add(FriendsSetup());
 
     // Finish fetching
     _steps.add(FetchFinishSetup());
@@ -93,14 +95,17 @@ class SetupManager {
       sendLog("Setup: ${setup.name}");
 
       Widget? ready;
-      try {
+      if(isDebug) {
         ready = await setup.load();
-      } catch (e) {
-        e.printError();
-        error(e.toString());
-        return;
+      } else {
+        try {
+          ready = await setup.load();
+        } catch (e) {
+          error(e.toString());
+          return;
+        }
       }
-
+      
       if (ready != null) {
         Get.find<TransitionController>().modelTransition(ready);
         return;

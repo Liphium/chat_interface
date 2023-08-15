@@ -57,10 +57,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         //* Open friend add window
                         Get.dialog(FriendAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.all(defaultSpacing),
-                        child: Icon(Icons.add, color: theme.colorScheme.primary),
-                      ),
+                      child: Icon(Icons.add, color: theme.colorScheme.primary),
                     )
                   ),
                 ),
