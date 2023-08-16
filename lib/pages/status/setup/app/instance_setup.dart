@@ -1,7 +1,12 @@
 import 'dart:io';
 
+import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/transitions/transition_container.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -18,7 +23,7 @@ class InstanceSetup extends Setup {
   Future<Widget?> load() async {
 
     // Get list of instances
-    print((await getApplicationSupportDirectory()).path);
+    sendLog((await getApplicationSupportDirectory()).path);
     final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
     final dir = Directory(instanceFolder);
 
@@ -26,7 +31,7 @@ class InstanceSetup extends Setup {
     final instances = await dir.list().toList();
 
     if(instances.isEmpty || !isDebug) {
-      setupInstance("default");
+      await setupInstance("default");
       return null;
     }
 
@@ -35,12 +40,17 @@ class InstanceSetup extends Setup {
   }
 }
 
-void setupInstance(String name, {bool next = false}) async {
+Future<bool> setupInstance(String name, {bool next = false}) async {
 
   // Initialize database
+  if(databaseInitialized) {
+    await db.close();
+  }
   final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
   final file = File(path.join(dbFolder, '$name.db'));
   db = Database(NativeDatabase.createInBackground(file, logStatements: true));
+
+  sendLog("going on");
 
   // Create tables
   var _ = await (db.select(db.setting)).get();
@@ -48,6 +58,8 @@ void setupInstance(String name, {bool next = false}) async {
   if(next) {
     setupManager.next(open: true);
   }
+
+  return true;
 }
 
 class InstanceSelectionPage extends StatefulWidget {
@@ -74,48 +86,50 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      backgroundColor: Get.theme.colorScheme.background,
       body: Center(
-        child: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('setup.choose.instance'.tr),
-              verticalSpacing(defaultSpacing),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.instances.length,
-                itemBuilder: (context, index) {
-
-                  var instance = widget.instances[index];
-                  final base = path.basename(path.withoutExtension(instance.path));
-
-                  return ElevatedButton(
-                    onPressed: () => setupInstance(path.basename(path.withoutExtension(instance.path)), next: true),
-                    child: Text(base),
-                  );
-                },
-              ),
-              verticalSpacing(defaultSpacing),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: 'setup.instance.name'.tr,
+        child: TransitionContainer(
+          tag: "login",
+          borderRadius: BorderRadius.circular(modelBorderRadius),
+          width: 370,
+          child: Padding(
+            padding: const EdgeInsets.all(modelPadding),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("${'setup.choose.instance'.tr}.", style: Get.textTheme.headlineMedium,),
+                verticalSpacing(sectionSpacing),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.instances.length,
+                  itemBuilder: (context, index) {
+          
+                    var instance = widget.instances[index];
+                    final base = path.basename(path.withoutExtension(instance.path));
+          
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: elementSpacing),
+                      child: FJElevatedButton(
+                        onTap: () => setupInstance(path.basename(path.withoutExtension(instance.path)), next: true),
+                        child: Center(child: Text(base, style: Get.textTheme.labelLarge)),
                       ),
-                    ),
-                  ),
-                  verticalSpacing(defaultSpacing),
-                  ElevatedButton(
-                    onPressed: () => setupInstance(_controller.text, next: true),
-                    child: const Text("Create"),
-                  )
-                ],
-              )
-            ],
+                    );
+                  },
+                ),
+                verticalSpacing(sectionSpacing - elementSpacing),
+                FJTextField(
+                  controller: _controller,
+                  hintText: 'setup.instance.name'.tr,
+                ),
+                verticalSpacing(defaultSpacing),
+                FJElevatedButton(
+                  onTap: () => setupInstance(_controller.text, next: true),
+                  child: Center(child: Text("Create", style: Get.textTheme.labelLarge)),
+                )
+              ],
+            ),
           )
         )
       )

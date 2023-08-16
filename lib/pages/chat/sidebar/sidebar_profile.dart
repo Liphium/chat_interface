@@ -36,7 +36,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
             return SizedBox(
               width: constraints.maxWidth,
               child: Material(
-                color: theme.colorScheme.background,
+                color: theme.colorScheme.onBackground,
                 child: InkWell(
                   onTap: () => Get.dialog(const OwnProfile(position: Offset(defaultSpacing, 60))),
                   splashColor: theme.hoverColor.withAlpha(10),

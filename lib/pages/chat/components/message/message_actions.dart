@@ -12,12 +12,15 @@ void sendActualMessage(RxBool loading, String conversation, String type, String 
   var key = controller.conversations[conversation]!.key;
   var hash = hashSha(message);
 
+  const encrypted = "msg"; // TODO: Reimplement
+  /*
   var encrypted = encryptAES(jsonEncode(<String, dynamic>{
     "c": message,
     "s": sign(asymmetricKeyPair.privateKey, hash),
     "t": type,
     "a": attachments
   }), key).base64;
+  */
 
   connector.sendAction(messaging.Message("conv_msg_create", <String, dynamic>{
     "conversation": conversation,

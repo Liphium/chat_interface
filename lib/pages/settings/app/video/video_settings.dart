@@ -114,7 +114,7 @@ final _cameras = <MediaDevice>[].obs;
                   child: Obx(() => 
                     Material(
                       color: controller.settings["video.camera"]!.getWhenValue("def", _cameras[0].label) == current ? theme.colorScheme.primaryContainer :
-                        theme.colorScheme.background,
+                        theme.colorScheme.onBackground,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
@@ -163,7 +163,7 @@ final _cameras = <MediaDevice>[].obs;
           child: AspectRatio(
             aspectRatio: 16 / 5,
             child: Material(
-              color: theme.colorScheme.secondaryContainer,
+              color: theme.colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(defaultSpacing),
               child: Obx(() => _cameraTrack.value == null ?
                 Center(

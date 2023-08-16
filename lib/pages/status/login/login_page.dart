@@ -1,8 +1,9 @@
-import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/register/register_page.dart';
-import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/transitions/transition_container.dart';
+import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,60 +17,53 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
 
   final _loading = false.obs;
-  final _passwordError = ''.obs;
   final _emailError = ''.obs;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       body: Center(
-        child: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text("login.page".tr),
-              verticalSpacing(defaultSpacing),
-              Obx(() =>
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'input.email'.tr,
+        child: TransitionContainer(
+          tag: "login",
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(defaultSpacing * 1.5),
+            topRight: Radius.circular(defaultSpacing * 1.5),
+            bottomLeft: Radius.circular(defaultSpacing * 1.5),
+            bottomRight: Radius.circular(defaultSpacing * 1.5),
+          ),
+          color: theme.colorScheme.onBackground,
+          width: 370,
+          child: Padding(
+            padding: const EdgeInsets.all(defaultSpacing * 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("${"input.email".tr}.", textAlign: TextAlign.start,
+                    style: theme.textTheme.headlineMedium),
+                verticalSpacing(defaultSpacing * 2),
+                Obx(
+                  () => FJTextField(
+                    hintText: 'placeholder.email'.tr,
                     errorText: _emailError.value == '' ? null : _emailError.value,
+                    controller: _emailController,
                   ),
-                  controller: _emailController,
                 ),
-              ),
-              Obx(() =>
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'input.password'.tr,
-                    errorText: _passwordError.value == '' ? null : _passwordError.value,
-                  ),
-                  obscureText: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  controller: _passwordController,
-                ),
-              ),
-              verticalSpacing(defaultSpacing * 1.5),
-              SizedBox(
-                width: 300,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if(_loading.value) return;
+                verticalSpacing(defaultSpacing * 1.5),
+                FJElevatedButton(
+                  onTap: () {
+                    if (_loading.value) return;
                     _loading.value = true;
                 
                     if (_emailController.text == '') {
@@ -78,67 +72,47 @@ class _LoginPageState extends State<LoginPage> {
                       return;
                     }
                 
-                    if (_passwordController.text == '') {
-                      _passwordError.value = 'input.password'.tr;
-                      _loading.value = false;
-                      return;
-                    }
-                
-                    _passwordError.value = '';
                     _emailError.value = '';
                 
-                    login(_emailController.text, _passwordController.text,
-                      success: () async {
-                        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
-                        setupManager.next();
-                      },
-                      failure: (msg) {
-                        Get.snackbar("login.failed".tr, msg.tr);
+                    loginStart(_emailController.text,
+                        success: () async {
+                          _loading.value = false;
+                    }, failure: (msg) {
+                      Get.snackbar("login.failed".tr, msg.tr);
                 
-                        switch (msg) {
-                          case "invalid.password":
-                            _passwordError.value = msg.tr;
-                            _emailError.value = msg.tr;
-                            break;
-                        }
-                        _loading.value = false;
-                      });
+                      switch (msg) {
+                        case "invalid.email":
+                          _emailError.value = msg.tr;
+                          break;
+                      }
+                      _loading.value = false;
+                    });
                   },
-                  child: Obx(() => _loading.value ? 
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.0,
-                    )
-                  ) : 
-                  Text('login.login'.tr)),
+                  child: Center(
+                    child: Obx(() => _loading.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                            ))
+                        : Text('login.next'.tr, style: theme.textTheme.labelLarge)),
+                  ),
+                ),
+                verticalSpacing(defaultSpacing * 1.5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("login.no_account.text".tr),
+                    horizontalSpacing(defaultSpacing),
+                    TextButton(
+                      onPressed: () => Get.find<TransitionController>().modelTransition(const RegisterPage()),
+                      child: Text('login.no_account'.tr),
+                    ),
+                  ],
                 )
-              ),
-              verticalSpacing(defaultSpacing * 1.5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('login.forgot.text'.tr),
-                  horizontalSpacing(defaultSpacing),
-                  TextButton(
-                    onPressed: () => setupManager.restart(),
-                    child: Text('login.forgot'.tr),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('login.no_account.text'.tr),
-                  horizontalSpacing(defaultSpacing),
-                  TextButton(
-                    onPressed: () => Get.offAll(const RegisterPage(), transition: Transition.fade),
-                    child: Text('login.no_account'.tr),
-                  ),
-                ],
-              )
-            ],
+              ],
+            ),
           ),
         ),
       ),

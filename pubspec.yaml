@@ -22,13 +22,13 @@ dependencies:
   crypto: any
   http: any
   animations: any
-  encrypt: any
   pointycastle: any
   livekit_client: any
   logging: any
   url_launcher: any
   flutter_webrtc: any
   record: any
+  sodium_libs: ^2.1.1+1
 
 dev_dependencies:
   flutter_test:
@@ -36,14 +36,15 @@ dev_dependencies:
   drift_dev: any
   build_runner: any
   flutter_lints: any
+  test: ^1.24.1
 
 flutter:
   uses-material-design: true
 
   fonts:
-    - family: Alfa Slab One
+    - family: Roboto Mono
       fonts:
-        - asset: assets/AlfaSlabOne-Regular.ttf
+        - asset: assets/RobotoMono.ttf
     - family: Roboto
       fonts:
         - asset: assets/Roboto-Regular.ttf

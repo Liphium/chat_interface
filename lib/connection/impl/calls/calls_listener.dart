@@ -2,6 +2,7 @@
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +14,7 @@ void setupCallListeners() {
 // Action c_s:l
 void _joinCall(Event openEvent) {
 
-  print("JOINING CALL");
+  sendLog("JOINING CALL");
 
   // Join call
   connector.sendAction(Message("c_s", <String, dynamic>{

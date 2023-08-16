@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -87,8 +88,8 @@ class _OutputTabState extends State<OutputTab> {
                   padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.25, horizontal: defaultSpacing * 0.5),
                   child: Obx(() => 
                     Material(
-                      color: controller.settings["audio.output"]!.getWhenValue("def", _outputs[0].label) == current ? theme.colorScheme.secondaryContainer :
-                        theme.hoverColor,
+                      color: controller.settings["audio.output"]!.getWhenValue("def", _outputs[0].label) == current ? theme.colorScheme.primaryContainer :
+                        theme.colorScheme.onBackground,
                       borderRadius: radius,
                       child: InkWell(
                         borderRadius: radius,
@@ -131,9 +132,9 @@ class _OutputTabState extends State<OutputTab> {
             children: [
               Text("audio.output.test.description".tr, style: theme.textTheme.bodyMedium),
               horizontalSpacing(defaultSpacing * 0.5),
-              ElevatedButton(
-                onPressed: () => {}, // play audio
-                child: Text("audio.output.test.play".tr, style: theme.textTheme.bodyMedium),
+              FJElevatedButton(
+                onTap: () => {}, // play audio
+                child: Text("audio.output.test.play".tr, style: theme.textTheme.labelLarge),
               ),
             ],
           ),

@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_webrtc
   flutter_window_close
   record_linux
+  sodium_libs
   sqlite3_flutter_libs
   url_launcher_linux
 )

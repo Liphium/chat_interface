@@ -11,7 +11,7 @@ class StatusController extends GetxController {
 
   // Status message
   final statusLoading = true.obs;
-  final status = 'online'.obs;
+  final status = '-'.obs; // "-" = status disabled
   final type = 1.obs;
 
   void setName(String value) => name.value = value;

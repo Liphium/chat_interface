@@ -20,7 +20,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onBackground,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: Stack(
         children: [
           Row(
@@ -50,6 +50,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
                       final current = SettingLabel.values[index-1];
 
+                      //* Sidebar buttons
                       return Padding(
                         padding: const EdgeInsets.only(top: defaultSpacing),
                         child: Column(
@@ -64,7 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: defaultSpacing * 0.5),
                                   child: Obx(() => Material(
-                                    color: currentCategory.value == element ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5) : Colors.transparent,
+                                    color: currentCategory.value == element ? Theme.of(context).colorScheme.primaryContainer : Colors.transparent,
                                     borderRadius: BorderRadius.circular(defaultSpacing),
                                     child: InkWell(
                                       onTap: () => currentCategory.value = element,
@@ -96,6 +97,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 )
               ),
+
+              //* Content
               Flexible(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 900),

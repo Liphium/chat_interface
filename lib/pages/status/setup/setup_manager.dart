@@ -1,18 +1,19 @@
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
-import 'package:chat_interface/pages/status/setup/account/conversation_setup.dart';
-import 'package:chat_interface/pages/status/setup/account/requests_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/settings_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/cluster_setup.dart';
 import 'package:chat_interface/pages/status/setup/connection/connection_setup.dart';
-import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/profile_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/updates_setup.dart';
-import 'package:chat_interface/pages/status/setup/encryption/salt_setup.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/pages/status/starting_page.dart';
+import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -46,21 +47,21 @@ class SetupManager {
     _steps.add(UpdateSetup());
     _steps.add(InstanceSetup());
     _steps.add(ServerSetup());
-    
+
     // Start fetching
     _steps.add(FetchSetup());
 
     // Setup account
     _steps.add(ProfileSetup());
     _steps.add(AccountSetup());
-    _steps.add(FriendsSetup());
-    _steps.add(RequestSetup());
-    _steps.add(ConversationSetup());
-    _steps.add(SettingsSetup());
 
     // Setup encryption
-    _steps.add(SaltSetup());
     _steps.add(KeySetup());
+
+    // Fetch data
+    _steps.add(RemoteIDSetup());
+    _steps.add(SettingsSetup());
+    _steps.add(FriendsSetup());
 
     // Finish fetching
     _steps.add(FetchFinishSetup());
@@ -72,14 +73,14 @@ class SetupManager {
 
   void restart() {
     current = -1;
-    Get.offAll(const StartingPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+    Get.find<TransitionController>().modelTransition(const StartingPage());
   }
 
   void next({bool open = true})  async {
     if (_steps.isEmpty) return;
 
     if(open) {
-      Get.offAll(const StartingPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+      Get.find<TransitionController>().modelTransition(const StartingPage());
     }
 
     current++;
@@ -91,19 +92,22 @@ class SetupManager {
       }
 
       message.value = setup.name;
-      print("Setup: ${setup.name}");
+      sendLog("Setup: ${setup.name}");
 
       Widget? ready;
-      try {
+      if(isDebug) {
         ready = await setup.load();
-      } catch (e) {
-        e.printError();
-        error(e.toString());
-        return;
+      } else {
+        try {
+          ready = await setup.load();
+        } catch (e) {
+          error(e.toString());
+          return;
+        }
       }
-
+      
       if (ready != null) {
-        Get.offAll(ready, transition: Transition.fade, duration: const Duration(milliseconds: 500));
+        Get.find<TransitionController>().modelTransition(ready);
         return;
       }
 
@@ -111,12 +115,13 @@ class SetupManager {
       next(open: false);
       
     } else {
+      sendLog("opening");
       Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
     }
   }
 
 
   void error(String error) {
-    Get.offAll(ErrorPage(title: error), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+    Get.find<TransitionController>().modelTransition(ErrorPage(title: error));
   }
 }

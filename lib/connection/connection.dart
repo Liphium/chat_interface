@@ -1,11 +1,11 @@
 
 import 'package:chat_interface/connection/impl/calls/calls_listener.dart';
-import 'package:chat_interface/connection/impl/friends/friend_listener.dart';
-import 'package:chat_interface/connection/impl/messages/message_listener.dart';
+import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'impl/setup/setup_listener.dart';
+import 'impl/setup_listener.dart';
 import 'messaging.dart';
 
 int nodeId = 0;
@@ -23,7 +23,7 @@ class Connector {
     connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
 
     connection.stream.listen((msg) {
-        print(msg);
+        sendLog(msg);
         Event event = Event.fromJson(msg);
 
         if(_handlers[event.name] == null) return;
@@ -34,6 +34,8 @@ class Connector {
       },
       cancelOnError: false,
       onDone: () {
+        // TODO: Limit connection attempts
+        sendLog("restarting..");
         initialized = false;
         setupManager.restart();
       },
@@ -41,6 +43,7 @@ class Connector {
   }
 
   void sendMessage(String message) {
+    sendLog(message);
     connection.sink.add(message);
   }
 
@@ -73,8 +76,7 @@ void startConnection(String node, String connectionToken) async {
   if(connector.initialized) return;
   connector.connect("ws://$node/gateway", connectionToken);
 
-  setupMessageListeners();
   setupSetupListeners();
-  setupFriendListeners();
   setupCallListeners();
+  setupStoredActionListener();
 }

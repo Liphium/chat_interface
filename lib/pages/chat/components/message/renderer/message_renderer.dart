@@ -1,3 +1,4 @@
+
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -21,7 +22,7 @@ class _MessageRendererState extends State<MessageRenderer> {
   @override
   Widget build(BuildContext context) {
 
-    Friend sender = widget.sender ?? Friend("0", "System", "", "fjc");
+    Friend sender = widget.sender ?? Friend.system();
     ThemeData theme = Theme.of(context);
 
     return Padding(

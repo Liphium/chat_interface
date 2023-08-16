@@ -25,8 +25,8 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
 
     // Background color
     brightness: Brightness.dark, 
-    background: Color(0xFF292929), 
-    onBackground: Color(0xFF1c1c1c),
+    background: Color(0xFF1c1c1c),
+    onBackground: Color(0xFF292929),
 
     // Online color
     secondary: Color(0xFF7cda81),
@@ -60,7 +60,8 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
   dividerColor: const Color(0xFF5c5c5c), 
   textTheme: defaultDarkTheme.textTheme.copyWith(
     headlineMedium: defaultDarkTheme.textTheme.headlineMedium!.copyWith(
-      fontFamily: 'Alfa Slab One'
+      fontFamily: 'Roboto Mono',
+      fontWeight: FontWeight.bold,
     ),
     bodySmall: defaultDarkTheme.textTheme.bodySmall!.copyWith(
       fontFamily: 'Open Sans',

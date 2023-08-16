@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:chat_interface/controller/chat/account/friend_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friends_page.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
@@ -50,9 +51,10 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
             width: 300,
             child: Material(
               elevation: 2.0,
-              borderRadius: BorderRadius.circular(defaultSpacing),
+              color: Get.theme.colorScheme.onBackground,
+              borderRadius: BorderRadius.circular(dialogBorderRadius),
               child: Padding(
-                padding: const EdgeInsets.all(defaultSpacing),
+                padding: const EdgeInsets.all(dialogPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -61,7 +63,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text("friends.add".tr, style: theme.textTheme.titleMedium),
+                        Text("friends".tr, style: theme.textTheme.titleMedium),
             
                         Obx(() =>
                           Text("${_members.length}/100", style: theme.textTheme.bodyMedium)
@@ -82,7 +84,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                             child: Obx(() => Material(
-                              color: _members.contains(friend.id) ? theme.colorScheme.secondaryContainer.withAlpha(150) : Colors.transparent,
+                              color: _members.contains(friend.id) ? theme.colorScheme.primaryContainer : Colors.transparent,
                               borderRadius: BorderRadius.circular(defaultSpacing),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(defaultSpacing),
@@ -100,7 +102,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                                     children: [
                                       Icon(Icons.person, size: 25, color: theme.colorScheme.primary),
                                       horizontalSpacing(defaultSpacing),
-                                      Text("${friend.name}#${friend.tag}", style: theme.textTheme.bodyLarge),
+                                      Text("${friend.name}#${friend.tag}", style: theme.textTheme.labelLarge),
                                     ],
                                   ),
                                 ),
@@ -111,7 +113,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       )),
                     ),
             
-                    const Divider(),
+                    Divider(color: Get.theme.dividerColor),
             
                     //* Create conversation button
                     Column(
@@ -173,8 +175,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                           )
                         ),
                         verticalSpacing(defaultSpacing * 0.5),
-                        ProfileButton(
-                          icon: Icons.message,
+                        FJElevatedButton(
                           onTap: () {
             
                             if(_members.isEmpty) {
@@ -189,8 +190,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
             
                             openConversation(_conversationLoading, _controller.text, _members);
                           },
-                          loading: _conversationLoading,
-                          label: "friends.message".tr,
+                          child: Center(
+                            child: Text("friends.create".tr, style: theme.textTheme.titleMedium),
+                          ),
                         ),
                       ],
                     )

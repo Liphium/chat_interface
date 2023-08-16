@@ -1,8 +1,5 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/aes.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
@@ -48,10 +45,12 @@ class _ProfileSettingsStatusState extends State<ProfileSettingsStatus> {
                   if(loading.value) return;
                   loading.value = true;
 
+                  // TODO: Reimplement profile
+
                   // Request data from server
-                  final key = randomAESKey();
+                  //final key = randomAESKey();
                   final res = await postRqAuthorized("/account/profile/enable", <String, dynamic>{
-                    "key": encryptRSA64(key, asymmetricKeyPair.publicKey)
+                    "key": "hello world!"
                   });
 
                   loading.value = false;

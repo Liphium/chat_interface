@@ -35,6 +35,17 @@ Future<Response> postRq(String path, Map<String, dynamic> body) async {
   );
 }
 
+Future<Response> postRqAuth(String path, Map<String, dynamic> body, String token) async {
+  return await post(
+    server(path),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token'
+    },
+    body: jsonEncode(body),
+  );
+}
+
 Future<Response> postRqAuthorized(String path, Map<String, dynamic> body) async {
   return await post(
     server(path),
@@ -57,3 +68,15 @@ String getSessionFromJWT(String token) {
   
   return jsonDecode(decoded)['ses'];
 }
+
+// Creates a stored action with the given name and payload
+String storedAction(String name, Map<String, dynamic> payload) {
+
+  final prefixJson = <String, dynamic>{
+    "a": name,
+  };
+  prefixJson.addAll(payload);
+
+  return jsonEncode(prefixJson);
+}
+

@@ -1,4 +1,5 @@
 
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 
 import 'impl/formatting_patterns.dart';
@@ -126,7 +127,7 @@ abstract class TextPattern {
 
   // scan returns a list of indices where the pattern is found in the text
   List<int> scan(String text) {
-    print(pattern);
+    sendLog(pattern);
     List<int> indices = [];
 
     int length = 0;
@@ -143,7 +144,7 @@ abstract class TextPattern {
         indices.add(index+(!enable ? pattern.length : 0));
         enable = !enable;
       } else {
-        print("Removed double pattern $index $length");
+        sendLog("Removed double pattern $index $length");
         indices.remove(index + (enable ? pattern.length : 0) - 1);
       }
 
