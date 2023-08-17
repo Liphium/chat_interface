@@ -47,6 +47,9 @@ Future<bool> processStoredAction(String id, String payload) async {
 }
 
 Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> json) async {
+  
+  // Delete the action (it doesn't need to be handled twice)
+  await deleteStoredAction(actionId);
 
   // Get friend by name and tag
   var res = await postRqAuth("/account/stored_actions/details", {
