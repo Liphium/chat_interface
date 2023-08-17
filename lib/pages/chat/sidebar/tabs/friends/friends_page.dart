@@ -1,6 +1,6 @@
 
-import 'package:chat_interface/controller/chat/account/friend_controller.dart';
-import 'package:chat_interface/controller/chat/account/requests_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friend_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/friends/request_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/friend_add_window.dart';
@@ -157,11 +157,6 @@ class _FriendsPageState extends State<FriendsPage> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                                  child: Text("friends".tr, style: theme.textTheme.labelLarge),
-                                ),
-                                verticalSpacing(elementSpacing),
                                 Builder(
                                   builder: (context) {
                                     if (friendController.friends.isEmpty) {

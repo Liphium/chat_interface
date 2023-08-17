@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/conversation/call/call_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/chat/components/call/call_cinema.dart';
 import 'package:chat_interface/pages/chat/components/call/call_grid.dart';

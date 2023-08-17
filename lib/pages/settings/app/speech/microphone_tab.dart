@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/call/sensitvity_controller.dart';
+import 'package:chat_interface/controller/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/conversation/call/sensitvity_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';

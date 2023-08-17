@@ -1,7 +1,7 @@
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/conversation/call/call_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';

@@ -1,6 +1,6 @@
-import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/call/call_member_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
+import 'package:chat_interface/controller/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/conversation/call/call_member_controller.dart';
+import 'package:chat_interface/controller/conversation/call/output_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';

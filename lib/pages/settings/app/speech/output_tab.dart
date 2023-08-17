@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/chat/conversation/call/output_controller.dart';
+import 'package:chat_interface/controller/conversation/call/output_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

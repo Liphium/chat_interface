@@ -1,10 +1,10 @@
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/controller/chat/account/friend_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/call/call_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/call/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/components/message/message_bar.dart';

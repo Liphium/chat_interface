@@ -53,10 +53,10 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
       controller: _controller,
       effects: [
         ScaleEffect(
-          begin: const Offset(0.8, 0.8),
+          begin: const Offset(0.75, 0.75),
           end: const Offset(1.0, 1.0), 
           curve: Curves.easeOut, 
-          duration: 100.ms
+          duration: 120.ms
         )
       ],
       child: Obx(() => Material(

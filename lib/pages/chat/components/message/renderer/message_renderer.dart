@@ -1,6 +1,6 @@
 
-import 'package:chat_interface/controller/chat/account/friend_controller.dart';
-import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

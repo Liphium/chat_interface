@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/chat/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/util/snackbar.dart';

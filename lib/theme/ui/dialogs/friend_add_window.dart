@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/chat/account/requests_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/containers/success_container.dart';
