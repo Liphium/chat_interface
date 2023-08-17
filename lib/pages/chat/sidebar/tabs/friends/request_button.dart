@@ -44,6 +44,9 @@ class _RequestButtonState extends State<RequestButton> {
 
     return Material(
       borderRadius: BorderRadius.circular(10),
+      color: Theme.of(context)
+          .colorScheme
+          .background,
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         hoverColor: Theme.of(context)

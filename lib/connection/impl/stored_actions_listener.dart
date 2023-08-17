@@ -14,6 +14,8 @@ import 'package:get/get.dart';
 import '../../controller/current/status_controller.dart';
 import '../../util/logging_framework.dart';
 
+part 'stored_actions_util.dart';
+
 void setupStoredActionListener() {
 
   connector.listen("s_a", (event) async {
@@ -49,7 +51,10 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
 Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> json) async {
   
   // Delete the action (it doesn't need to be handled twice)
-  await deleteStoredAction(actionId);
+  final response = await deleteStoredAction(actionId);
+  if(!response) {
+    sendLog("WARNING: couldn't delete stored action");
+  }
 
   // Get friend by name and tag
   var res = await postRqAuth("/account/stored_actions/details", {
@@ -85,6 +90,11 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 
   if(request.id != "hi") {
 
+    // This request doesn't have the right key storage yet
+    request.keyStorage.publicKey = publicKey;
+    request.keyStorage.profileKey = unpackageSymmetricKey(json["pf"]);
+    request.keyStorage.storedActionKey = json["sa"];
+
     // Add friend
     final controller = Get.find<FriendController>();
     controller.addFromRequest(request);
@@ -112,7 +122,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     json["tag"],
     "",
     actionId,
-    KeyStorage(publicKey, profileKey)
+    KeyStorage(publicKey, profileKey, json["sa"])
   );
 
   final vaultId = await storeInFriendsVault(request.toStoredPayload(false));
@@ -124,26 +134,6 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   // Add friend request
   request.vaultId = vaultId;
   Get.find<RequestController>().addRequest(request);
-
-  return true;
-}
-
-Future<bool> deleteStoredAction(String id) async {
-  
-  final res = await postRqAuthorized("/account/stored_actions/delete", {
-    "id": id
-  });
-
-  if(res.statusCode != 200) {
-    sendLog("couldn't delete stored action: invalid request");
-    return false;
-  }
-
-  final json = jsonDecode(res.body);
-  if(!json["success"]) {
-    sendLog("couldn't delete stored action: ${json["error"]}");
-    return false;
-  }
 
   return true;
 }

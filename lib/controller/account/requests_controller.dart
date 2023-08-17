@@ -6,8 +6,10 @@ import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -46,14 +48,20 @@ class RequestController extends GetxController {
     db.request.insertOnConflictUpdate(request.entity(false));
   }
 
-  void deleteSentRequest(Request request) {
-    requestsSent.remove(request);
-    db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
+  Future<bool> deleteSentRequest(Request request, {removal = true}) async {
+    if(removal) {
+      requestsSent.remove(request);
+    }
+    await db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
+    return true;
   }
 
-  void deleteRequest(Request request) {
-    requests.remove(request);
-    db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
+  Future<bool> deleteRequest(Request request, {removal = true}) async {
+    if(removal) {
+      requests.remove(request);
+    }
+    await db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
+    return true;
   }
 
 }
@@ -102,6 +110,19 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
     }),
     onConfirm: () async {
       declined = false;
+
+      // Save friend request in own vault
+      var request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey, ""));
+      final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
+
+      if(vaultId == null) {
+        requestsLoading.value = false;
+        return;
+      }
+
+      // This had me in a mental breakdown, but then I ended up fixing it in 10 minutes LMFAO
+      request.vaultId = vaultId;
+
       sendFriendRequest(controller, name, tag, id, publicKey, success);
     },
     onDecline: () {
@@ -110,6 +131,7 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
     },
   ));
 
+
   requestsLoading.value = !declined;
   return;
 }
@@ -117,24 +139,14 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
 void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Function(String) success) async {
   
   // Encrypt friend request
+  sendLog("OWN STORED ACTION KEY: ${storedActionKey}");
   final encryptedPayload = encryptAsymmetricAnonymous(publicKey, storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
     "tag": controller.tag.value,
     "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, "$name#$tag"),
     "pf": packageSymmetricKey(profileKey),
+    "sa": storedActionKey,
   }));
-
-  // Store in friends vault 
-  var request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey));
-  final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
-  
-  if(vaultId == null) {
-    requestsLoading.value = false;
-    return;
-  }
-
-  // This had me in a mental breakdown, but then I ended up fixing it in 10 minutes LMFAO
-  request.vaultId = vaultId;
 
   // Send stored action
   final res = await postRqAuth("/account/stored_actions/send", <String, dynamic>{
@@ -161,11 +173,12 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
   if(requestSent.id != "hi") {
 
     requestController.deleteRequest(requestSent);
-    Get.find<FriendController>().addFromRequest(request);
+    Get.find<FriendController>().addFromRequest(requestSent);
     success("request.accepted");
   } else {
 
     // Add to sent requests
+    final request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey, ""));
     RequestController requestController = Get.find();
     requestController.addSentRequest(request);
     success("request.sent");
@@ -190,7 +203,7 @@ class Request {
   Request.fromEntity(RequestData data)
       : name = data.name,
         tag = data.tag,
-        vaultId = data.id,
+        vaultId = data.vaultId,
         storedActionId = data.storedActionId,
         keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
         id = data.id;

@@ -46,8 +46,9 @@ class FriendsSetup extends Setup {
         requestsDone.add(data["id"]);
 
         // Check if request is already in the database
+        final sentRequest = Get.find<RequestController>().requestsSent.firstWhere((element) => element.id == data["id"], orElse: () => Request.mock("hi"));
         final request = Get.find<RequestController>().requests.firstWhere((element) => element.id == data["id"], orElse: () => Request.mock("hi"));
-        if(request.id != "hi") {
+        if(request.id != "hi" || sentRequest.id != "hi") {
 
           if(request.vaultId == "") {
             request.vaultId = friend["id"];
@@ -78,17 +79,29 @@ class FriendsSetup extends Setup {
     }
     
     // Delete requests and friends that are not in the vault
-    for(var request in Get.find<RequestController>().requests) {
-      if(!requestsDone.contains(request.id)) {
-        Get.find<RequestController>().deleteRequest(request);
+    Get.find<RequestController>().requests.removeWhere((rq) {
+      if(!requestsDone.contains(rq.id)) {
+        Get.find<RequestController>().deleteSentRequest(rq, removal: false);
+        return true;
       }
-    }
+      return false;
+    });
 
-    for(var friend in Get.find<FriendController>().friends.values) {
-      if(!friendsDone.contains(friend.id)) {
-        Get.find<FriendController>().remove(friend);
+    Get.find<RequestController>().requestsSent.removeWhere((rq) {
+      if(!requestsDone.contains(rq.id)) {
+        Get.find<RequestController>().deleteSentRequest(rq, removal: false);
+        return true;
       }
-    }
+      return false;
+    });
+
+    Get.find<FriendController>().friends.removeWhere((key, value) {
+      if(!friendsDone.contains(key)) {
+        Get.find<FriendController>().remove(value, removal: false);
+        return true;
+      }
+      return false;
+    });
     
     return null;
   }

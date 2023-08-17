@@ -36,6 +36,9 @@ class FriendController extends GetxController {
   // Add friend (also sends data to server vault)
   Future<bool> addFromRequest(Request request) async {
 
+    // Remove from requests controller
+    Get.find<RequestController>().deleteSentRequest(request);
+
     // Remove request from server
     if(!(await removeFromFriendsVault(request.vaultId))) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
@@ -57,9 +60,6 @@ class FriendController extends GetxController {
     request.vaultId = id;
     add(request.friend);
 
-    // Remove from requests controller
-    Get.find<RequestController>().deleteSentRequest(request);
-
     return true;
   }
 
@@ -68,9 +68,12 @@ class FriendController extends GetxController {
     db.friend.insertOnConflictUpdate(friend.entity());
   }
 
-  void remove(Friend friend) {
-    friends.remove(friend.id);
-    db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id));
+  Future<bool> remove(Friend friend, {removal = true}) async {
+    if(removal) {
+      friends.remove(friend.id);
+    }
+    await db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id));
+    return true;
   }
 }
 
