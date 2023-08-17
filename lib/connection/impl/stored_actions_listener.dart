@@ -16,13 +16,10 @@ import '../../util/logging_framework.dart';
 
 void setupStoredActionListener() {
 
-  connector.listen("s_a", (event) {
-
-    // Decrypt stored action payload
-    final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, event.data["payload"]);
+  connector.listen("s_a", (event) async {
 
     try {
-      processStoredAction(event.data["id"], payload);
+      await processStoredAction(event.data);
     } catch(e) {
       sendLog("something weird happened: error while processing stored action payload");
       sendLog(e);
@@ -32,14 +29,17 @@ void setupStoredActionListener() {
 
 }
 
-Future<bool> processStoredAction(String id, String payload) async {
+Future<bool> processStoredAction(Map<String, dynamic> action) async {
   
+  // Decrypt stored action payload
+  final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, action["payload"]);
+
   final json = jsonDecode(payload);
   switch(json["a"]) {
     
     // Handle friend requests
     case "fr_rq":
-      await _handleFriendRequestAction(id, json);
+      await _handleFriendRequestAction(action["id"], json);
       break;
   }
 

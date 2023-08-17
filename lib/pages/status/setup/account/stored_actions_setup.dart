@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/pages/status/error/server_offline_page.dart';
-import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +15,9 @@ class StoredActionsSetup extends Setup {
   Future<Widget?> load() async {
 
     // Get account from database
-    final res = await postRqAuthorized("/stored_actions/list", <String, dynamic>{});
+    final res = await postRqAuthorized("/account/stored_actions/list", <String, dynamic>{});
     if(res.statusCode != 200) {
-      return const LoginPage();
+      return const ServerOfflinePage();
     }
 
     final body = jsonDecode(res.body);
@@ -33,7 +32,7 @@ class StoredActionsSetup extends Setup {
     }
 
     for (var element in actions) {
-      await processStoredAction(element["id"], element["payload"]);
+      await processStoredAction(element);
     }
 
     return null;
