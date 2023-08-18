@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chat_interface/connection/connection.dart';
 import 'package:http/http.dart';
 
 String sessionToken = '';
@@ -25,6 +26,7 @@ Uri server(String path) {
   return Uri.parse('$basePath$path');
 }
 
+// Post request to node-backend
 Future<Response> postRq(String path, Map<String, dynamic> body) async {
   return await post(
     server(path),
@@ -35,6 +37,7 @@ Future<Response> postRq(String path, Map<String, dynamic> body) async {
   );
 }
 
+// Post request to node-backend with any token
 Future<Response> postRqAuth(String path, Map<String, dynamic> body, String token) async {
   return await post(
     server(path),
@@ -46,9 +49,22 @@ Future<Response> postRqAuth(String path, Map<String, dynamic> body, String token
   );
 }
 
+// Post request to node-backend with session token
 Future<Response> postRqAuthorized(String path, Map<String, dynamic> body) async {
   return await post(
     server(path),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $sessionToken'
+    },
+    body: jsonEncode(body),
+  );
+}
+
+// Post request to chat-node with any token (node needs to be connected already)
+Future<Response> postRqNode(String path, Map<String, dynamic> body) async {
+  return await post(
+    Uri.parse("$nodeDomain$path"),
     headers: <String, String>{
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $sessionToken'
