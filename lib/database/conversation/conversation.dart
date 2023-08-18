@@ -3,8 +3,8 @@ import 'package:drift/drift.dart';
 class Conversation extends Table {
 
   TextColumn get id => text()();
-  TextColumn get data => text().nullable()();
-  TextColumn get key => text().nullable()();
+  TextColumn get data => text()();
+  TextColumn get key => text()();
   Int64Column get updatedAt => int64()();
 
   @override

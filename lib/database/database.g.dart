@@ -17,13 +17,13 @@ class $ConversationTable extends Conversation
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
   late final GeneratedColumn<String> data = GeneratedColumn<String>(
-      'data', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
   late final GeneratedColumn<String> key = GeneratedColumn<String>(
-      'key', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
@@ -49,10 +49,14 @@ class $ConversationTable extends Conversation
     if (data.containsKey('data')) {
       context.handle(
           _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+    } else if (isInserting) {
+      context.missing(_dataMeta);
     }
     if (data.containsKey('key')) {
       context.handle(
           _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+    } else if (isInserting) {
+      context.missing(_keyMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
@@ -72,9 +76,9 @@ class $ConversationTable extends Conversation
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       data: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}data']),
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
       key: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}key']),
+          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
     );
@@ -89,21 +93,20 @@ class $ConversationTable extends Conversation
 class ConversationData extends DataClass
     implements Insertable<ConversationData> {
   final String id;
-  final String? data;
-  final String? key;
+  final String data;
+  final String key;
   final BigInt updatedAt;
   const ConversationData(
-      {required this.id, this.data, this.key, required this.updatedAt});
+      {required this.id,
+      required this.data,
+      required this.key,
+      required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    if (!nullToAbsent || data != null) {
-      map['data'] = Variable<String>(data);
-    }
-    if (!nullToAbsent || key != null) {
-      map['key'] = Variable<String>(key);
-    }
+    map['data'] = Variable<String>(data);
+    map['key'] = Variable<String>(key);
     map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
   }
@@ -111,8 +114,8 @@ class ConversationData extends DataClass
   ConversationCompanion toCompanion(bool nullToAbsent) {
     return ConversationCompanion(
       id: Value(id),
-      data: data == null && nullToAbsent ? const Value.absent() : Value(data),
-      key: key == null && nullToAbsent ? const Value.absent() : Value(key),
+      data: Value(data),
+      key: Value(key),
       updatedAt: Value(updatedAt),
     );
   }
@@ -122,8 +125,8 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConversationData(
       id: serializer.fromJson<String>(json['id']),
-      data: serializer.fromJson<String?>(json['data']),
-      key: serializer.fromJson<String?>(json['key']),
+      data: serializer.fromJson<String>(json['data']),
+      key: serializer.fromJson<String>(json['key']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
   }
@@ -132,21 +135,18 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'data': serializer.toJson<String?>(data),
-      'key': serializer.toJson<String?>(key),
+      'data': serializer.toJson<String>(data),
+      'key': serializer.toJson<String>(key),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
   }
 
   ConversationData copyWith(
-          {String? id,
-          Value<String?> data = const Value.absent(),
-          Value<String?> key = const Value.absent(),
-          BigInt? updatedAt}) =>
+          {String? id, String? data, String? key, BigInt? updatedAt}) =>
       ConversationData(
         id: id ?? this.id,
-        data: data.present ? data.value : this.data,
-        key: key.present ? key.value : this.key,
+        data: data ?? this.data,
+        key: key ?? this.key,
         updatedAt: updatedAt ?? this.updatedAt,
       );
   @override
@@ -174,8 +174,8 @@ class ConversationData extends DataClass
 
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<String> id;
-  final Value<String?> data;
-  final Value<String?> key;
+  final Value<String> data;
+  final Value<String> key;
   final Value<BigInt> updatedAt;
   final Value<int> rowid;
   const ConversationCompanion({
@@ -187,11 +187,13 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   });
   ConversationCompanion.insert({
     required String id,
-    this.data = const Value.absent(),
-    this.key = const Value.absent(),
+    required String data,
+    required String key,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
+        data = Value(data),
+        key = Value(key),
         updatedAt = Value(updatedAt);
   static Insertable<ConversationData> custom({
     Expression<String>? id,
@@ -211,8 +213,8 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
 
   ConversationCompanion copyWith(
       {Value<String>? id,
-      Value<String?>? data,
-      Value<String?>? key,
+      Value<String>? data,
+      Value<String>? key,
       Value<BigInt>? updatedAt,
       Value<int>? rowid}) {
     return ConversationCompanion(
@@ -570,15 +572,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   static const VerificationMeta _verifiedMeta =
       const VerificationMeta('verified');
   @override
-  late final GeneratedColumn<bool> verified =
-      GeneratedColumn<bool>('verified', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: true,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("verified" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }));
+  late final GeneratedColumn<bool> verified = GeneratedColumn<bool>(
+      'verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
@@ -621,15 +620,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _editedMeta = const VerificationMeta('edited');
   @override
-  late final GeneratedColumn<bool> edited =
-      GeneratedColumn<bool>('edited', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: true,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("edited" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }));
+  late final GeneratedColumn<bool> edited = GeneratedColumn<bool>(
+      'edited', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("edited" IN (0, 1))'));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1558,15 +1554,12 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _selfMeta = const VerificationMeta('self');
   @override
-  late final GeneratedColumn<bool> self =
-      GeneratedColumn<bool>('self', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: true,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("self" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }));
+  late final GeneratedColumn<bool> self = GeneratedColumn<bool>(
+      'self', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("self" IN (0, 1))'));
   static const VerificationMeta _vaultIdMeta =
       const VerificationMeta('vaultId');
   @override

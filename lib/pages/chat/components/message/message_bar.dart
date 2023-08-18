@@ -24,14 +24,8 @@ class _MessageBarState extends State<MessageBar> {
   @override
   Widget build(BuildContext context) {
 
-    StatusController statusController = Get.find();
-    FriendController friendController = Get.find();
-    ThemeData theme = Theme.of(context);
-
-    widget.conversation.refreshName(statusController, friendController);
-
     return Material(
-      color: theme.colorScheme.onBackground,
+      color: Get.theme.colorScheme.onBackground,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
         child: Row(
@@ -43,7 +37,7 @@ class _MessageBarState extends State<MessageBar> {
               children: [
                 Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.secondary),
                 horizontalSpacing(defaultSpacing),
-                Text(widget.conversation.decrypted.value, style: Theme.of(context).textTheme.titleMedium),
+                Text(widget.conversation.containerSub.value.name, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
 

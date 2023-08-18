@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -11,7 +12,7 @@ import 'package:get/get.dart';
 class MessageController extends GetxController {
 
   final loaded = false.obs;
-  final selectedConversation = Conversation("0", "data", "").obs;
+  final selectedConversation = Conversation("0", ConversationContainer("hi"), randomSymmetricKey()).obs;
   final messages = <Message>[].obs;
 
   void selectConversation(Conversation conversation) async {

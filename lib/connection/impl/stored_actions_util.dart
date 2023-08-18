@@ -22,7 +22,7 @@ Future<bool> deleteStoredAction(String id) async {
 
 Future<bool> sendAuthenticatedStoredAction(Friend friend, String payload) async {
 
-  
+  // TODO: Implement  
 
   return true;
 }

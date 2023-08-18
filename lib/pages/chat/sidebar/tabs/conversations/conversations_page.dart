@@ -85,7 +85,6 @@ class _ConversationsPageState extends State<ConversationsPage> {
               padding: const EdgeInsets.only(top: defaultSpacing),
               itemBuilder: (context, index) {
                 Conversation conversation = controller.conversations.values.elementAt(index);
-                conversation.refreshName(statusController, friendController);
             
                 Friend? friend;
                 if(!conversation.isGroup) {
@@ -139,13 +138,13 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                         //* Conversation title
                                         Obx(() =>
                                           conversation.isGroup ?
-                                          Text(conversation.decrypted.value, style: theme.textTheme.titleMedium,
+                                          Text(conversation.containerSub.value.name, style: theme.textTheme.titleMedium,
                                             textHeightBehavior: noTextHeight,
                                           ) :
                                           Row(
                                             children: [
                                               Flexible(
-                                                child: Text(conversation.decrypted.value, style: theme.textTheme.titleMedium,
+                                                child: Text(conversation.containerSub.value.name, style: theme.textTheme.titleMedium,
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   textHeightBehavior: noTextHeight,
