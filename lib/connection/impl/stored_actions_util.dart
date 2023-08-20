@@ -23,11 +23,11 @@ Future<bool> deleteStoredAction(String id) async {
 Future<bool> sendAuthenticatedStoredAction(Friend friend, String payload) async {
 
   // Send stored action
-  final res = await postRqAuth("/account/stored_actions/send_auth", <String, dynamic>{
+  final res = await postRq("/account/stored_actions/send_auth", <String, dynamic>{
     "account": friend.id,
     "payload": payload,
     "key": friend.keyStorage.storedActionKey,
-  }, randomRemoteID());
+  });
 
   if(res.statusCode != 200) {
     sendLog("couldn't send stored action: invalid request");

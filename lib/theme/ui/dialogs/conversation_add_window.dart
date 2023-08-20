@@ -1,9 +1,10 @@
 import 'dart:ui';
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friends_page.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -23,7 +24,7 @@ class ConversationAddWindow extends StatefulWidget {
 
 class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
-  final _members = <String>[].obs;
+  final _members = <Friend>[].obs;
   final _length = 0.obs;
   final _conversationLoading = false.obs;
   final _errorText = "".obs;
@@ -84,15 +85,15 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                             child: Obx(() => Material(
-                              color: _members.contains(friend.id) ? theme.colorScheme.primaryContainer : Colors.transparent,
+                              color: _members.contains(friend) ? theme.colorScheme.primaryContainer : Colors.transparent,
                               borderRadius: BorderRadius.circular(defaultSpacing),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(defaultSpacing),
                                 onTap: () {
-                                  if (_members.contains(friend.id)) {
-                                    _members.remove(friend.id);
+                                  if (_members.contains(friend)) {
+                                    _members.remove(friend);
                                   } else {
-                                    _members.add(friend.id);
+                                    _members.add(friend);
                                   }
                                   _length.value = _members.length;
                                 },
@@ -176,9 +177,14 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                         ),
                         verticalSpacing(defaultSpacing * 0.5),
                         FJElevatedButton(
-                          onTap: () {
+                          onTap: () async {
             
                             if(_members.isEmpty) {
+                              showMessage(SnackbarType.error, "choose.members".tr);
+                              return;
+                            }
+
+                            if(_members.length > specialConstants["max_conversation_members"]) {
                               showMessage(SnackbarType.error, "choose.members".tr);
                               return;
                             }
@@ -187,8 +193,17 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                               _errorText.value = "enter.name".tr;
                               return;
                             }
+
+                            if(_controller.text.length > specialConstants["max_conversation_name_length"] && _members.length > 1) {
+                              _errorText.value = "too.long".trParams({ "limit": specialConstants["max_conversation_name_length"].toString() });
+                              return;
+                            }
             
-                            openConversation(_conversationLoading, _controller.text, _members);
+                            if(_members.length == 1) {
+                              await openDirectMessage(_members.first);
+                            } else {
+                              await openGroupConversation(_members, _controller.text);
+                            }
                           },
                           child: Center(
                             child: Text("friends.create".tr, style: theme.textTheme.titleMedium),

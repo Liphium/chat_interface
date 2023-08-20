@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:http/http.dart';
 
 String sessionToken = '';
@@ -20,6 +21,7 @@ String tokensToPayload() {
   return jsonEncode(payload);
 }
 
+String nodeProtocol = "http://";
 String basePath = 'http://localhost:3000';
 
 Uri server(String path) {
@@ -64,10 +66,10 @@ Future<Response> postRqAuthorized(String path, Map<String, dynamic> body) async 
 // Post request to chat-node with any token (node needs to be connected already)
 Future<Response> postRqNode(String path, Map<String, dynamic> body) async {
   return await post(
-    Uri.parse("$nodeDomain$path"),
+    Uri.parse("$nodeProtocol$nodeDomain$path"),
     headers: <String, String>{
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $sessionToken'
+      'Authorization': 'Bearer ${randomRemoteID()}'
     },
     body: jsonEncode(body),
   );

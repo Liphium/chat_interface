@@ -40,11 +40,22 @@ const directMessagePrefix = "DM_";
 
 // Wrapper for consistent DM and Group conversation handling
 Future<bool> openDirectMessage(Friend friend) async {
-  return openConversation([friend], "$directMessagePrefix${friend.name}");
+
+  if(Get.find<ConversationController>().conversations.values.any((element) => element.members.length == 1 && element.members.first.account == friend)) {
+    // TODO: Open conversation
+    return false;
+  }
+
+  sendLog(directMessagePrefix + friend.id);
+  return _openConversation([friend], directMessagePrefix + friend.id);
+}
+
+Future<bool> openGroupConversation(List<Friend> friends, String name) {
+  return _openConversation(friends, name);
 }
 
 // Open conversation with a group of friends
-Future<bool> openConversation(List<Friend> friends, String name) async {
+Future<bool> _openConversation(List<Friend> friends, String name) async {
 
   // Prepare the conversation
   final conversationKey = randomSymmetricKey();
@@ -57,7 +68,10 @@ Future<bool> openConversation(List<Friend> friends, String name) async {
   final conversationContainer = ConversationContainer(name);
   final encryptedData = conversationContainer.encrypted(conversationKey);
 
+  sendLog(name.length.toString() + " | " + name + " | " + specialConstants["max_conversation_name_length"].toString());
+
   if(name.length > specialConstants["max_conversation_name_length"]) {
+    print("hi");
     showErrorPopup("conversations.error".tr, "conversations.name.length".trParams({
       "length": specialConstants["max_conversation_name_length"].toString()
     }));
@@ -72,16 +86,14 @@ Future<bool> openConversation(List<Friend> friends, String name) async {
   }
 
   // Create the conversation
-  final response = await postRqNode("/conversation/open", <String, dynamic>{
+  final response = await postRqNode("/conversations/open", <String, dynamic>{
     "accountData": ownMemberContainer,
     "members": memberContainers,
     "data": encryptedData
   });
 
   if(response.statusCode != 200) {
-    showErrorPopup("conversations.error".tr, "conversations.name.length".trParams({
-      "length": specialConstants["max_conversation_name_length"].toString()
-    }));
+    showErrorPopup("error".tr, "error.unknown".tr);
     return false;
   }
 
@@ -94,7 +106,7 @@ Future<bool> openConversation(List<Friend> friends, String name) async {
   //* Send the stuff to all other members
   final conversationController = Get.find<ConversationController>();
 
-  final conversation = Conversation(body["id"], conversationContainer, conversationKey);
+  final conversation = Conversation(body["conversation"], conversationContainer, conversationKey);
   await conversationController.add(conversation);
 
   final packagedKey = packageSymmetricKey(conversationKey);

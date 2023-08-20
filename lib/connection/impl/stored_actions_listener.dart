@@ -37,6 +37,7 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
   final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, action["payload"]);
 
   final json = jsonDecode(payload);
+  sendLog(json);
   switch(json["a"]) {
     
     // Handle friend requests

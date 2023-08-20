@@ -6,7 +6,7 @@ import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 
-late final String storedActionKey;
+late String storedActionKey;
 
 class StoredActionsSetup extends Setup {
   StoredActionsSetup() : super('loading.stored_actions', false);

@@ -114,7 +114,6 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
     },
     onDecline: () {
       declined = true;
-      return false;
     },
   ));
 
