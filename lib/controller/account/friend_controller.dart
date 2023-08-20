@@ -8,6 +8,7 @@ import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -40,8 +41,10 @@ class FriendController extends GetxController {
     Get.find<RequestController>().deleteSentRequest(request);
 
     // Remove request from server
+    sendLog(request.vaultId);
     if(!(await removeFromFriendsVault(request.vaultId))) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
+      sendLog("ADDING REGARDLESS");
       return false;
     }
 

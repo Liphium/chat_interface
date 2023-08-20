@@ -110,19 +110,6 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
     }),
     onConfirm: () async {
       declined = false;
-
-      // Save friend request in own vault
-      var request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey, ""));
-      final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
-
-      if(vaultId == null) {
-        requestsLoading.value = false;
-        return;
-      }
-
-      // This had me in a mental breakdown, but then I ended up fixing it in 10 minutes LMFAO
-      request.vaultId = vaultId;
-
       sendFriendRequest(controller, name, tag, id, publicKey, success);
     },
     onDecline: () {
@@ -177,8 +164,18 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
     success("request.accepted");
   } else {
 
-    // Add to sent requests
-    final request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey, ""));
+    // Save friend request in own vault
+    var request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey, ""));
+    final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
+
+    if(vaultId == null) {
+      requestsLoading.value = false;
+      return;
+    }
+
+    // This had me in a mental breakdown, but then I ended up fixing it in 10 minutes LMFAO
+    request.vaultId = vaultId;
+
     RequestController requestController = Get.find();
     requestController.addSentRequest(request);
     success("request.sent");
