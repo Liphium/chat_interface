@@ -5,7 +5,6 @@ import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -23,16 +22,6 @@ class ConversationController extends GetxController {
   final conversations = <String, Conversation>{}.obs;
   int newConvs = 0;
 
-  void newMembers(int id, List<Member> member) {
-    newConvs--;
-    if(newConvs == 0) {
-      loaded.value = true;
-    }
-
-    if(conversations[id] == null) return;
-    conversations[id]!.members.addAll(member);
-  }
-
   Future<bool> add(Conversation conversation) async {
     conversations[conversation.id] = conversation;
 
@@ -42,6 +31,19 @@ class ConversationController extends GetxController {
       for(var member in members) {
         conversation.members.add(Member.fromData(member));
       }
+    }
+
+    return true;
+  }
+
+  Future<bool> addCreated(Conversation conversation, List<Friend> members, {Member? admin}) async {
+    conversations[conversation.id] = conversation;
+
+    for(var member in members) {
+      conversation.members.add(Member(member.id, MemberRole.user));
+    }
+    if(admin != null) {
+      conversation.members.add(admin);
     }
 
     return true;
@@ -63,10 +65,12 @@ class Conversation {
   final membersLoading = false.obs;
   final members = <Member>[].obs;
 
-  Conversation(this.id, this.container, this.key);
-
+  Conversation(this.id, this.container, this.key) {
+    containerSub.value = container;
+  }
   Conversation.fromData(ConversationData data) : this(data.id, ConversationContainer.fromJson(jsonDecode(data.data)), unpackageSymmetricKey(data.key));
 
+  // TODO: Replace
   String status(StatusController statusController, FriendController friendController) {
     
     if(members.length == 2) {

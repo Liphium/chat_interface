@@ -9,6 +9,7 @@ import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
@@ -80,18 +81,10 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   }
 
   // Get public key and id of the user
-  var res = await postRqAuth("/account/stored_actions/details", <String, dynamic>{
+  var json = await postAuthJSON("/account/stored_actions/details", <String, dynamic>{
     "username": name,
     "tag": tag,
   }, randomRemoteID());
-
-  if (res.statusCode != 200) {
-    showErrorPopup("error.network", "error.network.text");
-    requestsLoading.value = false;
-    return;
-  }
-
-  var json = jsonDecode(res.body);
   if(!json["success"]) {
     showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
     requestsLoading.value = false;
@@ -126,29 +119,18 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
   
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: ${storedActionKey}");
-  final encryptedPayload = encryptAsymmetricAnonymous(publicKey, storedAction("fr_rq", <String, dynamic>{
+  final payload = storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
     "tag": controller.tag.value,
     "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, "$name#$tag"),
     "pf": packageSymmetricKey(profileKey),
     "sa": storedActionKey,
-  }));
+  });
 
   // Send stored action
-  final res = await postRqAuth("/account/stored_actions/send", <String, dynamic>{
-    "account": id,
-    "payload": encryptedPayload,
-  }, randomRemoteID());
-
-  if (res.statusCode != 200) {
-    showErrorPopup("error.network", "error.network.text");
-    requestsLoading.value = false;
-    return;
-  }
-
-  final json = jsonDecode(res.body);
-  if(!json["success"]) {
-    showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
+  final result = await sendStoredAction(id, publicKey, payload);
+  if(!result) {
+    showErrorPopup(Constants.unknownError.tr, Constants.unknownErrorText.tr);
     requestsLoading.value = false;
     return;
   }

@@ -14,7 +14,6 @@ class Conversation extends Table {
 class Member extends Table {
   
     TextColumn get id => text()();
-    TextColumn get name => text()();
     TextColumn get conversationId => text().nullable()();
     TextColumn get accountId => text()();
 

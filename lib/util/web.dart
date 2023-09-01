@@ -39,6 +39,27 @@ Future<Response> postRq(String path, Map<String, dynamic> body) async {
   );
 }
 
+// Post request to node-backend (new)
+Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+
+  final res = await post(
+    server(path),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(body),
+  );
+
+  if(res.statusCode != 200) {
+    return <String, dynamic>{
+      "success": false,
+      "error": defaultError
+    };
+  }
+
+  return jsonDecode(res.body);
+}
+
 // Post request to node-backend with any token
 Future<Response> postRqAuth(String path, Map<String, dynamic> body, String token) async {
   return await post(
@@ -49,6 +70,28 @@ Future<Response> postRqAuth(String path, Map<String, dynamic> body, String token
     },
     body: jsonEncode(body),
   );
+}
+
+// Post request to node-backend with any token (new)
+Future<Map<String, dynamic>> postAuthJSON(String path, Map<String, dynamic> body, String token, {String defaultError = "server.error"}) async {
+
+  final res = await post(
+    server(path),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token'
+    },
+    body: jsonEncode(body),
+  );
+
+  if(res.statusCode != 200) {
+    return <String, dynamic>{
+      "success": false,
+      "error": defaultError
+    };
+  }
+
+  return jsonDecode(res.body);
 }
 
 // Post request to node-backend with session token
@@ -63,6 +106,28 @@ Future<Response> postRqAuthorized(String path, Map<String, dynamic> body) async 
   );
 }
 
+// Post request to node-backend with session token (new)
+Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+  
+  final res = await post(
+    server(path),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $sessionToken'
+    },
+    body: jsonEncode(body),
+  );
+
+  if(res.statusCode != 200) {
+    return <String, dynamic>{
+      "success": false,
+      "error": defaultError
+    };
+  }
+
+  return jsonDecode(res.body);
+}
+
 // Post request to chat-node with any token (node needs to be connected already)
 Future<Response> postRqNode(String path, Map<String, dynamic> body) async {
   return await post(
@@ -73,6 +138,28 @@ Future<Response> postRqNode(String path, Map<String, dynamic> body) async {
     },
     body: jsonEncode(body),
   );
+}
+
+// Post request to chat-node with any token (node needs to be connected already) (new)
+Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+
+  final res = await post(
+    Uri.parse("$nodeProtocol$nodeDomain$path"),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${randomRemoteID()}'
+    },
+    body: jsonEncode(body),
+  );
+
+  if(res.statusCode != 200) {
+    return <String, dynamic>{
+      "success": false,
+      "error": defaultError
+    };
+  }
+
+  return jsonDecode(res.body);
 }
 
 String padBase64(String str) {

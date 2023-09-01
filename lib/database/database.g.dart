@@ -270,11 +270,6 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   @override
@@ -293,8 +288,7 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
       'role_id', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, conversationId, accountId, roleId];
+  List<GeneratedColumn> get $columns => [id, conversationId, accountId, roleId];
   @override
   String get aliasedName => _alias ?? 'member';
   @override
@@ -308,12 +302,6 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
     }
     if (data.containsKey('conversation_id')) {
       context.handle(
@@ -344,8 +332,6 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
     return MemberData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       conversationId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}conversation_id']),
       accountId: attachedDatabase.typeMapping
@@ -363,13 +349,11 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
 
 class MemberData extends DataClass implements Insertable<MemberData> {
   final String id;
-  final String name;
   final String? conversationId;
   final String accountId;
   final int roleId;
   const MemberData(
       {required this.id,
-      required this.name,
       this.conversationId,
       required this.accountId,
       required this.roleId});
@@ -377,7 +361,6 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['name'] = Variable<String>(name);
     if (!nullToAbsent || conversationId != null) {
       map['conversation_id'] = Variable<String>(conversationId);
     }
@@ -389,7 +372,6 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   MemberCompanion toCompanion(bool nullToAbsent) {
     return MemberCompanion(
       id: Value(id),
-      name: Value(name),
       conversationId: conversationId == null && nullToAbsent
           ? const Value.absent()
           : Value(conversationId),
@@ -403,7 +385,6 @@ class MemberData extends DataClass implements Insertable<MemberData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MemberData(
       id: serializer.fromJson<String>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
       conversationId: serializer.fromJson<String?>(json['conversationId']),
       accountId: serializer.fromJson<String>(json['accountId']),
       roleId: serializer.fromJson<int>(json['roleId']),
@@ -414,7 +395,6 @@ class MemberData extends DataClass implements Insertable<MemberData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'name': serializer.toJson<String>(name),
       'conversationId': serializer.toJson<String?>(conversationId),
       'accountId': serializer.toJson<String>(accountId),
       'roleId': serializer.toJson<int>(roleId),
@@ -423,13 +403,11 @@ class MemberData extends DataClass implements Insertable<MemberData> {
 
   MemberData copyWith(
           {String? id,
-          String? name,
           Value<String?> conversationId = const Value.absent(),
           String? accountId,
           int? roleId}) =>
       MemberData(
         id: id ?? this.id,
-        name: name ?? this.name,
         conversationId:
             conversationId.present ? conversationId.value : this.conversationId,
         accountId: accountId ?? this.accountId,
@@ -439,7 +417,6 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   String toString() {
     return (StringBuffer('MemberData(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
           ..write('conversationId: $conversationId, ')
           ..write('accountId: $accountId, ')
           ..write('roleId: $roleId')
@@ -448,13 +425,12 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, conversationId, accountId, roleId);
+  int get hashCode => Object.hash(id, conversationId, accountId, roleId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MemberData &&
           other.id == this.id &&
-          other.name == this.name &&
           other.conversationId == this.conversationId &&
           other.accountId == this.accountId &&
           other.roleId == this.roleId);
@@ -462,14 +438,12 @@ class MemberData extends DataClass implements Insertable<MemberData> {
 
 class MemberCompanion extends UpdateCompanion<MemberData> {
   final Value<String> id;
-  final Value<String> name;
   final Value<String?> conversationId;
   final Value<String> accountId;
   final Value<int> roleId;
   final Value<int> rowid;
   const MemberCompanion({
     this.id = const Value.absent(),
-    this.name = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.accountId = const Value.absent(),
     this.roleId = const Value.absent(),
@@ -477,18 +451,15 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
   });
   MemberCompanion.insert({
     required String id,
-    required String name,
     this.conversationId = const Value.absent(),
     required String accountId,
     required int roleId,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        name = Value(name),
         accountId = Value(accountId),
         roleId = Value(roleId);
   static Insertable<MemberData> custom({
     Expression<String>? id,
-    Expression<String>? name,
     Expression<String>? conversationId,
     Expression<String>? accountId,
     Expression<int>? roleId,
@@ -496,7 +467,6 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (name != null) 'name': name,
       if (conversationId != null) 'conversation_id': conversationId,
       if (accountId != null) 'account_id': accountId,
       if (roleId != null) 'role_id': roleId,
@@ -506,14 +476,12 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
 
   MemberCompanion copyWith(
       {Value<String>? id,
-      Value<String>? name,
       Value<String?>? conversationId,
       Value<String>? accountId,
       Value<int>? roleId,
       Value<int>? rowid}) {
     return MemberCompanion(
       id: id ?? this.id,
-      name: name ?? this.name,
       conversationId: conversationId ?? this.conversationId,
       accountId: accountId ?? this.accountId,
       roleId: roleId ?? this.roleId,
@@ -526,9 +494,6 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
     }
     if (conversationId.present) {
       map['conversation_id'] = Variable<String>(conversationId.value);
@@ -549,7 +514,6 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
   String toString() {
     return (StringBuffer('MemberCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
           ..write('conversationId: $conversationId, ')
           ..write('accountId: $accountId, ')
           ..write('roleId: $roleId, ')

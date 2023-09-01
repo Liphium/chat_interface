@@ -63,9 +63,6 @@ class SetupManager {
     _steps.add(RemoteIDSetup());
     _steps.add(SettingsSetup());
     _steps.add(FriendsSetup());
-        _steps.add(UpdateSetup());
-    _steps.add(UpdateSetup());
-    _steps.add(UpdateSetup());
 
     _steps.add(StoredActionsSetup());
 

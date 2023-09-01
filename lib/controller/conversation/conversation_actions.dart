@@ -41,8 +41,8 @@ const directMessagePrefix = "DM_";
 // Wrapper for consistent DM and Group conversation handling
 Future<bool> openDirectMessage(Friend friend) async {
 
-  if(Get.find<ConversationController>().conversations.values.any((element) => element.members.length == 1 && element.members.first.account == friend)) {
-    // TODO: Open conversation
+  if(Get.find<ConversationController>().conversations.values.any((element) => element.members.length == 1 && element.members.first.account == friend.name)) {
+    // TODO: Open conversation (in UI)
     return false;
   }
 
@@ -51,6 +51,9 @@ Future<bool> openDirectMessage(Friend friend) async {
 }
 
 Future<bool> openGroupConversation(List<Friend> friends, String name) {
+
+  // TODO: Check if it exists and open in UI
+
   return _openConversation(friends, name);
 }
 
@@ -71,7 +74,6 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   sendLog(name.length.toString() + " | " + name + " | " + specialConstants["max_conversation_name_length"].toString());
 
   if(name.length > specialConstants["max_conversation_name_length"]) {
-    print("hi");
     showErrorPopup("conversations.error".tr, "conversations.name.length".trParams({
       "length": specialConstants["max_conversation_name_length"].toString()
     }));
@@ -86,18 +88,11 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   }
 
   // Create the conversation
-  final response = await postRqNode("/conversations/open", <String, dynamic>{
+  final body = await postNodeJSON("/conversations/open", <String, dynamic>{
     "accountData": ownMemberContainer,
     "members": memberContainers,
     "data": encryptedData
   });
-
-  if(response.statusCode != 200) {
-    showErrorPopup("error".tr, "error.unknown".tr);
-    return false;
-  }
-
-  final body = jsonDecode(response.body);
   if(!body["success"]) {
     showErrorPopup("error".tr, "error.unknown".tr);
     return false;
@@ -107,12 +102,12 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   final conversationController = Get.find<ConversationController>();
 
   final conversation = Conversation(body["conversation"], conversationContainer, conversationKey);
-  await conversationController.add(conversation);
+  await conversationController.addCreated(conversation, friends, admin: Member(Get.find<StatusController>().id.value, MemberRole.admin));
 
   final packagedKey = packageSymmetricKey(conversationKey);
   for(var friend in friends) {
     await sendAuthenticatedStoredAction(friend, storedAction("conv", <String, dynamic>{
-      "id": body["id"],
+      "id": body["conversation"],
       "key": packagedKey,
     }));
   }

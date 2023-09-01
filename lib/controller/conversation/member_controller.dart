@@ -18,17 +18,38 @@ class MemberController extends GetxController {
 
 class Member {
 
-  final String name;
-  final String account;
-  final int role;
+  final String account; // Account id
+  final MemberRole role;
 
-  Member(this.name, this.account, this.role);
-  Member.fromJson(this.name, Map<String, dynamic> json) : 
+  Member(this.account, this.role);
+  Member.fromJson(Map<String, dynamic> json) : 
     account = json['account'],
-    role = json['role'];
+    role = MemberRole.fromValue(json['role']);
   
-  Member.fromData(MemberData data) : this(data.name, data.accountId, data.roleId);
+  Member.fromData(MemberData data) : this(data.accountId, MemberRole.fromValue(data.roleId));
 
-  MemberData toData(String id, String conversation) => MemberData(id: id, name: name, accountId: account, roleId: role, conversationId: conversation);
+  MemberData toData(String id, String conversation) => MemberData(id: id, accountId: account, roleId: role.value, conversationId: conversation);
 
+}
+
+enum MemberRole {
+  admin(2),
+  moderator(1),
+  user(0);
+
+  final int value;
+
+  const MemberRole(this.value);
+
+  static MemberRole fromValue(int value) {
+    switch(value) {
+      case 2:
+        return MemberRole.admin;
+      case 1:
+        return MemberRole.moderator;
+      case 0:
+        return MemberRole.user;
+    }
+    return MemberRole.user;
+  }
 }
