@@ -63,10 +63,10 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   // Prepare the conversation
   final conversationKey = randomSymmetricKey();
   final ownMemberContainer = MemberContainer(Get.find<StatusController>().id.value).encrypted(conversationKey);
-  final memberContainers = <String>[];
+  final memberContainers = <String, String>{};
   for(final friend in friends) {
     final container = MemberContainer(friend.id);
-    memberContainers.add(container.encrypted(conversationKey));
+    memberContainers[friend.id] = (container.encrypted(conversationKey));
   }
   final conversationContainer = ConversationContainer(name);
   final encryptedData = conversationContainer.encrypted(conversationKey);
@@ -90,7 +90,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   // Create the conversation
   final body = await postNodeJSON("/conversations/open", <String, dynamic>{
     "accountData": ownMemberContainer,
-    "members": memberContainers,
+    "members": memberContainers.values.toList(),
     "data": encryptedData
   });
   if(!body["success"]) {
@@ -106,8 +106,10 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
 
   final packagedKey = packageSymmetricKey(conversationKey);
   for(var friend in friends) {
+    final token = body["tokens"][hashSha(memberContainers[friend.id]!)];
     await sendAuthenticatedStoredAction(friend, storedAction("conv", <String, dynamic>{
       "id": body["conversation"],
+      "token": token,
       "key": packagedKey,
     }));
   }

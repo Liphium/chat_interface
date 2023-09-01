@@ -64,14 +64,15 @@ class SetupManager {
     _steps.add(SettingsSetup());
     _steps.add(FriendsSetup());
 
+    // Setup connection
+    _steps.add(ClusterSetup());
+    _steps.add(ConnectionSetup());
+
+    // Handle new stored actions
     _steps.add(StoredActionsSetup());
 
     // Finish fetching
     _steps.add(FetchFinishSetup());
-
-    // Setup connection
-    _steps.add(ClusterSetup());
-    _steps.add(ConnectionSetup());
   }
 
   void restart() {

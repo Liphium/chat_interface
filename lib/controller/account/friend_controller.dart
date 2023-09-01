@@ -142,12 +142,13 @@ class Friend {
 
   //* Remove friend
   Future<bool> remove(RxBool loading) async {
-    //loading.value = true;
+    loading.value = true;
 
     await removeFromFriendsVault(vaultId);
     db.friend.deleteWhere((tbl) => tbl.id.equals(id));
     Get.find<FriendController>().friends.remove(id);
 
+    loading.value = false;
     return true;
   }
 

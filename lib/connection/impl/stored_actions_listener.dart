@@ -45,11 +45,17 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
     case "fr_rq":
       await _handleFriendRequestAction(action["id"], json);
       break;
+
+    // Handle conversation opening
+    case "conv":
+      await _handleConversationOpening(action["id"], json);
+      break;
   }
 
   return true;
 }
 
+//* Friend requests
 Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> json) async {
   
   // Delete the action (it doesn't need to be handled twice)
@@ -136,6 +142,26 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   // Add friend request
   request.vaultId = vaultId;
   Get.find<RequestController>().addRequest(request);
+
+  return true;
+}
+
+//* Conversation opening
+Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> json) async {
+
+  // Delete the action (it doesn't need to be handled twice)
+  final response = await deleteStoredAction(actionId);
+  if(!response) {
+    sendLog("WARNING: couldn't delete stored action");
+  }
+
+  final key = json["key"];
+  final id = json["id"];
+  final token = json["token"];
+
+  // TODO: Implement multi device support first
+  // 1. Send request to node to activate token
+  // 2. Save conversation in the vault
 
   return true;
 }
