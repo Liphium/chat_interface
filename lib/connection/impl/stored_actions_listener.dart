@@ -7,6 +7,8 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/web.dart';
@@ -147,7 +149,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 }
 
 //* Conversation opening
-Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> json) async {
+Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> actionJson) async {
 
   // Delete the action (it doesn't need to be handled twice)
   final response = await deleteStoredAction(actionId);
@@ -155,13 +157,24 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> js
     sendLog("WARNING: couldn't delete stored action");
   }
 
-  final key = json["key"];
-  final id = json["id"];
-  final token = json["token"];
+  final json = await postNodeJSON("/conversations/activate", <String, dynamic>{
+    "id": actionJson["token"]["id"],
+    "token": actionJson["token"]["token"]
+  });
+  if(!json["success"]) {
+    sendLog("couldn't activate conversation: ${json["error"]}");
+    return true;
+  }
+  
+  final key = unpackageSymmetricKey(actionJson["key"]);
+  final members = <Member>[];
+  for(var memberData in json["data"]) {
+    final memberContainer = MemberContainer.decrypt(memberData["data"], key);
+    members.add(Member(memberContainer.id, MemberRole.fromValue(memberData["rank"])));
+  }
 
-  // TODO: Implement multi device support first
-  // 1. Send request to node to activate token
-  // 2. Save conversation in the vault
+  final container = ConversationContainer.decrypt(actionJson["data"], key);
+  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], container, key), members);
 
   return true;
 }

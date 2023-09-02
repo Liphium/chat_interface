@@ -37,11 +37,24 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  Future<bool> addCreated(Conversation conversation, List<Friend> members, {Member? admin}) async {
+  Future<bool> addCreatedFriends(Conversation conversation, List<Friend> members, {Member? admin}) async {
     conversations[conversation.id] = conversation;
 
     for(var member in members) {
       conversation.members.add(Member(member.id, MemberRole.user));
+    }
+    if(admin != null) {
+      conversation.members.add(admin);
+    }
+
+    return true;
+  }
+
+  Future<bool> addCreated(Conversation conversation, List<Member> members, {Member? admin}) async {
+    conversations[conversation.id] = conversation;
+
+    for(var member in members) {
+      conversation.members.add(member);
     }
     if(admin != null) {
       conversation.members.add(admin);

@@ -96,13 +96,13 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   if(!body["success"]) {
     showErrorPopup("error".tr, "error.unknown".tr);
     return false;
-  }
+  }  
 
   //* Send the stuff to all other members
   final conversationController = Get.find<ConversationController>();
 
   final conversation = Conversation(body["conversation"], conversationContainer, conversationKey);
-  await conversationController.addCreated(conversation, friends, admin: Member(Get.find<StatusController>().id.value, MemberRole.admin));
+  await conversationController.addCreatedFriends(conversation, friends, admin: Member(Get.find<StatusController>().id.value, MemberRole.admin));
 
   final packagedKey = packageSymmetricKey(conversationKey);
   for(var friend in friends) {
