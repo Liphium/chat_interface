@@ -12,7 +12,7 @@ import 'package:get/get.dart';
 class MessageController extends GetxController {
 
   final loaded = false.obs;
-  final selectedConversation = Conversation("0", ConversationContainer("hi"), randomSymmetricKey()).obs;
+  final selectedConversation = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey()).obs;
   final messages = <Message>[].obs;
 
   void selectConversation(Conversation conversation) async {

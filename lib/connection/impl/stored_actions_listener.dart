@@ -10,8 +10,10 @@ import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 import '../../controller/current/status_controller.dart';
@@ -157,24 +159,32 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     sendLog("WARNING: couldn't delete stored action");
   }
 
+  final token = jsonDecode(actionJson["token"]);
+  sendLog(token["token"].length);
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{
-    "id": actionJson["token"]["id"],
-    "token": actionJson["token"]["token"]
+    "id": token["id"],
+    "token": token["token"]
   });
   if(!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
+    Future.delayed(500.ms, () async {
+      await refreshVault();
+    });
     return true;
   }
   
   final key = unpackageSymmetricKey(actionJson["key"]);
   final members = <Member>[];
-  for(var memberData in json["data"]) {
+  for(var memberData in json["members"]) {
+    sendLog(memberData);
     final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-    members.add(Member(memberContainer.id, MemberRole.fromValue(memberData["rank"])));
+    members.add(Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"])));
   }
 
-  final container = ConversationContainer.decrypt(actionJson["data"], key);
-  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], container, key), members);
+  // TODO: When DM rename the conversation locally
+
+  final container = ConversationContainer.decrypt(json["data"], key);
+  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], ConversationToken.fromJson(token), container, key), members);
 
   return true;
 }

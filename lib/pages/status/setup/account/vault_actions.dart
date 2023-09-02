@@ -1,6 +1,6 @@
 part of 'vault_setup.dart';
 
-// Remove an entry from the vault (returns null if successful (error otherwise))
+/// Remove an entry from the vault (returns null if successful (error otherwise))
 Future<String?> removeFromVault(String id) async {
   
   final json = await postAuthorizedJSON("/account/vault/remove", <String, dynamic>{
@@ -13,7 +13,7 @@ Future<String?> removeFromVault(String id) async {
   return null;
 }
 
-// Add a new entry to the vault (payload is encrypted with the public key of the account in the function)
+/// Add a new entry to the vault (payload is encrypted with the public key of the account in the function)
 Future<String?> addToVault(String tag, String payload) async {
 
   final encryptedPayload = encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, payload);

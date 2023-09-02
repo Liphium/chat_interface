@@ -11,8 +11,23 @@ class MemberContainer {
     final json = jsonDecode(decryptSymmetric(cipherText, key));
     id = json["id"];
   }
-  String encrypted(SecureKey key) => encryptSymmetric(id, key);
+  String encrypted(SecureKey key) => encryptSymmetric(jsonEncode(<String, dynamic>{
+    "id": id
+  }), key);
 
+}
+
+class ConversationToken {
+  final String id;
+  final String token;
+
+  ConversationToken(this.id, this.token);
+  ConversationToken.fromJson(Map<String, dynamic> json) : id = json["id"], token = json["token"];
+
+  String toJson() => jsonEncode(<String, dynamic>{
+    "id": id,
+    "token": token
+  });
 }
 
 class ConversationContainer {
@@ -101,18 +116,20 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   //* Send the stuff to all other members
   final conversationController = Get.find<ConversationController>();
 
-  final conversation = Conversation(body["conversation"], conversationContainer, conversationKey);
-  await conversationController.addCreatedFriends(conversation, friends, admin: Member(Get.find<StatusController>().id.value, MemberRole.admin));
-
+  final conversation = Conversation(body["conversation"], ConversationToken.fromJson(body["admin_token"]), conversationContainer, conversationKey);
+  final members = <Member>[];
   final packagedKey = packageSymmetricKey(conversationKey);
   for(var friend in friends) {
-    final token = body["tokens"][hashSha(memberContainers[friend.id]!)];
+    final token = ConversationToken.fromJson(body["tokens"][hashSha(memberContainers[friend.id]!)]);
     await sendAuthenticatedStoredAction(friend, storedAction("conv", <String, dynamic>{
       "id": body["conversation"],
-      "token": token,
+      "token": token.toJson(),
       "key": packagedKey,
     }));
+    members.add(Member(token.id, friend.id, MemberRole.user));
   }
+
+  await conversationController.addCreated(conversation, members, admin: Member(conversation.token.id, Get.find<StatusController>().id.value, MemberRole.admin));
 
   return true;
 } 

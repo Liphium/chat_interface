@@ -7,6 +7,11 @@ final Map<String, dynamic> specialConstants = <String, dynamic>{
 
 //* These are just normal constants
 class Constants {
+  
+  // Vault
+  static const String conversationTag = "c"; 
+
+  // Errors
   static const String unknownError = "error.unknown";
   static const String unknownErrorText = "error.unknown.text";
 }

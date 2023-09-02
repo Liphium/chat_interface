@@ -20,6 +20,7 @@ import 'package:get/get.dart';
 
 import '../error/error_page.dart';
 import 'account/account_setup.dart';
+import 'account/vault_setup.dart';
 import 'encryption/key_setup.dart';
 
 abstract class Setup {
@@ -70,6 +71,7 @@ class SetupManager {
 
     // Handle new stored actions
     _steps.add(StoredActionsSetup());
+    _steps.add(VaultSetup());
 
     // Finish fetching
     _steps.add(FetchFinishSetup());

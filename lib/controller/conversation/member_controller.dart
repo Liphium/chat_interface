@@ -17,18 +17,20 @@ class MemberController extends GetxController {
 }
 
 class Member {
-
+  
+  final String tokenId; // Token id
   final String account; // Account id
   final MemberRole role;
 
-  Member(this.account, this.role);
+  Member(this.tokenId, this.account, this.role);
   Member.fromJson(Map<String, dynamic> json) : 
+    tokenId = json['id'],
     account = json['account'],
     role = MemberRole.fromValue(json['role']);
   
-  Member.fromData(MemberData data) : this(data.accountId, MemberRole.fromValue(data.roleId));
+  Member.fromData(MemberData data) : this(data.id, data.accountId, MemberRole.fromValue(data.roleId));
 
-  MemberData toData(String id, String conversation) => MemberData(id: id, accountId: account, roleId: role.value, conversationId: conversation);
+  MemberData toData(String conversation) => MemberData(id: tokenId, accountId: account, roleId: role.value, conversationId: conversation);
 
 }
 
