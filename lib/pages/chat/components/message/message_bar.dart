@@ -1,6 +1,4 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -35,9 +33,9 @@ class _MessageBarState extends State<MessageBar> {
             //* Conversation label
             Row(
               children: [
-                Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.secondary),
+                Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.primary),
                 horizontalSpacing(defaultSpacing),
-                Text(widget.conversation.containerSub.value.name, style: Theme.of(context).textTheme.titleMedium),
+                Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
 

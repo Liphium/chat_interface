@@ -20,29 +20,24 @@ class _SidebarProfileState extends State<SidebarProfile> {
     StatusController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: defaultSpacing,
-        right: defaultSpacing,
-        bottom: defaultSpacing,
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(defaultSpacing * 1.5),
-          bottomLeft: Radius.circular(defaultSpacing * 1.5),
-        ),
+    return Container(
+      color: theme.colorScheme.background,
+      child: Padding(
+        padding: const EdgeInsets.all(defaultSpacing),
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SizedBox(
               width: constraints.maxWidth,
               child: Material(
-                color: theme.colorScheme.onBackground,
+                borderRadius: BorderRadius.circular(defaultSpacing),
+                color: theme.colorScheme.background,
                 child: InkWell(
                   onTap: () => Get.dialog(const OwnProfile(position: Offset(defaultSpacing, 60))),
                   splashColor: theme.hoverColor.withAlpha(10),
+                  borderRadius: BorderRadius.circular(defaultSpacing),
                   splashFactory: NoSplash.splashFactory,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+                    padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -89,7 +84,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                             )
                                           ],
                                         ),
-
+          
                                         //* Status message
                                         Obx(() =>
                                           Visibility(

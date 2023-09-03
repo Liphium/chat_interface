@@ -66,7 +66,7 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
               ),
             color: widget.selected.value == widget.index
                 ? Theme.of(context).colorScheme.primaryContainer
-                : Theme.of(context).colorScheme.background,
+                : Theme.of(context).colorScheme.onBackground,
             child: InkWell(
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(defaultSpacing),

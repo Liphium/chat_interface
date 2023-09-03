@@ -176,7 +176,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                           )
                         ),
                         verticalSpacing(defaultSpacing * 0.5),
-                        FJElevatedButton(
+                        FJElevatedLoadingButton(
                           onTap: () async {
             
                             if(_members.isEmpty) {
@@ -198,16 +198,22 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                               _errorText.value = "too.long".trParams({ "limit": specialConstants["max_conversation_name_length"].toString() });
                               return;
                             }
-            
+
+                            _conversationLoading.value = true;
+                            var result = false;
                             if(_members.length == 1) {
-                              await openDirectMessage(_members.first);
+                              result = await openDirectMessage(_members.first);
                             } else {
-                              await openGroupConversation(_members, _controller.text);
+                              result = await openGroupConversation(_members, _controller.text);
                             }
+
+                            if(result) {
+                              Get.back();
+                            }
+                            _conversationLoading.value = false;
                           },
-                          child: Center(
-                            child: Text("friends.create".tr, style: theme.textTheme.titleMedium),
-                          ),
+                          label: "friends.create".tr,
+                          loading: _conversationLoading,
                         ),
                       ],
                     )

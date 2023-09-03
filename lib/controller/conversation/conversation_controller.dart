@@ -96,6 +96,7 @@ class Conversation {
   }
 
   bool get isGroup => members.length > 2;
+  String get dmName => Get.find<FriendController>().friends[members.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account]!.name;  
 
   ConversationData get entity => ConversationData(id: id, token: token.toJson(), key: packageSymmetricKey(key), data: container.toJson(), updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch));
   String toJson() => jsonEncode(<String, dynamic>{

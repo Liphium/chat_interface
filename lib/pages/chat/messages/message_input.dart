@@ -48,9 +48,9 @@ class _MessageInputState extends State<MessageInput> {
 
     return Padding(
       padding: const EdgeInsets.only(
-        right: defaultSpacing * 1.75,
-        left: defaultSpacing * 1.75,
-        bottom: defaultSpacing * 0.75
+        right: defaultSpacing,
+        left: defaultSpacing,
+        bottom: defaultSpacing
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,

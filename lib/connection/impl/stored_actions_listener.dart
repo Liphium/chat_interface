@@ -181,8 +181,6 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     members.add(Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"])));
   }
 
-  // TODO: When DM rename the conversation locally
-
   final container = ConversationContainer.decrypt(json["data"], key);
   await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], ConversationToken.fromJson(token), container, key), members);
 

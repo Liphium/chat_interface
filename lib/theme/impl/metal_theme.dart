@@ -25,8 +25,8 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
 
     // Background color
     brightness: Brightness.dark, 
-    background: Color(0xFF1c1c1c),
-    onBackground: Color(0xFF292929),
+    background: Color(0xFF292929),
+    onBackground: Color(0xFF1c1c1c),
 
     // Online color
     secondary: Color(0xFF7cda81),

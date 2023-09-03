@@ -100,7 +100,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   child: Obx(() => 
                   Material(
                     borderRadius: BorderRadius.circular(10),
-                    color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primaryContainer.withAlpha(150) : Colors.transparent,
+                    color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primaryContainer : Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
                       hoverColor: theme.colorScheme.primaryContainer.withAlpha(150),
@@ -144,7 +144,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                           Row(
                                             children: [
                                               Flexible(
-                                                child: Text(conversation.containerSub.value.name, style: theme.textTheme.titleMedium,
+                                                child: Text(conversation.dmName, style: theme.textTheme.titleMedium,
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   textHeightBehavior: noTextHeight,
