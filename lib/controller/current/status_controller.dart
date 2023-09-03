@@ -1,6 +1,9 @@
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'dart:convert';
+
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 
 class StatusController extends GetxController {
@@ -18,26 +21,36 @@ class StatusController extends GetxController {
   void setTag(String value) => tag.value = value;
   void setId(String value) => id.value = value;
 
-  void setStatus({String? message, int? type, Function()? success}) {
-    if(statusLoading.value) return;
+  Future<bool> setStatus({String? message, int? type, Function()? success}) async {
+    if(statusLoading.value) return false;
     statusLoading.value = true;
-
-    // TODO: Encrypt
   
-    // Send status to server
-    connector.sendAction(Message("acc_st", <String, dynamic>{
+    final tokens = <Map<String, dynamic>>[]; // All conversation tokens
+    for(final conversation in Get.find<ConversationController>().conversations.values) {
+      if(!conversation.isGroup) {
+        tokens.add(conversation.token.toMap());
+      }
+    }
+
+    final encryptedStatus = encryptSymmetric(jsonEncode(<String, dynamic>{
       "status": message ?? status.value,
       "type": type ?? this.type.value,
-    }), handler:(event) {
-      statusLoading.value = false;
-      if(event.data["success"]) {
-        if(message != null) status.value = message;
-        if(type != null) this.type.value = type;
-        if(success != null) success();
-      } else {
-        showMessage(SnackbarType.error, "error.status.offline");
-      }
-    },);
+    }), profileKey);
+
+    // Send status to server
+    final json = await postNodeJSON("/status", <String, dynamic>{
+      "tokens": tokens,
+      "status": encryptedStatus
+    });
+    statusLoading.value = false;
+    if(!json["success"]) {
+      return false;
+    }
+
+    if(message != null) status.value = message;
+    if(type != null) this.type.value = type;
+    if(success != null) success();
+    return true;
   }
 
 }

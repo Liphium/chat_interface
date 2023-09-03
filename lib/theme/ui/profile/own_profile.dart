@@ -1,5 +1,6 @@
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
@@ -7,6 +8,7 @@ import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -86,7 +88,10 @@ class _ProfileState extends State<OwnProfile> {
                       //* Copy button
                       LoadingIconButton(
                         loading: false.obs,
-                        onTap: () => {},
+                        onTap: () {
+                          db.conversation.deleteAll();
+                          db.message.deleteAll();
+                        },
                         icon: Icons.copy
                       )
                     ],

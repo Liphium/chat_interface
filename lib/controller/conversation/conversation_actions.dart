@@ -24,10 +24,11 @@ class ConversationToken {
   ConversationToken(this.id, this.token);
   ConversationToken.fromJson(Map<String, dynamic> json) : id = json["id"], token = json["token"];
 
-  String toJson() => jsonEncode(<String, dynamic>{
+  String toJson() => jsonEncode(toMap());
+  Map<String, dynamic> toMap() => <String, dynamic>{
     "id": id,
     "token": token
-  });
+  };
 }
 
 class ConversationContainer {
