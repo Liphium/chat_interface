@@ -172,6 +172,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     });
     return true;
   }
+  token["token"] = json["token"];
   
   final key = unpackageSymmetricKey(actionJson["key"]);
   final members = <Member>[];

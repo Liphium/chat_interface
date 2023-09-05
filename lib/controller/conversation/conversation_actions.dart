@@ -77,6 +77,13 @@ Future<bool> openGroupConversation(List<Friend> friends, String name) {
 // Open conversation with a group of friends
 Future<bool> _openConversation(List<Friend> friends, String name) async {
 
+  if(Get.find<ConversationController>().conversations.length >= specialConstants["max_conversation_amount"]) {
+    showErrorPopup("conversations.error".tr, "conversations.amount".trParams({
+      "amount": specialConstants["max_conversation_amount"].toString()
+    }));
+    return false;
+  }
+
   // Prepare the conversation
   final conversationKey = randomSymmetricKey();
   final ownMemberContainer = MemberContainer(Get.find<StatusController>().id.value).encrypted(conversationKey);
