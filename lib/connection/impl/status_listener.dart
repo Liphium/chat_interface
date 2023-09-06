@@ -3,6 +3,8 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:get/get.dart';
 
 void setupStatusListener() {
+
+  // Handle friend status change
   connector.listen("acc_st", (event) {
 
     final message = event.data["st"] as String;
@@ -19,6 +21,8 @@ void setupStatusListener() {
     }
 
     controller.friendIdLookup[status[0]]!.loadStatus(status[1]);
+
+    // TODO: Send back own status
 
   }, afterSetup: true);
 }

@@ -1,12 +1,13 @@
 import 'dart:convert';
 
+import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
-import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 
 class StatusController extends GetxController {
@@ -29,6 +30,11 @@ class StatusController extends GetxController {
     "t": type.value,
   });
 
+  String newStatusJson(String status, int type) => jsonEncode(<String, dynamic>{
+    "s": status,
+    "t": type,
+  });
+
   void fromStatusJson(String json) {
     final data = jsonDecode(json);
     status.value = data["s"];
@@ -39,35 +45,33 @@ class StatusController extends GetxController {
     return hashSha(id.value + name.value + tag.value + storedActionKey);
   }
 
+  String statusPacket(String statusJson) {
+    return "${generateFriendId()}:${encryptSymmetric(statusJson, profileKey)}";
+  }
+
   Future<bool> setStatus({String? message, int? type, Function()? success}) async {
     if(statusLoading.value) return false;
     statusLoading.value = true;
-  
-    final tokens = <Map<String, dynamic>>[]; // All conversation tokens
-    for(final conversation in Get.find<ConversationController>().conversations.values) {
-      if(!conversation.isGroup) {
+
+    final tokens = <Map<String, dynamic>>[];
+    for(var conversation in Get.find<ConversationController>().conversations.values) {
+      if(conversation.members.length == 2) {
         tokens.add(conversation.token.toMap());
       }
     }
 
-    final encryptedStatus = encryptSymmetric(jsonEncode(<String, dynamic>{
-      "status": message ?? status.value,
-      "type": type ?? this.type.value,
-    }), profileKey);
-
-    // Send status to server
-    final json = await postNodeJSON("/status", <String, dynamic>{
+    connector.sendAction(Message("st_send", <String, dynamic>{
+      "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
       "tokens": tokens,
-      "status": encryptedStatus
+    }), handler: (event) {
+      statusLoading.value = false;
+      success?.call();
+      if(event.data["success"] == true) {
+        if(message != null) status.value = message;
+        if(type != null) this.type.value = type;
+      }
     });
-    statusLoading.value = false;
-    if(!json["success"]) {
-      return false;
-    }
 
-    if(message != null) status.value = message;
-    if(type != null) this.type.value = type;
-    if(success != null) success();
     return true;
   }
 
