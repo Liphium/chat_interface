@@ -30,8 +30,6 @@ class VaultSetup extends Setup {
       await conversationController.add(Conversation.fromData(conversation));
     }
 
-    conversationController.finishedLoading();
-
     return null;
   }
 

@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +13,8 @@ class FetchSetup extends Setup {
   @override
   Future<Widget?> load() async {
     
+    setupFinished = false;
+
     // Setup last fetch time
     await startFetch();
 

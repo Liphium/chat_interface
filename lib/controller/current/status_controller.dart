@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
@@ -20,6 +23,21 @@ class StatusController extends GetxController {
   void setName(String value) => name.value = value;
   void setTag(String value) => tag.value = value;
   void setId(String value) => id.value = value;
+
+  String statusJson() => jsonEncode(<String, dynamic>{
+    "s": status.value,
+    "t": type.value,
+  });
+
+  void fromStatusJson(String json) {
+    final data = jsonDecode(json);
+    status.value = data["s"];
+    type.value = data["t"];
+  }
+
+  String generateFriendId() {
+    return hashSha(id.value + name.value + tag.value + storedActionKey);
+  }
 
   Future<bool> setStatus({String? message, int? type, Function()? success}) async {
     if(statusLoading.value) return false;
@@ -53,4 +71,8 @@ class StatusController extends GetxController {
     return true;
   }
 
+}
+
+String friendId(Friend friend) {
+  return hashSha(friend.id + friend.name + friend.tag + friend.keyStorage.storedActionKey);
 }

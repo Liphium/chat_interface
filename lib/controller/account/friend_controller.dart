@@ -21,6 +21,7 @@ part 'friends_vault.dart';
 class FriendController extends GetxController {
   
   final friends = <String, Friend>{}.obs;
+  final friendIdLookup = <String, Friend>{};
 
   Future<bool> loadFriends() async {
     for(FriendData data in await db.friend.select().get()) {
@@ -69,6 +70,7 @@ class FriendController extends GetxController {
   void add(Friend friend) {
     friends[friend.id] = friend;
     db.friend.insertOnConflictUpdate(friend.entity());
+    friendIdLookup[friendId(friend)] = friend;
   }
 
   Future<bool> remove(Friend friend, {removal = true}) async {
@@ -138,6 +140,13 @@ class Friend {
     reqPayload.addAll(keyStorage.toJson());
 
     return jsonEncode(reqPayload);
+  }
+
+  void loadStatus(String message) {
+    message = decryptSymmetric(message, keyStorage.profileKey);
+    final data = jsonDecode(message);
+    status.value = data["s"];
+    statusType.value = data["t"];
   }
 
   //* Remove friend

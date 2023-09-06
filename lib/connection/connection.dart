@@ -1,6 +1,8 @@
 
 import 'package:chat_interface/connection/impl/calls/calls_listener.dart';
+import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
+import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -16,6 +18,8 @@ class Connector {
   late WebSocketChannel connection;
   final _handlers = <String, Function(Event)>{};
   final _waiters = <String, Function()>{};
+  final _afterSetup = <String, bool>{};
+  final _afterSetupQueue = <Event>[];
   bool initialized = false;
 
   void connect(String url, String token) {
@@ -27,6 +31,11 @@ class Connector {
         Event event = Event.fromJson(msg);
 
         if(_handlers[event.name] == null) return;
+
+        if(_afterSetup[event.name] == true && !setupFinished) {
+          _afterSetupQueue.add(event);
+          return;
+        }
         _handlers[event.name]!(event);
         
         _waiters[event.name]?.call();
@@ -42,13 +51,20 @@ class Connector {
     );
   }
 
+  void runAfterSetupQueue() {
+    for(var event in _afterSetupQueue) {
+      _handlers[event.name]!(event);
+    }
+  }
+
   void sendMessage(String message) {
     sendLog(message);
     connection.sink.add(message);
   }
 
-  void listen(String event, Function(Event) handler) {
+  void listen(String event, Function(Event) handler, {afterSetup = false}) {
     _handlers[event] = handler;
+    _afterSetup[event] = afterSetup;
   }
 
   void sendAction(Message message, {Function(Event)? handler, Function()? waiter}) {
@@ -79,4 +95,5 @@ void startConnection(String node, String connectionToken) async {
   setupSetupListeners();
   setupCallListeners();
   setupStoredActionListener();
+  setupStatusListener();
 }
