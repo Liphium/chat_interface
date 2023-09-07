@@ -45,13 +45,13 @@ class _MessageRendererState extends State<MessageRenderer> {
               //* Avatar
               Visibility(
                 visible: !widget.last,
-                replacement: const SizedBox(width: 40), //* Show timestamp instead
+                replacement: const SizedBox(width: 50), //* Show timestamp instead
                 child: SizedBox(
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
                   child: CircleAvatar(
                     backgroundColor: widget.self ? theme.colorScheme.secondaryContainer : theme.colorScheme.primaryContainer,
-                    child: const Icon(Icons.person),
+                    child: const Icon(Icons.person, size: 30),
                   ),
                 ),
               ),
@@ -68,11 +68,16 @@ class _MessageRendererState extends State<MessageRenderer> {
                       visible: !widget.last,
                       child: Row(
                         children: [
-                          Text(sender.name, style: theme.textTheme.titleMedium),
+                          Text(
+                            sender.name, 
+                            style: theme.textTheme.titleLarge,
+                            textHeightBehavior: noTextHeight,
+                          ),
                           horizontalSpacing(defaultSpacing),
                           Text(
                             formatTime(widget.message.createdAt),
-                            style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.secondary)
+                            style: theme.textTheme.bodyMedium,
+                            textHeightBehavior: noTextHeight,
                           ),
                         ],
                       ),
@@ -80,7 +85,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                     verticalSpacing(defaultSpacing * 0.1),
               
                     //* Content
-                    Text(widget.message.content, style: theme.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.normal)),
+                    Text(widget.message.content, style: theme.textTheme.bodyLarge)
                   ],
                 ),
               ),

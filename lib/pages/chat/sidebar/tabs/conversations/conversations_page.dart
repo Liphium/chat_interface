@@ -138,13 +138,13 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                         //* Conversation title
                                         Obx(() =>
                                           conversation.isGroup ?
-                                          Text(conversation.containerSub.value.name, style: theme.textTheme.titleMedium,
+                                          Text(conversation.containerSub.value.name, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                             textHeightBehavior: noTextHeight,
                                           ) :
                                           Row(
                                             children: [
                                               Flexible(
-                                                child: Text(conversation.dmName, style: theme.textTheme.titleMedium,
+                                                child: Text(conversation.dmName, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   textHeightBehavior: noTextHeight,
@@ -251,6 +251,7 @@ Widget buildInput(ThemeData theme) {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
         child: TextField(
+          style: theme.textTheme.labelMedium,
           decoration: InputDecoration(
             border: InputBorder.none,
             prefixIcon: Icon(Icons.search, color: theme.colorScheme.primary),

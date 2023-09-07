@@ -33,7 +33,7 @@ void startCall(RxBool loading, String conversation) {
       Get.find<CallController>().openWithoutLivekit(conversation);
 
       // Send call message
-      sendActualMessage(loading, conversation, "call", event.data["token"], "", () => loading.value = false);
+      sendActualMessage(loading, conversation, MessageType.call, event.data["token"], "", () => loading.value = false);
     }
 
   });

@@ -1,7 +1,9 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -53,7 +55,9 @@ class _MessageBarState extends State<MessageBar> {
                 horizontalSpacing(defaultSpacing * 0.1),
                 IconButton(
                   icon: const Icon(Icons.sticky_note_2),
-                  onPressed: () {},
+                  onPressed: () {
+                    db.message.deleteAll();
+                  },
                 ),
               ],
             ),

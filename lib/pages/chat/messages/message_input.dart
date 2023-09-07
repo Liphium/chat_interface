@@ -1,4 +1,3 @@
-import 'package:chat_interface/connection/impl/messages/typing_listener.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
@@ -34,6 +33,7 @@ class _MessageInputState extends State<MessageInput> {
     MessageController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
+    /* TODO: Reimplement typing indicator
     _message.addListener(() {
       if(_message.text.isNotEmpty) {
         startTyping();
@@ -41,6 +41,7 @@ class _MessageInputState extends State<MessageInput> {
         stopTyping();
       }
     });
+    */
 
     Get.find<MessageController>().selectedConversation.listen((conversation) {
       _message.clear();
@@ -75,7 +76,7 @@ class _MessageInputState extends State<MessageInput> {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: defaultSpacing,
-                vertical: defaultSpacing * 0.1,
+                vertical: elementSpacing ,
               ),
               child: Row(
                 children: [
@@ -95,6 +96,7 @@ class _MessageInputState extends State<MessageInput> {
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(1000),
                       ],
+                      style: theme.textTheme.labelLarge,
                       controller: _message,
                       maxLines: null,
                       keyboardType: TextInputType.multiline,

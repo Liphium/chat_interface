@@ -1,6 +1,9 @@
 
+import 'dart:convert';
+
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/call/call_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -13,6 +16,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/message_re
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat_interface/connection/messaging.dart' as messaging;
@@ -119,16 +123,14 @@ class _MessageFeedState extends State<MessageFeed> {
                       
                     switch(message.type) {
                       
-                      case "text":
+                      case MessageType.text:
                         return MessageRenderer(message: message, self: self, last: last,
                         sender: self ? Friend.me() : sender);
 
-                      case "call":
+                      case MessageType.call:
                         return CallMessageRenderer(message: message, self: self, last: last,
                         sender: self ? Friend.me() : sender);
                     }
-
-                    return null;
                   },
                 ),
               ),

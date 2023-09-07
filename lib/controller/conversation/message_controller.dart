@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
@@ -36,10 +35,16 @@ class MessageController extends GetxController {
     }
     
     for (var msg in messages) {
-
       final message = Message.fromJson(msg);
       await db.into(db.message).insertOnConflictUpdate(message.entity);
     }
+  }
+
+  void storeMessage(Message message) {
+    if(selectedConversation.value.id == message.conversation) {
+      messages.insert(0, message);
+    }
+    db.into(db.message).insertOnConflictUpdate(message.entity);
   }
 
 }
@@ -47,7 +52,7 @@ class MessageController extends GetxController {
 class Message {
     
   final String id;
-  String type; // text, audio, call, stream
+  MessageType type; // text, audio, call, stream
   String content;
   String attachments;
   bool verified;
@@ -64,7 +69,7 @@ class Message {
     // Convert to message
     final message = Message(
       json["id"],
-      "",
+      MessageType.text,
       json["data"],
       "",
       json["certificate"],
@@ -75,21 +80,18 @@ class Message {
       false
     );
 
-    // TODO: Reimplement
-
     // Decrypt content
-    final conversation = Get.find<ConversationController>().conversations[message.conversation]!;
-    //message.content = decryptAES(Encrypted.fromBase64(message.content), conversation.key);
+    final conversation = Get.find<ConversationController>().conversations[json["conversation"]]!;
+    message.content = decryptSymmetric(message.content, conversation.key);
+    // TODO: Add a signature (check it ig)
 
     // Parse content and check signature
     final contentJson = jsonDecode(message.content);
-    final status = Get.find<StatusController>();
-    //var key = message.sender == status.id.value ? asymmetricKeyPair.publicKey : Get.find<FriendController>().friends[message.sender]!.keyStorage;
 
     // Check signature
-    //message.verified = verifySignature(contentJson["s"], key, hashSha(contentJson["c"]));
+    message.verified = true;
     message.content = contentJson["c"];
-    message.type = contentJson["t"] ?? "text";
+    message.type = MessageType.fromString(contentJson["t"] ?? "text");
     message.attachments = contentJson["a"] ?? "";
 
     return message;
@@ -97,7 +99,7 @@ class Message {
 
   Message.fromMessageData(MessageData messageData)
       : id = messageData.id,
-        type = messageData.type,
+        type = MessageType.fromString(messageData.type),
         content = messageData.content,
         attachments = messageData.attachments,
         certificate = messageData.certificate,
@@ -109,7 +111,7 @@ class Message {
 
   MessageData get entity => MessageData(
         id: id,
-        type: type,
+        type: type.name,
         content: content,
         attachments: attachments,
         certificate: certificate,
@@ -125,4 +127,24 @@ class Message {
     return <String, dynamic>{};
   }
 }
-      
+
+enum MessageType {
+  text("text"),
+  call("call");
+
+  final String name;
+
+  const MessageType(this.name);
+
+  static MessageType fromString(String name) {
+    switch (name) {
+      case "text":
+        return MessageType.text;
+      case "call":
+        return MessageType.call;
+      default:
+        return MessageType.text;
+    }
+  }
+
+}
