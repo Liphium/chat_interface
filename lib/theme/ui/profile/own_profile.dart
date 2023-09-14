@@ -1,4 +1,6 @@
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
@@ -6,6 +8,7 @@ import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart' as drift;
@@ -257,12 +260,18 @@ class _ProfileState extends State<OwnProfile> {
                     label: 'profile.test'.tr,
                     onTap: () async {
                       testLoading.value = true;
+                      
+                      connector.sendAction(Message("spc_start", <String, dynamic>{}), handler: (event) {
 
-                      await postRq("/node/test", <String, dynamic>{
-                        "node": nodeId,
-                        "account": Get.find<StatusController>().id.value,
-                        "message": "test",
+                        if(!event.data["success"]) {
+                          testLoading.value = false;
+                          return;
+                        }
+                        final appToken = event.data["token"] as Map<String, dynamic>;
+                        sendLog("connecting to node ${appToken["node"]}..");
+                        createSpaceConnection(appToken["domain"], appToken["token"]);
                       });
+
                       testLoading.value = false;
 
                     },
