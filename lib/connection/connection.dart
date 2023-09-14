@@ -1,5 +1,6 @@
 
 import 'package:chat_interface/connection/impl/calls/calls_listener.dart';
+import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
@@ -96,4 +97,5 @@ void startConnection(String node, String connectionToken) async {
   setupCallListeners();
   setupStoredActionListener();
   setupStatusListener();
+  setupMessageListener();
 }

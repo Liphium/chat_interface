@@ -39,9 +39,6 @@ class TextPatternManager {
     // Sort patterns
     patternMap = Map.fromEntries(patternMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
 
-    // Remove double pattern
-
-
     // Process text
     int lastIndex = 0;
     int lastLength = 0;

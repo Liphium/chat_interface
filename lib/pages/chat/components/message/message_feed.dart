@@ -112,8 +112,9 @@ class _MessageFeedState extends State<MessageFeed> {
                     }
                       
                     final message = controller.messages[index - 1];
-                    final sender = friendController.friends[message.sender];
-                    final self = statusController.id.value == message.sender;
+                    final conversationToken = controller.selectedConversation.value.members[message.sender]!;
+                    final sender = friendController.friends[conversationToken.account];
+                    final self = conversationToken.account == statusController.id.value;
 
                     bool last = false;
                     if(index != controller.messages.length) {

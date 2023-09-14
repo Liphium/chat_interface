@@ -1,6 +1,7 @@
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/theme/ui/text_renderer/text_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,11 +33,9 @@ class _MessageRendererState extends State<MessageRenderer> {
         splashColor: theme.hoverColor,
         onTap: () => {},
         child: Padding(
-          padding: const EdgeInsets.only(
-            top: defaultSpacing * 0.4,
-            bottom: defaultSpacing * 0.4,
-            right: defaultSpacing * 2,
-            left: defaultSpacing * 2
+          padding: const EdgeInsets.symmetric(
+            vertical: elementSpacing,
+            horizontal: sectionSpacing,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,12 +49,12 @@ class _MessageRendererState extends State<MessageRenderer> {
                   width: 50,
                   height: 50,
                   child: CircleAvatar(
-                    backgroundColor: widget.self ? theme.colorScheme.secondaryContainer : theme.colorScheme.primaryContainer,
+                    backgroundColor: widget.self ? theme.colorScheme.tertiaryContainer : theme.colorScheme.primaryContainer,
                     child: const Icon(Icons.person, size: 30),
                   ),
                 ),
               ),
-              horizontalSpacing(defaultSpacing),
+              horizontalSpacing(sectionSpacing),
 
               //* Message
               Expanded(
@@ -67,6 +66,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                     Visibility(
                       visible: !widget.last,
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             sender.name, 
@@ -82,10 +82,9 @@ class _MessageRendererState extends State<MessageRenderer> {
                         ],
                       ),
                     ),
-                    verticalSpacing(defaultSpacing * 0.1),
               
                     //* Content
-                    Text(widget.message.content, style: theme.textTheme.bodyLarge)
+                    TextRenderer(text: widget.message.content, style: theme.textTheme.bodyLarge)
                   ],
                 ),
               ),

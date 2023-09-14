@@ -57,7 +57,7 @@ const directMessagePrefix = "DM_";
 // Wrapper for consistent DM and Group conversation handling
 Future<bool> openDirectMessage(Friend friend) async {
 
-  if(Get.find<ConversationController>().conversations.values.any((element) => element.members.length == 2 && element.members.any((element) => element.account == friend.id))) {
+  if(Get.find<ConversationController>().conversations.values.any((element) => element.members.length == 2 && element.members.values.any((element) => element.account == friend.id))) {
     sendLog("Already exists (TODO: Open in UI)");
     // TODO: Open conversation (in UI)
     return true;

@@ -33,7 +33,7 @@ class ConversationController extends GetxController {
       final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
 
       for(var member in members) {
-        conversation.members.add(Member.fromData(member));
+        conversation.addMember(Member.fromData(member));
       }
     }
 
@@ -44,10 +44,10 @@ class ConversationController extends GetxController {
     conversations[conversation.id] = conversation;
 
     for(var member in members) {
-      conversation.members.add(member);
+      conversation.addMember(member);
     }
     if(admin != null) {
-      conversation.members.add(admin);
+      conversation.addMember(admin);
     }
 
     // Add to vault
@@ -55,7 +55,7 @@ class ConversationController extends GetxController {
 
     // Store in database
     await db.conversation.insertOnConflictUpdate(conversation.entity);
-    for(var member in conversation.members) {
+    for(var member in conversation.members.values) {
       await db.member.insertOnConflictUpdate(member.toData(conversation.id));
     }
 
@@ -77,7 +77,7 @@ class Conversation {
   SecureKey key;
 
   final membersLoading = false.obs;
-  final members = <Member>[].obs;
+  final members = <String, Member>{}.obs;
 
   Conversation(this.id, this.token, this.container, this.key) {
     containerSub.value = container;
@@ -89,15 +89,19 @@ class Conversation {
   String status(StatusController statusController, FriendController friendController) {
     
     if(members.length == 2) {
-      String id = members.firstWhere((element) => element.account != statusController.id.value).account;
+      String id = members.values.firstWhere((element) => element.account != statusController.id.value).account;
       return friendController.friends[id]!.status.value;
     } 
 
     return "status.offline".tr;
   }
 
+  void addMember(Member member) {
+    members[member.tokenId] = member;
+  }
+
   bool get isGroup => !container.name.startsWith(directMessagePrefix);
-  String get dmName => Get.find<FriendController>().friends[members.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account]!.name;  
+  String get dmName => Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account]!.name;  
 
   ConversationData get entity => ConversationData(id: id, token: token.toJson(), key: packageSymmetricKey(key), data: container.toJson(), updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch));
   String toJson() => jsonEncode(<String, dynamic>{

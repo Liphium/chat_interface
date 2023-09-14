@@ -88,7 +88,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
             
                 Friend? friend;
                 if(!conversation.isGroup) {
-                  String id = conversation.members.firstWhere((element) => element.account != statusController.id.value).account;
+                  String id = conversation.members.values.firstWhere((element) => element.account != statusController.id.value).account;
                   friend = friendController.friends[id]!;
                 }
             
