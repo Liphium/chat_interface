@@ -65,7 +65,7 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
                 topRight: Radius.circular(defaultSpacing),
               ),
             color: widget.selected.value == widget.index
-                ? Theme.of(context).colorScheme.primaryContainer
+                ? Theme.of(context).colorScheme.primary
                 : Theme.of(context).colorScheme.onBackground,
             child: InkWell(
               borderRadius: const BorderRadius.only(
@@ -77,7 +77,7 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: sectionSpacing),
-                child: Icon(widget.icon, color: widget.selected.value == widget.index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onSurface),
+                child: Icon(widget.icon, color: widget.selected.value == widget.index ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface),
               ),
             ),
           )),

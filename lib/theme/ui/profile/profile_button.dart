@@ -18,7 +18,7 @@ class ProfileButton extends StatelessWidget {
   Widget build(BuildContext context) {
     
     ThemeData theme = Theme.of(context);
-    Color backgroundColor = color ?? theme.colorScheme.primaryContainer.withAlpha(150);
+    Color backgroundColor = color ?? theme.colorScheme.primary.withAlpha(150);
 
     return Material(
       borderRadius: BorderRadius.circular(defaultSpacing),
@@ -44,10 +44,10 @@ class ProfileButton extends StatelessWidget {
                   padding: const EdgeInsets.all(defaultSpacing * 0.25),
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: iconColor ?? theme.colorScheme.primary,
+                    color: iconColor ?? theme.colorScheme.onPrimary,
                   ),
                 ),
-              ) : Icon(icon, size: 25, color: iconColor ?? theme.colorScheme.primary)),
+              ) : Icon(icon, size: 25, color: iconColor ?? theme.colorScheme.onPrimary)),
 
               //* Label
               horizontalSpacing(defaultSpacing),

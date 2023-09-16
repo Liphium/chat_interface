@@ -46,7 +46,7 @@ class _FriendsPageState extends State<FriendsPage> {
                     borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(defaultSpacing * 1.5),
                     ),
-                    color: theme.colorScheme.primaryContainer,
+                    color: theme.colorScheme.primary,
                     child: InkWell(
                       borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(defaultSpacing),
@@ -57,7 +57,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         //* Open friend add window
                         Get.dialog(FriendAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
                       },
-                      child: Icon(Icons.add, color: theme.colorScheme.primary),
+                      child: Icon(Icons.add, color: theme.colorScheme.onPrimary),
                     )
                   ),
                 ),
@@ -193,13 +193,13 @@ class _FriendsPageState extends State<FriendsPage> {
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(defaultSpacing * 1.5),
         ),
-        color: theme.colorScheme.primaryContainer,
+        color: theme.colorScheme.primary,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
           child: TextField(
             decoration: InputDecoration(
               border: InputBorder.none,
-              prefixIcon: Icon(Icons.search, color: theme.colorScheme.primary),
+              prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
               hintText: 'friends.placeholder'.tr,
             ),
           ),

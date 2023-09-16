@@ -14,7 +14,7 @@ class FJElevatedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.primaryContainer,
+      color: Theme.of(context).colorScheme.primary,
       borderRadius: BorderRadius.only(
         bottomLeft: Radius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),
         topRight: Radius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),

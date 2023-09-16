@@ -1,7 +1,9 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +29,7 @@ class _MessageBarState extends State<MessageBar> {
     return Material(
       color: Get.theme.colorScheme.onBackground,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -35,7 +37,7 @@ class _MessageBarState extends State<MessageBar> {
             //* Conversation label
             Row(
               children: [
-                Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.primary),
+                Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                 horizontalSpacing(defaultSpacing),
                 Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName, style: Theme.of(context).textTheme.titleMedium),
               ],
@@ -48,12 +50,17 @@ class _MessageBarState extends State<MessageBar> {
                 //* Start call
                 LoadingIconButton(
                   icon: Icons.call,
+                  iconSize: 27,
                   loading: callLoading,
-                  onTap: () => startCall(callLoading, widget.conversation.id),
+                  onTap: () {
+                    final controller = Get.find<MessageController>();
+                    controller.messages.insert(0, Message("asdasdad", MessageType.call, "hi", "hi", "hi", controller.selectedConversation.value.token.id, DateTime.now(), "", false, false));
+                  },
                 ),
 
-                horizontalSpacing(defaultSpacing * 0.1),
+                horizontalSpacing(elementSpacing),
                 IconButton(
+                  iconSize: 27,
                   icon: const Icon(Icons.sticky_note_2),
                   onPressed: () {
                     db.message.deleteAll();

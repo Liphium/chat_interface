@@ -1,4 +1,3 @@
-import 'package:chat_interface/controller/conversation/livekit/sensitvity_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:flutter/widgets.dart';
@@ -17,7 +16,7 @@ class SettingsSetup extends Setup {
     }
 
     // Start listenting for sensitivity changes
-    Get.find<SensitivityController>().setup();
+    //Get.find<SensitivityController>().setup(); DEPRECATED
 
     return null;
   }

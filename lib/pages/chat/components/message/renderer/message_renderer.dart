@@ -49,8 +49,8 @@ class _MessageRendererState extends State<MessageRenderer> {
                   width: 50,
                   height: 50,
                   child: CircleAvatar(
-                    backgroundColor: widget.self ? theme.colorScheme.tertiaryContainer : theme.colorScheme.primaryContainer,
-                    child: const Icon(Icons.person, size: 30),
+                    backgroundColor: widget.self ? theme.colorScheme.tertiaryContainer : theme.colorScheme.primary,
+                    child: Icon(Icons.person, size: 30, color: theme.colorScheme.onSurface),
                   ),
                 ),
               ),

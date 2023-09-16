@@ -4,7 +4,6 @@ import 'package:chat_interface/controller/conversation/livekit/call_controller.d
 import 'package:chat_interface/controller/conversation/livekit/microphone_controller.dart';
 import 'package:chat_interface/controller/conversation/livekit/output_controller.dart';
 import 'package:chat_interface/controller/conversation/livekit/screenshare_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -132,7 +131,7 @@ class _CallControlsState extends State<CallControls> {
             //* End call button
             LoadingIconButton(
               loading: false.obs,
-              onTap: () => startCall(false.obs, Get.find<CallController>().conversation.value),
+              onTap: () => {} /* startCall(false.obs, Get.find<CallController>().conversation.value) */,
               icon: Icons.close_rounded,
               color: Colors.red.shade400,
               iconSize: 35,

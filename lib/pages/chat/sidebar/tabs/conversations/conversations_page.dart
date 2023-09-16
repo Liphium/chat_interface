@@ -51,7 +51,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                     borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(defaultSpacing * 1.5),
                     ),
-                    color: theme.colorScheme.primaryContainer,
+                    color: theme.colorScheme.primary,
                     child: InkWell(
                       borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(defaultSpacing),
@@ -64,7 +64,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(defaultSpacing),
-                        child: Icon(Icons.add, color: theme.colorScheme.primary),
+                        child: Icon(Icons.add, color: theme.colorScheme.onPrimary),
                       ),
                     )
                   ),
@@ -100,10 +100,10 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   child: Obx(() => 
                   Material(
                     borderRadius: BorderRadius.circular(10),
-                    color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primaryContainer : Colors.transparent,
+                    color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primary : Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
-                      hoverColor: theme.colorScheme.primaryContainer.withAlpha(150),
+                      hoverColor: theme.colorScheme.primary.withAlpha(150),
                       splashColor: theme.hoverColor,
                       onHover: (value) {
                         hover.value = value;
@@ -127,7 +127,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                             Expanded(
                               child: Row(
                                 children: [
-                                  Icon(conversation.isGroup ? Icons.group : Icons.person, size: 35, color: theme.colorScheme.primary),
+                                  Icon(conversation.isGroup ? Icons.group : Icons.person, size: 35, color: theme.colorScheme.onPrimary),
                                   horizontalSpacing(defaultSpacing * 0.75),
                                   Expanded(
                                     child: Column(
@@ -213,7 +213,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
             
                                   //* Call button (only visible on hover)
                                   child: IconButton(
-                                    icon: Icon(Icons.call, color: theme.colorScheme.primary),
+                                    icon: Icon(Icons.call, color: theme.colorScheme.onPrimary),
                                     onPressed: () {},
                                   ),
                                 ),
@@ -247,16 +247,21 @@ Widget buildInput(ThemeData theme) {
       borderRadius: const BorderRadius.only(
         bottomLeft: Radius.circular(defaultSpacing * 1.5),
       ),
-      color: theme.colorScheme.primaryContainer,
+      color: theme.colorScheme.primary,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
         child: TextField(
           style: theme.textTheme.labelMedium,
           decoration: InputDecoration(
             border: InputBorder.none,
-            prefixIcon: Icon(Icons.search, color: theme.colorScheme.primary),
+            focusColor: theme.colorScheme.onPrimary,
+            iconColor: theme.colorScheme.onPrimary,
+            fillColor: theme.colorScheme.onPrimary,
+            hoverColor: theme.colorScheme.onPrimary,
+            prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
             hintText: 'conversations.placeholder'.tr,
           ),
+          cursorColor: theme.colorScheme.onPrimary,
         ),
       ),
     ),

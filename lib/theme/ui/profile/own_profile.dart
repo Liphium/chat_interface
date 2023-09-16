@@ -80,11 +80,11 @@ class _ProfileState extends State<OwnProfile> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.person, size: 30.0, color: theme.colorScheme.primary),
+                          Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
                           Text(controller.name.value, style: theme.textTheme.titleMedium, textHeightBehavior: noTextHeight,),
                           Text("#${controller.tag.value}", textHeightBehavior: noTextHeight, style: theme.textTheme.titleMedium!
-                          .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.primary)),
+                          .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
                         ],
                       ),
 
@@ -122,7 +122,7 @@ class _ProfileState extends State<OwnProfile> {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: defaultSpacing * 0.25),
                               child: Material(
-                                color: selected ? theme.colorScheme.primaryContainer : theme.colorScheme.background,
+                                color: selected ? theme.colorScheme.primary : theme.colorScheme.background,
                                 borderRadius: BorderRadius.circular(defaultSpacing),
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(defaultSpacing),
@@ -226,7 +226,7 @@ class _ProfileState extends State<OwnProfile> {
                             controller.setStatus(message: _status.text);
                           },
                           icon: statusMessage.value == "-" ? Icons.add : edit.value ? Icons.done : Icons.close,
-                          color: theme.colorScheme.primary,
+                          color: theme.colorScheme.onPrimary,
                         )
                       )
                     ],

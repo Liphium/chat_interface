@@ -37,6 +37,7 @@ class _ProfileState extends State<Profile> {
           width: widget.size.toDouble(),
           child: Material(
             borderRadius: BorderRadius.circular(defaultSpacing),
+            color: Get.theme.colorScheme.background,
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
               child: Column(
@@ -50,11 +51,11 @@ class _ProfileState extends State<Profile> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.person, size: 30.0, color: theme.colorScheme.primary),
+                          Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
                           Text(widget.friend.name, style: theme.textTheme.titleMedium),
                           Text("#${widget.friend.tag}", style: theme.textTheme.titleMedium!
-                          .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.primary)),
+                          .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
                         ],
                       ),
             

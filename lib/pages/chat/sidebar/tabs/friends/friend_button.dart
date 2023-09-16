@@ -29,7 +29,7 @@ class _FriendButtonState extends State<FriendButton> {
             borderRadius: BorderRadius.circular(10),
             hoverColor: Theme.of(context)
                 .colorScheme
-                .primaryContainer,
+                .primary,
             splashColor: Theme.of(context).hoverColor,
 
             //* Show profile
@@ -49,7 +49,7 @@ class _FriendButtonState extends State<FriendButton> {
                           size: 30,
                           color: Theme.of(context)
                               .colorScheme
-                              .primary),
+                              .onPrimary),
                         const SizedBox(width: 10),
                         Text(widget.friend.name, style: Get.theme.textTheme.titleMedium),
                       ],
@@ -64,7 +64,7 @@ class _FriendButtonState extends State<FriendButton> {
                           icon: Icon(Icons.add_call,
                               color: Theme.of(context)
                                   .colorScheme
-                                  .primary),
+                                  .onPrimary),
                           onPressed: () {},
                         ),
                       ],

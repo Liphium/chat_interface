@@ -1,6 +1,5 @@
 
 import 'package:chat_interface/theme/default_theme.dart';
-import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 
 final ThemeData lightMetalTheme = defaultLightTheme.copyWith(
@@ -28,6 +27,7 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     brightness: Brightness.dark, 
     background: Color(0xFF292929),
     onBackground: Color(0xFF1c1c1c),
+    primaryContainer: Color(0xFF171717),
 
     // Online color
     secondary: Color(0xFF7cda81),
@@ -36,8 +36,8 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     secondaryContainer: Color(0xFFF5C211),
 
     // Primary color
-    primary: Color(0xFF99c1f1),
-    primaryContainer: Color(0xFF0d3b54),
+    primary: Color(0xFF0d3b54),
+    onPrimary: Color(0xFF99c1f1),
 
     // Tertiary color 
     tertiary: Color(0xFFf7c5db),
@@ -49,7 +49,7 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     onError: Color(0xFFcc6d66),
     errorContainer: Color(0xFFb5514a),
 
-    onPrimary: Color(0xFFE5E5E5),
+    // Unused
     onSecondary: Color(0xFFE5E5E5),
 
     // Unimportant font colors
@@ -57,6 +57,11 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
 
     // Important font color
     onSurface: Color(0xFFFFFFFF),
+  ),
+  textSelectionTheme: const TextSelectionThemeData(
+    cursorColor: Color(0xFF99c1f1),
+    selectionColor: Color(0xFF5c5c5c),
+    selectionHandleColor: Color(0xFF99c1f1),
   ),
   dividerColor: const Color(0xFF5c5c5c), 
   textTheme: defaultDarkTheme.textTheme.copyWith(

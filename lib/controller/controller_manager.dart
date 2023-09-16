@@ -9,6 +9,7 @@ import 'package:chat_interface/controller/conversation/livekit/screenshare_contr
 import 'package:chat_interface/controller/conversation/livekit/sensitvity_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/notification_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -34,11 +35,16 @@ void initializeControllers() {
   Get.put(ThemeManager());
   Get.put(TransitionController());
 
+  // Space controls
+  Get.put(SpacesController());
+
   // Call controls
+  /* DEPRECTAED FOR NOW
   Get.put(CallController());
   Get.put(ScreenshareController());
   Get.put(MicrophoneController());
   Get.put(PublicationController());
   Get.put(CallMemberController());
   Get.put(SensitivityController());
+  */
 }
