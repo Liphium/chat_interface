@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/call/call_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
-import 'package:chat_interface/pages/chat/components/call/call_cinema.dart';
-import 'package:chat_interface/pages/chat/components/call/call_grid.dart';
-import 'package:chat_interface/pages/chat/components/call/call_page.dart';
-import 'package:chat_interface/pages/chat/components/call/widgets/call_controls.dart';
+import 'package:chat_interface/pages/chat/components/livekit/call_cinema.dart';
+import 'package:chat_interface/pages/chat/components/livekit/call_grid.dart';
+import 'package:chat_interface/pages/chat/components/livekit/call_page.dart';
+import 'package:chat_interface/pages/chat/components/livekit/widgets/call_controls.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

@@ -1,5 +1,5 @@
-import 'package:chat_interface/controller/conversation/call/call_controller.dart';
-import 'package:chat_interface/controller/conversation/call/output_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/output_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';

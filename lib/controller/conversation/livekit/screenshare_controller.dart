@@ -1,6 +1,6 @@
-import 'package:chat_interface/controller/conversation/call/call_controller.dart';
-import 'package:chat_interface/controller/conversation/call/call_member_controller.dart';
-import 'package:chat_interface/controller/conversation/call/output_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_member_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/output_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
+@Deprecated("LiveKit is no longer supported (will be used when we tackle the video call feature)")
 class ScreenshareController extends GetxController {
 
   final pub = Rx<LocalTrackPublication<LocalVideoTrack>?>(null);

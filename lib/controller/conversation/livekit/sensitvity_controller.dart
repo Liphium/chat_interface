@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:record/record.dart';
 
+@Deprecated("LiveKit is no longer supported (will be used when we tackle the video call feature)")
 class SensitivityController extends GetxController {
 
   final talking = false.obs;

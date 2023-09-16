@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/call/call_controller.dart';
-import 'package:chat_interface/controller/conversation/call/call_member_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_member_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
+@Deprecated("LiveKit is no longer supported (will be used when we tackle the video call feature)")
 class PublicationController extends GetxController {
 
   // Output status

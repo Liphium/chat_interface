@@ -1,16 +1,17 @@
 
-import 'package:chat_interface/controller/conversation/call/call_member_controller.dart';
-import 'package:chat_interface/controller/conversation/call/microphone_controller.dart';
-import 'package:chat_interface/controller/conversation/call/output_controller.dart';
-import 'package:chat_interface/controller/conversation/call/sensitvity_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_member_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/microphone_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/output_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/sensitvity_controller.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/chat/components/call/entities/video_entity.dart';
+import 'package:chat_interface/pages/chat/components/livekit/entities/video_entity.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
+@Deprecated("LiveKit is no longer supported (will be used when we tackle the video call feature)")
 class CallController extends GetxController {
 
   //* Call status

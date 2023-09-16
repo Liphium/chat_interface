@@ -1,12 +1,13 @@
-import 'package:chat_interface/controller/conversation/call/call_controller.dart';
-import 'package:chat_interface/controller/conversation/call/call_member_controller.dart';
-import 'package:chat_interface/controller/conversation/call/output_controller.dart';
-import 'package:chat_interface/pages/chat/components/call/entities/circle_member_entity.dart';
-import 'package:chat_interface/pages/chat/components/call/entities/rectangle_member_entity.dart';
-import 'package:chat_interface/pages/chat/components/call/entities/video_entity.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/call_member_controller.dart';
+import 'package:chat_interface/controller/conversation/livekit/output_controller.dart';
+import 'package:chat_interface/pages/chat/components/livekit/entities/circle_member_entity.dart';
+import 'package:chat_interface/pages/chat/components/livekit/entities/rectangle_member_entity.dart';
+import 'package:chat_interface/pages/chat/components/livekit/entities/video_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+@Deprecated("LiveKit is no longer supported (will be used when we tackle the video call feature)")
 List<Widget> renderEntites(double bottom, double right, BoxConstraints constraints, [int maxHero = 17]) {
 
   CallController controller = Get.find();

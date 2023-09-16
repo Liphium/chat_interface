@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
+@Deprecated("LiveKit is no longer supported (will be used when we tackle the video call feature)")
 class CallMemberController extends GetxController {
 
   final members = <String, Member>{}.obs;
