@@ -8,7 +8,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/livekit/call_rectangle.dart';
+import 'package:chat_interface/pages/chat/components/spaces/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/components/message/message_bar.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_renderer.dart';

@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/pages/chat/components/livekit/entities/circle_member_entity.dart';
+import 'package:chat_interface/pages/chat/components/spaces/entities/circle_member_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

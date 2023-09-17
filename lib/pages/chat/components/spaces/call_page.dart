@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/chat/components/livekit/call_rectangle.dart';
+import 'package:chat_interface/pages/chat/components/spaces/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:flutter/material.dart';
 
