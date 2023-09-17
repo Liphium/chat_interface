@@ -27,9 +27,12 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Row(
             children: [
-              const SizedBox(
-                width: 350,
-                child: Sidebar(),
+              const Hero(
+                tag: "sidebar",
+                child: SizedBox(
+                  width: 350,
+                  child: Sidebar(),
+                ),
               ),
               Expanded(
                 child: Obx(() => MessageFeed(id: controller.selectedConversation.value.id)),

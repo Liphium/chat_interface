@@ -25,10 +25,7 @@ List<Widget> renderEntites(double bottom, double right, BoxConstraints constrain
     entities.add(      
       entities.length > maxHero ?
       memberRenderer :
-      Hero(
-        tag: "mem${member.friend.id}",
-        child: memberRenderer,
-      )
+      memberRenderer
     );
   }
 

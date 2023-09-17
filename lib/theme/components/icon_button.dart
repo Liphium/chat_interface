@@ -23,6 +23,7 @@ class LoadingIconButton extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(50),
           onTap: () => loading.value ? null : onTap(),
+          hoverColor: Get.theme.hoverColor,
           child: Padding(
             padding: const EdgeInsets.all(defaultSpacing),
             child: Obx(() => loading.value ? 

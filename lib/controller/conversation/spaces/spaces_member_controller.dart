@@ -3,7 +3,10 @@ import 'package:get/get.dart';
 
 class SpaceMemberController extends GetxController {
 
-  final members = <String, SpaceMember>{}.obs;
+  final members = <String, SpaceMember>{
+    "hi": SpaceMember(Friend.me()),
+    "hi2": SpaceMember(Friend.system()),
+  }.obs;
 
   void onCall(String id) {
 

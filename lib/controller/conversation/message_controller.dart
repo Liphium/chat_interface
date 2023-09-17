@@ -14,8 +14,12 @@ class MessageController extends GetxController {
   final selectedConversation = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey()).obs;
   final messages = <Message>[].obs;
 
-  void selectConversation(Conversation conversation) async {
+  void unselectConversation() {
+    selectedConversation.value = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey());
+    messages.clear();
+  }
 
+  void selectConversation(Conversation conversation) async {
     Get.find<WritingController>().init(conversation.id);
     selectedConversation.value = conversation;
 

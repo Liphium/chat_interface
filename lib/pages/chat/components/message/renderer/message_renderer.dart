@@ -84,7 +84,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                     ),
               
                     //* Content
-                    TextRenderer(text: widget.message.content, style: theme.textTheme.bodyLarge)
+                    Text(widget.message.content, style: theme.textTheme.bodyLarge)
                   ],
                 ),
               ),

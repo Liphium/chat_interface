@@ -53,7 +53,7 @@ class _CallControlsState extends State<CallControls> {
     ThemeData theme = Theme.of(context);
 
     return Material(
-      color: theme.colorScheme.secondaryContainer,
+      color: theme.colorScheme.primaryContainer,
       borderRadius: BorderRadius.circular(50),
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing * 0.5),
@@ -69,7 +69,7 @@ class _CallControlsState extends State<CallControls> {
                   onTap: () => controller.setMicrophone(!controller.microphone.value),
                   icon: controller.microphone.value ? Icons.mic_rounded : Icons.mic_off_rounded,
                   iconSize: 35,
-                  color: theme.colorScheme.primary
+                  color: theme.colorScheme.onSurface
                 ); 
               },
             ),
@@ -84,7 +84,7 @@ class _CallControlsState extends State<CallControls> {
                   onTap: () => controller.setOutput(!controller.output.value),
                   icon: controller.output.value ? Icons.volume_up_rounded : Icons.volume_off_rounded,
                   iconSize: 35,
-                  color: theme.colorScheme.primary
+                  color: theme.colorScheme.onSurface
                 ); 
               },
             ),
@@ -96,7 +96,7 @@ class _CallControlsState extends State<CallControls> {
               loading: false.obs,
               onTap: () => {} /* startCall(false.obs, Get.find<CallController>().conversation.value) */,
               icon: Icons.close_rounded,
-              color: Colors.red.shade400,
+              color: theme.colorScheme.error,
               iconSize: 35,
             )
           ],

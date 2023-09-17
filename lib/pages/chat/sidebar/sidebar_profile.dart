@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
@@ -40,15 +41,15 @@ class _SidebarProfileState extends State<SidebarProfile> {
                       if(!controller.inSpace.value) {
                         return const SizedBox.shrink();
                       }
+                      final shown = Get.find<MessageController>().selectedConversation.value.id == "0";
 
                       return Material(
                         borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: theme.colorScheme.primaryContainer,
+                        color: shown ? theme.colorScheme.background : theme.colorScheme.primaryContainer,
                         child: InkWell(
-                          onTap: () => Get.dialog(const OwnProfile(position: Offset(defaultSpacing, 60))),
-                          splashColor: theme.colorScheme.onPrimary,
-                          hoverColor: theme.colorScheme.background,
-                          splashFactory: NoSplash.splashFactory,
+                          onTap: () => Get.find<MessageController>().unselectConversation(),
+                          splashColor: theme.hoverColor,
+                          hoverColor: shown ? theme.colorScheme.background : theme.colorScheme.background,
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           child: Padding(
                             padding: const EdgeInsets.all(defaultSpacing),
@@ -72,6 +73,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                       );
                     }
                   ),
+                  verticalSpacing(defaultSpacing),
 
                   //* Actual profile
                   Material(

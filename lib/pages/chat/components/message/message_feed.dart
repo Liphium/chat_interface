@@ -46,6 +46,11 @@ class _MessageFeedState extends State<MessageFeed> {
   Widget build(BuildContext context) {
 
     if(widget.id == null || widget.id == "0") {
+
+      if(Get.find<SpacesController>().inSpace.value) {
+        return const CallRectangle();
+      }
+
       return Center(
         child: Text('chat.welcome.1.0.0'.tr, style: Theme.of(context).textTheme.titleLarge),
       );
@@ -86,7 +91,7 @@ class _MessageFeedState extends State<MessageFeed> {
                     bool last = false;
                     if(index != controller.messages.length) {
                       final lastMessage = controller.messages[index];
-                      last = lastMessage.sender == message.sender;
+                      last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text;
                     }
                       
                     switch(message.type) {
