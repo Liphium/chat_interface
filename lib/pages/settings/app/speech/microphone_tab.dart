@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
-import 'package:chat_interface/controller/conversation/livekit/sensitvity_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
@@ -46,20 +45,12 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
     }
 
     _microphones.addAll(list);
-
-    if(!Get.find<CallController>().livekit.value) {
-      Get.find<SensitivityController>().startListening();
-    }
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
     super.dispose();
-
-    if(!Get.find<CallController>().livekit.value) {
-      Get.find<SensitivityController>().stopListening();
-    }
   }
 
   @override
@@ -67,7 +58,6 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
 
     SettingController controller = Get.find();
     final sens = controller.settings["audio.microphone.sensitivity"]!;
-    SensitivityController sensitivity = Get.find();
     ThemeData theme = Theme.of(context);
 
     return Column(
@@ -140,14 +130,14 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         Obx(() =>
           Column(
             children: [
-              SizedBox(height: 0, child: Opacity(opacity: 0, child: Text(sensitivity.current.value.toString(), overflow: TextOverflow.clip,))),
+              SizedBox(height: 0, child: Opacity(opacity: 0, child: Text("1.0", overflow: TextOverflow.clip,))),
               Slider(
                 value: sens.value.value,
                 min: -60,
                 max: 0,
                 divisions: 30,
                 label: "${sens.value.value} dB",
-                secondaryTrackValue: clampDouble(sensitivity.current.value, -60, 0),
+                secondaryTrackValue: clampDouble(-30, -60, 0),
                 secondaryActiveColor: theme.colorScheme.secondary,
                 onChanged: (value) => sens.value.value = value,
                 onChangeEnd: (value) {

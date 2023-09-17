@@ -37,7 +37,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                   //* Spaces status
                   GetX<SpacesController>(
                     builder: (controller) {
-                      if(!controller.connected.value) {
+                      if(!controller.inSpace.value) {
                         return const SizedBox.shrink();
                       }
 

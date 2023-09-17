@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +40,7 @@ class _CallPositionOverlayState extends State<CallPositionOverlay> {
   @override
   Widget build(BuildContext context) {
 
-    CallController callController = Get.find();
+    SpacesController spacesController = Get.find();
     SettingController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
@@ -84,7 +84,7 @@ class _CallPositionOverlayState extends State<CallPositionOverlay> {
                   children: [
                     horizontalButton(controller, widget.position),
                     horizontalSpacing(defaultSpacing * 0.5),
-                    hideOverlayButton(callController),
+                    hideOverlayButton(spacesController),
                     horizontalSpacing(defaultSpacing * 0.5),
                     verticalButton(controller, widget.alignment == CallOverlayAlignment.start ? CallOverlayPosition.bottom : CallOverlayPosition.top),
                   ],
@@ -95,7 +95,7 @@ class _CallPositionOverlayState extends State<CallPositionOverlay> {
                   children: [
                     verticalButton(controller, widget.position),
                     verticalSpacing(defaultSpacing * 0.5),
-                    hideOverlayButton(callController),
+                    hideOverlayButton(spacesController),
                     verticalSpacing(defaultSpacing * 0.5),
                     horizontalButton(controller, widget.alignment == CallOverlayAlignment.start ? CallOverlayPosition.right : CallOverlayPosition.left),
                   ],
@@ -123,8 +123,8 @@ class _CallPositionOverlayState extends State<CallPositionOverlay> {
     );
   }
 
-  Widget hideOverlayButton(CallController callController) => IconButton(
-    onPressed: () => callController.hideOverlay.toggle(),
-    icon: Icon(callController.hideOverlay.value ? Icons.unfold_more : Icons.unfold_less, size: 25, color: Colors.amber)
+  Widget hideOverlayButton(SpacesController callController) => IconButton(
+    onPressed: () => {} /* callController.hideOverlay.toggle() */,
+    icon: const Icon(/* callController.hideOverlay.value ? Icons.unfold_more : Icons.unfold_less */ Icons.unfold_less, size: 25, color: Colors.amber)
   );
 }

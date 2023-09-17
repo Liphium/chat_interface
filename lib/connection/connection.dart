@@ -1,5 +1,4 @@
 
-import 'package:chat_interface/connection/impl/calls/calls_listener.dart';
 import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
@@ -94,7 +93,6 @@ void startConnection(String node, String connectionToken) async {
   connector.connect("ws://$node/gateway", connectionToken);
 
   setupSetupListeners();
-  setupCallListeners();
   setupStoredActionListener();
   setupStatusListener();
   setupMessageListener();

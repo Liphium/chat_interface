@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/livekit/output_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -94,7 +93,7 @@ class _OutputTabState extends State<OutputTab> {
                       child: InkWell(
                         borderRadius: radius,
                         onTap: () {
-                          Get.find<PublicationController>().changeOutputDevice(_outputs[index]);
+                          //Get.find<AudioController>().changeOutputDevice(_outputs[index]);
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(defaultSpacing),

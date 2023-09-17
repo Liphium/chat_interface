@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
-import 'package:chat_interface/controller/conversation/livekit/microphone_controller.dart';
-import 'package:chat_interface/controller/conversation/livekit/output_controller.dart';
-import 'package:chat_interface/controller/conversation/livekit/screenshare_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +62,7 @@ class _CallControlsState extends State<CallControls> {
           children: [
 
             //* Microphone button
-            GetX<MicrophoneController>(
+            GetX<AudioController>(
               builder: (controller) {
                 return LoadingIconButton(
                   loading: controller.microphoneLoading,
@@ -79,7 +77,7 @@ class _CallControlsState extends State<CallControls> {
             horizontalSpacing(defaultSpacing * 0.5),
 
             //* Audio output
-            GetX<PublicationController>(
+            GetX<AudioController>(
               builder: (controller) {
                 return LoadingIconButton(
                   loading: controller.outputLoading,
@@ -88,41 +86,6 @@ class _CallControlsState extends State<CallControls> {
                   iconSize: 35,
                   color: theme.colorScheme.primary
                 ); 
-              },
-            ),
-
-            horizontalSpacing(defaultSpacing * 0.5),
-
-            //* Screenshare button
-            GetX<ScreenshareController>(
-              builder: (controller) {
-                return LoadingIconButton(
-                  loading: controller.sharingLoading,
-                  onTap: () {
-                    if (controller.isSharing.value) {
-                      controller.stopSharing();
-                    } else {
-                      controller.startSharing();
-                    }
-                  },
-                  icon: controller.isSharing.value ? Icons.cast_connected_rounded : Icons.cast_rounded,
-                  iconSize: 35,
-                  color: theme.colorScheme.primary
-                ); 
-              },
-            ),
-
-            horizontalSpacing(defaultSpacing * 0.5),
-
-            //* Hide overlay button
-            GetX<CallController>(
-              builder: (controller) {
-                return IconButton(
-                  onPressed: () => controller.hideOverlay.toggle(),
-                  icon: Icon(controller.hideOverlay.value ? Icons.unfold_more : Icons.unfold_less),
-                  iconSize: 35,
-                  color: theme.colorScheme.primary
-                );
               },
             ),
 

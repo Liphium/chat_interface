@@ -1,8 +1,7 @@
 import 'dart:math';
 
-import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
-import 'package:chat_interface/controller/conversation/livekit/call_member_controller.dart';
-import 'package:chat_interface/controller/conversation/livekit/output_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/pages/chat/components/livekit/entities/entity_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -24,12 +23,11 @@ class _CallGridViewState extends State<CallGridView> {
 
   @override
   Widget build(BuildContext context) {
-    CallController controller = Get.find();
-    PublicationController publicationController = Get.find();
-    CallMemberController callMemberController = Get.find();
+    SpacesController controller = Get.find();
+    SpaceMemberController spaceMemberController = Get.find();
 
     // Render entities
-    int people = callMemberController.members.length + publicationController.screenshares.length;
+    int people = spaceMemberController.members.length;
 
     // Calculate the available height for every participant
     double computedHeight = _calculateSmallRectangleHeight(widget.constraints.maxWidth, widget.constraints.maxHeight, people);

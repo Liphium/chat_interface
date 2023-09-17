@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/livekit/call_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
-import 'package:chat_interface/pages/chat/components/livekit/call_cinema.dart';
 import 'package:chat_interface/pages/chat/components/livekit/call_grid.dart';
 import 'package:chat_interface/pages/chat/components/livekit/call_page.dart';
 import 'package:chat_interface/pages/chat/components/livekit/widgets/call_controls.dart';
@@ -29,7 +28,7 @@ class _CallRectangleState extends State<CallRectangle> {
   @override
   Widget build(BuildContext context) {
 
-    CallController controller = Get.find();
+    SpacesController controller = Get.find();
 
     return Material(
       color: Colors.black,
@@ -60,9 +59,7 @@ class _CallRectangleState extends State<CallRectangle> {
                       return Padding(
                         padding: const EdgeInsets.all(defaultSpacing),
                         child: Obx(() =>
-                          !controller.cinema.value ?
-                          CallGridView(constraints: constraints) :
-                          const CallCinemaView()
+                          CallGridView(constraints: constraints)
                         ),
                       );
                     }
@@ -72,12 +69,7 @@ class _CallRectangleState extends State<CallRectangle> {
                 //* Controls
                 Hero(
                   tag: "controls",
-                  child: Obx(() => 
-                    Visibility(
-                      visible: !controller.hideOverlay.value,
-                      child: callControls(controller)
-                    )
-                  ),
+                  child: callControls(controller),
                 )
             
               ]
@@ -85,33 +77,30 @@ class _CallRectangleState extends State<CallRectangle> {
             
             //* Overlay
             Obx(() => 
-              Visibility(
-                visible: controller.hideOverlay.value,
-                child: Animate(
-                  effects: const [
-                    FadeEffect(
-                      duration: Duration(milliseconds: 200),
-                      curve: Curves.easeInOut
-                    )
-                  ],
-                  target: _show.value ? 1.0 : 0.0,
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.0),
-                            Colors.black.withOpacity(0.6),
-                          ]
-                        )
-                      ),
-                      child: callControls(controller)
-                    )
-                  ),
-                )
+              Animate(
+                effects: const [
+                  FadeEffect(
+                    duration: Duration(milliseconds: 200),
+                    curve: Curves.easeInOut
+                  )
+                ],
+                target: _show.value ? 1.0 : 0.0,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.0),
+                          Colors.black.withOpacity(0.6),
+                        ]
+                      )
+                    ),
+                    child: callControls(controller)
+                  )
+                ),
               )
             )
       
@@ -121,7 +110,7 @@ class _CallRectangleState extends State<CallRectangle> {
     );
   }
 
-  Widget callControls(CallController controller) => Padding(
+  Widget callControls(SpacesController controller) => Padding(
     padding: const EdgeInsets.all(defaultSpacing),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

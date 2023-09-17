@@ -1,11 +1,11 @@
-import 'package:chat_interface/controller/conversation/livekit/call_member_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CircleMemberEntity extends StatefulWidget {
 
-  final Member member;
+  final SpaceMember member;
 
   final double bottomPadding;
   final double rightPadding;
