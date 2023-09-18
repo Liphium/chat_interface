@@ -21,6 +21,11 @@ class ClusterSetup extends Setup {
     if(clusters.isEmpty) {
       return const ClusterSelectionPage();
     }
+    if(clusters.first.value.length < 5) {
+      return const ClusterSelectionPage();
+    }
+
+    connectedCluster = Cluster.fromJson(jsonDecode(clusters.first.value));
 
     return null;
   }
@@ -40,6 +45,12 @@ class Cluster {
 
   Cluster(this.id, this.name, this.country);
   Cluster.fromJson(dynamic cluster) : this(cluster["id"], cluster["name"], cluster["country"]);
+
+  String toJson() => jsonEncode({
+    "id": id,
+    "name": name,
+    "country": country,
+  });
 }
 
 class _ClusterSelectionPageState extends State<ClusterSelectionPage> {
@@ -99,7 +110,7 @@ class _ClusterSelectionPageState extends State<ClusterSelectionPage> {
                   return ElevatedButton(
                     onPressed: () async {
                       loading.value = true;
-                      await db.into(db.setting).insert(SettingData(key: "cluster", value: cluster.id.toString()));
+                      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "cluster", value: cluster.toJson()));
                       connectedCluster = cluster;
                       setupManager.next();
                     },

@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,7 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
 
     Friend sender = widget.sender ?? Friend.system();
     ThemeData theme = Theme.of(context);
+    final container = SpaceConnectionContainer.fromJson(jsonDecode(widget.message.content));
 
     return Padding(
       padding: const EdgeInsets.only(top: defaultSpacing),
@@ -80,7 +83,7 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(widget.message.content, style: theme.textTheme.labelLarge),
+                              Text("Space ${container.roomId}", style: theme.textTheme.labelLarge),
                               verticalSpacing(elementSpacing),
                               renderMiniAvatars(10),
                             ]

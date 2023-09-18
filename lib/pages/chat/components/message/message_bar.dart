@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -51,8 +52,8 @@ class _MessageBarState extends State<MessageBar> {
                   iconSize: 27,
                   loading: callLoading,
                   onTap: () {
-                    final controller = Get.find<MessageController>();
-                    controller.messages.insert(0, Message("asdasdad", MessageType.call, "hi", "hi", "hi", controller.selectedConversation.value.token.id, DateTime.now(), "", false, false));
+                    final controller = Get.find<SpacesController>();
+                    controller.createAndConnect(Get.find<MessageController>().selectedConversation.value.id);
                   },
                 ),
 

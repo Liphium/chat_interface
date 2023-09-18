@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -19,9 +20,9 @@ class SpacesController extends GetxController {
   @Deprecated("Not used anymore")
   final livekit = false.obs;
 
-  final inSpace = true.obs;
+  final inSpace = false.obs;
   final spaceLoading = false.obs;
-  final connected = true.obs;
+  final connected = false.obs;
   final title = "just playing".obs;
   final start = DateTime.now().obs;
 
@@ -57,7 +58,9 @@ class SpacesController extends GetxController {
 
       // Send invites
       final container = SpaceConnectionContainer(appToken["domain"], roomId, key!);
-      sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toJson(), () => {});
+      final conversationToken = Get.find<MessageController>().selectedConversation.value.token.id;
+      Get.find<MessageController>().messages.insert(0, Message("adasd", MessageType.call, container.toJson(), "", "", conversationToken, DateTime.now(), conversationId, false, false));
+      //sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toJson(), () => {});
     });
   }
 
@@ -68,8 +71,8 @@ class SpacesController extends GetxController {
   void _connectToRoom(String id, Map<String, dynamic> appToken) {
     key!;
     createSpaceConnection(appToken["domain"], appToken["token"]);
-    connector.sendAction(msg.Message("setup", <String, dynamic>{
-
+    spaceConnector.sendAction(msg.Message("setup", <String, dynamic>{
+      "data": encryptSymmetric(Get.find<StatusController>().id.value, key!)
     }), handler: (event) {
       if(!event.data["success"]) {
         showErrorPopup("error", "server.error");
@@ -81,6 +84,8 @@ class SpacesController extends GetxController {
   }
 
   void leaveCall() {
+    inSpace.value = false;
+    connected.value = false;
 
     // Tell other controllers about it
     Get.find<SpaceMemberController>().onDisconnect();

@@ -22,7 +22,7 @@ class Connector {
   final _afterSetupQueue = <Event>[];
   bool initialized = false;
 
-  void connect(String url, String token) {
+  void connect(String url, String token, {bool restart = true, Function()? onDone}) {
     initialized = true;
     connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
 
@@ -43,10 +43,14 @@ class Connector {
       },
       cancelOnError: false,
       onDone: () {
-        // TODO: Limit connection attempts
-        sendLog("restarting..");
-        initialized = false;
-        setupManager.restart();
+        if(onDone != null) {
+          onDone();
+        }
+        if(restart) {
+          sendLog("restarting..");
+          initialized = false;
+          setupManager.restart();
+        }
       },
     );
   }
