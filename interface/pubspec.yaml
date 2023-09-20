@@ -29,6 +29,8 @@ dependencies:
   flutter_webrtc: any
   record: any
   sodium_libs: any
+  ffi: any
+  flutter_rust_bridge: ^1.82.1
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +39,7 @@ dev_dependencies:
   build_runner: any
   flutter_lints: any
   test: any
+  ffigen: any
 
 flutter:
   uses-material-design: true
