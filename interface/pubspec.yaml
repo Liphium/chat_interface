@@ -30,7 +30,8 @@ dependencies:
   record: any
   sodium_libs: any
   ffi: any
-  flutter_rust_bridge: ^1.82.1
+  flutter_rust_bridge: any
+  freezed_annotation: any
 
 dev_dependencies:
   flutter_test:
@@ -40,6 +41,7 @@ dev_dependencies:
   flutter_lints: any
   test: any
   ffigen: any
+  freezed: any
 
 flutter:
   uses-material-design: true
