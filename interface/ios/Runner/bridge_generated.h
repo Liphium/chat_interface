@@ -3,8 +3,6 @@
 #include <stdlib.h>
 typedef struct _Dart_Handle* Dart_Handle;
 
-#define SAMPLE_RATE 48000
-
 #define FRAME_SIZE 960
 
 typedef struct DartCObject DartCObject;
@@ -40,6 +38,8 @@ void wire_start_voice(int64_t port_,
                       struct wire_uint_8_list *encryption_key,
                       struct wire_uint_8_list *address);
 
+void wire_test_voice(int64_t port_);
+
 struct wire_uint_8_list *new_uint_8_list_0(int32_t len);
 
 void free_WireSyncReturn(WireSyncReturn ptr);
@@ -49,6 +49,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) wire_create_log_stream);
     dummy_var ^= ((int64_t) (void*) wire_send_log);
     dummy_var ^= ((int64_t) (void*) wire_start_voice);
+    dummy_var ^= ((int64_t) (void*) wire_test_voice);
     dummy_var ^= ((int64_t) (void*) new_uint_8_list_0);
     dummy_var ^= ((int64_t) (void*) free_WireSyncReturn);
     dummy_var ^= ((int64_t) (void*) store_dart_post_cobject);

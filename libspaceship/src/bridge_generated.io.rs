@@ -22,6 +22,11 @@ pub extern "C" fn wire_start_voice(
     wire_start_voice_impl(port_, client_id, verification_key, encryption_key, address)
 }
 
+#[no_mangle]
+pub extern "C" fn wire_test_voice(port_: i64) {
+    wire_test_voice_impl(port_)
+}
+
 // Section: allocate functions
 
 #[no_mangle]

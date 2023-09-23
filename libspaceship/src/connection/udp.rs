@@ -71,6 +71,7 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
     }
     // Set config
     let config = Arc::new(connection::Config {
+        test: false,
         client_id: client_id,
         verification_key: util::crypto::parse_key(verification_key),
         encryption_key: util::crypto::parse_key(encryption_key),

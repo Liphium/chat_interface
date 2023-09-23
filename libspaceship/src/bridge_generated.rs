@@ -80,6 +80,16 @@ fn wire_start_voice_impl(
         },
     )
 }
+fn wire_test_voice_impl(port_: MessagePort) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap::<_, _, _, (), _>(
+        WrapInfo {
+            debug_name: "test_voice",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| Result::<_, ()>::Ok(test_voice()),
+    )
+}
 // Section: wrapper structs
 
 // Section: static checks

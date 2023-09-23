@@ -3,5 +3,5 @@ pub mod connection;
 pub mod audio;
 pub mod communication;
 pub mod util;
-mod api;
+pub mod api;
 mod logger;

@@ -7,10 +7,10 @@ use crate::connection;
 
 use super::decode;
 
-pub const SAMPLE_RATE: u32 = 48000;
+pub const SAMPLE_RATE: audiopus::SampleRate = audiopus::SampleRate::Hz48000;
 pub const FRAME_SIZE: usize = 960;
 
-pub fn encode(samples: Vec<f32>, encoder: &mut opus::Encoder) -> Vec<u8> {
+pub fn encode(samples: Vec<f32>, encoder: &mut audiopus::coder::Encoder) -> Vec<u8> {
 
     let mut output: Vec<u8> = vec![0u8; 3000];
 
@@ -46,8 +46,8 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
     *actual_receiver = receiver;
 
     let opus_channel = match channels {
-        1 => opus::Channels::Mono,
-        2 => opus::Channels::Stereo,
+        1 => audiopus::Channels::Mono,
+        2 => audiopus::Channels::Stereo,
         _ => panic!("invalid channel count")
     };
 
@@ -55,12 +55,12 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
     thread::spawn(move || {
 
         // Create encoder
-        let mut encoder = opus::Encoder::new(SAMPLE_RATE, opus_channel, opus::Application::Voip).unwrap();
+        let mut encoder = audiopus::coder::Encoder::new(SAMPLE_RATE, opus_channel, audiopus::Application::Voip).unwrap();
         let mut buffer = Vec::<u8>::with_capacity(8000);
         let mut talking_streak = 0;
 
         // Set the bitrate to 128 kb/s
-        encoder.set_bitrate(opus::Bitrate::Bits(128000)).unwrap();
+        encoder.set_bitrate(audiopus::Bitrate::BitsPerSecond(128000)).unwrap();
 
         loop {
             let samples = ENCODE_RECEIVER.lock().unwrap().recv().expect("Encoding channel broke");

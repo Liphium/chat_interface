@@ -54,6 +54,7 @@ void main() async {
   // Wait for it to be finished
   await Future.delayed(100.ms);
   await api.sendLog(s: "hello world");
+  await api.testVoice();
 
   if(isDebug) {
     await encryptionTest();

@@ -9,6 +9,7 @@ pub mod udp;
 pub mod receiver;
 
 pub struct Config {
+    pub test: bool,
     pub client_id: String,
     pub verification_key: Vec<u8>,
     pub encryption_key: Vec<u8>,

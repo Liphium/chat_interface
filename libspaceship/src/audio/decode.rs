@@ -5,13 +5,13 @@ use rodio::{Sink, OutputStream, buffer::SamplesBuffer};
 
 use crate::{audio, util};
 
-use super::{encode};
+use super::encode;
 
-pub fn decode(samples: Vec<u8>, buffer_size: usize, decoder: &mut opus::Decoder) -> Vec<f32> {
+pub fn decode(samples: Vec<u8>, buffer_size: usize, decoder: &mut audiopus::coder::Decoder) -> Vec<f32> {
 
     let mut output: Vec<f32> = vec![0f32; buffer_size];
 
-    return match decoder.decode_float(&samples, &mut output, false) {
+    return match decoder.decode_float(Some(&samples), &mut output, false) {
         Ok(size) => {
             output.split_at(size).0.to_vec()
         },
@@ -44,7 +44,7 @@ pub fn decode_play_thread() {
     *actual_receiver = receiver;
 
     // Create decoder
-    let mut decoder = opus::Decoder::new(audio::encode::SAMPLE_RATE, opus::Channels::Mono).unwrap();
+    let mut decoder = audiopus::coder::Decoder::new(audio::encode::SAMPLE_RATE, audiopus::Channels::Mono).unwrap();
 
     thread::spawn(move || {
 
