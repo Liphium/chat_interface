@@ -6,12 +6,12 @@ pub mod encode;
 pub mod decode;
 
 pub struct AudioOptions {
-    silent_mute: bool,
-    muted: bool,
-    deafened: bool,
-    amplitude_logging: bool,
-    talking: bool,
-    talking_amplitude: f32,
+    pub silent_mute: bool,
+    pub muted: bool,
+    pub deafened: bool,
+    pub amplitude_logging: bool,
+    pub talking: bool,
+    pub talking_amplitude: f32,
 }
 
 pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {

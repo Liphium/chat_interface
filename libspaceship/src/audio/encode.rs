@@ -1,5 +1,6 @@
 use std::{thread, sync::{Mutex, mpsc::{Sender, Receiver, self}, Arc}};
 
+use flutter_rust_bridge::StreamSink;
 use once_cell::sync::Lazy;
 use crate::{audio, util, logger};
 
@@ -9,6 +10,20 @@ use super::decode;
 
 pub const SAMPLE_RATE: audiopus::SampleRate = audiopus::SampleRate::Hz48000;
 pub const FRAME_SIZE: usize = 960;
+
+static AMPLITUDE_SINK: Lazy<Mutex<Option<StreamSink<f32>>>> = Lazy::new(|| Mutex::new(None));
+
+pub fn set_amplitude_sink(s: StreamSink<f32>) {
+    let mut sink = AMPLITUDE_SINK.lock().unwrap();
+    *sink = Some(s);
+    drop(sink);
+}
+
+pub fn delete_sink() {
+    let mut sink = AMPLITUDE_SINK.lock().unwrap();
+    *sink = None;
+    drop(sink);
+}
 
 pub fn encode(samples: Vec<f32>, encoder: &mut audiopus::coder::Encoder) -> Vec<u8> {
 
@@ -85,7 +100,10 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
             }
 
             if options.amplitude_logging {
-                logger::send_log(logger::TAG_CODEC, &format!("max:{}", max));
+                let mut sink = AMPLITUDE_SINK.lock().unwrap();
+                if let Some(s) = &mut *sink {
+                    s.add(max);
+                }
             }
 
             if max > options.talking_amplitude {

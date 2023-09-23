@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use flutter_rust_bridge::StreamSink;
 
-use crate::{connection, logger, audio::{decode, microphone}, util};
+use crate::{connection, logger, audio::{decode, microphone, self, AUDIO_OPTIONS}, util};
+
+//* App logic */
 
 pub struct LogEntry {
     pub time_secs: i64,
@@ -38,4 +40,59 @@ pub fn test_voice() {
 
 pub fn stop() {
     connection::stop();
+}
+
+//* Audio crab */
+
+pub fn set_muted(muted: bool) {
+    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    (*options).muted = muted;
+}
+
+pub fn set_deafen(deafened: bool) {
+    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    (*options).deafened = deafened;
+}
+
+pub fn is_muted() -> bool {
+    let options = AUDIO_OPTIONS.lock().unwrap();
+    options.muted
+}
+
+pub fn is_deafened() -> bool {
+    let options = AUDIO_OPTIONS.lock().unwrap();
+    options.deafened
+}
+
+pub fn set_amplitude_logging(amplitude_logging: bool) {
+    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    (*options).amplitude_logging = amplitude_logging;
+}
+
+pub fn is_amplitude_logging() -> bool {
+    let options = AUDIO_OPTIONS.lock().unwrap();
+    options.amplitude_logging
+}
+
+pub fn set_talking_amplitude(amplitude: f32) {
+    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    (*options).talking_amplitude = amplitude;
+}
+
+pub fn get_talking_amplitude() -> f32 {
+    let options = AUDIO_OPTIONS.lock().unwrap();
+    options.talking_amplitude
+}
+
+pub fn set_silent_mute(silent_mute: bool) {
+    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    (*options).silent_mute = silent_mute;
+}
+
+pub fn create_amplitude_stream(s: StreamSink<f32>) {
+    audio::encode::set_amplitude_sink(s);
+}
+
+pub fn delete_amplitude_stream() {
+    audio::encode::delete_sink();
 }
