@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 
 use once_cell::sync::Lazy;
-use rand::{Rng, rngs::ThreadRng};
+
 
 use crate::util;
 
@@ -16,13 +16,15 @@ pub struct Config {
     pub connection: bool
 }
 
-static CONN_ID: Lazy<Mutex<Vec<u8>>> = Lazy::new(|| {
-    let mut rng = rand::thread_rng();
-    Mutex::new(vec![random_letter_byte(&mut rng), random_letter_byte(&mut rng), random_letter_byte(&mut rng), random_letter_byte(&mut rng)])
-});
+// If the app should stop
+static STOP_CHAT: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 
-fn random_letter_byte(rng: &mut ThreadRng) -> u8 {
-    rng.sample(rand::distributions::Alphanumeric) as u8
+pub fn should_stop() -> bool {
+    *STOP_CHAT.lock().unwrap()
+}
+
+pub fn stop() {
+    *STOP_CHAT.lock().unwrap() = true;
 }
 
 pub fn get_key(token: &str) -> Vec<u8> {

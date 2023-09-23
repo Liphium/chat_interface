@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use flutter_rust_bridge::StreamSink;
 
-use crate::{connection, logger, audio::{encode, decode}};
+use crate::{connection, logger, audio::{decode, microphone}};
 
 pub struct LogEntry {
     pub time_secs: i64,
@@ -32,6 +32,10 @@ pub fn test_voice() {
         connection: false,
     });
 
-    encode::encode_thread(config.clone(), 1);
     decode::decode_play_thread();
+    microphone::record(config.clone());
+}
+
+pub fn stop() {
+    connection::stop();
 }

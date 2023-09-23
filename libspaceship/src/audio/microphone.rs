@@ -64,6 +64,9 @@ pub fn record(conn_config: Arc<connection::Config>) {
         stream.play().unwrap();
 
         loop {
+            if connection::should_stop() {
+                break;
+            }
             thread::sleep(Duration::from_millis(10));
         }
     });

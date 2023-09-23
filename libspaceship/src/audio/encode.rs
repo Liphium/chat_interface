@@ -63,6 +63,11 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
         encoder.set_bitrate(audiopus::Bitrate::BitsPerSecond(128000)).unwrap();
 
         loop {
+
+            if connection::should_stop() {
+                return;
+            }
+
             let samples = ENCODE_RECEIVER.lock().unwrap().recv().expect("Encoding channel broke");
             let samples_len = samples.len();
 
@@ -106,9 +111,13 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 talking_streak -= 1;
             }
 
-            if true { // TODO: Test thing
-                let encoded = encode(samples, &mut encoder);
-                decode::pass_to_decode(encoded);
+            if config.test { // TODO: Test thing
+
+                if options.talking {
+                    let encoded = encode(samples, &mut encoder);
+                    decode::pass_to_decode(encoded);
+                }
+
             } else if config.connection && !options.muted && !options.silent_mute && options.talking {
                 util::print_log("sending audio");
                 let encoded = encode(samples, &mut encoder);
