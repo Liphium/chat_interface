@@ -2,7 +2,7 @@ use std::{io, collections::HashMap};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{util, audio};
+use crate::{audio, logger};
 
 #[derive(Deserialize, Serialize)]
 pub struct Event {
@@ -28,10 +28,6 @@ const ACTION_SET_TALKING_AMPLITUDE: &str = "set_talking_amplitude";
 // Start listening for console input (from the other application)
 pub fn start_listening() -> ! {
 
-    util::print_action(Event{
-        action: "start_listening".to_string(),
-        data: HashMap::new()
-    });
     let mut input = String::new();
 
     loop {
@@ -39,7 +35,6 @@ pub fn start_listening() -> ! {
         input = input.trim().to_string();
 
         // ACTION:VALUE
-        let mut unknown = false;
         match input.as_str().split(":").nth(0).unwrap() {
             ACTION_DEAFEN => {
                 audio::set_deafen(true);
@@ -66,7 +61,7 @@ pub fn start_listening() -> ! {
             },
 
             ACTION_EXIT => {
-                util::print_log("Thanks for using Fajurion Voice!");
+                logger::send_log(logger::TAG_COMMUNICATION, "Thanks for using Fajurion Voice!");
                 std::process::exit(0);
             },
 
@@ -81,17 +76,8 @@ pub fn start_listening() -> ! {
             },
 
             action => {
-                util::print_log(format!("Unknown action: {}", action).as_str());
-                unknown = true;
+                logger::send_log(logger::TAG_COMMUNICATION, format!("Unknown action: {}", action).as_str());
             }
-        }
-
-        // Send feedback
-        if !unknown {
-            util::print_action(Event{
-                action: input.split(":").nth(0).unwrap().to_string(),
-                data: HashMap::new()
-            })
         }
 
         input.clear();

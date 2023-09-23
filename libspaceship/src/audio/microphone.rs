@@ -3,7 +3,7 @@ use std::{sync::{Mutex, Arc}, thread, time::Duration};
 use cpal::{traits::{HostTrait, DeviceTrait, StreamTrait}, StreamConfig};
 use rubato::{FftFixedOut, Resampler};
 
-use crate::{audio::encode, util, connection};
+use crate::{audio::encode, connection, logger};
 
 pub fn record(conn_config: Arc<connection::Config>) {
     
@@ -15,7 +15,7 @@ pub fn record(conn_config: Arc<connection::Config>) {
 
         // Create a stream config
         let default_config = device.default_input_config().expect("no stream config found");
-        util::print_log(format!("default config: {:?}", default_config).as_str());
+        logger::send_log(logger::TAG_AUDIO, format!("default config: {:?}", default_config).as_str());
         let sample_rate: u32 = default_config.sample_rate().0;
         let work_channels = 1; // Stereo doesn't work at the moment (will fix in the future or never)
         let mic_channels = default_config.channels();
@@ -49,13 +49,13 @@ pub fn record(conn_config: Arc<connection::Config>) {
                 resample_data(data, &mut resampler, &overflow_buffer_2, mic_channels);
             },
             move |err| {
-                util::print_log(format!("an error occurred on stream: {}", err).as_str());
+                logger::send_log(logger::TAG_ERROR, format!("an error occurred on stream: {}", err).as_str());
             },
             None,
         ) {
             Ok(stream) => stream,
             Err(err) => {
-                util::print_log(format!("an error occurred on stream: {}", err).as_str());
+                logger::send_log(logger::TAG_ERROR, format!("an error occurred on stream: {}", err).as_str());
                 return;
             }
         };

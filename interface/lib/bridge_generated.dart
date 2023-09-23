@@ -15,9 +15,9 @@ abstract class Libspaceship {
 
   FlutterRustBridgeTaskConstMeta get kCreateLogStreamConstMeta;
 
-  Future<void> sendLog({required String s, dynamic hint});
+  Stream<String> createActionStream({dynamic hint});
 
-  FlutterRustBridgeTaskConstMeta get kSendLogConstMeta;
+  FlutterRustBridgeTaskConstMeta get kCreateActionStreamConstMeta;
 
   Future<void> startVoice(
       {required String clientId,
@@ -31,6 +31,10 @@ abstract class Libspaceship {
   Future<void> testVoice({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kTestVoiceConstMeta;
+
+  Future<void> stop({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kStopConstMeta;
 }
 
 class LogEntry {
@@ -71,22 +75,21 @@ class LibspaceshipImpl implements Libspaceship {
         argNames: [],
       );
 
-  Future<void> sendLog({required String s, dynamic hint}) {
-    var arg0 = _platform.api2wire_String(s);
-    return _platform.executeNormal(FlutterRustBridgeTask(
-      callFfi: (port_) => _platform.inner.wire_send_log(port_, arg0),
-      parseSuccessData: _wire2api_unit,
+  Stream<String> createActionStream({dynamic hint}) {
+    return _platform.executeStream(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_create_action_stream(port_),
+      parseSuccessData: _wire2api_String,
       parseErrorData: null,
-      constMeta: kSendLogConstMeta,
-      argValues: [s],
+      constMeta: kCreateActionStreamConstMeta,
+      argValues: [],
       hint: hint,
     ));
   }
 
-  FlutterRustBridgeTaskConstMeta get kSendLogConstMeta =>
+  FlutterRustBridgeTaskConstMeta get kCreateActionStreamConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
-        debugName: "send_log",
-        argNames: ["s"],
+        debugName: "create_action_stream",
+        argNames: [],
       );
 
   Future<void> startVoice(
@@ -130,6 +133,23 @@ class LibspaceshipImpl implements Libspaceship {
   FlutterRustBridgeTaskConstMeta get kTestVoiceConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
         debugName: "test_voice",
+        argNames: [],
+      );
+
+  Future<void> stop({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_stop(port_),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kStopConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kStopConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "stop",
         argNames: [],
       );
 
@@ -311,22 +331,19 @@ class LibspaceshipWire implements FlutterRustBridgeWireBase {
   late final _wire_create_log_stream =
       _wire_create_log_streamPtr.asFunction<void Function(int)>();
 
-  void wire_send_log(
+  void wire_create_action_stream(
     int port_,
-    ffi.Pointer<wire_uint_8_list> s,
   ) {
-    return _wire_send_log(
+    return _wire_create_action_stream(
       port_,
-      s,
     );
   }
 
-  late final _wire_send_logPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_send_log');
-  late final _wire_send_log = _wire_send_logPtr
-      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+  late final _wire_create_action_streamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_create_action_stream');
+  late final _wire_create_action_stream =
+      _wire_create_action_streamPtr.asFunction<void Function(int)>();
 
   void wire_start_voice(
     int port_,
@@ -373,6 +390,18 @@ class LibspaceshipWire implements FlutterRustBridgeWireBase {
           'wire_test_voice');
   late final _wire_test_voice =
       _wire_test_voicePtr.asFunction<void Function(int)>();
+
+  void wire_stop(
+    int port_,
+  ) {
+    return _wire_stop(
+      port_,
+    );
+  }
+
+  late final _wire_stopPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_stop');
+  late final _wire_stop = _wire_stopPtr.asFunction<void Function(int)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,

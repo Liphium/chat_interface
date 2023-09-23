@@ -8,7 +8,7 @@ use once_cell::sync::Lazy;
 use rand::Rng;
 
 use crate::connection::receiver;
-use crate::{communication, audio};
+use crate::{communication, audio, logger};
 use crate::{connection, util};
 
 static SEND_SENDER: Lazy<Mutex<Sender<Vec<u8>>>> = Lazy::new(|| {
@@ -48,7 +48,7 @@ pub fn connect_read(address: &str) {
 pub fn connect_recursive(client_id: String, verification_key: String, encryption_key: String, address: &str, tries: u8, listen: bool) {
 
     if tries > 5 {
-        util::print_log("Could not connect");
+        logger::send_log(logger::TAG_CONNECTION, "Could not connect");
         return;
     }
 
@@ -56,7 +56,7 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
     let socket = match UdpSocket::bind(format!("0.0.0.0:{}", rand::thread_rng().gen_range(3000..4000))) {
         Ok(s) => s,
         Err(_) => {
-            util::print_log("Could not bind socket");
+            logger::send_log(logger::TAG_CONNECTION, "Could not bind socket");
             return;
         }
     };
@@ -65,7 +65,7 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
     match socket.connect(address) {
         Ok(_) => {}
         Err(_) => {
-            util::print_log("Could not connect to remote address");
+            logger::send_log(logger::TAG_CONNECTION, "Could not connect to remote address");
             return; 
         }
     }
@@ -91,7 +91,7 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
 
             match receiver::receive_packet(&config, &buf[0..size].to_vec()) {
                 Ok(_) => (),
-                Err(message) => util::print_log(format!("{}", message).as_str())
+                Err(message) => logger::send_log(logger::TAG_CONNECTION, format!("{}", message).as_str())
             }
         } 
     });
@@ -111,7 +111,7 @@ fn send_thread(socket: UdpSocket) {
             match socket.send(&data) {
                 Ok(_) => {}
                 Err(_) => {
-                    util::print_log("Could not send"); 
+                    logger::send_log(logger::TAG_CONNECTION, "Could not send"); 
                     return;
                 }
             }

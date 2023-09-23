@@ -1,7 +1,7 @@
-use std::{thread, sync::{Mutex, mpsc::{Sender, Receiver, self}, Arc}, collections::HashMap};
+use std::{thread, sync::{Mutex, mpsc::{Sender, Receiver, self}, Arc}};
 
 use once_cell::sync::Lazy;
-use crate::{audio, util, communication::Event};
+use crate::{audio, util, logger};
 
 use crate::connection;
 
@@ -85,26 +85,20 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
             }
 
             if options.amplitude_logging {
-                util::print_log(&format!("max:{}", max));
+                logger::send_log(logger::TAG_CODEC, &format!("max:{}", max));
             }
 
             if max > options.talking_amplitude {
                 talking_streak = 10;
 
                 if !options.talking {
-                    util::print_action(Event{
-                        action: "started_talking".to_string(),
-                        data: HashMap::new()
-                    });
+                    util::print_action("started_talking");
                 }
                 options.talking = true;
             } else if talking_streak <= 0 {
 
                 if options.talking {
-                    util::print_action(Event{
-                        action: "stopped_talking".to_string(),
-                        data: HashMap::new()
-                    });
+                    util::print_action("stopped_talking");
                 }
                 options.talking = false;
             } else {
@@ -119,10 +113,10 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 }
 
             } else if config.connection && !options.muted && !options.silent_mute && options.talking {
-                util::print_log("sending audio");
+                logger::send_log(logger::TAG_CODEC, "sending audio");
                 let encoded = encode(samples, &mut encoder);
                 connection::construct_packet(&config, &encoded, &mut buffer);
-                util::print_log(format!("packet len: {}", buffer.len()).as_str());
+                logger::send_log(logger::TAG_CODEC, format!("packet len: {}", buffer.len()).as_str());
 
                 //decode::pass_to_decode(encoded);
 

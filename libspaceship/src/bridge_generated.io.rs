@@ -7,8 +7,8 @@ pub extern "C" fn wire_create_log_stream(port_: i64) {
 }
 
 #[no_mangle]
-pub extern "C" fn wire_send_log(port_: i64, s: *mut wire_uint_8_list) {
-    wire_send_log_impl(port_, s)
+pub extern "C" fn wire_create_action_stream(port_: i64) {
+    wire_create_action_stream_impl(port_)
 }
 
 #[no_mangle]
@@ -25,6 +25,11 @@ pub extern "C" fn wire_start_voice(
 #[no_mangle]
 pub extern "C" fn wire_test_voice(port_: i64) {
     wire_test_voice_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_stop(port_: i64) {
+    wire_stop_impl(port_)
 }
 
 // Section: allocate functions

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use flutter_rust_bridge::StreamSink;
 
-use crate::{connection, logger, audio::{decode, microphone}};
+use crate::{connection, logger, audio::{decode, microphone}, util};
 
 pub struct LogEntry {
     pub time_secs: i64,
@@ -14,8 +14,8 @@ pub fn create_log_stream(s: StreamSink<LogEntry>) {
     logger::set_stream_sink(s);
 }
 
-pub fn send_log(s: String) {
-    logger::send_log("test", s.as_str());
+pub fn create_action_stream(s: StreamSink<String>) {
+    util::set_action_sink(s);
 }
 
 pub fn start_voice(client_id: String, verification_key: String, encryption_key: String, address: String) {

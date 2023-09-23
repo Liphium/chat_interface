@@ -38,16 +38,19 @@ fn wire_create_log_stream_impl(port_: MessagePort) {
         },
     )
 }
-fn wire_send_log_impl(port_: MessagePort, s: impl Wire2Api<String> + UnwindSafe) {
+fn wire_create_action_stream_impl(port_: MessagePort) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap::<_, _, _, (), _>(
         WrapInfo {
-            debug_name: "send_log",
+            debug_name: "create_action_stream",
             port: Some(port_),
-            mode: FfiCallMode::Normal,
+            mode: FfiCallMode::Stream,
         },
         move || {
-            let api_s = s.wire2api();
-            move |task_callback| Result::<_, ()>::Ok(send_log(api_s))
+            move |task_callback| {
+                Result::<_, ()>::Ok(create_action_stream(
+                    task_callback.stream_sink::<_, String>(),
+                ))
+            }
         },
     )
 }
@@ -88,6 +91,16 @@ fn wire_test_voice_impl(port_: MessagePort) {
             mode: FfiCallMode::Normal,
         },
         move || move |task_callback| Result::<_, ()>::Ok(test_voice()),
+    )
+}
+fn wire_stop_impl(port_: MessagePort) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap::<_, _, _, (), _>(
+        WrapInfo {
+            debug_name: "stop",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| Result::<_, ()>::Ok(stop()),
     )
 }
 // Section: wrapper structs
