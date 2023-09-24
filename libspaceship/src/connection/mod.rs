@@ -19,6 +19,10 @@ pub struct Config {
 // If the app should stop
 static STOP_CHAT: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 
+pub fn allow_start() {
+    *STOP_CHAT.lock().unwrap() = false;
+}
+
 pub fn should_stop() -> bool {
     *STOP_CHAT.lock().unwrap()
 }

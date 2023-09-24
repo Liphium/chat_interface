@@ -23,13 +23,83 @@ pub extern "C" fn wire_start_voice(
 }
 
 #[no_mangle]
-pub extern "C" fn wire_test_voice(port_: i64) {
-    wire_test_voice_impl(port_)
+pub extern "C" fn wire_test_voice(port_: i64, device: *mut wire_uint_8_list) {
+    wire_test_voice_impl(port_, device)
 }
 
 #[no_mangle]
 pub extern "C" fn wire_stop(port_: i64) {
     wire_stop_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_set_muted(port_: i64, muted: bool) {
+    wire_set_muted_impl(port_, muted)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_set_deafen(port_: i64, deafened: bool) {
+    wire_set_deafen_impl(port_, deafened)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_is_muted(port_: i64) {
+    wire_is_muted_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_is_deafened(port_: i64) {
+    wire_is_deafened_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_set_amplitude_logging(port_: i64, amplitude_logging: bool) {
+    wire_set_amplitude_logging_impl(port_, amplitude_logging)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_is_amplitude_logging(port_: i64) {
+    wire_is_amplitude_logging_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_set_talking_amplitude(port_: i64, amplitude: f32) {
+    wire_set_talking_amplitude_impl(port_, amplitude)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_get_talking_amplitude(port_: i64) {
+    wire_get_talking_amplitude_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_set_silent_mute(port_: i64, silent_mute: bool) {
+    wire_set_silent_mute_impl(port_, silent_mute)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_create_amplitude_stream(port_: i64) {
+    wire_create_amplitude_stream_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_delete_amplitude_stream(port_: i64) {
+    wire_delete_amplitude_stream_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_list_input_devices(port_: i64) {
+    wire_list_input_devices_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_get_default_id(port_: i64) {
+    wire_get_default_id_impl(port_)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_list_output_devices(port_: i64) {
+    wire_list_output_devices_impl(port_)
 }
 
 // Section: allocate functions

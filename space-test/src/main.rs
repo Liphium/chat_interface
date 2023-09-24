@@ -3,6 +3,13 @@ use std::{thread, time::Duration};
 use libspaceship::api;
 
 fn main() {
+    let devices = api::list_input_devices();
+    for device in devices {
+        println!("Device: {:?}", device.id);
+    }
+}
+
+pub fn test_voice() {
     api::test_voice();
     let mut tries = 0;
     loop {

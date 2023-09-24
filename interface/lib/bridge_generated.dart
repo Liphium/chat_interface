@@ -28,13 +28,82 @@ abstract class Libspaceship {
 
   FlutterRustBridgeTaskConstMeta get kStartVoiceConstMeta;
 
-  Future<void> testVoice({dynamic hint});
+  Future<void> testVoice({required String device, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kTestVoiceConstMeta;
 
   Future<void> stop({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kStopConstMeta;
+
+  Future<void> setMuted({required bool muted, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSetMutedConstMeta;
+
+  Future<void> setDeafen({required bool deafened, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSetDeafenConstMeta;
+
+  Future<bool> isMuted({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kIsMutedConstMeta;
+
+  Future<bool> isDeafened({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kIsDeafenedConstMeta;
+
+  Future<void> setAmplitudeLogging(
+      {required bool amplitudeLogging, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSetAmplitudeLoggingConstMeta;
+
+  Future<bool> isAmplitudeLogging({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kIsAmplitudeLoggingConstMeta;
+
+  Future<void> setTalkingAmplitude({required double amplitude, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSetTalkingAmplitudeConstMeta;
+
+  Future<double> getTalkingAmplitude({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kGetTalkingAmplitudeConstMeta;
+
+  Future<void> setSilentMute({required bool silentMute, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSetSilentMuteConstMeta;
+
+  Stream<double> createAmplitudeStream({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kCreateAmplitudeStreamConstMeta;
+
+  Future<void> deleteAmplitudeStream({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kDeleteAmplitudeStreamConstMeta;
+
+  Future<List<InputDevice>> listInputDevices({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kListInputDevicesConstMeta;
+
+  Future<String> getDefaultId({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kGetDefaultIdConstMeta;
+
+  Future<List<OutputDevice>> listOutputDevices({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kListOutputDevicesConstMeta;
+}
+
+class InputDevice {
+  final String id;
+  final int sampleRate;
+  final bool bestQuality;
+
+  const InputDevice({
+    required this.id,
+    required this.sampleRate,
+    required this.bestQuality,
+  });
 }
 
 class LogEntry {
@@ -46,6 +115,14 @@ class LogEntry {
     required this.timeSecs,
     required this.tag,
     required this.msg,
+  });
+}
+
+class OutputDevice {
+  final String id;
+
+  const OutputDevice({
+    required this.id,
   });
 }
 
@@ -119,13 +196,14 @@ class LibspaceshipImpl implements Libspaceship {
         argNames: ["clientId", "verificationKey", "encryptionKey", "address"],
       );
 
-  Future<void> testVoice({dynamic hint}) {
+  Future<void> testVoice({required String device, dynamic hint}) {
+    var arg0 = _platform.api2wire_String(device);
     return _platform.executeNormal(FlutterRustBridgeTask(
-      callFfi: (port_) => _platform.inner.wire_test_voice(port_),
+      callFfi: (port_) => _platform.inner.wire_test_voice(port_, arg0),
       parseSuccessData: _wire2api_unit,
       parseErrorData: null,
       constMeta: kTestVoiceConstMeta,
-      argValues: [],
+      argValues: [device],
       hint: hint,
     ));
   }
@@ -133,7 +211,7 @@ class LibspaceshipImpl implements Libspaceship {
   FlutterRustBridgeTaskConstMeta get kTestVoiceConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
         debugName: "test_voice",
-        argNames: [],
+        argNames: ["device"],
       );
 
   Future<void> stop({dynamic hint}) {
@@ -153,6 +231,252 @@ class LibspaceshipImpl implements Libspaceship {
         argNames: [],
       );
 
+  Future<void> setMuted({required bool muted, dynamic hint}) {
+    var arg0 = muted;
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_set_muted(port_, arg0),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kSetMutedConstMeta,
+      argValues: [muted],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kSetMutedConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "set_muted",
+        argNames: ["muted"],
+      );
+
+  Future<void> setDeafen({required bool deafened, dynamic hint}) {
+    var arg0 = deafened;
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_set_deafen(port_, arg0),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kSetDeafenConstMeta,
+      argValues: [deafened],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kSetDeafenConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "set_deafen",
+        argNames: ["deafened"],
+      );
+
+  Future<bool> isMuted({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_is_muted(port_),
+      parseSuccessData: _wire2api_bool,
+      parseErrorData: null,
+      constMeta: kIsMutedConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kIsMutedConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "is_muted",
+        argNames: [],
+      );
+
+  Future<bool> isDeafened({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_is_deafened(port_),
+      parseSuccessData: _wire2api_bool,
+      parseErrorData: null,
+      constMeta: kIsDeafenedConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kIsDeafenedConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "is_deafened",
+        argNames: [],
+      );
+
+  Future<void> setAmplitudeLogging(
+      {required bool amplitudeLogging, dynamic hint}) {
+    var arg0 = amplitudeLogging;
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) =>
+          _platform.inner.wire_set_amplitude_logging(port_, arg0),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kSetAmplitudeLoggingConstMeta,
+      argValues: [amplitudeLogging],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kSetAmplitudeLoggingConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "set_amplitude_logging",
+        argNames: ["amplitudeLogging"],
+      );
+
+  Future<bool> isAmplitudeLogging({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_is_amplitude_logging(port_),
+      parseSuccessData: _wire2api_bool,
+      parseErrorData: null,
+      constMeta: kIsAmplitudeLoggingConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kIsAmplitudeLoggingConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "is_amplitude_logging",
+        argNames: [],
+      );
+
+  Future<void> setTalkingAmplitude({required double amplitude, dynamic hint}) {
+    var arg0 = api2wire_f32(amplitude);
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) =>
+          _platform.inner.wire_set_talking_amplitude(port_, arg0),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kSetTalkingAmplitudeConstMeta,
+      argValues: [amplitude],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kSetTalkingAmplitudeConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "set_talking_amplitude",
+        argNames: ["amplitude"],
+      );
+
+  Future<double> getTalkingAmplitude({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_get_talking_amplitude(port_),
+      parseSuccessData: _wire2api_f32,
+      parseErrorData: null,
+      constMeta: kGetTalkingAmplitudeConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kGetTalkingAmplitudeConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "get_talking_amplitude",
+        argNames: [],
+      );
+
+  Future<void> setSilentMute({required bool silentMute, dynamic hint}) {
+    var arg0 = silentMute;
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_set_silent_mute(port_, arg0),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kSetSilentMuteConstMeta,
+      argValues: [silentMute],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kSetSilentMuteConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "set_silent_mute",
+        argNames: ["silentMute"],
+      );
+
+  Stream<double> createAmplitudeStream({dynamic hint}) {
+    return _platform.executeStream(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_create_amplitude_stream(port_),
+      parseSuccessData: _wire2api_f32,
+      parseErrorData: null,
+      constMeta: kCreateAmplitudeStreamConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kCreateAmplitudeStreamConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "create_amplitude_stream",
+        argNames: [],
+      );
+
+  Future<void> deleteAmplitudeStream({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_delete_amplitude_stream(port_),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kDeleteAmplitudeStreamConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kDeleteAmplitudeStreamConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "delete_amplitude_stream",
+        argNames: [],
+      );
+
+  Future<List<InputDevice>> listInputDevices({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_list_input_devices(port_),
+      parseSuccessData: _wire2api_list_input_device,
+      parseErrorData: null,
+      constMeta: kListInputDevicesConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kListInputDevicesConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "list_input_devices",
+        argNames: [],
+      );
+
+  Future<String> getDefaultId({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_get_default_id(port_),
+      parseSuccessData: _wire2api_String,
+      parseErrorData: null,
+      constMeta: kGetDefaultIdConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kGetDefaultIdConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "get_default_id",
+        argNames: [],
+      );
+
+  Future<List<OutputDevice>> listOutputDevices({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_list_output_devices(port_),
+      parseSuccessData: _wire2api_list_output_device,
+      parseErrorData: null,
+      constMeta: kListOutputDevicesConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kListOutputDevicesConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "list_output_devices",
+        argNames: [],
+      );
+
   void dispose() {
     _platform.dispose();
   }
@@ -162,8 +486,35 @@ class LibspaceshipImpl implements Libspaceship {
     return raw as String;
   }
 
+  bool _wire2api_bool(dynamic raw) {
+    return raw as bool;
+  }
+
+  double _wire2api_f32(dynamic raw) {
+    return raw as double;
+  }
+
   int _wire2api_i64(dynamic raw) {
     return castInt(raw);
+  }
+
+  InputDevice _wire2api_input_device(dynamic raw) {
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return InputDevice(
+      id: _wire2api_String(arr[0]),
+      sampleRate: _wire2api_u32(arr[1]),
+      bestQuality: _wire2api_bool(arr[2]),
+    );
+  }
+
+  List<InputDevice> _wire2api_list_input_device(dynamic raw) {
+    return (raw as List<dynamic>).map(_wire2api_input_device).toList();
+  }
+
+  List<OutputDevice> _wire2api_list_output_device(dynamic raw) {
+    return (raw as List<dynamic>).map(_wire2api_output_device).toList();
   }
 
   LogEntry _wire2api_log_entry(dynamic raw) {
@@ -175,6 +526,19 @@ class LibspaceshipImpl implements Libspaceship {
       tag: _wire2api_String(arr[1]),
       msg: _wire2api_String(arr[2]),
     );
+  }
+
+  OutputDevice _wire2api_output_device(dynamic raw) {
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return OutputDevice(
+      id: _wire2api_String(arr[0]),
+    );
+  }
+
+  int _wire2api_u32(dynamic raw) {
+    return raw as int;
   }
 
   int _wire2api_u8(dynamic raw) {
@@ -191,6 +555,16 @@ class LibspaceshipImpl implements Libspaceship {
 }
 
 // Section: api2wire
+
+@protected
+bool api2wire_bool(bool raw) {
+  return raw;
+}
+
+@protected
+double api2wire_f32(double raw) {
+  return raw;
+}
 
 @protected
 int api2wire_u8(int raw) {
@@ -379,17 +753,20 @@ class LibspaceshipWire implements FlutterRustBridgeWireBase {
 
   void wire_test_voice(
     int port_,
+    ffi.Pointer<wire_uint_8_list> device,
   ) {
     return _wire_test_voice(
       port_,
+      device,
     );
   }
 
-  late final _wire_test_voicePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
-          'wire_test_voice');
-  late final _wire_test_voice =
-      _wire_test_voicePtr.asFunction<void Function(int)>();
+  late final _wire_test_voicePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_test_voice');
+  late final _wire_test_voice = _wire_test_voicePtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_stop(
     int port_,
@@ -402,6 +779,212 @@ class LibspaceshipWire implements FlutterRustBridgeWireBase {
   late final _wire_stopPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_stop');
   late final _wire_stop = _wire_stopPtr.asFunction<void Function(int)>();
+
+  void wire_set_muted(
+    int port_,
+    bool muted,
+  ) {
+    return _wire_set_muted(
+      port_,
+      muted,
+    );
+  }
+
+  late final _wire_set_mutedPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Bool)>>(
+          'wire_set_muted');
+  late final _wire_set_muted =
+      _wire_set_mutedPtr.asFunction<void Function(int, bool)>();
+
+  void wire_set_deafen(
+    int port_,
+    bool deafened,
+  ) {
+    return _wire_set_deafen(
+      port_,
+      deafened,
+    );
+  }
+
+  late final _wire_set_deafenPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Bool)>>(
+          'wire_set_deafen');
+  late final _wire_set_deafen =
+      _wire_set_deafenPtr.asFunction<void Function(int, bool)>();
+
+  void wire_is_muted(
+    int port_,
+  ) {
+    return _wire_is_muted(
+      port_,
+    );
+  }
+
+  late final _wire_is_mutedPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_is_muted');
+  late final _wire_is_muted =
+      _wire_is_mutedPtr.asFunction<void Function(int)>();
+
+  void wire_is_deafened(
+    int port_,
+  ) {
+    return _wire_is_deafened(
+      port_,
+    );
+  }
+
+  late final _wire_is_deafenedPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_is_deafened');
+  late final _wire_is_deafened =
+      _wire_is_deafenedPtr.asFunction<void Function(int)>();
+
+  void wire_set_amplitude_logging(
+    int port_,
+    bool amplitude_logging,
+  ) {
+    return _wire_set_amplitude_logging(
+      port_,
+      amplitude_logging,
+    );
+  }
+
+  late final _wire_set_amplitude_loggingPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Bool)>>(
+          'wire_set_amplitude_logging');
+  late final _wire_set_amplitude_logging =
+      _wire_set_amplitude_loggingPtr.asFunction<void Function(int, bool)>();
+
+  void wire_is_amplitude_logging(
+    int port_,
+  ) {
+    return _wire_is_amplitude_logging(
+      port_,
+    );
+  }
+
+  late final _wire_is_amplitude_loggingPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_is_amplitude_logging');
+  late final _wire_is_amplitude_logging =
+      _wire_is_amplitude_loggingPtr.asFunction<void Function(int)>();
+
+  void wire_set_talking_amplitude(
+    int port_,
+    double amplitude,
+  ) {
+    return _wire_set_talking_amplitude(
+      port_,
+      amplitude,
+    );
+  }
+
+  late final _wire_set_talking_amplitudePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Float)>>(
+          'wire_set_talking_amplitude');
+  late final _wire_set_talking_amplitude =
+      _wire_set_talking_amplitudePtr.asFunction<void Function(int, double)>();
+
+  void wire_get_talking_amplitude(
+    int port_,
+  ) {
+    return _wire_get_talking_amplitude(
+      port_,
+    );
+  }
+
+  late final _wire_get_talking_amplitudePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_get_talking_amplitude');
+  late final _wire_get_talking_amplitude =
+      _wire_get_talking_amplitudePtr.asFunction<void Function(int)>();
+
+  void wire_set_silent_mute(
+    int port_,
+    bool silent_mute,
+  ) {
+    return _wire_set_silent_mute(
+      port_,
+      silent_mute,
+    );
+  }
+
+  late final _wire_set_silent_mutePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Bool)>>(
+          'wire_set_silent_mute');
+  late final _wire_set_silent_mute =
+      _wire_set_silent_mutePtr.asFunction<void Function(int, bool)>();
+
+  void wire_create_amplitude_stream(
+    int port_,
+  ) {
+    return _wire_create_amplitude_stream(
+      port_,
+    );
+  }
+
+  late final _wire_create_amplitude_streamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_create_amplitude_stream');
+  late final _wire_create_amplitude_stream =
+      _wire_create_amplitude_streamPtr.asFunction<void Function(int)>();
+
+  void wire_delete_amplitude_stream(
+    int port_,
+  ) {
+    return _wire_delete_amplitude_stream(
+      port_,
+    );
+  }
+
+  late final _wire_delete_amplitude_streamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_delete_amplitude_stream');
+  late final _wire_delete_amplitude_stream =
+      _wire_delete_amplitude_streamPtr.asFunction<void Function(int)>();
+
+  void wire_list_input_devices(
+    int port_,
+  ) {
+    return _wire_list_input_devices(
+      port_,
+    );
+  }
+
+  late final _wire_list_input_devicesPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_list_input_devices');
+  late final _wire_list_input_devices =
+      _wire_list_input_devicesPtr.asFunction<void Function(int)>();
+
+  void wire_get_default_id(
+    int port_,
+  ) {
+    return _wire_get_default_id(
+      port_,
+    );
+  }
+
+  late final _wire_get_default_idPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_get_default_id');
+  late final _wire_get_default_id =
+      _wire_get_default_idPtr.asFunction<void Function(int)>();
+
+  void wire_list_output_devices(
+    int port_,
+  ) {
+    return _wire_list_output_devices(
+      port_,
+    );
+  }
+
+  late final _wire_list_output_devicesPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_list_output_devices');
+  late final _wire_list_output_devices =
+      _wire_list_output_devicesPtr.asFunction<void Function(int)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,

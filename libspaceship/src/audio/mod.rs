@@ -1,6 +1,8 @@
 use std::sync::Mutex;
 use once_cell::sync::Lazy;
 
+use crate::api;
+
 pub mod microphone;
 pub mod encode;
 pub mod decode;
@@ -12,6 +14,7 @@ pub struct AudioOptions {
     pub amplitude_logging: bool,
     pub talking: bool,
     pub talking_amplitude: f32,
+    pub input_device: String,
 }
 
 pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {
@@ -22,6 +25,7 @@ pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {
         amplitude_logging: false,
         talking: false,
         talking_amplitude: 0.07,
+        input_device: String::from(api::DEFAULT_NAME),
     })
 });
 
@@ -68,6 +72,16 @@ pub fn get_talking_amplitude() -> f32 {
 pub fn set_silent_mute(silent_mute: bool) {
     let mut options = AUDIO_OPTIONS.lock().unwrap();
     (*options).silent_mute = silent_mute;
+}
+
+pub fn set_input_device(microphone: String) {
+    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    (*options).input_device = microphone;
+}
+
+pub fn get_input_device() -> String {
+    let options = AUDIO_OPTIONS.lock().unwrap();
+    options.input_device.clone()
 }
 
 pub fn is_silent_mute() -> bool {

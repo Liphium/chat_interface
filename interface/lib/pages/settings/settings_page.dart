@@ -38,7 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           onTap: () => Get.back(),
                           child: Row(
                             children: [
-                              Icon(Icons.arrow_back, color: theme.colorScheme.primary),
+                              Icon(Icons.arrow_back, color: theme.colorScheme.onPrimary),
                               horizontalSpacing(defaultSpacing * 0.5),
                               Text("back".tr, style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                                 color: theme.colorScheme.onSurface
@@ -65,7 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: defaultSpacing * 0.5),
                                   child: Obx(() => Material(
-                                    color: currentCategory.value == element ? Theme.of(context).colorScheme.primaryContainer : Colors.transparent,
+                                    color: currentCategory.value == element ? Theme.of(context).colorScheme.primary : Colors.transparent,
                                     borderRadius: BorderRadius.circular(defaultSpacing),
                                     child: InkWell(
                                       onTap: () => currentCategory.value = element,
@@ -76,12 +76,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                           children: [
                                             Icon(
                                               element.icon,
-                                              color: Theme.of(context).colorScheme.primary,
+                                              color: Theme.of(context).colorScheme.onPrimary,
                                             ),
                                             horizontalSpacing(defaultSpacing * 0.5),
-                                            Text(element.label, style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                              color: Theme.of(context).colorScheme.onSurface
-                                            )),
+                                            Text(element.label, style: Theme.of(context).textTheme.labelMedium!),
                                           ],
                                         ),
                                       ),

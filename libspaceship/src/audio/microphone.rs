@@ -11,7 +11,15 @@ pub fn record(conn_config: Arc<connection::Config>) {
 
         // Get a cpal host
         let host = cpal::default_host(); // Current host on computer
-        let device = host.default_input_device().expect("no input device available"); // Current device
+
+        // Get input device (using new API)
+        let mut device = host.default_input_device().expect("no input device available"); // Current device
+        for d in host.input_devices().expect("Couldn't get input devices") {
+            if d.name().unwrap() == super::get_input_device() {
+                device = d;
+                break;
+            }
+        }
 
         // Create a stream config
         let default_config = device.default_input_config().expect("no stream config found");

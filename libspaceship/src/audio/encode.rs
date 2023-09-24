@@ -6,7 +6,7 @@ use crate::{audio, util, logger};
 
 use crate::connection;
 
-use super::decode;
+
 
 pub const SAMPLE_RATE: audiopus::SampleRate = audiopus::SampleRate::Hz48000;
 pub const FRAME_SIZE: usize = 960;
@@ -55,9 +55,15 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
 
     // Encode channel
     let (sender, receiver) = mpsc::channel();
-    let mut actual_sender = ENCODE_SENDER.lock().unwrap();
+    let mut actual_sender = match ENCODE_SENDER.lock() {
+        Ok(lock) => lock,
+        Err(poisoned) => poisoned.into_inner(),
+    };
     *actual_sender = sender;
-    let mut actual_receiver = ENCODE_RECEIVER.lock().unwrap();
+    let mut actual_receiver = match ENCODE_RECEIVER.lock() {
+        Ok(lock) => lock,
+        Err(poisoned) => poisoned.into_inner(),
+    };
     *actual_receiver = receiver;
 
     let opus_channel = match channels {
@@ -83,7 +89,10 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 return;
             }
 
-            let samples = ENCODE_RECEIVER.lock().unwrap().recv().expect("Encoding channel broke");
+            let samples = match ENCODE_RECEIVER.lock() {
+                Ok(lock) => lock.recv().expect("receiving broken"),
+                Err(poisoned) => poisoned.into_inner().recv().expect("receiving broken")
+            };
             let samples_len = samples.len();
 
             if samples_len < FRAME_SIZE * channels {
@@ -123,14 +132,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 talking_streak -= 1;
             }
 
-            if config.test { // TODO: Test thing
-
-                if options.talking {
-                    let encoded = encode(samples, &mut encoder);
-                    decode::pass_to_decode(encoded);
-                }
-
-            } else if config.connection && !options.muted && !options.silent_mute && options.talking {
+            if !config.test && config.connection && !options.muted && !options.silent_mute && options.talking {
                 logger::send_log(logger::TAG_CODEC, "sending audio");
                 let encoded = encode(samples, &mut encoder);
                 connection::construct_packet(&config, &encoded, &mut buffer);

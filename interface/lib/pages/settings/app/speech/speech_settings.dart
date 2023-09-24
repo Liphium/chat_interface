@@ -12,7 +12,7 @@ void addSpeechSettings(SettingController controller) {
 
   //* Microphone
   controller.settings["audio.microphone"] = Setting<String>("audio.microphone", "def");
-  controller.settings["audio.microphone.sensitivity"] = Setting<double>("audio.microphone.sensitivity", -40.0);
+  controller.settings["audio.microphone.sensitivity"] = Setting<double>("audio.microphone.sensitivity", 0.15);
 
   //* Output
   controller.settings["audio.output"] = Setting<String>("audio.output", "def");
