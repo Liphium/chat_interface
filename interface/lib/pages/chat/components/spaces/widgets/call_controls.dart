@@ -65,9 +65,9 @@ class _CallControlsState extends State<CallControls> {
             GetX<AudioController>(
               builder: (controller) {
                 return LoadingIconButton(
-                  loading: controller.microphoneLoading,
-                  onTap: () => controller.setMicrophone(!controller.microphone.value),
-                  icon: controller.microphone.value ? Icons.mic_rounded : Icons.mic_off_rounded,
+                  loading: controller.muteLoading,
+                  onTap: () => controller.setMuted(!controller.muted.value),
+                  icon: controller.muted.value ? Icons.mic_off : Icons.mic,
                   iconSize: 35,
                   color: theme.colorScheme.onSurface
                 ); 
@@ -80,9 +80,9 @@ class _CallControlsState extends State<CallControls> {
             GetX<AudioController>(
               builder: (controller) {
                 return LoadingIconButton(
-                  loading: controller.outputLoading,
-                  onTap: () => controller.setOutput(!controller.output.value),
-                  icon: controller.output.value ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                  loading: controller.deafenLoading,
+                  onTap: () => controller.setDeafened(!controller.deafened.value),
+                  icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
                   iconSize: 35,
                   color: theme.colorScheme.onSurface
                 ); 
@@ -94,7 +94,7 @@ class _CallControlsState extends State<CallControls> {
             //* End call button
             LoadingIconButton(
               loading: false.obs,
-              onTap: () => {} /* startCall(false.obs, Get.find<CallController>().conversation.value) */,
+              onTap: () => Get.find<SpacesController>().leaveCall(),
               icon: Icons.close_rounded,
               color: theme.colorScheme.error,
               iconSize: 35,

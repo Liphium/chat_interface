@@ -1,11 +1,11 @@
-import 'dart:async';
 
+import 'package:chat_interface/ffi.dart';
+import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:livekit_client/livekit_client.dart';
 
 class OutputTab extends StatefulWidget {
   const OutputTab({super.key});
@@ -16,40 +16,31 @@ class OutputTab extends StatefulWidget {
 
 class _OutputTabState extends State<OutputTab> {
 
-  final _outputs = <MediaDevice>[].obs;
-  StreamSubscription<List<MediaDevice>>? _subscription;
+  final _microphones = <OutputDevice>[].obs;
 
   @override
   void initState() {
     super.initState();
 
     // Get microphones
-    Hardware.instance.enumerateDevices(type: "audiooutput").then(_getMicrophones);
-
-    // Subscribe to changes (e.g. unplugging a mic)
-    _subscription = Hardware.instance.onDeviceChange.stream.listen(_getMicrophones);
+    _init();
   }
-
-  void _getMicrophones(List<MediaDevice> list) {
+  
+  void _init() async {
+    final list = await api.listOutputDevices();
     SettingController controller = Get.find();
     String currentMic = controller.settings["audio.output"]!.getValue();
 
-    // Filter for microphones
-    _outputs.clear();
-    list.removeWhere((element) => element.kind != "audiooutput");
-
     // If the current microphone is not in the list, set it to default
-    if(list.firstWhereOrNull((element) => element.label == currentMic) == null) {
+    if(list.firstWhereOrNull((element) => element.id == currentMic) == null) {
       controller.settings["audio.output"]!.setValue("def");
     }
 
-    _outputs.addAll(list);
+    _microphones.addAll(list);  
   }
 
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
+  void _changeDevice(String device) async {
+    Get.find<SettingController>().settings["audio.output"]!.setValue(device);
   }
 
   @override
@@ -61,65 +52,41 @@ class _OutputTabState extends State<OutputTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        verticalSpacing(defaultSpacing * 0.5),
 
         //* Device selection
         Text("audio.output.device".tr, style: theme.textTheme.labelLarge),
-        verticalSpacing(defaultSpacing * 0.5),
+        verticalSpacing(defaultSpacing),
+
+        Text("audio.output.device.default".tr, style: theme.textTheme.bodyMedium),
+        verticalSpacing(elementSpacing),
+        buildOutputButton(controller, OutputDevice(id: SpeechSettings.defaultDeviceName), BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "Use system default"),
+        verticalSpacing(defaultSpacing),
+
+        Text("audio.output.device.other".tr, style: theme.textTheme.bodyMedium),
+        verticalSpacing(elementSpacing),
 
         RepaintBoundary(
           child: Obx(() =>
             ListView.builder(
-              itemCount: _outputs.length,
+              itemCount: _microphones.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
-                String current = _outputs[index].label;
+                final current = _microphones[index];
 
                 final first = index == 0;
-                final last = index == _outputs.length - 1;
+                final last = index == _microphones.length - 1;
                 
                 final radius = BorderRadius.vertical(
                   top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
                   bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
                 );
-                
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.25, horizontal: defaultSpacing * 0.5),
-                  child: Obx(() => 
-                    Material(
-                      color: controller.settings["audio.output"]!.getWhenValue("def", _outputs[0].label) == current ? theme.colorScheme.primaryContainer :
-                        theme.colorScheme.onBackground,
-                      borderRadius: radius,
-                      child: InkWell(
-                        borderRadius: radius,
-                        onTap: () {
-                          //Get.find<AudioController>().changeOutputDevice(_outputs[index]);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(defaultSpacing),
-                          child: Row(
-                            children: [
-                              //* Icon
-                              Icon(Icons.speaker, color: theme.colorScheme.primary),
 
-                              horizontalSpacing(defaultSpacing * 0.5),
-
-                              //* Label
-                              Text(_outputs[index].label, style: theme.textTheme.bodyMedium!.copyWith(
-                                color: theme.colorScheme.onSurface
-                              )),
-                            ],
-                          )
-                        ),
-                      ),
-                    )
-                  ),
-                );
+                return buildOutputButton(controller, current, radius);
               },
             )
           ),
         ),
-        verticalSpacing(defaultSpacing),
+        verticalSpacing(sectionSpacing),
       
         //* Audio test
         Text("audio.output.test".tr, style: theme.textTheme.labelLarge),
@@ -141,4 +108,38 @@ class _OutputTabState extends State<OutputTab> {
       ],
     );
   }
+
+  Widget buildOutputButton(SettingController controller, OutputDevice current, BorderRadius radius, {IconData? icon, String? label}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: elementSpacing * 0.5, horizontal: elementSpacing),
+      child: Obx(() => 
+        Material(
+          color: controller.settings["audio.output"]!.getOr(SpeechSettings.defaultDeviceName) == current.id ? Get.theme.colorScheme.primary :
+            Get.theme.colorScheme.onBackground,
+          borderRadius: radius,
+          child: InkWell(
+            borderRadius: radius,
+            onTap: () {
+              _changeDevice(current.id);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(defaultSpacing),
+              child: Row(
+                children: [
+                  //* Icon
+                  Icon(icon ?? Icons.mic, color: Get.theme.colorScheme.onPrimary),
+              
+                  horizontalSpacing(defaultSpacing * 0.5),
+              
+                  //* Label
+                  Text(label ?? current.id, style: Get.theme.textTheme.labelMedium),
+                ],
+              )
+            ),
+          ),
+        )
+      ),
+    );
+  }  
+
 }

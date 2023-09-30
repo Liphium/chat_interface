@@ -1,4 +1,5 @@
 
+import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/app/speech/microphone_tab.dart';
 import 'package:chat_interface/pages/settings/app/speech/output_tab.dart';
@@ -8,14 +9,23 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-void addSpeechSettings(SettingController controller) {
+class SpeechSettings {
+  static String defaultDeviceName = "";
+  static const String microphone = "audio.microphone";
+  static const String microphoneSensitivity = "audio.microphone.sensitivity";
+  static const String output = "audio.output";
+}
+
+void addSpeechSettings(SettingController controller) async {
+
+  SpeechSettings.defaultDeviceName = await api.getDefaultId();
 
   //* Microphone
-  controller.settings["audio.microphone"] = Setting<String>("audio.microphone", "def");
-  controller.settings["audio.microphone.sensitivity"] = Setting<double>("audio.microphone.sensitivity", 0.15);
+  controller.settings[SpeechSettings.microphone] = Setting<String>(SpeechSettings.microphone, "def");
+  controller.settings[SpeechSettings.microphoneSensitivity] = Setting<double>(SpeechSettings.microphoneSensitivity, 0.15);
 
   //* Output
-  controller.settings["audio.output"] = Setting<String>("audio.output", "def");
+  controller.settings[SpeechSettings.output] = Setting<String>(SpeechSettings.output, "def");
 
 }
 
@@ -49,7 +59,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
           padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
           child: Text("settings.categories.audio".tr, style: theme.textTheme.headlineMedium),
         ),
-        verticalSpacing(defaultSpacing),
+        verticalSpacing(elementSpacing),
 
         //* Tabs
         Row(
@@ -63,7 +73,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
               label: "audio.microphone",
               selected: _selected,
             ),
-            horizontalSpacing(defaultSpacing * 0.5),
+            horizontalSpacing(elementSpacing),
             SidebarButton(
               onTap: () => _selected.value = "audio.output",
               radius: const BorderRadius.only(
@@ -75,7 +85,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
           ]
         ),
 
-        verticalSpacing(defaultSpacing),
+        verticalSpacing(sectionSpacing),
 
         //* Current tab
         Obx(() =>

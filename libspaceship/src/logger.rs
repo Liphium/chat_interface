@@ -9,7 +9,6 @@ use crate::api;
 pub static TAG_COMMUNICATION: &str = "communication";
 pub static TAG_AUDIO: &str = "audio";
 pub static TAG_CONNECTION: &str = "connection";
-pub static TAG_CODEC: &str = "codec";
 pub static TAG_ERROR: &str = "error";
 
 static STREAM_SINK: Lazy<Mutex<Option<StreamSink<api::LogEntry>>>> = Lazy::new(|| Mutex::new(None));

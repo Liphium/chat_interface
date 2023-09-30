@@ -26,51 +26,60 @@ class _CallGridViewState extends State<CallGridView> {
     SpacesController controller = Get.find();
     SpaceMemberController spaceMemberController = Get.find();
 
-    // Render entities
-    int people = spaceMemberController.members.length;
+    return Obx(() {
 
-    // Calculate the available height for every participant
-    double computedHeight = _calculateSmallRectangleHeight(widget.constraints.maxWidth, widget.constraints.maxHeight, people);
-    computedHeight -= defaultSpacing * people;
+      if(spaceMemberController.membersLoading.value || spaceMemberController.members.isEmpty) {
+        return Center(
+          child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
+        );
+      }
 
-    if (computedHeight > _minHeight*0.4 || !controller.hasVideo.value) {
-      return Center(
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          runAlignment: WrapAlignment.center,
-          direction: Axis.horizontal,
-          spacing: defaultSpacing * 1.5,
-          runSpacing: defaultSpacing * 1.5,
-        
-          children: renderEntites(0, 0, BoxConstraints(
-            maxHeight: max(_minHeight, computedHeight),
-          )),
-        ),
-      );
-    } else {
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(defaultSpacing),
-        child: Row(
-          children: [
-            Expanded(
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                runAlignment: WrapAlignment.center,
-                direction: Axis.horizontal,
-                spacing: defaultSpacing * 1.5,
-                runSpacing: defaultSpacing * 1.5,
-              
-                children: renderEntites(0, 0, BoxConstraints(
-                  maxHeight: max(_minHeight, computedHeight),
-                )),
+      // Render entities
+      int people = spaceMemberController.members.length;
+
+      // Calculate the available height for every participant
+      double computedHeight = _calculateSmallRectangleHeight(widget.constraints.maxWidth, widget.constraints.maxHeight, people);
+      computedHeight -= defaultSpacing * people;
+
+      if (computedHeight > _minHeight*0.4 || !controller.hasVideo.value) {
+        return Center(
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runAlignment: WrapAlignment.center,
+            direction: Axis.horizontal,
+            spacing: defaultSpacing * 1.5,
+            runSpacing: defaultSpacing * 1.5,
+          
+            children: renderEntites(0, 0, BoxConstraints(
+              maxHeight: max(_minHeight, computedHeight),
+            )),
+          ),
+        );
+      } else {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Row(
+            children: [
+              Expanded(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  runAlignment: WrapAlignment.center,
+                  direction: Axis.horizontal,
+                  spacing: defaultSpacing * 1.5,
+                  runSpacing: defaultSpacing * 1.5,
+                
+                  children: renderEntites(0, 0, BoxConstraints(
+                    maxHeight: max(_minHeight, computedHeight),
+                  )),
+                ),
               ),
-            ),
-          ],
-        ),
-      );
-    }
+            ],
+          ),
+        );
+      }
+    });
   }
 
   // Thanks Bing Chat (you solved a problem I worked on for 2 hours)

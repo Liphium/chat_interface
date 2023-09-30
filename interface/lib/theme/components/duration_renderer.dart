@@ -14,7 +14,7 @@ class DurationRenderer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    current.value = start.difference(DateTime.now());
+    current.value = DateTime.now().difference(start);
     Timer.periodic(const Duration(seconds: 1), (timer) => current.value = DateTime.now().difference(start));
 
     return RepaintBoundary(

@@ -97,16 +97,16 @@ class Friend {
   Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage);
 
   Friend.system() : id = "system", name = "System", tag = "fjc", vaultId = "", keyStorage = KeyStorage.empty();
-  Friend.me()
+  Friend.me([StatusController? controller])
         : id = '',
           name = '',
           tag = '',
           vaultId = '',
           keyStorage = KeyStorage.empty() {
-    final StatusController controller = Get.find();
-    id = controller.id.value;
-    name = controller.name.value;
-    tag = controller.tag.value;
+    final StatusController statusController = controller ?? Get.find();
+    id = statusController.id.value;
+    name = statusController.name.value;
+    tag = statusController.tag.value;
   }
   Friend.unknown(this.id) 
         : name = 'fj-$id',

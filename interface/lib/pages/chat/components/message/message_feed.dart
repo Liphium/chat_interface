@@ -45,75 +45,77 @@ class _MessageFeedState extends State<MessageFeed> {
   @override
   Widget build(BuildContext context) {
 
-    if(widget.id == null || widget.id == "0") {
+    return Obx(() {
+      if(widget.id == null || widget.id == "0") {
 
-      if(Get.find<SpacesController>().inSpace.value) {
-        return const CallRectangle();
+        if(Get.find<SpacesController>().inSpace.value) {
+          return const CallRectangle();
+        }
+
+        return Center(
+          child: Text('chat.welcome.1.0.0'.tr, style: Theme.of(context).textTheme.titleLarge),
+        );
       }
 
-      return Center(
-        child: Text('chat.welcome.1.0.0'.tr, style: Theme.of(context).textTheme.titleLarge),
-      );
-    }
+      MessageController controller = Get.find();
+      FriendController friendController = Get.find();
+      StatusController statusController = Get.find();
 
-    MessageController controller = Get.find();
-    FriendController friendController = Get.find();
-    StatusController statusController = Get.find();
+      return Column(
+        children: [
+          
+          //* Header
+          Obx(() => MessageBar(conversation: controller.selectedConversation.value)),
 
-    return Column(
-      children: [
-        
-        //* Header
-        Obx(() => MessageBar(conversation: controller.selectedConversation.value)),
+          Expanded(
+            flex: 2,
+            child: Stack(
+              children: [
 
-        Expanded(
-          flex: 2,
-          child: Stack(
-            children: [
+                //* Message list
+                Obx(() => 
+                  ListView.builder(
+                    itemCount: controller.messages.length + 1,
+                    reverse: true,
+                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                    itemBuilder: (context, index) {
+                        
+                      if(index == 0) {
+                        return verticalSpacing(defaultSpacing * 12);
+                      }
+                        
+                      final message = controller.messages[index - 1];
+                      final conversationToken = controller.selectedConversation.value.members[message.sender]!;
+                      final sender = friendController.friends[conversationToken.account];
+                      final self = conversationToken.account == statusController.id.value;
 
-              //* Message list
-              Obx(() => 
-                ListView.builder(
-                  itemCount: controller.messages.length + 1,
-                  reverse: true,
-                  physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                  itemBuilder: (context, index) {
-                      
-                    if(index == 0) {
-                      return verticalSpacing(defaultSpacing * 12);
-                    }
-                      
-                    final message = controller.messages[index - 1];
-                    final conversationToken = controller.selectedConversation.value.members[message.sender]!;
-                    final sender = friendController.friends[conversationToken.account];
-                    final self = conversationToken.account == statusController.id.value;
+                      bool last = false;
+                      if(index != controller.messages.length) {
+                        final lastMessage = controller.messages[index];
+                        last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text;
+                      }
+                        
+                      switch(message.type) {
+                        
+                        case MessageType.text:
+                          return MessageRenderer(message: message, self: self, last: last,
+                          sender: self ? Friend.me() : sender);
 
-                    bool last = false;
-                    if(index != controller.messages.length) {
-                      final lastMessage = controller.messages[index];
-                      last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text;
-                    }
-                      
-                    switch(message.type) {
-                      
-                      case MessageType.text:
-                        return MessageRenderer(message: message, self: self, last: last,
-                        sender: self ? Friend.me() : sender);
-
-                      case MessageType.call:
-                        return SpaceMessageRenderer(message: message, self: self, last: last,
-                        sender: self ? Friend.me() : sender);
-                    }
-                  },
+                        case MessageType.call:
+                          return SpaceMessageRenderer(message: message, self: self, last: last,
+                          sender: self ? Friend.me() : sender);
+                      }
+                    },
+                  ),
                 ),
-              ),
 
-              //* Message input
-              const MessageInput()
-            ],
+                //* Message input
+                const MessageInput()
+              ],
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }

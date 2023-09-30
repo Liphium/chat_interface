@@ -28,9 +28,21 @@ pub fn send(data: Vec<u8>) {
 pub fn init() {
     // Sending channel
     let (sender, receiver) = mpsc::channel();
-    let mut actual_sender = SEND_SENDER.lock().unwrap();
+    let mut actual_sender = match SEND_SENDER.try_lock() {
+        Ok(sender) => sender,
+        Err(_) => {
+            logger::send_log(logger::TAG_CONNECTION, "Failed to acquire lock on SEND_SENDER");
+            return;
+        }
+    };
     *actual_sender = sender;
-    let mut actual_receiver = SEND_RECEIVER.lock().unwrap();
+    let mut actual_receiver = match SEND_RECEIVER.try_lock() {
+        Ok(receiver) => receiver,
+        Err(_) => {
+            logger::send_log(logger::TAG_CONNECTION, "Failed to acquire lock on SEND_RECEIVER");
+            return;
+        }
+    };
     *actual_receiver = receiver;
 
     drop(actual_sender);

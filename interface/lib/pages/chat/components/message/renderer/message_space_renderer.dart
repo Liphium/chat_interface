@@ -93,7 +93,7 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
                           //* Join button
                           FJElevatedButton(
                             smallCorners: true,
-                            onTap: () => {}, 
+                            onTap: () => Get.find<SpacesController>().join(container), 
                             child: Text("Join the fun!", style: theme.textTheme.labelMedium)
                           )
                         ],

@@ -2,11 +2,9 @@ use std::{thread, sync::{Mutex, mpsc::{Sender, Receiver, self}, Arc}};
 
 use flutter_rust_bridge::StreamSink;
 use once_cell::sync::Lazy;
-use crate::{audio, util, logger};
+use crate::{audio, util};
 
 use crate::connection;
-
-
 
 pub const SAMPLE_RATE: audiopus::SampleRate = audiopus::SampleRate::Hz48000;
 pub const FRAME_SIZE: usize = 960;
@@ -133,10 +131,8 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
             }
 
             if !config.test && config.connection && !options.muted && !options.silent_mute && options.talking {
-                logger::send_log(logger::TAG_CODEC, "sending audio");
                 let encoded = encode(samples, &mut encoder);
                 connection::construct_packet(&config, &encoded, &mut buffer);
-                logger::send_log(logger::TAG_CODEC, format!("packet len: {}", buffer.len()).as_str());
 
                 //decode::pass_to_decode(encoded);
 

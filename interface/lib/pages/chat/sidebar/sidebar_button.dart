@@ -60,7 +60,7 @@ class _SidebarButtonState extends State<SidebarButton> with TickerProviderStateM
       child: Obx(() => Material(
             borderRadius: widget.radius,
             color: widget.selected.value == widget.label
-                ? Theme.of(context).colorScheme.onPrimary
+                ? Theme.of(context).colorScheme.primary
                 : Theme.of(context).colorScheme.onBackground,
             child: InkWell(
               borderRadius: widget.radius,

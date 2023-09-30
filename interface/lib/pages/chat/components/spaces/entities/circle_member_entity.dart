@@ -72,7 +72,7 @@ class _MemberEntityState extends State<CircleMemberEntity> {
           //* Speaker indicator
           Obx(() =>
             Visibility(
-              visible: widget.member.isAudioMuted.value,
+              visible: widget.member.isDeafened.value,
               child: Positioned(
                 right: 0,
                 bottom: 0,

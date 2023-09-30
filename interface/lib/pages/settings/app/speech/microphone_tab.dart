@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:chat_interface/ffi.dart';
+import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,6 @@ class MicrophoneTab extends StatefulWidget {
 
 class _MicrophoneTabState extends State<MicrophoneTab> {
 
-  String defaultName = "";
   final _microphones = <InputDevice>[].obs;
   final _sensitivity = 0.0.obs;
   StreamSubscription? _sub;
@@ -33,7 +32,6 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
 
   void _init() async {
     final list = await api.listInputDevices();
-    defaultName = await api.getDefaultId();
     SettingController controller = Get.find();
     String currentMic = controller.settings["audio.microphone"]!.getValue();
 
@@ -50,7 +48,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
   }
 
   String _getCurrent() {
-    return Get.find<SettingController>().settings["audio.microphone"]!.getOr(defaultName);
+    return Get.find<SettingController>().settings["audio.microphone"]!.getOr(SpeechSettings.defaultDeviceName);
   }
 
   void _changeMicrophone(String device) async {
@@ -79,7 +77,6 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        verticalSpacing(elementSpacing),
 
         //* Device selection
         Text("audio.microphone.device".tr, style: theme.textTheme.labelLarge),
@@ -87,7 +84,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
 
         Text("audio.microphone.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildMicrophoneButton(controller, const InputDevice(id: "Use system default", sampleRate: 48000, bestQuality: false), BorderRadius.circular(defaultSpacing), icon: Icons.done_all),
+        buildMicrophoneButton(controller, InputDevice(id: SpeechSettings.defaultDeviceName, sampleRate: 48000, bestQuality: false), BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "Use system default"),
         verticalSpacing(defaultSpacing),
 
         Text("audio.microphone.device.other".tr, style: theme.textTheme.bodyMedium),
@@ -150,12 +147,12 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
     );
   }
 
-  Widget buildMicrophoneButton(SettingController controller, InputDevice current, BorderRadius radius, {IconData? icon}) {
+  Widget buildMicrophoneButton(SettingController controller, InputDevice current, BorderRadius radius, {IconData? icon, String? label}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: elementSpacing * 0.5, horizontal: elementSpacing),
       child: Obx(() => 
         Material(
-          color: controller.settings["audio.microphone"]!.getWhenValue("def", "def") == current.id ? Get.theme.colorScheme.primary :
+          color: controller.settings["audio.microphone"]!.getOr(SpeechSettings.defaultDeviceName) == current.id ? Get.theme.colorScheme.primary :
             Get.theme.colorScheme.onBackground,
           borderRadius: radius,
           child: InkWell(
@@ -176,7 +173,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                         horizontalSpacing(defaultSpacing * 0.5),
                   
                         //* Label
-                        Text(current.id, style: Get.theme.textTheme.labelMedium),
+                        Text(label ?? current.id, style: Get.theme.textTheme.labelMedium),
                       ],
                     ),
                   ),

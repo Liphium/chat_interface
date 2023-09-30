@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/messages/writing_status.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -100,7 +101,7 @@ class _MessageInputState extends State<MessageInput> {
                       style: theme.textTheme.labelLarge,
                       controller: _message,
                       maxLines: null,
-                      keyboardType: TextInputType.multiline,
+                      keyboardType: TextInputType.multiline
                     ),
                   ),
                   horizontalSpacing(defaultSpacing),

@@ -43,37 +43,41 @@ class _SidebarProfileState extends State<SidebarProfile> {
                       }
                       final shown = Get.find<MessageController>().selectedConversation.value.id == "0";
 
-                      return Material(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: shown ? theme.colorScheme.background : theme.colorScheme.primaryContainer,
-                        child: InkWell(
-                          onTap: () => Get.find<MessageController>().unselectConversation(),
-                          splashColor: theme.hoverColor,
-                          hoverColor: shown ? theme.colorScheme.background : theme.colorScheme.background,
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          child: Padding(
-                            padding: const EdgeInsets.all(defaultSpacing),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                      return Column(
+                        children: [
+                          Material(
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            color: shown ? theme.colorScheme.background : theme.colorScheme.primaryContainer,
+                            child: InkWell(
+                              onTap: () => Get.find<MessageController>().unselectConversation(),
+                              splashColor: theme.hoverColor,
+                              hoverColor: shown ? theme.colorScheme.background : theme.colorScheme.background,
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              child: Padding(
+                                padding: const EdgeInsets.all(defaultSpacing),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(controller.title.value, style: Get.theme.textTheme.labelMedium),
-                                    verticalSpacing(elementSpacing),
-                                    renderMiniAvatars(10)
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(controller.title.value, style: Get.theme.textTheme.labelMedium),
+                                        verticalSpacing(elementSpacing),
+                                        renderMiniAvatars(1)
+                                      ],
+                                    ),
+                                    horizontalSpacing(defaultSpacing),
+                                    DurationRenderer(controller.start.value, style: theme.textTheme.bodyLarge)
                                   ],
                                 ),
-                                horizontalSpacing(defaultSpacing),
-                                DurationRenderer(controller.start.value, style: theme.textTheme.bodyLarge)
-                              ],
+                              ),
                             ),
                           ),
-                        ),
+                          verticalSpacing(defaultSpacing),
+                        ],
                       );
                     }
                   ),
-                  verticalSpacing(defaultSpacing),
 
                   //* Actual profile
                   Material(
