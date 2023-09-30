@@ -1,5 +1,6 @@
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -45,6 +46,7 @@ void main() async {
 
   // Initialize sodium
   await initSodium();
+  print(packageSymmetricKey(randomSymmetricKey()));
 
   // Initialize logging from the native side
   api.createLogStream().listen((event) {

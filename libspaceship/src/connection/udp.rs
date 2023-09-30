@@ -54,7 +54,7 @@ pub fn connect_read(address: &str) {
     io::stdin().read_line(&mut input).expect("Failed to read line");
     input = input.trim().to_string();
     let mut args = input.split(":");
-    connect_recursive(args.nth(0).unwrap().to_string(), args.nth(0).unwrap().to_string(), args.nth(0).unwrap().to_string(), address, 0, false)
+    connect_recursive(args.nth(0).unwrap().to_string(), args.nth(0).unwrap().to_string(), args.nth(0).unwrap().to_string(), address, 0, true)
 }
 
 pub fn connect_recursive(client_id: String, verification_key: String, encryption_key: String, address: &str, tries: u8, listen: bool) {

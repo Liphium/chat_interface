@@ -2,7 +2,7 @@ use std::{thread, sync::{Mutex, mpsc::{Sender, Receiver, self}, Arc}};
 
 use flutter_rust_bridge::StreamSink;
 use once_cell::sync::Lazy;
-use crate::{audio, util};
+use crate::{audio, util, logger};
 
 use crate::connection;
 
@@ -75,7 +75,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
 
         // Create encoder
         let mut encoder = audiopus::coder::Encoder::new(SAMPLE_RATE, opus_channel, audiopus::Application::Voip).unwrap();
-        let mut buffer = Vec::<u8>::with_capacity(8000);
+        let mut buffer: Vec<u8> = Vec::<u8>::with_capacity(8000);
         let mut talking_streak = 0;
 
         // Set the bitrate to 128 kb/s
@@ -136,7 +136,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
 
                 //decode::pass_to_decode(encoded);
 
-                //connection::udp::send(buffer);
+                connection::udp::send(buffer.clone());
 
                 /*
                 let mut channel = vec![b'v', b':'];

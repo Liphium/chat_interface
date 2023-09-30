@@ -1,9 +1,10 @@
 use std::sync::Mutex;
 
+use base64::{engine::general_purpose, Engine};
 use once_cell::sync::Lazy;
 
 
-use crate::util;
+use crate::{util, logger};
 
 pub mod udp;
 pub mod receiver;
@@ -40,12 +41,13 @@ pub fn construct_packet(config: &Config, voice_data: &[u8], buffer: &mut Vec<u8>
     buffer.extend_from_slice(config.client_id.as_bytes());
 
     // Build verification thing
-    let hash = util::hasher::sha256(voice_data.to_vec());
-    let verifier = util::crypto::encrypt(&config.verification_key, &hash);
+    let encrypted_voice = util::crypto::encrypt(&config.encryption_key, voice_data);
+    let hash = util::hasher::sha256(encrypted_voice.to_vec());
+    let encrypted_verifier = util::crypto::encrypt(&config.verification_key, &hash);
+    let encoded_verifier = general_purpose::STANDARD_NO_PAD.encode(&encrypted_verifier);
+    buffer.extend_from_slice(&encoded_verifier.as_bytes());
     buffer.push(b':');
-    buffer.extend_from_slice(&verifier);
 
     // Encrypt voice data
-    let encrypted = util::crypto::encrypt(&config.encryption_key, voice_data);
-    buffer.extend_from_slice(&encrypted);
+    buffer.extend_from_slice(&encrypted_voice);
 }

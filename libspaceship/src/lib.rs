@@ -4,4 +4,4 @@ pub mod audio;
 pub mod communication;
 pub mod util;
 pub mod api;
-mod logger;
+pub mod logger;
