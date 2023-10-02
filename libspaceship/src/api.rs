@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use alkali::symmetric::cipher;
 use cpal::traits::HostTrait;
 use flutter_rust_bridge::StreamSink;
 use rodio::DeviceTrait;
@@ -35,7 +36,7 @@ pub fn test_voice(device: String) {
         test: true,
         client_id: "test".to_string(),
         verification_key: vec![0; 32],
-        encryption_key: vec![0; 32],
+        encryption_key: cipher::Key::generate().unwrap(),
         connection: false,
     });
 

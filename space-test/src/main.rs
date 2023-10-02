@@ -4,12 +4,11 @@ use alkali::{symmetric::auth::Key, mem::FullAccess};
 use base64::{engine::general_purpose, Engine};
 use libspaceship::{api, connection};
 
+static KEY: &str = "6HDUlw4Gyeu8pVpSD54YHW6gJ7fJilD5MR63MNiFdJI=";
+
 fn main() {
     
-    let mut buf = String::new();
-    io::stdin().read_line(&mut buf).expect("Failed to read line");
-    println!("Input: {}", buf);
-    let key = parse_sodium_key(buf.trim().to_string());
+    let key = parse_sodium_key(KEY.to_string());
     println!("Key: {:?}", key);
 }
 

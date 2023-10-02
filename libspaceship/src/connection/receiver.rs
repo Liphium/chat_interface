@@ -13,7 +13,7 @@ struct Event {
 
 pub fn receive_packet(config: &super::Config, data: &Vec<u8>) -> Result<(), String> {
 
-    let decrypted = util::crypto::decrypt(&config.encryption_key, data);
+    let decrypted = util::crypto::decrypt_sodium(&config.encryption_key, data);
     let event: Event = match serde_json::from_str(String::from_utf8_lossy(decrypted.as_slice()).as_ref()) {
         Ok(event) => event,
         Err(_) => return Err("Could not parse event".to_string())

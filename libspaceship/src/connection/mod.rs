@@ -1,10 +1,11 @@
 use std::sync::Mutex;
 
+use alkali::{symmetric::cipher, mem::FullAccess};
 use base64::{engine::general_purpose, Engine};
 use once_cell::sync::Lazy;
 
 
-use crate::{util, logger};
+use crate::util;
 
 pub mod udp;
 pub mod receiver;
@@ -13,7 +14,7 @@ pub struct Config {
     pub test: bool,
     pub client_id: String,
     pub verification_key: Vec<u8>,
-    pub encryption_key: Vec<u8>,
+    pub encryption_key: cipher::Key<FullAccess>,
     pub connection: bool
 }
 
@@ -41,7 +42,7 @@ pub fn construct_packet(config: &Config, voice_data: &[u8], buffer: &mut Vec<u8>
     buffer.extend_from_slice(config.client_id.as_bytes());
 
     // Build verification thing
-    let encrypted_voice = util::crypto::encrypt(&config.encryption_key, voice_data);
+    let encrypted_voice = util::crypto::encrypt_sodium(&config.encryption_key, voice_data);
     let hash = util::hasher::sha256(encrypted_voice.to_vec());
     let encrypted_verifier = util::crypto::encrypt(&config.verification_key, &hash);
     let encoded_verifier = general_purpose::STANDARD_NO_PAD.encode(&encrypted_verifier);

@@ -1,5 +1,5 @@
 use aes_gcm::{Aes256Gcm, AeadCore, aead::{OsRng, Aead}, KeyInit, Nonce};
-use alkali::{mem::FullAccess, symmetric::auth::Key};
+use alkali::{mem::FullAccess, symmetric::{auth::Key, cipher}};
 use base64::{engine::general_purpose, Engine};
 
 // Encrypts a byte array using AES-GCM encryption mode
@@ -33,12 +33,33 @@ pub fn decrypt(key: &[u8], ciphertext: &[u8]) -> Vec<u8> {
     return plaintext;
 }
 
+// Encrypt using sodium
+pub fn encrypt_sodium(key: &cipher::Key<FullAccess>, plaintext: &[u8]) -> Vec<u8> {
+    let mut encrypted = Vec::<u8>::with_capacity(plaintext.len() + cipher::MAC_LENGTH);
+    let nonce = cipher::generate_nonce().expect("nonce couldn't be generated");
+    cipher::encrypt(plaintext, key, Some(&nonce), &mut encrypted).unwrap();
+    let mut output = nonce.to_vec();
+    output.extend_from_slice(encrypted.as_slice());
+    output
+}
+
+// Decrypt using sodium
+pub fn decrypt_sodium(key: &cipher::Key<FullAccess>, ciphertext: &[u8]) -> Vec<u8> {
+    let mut output = Vec::<u8>::new();
+    let nonce = &ciphertext[0..cipher::NONCE_LENGTH];
+    let ciphertext = &ciphertext[cipher::NONCE_LENGTH..];
+    let mut nonce_array = [0u8; cipher::NONCE_LENGTH];
+    nonce_array.copy_from_slice(nonce);
+    cipher::decrypt(ciphertext, key, &nonce_array, &mut output).unwrap();
+    output
+}
+
 pub fn parse_key(key: String) -> Vec<u8> {
     general_purpose::STANDARD.decode(key).expect("Couldn't parse key")
 }
 
-pub fn parse_sodium_key(to_parse: String) -> Key<FullAccess> {
-    let mut key = Key::<FullAccess>::new_empty().unwrap();
+pub fn parse_sodium_key(to_parse: String) -> cipher::Key<FullAccess> {
+    let mut key = cipher::Key::<FullAccess>::new_empty().unwrap();
     let bytes = general_purpose::STANDARD.decode(to_parse.as_bytes()).unwrap();
     key.copy_from_slice(&bytes);
     key
