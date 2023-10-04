@@ -35,7 +35,7 @@ pub fn decrypt(key: &[u8], ciphertext: &[u8]) -> Vec<u8> {
 
 // Encrypt using sodium
 pub fn encrypt_sodium(key: &cipher::Key<FullAccess>, plaintext: &[u8]) -> Vec<u8> {
-    let mut encrypted = Vec::<u8>::with_capacity(plaintext.len() + cipher::MAC_LENGTH);
+    let mut encrypted = vec![0u8; plaintext.len() + cipher::MAC_LENGTH];
     let nonce = cipher::generate_nonce().expect("nonce couldn't be generated");
     cipher::encrypt(plaintext, key, Some(&nonce), &mut encrypted).unwrap();
     let mut output = nonce.to_vec();
@@ -45,7 +45,7 @@ pub fn encrypt_sodium(key: &cipher::Key<FullAccess>, plaintext: &[u8]) -> Vec<u8
 
 // Decrypt using sodium
 pub fn decrypt_sodium(key: &cipher::Key<FullAccess>, ciphertext: &[u8]) -> Vec<u8> {
-    let mut output = Vec::<u8>::new();
+    let mut output = vec![0u8; ciphertext.len() - cipher::NONCE_LENGTH - cipher::MAC_LENGTH];
     let nonce = &ciphertext[0..cipher::NONCE_LENGTH];
     let ciphertext = &ciphertext[cipher::NONCE_LENGTH..];
     let mut nonce_array = [0u8; cipher::NONCE_LENGTH];

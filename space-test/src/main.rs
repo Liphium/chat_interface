@@ -1,22 +1,10 @@
-use std::{thread, time::Duration, io};
+use std::{thread, time::Duration};
 
-use alkali::{symmetric::auth::Key, mem::FullAccess};
-use base64::{engine::general_purpose, Engine};
 use libspaceship::{api, connection};
 
-static KEY: &str = "6HDUlw4Gyeu8pVpSD54YHW6gJ7fJilD5MR63MNiFdJI=";
 
 fn main() {
-    
-    let key = parse_sodium_key(KEY.to_string());
-    println!("Key: {:?}", key);
-}
-
-pub fn parse_sodium_key(to_parse: String) -> Key<FullAccess> {
-    let mut key = Key::<FullAccess>::new_empty().unwrap();
-    let bytes = general_purpose::STANDARD.decode(to_parse.as_bytes()).unwrap();
-    key.copy_from_slice(&bytes);
-    key
+    connect_to_server();
 }
 
 pub fn connect_to_server() {

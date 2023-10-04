@@ -27,6 +27,7 @@ pub fn record(conn_config: Arc<connection::Config>) {
         let sample_rate: u32 = default_config.sample_rate().0;
         let work_channels = 1; // Stereo doesn't work at the moment (will fix in the future or never)
         let mic_channels = default_config.channels();
+        connection::new_protocol(connection::nearest_opus_protocol(default_config.sample_rate().0));
     
         let config: StreamConfig = StreamConfig {
             channels: mic_channels,
@@ -37,7 +38,7 @@ pub fn record(conn_config: Arc<connection::Config>) {
         // Create a resampler
         let mut resampler = FftFixedOut::<f64>::new(
             sample_rate as usize,
-            encode::SAMPLE_RATE as usize,
+            connection::get_protocol().usize(),
             encode::FRAME_SIZE,
             encode::FRAME_SIZE,
             work_channels as usize,

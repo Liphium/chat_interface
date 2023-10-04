@@ -74,7 +74,8 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
     thread::spawn(move || {
 
         // Create encoder
-        let mut encoder = audiopus::coder::Encoder::new(SAMPLE_RATE, opus_channel, audiopus::Application::Voip).unwrap();
+        let mut protocol = connection::get_protocol();
+        let mut encoder = audiopus::coder::Encoder::new(connection::get_protocol().opus_sample_rate(), opus_channel, audiopus::Application::Voip).unwrap();
         let mut buffer: Vec<u8> = Vec::<u8>::with_capacity(8000);
         let mut talking_streak = 0;
 
@@ -85,6 +86,12 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
 
             if connection::should_stop() {
                 return;
+            }
+
+            if protocol != connection::get_protocol() {
+                logger::send_log(logger::TAG_AUDIO, "Restarted encoding channel with new protocol.");
+                protocol = connection::get_protocol();
+                encoder = audiopus::coder::Encoder::new(connection::get_protocol().opus_sample_rate(), opus_channel, audiopus::Application::Voip).unwrap();
             }
 
             let samples = match ENCODE_RECEIVER.lock() {
@@ -130,12 +137,9 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 talking_streak -= 1;
             }
 
+            let encoded = encode(samples, &mut encoder);
             if !config.test && config.connection && !options.muted && !options.silent_mute && options.talking {
-                let encoded = encode(samples, &mut encoder);
-                connection::construct_packet(&config, &encoded, &mut buffer);
-
-                //decode::pass_to_decode(encoded);
-
+                connection::construct_packet(&config, &protocol, &encoded, &mut buffer);
                 connection::udp::send(buffer.clone());
 
                 /*
@@ -143,6 +147,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 channel.append(&mut encoded);    
                 connection::udp::send(auth::encrypted_packet(&mut channel)); */
             }
+            drop(encoded);
         }
     });
 }

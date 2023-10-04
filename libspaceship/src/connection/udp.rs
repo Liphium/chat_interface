@@ -49,11 +49,18 @@ pub fn init() {
     drop(actual_receiver);
 }
 
+// So you can test locally without having to worry about a key exchange
+static TEST_KEY: &str = "6HDUlw4Gyeu8pVpSD54YHW6gJ7fJilD5MR63MNiFdJI=";
+
 pub fn connect_read(address: &str) {
     let mut input = String::new();
     io::stdin().read_line(&mut input).expect("Failed to read line");
     input = input.trim().to_string();
     let mut args = input.split(":");
+    if args.clone().count() == 2 {
+        connect_recursive(args.nth(0).unwrap().to_string(), args.nth(0).unwrap().to_string(), TEST_KEY.to_string(), address, 0, true);
+        return;
+    }
     connect_recursive(args.nth(0).unwrap().to_string(), args.nth(0).unwrap().to_string(), args.nth(0).unwrap().to_string(), address, 0, true)
 }
 
@@ -72,6 +79,7 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
             return;
         }
     };
+
 
     // Connect to a remote address
     match socket.connect(address) {
@@ -93,13 +101,15 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
     // Start threads
     send_thread(socket.try_clone().expect("Could not clone socket"));
     audio::microphone::record(config.clone());
-    //audio::decode::decode_play_thread();
+    audio::decode::decode_play_thread();
 
     // Listen for udp traffic
     thread::spawn(move || {
         let mut buf: [u8; 8192] = [0u8; 8192];
         loop {
             let size = socket.recv(&mut buf).expect("Detected disconnect");
+
+            logger::send_log(logger::TAG_CONNECTION, "Received packet");
 
             match receiver::receive_packet(&config, &buf[0..size].to_vec()) {
                 Ok(_) => (),
