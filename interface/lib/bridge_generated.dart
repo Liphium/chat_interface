@@ -15,7 +15,7 @@ abstract class Libspaceship {
 
   FlutterRustBridgeTaskConstMeta get kCreateLogStreamConstMeta;
 
-  Stream<String> createActionStream({dynamic hint});
+  Stream<Action> createActionStream({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kCreateActionStreamConstMeta;
 
@@ -94,6 +94,16 @@ abstract class Libspaceship {
   FlutterRustBridgeTaskConstMeta get kListOutputDevicesConstMeta;
 }
 
+class Action {
+  final String action;
+  final String data;
+
+  const Action({
+    required this.action,
+    required this.data,
+  });
+}
+
 class InputDevice {
   final String id;
   final int sampleRate;
@@ -152,10 +162,10 @@ class LibspaceshipImpl implements Libspaceship {
         argNames: [],
       );
 
-  Stream<String> createActionStream({dynamic hint}) {
+  Stream<Action> createActionStream({dynamic hint}) {
     return _platform.executeStream(FlutterRustBridgeTask(
       callFfi: (port_) => _platform.inner.wire_create_action_stream(port_),
-      parseSuccessData: _wire2api_String,
+      parseSuccessData: _wire2api_action,
       parseErrorData: null,
       constMeta: kCreateActionStreamConstMeta,
       argValues: [],
@@ -484,6 +494,16 @@ class LibspaceshipImpl implements Libspaceship {
 
   String _wire2api_String(dynamic raw) {
     return raw as String;
+  }
+
+  Action _wire2api_action(dynamic raw) {
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return Action(
+      action: _wire2api_String(arr[0]),
+      data: _wire2api_String(arr[1]),
+    );
   }
 
   bool _wire2api_bool(dynamic raw) {

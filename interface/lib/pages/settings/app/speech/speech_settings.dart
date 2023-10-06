@@ -13,6 +13,7 @@ class SpeechSettings {
   static String defaultDeviceName = "";
   static const String microphone = "audio.microphone";
   static const String microphoneSensitivity = "audio.microphone.sensitivity";
+  static const String startMuted = "audio.microphone.muted";
   static const String output = "audio.output";
 }
 
@@ -23,6 +24,7 @@ void addSpeechSettings(SettingController controller) async {
   //* Microphone
   controller.settings[SpeechSettings.microphone] = Setting<String>(SpeechSettings.microphone, "def");
   controller.settings[SpeechSettings.microphoneSensitivity] = Setting<double>(SpeechSettings.microphoneSensitivity, 0.15);
+  controller.settings[SpeechSettings.startMuted] = Setting<bool>(SpeechSettings.startMuted, false);
 
   //* Output
   controller.settings[SpeechSettings.output] = Setting<String>(SpeechSettings.output, "def");

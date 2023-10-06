@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
+import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
@@ -111,8 +112,12 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
             )
           ),
         ),
-        verticalSpacing(sectionSpacing),
 
+        //* Start off muted
+        const BoolSettingSmall(settingName: SpeechSettings.startMuted),
+        
+        verticalSpacing(sectionSpacing),
+        
         //* Sensitivity
         Text("audio.microphone.sensitivity".tr, style: theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing * 0.5),

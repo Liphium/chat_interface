@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -183,7 +184,10 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   }
 
   final container = ConversationContainer.decrypt(json["data"], key);
-  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], ConversationToken.fromJson(token), container, key), members);
+  final convToken = ConversationToken.fromJson(token);
+  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], convToken, container, key), members);
+  final statusController = Get.find<StatusController>();
+  subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), convToken);
 
   return true;
 }

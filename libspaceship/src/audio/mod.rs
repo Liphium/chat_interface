@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::sync::{Mutex, self};
 use once_cell::sync::Lazy;
 
 use crate::api;
@@ -6,6 +6,9 @@ use crate::api;
 pub mod microphone;
 pub mod encode;
 pub mod decode;
+
+pub static ACTION_STARTED_TALKING: &str = "started_talking";
+pub static ACTION_STOPPED_TALKING: &str = "stopped_talking";
 
 pub struct AudioOptions {
     pub silent_mute: bool,
@@ -29,67 +32,74 @@ pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {
     })
 });
 
+fn get_options() -> sync::MutexGuard<'static, AudioOptions> {
+    match AUDIO_OPTIONS.lock() {
+        Ok(options) => options,
+        Err(options) => options.into_inner()
+    }
+}
+
 pub fn set_muted(muted: bool) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    let mut options = get_options();
     (*options).muted = muted;
 }
 
 pub fn set_deafen(deafened: bool) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    let mut options = get_options();
     (*options).deafened = deafened;
 }
 
 pub fn is_muted() -> bool {
-    let options = AUDIO_OPTIONS.lock().unwrap();
+    let options = get_options();
     options.muted
 }
 
 pub fn is_deafened() -> bool {
-    let options = AUDIO_OPTIONS.lock().unwrap();
+    let options = get_options();
     options.deafened
 }
 
 pub fn set_amplitude_logging(amplitude_logging: bool) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    let mut options = get_options();
     (*options).amplitude_logging = amplitude_logging;
 }
 
 pub fn is_amplitude_logging() -> bool {
-    let options = AUDIO_OPTIONS.lock().unwrap();
+    let options = get_options();
     options.amplitude_logging
 }
 
 pub fn set_talking_amplitude(amplitude: f32) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    let mut options = get_options();
     (*options).talking_amplitude = amplitude;
 }
 
 pub fn get_talking_amplitude() -> f32 {
-    let options = AUDIO_OPTIONS.lock().unwrap();
+    let options = get_options();
     options.talking_amplitude
 }
 
 pub fn set_silent_mute(silent_mute: bool) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    let mut options = get_options();
     (*options).silent_mute = silent_mute;
 }
 
 pub fn set_input_device(microphone: String) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
+    let mut options = get_options();
     (*options).input_device = microphone;
 }
 
 pub fn get_input_device() -> String {
-    let options = AUDIO_OPTIONS.lock().unwrap();
+    let options = get_options();
     options.input_device.clone()
 }
 
 pub fn is_silent_mute() -> bool {
-    let options = AUDIO_OPTIONS.lock().unwrap();
+    let options = get_options();
     options.silent_mute
 }
 
 pub fn is_talking() -> bool {
-    let options = AUDIO_OPTIONS.lock().unwrap();
+    let options = get_options();
     options.talking
 }

@@ -56,7 +56,7 @@ class ServerSelectorPage extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FJElevatedButton(
-                    onTap: () => chooseServer("https://chat.fajurion.com"),
+                    onTap: () => chooseServer("http://liphium.fajurion.com:4000"),
                     child: Center(child: Text('Fajurion network', style: Get.theme.textTheme.labelLarge)),
                   ),
                 ),

@@ -104,7 +104,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 continue;
             }
 
-            let mut options = audio::AUDIO_OPTIONS.lock().unwrap();
+            let mut options = audio::get_options();
 
             let mut max = 0.0;
             for sample in samples.iter() {
@@ -121,16 +121,16 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
             }
 
             if max > options.talking_amplitude {
-                talking_streak = 10;
+                talking_streak = 25;
 
                 if !options.talking {
-                    util::print_action("started_talking");
+                    util::print_action(audio::ACTION_STARTED_TALKING);
                 }
                 options.talking = true;
             } else if talking_streak <= 0 {
 
                 if options.talking {
-                    util::print_action("stopped_talking");
+                    util::print_action(audio::ACTION_STOPPED_TALKING);
                 }
                 options.talking = false;
             } else {

@@ -18,10 +18,10 @@ void setupSetupListeners() {
     final data = event.data["data"]! as String;
     final controller = Get.find<StatusController>();
 
-    if(data == "-") {
+    if(data == "-" || data == "") {
       controller.status.value = "-";
       controller.type.value = statusOnline;
-      sub(controller.statusJson(), controller.generateFriendId());
+      subscribeToConversations(controller.statusJson(), controller.generateFriendId());
       return;
     }
 
@@ -30,7 +30,7 @@ void setupSetupListeners() {
     final decrypted = decryptSymmetric(args[1], profileKey);
     controller.fromStatusJson(decrypted);
 
-    sub(controller.statusJson(), controller.generateFriendId());
+    subscribeToConversations(controller.statusJson(), controller.generateFriendId());
   }, afterSetup: true);
 
   //* Setup finished
@@ -40,7 +40,7 @@ void setupSetupListeners() {
 }
 
 // status is going to be encrypted in this function
-void sub(String status, String friendId) {
+void subscribeToConversations(String status, String friendId) {
 
   // Encrypt status with profile key
   status = encryptSymmetric(status, profileKey);
@@ -53,6 +53,23 @@ void sub(String status, String friendId) {
   }
 
   // Subscribe
+  _sub(status, tokens);
+}
+
+void subscribeToConversation(String status, String friendId, ConversationToken token) {
+  
+  // Encrypt status with profile key
+  status = encryptSymmetric(status, profileKey);
+  status = "$friendId:$status";
+
+  // Subscribe to all conversations
+  final tokens = <Map<String, dynamic>>[token.toMap()];
+
+  // Subscribe
+  _sub(status, tokens);
+}
+
+void _sub(String status, List<Map<String, dynamic>> tokens) {
   connector.sendAction(Message("conv_sub", <String, dynamic>{
     "tokens": tokens,
     "status": status,

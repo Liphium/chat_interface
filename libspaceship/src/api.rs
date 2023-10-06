@@ -19,7 +19,12 @@ pub fn create_log_stream(s: StreamSink<LogEntry>) {
     logger::set_stream_sink(s);
 }
 
-pub fn create_action_stream(s: StreamSink<String>) {
+pub struct Action {
+    pub action: String,
+    pub data: String,
+}
+
+pub fn create_action_stream(s: StreamSink<Action>) {
     util::set_action_sink(s);
 }
 

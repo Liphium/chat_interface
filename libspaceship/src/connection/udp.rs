@@ -1,6 +1,7 @@
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Mutex, Arc};
 
+use std::time::Duration;
 use std::{io, thread};
 use std::net::UdpSocket;
 
@@ -128,9 +129,19 @@ fn send_thread(socket: UdpSocket) {
 
     thread::spawn(move || {
         loop {
-            let data = SEND_RECEIVER.lock().expect("brokey").recv().expect("Packet sending channel broke");
+            if connection::should_stop() {
+                break;
+            }
 
-            match socket.send(&data) {
+            let data_result = match SEND_RECEIVER.lock() {
+                Ok(receiver) => receiver,
+                Err(receiver) => receiver.into_inner(),
+            }.recv_timeout(Duration::from_secs(1));
+            if data_result.is_err() {
+                continue;
+            }
+
+            match socket.send(&data_result.unwrap()) {
                 Ok(_) => {}
                 Err(_) => {
                     logger::send_log(logger::TAG_CONNECTION, "Could not send"); 

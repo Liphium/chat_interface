@@ -48,7 +48,7 @@ fn wire_create_action_stream_impl(port_: MessagePort) {
         move || {
             move |task_callback| {
                 Result::<_, ()>::Ok(create_action_stream(
-                    task_callback.stream_sink::<_, String>(),
+                    task_callback.stream_sink::<_, Action>(),
                 ))
             }
         },
@@ -310,6 +310,22 @@ impl Wire2Api<u8> for u8 {
 }
 
 // Section: impl IntoDart
+
+impl support::IntoDart for Action {
+    fn into_dart(self) -> support::DartAbi {
+        vec![
+            self.action.into_into_dart().into_dart(),
+            self.data.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl support::IntoDartExceptPrimitive for Action {}
+impl rust2dart::IntoIntoDart<Action> for Action {
+    fn into_into_dart(self) -> Self {
+        self
+    }
+}
 
 impl support::IntoDart for InputDevice {
     fn into_dart(self) -> support::DartAbi {

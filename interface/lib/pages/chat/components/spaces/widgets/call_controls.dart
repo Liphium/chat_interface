@@ -6,7 +6,6 @@ import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:livekit_client/livekit_client.dart';
 
 class CallControls extends StatefulWidget {
   const CallControls({super.key});
@@ -17,28 +16,11 @@ class CallControls extends StatefulWidget {
 
 class _CallControlsState extends State<CallControls> {
 
-  final _audioInputs = <MediaDevice>[].obs; // Will be used in the future
-  final _audioOutputs = <MediaDevice>[].obs;
-
   StreamSubscription<dynamic>? subscription;
 
   @override
   void initState() {
     super.initState();
-
-    /*
-    subscription = Hardware.instance.onDeviceChange.stream.listen((event) {
-      _updateDevices(event);
-    });
-    Hardware.instance.enumerateDevices().then((value) => _updateDevices(value)); */
-  }
-
-  void _updateDevices(List<MediaDevice> devices) {
-    _audioInputs.clear();
-    _audioInputs.addAll(devices.where((element) => element.kind == "audioinput").toList());
-
-    _audioOutputs.clear();
-    _audioOutputs.addAll(devices.where((element) => element.kind == "audiooutput").toList());
   }
 
   @override

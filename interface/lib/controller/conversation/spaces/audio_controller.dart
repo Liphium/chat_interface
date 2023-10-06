@@ -26,10 +26,10 @@ class AudioController extends GetxController {
   void onConnect() {
 
     // Enforce defaults
-    api.setMuted(muted: false);
+    api.setMuted(muted: Get.find<SettingController>().settings[SpeechSettings.startMuted]!.getValue() as bool);
     api.setDeafen(deafened: false);
     api.setSilentMute(silentMute: false);
-    muted.value = false;
+    muted.value = Get.find<SettingController>().settings[SpeechSettings.startMuted]!.getValue() as bool;
     deafened.value = false;
 
     // Set settings
