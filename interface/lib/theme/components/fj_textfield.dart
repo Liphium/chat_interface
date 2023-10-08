@@ -9,9 +9,12 @@ class FJTextField extends StatefulWidget {
   final bool animation;
   final String? hintText;
   final String? errorText;
+  // Uses the secondary background color instead of the primary
+  final bool secondaryColor;
+  final bool small;
   final TextEditingController? controller;
 
-  const FJTextField({super.key, this.controller, this.hintText, this.errorText, this.animation = true, this.obscureText = false});
+  const FJTextField({super.key, this.controller, this.hintText, this.errorText, this.animation = true, this.secondaryColor = false, this.small = false, this.obscureText = false});
 
   @override
   State<FJTextField> createState() => _FJTextFieldState();
@@ -51,7 +54,7 @@ class _FJTextFieldState extends State<FJTextField> {
       ],
       target: _focus.value && widget.animation ? 1 : 0,
       child: Material(
-        color: theme.colorScheme.background,
+        color: widget.secondaryColor ? Get.theme.colorScheme.onBackground : Get.theme.colorScheme.background,
         borderRadius: BorderRadius.circular(defaultSpacing),
         child: Padding(
           padding: const EdgeInsets.all(defaultSpacing),
@@ -59,11 +62,11 @@ class _FJTextFieldState extends State<FJTextField> {
             decoration: InputDecoration(
               isDense: true,
               hintText: widget.hintText,
-              labelStyle: theme.textTheme.labelLarge,
+              labelStyle: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
               errorText: widget.errorText,
               border: InputBorder.none,
             ),
-            style: theme.textTheme.labelLarge,
+            style: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
             obscureText: widget.obscureText,
             autocorrect: false,
             enableSuggestions: false,

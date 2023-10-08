@@ -1,12 +1,13 @@
 import 'dart:io';
 
+import 'package:chat_interface/pages/settings/app/language_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -34,6 +35,10 @@ class InstanceSetup extends Setup {
       await setupInstance("default");
       return null;
     }
+
+    // Set current language
+    SettingController controller = Get.find();
+    Get.updateLocale(LanguageSettings.languages[controller.settings[LanguageSettings.language]!.getValue()].locale);
 
     // Open instance selection page
     return InstanceSelectionPage(instances: instances);
@@ -99,7 +104,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("${'setup.choose.instance'.tr}.", style: Get.textTheme.headlineMedium,),
+                Text('setup.choose.instance'.tr, style: Get.textTheme.headlineMedium,),
                 verticalSpacing(sectionSpacing),
                 ListView.builder(
                   shrinkWrap: true,
@@ -126,7 +131,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                 verticalSpacing(defaultSpacing),
                 FJElevatedButton(
                   onTap: () => setupInstance(_controller.text, next: true),
-                  child: Center(child: Text("Create", style: Get.textTheme.labelLarge)),
+                  child: Center(child: Text("create".tr, style: Get.textTheme.labelLarge)),
                 )
               ],
             ),

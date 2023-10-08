@@ -28,13 +28,14 @@ class StatusRenderer extends StatelessWidget {
             color: color,
             size: 13,
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: elementSpacing),
           Text(
             "status.${status.toString().toLowerCase()}".tr,
             style: theme.textTheme.bodySmall!.copyWith(
               color: theme.colorScheme.onSurface,
             ),
           ),
+          const SizedBox(width: elementSpacing * 0.5),
         ],
       )
     );

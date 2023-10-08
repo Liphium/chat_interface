@@ -27,7 +27,7 @@ class _SettingsPageState extends State<SettingsPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: 200,
+                width: 240,
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing),
                   child: ListView.builder(
@@ -57,7 +57,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(current.label, style: Theme.of(context).textTheme.titleMedium),
+                            verticalSpacing(defaultSpacing),
+                            Text(current.label.tr, style: Theme.of(context).textTheme.titleMedium),
                             verticalSpacing(defaultSpacing * 0.5),
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -79,7 +80,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                               color: Theme.of(context).colorScheme.onPrimary,
                                             ),
                                             horizontalSpacing(defaultSpacing * 0.5),
-                                            Text(element.label, style: Theme.of(context).textTheme.labelMedium!),
+                                            Text("settings.${element.label}".tr, style: Theme.of(context).textTheme.labelMedium!),
                                           ],
                                         ),
                                       ),
@@ -102,7 +103,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   constraints: const BoxConstraints(maxWidth: 900),
                   child: Padding(
                     padding: const EdgeInsets.all(defaultSpacing),
-                    child: Obx(() => currentCategory.value.widget ?? const Placeholder()),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Obx(() =>
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
+                            child: Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
+                          )
+                        ),
+                        verticalSpacing(elementSpacing),
+                        Obx(() => currentCategory.value.widget ?? const Placeholder()),
+                      ],
+                    ),
                   ),
                 ),
               ),

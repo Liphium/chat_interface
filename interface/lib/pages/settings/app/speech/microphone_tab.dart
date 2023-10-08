@@ -80,15 +80,15 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
       children: [
 
         //* Device selection
-        Text("audio.microphone.device".tr, style: theme.textTheme.labelLarge),
+        Text("audio.device".tr, style: theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
-        Text("audio.microphone.device.default".tr, style: theme.textTheme.bodyMedium),
+        Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildMicrophoneButton(controller, InputDevice(id: SpeechSettings.defaultDeviceName, sampleRate: 48000, bestQuality: false), BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "Use system default"),
+        buildMicrophoneButton(controller, InputDevice(id: SpeechSettings.defaultDeviceName, sampleRate: 48000, bestQuality: false), BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing),
 
-        Text("audio.microphone.device.other".tr, style: theme.textTheme.bodyMedium),
+        Text("audio.microphone.device".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
 
         RepaintBoundary(
@@ -127,7 +127,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.".tr, style: theme.textTheme.bodyMedium),
+                Text("audio.microphone.sensitivity.text".tr, style: theme.textTheme.bodyMedium),
                 SizedBox(height: 0, child: Opacity(opacity: 0, child: Text(_sensitivity.value.toString(), overflow: TextOverflow.clip,))),
                 Slider(
                   value: clampDouble(sens.value.value, 0.0, 1.0),

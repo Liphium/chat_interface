@@ -83,7 +83,7 @@ class _ProfileState extends State<Profile> {
                   //* Add to call
                   ProfileButton(
                     icon: Icons.add_call,
-                    label: 'friends.add_to_call'.tr,
+                    label: 'friends.invite_to_space'.tr,
                     onTap: () => {},
                     loading: false.obs
                   ),

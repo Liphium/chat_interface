@@ -51,7 +51,7 @@ class _FriendButtonState extends State<FriendButton> {
                               .colorScheme
                               .onPrimary),
                         const SizedBox(width: 10),
-                        Text(widget.friend.name, style: Get.theme.textTheme.titleMedium),
+                        Text(widget.friend.name, style: Get.theme.textTheme.labelMedium),
                       ],
                     ),
 

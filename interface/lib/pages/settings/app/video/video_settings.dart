@@ -90,13 +90,7 @@ final _cameras = <MediaDevice>[].obs;
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
-          child: Text("settings.categories.video".tr, style: theme.textTheme.headlineMedium),
-        ),
-        verticalSpacing(defaultSpacing * 0.5),
-      
+      children: [      
         //* Device selection
         Text("video.camera.device".tr, style: theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing * 0.5),

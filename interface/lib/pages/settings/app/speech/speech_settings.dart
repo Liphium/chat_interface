@@ -51,18 +51,10 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
   @override
   Widget build(BuildContext context) {
 
-    ThemeData theme = Theme.of(context);
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
-          child: Text("settings.categories.audio".tr, style: theme.textTheme.headlineMedium),
-        ),
-        verticalSpacing(elementSpacing),
-
         //* Tabs
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,

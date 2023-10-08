@@ -14,8 +14,9 @@ class ListSelectionSetting extends StatefulWidget {
   
   final String settingName;
   final List<SelectableItem> items;
+  final Function(SelectableItem)? callback;
  
-  const ListSelectionSetting({super.key, required this.settingName, required this.items});
+  const ListSelectionSetting({super.key, required this.settingName, required this.items, this.callback});
 
   @override
   State<ListSelectionSetting> createState() => _ListSelectionSettingState();
@@ -46,19 +47,22 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
             padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
             child: Obx(() => 
               Material(
-                color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index ? Get.theme.colorScheme.primaryContainer :
+                color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index ? Get.theme.colorScheme.primary :
                   Get.theme.colorScheme.onBackground,
                 borderRadius: radius,
                 child: InkWell(
                   borderRadius: radius,
                   onTap: () {
                     controller.settings[widget.settingName]!.setValue(index);
+                    if(widget.callback != null) {
+                      widget.callback!(widget.items[index]);
+                    }
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(defaultSpacing),
                     child: Row(
                       children: [
-                        Icon(widget.items[index].icon, color: Get.theme.colorScheme.primary),
+                        Icon(widget.items[index].icon, color: Get.theme.colorScheme.onPrimary),
                         horizontalSpacing(defaultSpacing),
                         Text(widget.items[index].label.tr, style: Get.theme.textTheme.bodyMedium!.copyWith(
                           color: Get.theme.colorScheme.onSurface

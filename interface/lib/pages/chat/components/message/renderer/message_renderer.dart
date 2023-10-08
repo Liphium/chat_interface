@@ -1,7 +1,6 @@
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/theme/ui/text_renderer/text_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -66,7 +65,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                     Visibility(
                       visible: !widget.last,
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
                             sender.name, 
@@ -77,7 +76,6 @@ class _MessageRendererState extends State<MessageRenderer> {
                           Text(
                             formatTime(widget.message.createdAt),
                             style: theme.textTheme.bodyMedium,
-                            textHeightBehavior: noTextHeight,
                           ),
                         ],
                       ),

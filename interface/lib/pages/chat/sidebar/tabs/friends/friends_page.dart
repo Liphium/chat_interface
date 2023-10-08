@@ -197,6 +197,7 @@ class _FriendsPageState extends State<FriendsPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
           child: TextField(
+            style: Get.theme.textTheme.labelMedium,
             decoration: InputDecoration(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),

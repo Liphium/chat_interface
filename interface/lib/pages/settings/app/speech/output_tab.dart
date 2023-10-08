@@ -54,15 +54,15 @@ class _OutputTabState extends State<OutputTab> {
       children: [
 
         //* Device selection
-        Text("audio.output.device".tr, style: theme.textTheme.labelLarge),
+        Text("audio.device".tr, style: theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
-        Text("audio.output.device.default".tr, style: theme.textTheme.bodyMedium),
+        Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildOutputButton(controller, OutputDevice(id: SpeechSettings.defaultDeviceName), BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "Use system default"),
+        buildOutputButton(controller, OutputDevice(id: SpeechSettings.defaultDeviceName), BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing),
 
-        Text("audio.output.device.other".tr, style: theme.textTheme.bodyMedium),
+        Text("audio.output.device".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
 
         RepaintBoundary(
@@ -88,23 +88,7 @@ class _OutputTabState extends State<OutputTab> {
         ),
         verticalSpacing(sectionSpacing),
       
-        //* Audio test
-        Text("audio.output.test".tr, style: theme.textTheme.labelLarge),
-
-        Padding(
-          padding: const EdgeInsets.all(defaultSpacing * 0.5),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("audio.output.test.description".tr, style: theme.textTheme.bodyMedium),
-              horizontalSpacing(defaultSpacing * 0.5),
-              FJElevatedButton(
-                onTap: () => {}, // play audio
-                child: Text("audio.output.test.play".tr, style: theme.textTheme.labelLarge),
-              ),
-            ],
-          ),
-        ),
+        // TODO: Some sort of audio test
       ],
     );
   }

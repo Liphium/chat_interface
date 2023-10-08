@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
             width: 300,
             child: Material(
               elevation: 2.0,
-              color: Get.theme.colorScheme.onBackground,
+              color: Get.theme.colorScheme.background,
               borderRadius: BorderRadius.circular(dialogBorderRadius),
               child: Padding(
                 padding: const EdgeInsets.all(dialogPadding),
@@ -63,7 +64,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text("friends".tr, style: theme.textTheme.titleMedium),
+                        Text("conversations.create".tr, style: theme.textTheme.titleMedium),
             
                         Obx(() =>
                           Text("${_members.length}/100", style: theme.textTheme.bodyMedium)
@@ -84,7 +85,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                             child: Obx(() => Material(
-                              color: _members.contains(friend) ? theme.colorScheme.primaryContainer : Colors.transparent,
+                              color: _members.contains(friend) ? theme.colorScheme.primary : Colors.transparent,
                               borderRadius: BorderRadius.circular(defaultSpacing),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(defaultSpacing),
@@ -100,7 +101,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                                   padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.person, size: 25, color: theme.colorScheme.primary),
+                                      Icon(Icons.person, size: 25, color: theme.colorScheme.onPrimary),
                                       horizontalSpacing(defaultSpacing),
                                       Text("${friend.name}#${friend.tag}", style: theme.textTheme.labelLarge),
                                     ],
@@ -126,26 +127,22 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                               effects: [
                                 CustomEffect(
                                   curve: Curves.easeInOut,
-                                  duration: 200.ms,
+                                  duration: 250.ms,
                                   builder: (context, animation, child) {
                         
-                                    final height = lerpDouble(0, 50, animation);
+                                    final height = lerpDouble(0, 48, animation);
                         
                                     return SizedBox(
                                       height: height,
-                                      child: height! < 50 ? null : child
+                                      child: height! < 48 ? null : child
                                     );
                                   },
                                 ),
-                                FadeEffect(
-                                  delay: 200.ms,
-                                  duration: 300.ms,
-                                  curve: Curves.easeInOut,  
-                                ),
                                 ScaleEffect(
-                                  begin: const Offset(0.85,0.85),
-                                  duration: 300.ms,
-                                  curve: Curves.easeInOut,
+                                  delay: 200.ms,
+                                  begin: const Offset(0,0),
+                                  duration: 500.ms,
+                                  curve: const ElasticOutCurve(0.9),
                                 ),
                               ],
                               target: _length.value > 1 ? 1 : 0,
@@ -153,13 +150,11 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                               child: Material(
                                 color: theme.colorScheme.secondaryContainer.withAlpha(150),
                                 borderRadius: BorderRadius.circular(defaultSpacing),
-                                child: TextField(
+                                child: FJTextField(
                                   controller: _controller,
-                                  decoration: InputDecoration(
-                                    prefixIcon: const Icon(Icons.group),
-                                    hintText: "conversations.name".tr,
-                                    border: InputBorder.none
-                                  ),
+                                  hintText: "conversations.name".tr,
+                                  secondaryColor: true,
+                                  small: true,
                                 ),
                               ),
                             )
@@ -211,7 +206,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                             }
                             _conversationLoading.value = false;
                           },
-                          label: "friends.create".tr,
+                          label: "create".tr,
                           loading: _conversationLoading,
                         ),
                       ],

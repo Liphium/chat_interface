@@ -37,11 +37,6 @@ class _CallSettingsPageState extends State<CallSettingsPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
-              child: Text("settings.categories.call_app".tr, style: Theme.of(context).textTheme.headlineMedium)
-            ),
-            verticalSpacing(defaultSpacing),
       
             //* Preview
             Text("call_app.preview".tr, style: Get.theme.textTheme.labelLarge),

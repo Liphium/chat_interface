@@ -1,13 +1,17 @@
 import 'package:get/get.dart';
 
-class Messages extends Translations {
+class ErrorTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
+    
+    //* English US
     'en_US': {
-      'hello': 'Hello World',
+      'new.version': 'A new version is available, please update the app.',
     },
+
+    //* German
     'de_DE': {
-      'hello': 'Hallo Welt'
-    }
+      'new.version': 'Eine neue Version ist verfügbar, bitte aktualisiere die App.',
+    },
   };
 }

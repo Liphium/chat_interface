@@ -14,7 +14,7 @@ import 'app.dart';
 var logger = log.Logger();
 late final Sodium sodiumLib;
 const appId = 1;
-const appVersion = 0; // TODO: ALWAYS change to the new one saved in the node backend
+const appVersion = 1; // TODO: ALWAYS change to the new one saved in the node backend
 const bool isDebug = true; // TODO: Set to false before release
 
 // Authentication types

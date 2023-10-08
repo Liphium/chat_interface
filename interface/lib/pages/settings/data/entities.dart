@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/settings/account/profile/profile_settings.dart';
+import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/call/call_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/video/video_settings.dart';
@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 enum SettingLabel {
   account("settings.tab.account", [
     SettingCategory("data", Icons.account_circle, null),
-    SettingCategory("profile", Icons.assignment, ProfileSettingsPage()),
+    SettingCategory("profile", Icons.assignment, null),
     SettingCategory("security", Icons.security, null),
     SettingCategory("devices", Icons.phone_android, null),
   ]),
@@ -20,12 +20,12 @@ enum SettingLabel {
     SettingCategory("video", Icons.photo_camera, VideoSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage()),
     SettingCategory("notifications", Icons.notifications, null),
+    SettingCategory("language", Icons.public, LanguageSettingsPage()),
   ]),
 
   appearance("settings.tab.appearance", [
     SettingCategory("theme", Icons.dark_mode, null),
     SettingCategory("call_app", Icons.cable, CallSettingsPage()),
-    SettingCategory("language", Icons.public, null),
   ]),
 
   privacy("settings.tab.privacy", [
