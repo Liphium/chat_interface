@@ -43,7 +43,8 @@ class FriendController extends GetxController {
 
     // Remove request from server
     sendLog(request.vaultId);
-    if(!(await removeFromFriendsVault(request.vaultId))) {
+    final friendsVault = await removeFromFriendsVault(request.vaultId);
+    if(!friendsVault) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
       sendLog("ADDING REGARDLESS");
       return false;

@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,9 @@ class RequestButton extends StatefulWidget {
 }
 
 class _RequestButtonState extends State<RequestButton> {
+
+  final requestLoading = false.obs;
+
   @override
   Widget build(BuildContext context) {
 
@@ -33,12 +37,17 @@ class _RequestButtonState extends State<RequestButton> {
     // Add accept button if request is for self
     if(!widget.self) {
       children.insert(0, horizontalSpacing(defaultSpacing * 0.5));
-      children.insert(0, IconButton(
-        icon: Icon(Icons.check,
-            color: Theme.of(context)
-                .colorScheme
-                .onPrimary),
-        onPressed: () => widget.request.accept((p0) => sendLog("Request accepted")),
+      children.insert(0, LoadingIconButton(
+        loading: requestLoading,
+        icon: Icons.check,
+        color: Get.theme.colorScheme.onPrimary,
+        onTap: () {
+          requestLoading.value = true;
+          widget.request.accept((p0) {
+            sendLog("Request accepted");
+            requestLoading.value = false;
+          });
+        },
       ));
     }
 

@@ -13,6 +13,7 @@ import 'package:chat_interface/pages/chat/components/message/message_bar.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -57,6 +58,7 @@ class _MessageFeedState extends State<MessageFeed> {
         );
       }
 
+      final conversation = Get.find<ConversationController>().conversations[widget.id]!;
       MessageController controller = Get.find();
       FriendController friendController = Get.find();
       StatusController statusController = Get.find();
@@ -110,6 +112,8 @@ class _MessageFeedState extends State<MessageFeed> {
                 ),
 
                 //* Message input
+                conversation.borked ?
+                const SizedBox.shrink() :
                 const MessageInput()
               ],
             ),

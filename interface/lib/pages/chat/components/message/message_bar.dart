@@ -25,6 +25,22 @@ class _MessageBarState extends State<MessageBar> {
   @override
   Widget build(BuildContext context) {
 
+    if(widget.conversation.borked) {
+      return Material(
+        color: Get.theme.colorScheme.onBackground,
+        child: Padding(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Row(
+            children: [
+              Icon(Icons.person_off, size: 30, color: Theme.of(context).colorScheme.error),
+              horizontalSpacing(defaultSpacing),
+              Text("friend.removed".tr, style: Theme.of(context).textTheme.labelMedium),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Material(
       color: Get.theme.colorScheme.onBackground,
       child: Padding(
@@ -62,7 +78,7 @@ class _MessageBarState extends State<MessageBar> {
                   iconSize: 27,
                   icon: const Icon(Icons.sticky_note_2),
                   onPressed: () {
-                    db.message.deleteAll();
+                    widget.conversation.delete();
                   },
                 ),
               ],

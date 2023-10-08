@@ -20,15 +20,13 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   }), key);
 
   // Send message
+  print(conversation.id + " | " + conversation.token.id + " | " + conversation.token.token + " | " + encrypted);
   final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
     "conversation": conversation.id,
     "token_id": conversation.token.id,
     "token": conversation.token.token,
     "data": encrypted
   });
-
-  // Store message
-  Get.find<MessageController>().storeMessage(Message.fromJson(json["message"]));
 
   callback.call();
   if(!json["success"]) {
@@ -41,6 +39,9 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
     showMessage(SnackbarType.error, message.tr);
     return;
   }
+
+  // Store message
+  Get.find<MessageController>().storeMessage(Message.fromJson(json["message"]));
 
   /* OLD CODE FOR REFERENCE
   connector.sendAction(messaging.Message("conv_msg_create", <String, dynamic>{

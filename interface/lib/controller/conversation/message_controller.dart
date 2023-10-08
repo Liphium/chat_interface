@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
@@ -46,7 +47,9 @@ class MessageController extends GetxController {
 
   void storeMessage(Message message) {
     if(selectedConversation.value.id == message.conversation) {
-      messages.insert(0, message);
+      if(messages.isNotEmpty && messages[0].id != message.id) {
+        messages.insert(0, message);        
+      }
     }
     db.into(db.message).insertOnConflictUpdate(message.entity);
   }

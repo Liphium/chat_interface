@@ -41,5 +41,7 @@ Future<bool> removeFromFriendsVault(String id, {errorPopup = false}) async {
     }
   
     final json = jsonDecode(res.body);
+    sendLog(json);
+    sendLog(id);
     return json["success"] as bool;
   }

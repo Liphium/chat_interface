@@ -78,7 +78,8 @@ class _ErrorPageState extends State<ErrorPage> {
                           width: 20.0,
                           height: 20.0,
                           child: CircularProgressIndicator(
-                            backgroundColor: Theme.of(context).secondaryHeaderColor,
+                            backgroundColor: Get.theme.colorScheme.primary,
+                            color: Get.theme.colorScheme.onPrimary,
                             value: _progress.value,
                             strokeWidth: 2,
                           ),

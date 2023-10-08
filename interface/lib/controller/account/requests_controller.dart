@@ -141,7 +141,7 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
   if(requestSent.id != "hi") {
 
     requestController.deleteRequest(requestSent);
-    Get.find<FriendController>().addFromRequest(requestSent);
+    await Get.find<FriendController>().addFromRequest(requestSent);
     success("request.accepted");
   } else {
 

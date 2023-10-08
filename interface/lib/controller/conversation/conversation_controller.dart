@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
@@ -100,7 +102,8 @@ class Conversation {
   }
 
   bool get isGroup => !container.name.startsWith(directMessagePrefix);
-  String get dmName => Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account]!.name;  
+  String get dmName => (Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] ?? Friend.unknown(container.name)).name;  
+  bool get borked => Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] == null;
 
   ConversationData get entity => ConversationData(id: id, token: token.toJson(), key: packageSymmetricKey(key), data: container.toJson(), updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch));
   String toJson() => jsonEncode(<String, dynamic>{
@@ -109,4 +112,13 @@ class Conversation {
     "key": packageSymmetricKey(key),
     "data": container.toJson(),
   });
+
+  void delete() {
+    // TODO: Delete on the server
+    db.conversation.deleteWhere((tbl) => tbl.id.equals(id));
+    db.message.deleteWhere((tbl) => tbl.conversationId.equals(id));
+    db.member.deleteWhere((tbl) => tbl.conversationId.equals(id));
+    Get.find<MessageController>().unselectConversation();
+    Get.find<ConversationController>().conversations.remove(id);
+  }
 }

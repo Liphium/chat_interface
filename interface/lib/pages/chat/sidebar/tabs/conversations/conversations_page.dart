@@ -20,6 +20,7 @@ class ConversationsPage extends StatefulWidget {
 class _ConversationsPageState extends State<ConversationsPage> {
 
   final GlobalKey _addKey = GlobalKey();
+  final query = "".obs;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                buildInput(theme),
+                buildInput(theme, query),
                 horizontalSpacing(defaultSpacing * 0.5),
                 SizedBox(
                   key: _addKey,
@@ -89,80 +90,113 @@ class _ConversationsPageState extends State<ConversationsPage> {
                 Friend? friend;
                 if(!conversation.isGroup) {
                   String id = conversation.members.values.firstWhere((element) => element.account != statusController.id.value).account;
-                  friend = friendController.friends[id]!;
+                  friend = friendController.friends[id];
                 }
             
                 final hover = false.obs;
                 
                 //* Conversation item
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                  child: Obx(() => 
-                  Material(
-                    borderRadius: BorderRadius.circular(10),
-                    color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primary : Colors.transparent,
-                    child: InkWell(
+                return Obx(() {
+                  var title = conversation.isGroup || friend == null ? conversation.containerSub.value.name : conversation.dmName;
+                  if(friend == null) {
+                    title = ".$title";
+                  }
+
+                  if(query.value != "") {
+                    if(!title.toLowerCase().startsWith(query.value.toLowerCase())) {
+                      return const SizedBox.shrink();
+                    }
+                  } else if(friend == null) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                    child: Obx(() => 
+                    Material(
                       borderRadius: BorderRadius.circular(10),
-                      hoverColor: theme.colorScheme.primary.withAlpha(150),
-                      splashColor: theme.hoverColor,
-                      onHover: (value) {
-                        hover.value = value;
-                      },
-            
-                      //* When conversation is tapped (open conversation)
-                      onTap: () {
-                        if(messageController.selectedConversation.value == conversation) return;
-                        stopTyping();
-                        messageController.selectConversation(conversation);
-                      },
-            
-                      //* Conversation item content
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-            
-                            //* Conversation info
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Icon(conversation.isGroup ? Icons.group : Icons.person, size: 35, color: theme.colorScheme.onPrimary),
-                                  horizontalSpacing(defaultSpacing * 0.75),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-            
-            
-                                        //* Conversation title
-                                        Obx(() =>
-                                          conversation.isGroup ?
-                                          Text(conversation.containerSub.value.name, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
-                                            textHeightBehavior: noTextHeight,
-                                          ) :
-                                          Row(
-                                            children: [
-                                              Flexible(
-                                                child: Text(conversation.dmName, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  textHeightBehavior: noTextHeight,
+                      color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primary : Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        hoverColor: theme.colorScheme.primary.withAlpha(150),
+                        splashColor: theme.hoverColor,
+                        onHover: (value) {
+                          hover.value = value;
+                        },
+              
+                        //* When conversation is tapped (open conversation)
+                        onTap: () {
+                          if(messageController.selectedConversation.value == conversation) return;
+                          stopTyping();
+                          messageController.selectConversation(conversation);
+                        },
+              
+                        //* Conversation item content
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+              
+                              //* Conversation info
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Icon(conversation.isGroup ? Icons.group : friend == null ? Icons.person_off : Icons.person, size: 35, color: theme.colorScheme.onPrimary),
+                                    horizontalSpacing(defaultSpacing * 0.75),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+              
+              
+                                          //* Conversation title
+                                          Obx(() {
+
+                                            if(conversation.isGroup) {
+                                              return Text(conversation.containerSub.value.name, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
+                                                textHeightBehavior: noTextHeight,
+                                              );
+                                            }
+
+                                            if(friend == null) {
+                                              return Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: Text(conversation.containerSub.value.name, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      textHeightBehavior: noTextHeight,
+                                                    ),
+                                                  ),
+                                                  horizontalSpacing(defaultSpacing),
+                                                ],
+                                              );
+                                            }
+
+                                            return Row(
+                                              children: [
+                                                Flexible(
+                                                  child: Text(conversation.dmName, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    textHeightBehavior: noTextHeight,
+                                                  ),
                                                 ),
-                                              ),
-                                              horizontalSpacing(defaultSpacing),
-                                              StatusRenderer(status: friend!.statusType.value),
-                                            ],
-                                          )
-                                        ),
-            
-                                        Visibility(
-                                          visible: conversation.isGroup || friend!.status.value != "-",
-                                          child: verticalSpacing(defaultSpacing * 0.25),
-                                        ),
-                                                              
-                                        // Conversation description
-                                        Obx(() =>
+                                                horizontalSpacing(defaultSpacing),
+                                                StatusRenderer(status: friend.statusType.value),
+                                              ],
+                                            );
+                                          }),
+              
+                                          friend == null ?
+                                          verticalSpacing(elementSpacing * 0.5) :
+                                          Visibility(
+                                            visible: conversation.isGroup || friend.status.value != "-",
+                                            child: verticalSpacing(defaultSpacing * 0.25),
+                                          ),
+                                                                
+                                          // Conversation description
                                           conversation.isGroup ?
                                           Text(
                                                               
@@ -177,54 +211,65 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                           ) :
             
                                           //* Friend status message
-                                          Visibility(
-                                            visible: friend!.status.value != "-" && friend.statusType.value != statusOffline,
-                                            child: Text(
-                                              friend.status.value,
-                                              style: theme.textTheme.bodySmall,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              textHeightBehavior: noTextHeight,
-                                            ),
+                                          friend == null ?
+                                          Text(
+                                            friend != null ? friend.status.value : "friend.removed".tr,
+                                            style: theme.textTheme.bodySmall,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textHeightBehavior: noTextHeight,
+                                          ) :
+                                          Obx(() =>
+                                            Visibility(
+                                              visible: friend!.status.value != "-" && friend.statusType.value != statusOffline,
+                                              child: Text(
+                                                friend.status.value,
+                                                style: theme.textTheme.bodySmall,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                textHeightBehavior: noTextHeight,
+                                              ),
+                                            )
                                           ),
-                                        ),
-                                      ],
+                                          
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-            
-                            Obx(() =>
-                              SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: Visibility(
-                                  visible: hover.value,
-            
-                                  //* Writing indicator (only visible on not hover)
-                                  replacement: Obx(() =>
-                                    (writingController.writing[conversation.id] ?? []).isNotEmpty ?
-                                    const Padding(
-                                      padding: EdgeInsets.all(defaultSpacing * 1.2),
-                                      child: CircularProgressIndicator(strokeWidth: 3.0,)
-                                    ) : const SizedBox(),
-                                  ),
-            
-                                  //* Call button (only visible on hover)
-                                  child: IconButton(
-                                    icon: Icon(Icons.call, color: theme.colorScheme.onPrimary),
-                                    onPressed: () {},
+              
+                              Obx(() =>
+                                SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: Visibility(
+                                    visible: hover.value,
+              
+                                    //* Writing indicator (only visible on not hover)
+                                    replacement: Obx(() =>
+                                      (writingController.writing[conversation.id] ?? []).isNotEmpty ?
+                                      const Padding(
+                                        padding: EdgeInsets.all(defaultSpacing * 1.2),
+                                        child: CircularProgressIndicator(strokeWidth: 3.0,)
+                                      ) : const SizedBox(),
+                                    ),
+              
+                                    //* Call button (only visible on hover)
+                                    child: IconButton(
+                                      icon: Icon(Icons.call, color: theme.colorScheme.onPrimary),
+                                      onPressed: () {},
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ]
+                            ]
+                          ),
                         ),
                       ),
-                    ),
-                  )),
-                );
+                    )),
+                  );
+                });
               },
             ) :
             controller.loaded.value ?
@@ -241,7 +286,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
   }
 }
 
-Widget buildInput(ThemeData theme) {
+Widget buildInput(ThemeData theme, RxString query) {
   return Expanded(
     child: Material(
       borderRadius: const BorderRadius.only(
@@ -261,6 +306,9 @@ Widget buildInput(ThemeData theme) {
             prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
             hintText: 'conversations.placeholder'.tr,
           ),
+          onChanged: (value) {
+            query.value = value;
+          },
           cursorColor: theme.colorScheme.onPrimary,
         ),
       ),

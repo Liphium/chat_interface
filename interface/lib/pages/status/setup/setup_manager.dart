@@ -46,9 +46,9 @@ class SetupManager {
     // Initialize setups
 
     // Setup app
-    _steps.add(UpdateSetup());
     _steps.add(InstanceSetup());
     _steps.add(ServerSetup());
+    _steps.add(UpdateSetup());
 
     // Start fetching
     _steps.add(FetchSetup());

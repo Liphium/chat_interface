@@ -82,7 +82,7 @@ class _MessageInputState extends State<MessageInput> {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: () => {},
+                    onPressed: () => loading.value = false,
                     icon: const Icon(Icons.add),
                     color: theme.colorScheme.onPrimary,
                     tooltip: "soon",
