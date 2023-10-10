@@ -18,6 +18,7 @@ pub struct AudioOptions {
     pub talking: bool,
     pub talking_amplitude: f32,
     pub input_device: String,
+    pub output_device: String,
 }
 
 pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {
@@ -29,6 +30,7 @@ pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {
         talking: false,
         talking_amplitude: 0.07,
         input_device: String::from(api::DEFAULT_NAME),
+        output_device: String::from(api::DEFAULT_NAME),
     })
 });
 
@@ -92,6 +94,16 @@ pub fn set_input_device(microphone: String) {
 pub fn get_input_device() -> String {
     let options = get_options();
     options.input_device.clone()
+}
+
+pub fn set_output_device(speaker: String) {
+    let mut options = get_options();
+    (*options).output_device = speaker;
+}
+
+pub fn get_output_device() -> String {
+    let options = get_options();
+    options.output_device.clone()
 }
 
 pub fn is_silent_mute() -> bool {

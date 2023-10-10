@@ -177,3 +177,12 @@ pub fn list_output_devices() -> Vec<OutputDevice> {
 
     output_devices
 }
+
+// Set devices
+pub fn set_input_device(id: String) {
+    audio::set_input_device(id)
+}
+
+pub fn set_output_device(id: String) {
+    audio::set_output_device(id)
+}

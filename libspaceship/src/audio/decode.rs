@@ -1,10 +1,11 @@
-use std::{thread, sync::{Mutex, mpsc::{Sender, self, Receiver}}, collections::HashMap, time::{Duration, SystemTime}, alloc::System};
+use std::{thread, sync::{Mutex, mpsc::{Sender, self, Receiver}}, collections::HashMap, time::{Duration, SystemTime}, alloc::System, fmt::format};
 
 use audiopus::coder::{self};
+use cpal::{Device, traits::HostTrait};
 use once_cell::sync::Lazy;
-use rodio::{Sink, OutputStream, buffer::SamplesBuffer};
+use rodio::{Sink, OutputStream, buffer::SamplesBuffer, DeviceTrait};
 
-use crate::{audio, logger, connection::{self, Protocol}, util, api};
+use crate::{audio, connection::{self, Protocol}, util, api, logger};
 
 pub fn decode(samples: &[u8], buffer_size: usize, decoder: &mut audiopus::coder::Decoder) -> Vec<f32> {
 
@@ -60,10 +61,20 @@ pub fn decode_play_thread() {
 
     thread::spawn(move || {
 
-        let (_, stream_handle) = OutputStream::try_default().unwrap();
+        let host = cpal::default_host();
+        let mut device = host.default_output_device().expect("No device available");
+        for d in host.output_devices().expect("Couldn't get output devices") {
+            if d.name().unwrap() == super::get_output_device() {
+                device = d;
+                break;
+            }
+        }
+
+        let (_, stream_handle) = OutputStream::try_from_device(&device).expect("Couldn't start output stream");
         let sink = Sink::try_new(&stream_handle).unwrap();
         let mut decoders: HashMap<String, DecoderInfo> = HashMap::new();
         let mut talking: HashMap<String, SystemTime> = HashMap::new();
+        let mut last_packet = SystemTime::now();
 
         loop {
 
@@ -123,6 +134,8 @@ pub fn decode_play_thread() {
             }
             let decoded = decode(voice_data, audio::encode::FRAME_SIZE, &mut item.decoder);
 
+            logger::send_log(logger::TAG_AUDIO, format!("delay {}ns", SystemTime::now().duration_since(last_packet).unwrap().as_nanos()).as_str());
+            last_packet = SystemTime::now();
             sink.append(SamplesBuffer::new(1, protocol.opus_sample_rate() as u32, decoded));
         }
     });
