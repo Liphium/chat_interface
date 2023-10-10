@@ -99,17 +99,15 @@ pub fn get_protocol() -> Protocol {
     }
 }
 
-pub fn protocol_from_prefix(prefix: &str) -> Protocol {
+pub fn protocol_from_prefix(prefix: &str) -> Option<Protocol> {
     match prefix {
-        "o4" => Protocol::Hz48000,
-        "o3" => Protocol::Hz24000,
-        "o2" => Protocol::Hz16000,
-        "o1" => Protocol::Hz12000,
-        "o0" => Protocol::Hz8000, 
-        "n-" => Protocol::None,
-        _ => {
-            panic!("Unexpected prefix: {}", prefix);
-        }
+        "o4" => Some(Protocol::Hz48000),
+        "o3" => Some(Protocol::Hz24000),
+        "o2" => Some(Protocol::Hz16000),
+        "o1" => Some(Protocol::Hz12000),
+        "o0" => Some(Protocol::Hz8000), 
+        "n-" => Some(Protocol::None),
+        _ => None
     }
 }
 

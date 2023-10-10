@@ -62,7 +62,7 @@ pub fn decode_play_thread() {
 
     thread::spawn(move || {
 
-        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+        let (_, stream_handle) = OutputStream::try_default().unwrap();
         let sink = Sink::try_new(&stream_handle).unwrap();
         let mut decoders: HashMap<String, DecoderInfo> = HashMap::new();
         let mut talking: HashMap<String, SystemTime> = HashMap::new();
@@ -101,10 +101,14 @@ pub fn decode_play_thread() {
             let prefix = String::from_utf8(protocol.to_vec()).unwrap();
 
             // Decode (if decoder available)
-            let protocol = connection::protocol_from_prefix(prefix.as_str());
+            let protocol_option = connection::protocol_from_prefix(prefix.as_str());
+            if protocol_option == None {
+                continue;
+            }
+            let protocol = protocol_option.unwrap();
             let item = decoders.entry(packet.id.clone()).or_insert_with(|| {
                 DecoderInfo {
-                    decoder: coder::Decoder::new(connection::protocol_from_prefix(prefix.as_str()).opus_sample_rate(), audiopus::Channels::Mono).unwrap(),
+                    decoder: coder::Decoder::new(protocol.opus_sample_rate(), audiopus::Channels::Mono).unwrap(),
                     protocol: protocol.clone(),
                 }
             });
@@ -122,7 +126,7 @@ pub fn decode_play_thread() {
             let decoded = decode(voice_data, audio::encode::FRAME_SIZE, &mut item.decoder);
 
             logger::send_log(logger::TAG_AUDIO, format!("Decoded {} samples", decoded.len()).as_str());
-            sink.append(SamplesBuffer::new(1, encode::SAMPLE_RATE as u32, decoded));
+            sink.append(SamplesBuffer::new(1, protocol.opus_sample_rate() as u32, decoded));
         }
     });
 }
