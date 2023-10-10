@@ -124,12 +124,14 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 talking_streak = 25;
 
                 if !options.talking {
+                    logger::send_log(logger::TAG_AUDIO, "Started talking.");
                     util::print_action(audio::ACTION_STARTED_TALKING);
                 }
                 options.talking = true;
             } else if talking_streak <= 0 {
 
                 if options.talking {
+                    logger::send_log(logger::TAG_AUDIO, "Stopped talking.");
                     util::print_action(audio::ACTION_STOPPED_TALKING);
                 }
                 options.talking = false;

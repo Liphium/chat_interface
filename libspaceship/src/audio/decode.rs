@@ -1,7 +1,7 @@
-use std::{thread, sync::{Mutex, mpsc::{Sender, self, Receiver}}, collections::HashMap, time::{Duration, SystemTime}, alloc::System, fmt::format};
+use std::{thread, sync::{Mutex, mpsc::{Sender, self, Receiver}}, collections::HashMap, time::{Duration, SystemTime}};
 
 use audiopus::coder::{self};
-use cpal::{Device, traits::HostTrait};
+use cpal::{traits::HostTrait};
 use once_cell::sync::Lazy;
 use rodio::{Sink, OutputStream, buffer::SamplesBuffer, DeviceTrait};
 
@@ -69,14 +69,30 @@ pub fn decode_play_thread() {
                 break;
             }
         }
+        let mut last_value = super::get_output_device();
 
-        let (_, stream_handle) = OutputStream::try_from_device(&device).expect("Couldn't start output stream");
-        let sink = Sink::try_new(&stream_handle).unwrap();
+        logger::send_log(logger::TAG_AUDIO, format!("Output device: {}", device.name().unwrap()).as_str());
+        let (mut _stream, mut stream_handle) = OutputStream::try_from_device(&device).expect("Couldn't start output stream");
+        let mut sink = Sink::try_new(&stream_handle).expect("Couldn't create sink");
         let mut decoders: HashMap<String, DecoderInfo> = HashMap::new();
         let mut talking: HashMap<String, SystemTime> = HashMap::new();
         let mut last_packet = SystemTime::now();
 
         loop {
+
+            if super::get_output_device() != last_value {
+                for d in host.output_devices().expect("Couldn't get output devices") {
+                    if d.name().unwrap() == super::get_output_device() {
+                        device = d;
+                        break;
+                    }
+                }
+                logger::send_log(logger::TAG_AUDIO, format!("Output device changed to: {}", device.name().unwrap()).as_str());
+                drop(_stream);
+                last_value = super::get_output_device();
+                (_stream, stream_handle) = OutputStream::try_from_device(&device).expect("Couldn't start output stream");
+                sink = Sink::try_new(&stream_handle).expect("Couldn't create sink");
+            }
 
             if connection::should_stop() {
                 break;

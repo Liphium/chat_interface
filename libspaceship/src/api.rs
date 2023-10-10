@@ -4,6 +4,7 @@ use alkali::symmetric::cipher;
 use cpal::traits::HostTrait;
 use flutter_rust_bridge::StreamSink;
 use rodio::DeviceTrait;
+use serde::de;
 
 use crate::{connection, logger, audio::{microphone, self, AUDIO_OPTIONS}, util};
 
@@ -57,48 +58,39 @@ pub fn stop() {
 //* Audio crab */
 
 pub fn set_muted(muted: bool) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
-    (*options).muted = muted;
+    audio::set_muted(muted)
 }
 
 pub fn set_deafen(deafened: bool) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
-    (*options).deafened = deafened;
+    audio::set_deafen(deafened)
 }
 
 pub fn is_muted() -> bool {
-    let options = AUDIO_OPTIONS.lock().unwrap();
-    options.muted
+    audio::is_muted()
 }
 
 pub fn is_deafened() -> bool {
-    let options = AUDIO_OPTIONS.lock().unwrap();
-    options.deafened
+    audio::is_deafened()
 }
 
 pub fn set_amplitude_logging(amplitude_logging: bool) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
-    (*options).amplitude_logging = amplitude_logging;
+    audio::set_amplitude_logging(amplitude_logging)
 }
 
 pub fn is_amplitude_logging() -> bool {
-    let options = AUDIO_OPTIONS.lock().unwrap();
-    options.amplitude_logging
+    audio::is_amplitude_logging()
 }
 
 pub fn set_talking_amplitude(amplitude: f32) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
-    (*options).talking_amplitude = amplitude;
+    audio::set_talking_amplitude(amplitude)
 }
 
 pub fn get_talking_amplitude() -> f32 {
-    let options = AUDIO_OPTIONS.lock().unwrap();
-    options.talking_amplitude
+    audio::get_talking_amplitude()
 }
 
 pub fn set_silent_mute(silent_mute: bool) {
-    let mut options = AUDIO_OPTIONS.lock().unwrap();
-    (*options).silent_mute = silent_mute;
+    audio::set_silent_mute(silent_mute)
 }
 
 pub fn create_amplitude_stream(s: StreamSink<f32>) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
@@ -21,6 +22,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
 
   final _microphones = <InputDevice>[].obs;
   final _sensitivity = 0.0.obs;
+  bool _started = false;
   StreamSubscription? _sub;
 
   @override
@@ -41,30 +43,35 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
       controller.settings["audio.microphone"]!.setValue("def");
     }
 
-    _microphones.addAll(list);  
-    await api.testVoice(device: _getCurrent());
+    _microphones.addAll(list);
+    if(!Get.find<SpacesController>().connected.value) {
+      await api.testVoice(device: _getCurrent());
+      _started = true;
+    } else {
+      await api.setAmplitudeLogging(amplitudeLogging: true);
+    }
     _sub = api.createAmplitudeStream().listen((amp) {
       _sensitivity.value = amp;
     });
   }
 
   String _getCurrent() {
-    return Get.find<SettingController>().settings["audio.microphone"]!.getOr(SpeechSettings.defaultDeviceName);
+    return Get.find<SettingController>().settings[SpeechSettings.microphone]!.getOr(SpeechSettings.defaultDeviceName);
   }
 
   void _changeMicrophone(String device) async {
-    await api.stop();
-    Get.find<SettingController>().settings["audio.microphone"]!.setValue(device);
-    Future.delayed(500.ms, () async {
-      await api.testVoice(device: _getCurrent());
-    });
+    Get.find<SettingController>().settings[SpeechSettings.microphone]!.setValue(device);
+    api.setInputDevice(id: device);
   }
 
   @override
   void dispose() {
     _sub?.cancel();
+    api.setAmplitudeLogging(amplitudeLogging: false);
     api.deleteAmplitudeStream();
-    api.stop();
+    if(_started) {
+      api.stop();
+    }
     super.dispose();
   }
 

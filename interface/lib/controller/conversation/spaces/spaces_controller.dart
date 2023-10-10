@@ -139,6 +139,7 @@ class SpacesController extends GetxController {
         address: '$domain:${event.data["port"]}',
       );
 
+      connected.value = true;
       inSpace.value = true;
       spaceLoading.value = false;
     });
@@ -152,6 +153,7 @@ class SpacesController extends GetxController {
 
     // Tell other controllers about it
     Get.find<SpaceMemberController>().onDisconnect();
+    Get.find<AudioController>().disconnect();
   }
 }
 

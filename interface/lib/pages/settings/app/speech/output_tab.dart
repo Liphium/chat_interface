@@ -2,7 +2,6 @@
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,7 +28,7 @@ class _OutputTabState extends State<OutputTab> {
   void _init() async {
     final list = await api.listOutputDevices();
     SettingController controller = Get.find();
-    String currentMic = controller.settings["audio.output"]!.getValue();
+    String currentMic = controller.settings[SpeechSettings.output]!.getValue();
 
     // If the current microphone is not in the list, set it to default
     if(list.firstWhereOrNull((element) => element.id == currentMic) == null) {
@@ -40,7 +39,8 @@ class _OutputTabState extends State<OutputTab> {
   }
 
   void _changeDevice(String device) async {
-    Get.find<SettingController>().settings["audio.output"]!.setValue(device);
+    Get.find<SettingController>().settings[SpeechSettings.output]!.setValue(device);
+    await api.setOutputDevice(id: device);
   }
 
   @override

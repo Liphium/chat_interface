@@ -54,6 +54,9 @@ class SpaceMemberController extends GetxController {
         case startedTalkingAction:
           final target = event.data == "" ? _ownId : event.data;
           sendLog("talking");
+          if(members[target]!.isMuted.value || members[target]!.isDeafened.value) {
+            return;
+          }
           members[target]!.isSpeaking.value = true;
         case stoppedTalkingAction:
           sendLog("stopped talking ${event.data}");

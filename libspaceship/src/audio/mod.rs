@@ -34,7 +34,7 @@ pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {
     })
 });
 
-fn get_options() -> sync::MutexGuard<'static, AudioOptions> {
+pub fn get_options() -> sync::MutexGuard<'static, AudioOptions> {
     match AUDIO_OPTIONS.lock() {
         Ok(options) => options,
         Err(options) => options.into_inner()

@@ -53,7 +53,7 @@ class _MemberEntityState extends State<CircleMemberEntity> {
                 bottom: 0,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Get.theme.colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(200),
                   ),
                   width: 30,
@@ -78,7 +78,7 @@ class _MemberEntityState extends State<CircleMemberEntity> {
                 bottom: 0,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Get.theme.colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(200),
                   ),
                   width: 30,

@@ -1,5 +1,5 @@
 use aes_gcm::{Aes256Gcm, AeadCore, aead::{OsRng, Aead}, KeyInit, Nonce};
-use alkali::{mem::FullAccess, symmetric::{auth::Key, cipher}};
+use alkali::{mem::FullAccess, symmetric::{cipher}};
 use base64::{engine::general_purpose, Engine};
 
 // Encrypts a byte array using AES-GCM encryption mode

@@ -20,6 +20,7 @@ pub fn record(conn_config: Arc<connection::Config>) {
                 break;
             }
         }
+        let last_value = super::get_input_device();
 
         // Create a stream config
         let default_config = device.default_input_config().expect("no stream config found");
@@ -49,9 +50,10 @@ pub fn record(conn_config: Arc<connection::Config>) {
         let overflow_buffer_2: Arc<Mutex<Vec<f32>>> = overflow_buffer.clone();
 
         // Start encoding: Arc<Mutex<Vec<f32>>> thread
-        encode::encode_thread(conn_config, (work_channels as usize).clone());
+        encode::encode_thread(conn_config.clone(), (work_channels as usize).clone());
 
         // Create a stream
+        let cloned_config = conn_config.clone();
         let stream = match device.build_input_stream(
             &config.into(),
             move |data: &[f32], _: &_| {
@@ -73,10 +75,17 @@ pub fn record(conn_config: Arc<connection::Config>) {
         stream.play().unwrap();
 
         loop {
+
+            if last_value != super::get_input_device() {
+                logger::send_log(logger::TAG_AUDIO, format!("Input device changed to {}, restarting", super::get_input_device()).as_str());
+                record(cloned_config);
+                break;
+            }
+
             if connection::should_stop() {
                 break;
             }
-            thread::sleep(Duration::from_millis(10));
+            thread::sleep(Duration::from_millis(100));
         }
     });
 }
@@ -128,7 +137,6 @@ fn resample_data(
         let sample = resampled[0].iter().map(|&x| x as f32).collect::<Vec<f32>>();
 
         // Add all to sample_vec
-        //util::print_log(format!("sample: {:?}", sample.len());
         encode::pass_to_encode(sample);
 
         // Prepare for next iteration
