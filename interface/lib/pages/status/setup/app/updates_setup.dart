@@ -11,6 +11,10 @@ class UpdateSetup extends Setup {
   @override
   Future<Widget?> load() async {
 
+    if(!checkVersion) {
+      return null;
+    }
+
     // TODO: Update the actual app files from some source
     final json = await postJSON("/app/version", <String, dynamic>{
       "app": appId
