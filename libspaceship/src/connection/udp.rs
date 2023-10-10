@@ -110,11 +110,9 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
         loop {
             let size = socket.recv(&mut buf).expect("Detected disconnect");
 
-            logger::send_log(logger::TAG_CONNECTION, "Received packet");
-
             match receiver::receive_packet(&config, &buf[0..size].to_vec()) {
                 Ok(_) => (),
-                Err(message) => logger::send_log(logger::TAG_CONNECTION, format!("{}", message).as_str())
+                Err(message) => logger::send_log(logger::TAG_CONNECTION, format!("Error while receiving: {}", message).as_str())
             }
         } 
     });

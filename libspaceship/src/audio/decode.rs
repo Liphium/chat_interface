@@ -1,12 +1,10 @@
 use std::{thread, sync::{Mutex, mpsc::{Sender, self, Receiver}}, collections::HashMap, time::{Duration, SystemTime}, alloc::System};
 
-use audiopus::coder::{self, Decoder};
+use audiopus::coder::{self};
 use once_cell::sync::Lazy;
 use rodio::{Sink, OutputStream, buffer::SamplesBuffer};
 
 use crate::{audio, logger, connection::{self, Protocol}, util, api};
-
-use super::encode;
 
 pub fn decode(samples: &[u8], buffer_size: usize, decoder: &mut audiopus::coder::Decoder) -> Vec<f32> {
 
@@ -125,7 +123,6 @@ pub fn decode_play_thread() {
             }
             let decoded = decode(voice_data, audio::encode::FRAME_SIZE, &mut item.decoder);
 
-            logger::send_log(logger::TAG_AUDIO, format!("Decoded {} samples", decoded.len()).as_str());
             sink.append(SamplesBuffer::new(1, protocol.opus_sample_rate() as u32, decoded));
         }
     });
