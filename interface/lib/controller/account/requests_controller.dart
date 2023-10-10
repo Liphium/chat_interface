@@ -225,8 +225,6 @@ class Request {
   // Accept friend request
   void accept(Function(String) success) {
     sendFriendRequest(Get.find<StatusController>(), name, tag, id, keyStorage.publicKey, (msg) async {
-      await removeFromFriendsVault(vaultId);
-      await deleteStoredAction(storedActionId);
       success(msg);
     });
   }

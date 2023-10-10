@@ -270,6 +270,32 @@ fn wire_list_output_devices_impl(port_: MessagePort) {
         move || move |task_callback| Result::<_, ()>::Ok(list_output_devices()),
     )
 }
+fn wire_set_input_device_impl(port_: MessagePort, id: impl Wire2Api<String> + UnwindSafe) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap::<_, _, _, (), _>(
+        WrapInfo {
+            debug_name: "set_input_device",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_id = id.wire2api();
+            move |task_callback| Result::<_, ()>::Ok(set_input_device(api_id))
+        },
+    )
+}
+fn wire_set_output_device_impl(port_: MessagePort, id: impl Wire2Api<String> + UnwindSafe) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap::<_, _, _, (), _>(
+        WrapInfo {
+            debug_name: "set_output_device",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_id = id.wire2api();
+            move |task_callback| Result::<_, ()>::Ok(set_output_device(api_id))
+        },
+    )
+}
 // Section: wrapper structs
 
 // Section: static checks

@@ -102,6 +102,16 @@ pub extern "C" fn wire_list_output_devices(port_: i64) {
     wire_list_output_devices_impl(port_)
 }
 
+#[no_mangle]
+pub extern "C" fn wire_set_input_device(port_: i64, id: *mut wire_uint_8_list) {
+    wire_set_input_device_impl(port_, id)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_set_output_device(port_: i64, id: *mut wire_uint_8_list) {
+    wire_set_output_device_impl(port_, id)
+}
+
 // Section: allocate functions
 
 #[no_mangle]

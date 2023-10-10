@@ -19,6 +19,7 @@ Future<String?> storeInFriendsVault(String data, {errorPopup = false, prefix = "
   }
 
   final json = jsonDecode(res.body);
+  sendLog(json);
   if(!json["success"]) {
     if(errorPopup) {
       showErrorPopup("$prefix.${json["error"]}", "$prefix.${json["error"]}.text");

@@ -55,6 +55,7 @@ class FriendController extends GetxController {
     
     // Add friend to vault
     final id = await storeInFriendsVault(request.friend.toStoredPayload());
+    sendLog("STORING IN FRIENDS VAULT");
 
     if(id == null) {
       add(request.friend); // probably already in the vault (from other device)

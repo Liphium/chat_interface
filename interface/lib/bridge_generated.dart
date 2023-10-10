@@ -92,6 +92,14 @@ abstract class Libspaceship {
   Future<List<OutputDevice>> listOutputDevices({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kListOutputDevicesConstMeta;
+
+  Future<void> setInputDevice({required String id, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSetInputDeviceConstMeta;
+
+  Future<void> setOutputDevice({required String id, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSetOutputDeviceConstMeta;
 }
 
 class Action {
@@ -485,6 +493,42 @@ class LibspaceshipImpl implements Libspaceship {
       const FlutterRustBridgeTaskConstMeta(
         debugName: "list_output_devices",
         argNames: [],
+      );
+
+  Future<void> setInputDevice({required String id, dynamic hint}) {
+    var arg0 = _platform.api2wire_String(id);
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_set_input_device(port_, arg0),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kSetInputDeviceConstMeta,
+      argValues: [id],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kSetInputDeviceConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "set_input_device",
+        argNames: ["id"],
+      );
+
+  Future<void> setOutputDevice({required String id, dynamic hint}) {
+    var arg0 = _platform.api2wire_String(id);
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_set_output_device(port_, arg0),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: null,
+      constMeta: kSetOutputDeviceConstMeta,
+      argValues: [id],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kSetOutputDeviceConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "set_output_device",
+        argNames: ["id"],
       );
 
   void dispose() {
@@ -1005,6 +1049,40 @@ class LibspaceshipWire implements FlutterRustBridgeWireBase {
           'wire_list_output_devices');
   late final _wire_list_output_devices =
       _wire_list_output_devicesPtr.asFunction<void Function(int)>();
+
+  void wire_set_input_device(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> id,
+  ) {
+    return _wire_set_input_device(
+      port_,
+      id,
+    );
+  }
+
+  late final _wire_set_input_devicePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_set_input_device');
+  late final _wire_set_input_device = _wire_set_input_devicePtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_set_output_device(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> id,
+  ) {
+    return _wire_set_output_device(
+      port_,
+      id,
+    );
+  }
+
+  late final _wire_set_output_devicePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_set_output_device');
+  late final _wire_set_output_device = _wire_set_output_devicePtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,
