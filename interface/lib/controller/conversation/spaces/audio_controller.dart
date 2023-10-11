@@ -1,3 +1,5 @@
+import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
@@ -17,6 +19,7 @@ class AudioController extends GetxController {
     if(_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[controller.getClientId()]!.isDeafened.value = newOutput;
+      _refreshState();
     }
   }
 
@@ -30,24 +33,34 @@ class AudioController extends GetxController {
     if(_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[controller.getClientId()]!.isMuted.value = newMuted;
+      _refreshState();
     }
   }
 
-  void onConnect() {
+  void _refreshState() async {
+    spaceConnector.sendAction(Message("update", <String, dynamic>{
+      "muted": muted.value,
+      "deafened": deafened.value,
+    }));
+  }
+
+  void onConnect() async {
 
     // Enforce defaults
     final settingController = Get.find<SettingController>();
-    api.setMuted(muted: settingController.settings[SpeechSettings.startMuted]!.getValue() as bool);
-    api.setDeafen(deafened: false);
-    api.setSilentMute(silentMute: false);
-    muted.value = settingController.settings[SpeechSettings.startMuted]!.getValue() as bool;
+    await api.setDeafen(deafened: false);
+    await api.setSilentMute(silentMute: false);
     deafened.value = false;
 
     // Set settings
-    api.setTalkingAmplitude(amplitude: settingController.settings[SpeechSettings.microphoneSensitivity]!.getOr(0.0));
-    api.setInputDevice(id: settingController.settings[SpeechSettings.microphone]!.getValue());
-    api.setOutputDevice(id: settingController.settings[SpeechSettings.output]!.getValue());
+    await api.setTalkingAmplitude(amplitude: settingController.settings[SpeechSettings.microphoneSensitivity]!.getOr(0.0));
+    await api.setInputDevice(id: settingController.settings[SpeechSettings.microphone]!.getValue());
+    await api.setOutputDevice(id: settingController.settings[SpeechSettings.output]!.getValue());
     _connected = true;
+
+    // Set mute
+    final startMuted = settingController.settings[SpeechSettings.startMuted]!.getValue() as bool;
+    setMuted(startMuted);
   }
 
   void disconnect() {
