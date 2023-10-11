@@ -6,7 +6,6 @@ use crate::{audio, util, logger};
 
 use crate::connection;
 
-pub const SAMPLE_RATE: audiopus::SampleRate = audiopus::SampleRate::Hz48000;
 pub const FRAME_SIZE: usize = 960;
 
 static AMPLITUDE_SINK: Lazy<Mutex<Option<StreamSink<f32>>>> = Lazy::new(|| Mutex::new(None));

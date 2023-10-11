@@ -76,7 +76,7 @@ pub fn decode_play_thread() {
         let mut sink = Sink::try_new(&stream_handle).expect("Couldn't create sink");
         let mut decoders: HashMap<String, DecoderInfo> = HashMap::new();
         let mut talking: HashMap<String, SystemTime> = HashMap::new();
-        let mut last_packet = SystemTime::now();
+        //let mut last_packet = SystemTime::now();
 
         loop {
 
@@ -150,8 +150,8 @@ pub fn decode_play_thread() {
             }
             let decoded = decode(voice_data, audio::encode::FRAME_SIZE, &mut item.decoder);
 
-            logger::send_log(logger::TAG_AUDIO, format!("delay {}ns", SystemTime::now().duration_since(last_packet).unwrap().as_nanos()).as_str());
-            last_packet = SystemTime::now();
+            //logger::send_log(logger::TAG_AUDIO, format!("delay {}ns", SystemTime::now().duration_since(last_packet).unwrap().as_nanos()).as_str());
+            //last_packet = SystemTime::now();
             sink.append(SamplesBuffer::new(1, protocol.opus_sample_rate() as u32, decoded));
         }
     });
