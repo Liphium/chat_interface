@@ -4,7 +4,7 @@ use alkali::{symmetric::cipher, mem::FullAccess};
 use base64::{engine::general_purpose, Engine};
 use once_cell::sync::Lazy;
 
-use crate::util;
+use crate::{util, logger};
 
 pub mod udp;
 pub mod receiver;
@@ -126,7 +126,12 @@ pub fn construct_packet(config: &Config, protocol: &Protocol, voice_data: &[u8],
     // Build verification thing
     let mut voice_vec = protocol.packet_prefix().as_bytes().to_vec();
     voice_vec.extend_from_slice(voice_data);
-    let encrypted_voice = util::crypto::encrypt_sodium(&config.encryption_key, &voice_vec);
+    let encrypted_voice_res = util::crypto::encrypt_sodium(&config.encryption_key, &voice_vec);
+    if encrypted_voice_res.is_err() {
+        logger::send_log(logger::TAG_CONNECTION, "packet couldn't be encrypted, maybe a key exchange issue?");
+        return;
+    }
+    let encrypted_voice = encrypted_voice_res.unwrap();
     let hash = util::hasher::sha256(encrypted_voice.to_vec());
     let encrypted_verifier = util::crypto::encrypt(&config.verification_key, &hash);
     let encoded_verifier = general_purpose::STANDARD_NO_PAD.encode(&encrypted_verifier);

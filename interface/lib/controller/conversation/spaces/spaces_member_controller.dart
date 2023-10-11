@@ -26,8 +26,11 @@ class SpaceMemberController extends GetxController {
     final myId = statusController.id.value;
     final membersFound = <String>[];
 
+    // id = encryptedId:clientId
+    // muted = bool
+    // deafened = bool
     for (var member in members) {
-      final args = member.split(":");
+      final args = member["id"].split(":");
       final decrypted = decryptSymmetric(args[0], key!);
       final clientId = args[1];
       sendLog("$decrypted:$clientId");
@@ -36,7 +39,7 @@ class SpaceMemberController extends GetxController {
       }
       membersFound.add(clientId);
       if(this.members[clientId] == null) {
-        this.members[clientId] = SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)));
+        this.members[clientId] = SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)), member["muted"], member["deafened"]);
       }
     }
 
@@ -84,12 +87,9 @@ class SpaceMember {
   final isMuted = false.obs;
   final isDeafened = false.obs;
 
-  SpaceMember(this.friend);
-
-  void _onChanged() {
-  }
-
-  void disconnect() {
+  SpaceMember(this.friend, bool muted, bool deafened) {
+    isMuted.value = muted;
+    isDeafened.value = deafened;
   }
 
 }

@@ -1,5 +1,5 @@
 use aes_gcm::{Aes256Gcm, AeadCore, aead::{OsRng, Aead}, KeyInit, Nonce};
-use alkali::{mem::FullAccess, symmetric::{cipher}};
+use alkali::{mem::FullAccess, symmetric::{cipher::{self, SymmetricCipherError}}, AlkaliError};
 use base64::{engine::general_purpose, Engine};
 
 // Encrypts a byte array using AES-GCM encryption mode
@@ -34,24 +34,38 @@ pub fn decrypt(key: &[u8], ciphertext: &[u8]) -> Vec<u8> {
 }
 
 // Encrypt using sodium
-pub fn encrypt_sodium(key: &cipher::Key<FullAccess>, plaintext: &[u8]) -> Vec<u8> {
+pub fn encrypt_sodium(key: &cipher::Key<FullAccess>, plaintext: &[u8]) -> Result<Vec<u8>, AlkaliError> {
     let mut encrypted = vec![0u8; plaintext.len() + cipher::MAC_LENGTH];
     let nonce = cipher::generate_nonce().expect("nonce couldn't be generated");
-    cipher::encrypt(plaintext, key, Some(&nonce), &mut encrypted).unwrap();
+    let error: Option<AlkaliError> = match cipher::encrypt(plaintext, key, Some(&nonce), &mut encrypted) {
+        Ok(_) => None,
+        Err(e) => Some(e)
+    };
+    if error.is_some() {
+        return Err(error.unwrap());
+    }
+    
     let mut output = nonce.to_vec();
     output.extend_from_slice(encrypted.as_slice());
-    output
+    Ok(output)
 }
 
 // Decrypt using sodium
-pub fn decrypt_sodium(key: &cipher::Key<FullAccess>, ciphertext: &[u8]) -> Vec<u8> {
+pub fn decrypt_sodium(key: &cipher::Key<FullAccess>, ciphertext: &[u8]) -> Result<Vec<u8>, AlkaliError> {
     let mut output = vec![0u8; ciphertext.len() - cipher::NONCE_LENGTH - cipher::MAC_LENGTH];
     let nonce = &ciphertext[0..cipher::NONCE_LENGTH];
     let ciphertext = &ciphertext[cipher::NONCE_LENGTH..];
     let mut nonce_array = [0u8; cipher::NONCE_LENGTH];
     nonce_array.copy_from_slice(nonce);
-    cipher::decrypt(ciphertext, key, &nonce_array, &mut output).unwrap();
-    output
+    let error = match cipher::decrypt(ciphertext, key, &nonce_array, &mut output) {
+        Ok(_) => None,
+        Err(e) => Some(e)
+    };
+
+    if error.is_some() {
+        return Err(error.unwrap());
+    }
+    Ok(output)
 }
 
 pub fn parse_key(key: String) -> Vec<u8> {
