@@ -1,7 +1,7 @@
 part of 'message_feed.dart';
 
 void sendTextMessage(RxBool loading, String conversationId, String message, String attachments, Function() callback) async {
-  sendActualMessage(loading, conversationId, MessageType.text, attachments, message, callback);
+  sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
 
 void sendActualMessage(RxBool loading, String conversationId, MessageType type, String attachments, String message, Function() callback) async {
@@ -20,7 +20,6 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   }), key);
 
   // Send message
-  print(conversation.id + " | " + conversation.token.id + " | " + conversation.token.token + " | " + encrypted);
   final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
     "conversation": conversation.id,
     "token_id": conversation.token.id,

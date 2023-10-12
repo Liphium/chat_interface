@@ -8,9 +8,14 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
 class StatusController extends GetxController {
+
+  StatusController() {
+    sendLog("CONSTRUCTED STATUS CONTROLLER");
+  }
 
   final name = 'test'.obs;
   final tag = 'hi'.obs;

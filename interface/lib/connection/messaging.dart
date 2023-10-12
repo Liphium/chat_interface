@@ -10,15 +10,11 @@ class Event {
   /// Data of the event
   final Map<String, dynamic> data;
 
-  /// ID of the sender
-  final String sender;
-
-  Event(this.sender, this.name, this.data);
-  Event.fromMap(Map<String, dynamic> map) : this(map['sender'], map['name'], map['data']);
+  Event(this.name, this.data);
+  Event.fromMap(Map<String, dynamic> map) : this(map['name'], map['data']);
   Event.fromJson(String json) : this.fromMap(jsonDecode(json));
 
   Map<String, dynamic> toMap() => {
-    'sender': sender,
     'name': name,
     'data': data,
   };

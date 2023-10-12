@@ -4,7 +4,6 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
@@ -97,7 +96,7 @@ class Message {
 
     // Check signature
     message.verified = true;
-    message.content = contentJson["c"];
+    message.content = utf8.decode(base64Decode(contentJson["c"]));
     message.type = MessageType.fromString(contentJson["t"] ?? "text");
     message.attachments = contentJson["a"] ?? "";
 

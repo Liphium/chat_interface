@@ -11,15 +11,17 @@ void typingStatus(msg.Event event) {
   StatusController statusController = Get.find();
   WritingController controller = Get.find();
 
-  if(event.sender == statusController.id.value) return;
+  // TODO: Fix
+
+  if("" == statusController.id.value) return;
 
   switch(event.name) {
     case "conv_t":
-      controller.add(event.data["id"], event.sender);
+      controller.add(event.data["id"], "");
       break;
 
     case "conv_t_s":
-      controller.remove(event.data["id"], event.sender);
+      controller.remove(event.data["id"], "");
       break;
   }
 
