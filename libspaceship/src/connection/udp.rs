@@ -103,6 +103,8 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
     send_thread(socket.try_clone().expect("Could not clone socket"));
     audio::microphone::record(config.clone());
     audio::decode::decode_play_thread();
+    let init_packet = super::init_packet(&config);
+    send(init_packet);
 
     // Listen for udp traffic
     thread::spawn(move || {

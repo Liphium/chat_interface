@@ -100,6 +100,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
             let samples_len = samples.len();
 
             if samples_len < FRAME_SIZE * channels {
+                logger::send_log(logger::TAG_AUDIO, "packet dropped");
                 continue;
             }
 

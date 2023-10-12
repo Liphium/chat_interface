@@ -57,14 +57,14 @@ class SpaceMemberController extends GetxController {
         case startedTalkingAction:
           final target = event.data == "" ? _ownId : event.data;
           sendLog("talking");
-          if(members[target]!.isMuted.value || members[target]!.isDeafened.value) {
+          if(members[target] != null && (members[target]!.isMuted.value || members[target]!.isDeafened.value)) {
             return;
           }
-          members[target]!.isSpeaking.value = true;
+          members[target]?.isSpeaking.value = true;
         case stoppedTalkingAction:
           sendLog("stopped talking ${event.data}");
           final target = event.data == "" ? _ownId : event.data;
-          members[target]!.isSpeaking.value = false;
+          members[target]?.isSpeaking.value = false;
       }
     });
   }

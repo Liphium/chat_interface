@@ -119,6 +119,21 @@ pub fn get_key(token: &str) -> Vec<u8> {
     util::hasher::sha256(token.as_bytes().to_vec())
 }
 
+pub fn init_packet(config: &Config) -> Vec<u8> {
+
+    let init_vec = vec![b'd', b'r', b'o', b'p'];
+    let hash = util::hasher::sha256(init_vec.clone());
+
+    let mut buffer = Vec::<u8>::new();
+    let encrypted_verifier = util::crypto::encrypt(&config.verification_key, &hash);
+    let encoded_verifier = general_purpose::STANDARD_NO_PAD.encode(&encrypted_verifier);
+    buffer.extend_from_slice(config.client_id.as_bytes());
+    buffer.extend_from_slice(&encoded_verifier.as_bytes());
+    buffer.push(b':');
+    buffer.extend_from_slice(&init_vec);
+    buffer
+}
+
 pub fn construct_packet(config: &Config, protocol: &Protocol, voice_data: &[u8], buffer: &mut Vec<u8>) {
     buffer.clear();
     buffer.extend_from_slice(config.client_id.as_bytes());

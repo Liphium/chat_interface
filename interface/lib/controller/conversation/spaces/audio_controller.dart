@@ -19,6 +19,7 @@ class AudioController extends GetxController {
     if(_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[controller.getClientId()]!.isDeafened.value = newOutput;
+      controller.members[controller.getClientId()]!.isSpeaking.value = newOutput ? false : controller.members[controller.getClientId()]!.isSpeaking.value;
       _refreshState();
     }
   }
@@ -33,6 +34,7 @@ class AudioController extends GetxController {
     if(_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[controller.getClientId()]!.isMuted.value = newMuted;
+      controller.members[controller.getClientId()]!.isSpeaking.value = newMuted ? false : controller.members[controller.getClientId()]!.isSpeaking.value;
       _refreshState();
     }
   }
@@ -60,6 +62,8 @@ class AudioController extends GetxController {
 
     // Set mute
     final startMuted = settingController.settings[SpeechSettings.startMuted]!.getValue() as bool;
+    await api.setMuted(muted: startMuted);
+    await Future.delayed(500.milliseconds);
     setMuted(startMuted);
   }
 
