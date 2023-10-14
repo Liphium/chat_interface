@@ -4,17 +4,21 @@ use libspaceship::{api, connection};
 
 
 fn main() {
-    connect_to_server();
+    connect_to_space_node();
 }
 
-pub fn connect_to_server() {
-    let devices = api::list_input_devices();
-    for device in devices {
-        println!("Device: {:?}", device.id);
-    }
+pub fn connect_to_local_server() {
     libspaceship::logger::set_log_stdout(true);
+    libspaceship::api::set_talking_amplitude(0.0f32);
     connection::udp::init();
     connection::udp::connect_read("localhost:3011")
+}
+
+pub fn connect_to_space_node() {
+    libspaceship::logger::set_log_stdout(true);
+    libspaceship::api::set_talking_amplitude(0.0f32);
+    connection::udp::init();
+    connection::udp::connect_read("128.140.35.38:4101")
 }
 
 pub fn test_voice() {

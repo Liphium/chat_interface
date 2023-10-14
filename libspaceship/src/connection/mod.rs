@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::{sync::Mutex, time::Duration};
 
 use alkali::{symmetric::cipher, mem::FullAccess};
 use base64::{engine::general_purpose, Engine};
@@ -7,7 +7,6 @@ use once_cell::sync::Lazy;
 use crate::{util, logger};
 
 pub mod udp;
-pub mod receiver;
 
 pub struct Config {
     pub test: bool,
@@ -28,6 +27,18 @@ pub enum Protocol {
 }
 
 impl Protocol {
+
+    pub fn frame_duration(&self) -> Duration {
+        match &self {
+            Self::Hz48000 => Duration::from_millis(20),
+            Self::Hz24000 => Duration::from_millis(20), // Unsupported
+            Self::Hz16000 => Duration::from_millis(20), // Unsupported
+            Self::Hz12000 => Duration::from_millis(20), // Unsupported
+            Self::Hz8000 => Duration::from_millis(20), // Unsupported
+            Self::None => Duration::from_millis(20), // Unsupported
+        }
+    }
+
     pub fn opus_sample_rate(&self) -> audiopus::SampleRate {
         match &self {
             Self::Hz48000 => audiopus::SampleRate::Hz48000,
@@ -134,12 +145,13 @@ pub fn init_packet(config: &Config) -> Vec<u8> {
     buffer
 }
 
-pub fn construct_packet(config: &Config, protocol: &Protocol, voice_data: &[u8], buffer: &mut Vec<u8>) {
+pub fn construct_packet(config: &Config, protocol: &Protocol, voice_data: &[u8], sequence: u32, buffer: &mut Vec<u8>) {
     buffer.clear();
     buffer.extend_from_slice(config.client_id.as_bytes());
 
     // Build verification thing
     let mut voice_vec = protocol.packet_prefix().as_bytes().to_vec();
+    voice_vec.extend_from_slice(&sequence.to_be_bytes());
     voice_vec.extend_from_slice(voice_data);
     let encrypted_voice_res = util::crypto::encrypt_sodium(&config.encryption_key, &voice_vec);
     if encrypted_voice_res.is_err() {

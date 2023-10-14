@@ -6,6 +6,7 @@ use crate::api;
 pub mod microphone;
 pub mod encode;
 pub mod decode;
+pub mod player;
 
 pub static ACTION_STARTED_TALKING: &str = "started_talking";
 pub static ACTION_STOPPED_TALKING: &str = "stopped_talking";

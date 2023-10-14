@@ -4,9 +4,9 @@ use alkali::symmetric::cipher;
 use cpal::traits::HostTrait;
 use flutter_rust_bridge::StreamSink;
 use rodio::DeviceTrait;
-use serde::de;
 
-use crate::{connection, logger, audio::{microphone, self, AUDIO_OPTIONS}, util};
+
+use crate::{connection, logger, audio::{microphone, self}, util};
 
 //* App logic */
 

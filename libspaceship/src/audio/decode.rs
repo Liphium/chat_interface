@@ -1,11 +1,14 @@
-use std::{thread, sync::{Mutex, mpsc::{Sender, self, Receiver}}, collections::HashMap, time::{Duration, SystemTime}};
+use std::{thread, sync::{Mutex, mpsc::{Sender, self, Receiver}, Arc}, collections::HashMap, time::{Duration, SystemTime}};
 
 use audiopus::coder::{self};
-use cpal::{traits::HostTrait};
+use cpal::traits::HostTrait;
 use once_cell::sync::Lazy;
-use rodio::{Sink, OutputStream, buffer::SamplesBuffer, DeviceTrait};
+use rodio::{Sink, OutputStream, DeviceTrait};
+use tokio::runtime::Runtime;
 
-use crate::{audio, connection::{self, Protocol}, util, api, logger};
+use crate::{connection::{self, Protocol}, util::{self, crypto}, api, logger};
+
+use super::player::{start_audio_processor, start_audio_player};
 
 pub fn decode(samples: &[u8], buffer_size: usize, decoder: &mut audiopus::coder::Decoder) -> Vec<f32> {
 
@@ -20,31 +23,33 @@ pub fn decode(samples: &[u8], buffer_size: usize, decoder: &mut audiopus::coder:
 }
 
 pub struct AudioPacket {
+    pub protocol: Protocol,
     pub data: Vec<u8>,
-    pub id: String
+    pub id: String,
+    pub seq: u32,
 }
 
-static RECEIVE_SENDER: Lazy<Mutex<Sender<AudioPacket>>> = Lazy::new(|| {
+static RECEIVE_SENDER: Lazy<Mutex<Sender<Vec<u8>>>> = Lazy::new(|| {
     let (sender, _) = mpsc::channel();
     Mutex::new(sender)
 });
 
-static RECEIVE_RECEIVER: Lazy<Mutex<Receiver<AudioPacket>>> = Lazy::new(|| {
+static RECEIVE_RECEIVER: Lazy<Mutex<Receiver<Vec<u8>>>> = Lazy::new(|| {
     let (_, receiver) = mpsc::channel();
     Mutex::new(receiver)
 });
 
-pub fn send_packet(packet: AudioPacket) {
+pub fn send_packet(packet: Vec<u8>) {
     RECEIVE_SENDER.lock().expect("channel kaputt").send(packet).expect("sending kaputt");
 }
 
-struct DecoderInfo {
+pub struct PlayerInfo {
+    pub receiver: tokio::sync::mpsc::Receiver<AudioPacket>,
     pub decoder: coder::Decoder,
-    pub protocol: Protocol,
 }
 
 // Starts a thread that decodes and plays the audio
-pub fn decode_play_thread() {
+pub fn decode_play_thread(config: Arc<connection::Config>) {
 
     // Receive channel
     let (sender, receiver) = mpsc::channel();
@@ -73,9 +78,11 @@ pub fn decode_play_thread() {
 
         logger::send_log(logger::TAG_AUDIO, format!("Output device: {}", device.name().unwrap()).as_str());
         let (mut _stream, mut stream_handle) = OutputStream::try_from_device(&device).expect("Couldn't start output stream");
-        let mut sink = Sink::try_new(&stream_handle).expect("Couldn't create sink");
-        let mut decoders: HashMap<String, DecoderInfo> = HashMap::new();
+        let sink = Arc::new(Mutex::new(Sink::try_new(&stream_handle).expect("Couldn't create sink")));
+        let mut players: HashMap<String, tokio::sync::mpsc::Sender<AudioPacket>> = HashMap::new();
         let mut talking: HashMap<String, SystemTime> = HashMap::new();
+        let runtime = Runtime::new().unwrap();
+
         //let mut last_packet = SystemTime::now();
 
         loop {
@@ -91,7 +98,7 @@ pub fn decode_play_thread() {
                 drop(_stream);
                 last_value = super::get_output_device();
                 (_stream, stream_handle) = OutputStream::try_from_device(&device).expect("Couldn't start output stream");
-                sink = Sink::try_new(&stream_handle).expect("Couldn't create sink");
+                *sink.lock().unwrap() = Sink::try_new(&stream_handle).expect("Couldn't create sink");
             }
 
             if connection::should_stop() {
@@ -121,8 +128,22 @@ pub fn decode_play_thread() {
             if packet_result.is_err() {
                 continue;
             }
-            let packet = packet_result.unwrap();
-            let (protocol, voice_data) = packet.data.split_at(2);
+
+            // Split voice and sender data
+            let unpacked = packet_result.unwrap();
+            let (enc_sender_id, voice) = unpacked.split_at(38);
+            let sender_id = crypto::decrypt(&config.verification_key, enc_sender_id);
+
+            let decrypted = util::crypto::decrypt_sodium(&config.encryption_key, voice);
+            if decrypted.is_err() {
+                logger::send_log(logger::TAG_CONNECTION, "error decrypting a packet, maybe just a UDP packet drop error?");
+                continue;
+            }
+            let decrypted = decrypted.unwrap();
+
+            let (protocol, voice_and_seq) = decrypted.split_at(2);
+            let (seq_bytes, voice_data) = voice_and_seq.split_at(4);
+            let seq = u32::from_be_bytes(seq_bytes.try_into().unwrap());
             let prefix = String::from_utf8(protocol.to_vec()).unwrap();
 
             // Decode (if decoder available)
@@ -131,28 +152,41 @@ pub fn decode_play_thread() {
                 continue;
             }
             let protocol = protocol_option.unwrap();
-            let item = decoders.entry(packet.id.clone()).or_insert_with(|| {
-                DecoderInfo {
-                    decoder: coder::Decoder::new(protocol.opus_sample_rate(), audiopus::Channels::Mono).unwrap(),
-                    protocol: protocol.clone(),
-                }
-            });
-            if item.protocol != protocol {
-                decoders.remove(&packet.id);
-                continue;
-            }
-            let prev = talking.insert(packet.id.clone(), SystemTime::now());
-            if prev == None {
-                util::send_action(api::Action{
-                    action: super::ACTION_STARTED_TALKING.to_string(),
-                    data: packet.id.clone(),
-                });
-            }
-            let decoded = decode(voice_data, audio::encode::FRAME_SIZE, &mut item.decoder);
 
-            //logger::send_log(logger::TAG_AUDIO, format!("delay {}ns", SystemTime::now().duration_since(last_packet).unwrap().as_nanos()).as_str());
-            //last_packet = SystemTime::now();
-            sink.append(SamplesBuffer::new(1, protocol.opus_sample_rate() as u32, decoded));
+            let packet = AudioPacket{
+                protocol: protocol.clone(),
+                data: voice_data.to_vec(),
+                id: String::from_utf8(sender_id).unwrap(),
+                seq: seq,
+            };
+
+            // TODO: Replace with multiple tokio threads
+
+            let item = players.entry(packet.id.clone()).or_insert_with(|| {
+                let (voice_sender, voice_receiver) = tokio::sync::mpsc::channel(10usize);
+                let (packet_sender, packet_receiver) = tokio::sync::mpsc::channel(10usize);
+                start_audio_player(runtime.handle(), sink.clone(), voice_receiver);
+                start_audio_processor(runtime.handle(), packet_receiver, voice_sender);
+                packet_sender
+            });
+            item.try_send(packet).unwrap_or_default();
+
+            // if item.protocol != protocol {
+            //     decoders.remove(&packet.id);
+            //     continue;
+            // }
+            // let prev = talking.insert(packet.id.clone(), SystemTime::now());
+            // if prev == None {
+            //     util::send_action(api::Action{
+            //         action: super::ACTION_STARTED_TALKING.to_string(),
+            //         data: packet.id.clone(),
+            //     });
+            // }
+            // let decoded = decode(voice_data, audio::encode::FRAME_SIZE, &mut item.decoder);
+
+            // //logger::send_log(logger::TAG_AUDIO, format!("delay {}ns", SystemTime::now().duration_since(last_packet).unwrap().as_nanos()).as_str());
+            // //last_packet = SystemTime::now();
+            // sink.append(SamplesBuffer::new(1, protocol.opus_sample_rate() as u32, decoded));
         }
     });
 }

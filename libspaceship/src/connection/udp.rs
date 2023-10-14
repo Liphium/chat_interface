@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Mutex, Arc};
 
@@ -8,7 +9,7 @@ use std::net::UdpSocket;
 use once_cell::sync::Lazy;
 use rand::Rng;
 
-use crate::connection::receiver;
+use crate::audio::decode;
 use crate::{communication, audio, logger};
 use crate::{connection, util};
 
@@ -102,7 +103,7 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
     // Start threads
     send_thread(socket.try_clone().expect("Could not clone socket"));
     audio::microphone::record(config.clone());
-    audio::decode::decode_play_thread();
+    audio::decode::decode_play_thread(config.clone());
     let init_packet = super::init_packet(&config);
     send(init_packet);
 
@@ -111,11 +112,9 @@ pub fn connect_recursive(client_id: String, verification_key: String, encryption
         let mut buf: [u8; 8192] = [0u8; 8192];
         loop {
             let size = socket.recv(&mut buf).expect("Detected disconnect");
+            let _channel_map = HashMap::<String, String>::new();
 
-            match receiver::receive_packet(&config, &buf[0..size].to_vec()) {
-                Ok(_) => (),
-                Err(message) => logger::send_log(logger::TAG_CONNECTION, format!("Error while receiving: {}", message).as_str())
-            }
+            decode::send_packet(buf[0..size].to_vec());
         } 
     });
 

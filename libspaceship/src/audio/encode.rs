@@ -77,6 +77,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
         let mut encoder = audiopus::coder::Encoder::new(connection::get_protocol().opus_sample_rate(), opus_channel, audiopus::Application::Voip).unwrap();
         let mut buffer: Vec<u8> = Vec::<u8>::with_capacity(8000);
         let mut talking_streak = 0;
+        let mut sequence = 0u32;
 
         // Set the bitrate to 128 kb/s
         encoder.set_bitrate(audiopus::Bitrate::BitsPerSecond(128000)).unwrap();
@@ -141,7 +142,8 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
 
             let encoded = encode(samples, &mut encoder);
             if !config.test && config.connection && !options.muted && !options.silent_mute && options.talking {
-                connection::construct_packet(&config, &protocol, &encoded, &mut buffer);
+                sequence += 1;
+                connection::construct_packet(&config, &protocol, &encoded, sequence, &mut buffer);
                 connection::udp::send(buffer.clone());
 
                 /*
