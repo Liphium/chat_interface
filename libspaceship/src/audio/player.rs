@@ -51,7 +51,7 @@ pub fn start_audio_player(handle: &tokio::runtime::Handle, sink: Arc<Mutex<Sink>
     });
 }
 
-pub const BUFFER_SIZE: usize = 4; // 80ms normally
+pub const BUFFER_SIZE: usize = 10; // 80ms normally
 
 pub fn start_audio_processor(handle: &tokio::runtime::Handle, mut receiver: Receiver<AudioPacket>, sender: Sender<DecodedAudioPacket>) {
     handle.spawn(async move {
@@ -60,6 +60,7 @@ pub fn start_audio_processor(handle: &tokio::runtime::Handle, mut receiver: Rece
         let mut decoder = coder::Decoder::new(audiopus::SampleRate::Hz48000, audiopus::Channels::Mono).unwrap();
         let mut jitter_buffer = VecDeque::with_capacity(BUFFER_SIZE);
         let mut last_played_seq: u32 = 0;
+        let mut last_real_played: u32 = 0;
         let mut last_packet = Instant::now();
 
         loop {
@@ -69,6 +70,7 @@ pub fn start_audio_processor(handle: &tokio::runtime::Handle, mut receiver: Rece
             if packet.protocol != current_protocol {
                 decoder = coder::Decoder::new(packet.protocol.opus_sample_rate(), audiopus::Channels::Mono).unwrap();
                 current_protocol = packet.protocol.clone();
+                logger::send_log(logger::TAG_AUDIO, "different protocol found");
                 continue;
             }
             let decoded = decode::decode(packet.data.as_slice(), super::encode::FRAME_SIZE, &mut decoder);
@@ -85,14 +87,17 @@ pub fn start_audio_processor(handle: &tokio::runtime::Handle, mut receiver: Rece
                 jitter_buffer.pop_front();
             } else if jitter_buffer.len() != BUFFER_SIZE {
                 logger::send_log(logger::TAG_AUDIO, "Jitter buffer too small, dropping packet");
+                // TODO: Remove if statement below and put it here instead (at least the last_played_seq == 0 part)
                 continue;
             }
 
             // Make sure something is always playing
-            let (front_seq, _) = jitter_buffer.front().unwrap();
-            if last_played_seq == 0 || last_played_seq.wrapping_sub(*front_seq) > BUFFER_SIZE as u32 {
-                logger::send_log(logger::TAG_AUDIO, format!("Last played: {}, front: {}", last_played_seq, front_seq).as_str());
-                last_played_seq = *front_seq - 1;
+            let (front_seq_p, _) = jitter_buffer.front().unwrap();
+            let front_seq = front_seq_p.clone();
+            if last_played_seq == 0 || (front_seq.wrapping_sub(last_real_played) > BUFFER_SIZE as u32) {
+                logger::send_log(logger::TAG_AUDIO, format!("Last played: {}, front: {}, difference: {}", last_played_seq, front_seq, front_seq.wrapping_sub(last_real_played)).as_str());
+                last_played_seq = front_seq.clone() - 1;
+                last_real_played = last_played_seq;
             }
 
             // Check if the next packet in the buffer is ready to be played
@@ -108,13 +113,15 @@ pub fn start_audio_processor(handle: &tokio::runtime::Handle, mut receiver: Rece
                 Some((seq, decoded)) => (seq.clone(), decoded.clone()),
                 None => continue,
             };
-            logger::send_log(logger::TAG_AUDIO, format!("Last played: {}, now playing: {}", last_played_seq, next_seq).as_str());
             jitter_buffer.remove(index);
+            last_real_played = next_seq;
+
+            logger::send_log(logger::TAG_AUDIO, format!("Last played: {}, now playing: {}, front: {} ({})", last_played_seq, next_seq, front_seq, index).as_str());
 
             sender.try_send(DecodedAudioPacket { 
                 samples: next_decoded.clone(), 
                 protocol: current_protocol.clone(), 
-            }).unwrap();
+            }).expect("sending channel broke");
 
             last_played_seq = next_seq;
 
