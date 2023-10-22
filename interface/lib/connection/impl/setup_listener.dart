@@ -6,6 +6,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:get/get.dart';
 
@@ -73,6 +74,7 @@ void _sub(String status, List<Map<String, dynamic>> tokens) {
   connector.sendAction(Message("conv_sub", <String, dynamic>{
     "tokens": tokens,
     "status": status,
+    "date": lastFetchTime.millisecondsSinceEpoch,
   }), handler: (event) {
     if(!event.data["success"]) {
       sendLog("ERROR WHILE SUBSCRIBING: ${event.data["message"]}");
