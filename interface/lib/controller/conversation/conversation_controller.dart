@@ -78,7 +78,7 @@ class Conversation {
   SecureKey key;
 
   final membersLoading = false.obs;
-  final members = <String, Member>{}.obs;
+  final members = <String, Member>{}.obs; // Token ID -> Member
 
   Conversation(this.id, this.token, this.container, this.key) {
     containerSub.value = container;

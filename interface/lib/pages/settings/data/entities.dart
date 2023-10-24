@@ -64,9 +64,10 @@ class Setting<T> {
     this.value.value = jsonDecode(s)["v"] as T;
   }
 
-  void grabFromDb() async {
+  Future<bool> grabFromDb() async {
     final val = await (db.select(db.setting)..where((tbl) => tbl.key.equals(label))).getSingleOrNull();
     grabFrom((val ?? SettingData(key: label, value: stringify())).value);
+    return true;
   }
 
   String stringify() {

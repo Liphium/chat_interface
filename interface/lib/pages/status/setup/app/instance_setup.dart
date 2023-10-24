@@ -36,10 +36,6 @@ class InstanceSetup extends Setup {
       return null;
     }
 
-    // Set current language
-    SettingController controller = Get.find();
-    Get.updateLocale(LanguageSettings.languages[controller.settings[LanguageSettings.language]!.getValue()].locale);
-
     // Open instance selection page
     return InstanceSelectionPage(instances: instances);
   }

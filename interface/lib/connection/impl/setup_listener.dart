@@ -4,13 +4,16 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
-import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:get/get.dart';
 
 import '../../util/logging_framework.dart';
+
+const lastConversationFetchDB = "lastConvFetch";
+var lastConversationFetch = DateTime.now(); 
 
 void setupSetupListeners() {
 
@@ -41,11 +44,19 @@ void setupSetupListeners() {
 }
 
 // status is going to be encrypted in this function
-void subscribeToConversations(String status, String friendId) {
+Future<bool> subscribeToConversations(String status, String friendId) async {
 
   // Encrypt status with profile key
-  status = encryptSymmetric(status, profileKey);
-  status = "$friendId:$status";
+  status = generateStatusData(status, friendId);
+
+  var lastFetch = await (db.select(db.setting)..where((tbl) => tbl.key.equals(lastConversationFetchDB))).getSingleOrNull();
+  if(lastFetch == null) {
+    var first = DateTime.fromMillisecondsSinceEpoch(0);
+    await db.into(db.setting).insertOnConflictUpdate(SettingData(key: lastConversationFetchDB, value: first.millisecondsSinceEpoch.toString()));
+    lastFetch = SettingData(key: "lastFetch", value: first.millisecondsSinceEpoch.toString());
+  }
+
+  lastConversationFetch = DateTime.fromMillisecondsSinceEpoch(int.parse(lastFetch.value));
 
   // Subscribe to all conversations
   final tokens = <Map<String, dynamic>>[];
@@ -55,13 +66,15 @@ void subscribeToConversations(String status, String friendId) {
 
   // Subscribe
   _sub(status, tokens);
+
+  await db.into(db.setting).insertOnConflictUpdate(SettingData(key: lastConversationFetchDB, value: DateTime.now().millisecondsSinceEpoch.toString()));
+  return true;
 }
 
 void subscribeToConversation(String status, String friendId, ConversationToken token) {
   
   // Encrypt status with profile key
-  status = encryptSymmetric(status, profileKey);
-  status = "$friendId:$status";
+  status = generateStatusData(status, friendId);
 
   // Subscribe to all conversations
   final tokens = <Map<String, dynamic>>[token.toMap()];
@@ -70,11 +83,18 @@ void subscribeToConversation(String status, String friendId, ConversationToken t
   _sub(status, tokens);
 }
 
+String generateStatusData(String status, String friendId) {
+  status = encryptSymmetric(status, profileKey);
+  status = "$friendId:$status";
+
+  return status;
+}
+
 void _sub(String status, List<Map<String, dynamic>> tokens) {
   connector.sendAction(Message("conv_sub", <String, dynamic>{
     "tokens": tokens,
     "status": status,
-    "date": lastFetchTime.millisecondsSinceEpoch,
+    "date": lastConversationFetch.millisecondsSinceEpoch,
   }), handler: (event) {
     if(!event.data["success"]) {
       sendLog("ERROR WHILE SUBSCRIBING: ${event.data["message"]}");
