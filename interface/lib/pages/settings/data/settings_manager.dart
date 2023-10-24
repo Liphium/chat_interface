@@ -1,0 +1,27 @@
+import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/settings/app/language_settings.dart';
+import 'package:chat_interface/pages/settings/appearance/call/call_settings.dart';
+import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
+import 'package:chat_interface/pages/settings/app/video/video_settings.dart';
+import 'package:chat_interface/pages/settings/data/entities.dart';
+import 'package:drift/drift.dart';
+import 'package:get/get.dart';
+
+class SettingController extends GetxController {
+
+  final settings = <String, Setting>{}; // label: Setting
+
+  SettingController() {
+    
+    addSpeechSettings(this);
+    addVideoSettings(this);
+    addCallAppearanceSettings(this);
+    addLanguageSettings(this);
+    
+  }
+
+  void addSetting(Setting setting) {
+    settings[setting.label] = setting;
+  }
+
+}
