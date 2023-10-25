@@ -9,7 +9,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
-import '../../data/entities.dart';
+import '../data/entities.dart';
 
 void addVideoSettings(SettingController controller) {
 

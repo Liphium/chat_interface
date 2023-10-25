@@ -1,8 +1,8 @@
 
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
-import 'package:chat_interface/pages/settings/app/speech/microphone_tab.dart';
-import 'package:chat_interface/pages/settings/app/speech/output_tab.dart';
+import 'package:chat_interface/pages/settings/app/microphone_tab.dart';
+import 'package:chat_interface/pages/settings/app/output_tab.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

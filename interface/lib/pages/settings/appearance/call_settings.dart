@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/settings/appearance/call/call_preview.dart';
+import 'package:chat_interface/pages/settings/appearance/call_preview.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';

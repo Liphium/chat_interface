@@ -2,9 +2,10 @@ import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
-import 'package:chat_interface/pages/settings/appearance/call/call_settings.dart';
-import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
-import 'package:chat_interface/pages/settings/app/video/video_settings.dart';
+import 'package:chat_interface/pages/settings/app/speech_settings.dart';
+import 'package:chat_interface/pages/settings/app/video_settings.dart';
+import 'package:chat_interface/pages/settings/appearance/call_settings.dart';
+import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,7 +25,7 @@ enum SettingLabel {
   ]),
 
   appearance("settings.tab.appearance", [
-    SettingCategory("theme", Icons.dark_mode, null),
+    SettingCategory("theme", Icons.dark_mode, ThemeSettingsPage()),
     SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 

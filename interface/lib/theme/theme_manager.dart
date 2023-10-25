@@ -1,20 +1,16 @@
+import 'package:chat_interface/theme/impl/metal_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'impl/metal_theme.dart';
-
 class ThemeManager extends GetxController {
 
-  final themes = [
-    CustomTheme('Metal', lightMetalTheme, darkMetalTheme),
-  ];
+  final currentTheme = darkMetalTheme.obs;
 
-  final currentTheme = 0.obs;
   final brightness = Brightness.dark.obs;
 
   // Changes the color theme
-  void changeTheme(int index) {
-    currentTheme.value = index;
+  void changeTheme(ThemeData theme) {
+    currentTheme.value = theme;
   }
 
   // Changes the brightness (light or dark)

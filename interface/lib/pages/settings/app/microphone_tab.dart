@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/ffi.dart';
-import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
+import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class MicrophoneTab extends StatefulWidget {

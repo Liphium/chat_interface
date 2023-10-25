@@ -2,7 +2,7 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/ffi.dart';
-import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
+import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:get/get.dart';
 
