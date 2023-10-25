@@ -47,8 +47,8 @@ class ThemeSettings {
   ];
 
   static final backgroundModes = [
-    SelectableItem("none".tr, Icons.close),
-    SelectableItem("colored".tr, Icons.color_lens)
+    SelectableItem("custom.none".tr, Icons.close),
+    SelectableItem("custom.colored".tr, Icons.color_lens)
   ];
 
   static final themePresets = [
@@ -120,7 +120,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("theme.custom".tr, style: Get.theme.textTheme.labelLarge),
+                      Text("theme.custom.title".tr, style: Get.theme.textTheme.labelLarge),
                       verticalSpacing(defaultSpacing),
 
                       //* Sliders
@@ -136,7 +136,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                       //* Selections
                       Text("custom.theme_mode".tr, ),
                       verticalSpacing(elementSpacing),
-                      const ListSelectionSetting(settingName: ThemeSettings.themeMode, items: [SelectableItem("Dark", Icons.dark_mode), SelectableItem("Light", Icons.light_mode)]),
+                      ListSelectionSetting(settingName: ThemeSettings.themeMode, items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
                       verticalSpacing(defaultSpacing),
 
                       Text("custom.background_mode".tr, ),
