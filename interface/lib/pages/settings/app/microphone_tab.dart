@@ -126,7 +126,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         
         //* Sensitivity
         Text("audio.microphone.sensitivity".tr, style: theme.textTheme.labelLarge),
-        verticalSpacing(defaultSpacing * 0.5),
+        verticalSpacing(elementSpacing),
 
         RepaintBoundary(
           child: Obx(() =>

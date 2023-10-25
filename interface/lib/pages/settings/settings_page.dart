@@ -105,18 +105,21 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
                     child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Obx(() =>
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
-                              child: Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
-                            )
-                          ),
-                          verticalSpacing(elementSpacing),
-                          Obx(() => currentCategory.value.widget ?? const Placeholder()),
-                        ],
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: defaultSpacing),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Obx(() =>
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
+                                child: Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
+                              )
+                            ),
+                            verticalSpacing(elementSpacing),
+                            Obx(() => currentCategory.value.widget ?? const Placeholder()),
+                          ],
+                        ),
                       ),
                     ),
                   ),

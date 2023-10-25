@@ -35,56 +35,45 @@ class ColorFactory {
 
 }
 
-GeneratedColors generateColorTheme() {
+ColorFactory buildColorFactoryFromSettings() {
   final SettingController controller = Get.find();
+  var index = controller.settings[ThemeSettings.themePreset]!.getValue() as int;
+  if(index > ThemeSettings.customThemeIndex) {
+    index = ThemeSettings.customThemeIndex;
+  }
+  final preset = ThemeSettings.themePresets[index];
 
   // Base values
-  final primHue = controller.settings[ThemeSettings.primaryHue]!.getValue() * 360.0;
-  final secHue = controller.settings[ThemeSettings.secondaryHue]!.getValue() * 360.0;
-  final sat = controller.settings[ThemeSettings.baseSaturation]!.getValue() as double;
+  var primHue = preset.primaryHue * 360.0;
+  var secHue = preset.secondaryHue * 360.0;
+  var sat = preset.baseSaturation;
 
   // Advanced color
-  final lum = controller.settings[ThemeSettings.baseLuminosity]!.getValue() as double;
-  final themeMode = ThemeSettings.themeModes[controller.settings[ThemeSettings.themeMode]!.getValue() as int];
-  final lumJumps = controller.settings[ThemeSettings.luminosityJumps]!.getValue() as double;
+  var themeMode = ThemeSettings.themeModes[preset.themeMode];
+  var backgroundMode = preset.backgroundMode;
 
-  // Background
-  final background1 = HSLColor.fromAHSL(1.0, primHue, sat, lum).toColor();
-  final background2 = HSLColor.fromAHSL(1.0, primHue, sat, clampDouble(lum + (lumJumps * themeMode), 0.0, 1.0)).toColor();
-  final background3 = HSLColor.fromAHSL(1.0, primHue, sat, clampDouble(lum + (lumJumps * 2 * themeMode), 0.0, 1.0)).toColor();
+  if(index == ThemeSettings.customThemeIndex) {
+    primHue = controller.settings[ThemeSettings.primaryHue]!.getValue() * 360.0;
+    secHue = controller.settings[ThemeSettings.secondaryHue]!.getValue() * 360.0;
+    sat = controller.settings[ThemeSettings.baseSaturation]!.getValue() as double;
 
-  // Primary color
-  final primary = HSLColor.fromAHSL(1.0, primHue, sat, 0.5).toColor();
-  final primaryContainer = HSLColor.fromAHSL(1.0, primHue, sat, clampDouble(0.5 + (0.1 * themeMode), 0.0, 1.0)).toColor();
+    // Advanced color
+    themeMode = ThemeSettings.themeModes[controller.settings[ThemeSettings.themeMode]!.getValue() as int];
+    backgroundMode = controller.settings[ThemeSettings.backgroundMode]!.getValue() as int;
+  }
 
-  final secondary = HSLColor.fromAHSL(1.0, secHue, sat, 0.5).toColor();
-  final secondaryContainer = HSLColor.fromAHSL(1.0, secHue, sat, clampDouble(0.5 + (0.1 * themeMode), 0.0, 1.0)).toColor();
-
-  return GeneratedColors(primary, primaryContainer, secondary, secondaryContainer, background1, background2, background3);
+  return ColorFactory(primHue, secHue, sat, themeMode == -1 ? ThemeSettings.baseLuminosityDark : ThemeSettings.baseLuminosityLight, themeMode, ThemeSettings.luminosityJumps, backgroundMode);
 }
 
 ThemeData getThemeData() {
-  final SettingController controller = Get.find();
-
-  // Base values
-  final primHue = controller.settings[ThemeSettings.primaryHue]!.getValue() * 360.0;
-  final secHue = controller.settings[ThemeSettings.secondaryHue]!.getValue() * 360.0;
-  final sat = controller.settings[ThemeSettings.baseSaturation]!.getValue() as double;
-
-  // Advanced color
-  final lum = controller.settings[ThemeSettings.baseLuminosity]!.getValue() as double;
-  final themeMode = ThemeSettings.themeModes[controller.settings[ThemeSettings.themeMode]!.getValue() as int];
-  final backgroundMode = controller.settings[ThemeSettings.backgroundMode]!.getValue() as int;
-  final lumJumps = controller.settings[ThemeSettings.luminosityJumps]!.getValue() as double;
-
-  final factory = ColorFactory(primHue, secHue, sat, lum, themeMode, lumJumps, backgroundMode);
+  final factory = buildColorFactoryFromSettings();
 
   return defaultDarkTheme.copyWith(
     brightness: Brightness.dark,
     colorScheme: ColorScheme(
 
       // Background color
-      brightness: Brightness.dark, 
+      brightness: Brightness.dark,
       background: factory.getBackground1(),
       onBackground: factory.getBackground2(),
       primaryContainer: factory.getBackground3(),
