@@ -1,8 +1,8 @@
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
-import 'package:chat_interface/pages/chat/sidebar/tabs/friends/friend_button.dart';
-import 'package:chat_interface/pages/chat/sidebar/tabs/friends/request_button.dart';
+import 'package:chat_interface/pages/chat/sidebar/friends/friend_button.dart';
+import 'package:chat_interface/pages/chat/sidebar/friends/request_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/friend_add_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
