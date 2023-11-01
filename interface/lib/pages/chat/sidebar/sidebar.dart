@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/chat/sidebar/conversations/conversations_page.dart';
+import 'package:chat_interface/pages/chat/sidebar/files/files_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_icon_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
@@ -19,7 +20,7 @@ class _SidebarState extends State<Sidebar> {
   var map = <int, Widget>{
     0: const ConversationsPage(),
     1: const FriendsPage(),
-    2: const SettingsPage(),
+    2: const FilesPage(),
     3: const SettingsPage(),
   };
 
@@ -27,7 +28,7 @@ class _SidebarState extends State<Sidebar> {
   Widget build(BuildContext context) {
 
     ThemeData theme = Theme.of(context);
-  var selected = 0.obs;
+  var selected = 2.obs;
 
     //* Sidebar
     return Container(
@@ -41,7 +42,8 @@ class _SidebarState extends State<Sidebar> {
         children: [
           Center(
             child: RepaintBoundary(
-              child: Padding(
+              child: Container(
+                color: theme.colorScheme.onBackground,
                 padding: const EdgeInsets.all(defaultSpacing),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
