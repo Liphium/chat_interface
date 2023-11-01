@@ -99,7 +99,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                 children: [
                                   Icon(
                                     Icons.person,
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    color: Theme.of(context).colorScheme.tertiary,
                                     size: 35,
                                   ),
                                   horizontalSpacing(defaultSpacing * 0.75),

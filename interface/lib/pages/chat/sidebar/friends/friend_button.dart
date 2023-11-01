@@ -22,6 +22,7 @@ class _FriendButtonState extends State<FriendButton> {
     return Padding(
       padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
       child: Material(
+        color: Get.theme.colorScheme.onBackground,
         borderRadius: BorderRadius.circular(10),
         child: MouseRegion(
           onHover: (event) => widget.position.value = event.position,
@@ -29,7 +30,7 @@ class _FriendButtonState extends State<FriendButton> {
             borderRadius: BorderRadius.circular(10),
             hoverColor: Theme.of(context)
                 .colorScheme
-                .primary,
+                .primary.withAlpha(100),
             splashColor: Theme.of(context).hoverColor,
 
             //* Show profile

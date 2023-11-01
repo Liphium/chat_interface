@@ -84,7 +84,7 @@ class _MessageInputState extends State<MessageInput> {
                   IconButton(
                     onPressed: () => loading.value = false,
                     icon: const Icon(Icons.add),
-                    color: theme.colorScheme.onPrimary,
+                    color: theme.colorScheme.tertiary,
                     tooltip: "soon",
                   ),
                   horizontalSpacing(defaultSpacing),
@@ -97,7 +97,7 @@ class _MessageInputState extends State<MessageInput> {
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(1000),
                       ],
-                      cursorColor: theme.colorScheme.onPrimary,
+                      cursorColor: theme.colorScheme.tertiary,
                       style: theme.textTheme.labelLarge,
                       controller: _message,
                       maxLines: null,
@@ -113,7 +113,7 @@ class _MessageInputState extends State<MessageInput> {
                       })
                     ,
                     icon: Icons.send,
-                    color: theme.colorScheme.onPrimary,
+                    color: theme.colorScheme.tertiary,
                     loading: loading,
                   )
                 ],

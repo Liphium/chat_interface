@@ -37,7 +37,7 @@ class ThemeSettings {
   static const String baseSaturation = 'theme.baseSaturation';
   static const String backgroundMode = 'theme.backgroundMode'; // Colored or dark
   
-  static const double baseLuminosityLight = 0.9;
+  static const double baseLuminosityLight = 0.87;
   static const double baseLuminosityDark = 0.13;
   static const double luminosityJumps = 0.04;
 
