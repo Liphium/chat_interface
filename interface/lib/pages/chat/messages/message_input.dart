@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/messages/writing_status.dart';
+import 'package:chat_interface/util/logging_framework.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -47,6 +51,18 @@ class _MessageInputState extends State<MessageInput> {
       _message.clear();
     });
 
+    final actionsMap = {
+      SendIntent: CallbackAction<SendIntent>(
+        onInvoke: (SendIntent intent) {
+          sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, "", () {
+            _message.clear();
+            loading.value = false;
+          });
+          return null;
+        },
+      ),
+    };
+
     return Padding(
       padding: const EdgeInsets.only(
         right: defaultSpacing,
@@ -67,55 +83,69 @@ class _MessageInputState extends State<MessageInput> {
           verticalSpacing(defaultSpacing * 0.5),
 
           //* Input
-          Material(
-            color: theme.colorScheme.onBackground,
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(defaultSpacing * 1.5),
-              bottomLeft: Radius.circular(defaultSpacing * 1.5),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: defaultSpacing,
-                vertical: elementSpacing ,
+          Actions(
+            actions: actionsMap,
+            child: Material(
+              color: theme.colorScheme.onBackground,
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(defaultSpacing * 1.5),
+                bottomLeft: Radius.circular(defaultSpacing * 1.5),
               ),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => loading.value = false,
-                    icon: const Icon(Icons.add),
-                    color: theme.colorScheme.tertiary,
-                    tooltip: "soon",
-                  ),
-                  horizontalSpacing(defaultSpacing),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'chat.message'.tr,
-                      ),
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(1000),
-                      ],
-                      cursorColor: theme.colorScheme.tertiary,
-                      style: theme.textTheme.labelLarge,
-                      controller: _message,
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: defaultSpacing,
+                  vertical: elementSpacing ,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        final result = await FilePicker.platform.pickFiles();
+                        if(result == null) {
+                          return;
+                        }
+            
+                        File file = File(result.files.single.path!);
+            
+                      },
+                      icon: const Icon(Icons.add),
+                      color: theme.colorScheme.tertiary,
+                      tooltip: "soon",
                     ),
-                  ),
-                  horizontalSpacing(defaultSpacing),
-                  LoadingIconButton(
-                    onTap: () =>
-                      sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, "", () {
+                    horizontalSpacing(defaultSpacing),
+                    Expanded(
+                      child: Shortcuts(
+                        shortcuts: {
+                          LogicalKeySet(LogicalKeyboardKey.enter): const SendIntent(),
+                        },
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'chat.message'.tr,
+                          ),
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(1000),
+                          ],
+                          cursorColor: theme.colorScheme.tertiary,
+                          style: theme.textTheme.labelLarge,
+                          controller: _message,
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline
+                        ),
+                      ),
+                    ),
+                    horizontalSpacing(defaultSpacing),
+                    LoadingIconButton(
+                      onTap: () => sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, "", () {
                         _message.clear();
                         loading.value = false;
-                      })
-                    ,
-                    icon: Icons.send,
-                    color: theme.colorScheme.tertiary,
-                    loading: loading,
-                  )
-                ],
+                      }),
+                      icon: Icons.send,
+                      color: theme.colorScheme.tertiary,
+                      loading: loading,
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -123,4 +153,8 @@ class _MessageInputState extends State<MessageInput> {
       ),
     );
   }
+}
+
+class SendIntent extends Intent {
+  const SendIntent();
 }

@@ -9,8 +9,9 @@ class LoadingIconButton extends StatelessWidget {
   final Color? color;
   final double iconSize;
   final Function() onTap;
+  final Function(BuildContext)? onTapContext;
 
-  const LoadingIconButton({super.key, required this.loading, required this.onTap, required this.icon, this.color, this.iconSize = 23});
+  const LoadingIconButton({super.key, required this.loading, required this.onTap, this.onTapContext, required this.icon, this.color, this.iconSize = 23});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,16 @@ class LoadingIconButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(50),
-          onTap: () => loading.value ? null : onTap(),
+          onTap: () {
+            if(loading.value) {
+              return;
+            }
+
+            onTap();
+            if(onTapContext != null) {
+              onTapContext!(context);
+            }
+          },
           hoverColor: Get.theme.hoverColor,
           child: Padding(
             padding: const EdgeInsets.all(defaultSpacing),
