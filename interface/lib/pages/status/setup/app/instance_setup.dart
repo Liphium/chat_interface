@@ -128,7 +128,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                 FJElevatedButton(
                   onTap: () => setupInstance(_controller.text, next: true),
                   child: Center(child: Text("create".tr, style: Get.textTheme.labelLarge)),
-                )
+                ),
               ],
             ),
           )

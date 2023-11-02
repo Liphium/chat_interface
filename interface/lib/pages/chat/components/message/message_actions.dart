@@ -1,10 +1,33 @@
 part of 'message_feed.dart';
 
+void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<XFile> files, Function() callback) async {
+  if(loading.value) {
+    return;
+  }
+  loading.value = true;
+
+  // Upload files
+  final attachments = <String>[];
+  for(var file in files) {
+    final res = await _attachFile(file);
+    if(!res.success) {
+      showErrorPopup("error", res.message);
+      callback.call();
+      return;
+    }
+    attachments.add(res.data);
+  }
+
+  loading.value = false;
+  sendActualMessage(loading, conversationId, MessageType.text, jsonEncode(attachments), base64Encode(utf8.encode(message)), callback);
+}
+
 void sendTextMessage(RxBool loading, String conversationId, String message, String attachments, Function() callback) async {
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
 
 void sendActualMessage(RxBool loading, String conversationId, MessageType type, String attachments, String message, Function() callback) async {
+  if(loading.value) return;
   loading.value = true;
 
   // Encrypt message with signature
@@ -41,23 +64,50 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
 
   // Store message
   Get.find<MessageController>().storeMessage(Message.fromJson(json["message"]));
+}
 
-  /* OLD CODE FOR REFERENCE
-  connector.sendAction(messaging.Message("conv_msg_create", <String, dynamic>{
-    "conversation": conversation.id,
-    "token_id": conversation.token.id,
-    "token": conversation.token.token,
-    "data": encrypted
-  }), handler: (event) {
-    callback.call();
-    if(event.data["success"]) return;
+class _FileUploadResponse {
+  final bool success;
+  final String message;
+  final String data;
 
-    String message = "conv_msg_create.${event.data["status"]}";
-    if(event.data["message"] == "server.error") {
-      message = "server.error";
-    }
+  _FileUploadResponse(this.success, this.message, this.data);
+}
 
-    showMessage(SnackbarType.error, message.tr);
+Future<_FileUploadResponse> _attachFile(XFile file) async {
+  final bytes = await file.readAsBytes();
+  sendLog("Original size: ${bytes.length}");
+  final key = randomSymmetricKey();
+  final encrypted = encryptSymmetricBytes(bytes, key);
+  sendLog("Encrypted size: ${encrypted.length}");
+  final name = encryptSymmetric(file.name, key);
+
+  // Upload file
+  final request = http.MultipartRequest("POST", server("/account/files/upload"));
+  request.files.add(http.MultipartFile.fromBytes("file", encrypted, filename: name));
+  request.fields.addAll(<String, String>{
+    "name": name,
+    "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
+    "extension": file.name.split(".").last
   });
-  */
+  request.headers.addAll({
+    "Content-Type": "multipart/form-data",
+    "Authorization": "Bearer $sessionToken"
+  });
+
+  final res = await request.send();
+  if(res.statusCode != 200) {
+    return _FileUploadResponse(false, "server.error", "");
+  }
+
+  final json = jsonDecode(await res.stream.bytesToString());
+  if(!json["success"]) {
+    return _FileUploadResponse(false, json["message"], "");
+  }
+
+  return _FileUploadResponse(true, "success", jsonEncode({
+    "id": json["id"],
+    "key": packageSymmetricKey(key),
+    "url": json["url"]
+  }));
 }
