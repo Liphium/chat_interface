@@ -63,7 +63,7 @@ class SpacesController extends GetxController {
 
       // Send invites
       final container = SpaceConnectionContainer(appToken["domain"], roomId, key!);
-      sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toJson(), () => {});
+      sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toInviteJson(), () => {});
     });
   }
 
@@ -157,15 +157,24 @@ class SpacesController extends GetxController {
   }
 }
 
-class SpaceConnectionContainer {  
+class SpaceConnectionContainer extends ShareContainer {  
   final String node; // Node domain
   final String roomId; // Token
   final SecureKey key; // Symmetric key
 
-  SpaceConnectionContainer(this.node, this.roomId, this.key);
+  SpaceConnectionContainer(this.node, this.roomId, this.key) : super(ShareType.space);
   SpaceConnectionContainer.fromJson(Map<String, dynamic> json) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]));
 
-  String toJson() => jsonEncode({
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      "node": node,
+      "id": roomId,
+      "key": packageSymmetricKey(key)
+    };
+  }
+
+  String toInviteJson() => jsonEncode({
     "node": node,
     "id": roomId,
     "key": packageSymmetricKey(key)

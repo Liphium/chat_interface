@@ -22,10 +22,12 @@ class Connector {
   final _afterSetup = <String, bool>{};
   final _afterSetupQueue = <Event>[];
   bool initialized = false;
+  bool _connected = false;
 
   void connect(String url, String token, {bool restart = true, Function()? onDone}) {
     initialized = true;
     connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
+    _connected = true;
 
     connection.stream.listen((msg) {
         sendLog(msg);
@@ -44,6 +46,7 @@ class Connector {
       },
       cancelOnError: false,
       onDone: () {
+        _connected = false;
         if(onDone != null) {
           onDone();
         }
@@ -69,6 +72,10 @@ class Connector {
   void sendMessage(String message) {
     sendLog(message);
     connection.sink.add(message);
+  }
+
+  bool isConnected() {
+    return _connected;
   }
 
   void listen(String event, Function(Event) handler, {afterSetup = false}) {

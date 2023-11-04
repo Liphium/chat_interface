@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
@@ -92,6 +93,7 @@ class Friend {
   KeyStorage keyStorage;
   var status = "-".obs;
   final statusType = 0.obs;
+  Timer? _timer;
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
@@ -149,6 +151,17 @@ class Friend {
     final data = jsonDecode(message);
     status.value = data["s"];
     statusType.value = data["t"];
+
+    _timer?.cancel();
+    _timer = Timer(const Duration(minutes: 2), () {
+      setOffline();
+      _timer = null;
+    });
+  }
+
+  void setOffline() {
+    status.value = "-";
+    statusType.value = 0;
   }
 
   //* Remove friend
