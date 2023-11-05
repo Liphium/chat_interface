@@ -498,3 +498,31 @@ class ElementSetting extends Setting<String> {
     });
   }
 }
+
+// String is the id of the deck
+class DeckSetting extends Setting<String> {
+  DeckSetting(String name, String description) : super(name, description, SettingType.element, "");
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<EditorController>();
+
+    return Obx(() {
+
+      // Grab all elements in the current layout
+      final decks = controller.currentCanvas.value.decks.values.toList();
+
+      return ListSelection(
+        currentIndex: controller.currentCanvas.value.decks.keys.toList().indexOf(value.value ?? _defaultValue),
+        items: List.generate(decks.length, (index) {
+          final element = decks[index];
+          return SelectableItem(element.name, Icons.layers);
+        }),
+        callback: (newVal, index) {
+          setValue(controller.currentCanvas.value.decks.keys.toList()[index]);
+          Get.find<EditorController>().save();
+        },
+      );
+    });
+  }
+}

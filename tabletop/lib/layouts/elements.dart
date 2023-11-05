@@ -8,6 +8,7 @@ import 'package:tabletop/theme/list_selection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tabletop/theme/vertical_spacing.dart';
 
 class ImageElement extends layout.Element {
   
@@ -265,4 +266,78 @@ class BoxElement extends layout.Element {
     ];
   }
 
+}
+
+class StackElement extends layout.Element {
+  
+  StackElement(String name) : super(name, 4, Icons.filter_none);
+  StackElement.fromMap(int type, Map<String, dynamic> json) : super.fromMap(type, Icons.filter_none, json);
+
+  @override
+  void init() {
+    scalable = false;
+    if(size.value.width == 0) size.value = const Size(100, 100);
+  }
+
+  @override
+  void preProcess() {
+    final deckId = settings[0].value.value as String;
+    final deck = Get.find<EditorController>().currentCanvas.value.decks[deckId]; 
+    if(deck == null) {
+      return;
+    }
+    setWidth(deck.width.toDouble());
+    setHeight(deck.height.toDouble());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    final deckId = settings[0].value.value as String;
+    final deck = Get.find<EditorController>().currentCanvas.value.decks[deckId]; 
+    if(deck == null) {
+      return const Placeholder();
+    }
+
+    if(deck.images.isEmpty) {
+      return Container(
+        color: Colors.black,
+        child: const Center(
+          child: Text("No images in deck", style: TextStyle(color: Colors.white)),
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(deck.width / 10),
+          child: Image.file(File(deck.images[0].path), fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
+            return Placeholder(
+              color: Get.theme.colorScheme.error,
+              child: Center(
+                child: Text("Error loading image", style: Theme.of(context).textTheme.labelLarge),
+              ),
+            );
+          },),
+        ),
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 35, sigmaY: 35), 
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(deck.width / 10),
+            ),
+          )
+        ),
+      ],
+    );
+  }
+
+  @override
+  List<layout.Setting> buildSettings() {
+    return [
+      layout.DeckSetting("deck", "Deck"),
+    ];
+  }
 }

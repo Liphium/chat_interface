@@ -104,6 +104,7 @@ class EditorController extends GetxController {
       case 1: element = TextElement(name); break;
       case 2: element = BoxElement(name); break;
       case 3: element = ParagraphElement(name); break;
+      case 4: element = StackElement(name); break;
       default: throw Exception("Unknown element type: $type");
     }
     layer.addElement(element);

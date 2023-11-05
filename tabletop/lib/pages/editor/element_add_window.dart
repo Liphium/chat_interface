@@ -30,7 +30,7 @@ class _ConversationAddWindowState extends State<ElementAddWindow> {
     const SelectableItem("Text", Icons.text_fields),
     const SelectableItem("Box", Icons.crop_square),
     const SelectableItem("Paragraph", Icons.segment),
-    const SelectableItem("Hider", Icons.visibility_off),
+    const SelectableItem("Stack", Icons.filter_none),
   ];
 
   @override
