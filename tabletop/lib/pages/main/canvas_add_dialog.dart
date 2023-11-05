@@ -1,24 +1,31 @@
-import 'package:tabletop/layouts/effects.dart';
-import 'package:tabletop/pages/editor/editor_controller.dart';
+import 'package:tabletop/layouts/canvas_manager.dart';
 import 'package:tabletop/theme/fj_button.dart';
+import 'package:tabletop/theme/fj_textfield.dart';
 import 'package:tabletop/theme/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-class ErrorDialog extends StatefulWidget {
-  const ErrorDialog({super.key});
+class CanvasAddDialog extends StatefulWidget {
+  const CanvasAddDialog({super.key});
 
   @override
-  State<ErrorDialog> createState() => _CanvasAddDialogState();
+  State<CanvasAddDialog> createState() => _CanvasAddDialogState();
 }
 
-class _CanvasAddDialogState extends State<ErrorDialog> {
+class _CanvasAddDialogState extends State<CanvasAddDialog> {
+
+  final _controller = TextEditingController();
+  final _error = Rx<String?>(null);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<EditorController>();
-
     return Center(
       child: SizedBox(
         width: 380,
@@ -41,26 +48,28 @@ class _CanvasAddDialogState extends State<ErrorDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  Text("Error", style: Get.theme.textTheme.titleMedium),
+                  Text("Create a canvas", style: Get.theme.textTheme.titleMedium),
                   verticalSpacing(sectionSpacing),
 
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: controller.errorMessages.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: defaultSpacing),
-                        child: Text(controller.errorMessages[index], style: Get.theme.textTheme.labelMedium)
-                      );
-                    },
+                  Obx(() =>
+                    FJTextField(
+                      controller: _controller,
+                      hintText: "Canvas name",
+                      errorText: _error.value,
+                    )
                   ),
-
+                  verticalSpacing(defaultSpacing),
                   FJElevatedButton(
-                    onTap: () async {
+                    onTap: () {
+                      if(_controller.text.length < 3) {
+                        _error.value = "Must be at least 3 characters long.";
+                        return;
+                      }
+
+                      CanvasManager.saveCanvas(Canvas.create(_controller.text, ""));
                       Get.back();
                     }, 
-                    child: Center(child: Text("Alright", style: Get.theme.textTheme.labelLarge)),
+                    child: Center(child: Text("Create", style: Get.theme.textTheme.labelLarge)),
                   )
                 ],
               ),

@@ -19,9 +19,9 @@ class _SidebarElementTabState extends State<SidebarElementTab> {
       builder: (controller) {
         return ListView.builder(
           shrinkWrap: true,
-          itemCount: controller.currentLayout.value.layers.length,
+          itemCount: controller.currentCanvas.value.layers.length,
           itemBuilder: (context, index) {
-            final layer = controller.currentLayout.value.layers[index];
+            final layer = controller.currentCanvas.value.layers[index];
 
             return Padding(
               padding: const EdgeInsets.only(bottom: sectionSpacing),

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:tabletop/layouts/color_manager.dart';
-import 'package:tabletop/layouts/layout_manager.dart' as layout;
+import 'package:tabletop/layouts/canvas_manager.dart' as layout;
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/theme/list_selection.dart';
 import 'package:file_picker/file_picker.dart';
@@ -98,7 +98,7 @@ class TextElement extends layout.Element {
     final text = settings[0].value.value as String;
     final controller = Get.find<EditorController>();
     final colorId = settings[1].value.value as String;
-    final color = controller.currentLayout.value.colorManager.colors[colorId] ?? PickedColor("error");
+    final color = controller.currentCanvas.value.colorManager.colors[colorId] ?? PickedColor("error");
     final align = settings[2].value.value as int;
     final fontSize = double.tryParse(settings[3].value.value ?? "17") ?? 17.0; 
     final bold = settings[4].value.value as bool;
@@ -112,7 +112,7 @@ class TextElement extends layout.Element {
       child: Text(
         text,
         style: TextStyle(
-          color: color.getColor(1.0, controller.currentLayout.value.colorManager.saturation.value),
+          color: color.getColor(1.0, controller.currentCanvas.value.colorManager.saturation.value),
           fontSize: fontSize, 
           fontWeight: bold ? FontWeight.bold : FontWeight.normal, 
           fontStyle: italic ? FontStyle.italic : FontStyle.normal,
@@ -176,7 +176,7 @@ class ParagraphElement extends layout.Element {
     final text = settings[0].value.value as String;
     final controller = Get.find<EditorController>();
     final colorId = settings[1].value.value as String;
-    final color = controller.currentLayout.value.colorManager.colors[colorId] ?? PickedColor("error");
+    final color = controller.currentCanvas.value.colorManager.colors[colorId] ?? PickedColor("error");
     final align = settings[2].value.value as int;
     final fontSize = double.tryParse(settings[3].value.value ?? "20") ?? 20.0;
     final bold = settings[4].value.value as bool;
@@ -188,7 +188,7 @@ class ParagraphElement extends layout.Element {
       child: Text(
         text, 
         style: TextStyle(
-          color: color.getColor(1.0, controller.currentLayout.value.colorManager.saturation.value),
+          color: color.getColor(1.0, controller.currentCanvas.value.colorManager.saturation.value),
           fontSize: fontSize, 
           fontWeight: bold ? FontWeight.bold : FontWeight.normal, 
           fontStyle: italic ? FontStyle.italic : FontStyle.normal
@@ -241,7 +241,7 @@ class BoxElement extends layout.Element {
 
     final controller = Get.find<EditorController>();
     final colorId = settings[0].value.value as String;
-    final color = controller.currentLayout.value.colorManager.colors[colorId] ?? PickedColor("error");
+    final color = controller.currentCanvas.value.colorManager.colors[colorId] ?? PickedColor("error");
     final opacity = settings[1].value.value as double;
     final borderRadius = settings[2].value.value as double;
     final blur = settings[3].value.value as double;
@@ -257,7 +257,7 @@ class BoxElement extends layout.Element {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius),
-              color: color.getColor(opacity, controller.currentLayout.value.colorManager.saturation.value),
+              color: color.getColor(opacity, controller.currentCanvas.value.colorManager.saturation.value),
             ),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),

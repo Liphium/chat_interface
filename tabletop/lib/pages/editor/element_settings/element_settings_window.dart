@@ -1,4 +1,4 @@
-import 'package:tabletop/layouts/layout_manager.dart' as layout;
+import 'package:tabletop/layouts/canvas_manager.dart' as layout;
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/pages/editor/element_settings/effect_add_dialog.dart';
 import 'package:tabletop/theme/fj_button.dart';

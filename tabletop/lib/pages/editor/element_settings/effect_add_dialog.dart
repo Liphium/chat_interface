@@ -11,10 +11,10 @@ class EffectAddDialog extends StatefulWidget {
   const EffectAddDialog({super.key});
 
   @override
-  State<EffectAddDialog> createState() => _LayoutAddDialogState();
+  State<EffectAddDialog> createState() => _CanvasAddDialogState();
 }
 
-class _LayoutAddDialogState extends State<EffectAddDialog> {
+class _CanvasAddDialogState extends State<EffectAddDialog> {
 
   final _controller = TextEditingController(), _width = TextEditingController(), _height = TextEditingController();
 

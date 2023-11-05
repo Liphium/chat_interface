@@ -1,4 +1,4 @@
-import 'package:tabletop/layouts/layout_manager.dart';
+import 'package:tabletop/layouts/canvas_manager.dart';
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/theme/fj_button.dart';
 import 'package:tabletop/theme/vertical_spacing.dart';
@@ -29,7 +29,7 @@ class _ConversationAddWindowState extends State<EditLayersWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final layout = Get.find<EditorController>().currentLayout.value;
+    final layout = Get.find<EditorController>().currentCanvas.value;
 
     return Stack(
       children: [

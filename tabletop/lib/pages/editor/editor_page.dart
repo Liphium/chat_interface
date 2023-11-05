@@ -1,4 +1,4 @@
-import 'package:tabletop/layouts/layout_manager.dart';
+import 'package:tabletop/layouts/canvas_manager.dart';
 import 'package:tabletop/pages/editor/editor_canvas.dart';
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/pages/editor/sidebar/editor_sidebar.dart';
@@ -25,19 +25,20 @@ class _EditorPageState extends State<EditorPage> {
 
   final scale = Rx<double>(1.0);
   final offset = Rx<Offset>(Offset.zero);
-  final layout = Rx<Layout?>(null);
+  final layout = Rx<Canvas?>(null);
+  final _canvasKey = GlobalKey();
 
   @override
   void initState() {
-    loadLayout();
+    loadCanvas();
     super.initState();
   }
 
-  void loadLayout() async {
-    layout.value = await LayoutManager.loadLayout(widget.name);
-    Get.find<EditorController>().setCurrentLayout(layout.value!);
+  void loadCanvas() async {
+    layout.value = await CanvasManager.loadCanvas(widget.name);
+    Get.find<EditorController>().setCurrentCanvas(layout.value!);
     await Future.delayed(500.ms);
-    Get.find<EditorController>().redoLayout();
+    Get.find<EditorController>().redoCanvas();
   }
 
   @override
@@ -46,7 +47,7 @@ class _EditorPageState extends State<EditorPage> {
       backgroundColor: Get.theme.colorScheme.background,
       body: Column(
         children: [
-          //* Layout info
+          //* Canvas info
           Container(
             color: Get.theme.colorScheme.onBackground,
             padding: const EdgeInsets.all(defaultSpacing),
@@ -117,7 +118,7 @@ class _EditorPageState extends State<EditorPage> {
                       loading: Get.find<EditorController>().loading,
                       color: Get.theme.colorScheme.onPrimary,
                       icon: Icons.save,
-                      onTap: () => Get.find<EditorController>().redoLayout(),
+                      onTap: () => Get.find<EditorController>().redoCanvas(),
                     ),
                     horizontalSpacing(defaultSpacing),
                     Obx(() =>
@@ -173,25 +174,18 @@ class _EditorPageState extends State<EditorPage> {
                         behavior: HitTestBehavior.opaque,
                         onPointerSignal: (event) {
                           if(event is PointerScrollEvent) {
-                            scale.value += event.scrollDelta.dy / 100 * 0.1 * -1;
-                            if(scale.value < 0.5) scale.value = 0.5;
-                            if(scale.value > 5.0) scale.value = 5.0;
+                            final delta = event.scrollDelta.dy * 0.001 * -1;
+                            scale.value += delta;
                           }
                         },
                         onPointerMove: (event) {
                           if(event.buttons == 4) {
-                            offset.value += event.delta * (1 / scale.value);
+                            offset.value += event.delta;
                           }
                         },
                         child: Center(
                           child: Obx(() => 
-                            layout.value != null ? Transform.scale(
-                              scale: scale.value,
-                              child: Transform.translate(
-                                offset: offset.value,
-                                child: const EditorCanvas(),
-                              ),
-                            )
+                            layout.value != null ? EditorCanvas(key: _canvasKey, position: offset.value, zoom: scale.value)
                             : Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary))
                           ),
                         ),

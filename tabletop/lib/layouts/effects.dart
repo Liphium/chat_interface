@@ -1,4 +1,4 @@
-import 'package:tabletop/layouts/layout_manager.dart' as layout;
+import 'package:tabletop/layouts/canvas_manager.dart' as layout;
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/theme/list_selection.dart';
 import 'package:flutter/material.dart';
@@ -97,7 +97,7 @@ class InheritSizeEffect extends Effect {
     // Find element
     final controller = Get.find<EditorController>();
     layout.Element? parent;
-    for(var layer in controller.currentLayout.value.layers) {
+    for(var layer in controller.currentCanvas.value.layers) {
       for(var eId in layer.elements.keys.toList()) {
         if(eId == target) {
           parent = layer.elements[eId]!;
@@ -143,7 +143,7 @@ class InheritPositionEffect extends Effect {
     // Find element
     final controller = Get.find<EditorController>();
     layout.Element? parent;
-    for(var layer in controller.currentLayout.value.layers) {
+    for(var layer in controller.currentCanvas.value.layers) {
       for(var eId in layer.elements.keys.toList()) {
         if(eId == target) {
           parent = layer.elements[eId]!;
@@ -195,7 +195,7 @@ class ElementAlignmentEffect extends Effect {
     // Find element
     final controller = Get.find<EditorController>();
     layout.Element? parent;
-    for(var layer in controller.currentLayout.value.layers) {
+    for(var layer in controller.currentCanvas.value.layers) {
       for(var eId in layer.elements.keys.toList()) {
         if(eId == target) {
           parent = layer.elements[eId]!;

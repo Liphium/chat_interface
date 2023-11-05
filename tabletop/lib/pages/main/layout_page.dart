@@ -1,18 +1,18 @@
-import 'package:tabletop/pages/main/layout_add_dialog.dart';
-import 'package:tabletop/pages/main/layouts_tab.dart';
+import 'package:tabletop/pages/main/canvas_add_dialog.dart';
+import 'package:tabletop/pages/main/canvas_tab.dart';
 import 'package:tabletop/theme/fj_button.dart';
 import 'package:tabletop/theme/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class LayoutPage extends StatefulWidget {
-  const LayoutPage({super.key});
+class CanvasPage extends StatefulWidget {
+  const CanvasPage({super.key});
 
   @override
-  State<LayoutPage> createState() => _LayoutPageState();
+  State<CanvasPage> createState() => _CanvasPageState();
 }
 
-class _LayoutPageState extends State<LayoutPage> {
+class _CanvasPageState extends State<CanvasPage> {
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class _LayoutPageState extends State<LayoutPage> {
                 FJElevatedButton(
                   smallCorners: true,
                   onTap: () {
-                    Get.dialog(const LayoutAddDialog());
+                    Get.dialog(const CanvasAddDialog());
                   }, 
                   child: Row(
                     children: [
@@ -44,8 +44,10 @@ class _LayoutPageState extends State<LayoutPage> {
             ),
           ),
         
-          //* Layout list
-          const LayoutsTab()
+          //* Canvas list
+          const Expanded(
+            child: CanvasTab()
+          )
         ],
       )
     );

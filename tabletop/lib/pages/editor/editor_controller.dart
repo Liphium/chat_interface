@@ -1,11 +1,11 @@
 import 'package:tabletop/layouts/elements.dart';
-import 'package:tabletop/layouts/layout_manager.dart';
+import 'package:tabletop/layouts/canvas_manager.dart';
 import 'package:tabletop/pages/editor/element_settings/effect_error_dialog.dart';
 import 'package:get/get.dart';
 
 class EditorController extends GetxController {
 
-  final currentLayout = Layout("name", "").obs;
+  final currentCanvas = Canvas("name", "").obs;
   final currentElement = Rx<Element?>(null);
   final showSettings = false.obs;
   final renderMode = false.obs;
@@ -14,48 +14,48 @@ class EditorController extends GetxController {
   bool changed = false;
   final loading = false.obs;
 
-  void setCurrentLayout(Layout layout) {
+  void setCurrentCanvas(Canvas layout) {
     showSettings.value = false;
     currentElement.value = null;
-    currentLayout.value = layout;
+    currentCanvas.value = layout;
     renderMode.value = false;
   }
 
   void deleteLayer(Layer layer) {
-    currentLayout.value.layers.remove(layer);
+    currentCanvas.value.layers.remove(layer);
     save();
   }
 
   void reorderLayer(int oldIndex, int newIndex) {
-    final layer = currentLayout.value.layers.removeAt(oldIndex);
+    final layer = currentCanvas.value.layers.removeAt(oldIndex);
     if(newIndex > oldIndex) newIndex--;
-    currentLayout.value.layers.insert(newIndex, layer);
+    currentCanvas.value.layers.insert(newIndex, layer);
     save();
   }
 
   void addLayer(Layer layer) {
-    currentLayout.value.layers.insert(0, layer);
+    currentCanvas.value.layers.insert(0, layer);
     save();
   }
 
-  void redoLayout() async {
+  void redoCanvas() async {
     loading.value = true;
-    while(_doLayoutReorder()) {
+    while(_doCanvasReorder()) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
     loading.value = false;
   }
 
-  bool _doLayoutReorder() {
+  bool _doCanvasReorder() {
     changed = false;
     errorMessages.clear();
-    for(var layer in currentLayout.value.layers) {
+    for(var layer in currentCanvas.value.layers) {
       for(var element in layer.elements.values) {
-        element.startLayout();
+        element.startCanvas();
       }
     }
 
-    for(var layer in currentLayout.value.layers) {
+    for(var layer in currentCanvas.value.layers) {
       for(var element in layer.elements.values) {
         element.preProcess();
         for(var effect in element.effects) {
@@ -64,9 +64,9 @@ class EditorController extends GetxController {
       }
     }
 
-    for(var layer in currentLayout.value.layers) {
+    for(var layer in currentCanvas.value.layers) {
       for(var element in layer.elements.values) {
-        element.applyLayout();
+        element.applyCanvas();
       }
     }
 
@@ -97,10 +97,10 @@ class EditorController extends GetxController {
 
   void save({bool layout = true}) {
     if(layout) {
-      redoLayout();
+      redoCanvas();
       return;
     }
-    LayoutManager.saveLayout(currentLayout.value);
+    CanvasManager.saveCanvas(currentCanvas.value);
   }
 
   void selectElement(Element element) {

@@ -67,7 +67,7 @@ class _ConversationAddWindowState extends State<ColorAddWindow> {
                           return;
                         }
 
-                        Get.find<EditorController>().currentLayout.value.colorManager.addColor(_controller.text);
+                        Get.find<EditorController>().currentCanvas.value.colorManager.addColor(_controller.text);
                         Get.back();
                       }, 
                       child: Center(child: Text("Create", style: Get.theme.textTheme.labelLarge)),

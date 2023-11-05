@@ -47,9 +47,9 @@ class _SidebarSettingsTabState extends State<SidebarSettingsTab> {
           Obx(() =>
             ListView.builder(
               shrinkWrap: true,
-              itemCount: controller.currentLayout.value.colorManager.colors.length, 
+              itemCount: controller.currentCanvas.value.colorManager.colors.length, 
               itemBuilder: (context, index) {
-                final color = controller.currentLayout.value.colorManager.colors.values.toList()[index];
+                final color = controller.currentCanvas.value.colorManager.colors.values.toList()[index];
                 final expanded = false.obs;
 
                 return Padding(
@@ -75,7 +75,7 @@ class _SidebarSettingsTabState extends State<SidebarSettingsTab> {
                                     width: 20,
                                     height: 20,
                                     decoration: BoxDecoration(
-                                      color: color.getColor(1.0, controller.currentLayout.value.colorManager.saturation.value),
+                                      color: color.getColor(1.0, controller.currentCanvas.value.colorManager.saturation.value),
                                       borderRadius: BorderRadius.circular(elementSpacing),
                                     ),
                                   )
@@ -84,7 +84,7 @@ class _SidebarSettingsTabState extends State<SidebarSettingsTab> {
                             ),
 
                             Obx(() {
-                              final color = controller.currentLayout.value.colorManager.colors.values.toList()[index];
+                              final color = controller.currentCanvas.value.colorManager.colors.values.toList()[index];
                               final avoidSat = color.avoidSat.value;
 
                               return Visibility(
@@ -124,7 +124,7 @@ class _SidebarSettingsTabState extends State<SidebarSettingsTab> {
                                         ),
                                         FJElevatedButton(
                                           smallCorners: true,
-                                          onTap: () => controller.currentLayout.value.colorManager.removeColor(color.id), 
+                                          onTap: () => controller.currentCanvas.value.colorManager.removeColor(color.id), 
                                           child: Text("Delete", style: Get.theme.textTheme.labelMedium, textHeightBehavior: noTextHeight)
                                         ),
                                       ],
@@ -154,8 +154,8 @@ class _SidebarSettingsTabState extends State<SidebarSettingsTab> {
                   FJSlider(
                     min: 0.0,
                     max: 1.0,
-                    value: controller.currentLayout.value.colorManager.saturation.value,
-                    onChanged: (newVal) => controller.currentLayout.value.colorManager.saturation.value = newVal,
+                    value: controller.currentCanvas.value.colorManager.saturation.value,
+                    onChanged: (newVal) => controller.currentCanvas.value.colorManager.saturation.value = newVal,
                     onChangeEnd: (finalVal) => controller.save(),
                   )
                 ),

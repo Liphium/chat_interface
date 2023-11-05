@@ -1,15 +1,15 @@
-part of 'layout_manager.dart';
+part of 'canvas_manager.dart';
 
-class Layout {
+class Canvas {
   String name;
   final String path;
   late final layers = RxList<Layer>();
 
   final ColorManager colorManager = ColorManager();
 
-  Layout(this.name, this.path);
-  Layout.create(this.name, this.path);
-  Layout.fromMap(this.path, Map<String, dynamic> json) : name = json["name"] {
+  Canvas(this.name, this.path);
+  Canvas.create(this.name, this.path);
+  Canvas.fromMap(this.path, Map<String, dynamic> json) : name = json["name"] {
     for(var layer in json["layers"]) {
       layers.add(Layer.fromMap(layer));
     }
@@ -36,7 +36,7 @@ class Layer {
   Layer(this.name);
   Layer.fromMap(Map<String, dynamic> json) : name = json["name"] {
     for(var jsonElement in json["elements"]) {
-      final element = LayoutManager.getElementFromMap(this, jsonElement);
+      final element = CanvasManager.getElementFromMap(this, jsonElement);
       elements[element.id] = element;
     }
   }
@@ -141,7 +141,7 @@ abstract class Element {
   void preProcess() {}
   Widget build(BuildContext context);
 
-  void startLayout() {
+  void startCanvas() {
     layoutOffset = null;
     layoutSize = null;
     xOverrides = yOverrides = widthOverrides = heightOverrides = 0;
@@ -167,7 +167,7 @@ abstract class Element {
     heightOverrides++;
   }
 
-  void applyLayout() {
+  void applyCanvas() {
     final controller = Get.find<EditorController>();
 
     if(position.value != layoutOffset && layoutOffset != null) {
@@ -420,13 +420,13 @@ class ColorSetting extends Setting<String> {
     final controller = Get.find<EditorController>();
 
     return Obx(() => ListSelection(
-      currentIndex: controller.currentLayout.value.colorManager.colors.keys.toList().indexOf(value.value ?? _defaultValue),
-      items: List.generate(controller.currentLayout.value.colorManager.colors.length, (index) {
-        final color = controller.currentLayout.value.colorManager.colors.values.toList()[index];
-        return SelectableItem(color.name, Icons.color_lens, iconColor: color.getColor(1.0, controller.currentLayout.value.colorManager.saturation.value));
+      currentIndex: controller.currentCanvas.value.colorManager.colors.keys.toList().indexOf(value.value ?? _defaultValue),
+      items: List.generate(controller.currentCanvas.value.colorManager.colors.length, (index) {
+        final color = controller.currentCanvas.value.colorManager.colors.values.toList()[index];
+        return SelectableItem(color.name, Icons.color_lens, iconColor: color.getColor(1.0, controller.currentCanvas.value.colorManager.saturation.value));
       }),
       callback: (newVal, index) {
-        setValue(controller.currentLayout.value.colorManager.colors.keys.toList()[index]);
+        setValue(controller.currentCanvas.value.colorManager.colors.keys.toList()[index]);
         Get.find<EditorController>().save();
       },
     ));
@@ -445,7 +445,7 @@ class ElementSetting extends Setting<String> {
 
       // Grab all elements in the current layout
       final elements = <String, Element>{};
-      for(var layer in controller.currentLayout.value.layers) {
+      for(var layer in controller.currentCanvas.value.layers) {
         for(var element in layer.elements.values) {
           elements[element.id] = element;
         }

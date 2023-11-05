@@ -75,5 +75,5 @@ class PickedColor {
   }
 
   Color getColor(double alpha, double sat) => HSLColor.fromAHSL(alpha, hue.value, avoidSat.value ? 0.0 : sat, luminosity.value).toColor();
-  Color colorFromController(double alpha) => HSLColor.fromAHSL(alpha, hue.value, avoidSat.value ? 0.0 : Get.find<EditorController>().currentLayout.value.colorManager.saturation.value, luminosity.value).toColor();
+  Color colorFromController(double alpha) => HSLColor.fromAHSL(alpha, hue.value, avoidSat.value ? 0.0 : Get.find<EditorController>().currentCanvas.value.colorManager.saturation.value, luminosity.value).toColor();
 }

@@ -1,29 +1,41 @@
-import 'package:tabletop/layouts/layout_manager.dart';
+import 'dart:async';
+
+import 'package:tabletop/layouts/canvas_manager.dart';
 import 'package:tabletop/pages/editor/editor_page.dart';
 import 'package:tabletop/theme/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class LayoutsTab extends StatefulWidget {
-  const LayoutsTab({super.key});
+class CanvasTab extends StatefulWidget {
+  const CanvasTab({super.key});
 
   @override
-  State<LayoutsTab> createState() => _LayoutsTabState();
+  State<CanvasTab> createState() => _CanvasTabState();
 }
 
-class _LayoutsTabState extends State<LayoutsTab> {
+class _CanvasTabState extends State<CanvasTab> {
 
   final _loading = true.obs;
   final _layouts = <String>[].obs;
+  Timer? _timer;
 
   @override
   void initState() {
-    loadLayouts();
+    loadCanvass();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      loadCanvass();
+    });
     super.initState();
   }
 
-  void loadLayouts() async {
-    _layouts.value = await LayoutManager.getLayouts();
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void loadCanvass() async {
+    _layouts.value = await CanvasManager.getCanvass();
     _loading.value = false;
   }
 
@@ -36,7 +48,7 @@ class _LayoutsTabState extends State<LayoutsTab> {
       }
 
       if(_layouts.isEmpty) {
-        return const Center(child: Text("No layouts found"));
+        return const Center(child: Text("No canvases found"));
       }
 
       return Padding(
@@ -63,13 +75,14 @@ class _LayoutsTabState extends State<LayoutsTab> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(Icons.apps, color: Get.theme.colorScheme.onPrimary),
+                        Icon(Icons.draw, color: Get.theme.colorScheme.onPrimary),
                         horizontalSpacing(elementSpacing),
                         Text(layout, style: Get.theme.textTheme.labelMedium, textHeightBehavior: noTextHeight,),
                         Expanded(child: Container()),
                         IconButton(
-                          icon: const Icon(Icons.share),
+                          icon: const Icon(Icons.delete),
                           onPressed: () {
+                            CanvasManager.deleteCanvas(layout);
                           },
                         )
                       ],
