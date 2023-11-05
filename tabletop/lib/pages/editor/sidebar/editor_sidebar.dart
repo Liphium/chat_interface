@@ -1,6 +1,8 @@
 import 'package:tabletop/pages/editor/edit_layers_window.dart';
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/pages/editor/layer_add_window.dart';
+import 'package:tabletop/pages/editor/sidebar/deck_add_window.dart';
+import 'package:tabletop/pages/editor/sidebar/sidebar_deck_tab.dart';
 import 'package:tabletop/pages/editor/sidebar/sidebar_element_tab.dart';
 import 'package:tabletop/pages/editor/sidebar/sidebar_settings_tab.dart';
 import 'package:tabletop/theme/tab_button.dart';
@@ -22,6 +24,7 @@ class _EditorSidebarState extends State<EditorSidebar> {
   
   final tabs = {
     "Layers": const SidebarElementTab(),
+    "Decks": const SidebarDeckTab(),
     "Settings": const SidebarSettingsTab(),
   };
 
@@ -42,6 +45,16 @@ class _EditorSidebarState extends State<EditorSidebar> {
               onTap: () {
                 _selected.value = "Layers";
               },
+            ),
+            horizontalSpacing(elementSpacing),
+            TabButton(
+              selected: _selected,
+              label: "Decks",
+              radius: BorderRadius.circular(0),
+              onTap: () {
+                _selected.value = "Decks";
+                
+              }, 
             ),
             horizontalSpacing(elementSpacing),
             TabButton(
@@ -77,7 +90,7 @@ class _EditorSidebarState extends State<EditorSidebar> {
             horizontalSpacing(elementSpacing),
             Obx(() =>
               Visibility(
-                visible: _selected.value == "Layers" && !controller.renderMode.value,
+                visible: (_selected.value == "Layers" || _selected.value == "Decks") && !controller.renderMode.value,
                 child: IconButton.filled(
                   key: _addKey,
                   color: Get.theme.colorScheme.onPrimary,
@@ -86,6 +99,9 @@ class _EditorSidebarState extends State<EditorSidebar> {
                     if(_selected.value == "Layers") {
                       final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
                       Get.dialog(LayerAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                    } else if(_selected.value == "Decks") {
+                      final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
+                      Get.dialog(DeckAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
                     }
                   }, 
                 ),

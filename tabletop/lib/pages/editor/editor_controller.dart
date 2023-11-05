@@ -37,6 +37,26 @@ class EditorController extends GetxController {
     currentCanvas.value.layers.insert(0, layer);
     save();
   }
+  
+  void addDeck(Deck deck) {
+    currentCanvas.value.decks[deck.id] = deck;
+    save();
+  }
+
+  void deleteDeck(Deck deck) {
+    currentCanvas.value.decks.remove(deck);
+    save();
+  }
+
+  void addDeckImage(Deck deck, DeckImage image) {
+    deck.addImage(image);
+    save();
+  }
+
+  void deleteDeckImage(Deck deck, DeckImage image) {
+    deck.images.remove(image);
+    save();
+  }
 
   void redoCanvas() async {
     loading.value = true;

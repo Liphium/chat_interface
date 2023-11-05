@@ -1,4 +1,3 @@
-import 'package:tabletop/layouts/effects.dart';
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/theme/fj_button.dart';
 import 'package:tabletop/theme/vertical_spacing.dart';

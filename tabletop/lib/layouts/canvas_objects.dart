@@ -3,7 +3,8 @@ part of 'canvas_manager.dart';
 class Canvas {
   String name;
   final String path;
-  late final layers = RxList<Layer>();
+  final layers = RxList<Layer>();
+  final decks = RxMap<String, Deck>(); 
 
   final ColorManager colorManager = ColorManager();
 
@@ -12,6 +13,10 @@ class Canvas {
   Canvas.fromMap(this.path, Map<String, dynamic> json) : name = json["name"] {
     for(var layer in json["layers"]) {
       layers.add(Layer.fromMap(layer));
+    }
+    for(var deckJson in json["decks"]) {
+      final deck = Deck.fromMap(deckJson);
+      decks[deck.id] = deck;
     }
     colorManager.load(json["colors"] ?? {});
   }
@@ -23,6 +28,7 @@ class Canvas {
     return {
       "name": name,
       "layers": layersMap,
+      "decks": decks.values.map((e) => e.toMap()).toList(),
       "colors": colorManager.toMap()
     };
   }
@@ -56,14 +62,51 @@ class Layer {
   void addElement(Element element) {
     elements[element.id] = element;
   }
+}
 
-  void loadFromExported(Map<String, dynamic> json) {
-    for(var jsonElement in json["elements"]) {
-      final element = elements[jsonElement["id"]];
-      if(element == null) continue;
-      element.loadFromExported(jsonElement);
+class Deck {
+  late final String id;
+  final String name;
+  final int width, height;
+  late final images = RxList<DeckImage>();
+  final expanded = true.obs;
+
+  Deck(this.name, this.width, this.height) {
+    id = generateRandomString(12);
+  }
+  Deck.fromMap(Map<String, dynamic> json) : name = json["name"], width = json["width"], height = json["height"], id = json["id"] {
+    for(var jsonElement in json["images"]) {
+      images.add(DeckImage.fromMap(jsonElement));
     }
   }
+  Map<String, dynamic> toMap() {
+    List<Map<String, dynamic>> elementsMap = [];
+    for(var image in images) {
+      elementsMap.add(image.toMap());
+    }
+    return {
+      "id": id,
+      "name": name,
+      "width": width,
+      "height": height,
+      "images": elementsMap
+    };
+  }
+
+  void addImage(DeckImage element) {
+    images.add(element);
+  }
+}
+
+class DeckImage {
+  final String path;
+
+  DeckImage(this.path);
+
+  DeckImage.fromMap(Map<String, dynamic> json) : path = json["path"];
+  Map<String, dynamic> toMap() => {
+    "path": path
+  };
 }
 
 abstract class Element {
@@ -122,14 +165,6 @@ abstract class Element {
       "settings": settingsMap,
       "effects": effectsMap
     };
-  }
-
-  void loadFromExported(Map<String, dynamic> json) {
-    for(int i = 0; i < settings.length; i++) { // IDK why this doesn't work with a for in loop
-      final setting = settings[i];
-      if(!setting.exposed) continue;
-      settings[i].fromJson(json["settings"]);
-    }
   }
 
   void addEffect(Effect effect) {
@@ -218,15 +253,13 @@ abstract class Setting<T> {
   final String description;
   final SettingType type;
 
-  /// Whether this setting should be exposed to the user when this is a template
-  final bool exposed;
   final T _defaultValue;
   final value = Rx<T?>(null);
  
   // Configuration
   bool showLabel = true;
  
-  Setting(this.name, this.description, this.type, this.exposed, this._defaultValue) {
+  Setting(this.name, this.description, this.type, this._defaultValue) {
     value.value = _defaultValue;
     init();
   }
@@ -253,7 +286,7 @@ abstract class Setting<T> {
 }
 
 class TextSetting extends Setting<String> {
-  TextSetting(String name, String description, bool exposed, String def) : super(name, description, SettingType.text, exposed, def);
+  TextSetting(String name, String description, String def) : super(name, description, SettingType.text, def);
 
   TextEditingController? _controller;
 
@@ -279,7 +312,7 @@ class TextSetting extends Setting<String> {
 }
 
 class ParagraphSetting extends Setting<String> {
-  ParagraphSetting(String name, String description, bool exposed, String def) : super(name, description, SettingType.text, exposed, def);
+  ParagraphSetting(String name, String description, String def) : super(name, description, SettingType.text, def);
 
   TextEditingController? _controller;
 
@@ -309,7 +342,7 @@ class NumberSetting extends Setting<double> {
 
   final double min, max;
 
-  NumberSetting(String name, String description, bool exposed, double def, this.min, this.max) : super(name, description, SettingType.number, exposed, def);
+  NumberSetting(String name, String description, double def, this.min, this.max) : super(name, description, SettingType.number, def);
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +364,7 @@ class NumberSetting extends Setting<double> {
 
 class BoolSetting extends Setting<bool> {
 
-  BoolSetting(String name, String description, bool exposed, bool def) : super(name, description, SettingType.bool, exposed, def);
+  BoolSetting(String name, String description, bool def) : super(name, description, SettingType.bool, def);
 
   @override
   Widget build(BuildContext context) {
@@ -364,7 +397,7 @@ class BoolSetting extends Setting<bool> {
 
 class FileSetting extends Setting<String> {
   final fp.FileType fileType;
-  FileSetting(String name, String description, this.fileType, bool exposed) : super(name, description, SettingType.file, exposed, "");
+  FileSetting(String name, String description, this.fileType) : super(name, description, SettingType.file, "");
 
   @override
   Widget build(BuildContext context) {
@@ -396,7 +429,7 @@ class FileSetting extends Setting<String> {
 
 class SelectionSetting extends Setting<int> {
   final List<SelectableItem> options;
-  SelectionSetting(String name, String description, bool exposed, int def, this.options) : super(name, description, SettingType.selection, exposed, def);
+  SelectionSetting(String name, String description, int def, this.options) : super(name, description, SettingType.selection, def);
 
   @override
   Widget build(BuildContext context) {
@@ -413,7 +446,7 @@ class SelectionSetting extends Setting<int> {
 
 // String is the id of the color
 class ColorSetting extends Setting<String> {
-  ColorSetting(String name, String description, bool exposed) : super(name, description, SettingType.color, exposed, "");
+  ColorSetting(String name, String description) : super(name, description, SettingType.color, "");
 
   @override
   Widget build(BuildContext context) {
@@ -435,7 +468,7 @@ class ColorSetting extends Setting<String> {
 
 // String is the id of the element
 class ElementSetting extends Setting<String> {
-  ElementSetting(String name, String description, bool exposed) : super(name, description, SettingType.element, exposed, "");
+  ElementSetting(String name, String description) : super(name, description, SettingType.element, "");
 
   @override
   Widget build(BuildContext context) {

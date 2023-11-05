@@ -16,19 +16,27 @@ class ImageElement extends layout.Element {
 
   @override
   void init() {
-    scalable = true;
+    scalable = false;
     if(size.value.width == 0) size.value = const Size(100, 100);
+  }
+
+  @override
+  void preProcess() {
+    final width = double.tryParse(settings[3].value.value ?? "100") ?? 100.0;
+    final height = double.tryParse(settings[4].value.value ?? "100") ?? 100.0;
+    setWidth(width);
+    setHeight(height);
+    super.preProcess();
   }
 
   @override
   Widget build(BuildContext context) {
 
     final path = settings[0].value.value as String;
-    final fit = settings[1].value.value as int;
-    final xOffset = settings[2].value.value as double;
-    final yOffset = settings[3].value.value as double;
+    final xOffset = settings[1].value.value as double;
+    final yOffset = settings[2].value.value as double;
 
-    return Image.file(File(path), fit: BoxFit.values[fit], alignment: AlignmentDirectional(xOffset, yOffset), errorBuilder: (context, error, stackTrace) {
+    return Image.file(File(path), fit: BoxFit.cover, alignment: AlignmentDirectional(xOffset, yOffset), errorBuilder: (context, error, stackTrace) {
       return Placeholder(
         color: Get.theme.colorScheme.error,
         child: Center(
@@ -38,37 +46,14 @@ class ImageElement extends layout.Element {
     },);
   }
 
-  final iconMap = {
-    BoxFit.contain: Icons.crop_square,
-    BoxFit.cover: Icons.crop_5_4,
-    BoxFit.fill: Icons.crop_7_5,
-    BoxFit.fitHeight: Icons.crop_16_9,
-    BoxFit.fitWidth: Icons.crop_din,
-    BoxFit.none: Icons.crop_free,
-    BoxFit.scaleDown: Icons.crop_landscape
-  };
-
   @override
   List<layout.Setting> buildSettings() {
     return [
-      layout.FileSetting("image", "Image", FileType.image, true),
-      layout.SelectionSetting("fit", "Image fit", true, BoxFit.values.indexOf(BoxFit.cover), 
-        List.generate(BoxFit.values.length, (index) {
-          final value = BoxFit.values[index];
-          var formattedName = value.toString().split(".").last;
-          for(var i = 0; i < formattedName.length; i++) {
-            if(formattedName[i].toUpperCase() == formattedName[i]) {
-              formattedName = "${formattedName.substring(0, i)} ${formattedName.substring(i).toLowerCase()}";
-              i++;
-            }
-          }
-          formattedName = formattedName.substring(0, 1).toUpperCase() + formattedName.substring(1);
-
-          return SelectableItem(formattedName, iconMap[value]!);
-        })
-      ),
-      layout.NumberSetting("x_offset", "X offset", true, 0.0, -1.0, 1.0),
-      layout.NumberSetting("y_offset", "Y offset", true, 0.0, -1.0, 1.0),
+      layout.FileSetting("image", "Image", FileType.image),
+      layout.NumberSetting("x_offset", "X offset", 0.0, -1.0, 1.0),
+      layout.NumberSetting("y_offset", "Y offset", 0.0, -1.0, 1.0),
+      layout.TextSetting("width", "Width", "100"),
+      layout.TextSetting("height", "Height", "100"),
     ];
   }
 }
@@ -132,19 +117,19 @@ class TextElement extends layout.Element {
   @override
   List<layout.Setting> buildSettings() {
     return [
-      layout.TextSetting("text", "Text", true, "Some text"),
-      layout.ColorSetting("color", "Text color", false),
-      layout.SelectionSetting("align", "Text alignment", false, 0, 
+      layout.TextSetting("text", "Text", "Some text"),
+      layout.ColorSetting("color", "Text color"),
+      layout.SelectionSetting("align", "Text alignment", 0, 
         [
           const SelectableItem("Left", Icons.format_align_left),
           const SelectableItem("Center", Icons.format_align_center),
           const SelectableItem("Right", Icons.format_align_right),
         ]
       ),
-      layout.TextSetting("size", "Font size", false, "20"),
-      layout.BoolSetting("bold", "Bold", false, false),
-      layout.BoolSetting("italic", "Italic", false, false),
-      layout.BoolSetting("autosize", "Auto size", false, false),
+      layout.TextSetting("size", "Font size", "20"),
+      layout.BoolSetting("bold", "Bold", false),
+      layout.BoolSetting("italic", "Italic", false),
+      layout.BoolSetting("autosize", "Auto size", false),
     ];
   }
 }
@@ -207,20 +192,20 @@ class ParagraphElement extends layout.Element {
   @override
   List<layout.Setting> buildSettings() {
     return [
-      layout.ParagraphSetting("text", "Text", true, "Some text"),
-      layout.ColorSetting("color", "Text color", false),
-      layout.SelectionSetting("align", "Text alignment", false, 0, 
+      layout.ParagraphSetting("text", "Text", "Some text"),
+      layout.ColorSetting("color", "Text color"),
+      layout.SelectionSetting("align", "Text alignment", 0, 
         [
           const SelectableItem("Left", Icons.format_align_left),
           const SelectableItem("Center", Icons.format_align_center),
           const SelectableItem("Right", Icons.format_align_right),
         ]
       ),
-      layout.TextSetting("size", "Font size", false, "20"),
-      layout.BoolSetting("bold", "Bold", false, false),
-      layout.BoolSetting("italic", "Italic", false, false),
-      layout.BoolSetting("autosize", "Auto size", false, true),
-      layout.TextSetting("lines", "Lines", true, "1"),
+      layout.TextSetting("size", "Font size", "20"),
+      layout.BoolSetting("bold", "Bold", false),
+      layout.BoolSetting("italic", "Italic", false),
+      layout.BoolSetting("autosize", "Auto size", true),
+      layout.TextSetting("lines", "Lines", "1"),
     ];
   }
 }
@@ -272,11 +257,11 @@ class BoxElement extends layout.Element {
   @override
   List<layout.Setting> buildSettings() {
     return [
-      layout.ColorSetting("color", "Color", false),
-      layout.NumberSetting("opacity", "Opacity", false, 1.0, 0.0, 1.0),
-      layout.NumberSetting("border_radius", "Border radius", false, 0.0, 0.0, 30.0),
-      layout.NumberSetting("blur", "Background blur", false, 0.0, 0.0, 20.0),
-      layout.NumberSetting("padding", "Padding", false, 0.0, 0.0, 50.0),
+      layout.ColorSetting("color", "Color"),
+      layout.NumberSetting("opacity", "Opacity", 1.0, 0.0, 1.0),
+      layout.NumberSetting("border_radius", "Border radius", 0.0, 0.0, 30.0),
+      layout.NumberSetting("blur", "Background blur", 0.0, 0.0, 20.0),
+      layout.NumberSetting("padding", "Padding", 0.0, 0.0, 50.0),
     ];
   }
 

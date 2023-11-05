@@ -52,7 +52,7 @@ abstract class Effect {
 //* Effects
 class PaddingEffect extends Effect {
 
-  final padding = layout.TextSetting("padding", "Padding", false, "0");
+  final padding = layout.TextSetting("padding", "Padding", "0");
 
   PaddingEffect() : super(0, "Padding", Icons.padding);
   PaddingEffect.fromMap(Map<String, dynamic> json) : super.fromMap("Padding", Icons.padding, json);
@@ -77,10 +77,10 @@ class PaddingEffect extends Effect {
 
 class InheritSizeEffect extends Effect {
 
-  final element = layout.ElementSetting("element", "Element", false);
-  final inheritWidth = layout.BoolSetting("inheritWidth", "Inherit width", false, true);
-  final inheritHeight = layout.BoolSetting("inheritHeight", "Inherit height", false, true);
-  final extra = layout.TextSetting("extra", "Extra spacing", false, "0");
+  final element = layout.ElementSetting("element", "Element");
+  final inheritWidth = layout.BoolSetting("inheritWidth", "Inherit width", true);
+  final inheritHeight = layout.BoolSetting("inheritHeight", "Inherit height", true);
+  final extra = layout.TextSetting("extra", "Extra spacing", "0");
 
   InheritSizeEffect() : super(1, "Inherit size", Icons.crop_square);
   InheritSizeEffect.fromMap(Map<String, dynamic> json) : super.fromMap("Inherit size", Icons.crop_square, json);
@@ -123,10 +123,10 @@ class InheritSizeEffect extends Effect {
 
 class InheritPositionEffect extends Effect {
 
-  final element = layout.ElementSetting("element", "Element", false);
-  final inheritX = layout.BoolSetting("inheritX", "Inherit X", false, true);
-  final inheritY = layout.BoolSetting("inheritY", "Inherit Y", false, true);
-  final extra = layout.TextSetting("extra", "Extra addition", false, "0");
+  final element = layout.ElementSetting("element", "Element");
+  final inheritX = layout.BoolSetting("inheritX", "Inherit X", true);
+  final inheritY = layout.BoolSetting("inheritY", "Inherit Y", true);
+  final extra = layout.TextSetting("extra", "Extra addition", "0");
 
   InheritPositionEffect() : super(2, "Inherit position", Icons.radar);
   InheritPositionEffect.fromMap(Map<String, dynamic> json) : super.fromMap("Inherit position", Icons.radar, json);
@@ -169,8 +169,8 @@ class InheritPositionEffect extends Effect {
 
 class ElementAlignmentEffect extends Effect {
 
-  final element = layout.ElementSetting("element", "Element", false);
-  final alignment = layout.SelectionSetting("alignment", "Alignment", false, 0, 
+  final element = layout.ElementSetting("element", "Element");
+  final alignment = layout.SelectionSetting("alignment", "Alignment", 0, 
     [
       const SelectableItem("Top", Icons.arrow_upward),
       const SelectableItem("Bottom", Icons.arrow_downward),
@@ -178,7 +178,7 @@ class ElementAlignmentEffect extends Effect {
       const SelectableItem("Right", Icons.arrow_forward),
     ]
   );
-  final spacing = layout.TextSetting("spacing", "Spacing", false, "0");
+  final spacing = layout.TextSetting("spacing", "Spacing", "0");
 
   ElementAlignmentEffect() : super(3, "Element alignment", Icons.arrow_downward);
   ElementAlignmentEffect.fromMap(Map<String, dynamic> json) : super.fromMap("Element alignment", Icons.arrow_downward, json);

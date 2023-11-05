@@ -52,10 +52,6 @@ class _ConversationAddWindowState extends State<ElementSidebar> {
               final setting = widget.element.settings[index];
               final last = index == widget.element.settings.length - 1;
               settings.add(setting);
-      
-              if(!setting.exposed && controller.renderMode.value) {
-                return Container();
-              }
         
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,10 +176,6 @@ class _ConversationAddWindowState extends State<ElementSidebar> {
                                 final setting = effect.settings[index];
                                 final last = index == effect.settings.length - 1;
                                 settings.add(setting);
-                                                
-                                if(!setting.exposed && controller.renderMode.value) {
-                                  return Container();
-                                }
                                                   
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,

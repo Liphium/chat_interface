@@ -62,7 +62,7 @@ class _EditorPageState extends State<EditorPage> {
                     ),
                   ],
                 ),
-                Icon(Icons.apps, color: Get.theme.colorScheme.onPrimary, size: 30),
+                Icon(Icons.draw, color: Get.theme.colorScheme.onPrimary, size: 30),
                 horizontalSpacing(elementSpacing),
                 Text(widget.name, style: Get.theme.textTheme.titleMedium),
                 const Expanded(child: SizedBox()),
