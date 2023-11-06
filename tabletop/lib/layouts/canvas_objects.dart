@@ -65,7 +65,7 @@ class Layer {
 }
 
 class Deck {
-  late final String id;
+  late String id;
   final String name;
   final int width, height;
   late final images = RxList<DeckImage>();
@@ -99,7 +99,7 @@ class Deck {
 }
 
 class DeckImage {
-  final String path;
+  String path;
 
   DeckImage(this.path);
 
@@ -107,6 +107,10 @@ class DeckImage {
   Map<String, dynamic> toMap() => {
     "path": path
   };
+
+  String getPath() {
+    return path.replaceAll("_local_", currentProjectFolder);
+  }
 }
 
 abstract class Element {

@@ -38,17 +38,16 @@ class CanvasManager {
     return directory.path;
   }
 
-  static Future<bool> saveCanvas(Canvas layout) async {
-    final path = await _getPath();
+  static Future<bool> saveCanvas(Canvas layout, {String? location}) async {
     final map = layout.toMap();
-    final file = File("$path/${layout.name}.can");
+    final file = File(location ?? layout.path);
     await file.writeAsString(jsonEncode(map));
     return true;
   }
 
-  static Future<Canvas> loadCanvas(String name) async {
+  static Future<Canvas> loadCanvas(String name, {String? location}) async {
     final path = await _getPath();
-    final file = File("$path/$name.can");
+    final file = File(location ?? "$path/$name.can");
     final json = jsonDecode(await file.readAsString());
     return Canvas.fromMap(file.path, json);
   }

@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:tabletop/layouts/elements.dart';
 import 'package:tabletop/layouts/canvas_manager.dart';
 import 'package:tabletop/pages/editor/element_settings/effect_error_dialog.dart';
 import 'package:get/get.dart';
+
+var currentProjectFolder = "";
 
 class EditorController extends GetxController {
 
@@ -18,6 +22,7 @@ class EditorController extends GetxController {
     showSettings.value = false;
     currentElement.value = null;
     currentCanvas.value = layout;
+    currentProjectFolder = "${File(layout.path).parent.path}/";
     renderMode.value = false;
   }
 

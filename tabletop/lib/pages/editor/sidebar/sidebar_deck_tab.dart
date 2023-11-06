@@ -111,8 +111,7 @@ class _SidebarElementTabState extends State<SidebarDeckTab> {
                                           children: [
                                             Icon(Icons.image, color: Get.theme.colorScheme.onPrimary),
                                             horizontalSpacing(elementSpacing),
-                                            Text(image.path.split("\\").last, style: Get.theme.textTheme.labelMedium, textHeightBehavior: noTextHeight,),
-                                            const Expanded(child: SizedBox()),
+                                            Expanded(child: Text(image.path.split("\\").last, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis, textHeightBehavior: noTextHeight,)),
                                             Visibility(
                                               visible: !controller.renderMode.value,
                                               replacement: IconButton(

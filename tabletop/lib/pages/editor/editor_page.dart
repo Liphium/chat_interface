@@ -1,4 +1,5 @@
 import 'package:tabletop/layouts/canvas_manager.dart';
+import 'package:tabletop/layouts/templates/template_manager.dart';
 import 'package:tabletop/pages/editor/editor_canvas.dart';
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/pages/editor/sidebar/editor_sidebar.dart';
@@ -14,8 +15,9 @@ import 'package:get/get.dart';
 class EditorPage extends StatefulWidget {
 
   final String name;
+  final String? location;
 
-  const EditorPage({super.key, required this.name});
+  const EditorPage({super.key, required this.name, this.location});
 
   @override
   State<EditorPage> createState() => _EditorPageState();
@@ -35,7 +37,7 @@ class _EditorPageState extends State<EditorPage> {
   }
 
   void loadCanvas() async {
-    layout.value = await CanvasManager.loadCanvas(widget.name);
+    layout.value = await CanvasManager.loadCanvas(widget.name, location: widget.location);
     Get.find<EditorController>().setCurrentCanvas(layout.value!);
     await Future.delayed(500.ms);
     Get.find<EditorController>().redoCanvas();
@@ -43,6 +45,7 @@ class _EditorPageState extends State<EditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<EditorController>();
     return Scaffold(
       backgroundColor: Get.theme.colorScheme.background,
       body: Column(
@@ -64,7 +67,9 @@ class _EditorPageState extends State<EditorPage> {
                 ),
                 Icon(Icons.draw, color: Get.theme.colorScheme.onPrimary, size: 30),
                 horizontalSpacing(elementSpacing),
-                Text(widget.name, style: Get.theme.textTheme.titleMedium),
+                Obx(() =>
+                  Text(controller.currentCanvas.value.name, style: Get.theme.textTheme.titleMedium)
+                ),
                 const Expanded(child: SizedBox()),
                 
                 //* Current selected toolbar
@@ -137,7 +142,10 @@ class _EditorPageState extends State<EditorPage> {
                     horizontalSpacing(defaultSpacing),
                     FJElevatedButton(
                       smallCorners: true,
-                      onTap: () => {},
+                      onTap: () async {
+                        final result = await TemplateManager.buildTemplate(layout.value!);
+                        TemplateManager.launchFileExplorer(result);
+                      },
                       child: Row(
                         children: [
                           Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),

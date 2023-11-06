@@ -8,7 +8,6 @@ import 'package:tabletop/theme/list_selection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tabletop/theme/vertical_spacing.dart';
 
 class ImageElement extends layout.Element {
   
@@ -30,10 +29,18 @@ class ImageElement extends layout.Element {
     super.preProcess();
   }
 
+  String getImagePath() {
+    return (settings[0].value.value as String).replaceAll("_local_", currentProjectFolder);
+  }
+
+  void setImagePath(String path) {
+    settings[0].value.value = path;
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    final path = settings[0].value.value as String;
+    final path = getImagePath();
     final xOffset = settings[1].value.value as double;
     final yOffset = settings[2].value.value as double;
 
@@ -312,7 +319,7 @@ class StackElement extends layout.Element {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(deck.width / 10),
-          child: Image.file(File(deck.images[0].path), fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
+          child: Image.file(File(deck.images[0].getPath()), fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
             return Placeholder(
               color: Get.theme.colorScheme.error,
               child: Center(
@@ -321,14 +328,17 @@ class StackElement extends layout.Element {
             );
           },),
         ),
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 35, sigmaY: 35), 
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(deck.width / 10),
-            ),
-          )
+        ClipRRect(
+          borderRadius: BorderRadius.circular(deck.width / 10),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 35, sigmaY: 35), 
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(deck.width / 10),
+              ),
+            )
+          ),
         ),
       ],
     );
