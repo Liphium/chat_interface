@@ -102,6 +102,11 @@ class EditorController extends GetxController {
     return changed;
   }
 
+  void playCurrentCanvas() {
+    renderMode.value = true;
+    redoCanvas();
+  }
+
   void addElement(Layer layer, int type, String name) {
     Element? element;
     switch(type) {

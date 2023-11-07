@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:tabletop/layouts/color_manager.dart';
 import 'package:tabletop/layouts/canvas_manager.dart' as layout;
+import 'package:tabletop/layouts/templates/playable_canvas.dart';
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/theme/list_selection.dart';
 import 'package:file_picker/file_picker.dart';
@@ -282,6 +283,13 @@ class StackElement extends layout.Element {
 
   @override
   void init() {
+    final controller = Get.find<EditorController>();
+    if(controller.currentCanvas.value is PlayableCanvas) {
+      final canvas = controller.currentCanvas.value as PlayableCanvas;
+      final deckId = settings[0].value.value as String;
+      final deck = canvas.decks[deckId];
+      deck?.images.shuffle();
+    }
     scalable = false;
     if(size.value.width == 0) size.value = const Size(100, 100);
   }
@@ -349,5 +357,18 @@ class StackElement extends layout.Element {
     return [
       layout.DeckSetting("deck", "Deck"),
     ];
+  }
+
+  @override
+  void onGameClick(PlayableCanvas canvas) {
+    final deckId = settings[0].value.value as String;
+    final deck = canvas.decks[deckId];
+    if(deck == null) {
+      return;
+    }
+    if(deck.images.isEmpty) {
+      return;
+    }
+    canvas.playLayer.addElement(DeckImageElement(deck.images.removeAt(0)));
   }
 }

@@ -20,7 +20,7 @@ class TemplateManager {
     final path = await _getPath();
     final encoder = ZipFileEncoder();
     final copy = Canvas(canvas.name, canvas.path);
-    encoder.create("$path/${copy.name}.zip");
+    encoder.create("$path/${copy.name}.ctmp");
     for(var layer in canvas.layers) {
       copy.layers.add(Layer(layer.name, ));
       for(var element in layer.elements.values) {
@@ -59,7 +59,7 @@ class TemplateManager {
     // Delete the temp file
     await temp.delete();
 
-    return "$path/${copy.name}.zip";
+    return path;
   }
 
   static void launchFileExplorer(String path) {

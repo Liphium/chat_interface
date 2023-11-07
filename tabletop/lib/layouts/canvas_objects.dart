@@ -118,7 +118,6 @@ abstract class Element {
   late final String id;
   final String name;
   final IconData icon;
-  Layer parent = Layer("");
   bool scalable = false, scalableWidth = true, scalableHeight = true;
   final position = const Offset(0, 0).obs;
   final size = const Size(0, 0).obs;
@@ -176,6 +175,7 @@ abstract class Element {
   }
 
   void init();
+  void onGameClick(PlayableCanvas canvas) {}
   List<Setting> buildSettings();
   void preProcess() {}
   Widget build(BuildContext context);

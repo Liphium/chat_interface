@@ -122,6 +122,13 @@ class _EditorPageState extends State<EditorPage> {
                     LoadingIconButton(
                       loading: Get.find<EditorController>().loading,
                       color: Get.theme.colorScheme.onPrimary,
+                      icon: Icons.play_arrow,
+                      onTap: () => Get.find<EditorController>().redoCanvas(),
+                    ),
+                    horizontalSpacing(defaultSpacing),
+                    LoadingIconButton(
+                      loading: Get.find<EditorController>().loading,
+                      color: Get.theme.colorScheme.onPrimary,
                       icon: Icons.save,
                       onTap: () => Get.find<EditorController>().redoCanvas(),
                     ),
@@ -150,7 +157,7 @@ class _EditorPageState extends State<EditorPage> {
                         children: [
                           Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
                           horizontalSpacing(elementSpacing),
-                          Text("Play", style: Get.theme.textTheme.labelMedium),
+                          Text("Export", style: Get.theme.textTheme.labelMedium),
                         ],
                       ),
                     )

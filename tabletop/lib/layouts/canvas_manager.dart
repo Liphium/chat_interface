@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:tabletop/layouts/color_manager.dart';
 import 'package:tabletop/layouts/effects.dart';
 import 'package:tabletop/layouts/elements.dart';
+import 'package:tabletop/layouts/templates/playable_canvas.dart';
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/theme/fj_button.dart';
 import 'package:tabletop/theme/fj_textfield.dart';
@@ -40,6 +41,7 @@ class CanvasManager {
 
   static Future<bool> saveCanvas(Canvas layout, {String? location}) async {
     final map = layout.toMap();
+    if(map.isEmpty) return true;
     final file = File(location ?? layout.path);
     await file.writeAsString(jsonEncode(map));
     return true;
