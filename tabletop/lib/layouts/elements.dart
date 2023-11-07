@@ -369,6 +369,9 @@ class StackElement extends layout.Element {
     if(deck.images.isEmpty) {
       return;
     }
-    canvas.playLayer.addElement(DeckImageElement(deck.images.removeAt(0)));
+    final element = DeckImageElement(deck, deck.images.removeAt(0));
+    element.position.value = position.value;
+    canvas.playLayer.addElement(element);
+    return;
   }
 }

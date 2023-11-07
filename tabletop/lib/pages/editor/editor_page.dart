@@ -1,9 +1,11 @@
 import 'package:tabletop/layouts/canvas_manager.dart';
+import 'package:tabletop/layouts/templates/playable_canvas.dart';
 import 'package:tabletop/layouts/templates/template_manager.dart';
 import 'package:tabletop/pages/editor/editor_canvas.dart';
 import 'package:tabletop/pages/editor/editor_controller.dart';
 import 'package:tabletop/pages/editor/sidebar/editor_sidebar.dart';
 import 'package:tabletop/pages/editor/element_settings/element_settings_window.dart';
+import 'package:tabletop/pages/player/player_page.dart';
 import 'package:tabletop/theme/fj_button.dart';
 import 'package:tabletop/theme/icon_button.dart';
 import 'package:tabletop/theme/vertical_spacing.dart';
@@ -123,7 +125,10 @@ class _EditorPageState extends State<EditorPage> {
                       loading: Get.find<EditorController>().loading,
                       color: Get.theme.colorScheme.onPrimary,
                       icon: Icons.play_arrow,
-                      onTap: () => Get.find<EditorController>().redoCanvas(),
+                      onTap: () {
+                        final playable = PlayableCanvas.copy(controller.currentCanvas.value);
+                        Get.to(PlayerPage(canvas: playable));
+                      },
                     ),
                     horizontalSpacing(defaultSpacing),
                     LoadingIconButton(
@@ -183,28 +188,9 @@ class _EditorPageState extends State<EditorPage> {
                 //* Editor
                 Expanded(
                   child: ClipRect(
-                    child: GestureDetector(
-                      onTap: () => Get.find<EditorController>().currentElement.value = null,
-                      child: Listener(
-                        behavior: HitTestBehavior.opaque,
-                        onPointerSignal: (event) {
-                          if(event is PointerScrollEvent) {
-                            final delta = event.scrollDelta.dy * 0.001 * -1;
-                            scale.value += delta;
-                          }
-                        },
-                        onPointerMove: (event) {
-                          if(event.buttons == 4) {
-                            offset.value += event.delta;
-                          }
-                        },
-                        child: Center(
-                          child: Obx(() => 
-                            layout.value != null ? EditorCanvas(key: _canvasKey, position: offset.value, zoom: scale.value)
-                            : Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary))
-                          ),
-                        ),
-                      ),
+                    child: Obx(() => 
+                      layout.value != null ? EditorCanvas(key: _canvasKey)
+                      : Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary))
                     ),
                   ) 
                 ),

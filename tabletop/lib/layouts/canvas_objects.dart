@@ -175,6 +175,9 @@ abstract class Element {
   }
 
   void init();
+
+  /// Returns wether it should be draggable during playing or not
+  bool gameDragging() => false;
   void onGameClick(PlayableCanvas canvas) {}
   List<Setting> buildSettings();
   void preProcess() {}
