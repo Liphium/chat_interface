@@ -34,7 +34,10 @@ class StatusController extends GetxController {
   final status = '-'.obs; // "-" = status disabled
   final type = 1.obs;
 
-  // Current space information
+  // Shared content by friends
+  final sharedContent = <ShareContainer>[].obs;
+
+  // Current shared content (by this account)
   ShareContainer? _container;
 
   void setName(String value) => name.value = value;
@@ -117,9 +120,10 @@ enum ShareType {
 
 abstract class ShareContainer {
 
+  final Friend? sender;
   final ShareType type;
 
-  ShareContainer(this.type);
+  ShareContainer(this.sender, this.type);
 
   Map<String, dynamic> toMap();
 

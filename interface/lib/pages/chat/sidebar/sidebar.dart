@@ -28,7 +28,7 @@ class _SidebarState extends State<Sidebar> {
   Widget build(BuildContext context) {
 
     ThemeData theme = Theme.of(context);
-  var selected = 2.obs;
+  var selected = 3.obs;
 
     //* Sidebar
     return Container(

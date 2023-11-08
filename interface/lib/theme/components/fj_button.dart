@@ -8,8 +8,9 @@ class FJElevatedButton extends StatelessWidget {
   final Widget child;
   final bool shadow;
   final bool smallCorners;
+  final bool secondary;
 
-  const FJElevatedButton({super.key, required this.onTap, required this.child, this.shadow = false, this.smallCorners = false});
+  const FJElevatedButton({super.key, required this.onTap, required this.child, this.shadow = false, this.secondary = false, this.smallCorners = false});
 
   @override
   Widget build(BuildContext context) {

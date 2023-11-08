@@ -31,6 +31,11 @@ class ChatPageTranslations extends Translations {
       'conversations.create': 'Create conversation',
       'conversations.name': 'Conversation name',
       'chat.message': 'Say something',
+
+      // Sharing
+      'sharing.placeholder': 'Search shared content',
+      'join.space': 'Join space',
+      'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
     },
 
     //* German
@@ -60,6 +65,11 @@ class ChatPageTranslations extends Translations {
       'conversations.create': 'Chat erstellen',
       'conversations.name': 'Gruppenname',
       'chat.message': 'Sag etwas',
+
+      // Sharing
+      'sharing.placeholder': 'Geteilte Inhalte durchsuchen',
+      'join.space': 'Space beitreten',
+      'join.space.popup': 'Manche klicken darauf ausversehen, also willst du wirklich diesem Space beitreten?',
     }
   };
 }

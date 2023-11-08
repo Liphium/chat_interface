@@ -11,6 +11,8 @@ class GeneralTranslations extends Translations {
       'ok': 'Okay',
       'retry': 'Retry',
       'back': 'Back',
+      'no.got': 'No, you got me',
+      'yeah': 'Yeah',
 
       // Time TODO: Differentiate between PM and AM
       'time.now': 'Today at @hour:@minute',
@@ -24,6 +26,8 @@ class GeneralTranslations extends Translations {
       'ok': 'Verstanden',
       'retry': 'Nochmal versuchen',
       'back': 'Zurück',
+      'no.got': 'Nein, sorry',
+      'yeah': 'NatürlichR',
 
       // Time
       'time.now': 'Heute um @hour:@minute',

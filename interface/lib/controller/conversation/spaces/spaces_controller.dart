@@ -65,7 +65,7 @@ class SpacesController extends GetxController {
       _connectToRoom(roomId, appToken);
 
       // Send invites
-      final container = SpaceConnectionContainer(appToken["domain"], roomId, key!);
+      final container = SpaceConnectionContainer(appToken["domain"], roomId, key!, null);
       sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toInviteJson(), () => {});
     });
   }
@@ -162,10 +162,19 @@ class SpacesController extends GetxController {
 
 class SpaceInfo {
   late bool exists;
-  late String? title;
-  late DateTime? start;
+  late String title;
+  late DateTime start;
   final List<Friend> friends = [];
   late final List<String> members;
+
+  SpaceInfo(this.title, this.start, this.members) {
+    exists = true;
+    final controller = Get.find<FriendController>();
+    for(var member in members) {
+      final friend = controller.friends[member];
+      if(friend != null) friends.add(friend);
+    }
+  }
 
   SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
     title = decryptSymmetric(json["data"], container.key);
@@ -193,8 +202,8 @@ class SpaceConnectionContainer extends ShareContainer {
 
   SpaceInfo? info;
 
-  SpaceConnectionContainer(this.node, this.roomId, this.key) : super(ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]));
+  SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {
