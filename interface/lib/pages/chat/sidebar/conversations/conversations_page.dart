@@ -42,7 +42,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                buildInput(theme, query),
+                buildSearchInputSidebar(theme, query),
                 horizontalSpacing(defaultSpacing * 0.5),
                 SizedBox(
                   key: _addKey,
@@ -286,7 +286,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
   }
 }
 
-Widget buildInput(ThemeData theme, RxString query) {
+Widget buildSearchInputSidebar(ThemeData theme, RxString query, {String hintText = "conversations.placeholder"}) {
   return Expanded(
     child: Material(
       borderRadius: const BorderRadius.only(
@@ -304,7 +304,7 @@ Widget buildInput(ThemeData theme, RxString query) {
             fillColor: theme.colorScheme.onPrimary,
             hoverColor: theme.colorScheme.onPrimary,
             prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
-            hintText: 'conversations.placeholder'.tr,
+            hintText: hintText.tr,
           ),
           onChanged: (value) {
             query.value = value;

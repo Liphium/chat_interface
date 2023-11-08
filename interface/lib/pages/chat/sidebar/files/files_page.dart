@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:chat_interface/pages/chat/sidebar/conversations/conversations_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,6 +13,8 @@ class FilesPage extends StatefulWidget {
 }
 
 class _ConversationsPageState extends State<FilesPage> {
+
+  final GlobalKey _addKey = GlobalKey();
 
   final files = [
     "deine_mutter.png",
@@ -53,6 +56,40 @@ class _ConversationsPageState extends State<FilesPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
+            SizedBox(
+              height: 48,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  buildSearchInputSidebar(Get.theme, query, hintText: "files.placeholder"),
+                  horizontalSpacing(defaultSpacing * 0.5),
+                  SizedBox(
+                    key: _addKey,
+                    width: 48,
+                    height: 48,
+                    child: Material(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(defaultSpacing * 1.5),
+                      ),
+                      color: Get.theme.colorScheme.primary,
+                      child: InkWell(
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(defaultSpacing),
+                        ),
+                        onTap: () {
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(defaultSpacing),
+                          child: Icon(Icons.add, color: Get.theme.colorScheme.onPrimary),
+                        ),
+                      )
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            verticalSpacing(sectionSpacing),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),

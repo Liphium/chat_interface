@@ -88,7 +88,7 @@ class _MessageFeedState extends State<MessageFeed> {
                       shrinkWrap: true,
                       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                       itemBuilder: (context, index) {
-                          
+
                         if(index == 0) {
                           return verticalSpacing(defaultSpacing);
                         }

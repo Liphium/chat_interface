@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/error/server_offline_page.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,16 +27,14 @@ class ProfileSetup extends Setup {
     String session = getSessionFromJWT(sessionToken);
 
     // Refresh token
-    var res = await postRqAuthorized("/auth/refresh", <String, dynamic>{
+    final body = await postJSON("/auth/refresh", <String, dynamic>{
       "session": session,
       "token": refreshToken,
     });
 
-    if(res.statusCode == 404) return const ServerOfflinePage();
-    if(res.statusCode != 200) return const LoginPage();
+    sendLog(body);
 
     // Set new token (if refreshed)
-    var body = jsonDecode(res.body);
     if(body["success"]) {
       loadTokensFromPayload(body);
       await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
@@ -42,6 +42,10 @@ class ProfileSetup extends Setup {
 
       if(body["error"] == "session.duration") {
         return null;
+      }
+
+      if(body["error"] == "server.error") {
+        return const ErrorPage(title: "server.error");
       }
 
       Get.snackbar("loading.profile".tr, body["error"].tr);

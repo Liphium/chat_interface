@@ -1,9 +1,9 @@
 import 'package:chat_interface/pages/chat/sidebar/conversations/conversations_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/files/files_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
+import 'package:chat_interface/pages/chat/sidebar/sharing_hub/sharing_hub_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_icon_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
-import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,7 +21,7 @@ class _SidebarState extends State<Sidebar> {
     0: const ConversationsPage(),
     1: const FriendsPage(),
     2: const FilesPage(),
-    3: const SettingsPage(),
+    3: const SharingHubPage(),
   };
 
   @override

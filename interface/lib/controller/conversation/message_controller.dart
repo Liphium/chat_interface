@@ -25,7 +25,7 @@ class MessageController extends GetxController {
 
     // Load messages
     messages.clear();
-    var loaded = await (db.select(db.message)..limit(60)..orderBy([(u) => OrderingTerm.desc(u.createdAt)])..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
+    var loaded = await (db.select(db.message)..limit(30)..orderBy([(u) => OrderingTerm.desc(u.createdAt)])..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
 
     for (var message in loaded) {
       messages.add(Message.fromMessageData(message));

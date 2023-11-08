@@ -42,13 +42,21 @@ Future<Response> postRq(String path, Map<String, dynamic> body) async {
 // Post request to node-backend (new)
 Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
 
-  final res = await post(
-    server(path),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode(body),
-  );
+  Response? res;
+  try {
+    res = await post(
+      server(path),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+  } catch (e) {
+    return <String, dynamic> {
+      "success": false,
+      "error": "server.error"
+    };
+  }
 
   if(res.statusCode != 200) {
     return <String, dynamic>{

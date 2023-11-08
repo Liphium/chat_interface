@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
@@ -13,7 +14,9 @@ import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class SpacesController extends GetxController {
@@ -157,10 +160,38 @@ class SpacesController extends GetxController {
   }
 }
 
+class SpaceInfo {
+  late bool exists;
+  late String? title;
+  late DateTime? start;
+  final List<Friend> friends = [];
+  late final List<String> members;
+
+  SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
+    title = decryptSymmetric(json["data"], container.key);
+    start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
+    members = List<String>.from(json["members"].map((e) => decryptSymmetric(e, container.key)));
+    exists = true;
+  
+    final controller = Get.find<FriendController>();
+    for(var member in members) {
+      final friend = controller.friends[member];
+      if(friend != null) friends.add(friend);
+    }
+  }
+
+  SpaceInfo.notLoaded() {
+    exists = false;
+    members = [];
+  }
+}
+
 class SpaceConnectionContainer extends ShareContainer {  
   final String node; // Node domain
-  final String roomId; // Token
+  final String roomId; // Token required for joining (even though it's not really a token)
   final SecureKey key; // Symmetric key
+
+  SpaceInfo? info;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key) : super(ShareType.space);
   SpaceConnectionContainer.fromJson(Map<String, dynamic> json) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]));
@@ -179,4 +210,29 @@ class SpaceConnectionContainer extends ShareContainer {
     "id": roomId,
     "key": packageSymmetricKey(key)
   });
+
+  Future<SpaceInfo> getInfo() async {
+    if(info != null) {
+      return info!;
+    }
+
+    final req = await post(
+      Uri.parse("$nodeProtocol$node/info"),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "room": roomId
+      }),
+    );
+    if(req.statusCode != 200) {
+      return SpaceInfo.notLoaded();
+    }
+    final body = jsonDecode(req.body);
+    if(!body["success"]) {
+      return SpaceInfo.notLoaded();
+    }
+    info = SpaceInfo.fromJson(this, body);
+    return info!;
+  }
 }
