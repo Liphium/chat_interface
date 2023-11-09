@@ -23,11 +23,14 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
 }
 
 void sendTextMessage(RxBool loading, String conversationId, String message, String attachments, Function() callback) async {
+  if(loading.value) {
+    return;
+  }
+  loading.value = true;
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
 
 void sendActualMessage(RxBool loading, String conversationId, MessageType type, String attachments, String message, Function() callback) async {
-  if(loading.value) return;
   loading.value = true;
 
   // Encrypt message with signature
@@ -53,7 +56,7 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   callback.call();
   if(!json["success"]) {
     loading.value = false;
-    String message = "conv_msg_create.${json["status"]}";
+    String message = "conv_msg_create.${json["error"]}";
     if(json["message"] == "server.error") {
       message = "server.error";
     }

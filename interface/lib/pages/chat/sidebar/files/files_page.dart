@@ -79,6 +79,7 @@ class _ConversationsPageState extends State<FilesPage> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
                       child: TextField(
+                        autofocus: true,
                         style: Get.theme.textTheme.labelMedium,
                         decoration: InputDecoration(
                           border: InputBorder.none,

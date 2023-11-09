@@ -25,6 +25,7 @@ const modelBorderRadius = defaultSpacing * 1.5;
 const modelPadding = defaultSpacing * 2;
 const dialogBorderRadius = defaultSpacing * 1.5;
 const dialogPadding = defaultSpacing * 1.5;
+const scaleAnimationCurve = ElasticOutCurve(1.1);
 
 String formatTime(DateTime time) {
   final now = DateTime.now();

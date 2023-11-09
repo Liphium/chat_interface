@@ -1,4 +1,5 @@
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -37,7 +38,7 @@ class _AnimatedContainerState extends State<TransitionContainer> {
         duration: 500.ms,
         begin: const Offset(0, 0),
         end: const Offset(1, 1),
-        curve: const ElasticOutCurve(0.9),
+        curve: scaleAnimationCurve
       );
     }
 

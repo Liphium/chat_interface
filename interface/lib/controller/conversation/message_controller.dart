@@ -96,8 +96,10 @@ class Message {
 
     // Check signature
     message.verified = true;
-    message.content = utf8.decode(base64Decode(contentJson["c"]));
     message.type = MessageType.fromString(contentJson["t"] ?? "text");
+    if(message.type == MessageType.text) {
+      message.content = utf8.decode(base64Decode(contentJson["c"]));
+    }
     message.attachments = contentJson["a"] ?? "";
 
     return message;
