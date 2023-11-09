@@ -19,59 +19,56 @@ class _FriendButtonState extends State<FriendButton> {
   
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-      child: Material(
-        color: Get.theme.colorScheme.onBackground,
-        borderRadius: BorderRadius.circular(10),
-        child: MouseRegion(
-          onHover: (event) => widget.position.value = event.position,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            hoverColor: Theme.of(context)
-                .colorScheme
-                .primary.withAlpha(100),
-            splashColor: Theme.of(context).hoverColor,
+    return Material(
+      color: Get.theme.colorScheme.onBackground,
+      borderRadius: BorderRadius.circular(10),
+      child: MouseRegion(
+        onHover: (event) => widget.position.value = event.position,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          hoverColor: Theme.of(context)
+              .colorScheme
+              .primary.withAlpha(100),
+          splashColor: Theme.of(context).hoverColor,
 
-            //* Show profile
-            onTap: () => Get.dialog(Profile(position: widget.position.value, friend: widget.friend)),
+          //* Show profile
+          onTap: () => Get.dialog(Profile(position: widget.position.value, friend: widget.friend)),
 
-            //* Friend info
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: defaultSpacing,
-                  vertical: defaultSpacing * 0.5),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.person,
-                          size: 30,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimary),
-                        const SizedBox(width: 10),
-                        Text(widget.friend.name, style: Get.theme.textTheme.labelMedium),
-                      ],
-                    ),
+          //* Friend info
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: defaultSpacing,
+                vertical: defaultSpacing * 0.5),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.person,
+                        size: 30,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimary),
+                      const SizedBox(width: 10),
+                      Text(widget.friend.name, style: Get.theme.textTheme.labelMedium),
+                    ],
+                  ),
 
-                    //* Friend actions
-                    Row(
-                      children: [
+                  //* Friend actions
+                  Row(
+                    children: [
 
-                        //* Add to call
-                        IconButton(
-                          icon: Icon(Icons.add_call,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimary),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                  ]),
-            ),
+                      //* Add to call
+                      IconButton(
+                        icon: Icon(Icons.add_call,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimary),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ]),
           ),
         ),
       ),

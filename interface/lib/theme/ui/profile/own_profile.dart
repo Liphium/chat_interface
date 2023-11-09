@@ -3,6 +3,8 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/chat/sidebar/files/files_page.dart';
+import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
@@ -243,14 +245,20 @@ class _ProfileState extends State<OwnProfile> {
                     loading: false.obs
                   ),
 
-                  // Theme button
-                  Obx(() =>
-                    ProfileButton(
-                      icon: manager.brightness.value == Brightness.light ? Icons.dark_mode : Icons.light_mode,
-                      label: 'profile.theme.${manager.brightness.value.toString().split(".")[1]}'.tr, // profile.theme.light and profile.theme.dark
-                      onTap: () => manager.changeBrightness(manager.brightness.value == Brightness.light ? Brightness.dark : Brightness.light),
-                      loading: false.obs
-                    ),
+                  //* Friends page
+                  ProfileButton(
+                    icon: Icons.group,
+                    label: 'profile.friends'.tr,
+                    onTap: () => Get.dialog(const FriendsPage()),
+                    loading: false.obs
+                  ),
+
+                  //* Files page
+                  ProfileButton(
+                    icon: Icons.folder,
+                    label: 'profile.files'.tr,
+                    onTap: () => Get.dialog(const FilesPage()),
+                    loading: false.obs
                   ),
 
                   //* Hide profile

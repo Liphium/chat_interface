@@ -51,3 +51,18 @@ class ExpandEffect extends CustomEffect {
   }, curve: curve, duration: duration, delay: delay);
 
 }
+
+class ReverseExpandEffect extends CustomEffect {
+
+  ReverseExpandEffect({Curve? curve, Duration? duration, Axis? axis, Alignment? alignment, Duration? delay}) : super(builder: (context, value, child) {
+    return ClipRect(
+      child: Align(
+        alignment: alignment ?? Alignment.topCenter,
+        heightFactor: axis == Axis.vertical ? max(1-value, 0.0) : null,
+        widthFactor: axis == Axis.horizontal ? max(1-value, 0.0) : null,
+        child: child,
+      ),
+    );
+  }, curve: curve, duration: duration, delay: delay);
+
+}

@@ -40,209 +40,230 @@ class _ConversationsPageState extends State<FilesPage> {
   @override
   Widget build(BuildContext context) {
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      child: Obx(() {
-    
-        if(files.isEmpty) {
-          return Center(
-            child: Text(
-              "No files found",
-              style: Get.theme.textTheme.labelLarge
-            )
-          );
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-            SizedBox(
-              height: 48,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  buildSearchInputSidebar(Get.theme, query, hintText: "files.placeholder"),
-                  horizontalSpacing(defaultSpacing * 0.5),
-                  SizedBox(
-                    key: _addKey,
-                    width: 48,
-                    height: 48,
-                    child: Material(
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(defaultSpacing * 1.5),
-                      ),
-                      color: Get.theme.colorScheme.primary,
-                      child: InkWell(
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(defaultSpacing),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 500,
+          maxHeight: 400,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(dialogBorderRadius),
+            color: Get.theme.colorScheme.background,
+          ),
+          padding: const EdgeInsets.only(top: dialogPadding, right: dialogPadding, left: dialogPadding),
+          child: Obx(() {
+        
+            if(files.isEmpty) {
+              return Center(
+                child: Text(
+                  "No files found",
+                  style: Get.theme.textTheme.labelLarge
+                )
+              );
+            }
+          
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+          
+                SizedBox(
+                  height: 48,
+                  child: Material(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(defaultSpacing * 1.5),
+                      topRight: Radius.circular(defaultSpacing * 1.5),
+                    ),
+                    color: Get.theme.colorScheme.primary,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
+                      child: TextField(
+                        style: Get.theme.textTheme.labelMedium,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusColor: Get.theme.colorScheme.onPrimary,
+                          iconColor: Get.theme.colorScheme.onPrimary,
+                          fillColor: Get.theme.colorScheme.onPrimary,
+                          hoverColor: Get.theme.colorScheme.onPrimary,
+                          prefixIcon: Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
+                          hintText: "files.placeholder".tr,
                         ),
-                        onTap: () {
+                        onChanged: (value) {
+                          query.value = value;
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.all(defaultSpacing),
-                          child: Icon(Icons.add, color: Get.theme.colorScheme.onPrimary),
-                        ),
-                      )
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            verticalSpacing(sectionSpacing),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-              child: Text("files.favorite".tr, style: Get.theme.textTheme.labelMedium),
-            ),         
-            verticalSpacing(defaultSpacing),
-
-            ListView.builder(
-              itemCount: files.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                final file = files[index];
-                final extension = file.split(".").last;
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                  child: Material(
-                    color: Get.theme.colorScheme.onBackground,
-                    borderRadius: BorderRadius.circular(10),
-                    child: MouseRegion(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        hoverColor: Theme.of(context)
-                            .colorScheme
-                            .primary.withAlpha(100),
-                        splashColor: Theme.of(context).hoverColor,
-
-                        //* Show file overview
-                        onTap: () => {},
-
-                        //* Friend info
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: defaultSpacing,
-                              vertical: defaultSpacing * 0.5),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(extensionMap[extension] ?? Icons.insert_drive_file,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary),
-                                    const SizedBox(width: 10),
-                                    Text(file, style: Get.theme.textTheme.bodyMedium),
-                                  ],
-                                ),
-
-                                //* Friend actions
-                                Row(
-                                  children: [
-
-                                    //* Add to call
-                                    IconButton(
-                                      icon: Icon(Icons.launch,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary),
-                                      onPressed: () {},
-                                    ),
-                                  ],
-                                ),
-                              ]),
-                        ),
+                        cursorColor: Get.theme.colorScheme.onPrimary,
                       ),
                     ),
                   ),
-                );
-              },
-            ),
-
-            verticalSpacing(sectionSpacing),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-              child: Text("files.uploaded".tr, style: Get.theme.textTheme.labelMedium),
-            ),         
-            verticalSpacing(defaultSpacing),
-
-            ListView.builder(
-              itemCount: files.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                final file = files[index];
-                final extension = file.split(".").last;
-                final expiry = DateTime.now().add(Duration(days: -Random().nextInt(30)));
-                final duration = DateTime.now().difference(expiry);
-                final difference = duration.inHours / (30 * 24);
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                  child: Material(
-                    color: Get.theme.colorScheme.onBackground,
-                    borderRadius: BorderRadius.circular(10),
-                    child: MouseRegion(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        hoverColor: Theme.of(context)
-                            .colorScheme
-                            .primary.withAlpha(100),
-                        splashColor: Theme.of(context).hoverColor,
-
-                        //* Show file overview
-                        onTap: () => {},
-
-                        //* Friend info
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: defaultSpacing,
-                              vertical: defaultSpacing * 0.5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(extensionMap[extension] ?? Icons.insert_drive_file,
-                                    color: Theme.of(context)
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        verticalSpacing(sectionSpacing),
+                  
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                          child: Text("files.favorite".tr, style: Get.theme.textTheme.labelMedium),
+                        ),         
+                        verticalSpacing(defaultSpacing),
+                                
+                        ListView.builder(
+                          itemCount: files.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            final file = files[index];
+                            final extension = file.split(".").last;
+                                
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                              child: Material(
+                                color: Get.theme.colorScheme.onBackground,
+                                borderRadius: BorderRadius.circular(10),
+                                child: MouseRegion(
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(10),
+                                    hoverColor: Theme.of(context)
                                         .colorScheme
-                                        .onPrimary),
-                                  const SizedBox(width: 10),
-                                  Text(file, style: Get.theme.textTheme.bodyMedium),
-                                ],
-                              ),
-
-                              //* Friend actions
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: SizedBox(
-                                  width: defaultSpacing * 3,
-                                  height: defaultSpacing * 3,
-                                  child: Tooltip(
-                                    message: "This file will be deleted in ${duration.inDays} days",
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 3,
-                                      value: difference,
-                                      color: Get.theme.colorScheme.onPrimary,
-                                      backgroundColor: Get.theme.colorScheme.primary,
+                                        .primary.withAlpha(100),
+                                    splashColor: Theme.of(context).hoverColor,
+                                
+                                    //* Show file overview
+                                    onTap: () => {},
+                                
+                                    //* Friend info
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: defaultSpacing,
+                                          vertical: defaultSpacing * 0.5),
+                                      child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(extensionMap[extension] ?? Icons.insert_drive_file,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onPrimary),
+                                                const SizedBox(width: 10),
+                                                Text(file, style: Get.theme.textTheme.bodyMedium),
+                                              ],
+                                            ),
+                                
+                                            //* Friend actions
+                                            Row(
+                                              children: [
+                                
+                                                //* Add to call
+                                                IconButton(
+                                                  icon: Icon(Icons.launch,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onPrimary),
+                                                  onPressed: () {},
+                                                ),
+                                              ],
+                                            ),
+                                          ]),
                                     ),
                                   ),
                                 ),
                               ),
-                            ]
-                          ), 
+                            );
+                          },
                         ),
-                      ),
+                                
+                        verticalSpacing(sectionSpacing),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                          child: Text("files.uploaded".tr, style: Get.theme.textTheme.labelMedium),
+                        ),         
+                        verticalSpacing(defaultSpacing),
+                                
+                        ListView.builder(
+                          itemCount: files.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            final file = files[index];
+                            final extension = file.split(".").last;
+                            final expiry = DateTime.now().add(Duration(days: -Random().nextInt(30)));
+                            final duration = DateTime.now().difference(expiry);
+                            final difference = duration.inHours / (30 * 24);
+                                
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                              child: Material(
+                                color: Get.theme.colorScheme.onBackground,
+                                borderRadius: BorderRadius.circular(10),
+                                child: MouseRegion(
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(10),
+                                    hoverColor: Theme.of(context)
+                                        .colorScheme
+                                        .primary.withAlpha(100),
+                                    splashColor: Theme.of(context).hoverColor,
+                                
+                                    //* Show file overview
+                                    onTap: () => {},
+                                
+                                    //* Friend info
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: defaultSpacing,
+                                          vertical: defaultSpacing * 0.5),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(extensionMap[extension] ?? Icons.insert_drive_file,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimary),
+                                              const SizedBox(width: 10),
+                                              Text(file, style: Get.theme.textTheme.bodyMedium),
+                                            ],
+                                          ),
+                                
+                                          //* Friend actions
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: SizedBox(
+                                              width: defaultSpacing * 3,
+                                              height: defaultSpacing * 3,
+                                              child: Tooltip(
+                                                message: "This file will be deleted in ${duration.inDays} days",
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 3,
+                                                  value: difference,
+                                                  color: Get.theme.colorScheme.onPrimary,
+                                                  backgroundColor: Get.theme.colorScheme.primary,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ]
+                                      ), 
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        verticalSpacing(defaultSpacing),
+                      ],
                     ),
                   ),
-                );
-              },
-            ),
-          ],
-        );
-      }),
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
     );
   }
 }

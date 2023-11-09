@@ -52,19 +52,10 @@ class _RequestButtonState extends State<RequestButton> {
     }
 
     return Material(
-      borderRadius: BorderRadius.circular(10),
-      color: Theme.of(context)
-          .colorScheme
-          .background,
+      borderRadius: BorderRadius.circular(defaultSpacing),
+      color: Get.theme.colorScheme.onBackground,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        hoverColor: Theme.of(context)
-            .colorScheme
-            .primary,
-        splashColor: Theme.of(context)
-            .colorScheme
-            .primary,
-        onTap: () {},
+        borderRadius: BorderRadius.circular(defaultSpacing),
 
         //* Request item content
         child: Padding(
@@ -77,7 +68,7 @@ class _RequestButtonState extends State<RequestButton> {
                   children: [
                       Row(
                         children: [
-                          Icon(Icons.person,
+                          Icon(Icons.email,
                               size: 30,
                               color: Theme.of(context)
                                   .colorScheme

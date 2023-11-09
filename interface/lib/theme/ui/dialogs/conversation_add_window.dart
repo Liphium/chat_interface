@@ -59,21 +59,21 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-            
+                          
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text("conversations.create".tr, style: theme.textTheme.titleMedium),
-            
+                          
                         Obx(() =>
                           Text("${_members.length}/100", style: theme.textTheme.bodyMedium)
                         )
                       ],
                     ),
-            
+                          
                     verticalSpacing(defaultSpacing * 0.5),
-            
+                          
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxHeight: 300),
                       child: Obx(() => ListView.builder(
@@ -113,9 +113,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                         },
                       )),
                     ),
-            
+                          
                     Divider(color: Get.theme.dividerColor),
-            
+                          
                     //* Create conversation button
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,27 +172,27 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                         verticalSpacing(defaultSpacing * 0.5),
                         FJElevatedLoadingButton(
                           onTap: () async {
-            
+                          
                             if(_members.isEmpty) {
                               showMessage(SnackbarType.error, "choose.members".tr);
                               return;
                             }
-
+                      
                             if(_members.length > specialConstants["max_conversation_members"]) {
                               showMessage(SnackbarType.error, "choose.members".tr);
                               return;
                             }
-
+                      
                             if(_controller.text.isEmpty && _members.length > 1) {
                               _errorText.value = "enter.name".tr;
                               return;
                             }
-
+                      
                             if(_controller.text.length > specialConstants["max_conversation_name_length"] && _members.length > 1) {
                               _errorText.value = "too.long".trParams({ "limit": specialConstants["max_conversation_name_length"].toString() });
                               return;
                             }
-
+                      
                             _conversationLoading.value = true;
                             var result = false;
                             if(_members.length == 1) {
@@ -200,7 +200,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                             } else {
                               result = await openGroupConversation(_members, _controller.text);
                             }
-
+                      
                             if(result) {
                               Get.back();
                             }

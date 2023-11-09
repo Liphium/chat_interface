@@ -14,17 +14,19 @@ class ChatPageTranslations extends Translations {
       'status.message': 'Status message',
       'status.message.add': 'Add a status message',
       'profile.settings': 'Settings',
-      'profile.theme.dark': 'Dark theme',
-      'profile.theme.light': 'Light theme',
+      'profile.friends': 'Friends',
+      'profile.files': 'Files',
       'profile.test': "Test something (DON'T CLICK)",
 
       // Friends
       'friends': 'Friends',
-      'friends.placeholder': 'Search friends',
+      'friends.placeholder': 'Search friends (type name to add)',
       'friends.remove': 'Remove friend',
       'friends.add': 'Add friend',
       'friends.message': 'Start direct message',
       'friends.invite_to_space': 'Invite to current space',
+      'friends.requests_sent': 'Requests sent',
+      'friends.requests': 'Requests',
 
       // Conversations
       'conversations.placeholder': 'Search (. for hidden ones)',
@@ -32,8 +34,7 @@ class ChatPageTranslations extends Translations {
       'conversations.name': 'Conversation name',
       'chat.message': 'Say something',
 
-      // Sharing
-      'sharing.placeholder': 'Search shared content',
+      // Spaces
       'join.space': 'Join space',
       'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
     },
@@ -48,17 +49,19 @@ class ChatPageTranslations extends Translations {
       'status.message': 'Status',
       'status.message.add': 'Status hinzufügen',
       'profile.settings': 'Einstellungen',
-      'profile.theme.dark': 'Dunkles Design',
-      'profile.theme.light': 'Helles Design',
+      'profile.friends': 'Freunde',
+      'profile.files': 'Dateien',
       'profile.test': "Teste etwas (NICHT KLICKEN)",
 
       // Friends
       'friends': 'Freunde',
-      'friends.placeholder': 'Freunde durchsuchen',
+      'friends.placeholder': 'Freunde durchsuchen (auch hinzufügen)',
       'friends.remove': 'Freund entfernen',
       'friends.add': 'Freund hinzufügen',
       'friends.message': 'Direktnachricht starten',
       'friends.invite_to_space': 'Zum Space einladen',
+      'friends.requests_sent': 'Gesendete Anfragen',
+      'friends.requests': 'Anfragen',
 
       // Conversations
       'conversations.placeholder': 'Suche (. für versteckte)',
@@ -66,8 +69,7 @@ class ChatPageTranslations extends Translations {
       'conversations.name': 'Gruppenname',
       'chat.message': 'Sag etwas',
 
-      // Sharing
-      'sharing.placeholder': 'Geteilte Inhalte durchsuchen',
+      // Spaces
       'join.space': 'Space beitreten',
       'join.space.popup': 'Manche klicken darauf ausversehen, also willst du wirklich diesem Space beitreten?',
     }

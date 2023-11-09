@@ -238,31 +238,6 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                   ],
                                 ),
                               ),
-              
-                              Obx(() =>
-                                SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: Visibility(
-                                    visible: hover.value,
-              
-                                    //* Writing indicator (only visible on not hover)
-                                    replacement: Obx(() =>
-                                      (writingController.writing[conversation.id] ?? []).isNotEmpty ?
-                                      const Padding(
-                                        padding: EdgeInsets.all(defaultSpacing * 1.2),
-                                        child: CircularProgressIndicator(strokeWidth: 3.0,)
-                                      ) : const SizedBox(),
-                                    ),
-              
-                                    //* Call button (only visible on hover)
-                                    child: IconButton(
-                                      icon: Icon(Icons.call, color: theme.colorScheme.onPrimary),
-                                      onPressed: () {},
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ]
                           ),
                         ),
