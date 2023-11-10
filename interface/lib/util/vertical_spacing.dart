@@ -20,6 +20,7 @@ Widget horizontalSpacing(double width) {
 
 const defaultSpacing = 8.0;
 const elementSpacing = defaultSpacing * 0.5;
+const elementSpacing2 = elementSpacing * 1.5;
 const sectionSpacing = defaultSpacing * 2;
 const modelBorderRadius = defaultSpacing * 1.5;
 const modelPadding = defaultSpacing * 2;

@@ -53,14 +53,14 @@ class FJElevatedLoadingButton extends StatelessWidget {
         child: Obx(() => 
         loading.value ? 
         SizedBox(
-          height: Get.theme.textTheme.titleMedium!.fontSize! + defaultSpacing,
-          width: Get.theme.textTheme.titleMedium!.fontSize! + defaultSpacing,
+          height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+          width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
           child: const Padding(
             padding: EdgeInsets.all(defaultSpacing * 0.25),
             child: CircularProgressIndicator(strokeWidth: 3.0,),
           ),
         ) : 
-        Text(label, style: Get.theme.textTheme.titleMedium)
+        Text(label, style: Get.theme.textTheme.labelLarge)
       ),
       )  
     );

@@ -35,7 +35,7 @@ class StatusController extends GetxController {
   final type = 1.obs;
 
   // Shared content by friends
-  final sharedContent = <ShareContainer>[].obs;
+  final sharedContent = RxMap<String, ShareContainer>();
 
   // Current shared content (by this account)
   ShareContainer? _container;

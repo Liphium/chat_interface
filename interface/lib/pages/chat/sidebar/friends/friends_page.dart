@@ -306,10 +306,10 @@ class _FriendsPageState extends State<FriendsPage> {
                                       );
                                     },
                                   ),
-                                  verticalSpacing(dialogPadding),
                                 ],
                               )
                             ),
+                          verticalSpacing(dialogPadding),
                           ],
                         ),
                       );

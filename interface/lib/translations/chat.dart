@@ -6,6 +6,12 @@ class ChatPageTranslations extends Translations {
 
     //* English US
     'en_US': {
+
+      // App
+      'app.title': 'The chat app',
+      'app.welcome': 'Thanks for joining me on this journey!',
+      'app.build': 'Current version: @build',
+
       // Profile
       'status.0': 'Offline',
       'status.1': 'Online',
@@ -30,7 +36,8 @@ class ChatPageTranslations extends Translations {
       'friends.requests': 'Requests',
 
       // Conversations
-      'conversations.placeholder': 'Search (. for hidden ones)',
+      'conversations.placeholder': 'Search',
+      'conversations.hidden': "Searching for something else? You can use '.' at the beginning of your query to search for hidden conversations.",
       'conversations.create': 'Create conversation',
       'conversations.name': 'Conversation name',
       'chat.message': 'Say something',
@@ -42,6 +49,12 @@ class ChatPageTranslations extends Translations {
 
     //* German
     'de_DE': {
+
+      // App
+      'app.title': 'The chat app',
+      'app.welcome': 'Danke, dass du mich auf dieser Reise begleitest!',
+      'app.build': 'Aktuelle Version: @build',
+
       // Profile
       'status.0': 'Offline',
       'status.1': 'Online',
@@ -66,7 +79,8 @@ class ChatPageTranslations extends Translations {
       'friends.requests': 'Anfragen',
 
       // Conversations
-      'conversations.placeholder': 'Suche (. für versteckte)',
+      'conversations.placeholder': 'Suche',
+      'conversations.hidden': "Suchst du nach etwas anderem? Du kannst '.' am Anfang deiner Suche hinzufügen, um nach versteckten Chats zu suchen.",
       'conversations.create': 'Chat erstellen',
       'conversations.name': 'Gruppenname',
       'chat.message': 'Sag etwas',

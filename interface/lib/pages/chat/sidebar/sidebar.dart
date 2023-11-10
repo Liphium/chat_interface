@@ -1,13 +1,16 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
-import 'package:chat_interface/theme/dialog_route.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class Sidebar extends StatefulWidget {
@@ -20,7 +23,7 @@ class Sidebar extends StatefulWidget {
 class _SidebarState extends State<Sidebar> {
 
   final query = "".obs;
-  final GlobalKey _addKey = GlobalKey();
+  final GlobalKey _addConvKey = GlobalKey(), _addSpaceKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,6 @@ class _SidebarState extends State<Sidebar> {
     ThemeData theme = Theme.of(context);
     
     MessageController messageController = Get.find();
-    StatusController statusController = Get.find();
     FriendController friendController = Get.find();
     ConversationController controller = Get.find();
 
@@ -82,7 +84,28 @@ class _SidebarState extends State<Sidebar> {
                     ),
                     horizontalSpacing(defaultSpacing * 0.5),
                     SizedBox(
-                      key: _addKey,
+                      key: _addSpaceKey,
+                      width: 48,
+                      height: 48,
+                      child: Material(
+                        color: theme.colorScheme.primary,
+                        child: InkWell(
+                          onTap: () {
+                            final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
+                                  
+                            //* Open conversation add window
+                            Get.dialog(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(defaultSpacing),
+                            child: Icon(Icons.auto_awesome, color: theme.colorScheme.onPrimary),
+                          ),
+                        )
+                      ),
+                    ),
+                    horizontalSpacing(defaultSpacing * 0.5),
+                    SizedBox(
+                      key: _addConvKey,
                       width: 48,
                       height: 48,
                       child: Material(
@@ -95,14 +118,14 @@ class _SidebarState extends State<Sidebar> {
                             topRight: Radius.circular(defaultSpacing),
                           ),
                           onTap: () {
-                            final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
+                            final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
                                   
                             //* Open conversation add window
                             Get.dialog(ConversationAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(defaultSpacing),
-                            child: Icon(Icons.add, color: theme.colorScheme.onPrimary),
+                            child: Icon(Icons.chat_bubble, color: theme.colorScheme.onPrimary),
                           ),
                         )
                       ),
@@ -112,16 +135,75 @@ class _SidebarState extends State<Sidebar> {
               ),
             ),
 
+            Obx(() {
+              return Animate(
+                effects: [
+                  ExpandEffect(
+                    duration: 250.ms,
+                    curve: Curves.easeInOut,
+                    axis: Axis.vertical,
+                    alignment: Alignment.topCenter,
+                  ),
+                  ScaleEffect(
+                    duration: 250.ms,
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.center,
+                  )
+                ],
+                target: query.value.isEmpty ? 0.0 : 1.0,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: defaultSpacing, left: defaultSpacing, right: defaultSpacing),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Get.theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(defaultSpacing),
+                    ),
+                    padding: const EdgeInsets.all(defaultSpacing),
+                    child: Text("conversations.hidden".tr, style: theme.textTheme.bodyMedium),
+                  ),
+                ),
+              );
+            }),
+
             //* Selected tab
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
                 child: Obx(() {
+                  final statusController = Get.find<StatusController>();
+                  final length = controller.conversations.length + statusController.sharedContent.length;
                   return ListView.builder(
-                    itemCount: controller.conversations.length,
+                    itemCount: length,
                     addRepaintBoundaries: true,
                     padding: const EdgeInsets.only(top: defaultSpacing),
                     itemBuilder: (context, index) {
+                      final prev = index > 0 ? controller.conversations.values.elementAt(index - 1) : null;
+                      if(prev != null && !prev.isGroup) {
+                        final otherGuy = prev.members.values.firstWhere((element) => element.account != statusController.id.value);
+
+                        //* Shared content renderer
+                        if(statusController.sharedContent.containsKey(otherGuy)) {
+                          final content = statusController.sharedContent[otherGuy]!;
+                          Widget? renderer;
+                          switch(content.type) {
+                            case ShareType.space:
+                              renderer = SpaceRenderer(container: content as SpaceConnectionContainer);
+                          }
+
+                          return Animate(
+                            effects: [
+                              ExpandEffect(
+                                duration: 250.ms,
+                                curve: Curves.easeInOut,
+                              ),
+                            ],
+                            target: 1.0,
+                            child: renderer,
+                          );
+                        }
+                      }
+
+                      //* Normal conversation renderer
                       Conversation conversation = controller.conversations.values.elementAt(index);
                   
                       Friend? friend;
@@ -169,7 +251,7 @@ class _SidebarState extends State<Sidebar> {
                     
                               //* Conversation item content
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+                                padding: const EdgeInsets.all(elementSpacing2),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -190,37 +272,24 @@ class _SidebarState extends State<Sidebar> {
                                                 Obx(() {
               
                                                   if(conversation.isGroup) {
-                                                    return Text(conversation.containerSub.value.name, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
+                                                    return Text(conversation.containerSub.value.name, 
+                                                      style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                       textHeightBehavior: noTextHeight,
-                                                    );
-                                                  }
-              
-                                                  if(friend == null) {
-                                                    return Row(
-                                                      children: [
-                                                        Flexible(
-                                                          child: Text(conversation.containerSub.value.name, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
-                                                            maxLines: 1,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            textHeightBehavior: noTextHeight,
-                                                          ),
-                                                        ),
-                                                        horizontalSpacing(defaultSpacing),
-                                                      ],
                                                     );
                                                   }
               
                                                   return Row(
                                                     children: [
                                                       Flexible(
-                                                        child: Text(conversation.dmName, style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
+                                                        child: Text(friend != null ? conversation.dmName : conversation.containerSub.value.name, 
+                                                          style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                           textHeightBehavior: noTextHeight,
                                                         ),
                                                       ),
                                                       horizontalSpacing(defaultSpacing),
-                                                      StatusRenderer(status: friend.statusType.value),
+                                                      if(friend != null) StatusRenderer(status: friend.statusType.value),
                                                     ],
                                                   );
                                                 }),
@@ -267,7 +336,6 @@ class _SidebarState extends State<Sidebar> {
                                                     ),
                                                   )
                                                 ),
-                                                
                                               ],
                                             ),
                                           ),

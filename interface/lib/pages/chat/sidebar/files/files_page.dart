@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:chat_interface/pages/chat/sidebar/conversations/conversations_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,8 +12,6 @@ class FilesPage extends StatefulWidget {
 }
 
 class _ConversationsPageState extends State<FilesPage> {
-
-  final GlobalKey _addKey = GlobalKey();
 
   final files = [
     "deine_mutter.png",

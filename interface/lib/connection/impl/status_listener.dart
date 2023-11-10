@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
@@ -51,5 +56,21 @@ Friend? handleStatus(Event event) {
   }
 
   controller.friendIdLookup[status[0]]!.loadStatus(status[1]);
+  
+  // Extract shared content
+  final sharedData = event.data["d"] as String;
+  if(sharedData != "") {
+    final sharedJson = decryptSymmetric(sharedData, profileKey);
+    final shared = jsonDecode(sharedJson) as Map<String, dynamic>;
+    switch(ShareType.values[shared["type"] as int]) {
+
+      // Shared space
+      case ShareType.space:
+        final container = SpaceConnectionContainer.fromJson(shared);
+        Get.find<StatusController>().sharedContent[friend.id] = container;
+        break;
+    }
+  }
+  
   return friend;
 }

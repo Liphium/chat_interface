@@ -57,8 +57,15 @@ class _MessageFeedState extends State<MessageFeed> {
           return const CallRectangle();
         }
 
-        return Center(
-          child: Text('chat.welcome.1.0.0'.tr, style: Theme.of(context).textTheme.titleLarge),
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
+            verticalSpacing(sectionSpacing),
+            Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
+            verticalSpacing(elementSpacing),
+            Text('app.build'.trParams({"build":"Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
+          ],
         );
       }
 
