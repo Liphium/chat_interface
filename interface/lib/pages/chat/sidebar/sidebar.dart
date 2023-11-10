@@ -8,6 +8,7 @@ import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -182,8 +183,8 @@ class _SidebarState extends State<Sidebar> {
                         final otherGuy = prev.members.values.firstWhere((element) => element.account != statusController.id.value);
 
                         //* Shared content renderer
-                        if(statusController.sharedContent.containsKey(otherGuy)) {
-                          final content = statusController.sharedContent[otherGuy]!;
+                        if(statusController.sharedContent.containsKey(otherGuy.account)) {
+                          final content = statusController.sharedContent[otherGuy.account]!;
                           Widget? renderer;
                           switch(content.type) {
                             case ShareType.space:

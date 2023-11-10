@@ -92,6 +92,7 @@ class Friend {
   String vaultId;
   KeyStorage keyStorage;
   var status = "-".obs;
+  bool answerStatus = true;
   final statusType = 0.obs;
   Timer? _timer;
 
@@ -155,6 +156,7 @@ class Friend {
     _timer?.cancel();
     _timer = Timer(const Duration(minutes: 2), () {
       setOffline();
+      answerStatus = true;
       _timer = null;
     });
   }

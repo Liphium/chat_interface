@@ -40,7 +40,15 @@ class SpacesController extends GetxController {
   final fullScreen = false.obs;
   final hasVideo = false.obs;
 
+  void createSpace(String title, bool publish) {
+    _startSpace((container) => publish ? Get.find<StatusController>().share(container) : {});
+  }
+
   void createAndConnect(String conversationId) {
+    _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toInviteJson(), () => {}));
+  }
+
+  void _startSpace(Function(SpaceConnectionContainer) callback) {
     if(connected.value) {
       showErrorPopup("error", "already.calling");
       return;
@@ -66,7 +74,7 @@ class SpacesController extends GetxController {
 
       // Send invites
       final container = SpaceConnectionContainer(appToken["domain"], roomId, key!, null);
-      sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toInviteJson(), () => {});
+      callback.call(container);
     });
   }
 
@@ -177,7 +185,11 @@ class SpaceInfo {
   }
 
   SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
-    title = decryptSymmetric(json["data"], container.key);
+    if(json["data"] != "") {
+      title = decryptSymmetric(json["data"], container.key);
+    } else {
+      title = "";
+    }
     start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
     members = List<String>.from(json["members"].map((e) => decryptSymmetric(e, container.key)));
     exists = true;

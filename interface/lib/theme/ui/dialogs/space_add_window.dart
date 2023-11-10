@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_switch.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
@@ -76,6 +77,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
                 return;
               }
               
+              Get.find<SpacesController>().createSpace(_controller.text, public.value);
               Get.back();
             },
             label: "create".tr,

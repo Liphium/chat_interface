@@ -18,6 +18,8 @@ void setupStatusListener() {
   connector.listen("acc_st", (event) {
     final friend = handleStatus(event);
     if(friend == null) return;
+    if(!friend.answerStatus) return;
+    friend.answerStatus = false;
 
     // Send back status
     final controller = Get.find<StatusController>();
@@ -30,6 +32,7 @@ void setupStatusListener() {
       "id": dm.token.id,
       "token": dm.token.token,
       "status": status,
+      "data": "",
     }));
 
   }, afterSetup: true);
@@ -60,7 +63,8 @@ Friend? handleStatus(Event event) {
   // Extract shared content
   final sharedData = event.data["d"] as String;
   if(sharedData != "") {
-    final sharedJson = decryptSymmetric(sharedData, profileKey);
+    sendLog("RECEIVED SHARED CONTENT");
+    final sharedJson = decryptSymmetric(sharedData, friend.keyStorage.profileKey);
     final shared = jsonDecode(sharedJson) as Map<String, dynamic>;
     switch(ShareType.values[shared["type"] as int]) {
 
