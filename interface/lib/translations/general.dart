@@ -27,7 +27,7 @@ class GeneralTranslations extends Translations {
       'retry': 'Nochmal versuchen',
       'back': 'Zurück',
       'no.got': 'Nein, sorry',
-      'yeah': 'NatürlichR',
+      'yeah': 'Natürlich',
 
       // Time
       'time.now': 'Heute um @hour:@minute',

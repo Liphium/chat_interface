@@ -48,6 +48,8 @@ class MessageController extends GetxController {
     if(selectedConversation.value.id == message.conversation) {
       if(messages.isNotEmpty && messages[0].id != message.id) {
         messages.insert(0, message);        
+      } else if(messages.isEmpty) {
+        messages.insert(0, message);
       }
     }
     db.into(db.message).insertOnConflictUpdate(message.entity);

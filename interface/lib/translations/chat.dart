@@ -41,9 +41,10 @@ class ChatPageTranslations extends Translations {
       'conversations.create': 'Create conversation',
       'conversations.name': 'Conversation name',
       'chat.message': 'Say something',
+      'chat.members': '@count members',
 
       // Spaces
-      'join.space': 'Join space',
+      'join.space': 'Join Space',
       'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
     },
 
@@ -84,6 +85,7 @@ class ChatPageTranslations extends Translations {
       'conversations.create': 'Chat erstellen',
       'conversations.name': 'Gruppenname',
       'chat.message': 'Sag etwas',
+      'chat.members': '@count Mitglieder',
 
       // Spaces
       'join.space': 'Space beitreten',

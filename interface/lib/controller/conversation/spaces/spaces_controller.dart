@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/connection/connection.dart';
@@ -32,7 +33,7 @@ class SpacesController extends GetxController {
   final start = DateTime.now().obs;
 
   //* Space information
-  String id = "";
+  final id = "".obs;
   SecureKey? key;
 
   //* Call layout
@@ -41,14 +42,32 @@ class SpacesController extends GetxController {
   final hasVideo = false.obs;
 
   void createSpace(String title, bool publish) {
-    _startSpace((container) => publish ? Get.find<StatusController>().share(container) : {});
+    _startSpace((container) {
+      if(publish) {
+        Get.find<StatusController>().share(container);
+      }
+    }, connectedCallback: () => setSpaceTitle(title));
   }
 
   void createAndConnect(String conversationId) {
     _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toInviteJson(), () => {}));
   }
 
-  void _startSpace(Function(SpaceConnectionContainer) callback) {
+  void setSpaceTitle(String title) {
+    if(connected.value) {
+      spaceConnector.sendAction(msg.Message("set_data", {
+        "data": encryptSymmetric(title, key!)
+      }), handler: (event) {
+        if(!event.data["success"]) {
+          showErrorPopup("error", "server.error");
+          return;
+        }
+        this.title.value = title;
+      });
+    }
+  }
+
+  void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {
     if(connected.value) {
       showErrorPopup("error", "already.calling");
       return;
@@ -64,13 +83,12 @@ class SpacesController extends GetxController {
         spaceLoading.value = false;
         return showErrorPopup("error", "server.error");
       }
-      final controller = Get.find<StatusController>();
       final appToken = event.data["token"] as Map<String, dynamic>;
       final roomId = event.data["id"];
       sendLog("connecting to node ${appToken["node"]}..");
       key = randomSymmetricKey();
-      id = controller.id.value;
-      _connectToRoom(roomId, appToken);
+      id.value = roomId;
+      _connectToRoom(roomId, appToken, connectedCallback: connectedCallback);
 
       // Send invites
       final container = SpaceConnectionContainer(appToken["domain"], roomId, key!, null);
@@ -113,15 +131,15 @@ class SpacesController extends GetxController {
       }
     
       // Load information from space container
-      id = container.roomId;
+      id.value = container.roomId;
       key = container.key;
 
       // Connect to the room
-      _connectToRoom(id, event.data["token"]);
+      _connectToRoom(id.value, event.data["token"]);
     });
   }
 
-  void _connectToRoom(String id, Map<String, dynamic> appToken) {
+  void _connectToRoom(String id, Map<String, dynamic> appToken, {Function()? connectedCallback}) {
     if(key == null) {
       sendLog("key is null: can't connect to space");
       return;
@@ -153,6 +171,7 @@ class SpacesController extends GetxController {
       connected.value = true;
       inSpace.value = true;
       spaceLoading.value = false;
+      connectedCallback?.call();
     });
   }
 
@@ -160,9 +179,11 @@ class SpacesController extends GetxController {
     inSpace.value = false;
     connected.value = false;
     await api.stop();
+    id.value = "";
     spaceConnector.disconnect();
 
     // Tell other controllers about it
+    Get.find<StatusController>().stopSharing();
     Get.find<SpaceMemberController>().onDisconnect();
     Get.find<AudioController>().disconnect();
   }
@@ -212,7 +233,8 @@ class SpaceConnectionContainer extends ShareContainer {
   final String roomId; // Token required for joining (even though it's not really a token)
   final SecureKey key; // Symmetric key
 
-  SpaceInfo? info;
+  final info = Rx<SpaceInfo?>(null);
+  Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
   SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
@@ -232,11 +254,12 @@ class SpaceConnectionContainer extends ShareContainer {
     "key": packageSymmetricKey(key)
   });
 
-  Future<SpaceInfo> getInfo() async {
-    if(info != null) {
-      return info!;
-    }
+  @override
+  void onDrop() {
+    _timer?.cancel();
+  }
 
+  Future<SpaceInfo> getInfo({bool timer = false}) async {
     final req = await post(
       Uri.parse("$nodeProtocol$node/info"),
       headers: <String, String>{
@@ -253,7 +276,16 @@ class SpaceConnectionContainer extends ShareContainer {
     if(!body["success"]) {
       return SpaceInfo.notLoaded();
     }
-    info = SpaceInfo.fromJson(this, body);
-    return info!;
+    if(timer && _timer == null) {
+      _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
+        final info = await getInfo();
+        if(info.exists) {
+          this.info.value = info;
+          timer.cancel();
+        }
+      });
+    }
+    info.value = SpaceInfo.fromJson(this, body);
+    return info.value!;
   }
 }

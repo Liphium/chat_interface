@@ -137,15 +137,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     ],
                     target: _length.value > 1 ? 1 : 0,
               
-                    child: Material(
-                      color: theme.colorScheme.secondaryContainer.withAlpha(150),
-                      borderRadius: BorderRadius.circular(defaultSpacing),
-                      child: FJTextField(
-                        controller: _controller,
-                        hintText: "conversations.name".tr,
-                        secondaryColor: true,
-                        small: true,
-                      ),
+                    child: FJTextField(
+                      controller: _controller,
+                      hintText: "conversations.name".tr,
                     ),
                   )
                 ),

@@ -88,9 +88,11 @@ class _MessageFeedState extends State<MessageFeed> {
                 children: [
             
                   //* Message list
-                  Obx(() => 
-                    ListView.builder(
-                      itemCount: controller.messages.length + 1,
+                  Obx(() {
+                    sendLog("update");
+                    final messages = controller.messages;
+                    return ListView.builder(
+                      itemCount: messages.length + 1,
                       reverse: true,
                       shrinkWrap: true,
                       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
@@ -122,8 +124,8 @@ class _MessageFeedState extends State<MessageFeed> {
                             sender: self ? Friend.me() : sender);
                         }
                       },
-                    ),
-                  ),
+                    );
+              }),
             
                   //* Message input
                   conversation.borked ?

@@ -70,10 +70,18 @@ Friend? handleStatus(Event event) {
 
       // Shared space
       case ShareType.space:
+        final existing = Get.find<StatusController>().sharedContent[friend.id];
         final container = SpaceConnectionContainer.fromJson(shared);
-        Get.find<StatusController>().sharedContent[friend.id] = container;
+        if(existing == null || existing is! SpaceConnectionContainer) {
+          Get.find<StatusController>().sharedContent[friend.id] = container;
+        } else if(existing.roomId != container.roomId) {
+          Get.find<StatusController>().sharedContent[friend.id] = container;
+        }
         break;
     }
+  } else {
+    final container = Get.find<StatusController>().sharedContent.remove(friend.id);
+    container?.onDrop();
   }
   
   return friend;

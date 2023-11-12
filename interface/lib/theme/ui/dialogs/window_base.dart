@@ -24,6 +24,40 @@ class WindowBase extends StatelessWidget {
   }
 }
 
+class DialogBase extends StatelessWidget {
+
+  final Widget child;
+
+  const DialogBase({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Animate(
+        effects: [
+          ScaleEffect(
+            duration: 500.ms,
+            begin: const Offset(0, 0),
+            end: const Offset(1, 1),
+            curve: scaleAnimationCurve
+          )
+        ],
+        target: 1,
+        child: Material(
+          elevation: 2.0,
+          color: Get.theme.colorScheme.onBackground,
+          borderRadius: BorderRadius.circular(dialogBorderRadius),
+          child: Container(
+            width: 300,
+            padding: const EdgeInsets.all(dialogPadding),
+            child: child
+          ),
+        )
+      ),
+    );
+  }
+}
+
 class SlidingWindowBase extends StatelessWidget {
 
   final Offset position;

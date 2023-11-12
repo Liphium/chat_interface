@@ -8,7 +8,6 @@ import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -34,6 +33,7 @@ class _SidebarState extends State<Sidebar> {
     MessageController messageController = Get.find();
     FriendController friendController = Get.find();
     ConversationController controller = Get.find();
+    SpacesController spacesController = Get.find();
 
     //* Sidebar
     return Container(
@@ -185,22 +185,22 @@ class _SidebarState extends State<Sidebar> {
                         //* Shared content renderer
                         if(statusController.sharedContent.containsKey(otherGuy.account)) {
                           final content = statusController.sharedContent[otherGuy.account]!;
-                          Widget? renderer;
                           switch(content.type) {
                             case ShareType.space:
-                              renderer = SpaceRenderer(container: content as SpaceConnectionContainer);
+                              final container = content as SpaceConnectionContainer;
+                              return Obx(() => Animate(
+                                effects: [
+                                  ExpandEffect(
+                                    duration: 250.ms,
+                                    curve: Curves.easeInOut,
+                                    axis: Axis.vertical,
+                                    alignment: Alignment.topLeft,
+                                  ),
+                                ],
+                                target: spacesController.id.value == container.roomId ? 0.0 : 1.0,
+                                child: SpaceRenderer(container: container, pollNewData: true,),
+                              ));
                           }
-
-                          return Animate(
-                            effects: [
-                              ExpandEffect(
-                                duration: 250.ms,
-                                curve: Curves.easeInOut,
-                              ),
-                            ],
-                            target: 1.0,
-                            child: renderer,
-                          );
                         }
                       }
 
@@ -218,7 +218,7 @@ class _SidebarState extends State<Sidebar> {
                       //* Conversation item
                       return Obx(() {
                         var title = conversation.isGroup || friend == null ? conversation.containerSub.value.name : conversation.dmName;
-                        if(friend == null) {
+                        if(friend == null && !conversation.isGroup) {
                           title = ".$title";
                         }
               
@@ -226,7 +226,7 @@ class _SidebarState extends State<Sidebar> {
                           if(!title.toLowerCase().startsWith(query.value.toLowerCase())) {
                             return const SizedBox.shrink();
                           }
-                        } else if(friend == null) {
+                        } else if(friend == null && !conversation.isGroup) {
                           return const SizedBox.shrink();
                         }
               
@@ -234,10 +234,10 @@ class _SidebarState extends State<Sidebar> {
                           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                           child: Obx(() => 
                           Material(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(defaultSpacing),
                             color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primary : Colors.transparent,
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(defaultSpacing),
                               hoverColor: theme.colorScheme.primary.withAlpha(150),
                               splashColor: theme.hoverColor,
                               onHover: (value) {

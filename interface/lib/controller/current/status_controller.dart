@@ -75,6 +75,14 @@ class StatusController extends GetxController {
     return true;
   }
 
+  void stopSharing() {
+    if(_container == null) {
+      return;
+    }
+    _container = null;
+    setStatus();
+  }
+
   Future<bool> setStatus({String? message, int? type, Function()? success}) async {
     if(statusLoading.value) return false;
     statusLoading.value = true;
@@ -132,4 +140,6 @@ abstract class ShareContainer {
     map["type"] = type.index;
     return jsonEncode(map);
   }
+
+  void onDrop() {}
 }
