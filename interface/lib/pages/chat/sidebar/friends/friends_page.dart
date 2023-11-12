@@ -194,6 +194,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    verticalSpacing(sectionSpacing),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
                                       child: Text("friends.requests".tr, style: theme.textTheme.labelLarge),

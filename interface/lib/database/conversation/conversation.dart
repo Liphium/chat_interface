@@ -7,6 +7,7 @@ class Conversation extends Table {
   TextColumn get token => text()();
   TextColumn get key => text()();
   Int64Column get updatedAt => int64()();
+  Int64Column get readAt => int64()();
 
   @override
   Set<Column<Object>>? get primaryKey => {id};

@@ -8,6 +8,7 @@ import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -174,6 +175,7 @@ class _SidebarState extends State<Sidebar> {
                   final statusController = Get.find<StatusController>();
                   final length = controller.order.length + statusController.sharedContent.length;
                   int additional = 0;
+                  sendLog(controller.order);
                   bool renderedShared = false;
                   return ListView.builder(
                     itemCount: length,
@@ -181,7 +183,8 @@ class _SidebarState extends State<Sidebar> {
                     padding: const EdgeInsets.only(top: defaultSpacing),
                     itemBuilder: (context, index) {
                       index -= additional;
-                      final prev = index > 0 ? controller.conversations.values.elementAt(index - 1) : null;
+                      final prevId = index > 0 ? controller.order.elementAt(index - 1) : null;
+                      final prev = prevId != null ? controller.conversations[prevId] : null;
                       if(prev != null && !prev.isGroup) {
                         final otherGuy = prev.members.values.firstWhere((element) => element.account != statusController.id.value);
 
@@ -214,8 +217,8 @@ class _SidebarState extends State<Sidebar> {
                       renderedShared = false;
 
                       //* Normal conversation renderer
-                      Conversation conversation = controller.conversations.values.elementAt(index);
-                  
+                      Conversation conversation = controller.conversations[controller.order.elementAt(index)]!;
+
                       Friend? friend;
                       if(!conversation.isGroup) {
                         String id = conversation.members.values.firstWhere((element) => element.account != statusController.id.value).account;

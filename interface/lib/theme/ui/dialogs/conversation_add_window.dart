@@ -115,24 +115,16 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                   Animate(
               
                     effects: [
-                      CustomEffect(
-                        curve: Curves.easeInOut,
+                      ExpandEffect(
+                        axis: Axis.vertical,
                         duration: 250.ms,
-                        builder: (context, animation, child) {
-              
-                          final height = lerpDouble(0, 48, animation);
-              
-                          return SizedBox(
-                            height: height,
-                            child: height! < 48 ? null : child
-                          );
-                        },
+                        curve: Curves.easeInOut,
                       ),
                       ScaleEffect(
-                        delay: 200.ms,
+                        alignment: Alignment.center,
                         begin: const Offset(0,0),
-                        duration: 500.ms,
-                        curve: const ElasticOutCurve(0.9),
+                        duration: 250.ms,
+                        curve: Curves.easeInOut,
                       ),
                     ],
                     target: _length.value > 1 ? 1 : 0,

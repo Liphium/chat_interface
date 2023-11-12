@@ -11,11 +11,11 @@ import 'package:get/get.dart';
 class MessageController extends GetxController {
 
   final loaded = false.obs;
-  final selectedConversation = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
+  final selectedConversation = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0, 0).obs;
   final messages = <Message>[].obs;
 
   void unselectConversation() {
-    selectedConversation.value = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
+    selectedConversation.value = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0, 0);
     messages.clear();
   }
 
@@ -45,6 +45,7 @@ class MessageController extends GetxController {
   }
 
   void storeMessage(Message message) {
+    Get.find<ConversationController>().updateMessageRead(message.conversation);
     if(selectedConversation.value.id == message.conversation) {
       if(messages.isNotEmpty && messages[0].id != message.id) {
         messages.insert(0, message);        

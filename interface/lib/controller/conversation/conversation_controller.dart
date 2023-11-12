@@ -29,7 +29,7 @@ class ConversationController extends GetxController {
   int newConvs = 0;
 
   Future<bool> add(Conversation conversation) async {
-    order.add(conversation.id);
+    _insertToOrder(conversation.id);
     conversations[conversation.id] = conversation;
 
     if(conversation.members.isEmpty) {
@@ -45,6 +45,7 @@ class ConversationController extends GetxController {
 
   Future<bool> addCreated(Conversation conversation, List<Member> members, {Member? admin}) async {
     conversations[conversation.id] = conversation;
+    _insertToOrder(conversation.id);
 
     for(var member in members) {
       conversation.addMember(member);
@@ -69,15 +70,20 @@ class ConversationController extends GetxController {
     (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
     
     // Swap in the map
-    final index = order.indexOf(conversation);
-    order.removeAt(index);
-    order.insert(0, conversation);
+    _insertToOrder(conversation);
   }
 
   void finishedLoading() {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
     loaded.value = true;
+  }
+
+  void _insertToOrder(String id) {
+    if(order.contains(id)) {
+      order.remove(id);
+    }
+    order.insert(0, id);
   }
 
 }
@@ -88,15 +94,17 @@ class Conversation {
   final ConversationToken token;
   final ConversationContainer container;
   final updatedAt = 0.obs;
+  final readAt = 0.obs;
   final containerSub = ConversationContainer("").obs; // Data subscription
   SecureKey key;
 
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.token, this.container, this.key, int updatedAt) {
+  Conversation(this.id, this.token, this.container, this.key, int updatedAt, int readAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
+    this.readAt.value = readAt;
   }
   Conversation.fromJson(Map<String, dynamic> json) 
   : this(
@@ -104,7 +112,8 @@ class Conversation {
     ConversationToken.fromJson(json["token"]), 
     ConversationContainer.fromJson(json["data"]), 
     unpackageSymmetricKey(json["key"]), 
-    json["update"] ?? DateTime.now().millisecondsSinceEpoch
+    json["update"] ?? DateTime.now().millisecondsSinceEpoch,
+    DateTime.now().millisecondsSinceEpoch
   );
   Conversation.fromData(ConversationData data) 
   : this(
@@ -112,19 +121,9 @@ class Conversation {
     ConversationToken.fromJson(jsonDecode(data.token)), 
     ConversationContainer.fromJson(jsonDecode(data.data)), 
     unpackageSymmetricKey(data.key),
-    data.updatedAt.toInt()
+    data.updatedAt.toInt(),
+    data.readAt.toInt()
   );
-
-  // // TODO: Replace
-  // String status(StatusController statusController, FriendController friendController) {
-    
-  //   if(members.length == 2) {
-  //     String id = members.values.firstWhere((element) => element.account != statusController.id.value).account;
-  //     return friendController.friends[id]!.status.value;
-  //   } 
-
-  //   return "status.offline".tr;
-  // }
 
   void addMember(Member member) {
     members[member.tokenId] = member;
@@ -134,7 +133,14 @@ class Conversation {
   String get dmName => (Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] ?? Friend.unknown(container.name)).name;  
   bool get borked => Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] == null;
 
-  ConversationData get entity => ConversationData(id: id, token: token.toJson(), key: packageSymmetricKey(key), data: container.toJson(), updatedAt: BigInt.from(updatedAt.value));
+  ConversationData get entity => ConversationData(
+    id: id, 
+    token: token.toJson(), 
+    key: packageSymmetricKey(key), 
+    data: container.toJson(), 
+    updatedAt: BigInt.from(updatedAt.value),
+    readAt: BigInt.from(readAt.value)
+  );
   String toJson() => jsonEncode(<String, dynamic>{
     "id": id,
     "token": token.toJson(),
