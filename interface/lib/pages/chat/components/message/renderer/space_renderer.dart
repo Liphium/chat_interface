@@ -46,7 +46,6 @@ class _SpaceRendererState extends State<SpaceRenderer> {
   void loadState() async {
     _info.value = await widget.container.getInfo(timer: widget.pollNewData);
     _sub = widget.container.info.listen((p0) {
-      sendLog("update");
       _info.value = p0;
     });
     _loading.value = false;
@@ -114,12 +113,15 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                                           
                                       return Positioned(
                                         left: index * 25,
-                                        child: SizedBox(
-                                          width: 40,
-                                          height: 40,
-                                          child: CircleAvatar(
-                                            backgroundColor: index % 2 == 0 ? Get.theme.colorScheme.primary : Get.theme.colorScheme.tertiaryContainer,
-                                            child: Icon(Icons.person, size: 23, color: Get.theme.colorScheme.onSurface),
+                                        child: Tooltip(
+                                          message: info.friends[index].name,
+                                          child: SizedBox(
+                                            width: 40,
+                                            height: 40,
+                                            child: CircleAvatar(
+                                              backgroundColor: index % 2 == 0 ? Get.theme.colorScheme.primary : Get.theme.colorScheme.tertiaryContainer,
+                                              child: Icon(Icons.person, size: 23, color: Get.theme.colorScheme.onSurface),
+                                            ),
                                           ),
                                         ),
                                       );

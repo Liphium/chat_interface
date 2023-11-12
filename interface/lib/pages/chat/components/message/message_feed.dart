@@ -89,7 +89,6 @@ class _MessageFeedState extends State<MessageFeed> {
             
                   //* Message list
                   Obx(() {
-                    sendLog("update");
                     final messages = controller.messages;
                     return ListView.builder(
                       itemCount: messages.length + 1,

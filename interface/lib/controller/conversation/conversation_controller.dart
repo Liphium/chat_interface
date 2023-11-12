@@ -13,7 +13,7 @@ import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -24,10 +24,12 @@ part 'conversation_actions.dart';
 class ConversationController extends GetxController {
 
   final loaded = false.obs;
-  final conversations = <String, Conversation>{}.obs;
+  final order = <String>[].obs; // List of conversation IDs in order of last updated
+  final conversations = <String, Conversation>{};
   int newConvs = 0;
 
   Future<bool> add(Conversation conversation) async {
+    order.add(conversation.id);
     conversations[conversation.id] = conversation;
 
     if(conversation.members.isEmpty) {
@@ -63,7 +65,18 @@ class ConversationController extends GetxController {
     return true;
   }
 
+  void updateMessageRead(String conversation) {
+    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+    
+    // Swap in the map
+    final index = order.indexOf(conversation);
+    order.removeAt(index);
+    order.insert(0, conversation);
+  }
+
   void finishedLoading() {
+    // Sort the conversations
+    order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
     loaded.value = true;
   }
 
@@ -74,28 +87,44 @@ class Conversation {
   final String id;
   final ConversationToken token;
   final ConversationContainer container;
+  final updatedAt = 0.obs;
   final containerSub = ConversationContainer("").obs; // Data subscription
   SecureKey key;
 
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.token, this.container, this.key) {
+  Conversation(this.id, this.token, this.container, this.key, int updatedAt) {
     containerSub.value = container;
+    this.updatedAt.value = updatedAt;
   }
-  Conversation.fromJson(Map<String, dynamic> json) : this(json["id"], ConversationToken.fromJson(json["token"]), ConversationContainer.fromJson(json["data"]), unpackageSymmetricKey(json["key"]));
-  Conversation.fromData(ConversationData data) : this(data.id, ConversationToken.fromJson(jsonDecode(data.token)), ConversationContainer.fromJson(jsonDecode(data.data)), unpackageSymmetricKey(data.key));
+  Conversation.fromJson(Map<String, dynamic> json) 
+  : this(
+    json["id"], 
+    ConversationToken.fromJson(json["token"]), 
+    ConversationContainer.fromJson(json["data"]), 
+    unpackageSymmetricKey(json["key"]), 
+    json["update"] ?? DateTime.now().millisecondsSinceEpoch
+  );
+  Conversation.fromData(ConversationData data) 
+  : this(
+    data.id, 
+    ConversationToken.fromJson(jsonDecode(data.token)), 
+    ConversationContainer.fromJson(jsonDecode(data.data)), 
+    unpackageSymmetricKey(data.key),
+    data.updatedAt.toInt()
+  );
 
-  // TODO: Replace
-  String status(StatusController statusController, FriendController friendController) {
+  // // TODO: Replace
+  // String status(StatusController statusController, FriendController friendController) {
     
-    if(members.length == 2) {
-      String id = members.values.firstWhere((element) => element.account != statusController.id.value).account;
-      return friendController.friends[id]!.status.value;
-    } 
+  //   if(members.length == 2) {
+  //     String id = members.values.firstWhere((element) => element.account != statusController.id.value).account;
+  //     return friendController.friends[id]!.status.value;
+  //   } 
 
-    return "status.offline".tr;
-  }
+  //   return "status.offline".tr;
+  // }
 
   void addMember(Member member) {
     members[member.tokenId] = member;
@@ -105,11 +134,12 @@ class Conversation {
   String get dmName => (Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] ?? Friend.unknown(container.name)).name;  
   bool get borked => Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] == null;
 
-  ConversationData get entity => ConversationData(id: id, token: token.toJson(), key: packageSymmetricKey(key), data: container.toJson(), updatedAt: BigInt.from(DateTime.now().millisecondsSinceEpoch));
+  ConversationData get entity => ConversationData(id: id, token: token.toJson(), key: packageSymmetricKey(key), data: container.toJson(), updatedAt: BigInt.from(updatedAt.value));
   String toJson() => jsonEncode(<String, dynamic>{
     "id": id,
     "token": token.toJson(),
     "key": packageSymmetricKey(key),
+    "update": updatedAt.value.toInt(),
     "data": container.toJson(),
   });
 

@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:get/get.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 class StatusController extends GetxController {
 
@@ -67,6 +68,13 @@ class StatusController extends GetxController {
   String statusPacket(String statusJson) {
     return "${generateFriendId()}:${encryptSymmetric(statusJson, profileKey)}";
   }
+  
+  String sharedContentPacket() {
+    if(_container == null) {
+      return "";
+    }
+    return encryptSymmetric(_container!.toJson(), profileKey);
+  }
 
   Future<bool> share(ShareContainer container) async {
     if(_container != null) return false;
@@ -94,16 +102,10 @@ class StatusController extends GetxController {
       }
     }
 
-    // Send space data
-    var spaceData = "";
-    if(_container != null) {
-      spaceData = encryptSymmetric(_container!.toJson(), profileKey);
-    }
-
     connector.sendAction(Message("st_send", <String, dynamic>{
       "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
       "tokens": tokens,
-      "data": spaceData,
+      "data": sharedContentPacket(),
     }), handler: (event) {
       statusLoading.value = false;
       success?.call();

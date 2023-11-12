@@ -281,6 +281,7 @@ class SpaceConnectionContainer extends ShareContainer {
         final info = await getInfo();
         if(info.exists) {
           this.info.value = info;
+        } else {
           timer.cancel();
         }
       });

@@ -172,37 +172,46 @@ class _SidebarState extends State<Sidebar> {
                 padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
                 child: Obx(() {
                   final statusController = Get.find<StatusController>();
-                  final length = controller.conversations.length + statusController.sharedContent.length;
+                  final length = controller.order.length + statusController.sharedContent.length;
+                  int additional = 0;
+                  bool renderedShared = false;
                   return ListView.builder(
                     itemCount: length,
                     addRepaintBoundaries: true,
                     padding: const EdgeInsets.only(top: defaultSpacing),
                     itemBuilder: (context, index) {
+                      index -= additional;
                       final prev = index > 0 ? controller.conversations.values.elementAt(index - 1) : null;
                       if(prev != null && !prev.isGroup) {
                         final otherGuy = prev.members.values.firstWhere((element) => element.account != statusController.id.value);
 
                         //* Shared content renderer
-                        if(statusController.sharedContent.containsKey(otherGuy.account)) {
+                        if(statusController.sharedContent.containsKey(otherGuy.account) && !renderedShared) {
+                          additional += 1;
+                          renderedShared = true;
                           final content = statusController.sharedContent[otherGuy.account]!;
                           switch(content.type) {
                             case ShareType.space:
                               final container = content as SpaceConnectionContainer;
-                              return Obx(() => Animate(
-                                effects: [
-                                  ExpandEffect(
-                                    duration: 250.ms,
-                                    curve: Curves.easeInOut,
-                                    axis: Axis.vertical,
-                                    alignment: Alignment.topLeft,
-                                  ),
-                                ],
-                                target: spacesController.id.value == container.roomId ? 0.0 : 1.0,
-                                child: SpaceRenderer(container: container, pollNewData: true,),
-                              ));
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: elementSpacing),
+                                child: Obx(() => Animate(
+                                  effects: [
+                                    ExpandEffect(
+                                      duration: 250.ms,
+                                      curve: Curves.easeInOut,
+                                      axis: Axis.vertical,
+                                      alignment: Alignment.topLeft,
+                                    ),
+                                  ],
+                                  target: spacesController.id.value == container.roomId ? 0.0 : 1.0,
+                                  child: SpaceRenderer(container: container, pollNewData: true,),
+                                )),
+                              );
                           }
                         }
                       }
+                      renderedShared = false;
 
                       //* Normal conversation renderer
                       Conversation conversation = controller.conversations.values.elementAt(index);
