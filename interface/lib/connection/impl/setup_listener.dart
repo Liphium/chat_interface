@@ -101,6 +101,6 @@ void _sub(String status, List<Map<String, dynamic>> tokens) {
       return;
     }
     Get.find<StatusController>().statusLoading.value = false;
-    Get.find<ConversationController>().finishedLoading();
+    Get.find<ConversationController>().finishedLoading(event.data["read"]);
   });
 }

@@ -33,6 +33,7 @@ dependencies:
   flutter_rust_bridge: any
   freezed_annotation: any
   file_selector: ^1.0.1
+  drift_db_viewer: ^2.0.0
 
 dev_dependencies:
   flutter_test:

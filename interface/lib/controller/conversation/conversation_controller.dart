@@ -71,11 +71,21 @@ class ConversationController extends GetxController {
     
     // Swap in the map
     _insertToOrder(conversation);
+    conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
+    conversations[conversation]!.notificationCount.value += 1;
+    sendLog(conversations[conversation]!.notificationCount.value.toString());
   }
 
-  void finishedLoading() {
+  void finishedLoading(Map<String, dynamic> readStates) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
+    for(var conversation in conversations.values) {
+      if(readStates.containsKey(conversation.id)) {
+        conversation.readAt.value = readStates[conversation.id]!;
+        await conversation.fetchNotificationCount();
+        sendLog(conversation.notificationCount.value.toString());
+      }
+    }
     loaded.value = true;
   }
 
@@ -95,6 +105,7 @@ class Conversation {
   final ConversationContainer container;
   final updatedAt = 0.obs;
   final readAt = 0.obs;
+  final notificationCount = 0.obs;
   final containerSub = ConversationContainer("").obs; // Data subscription
   SecureKey key;
 
@@ -127,6 +138,16 @@ class Conversation {
 
   void addMember(Member member) {
     members[member.tokenId] = member;
+  }
+
+  Future<bool> fetchNotificationCount() async {
+    final count = await db.customSelect(
+      "SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at < ?", 
+      variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))],
+      readsFrom: {db.message}
+    ).getSingle();
+    notificationCount.value += (count.data["c"] ?? 0) as int;
+    return true;
   }
 
   bool get isGroup => !container.name.startsWith(directMessagePrefix);

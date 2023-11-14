@@ -13,6 +13,7 @@ import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -267,17 +268,8 @@ class _ProfileState extends State<OwnProfile> {
                     label: 'profile.test'.tr,
                     onTap: () async {
                       testLoading.value = true;
-                      
-                      connector.sendAction(Message("spc_start", <String, dynamic>{}), handler: (event) {
 
-                        if(!event.data["success"]) {
-                          testLoading.value = false;
-                          return;
-                        }
-                        final appToken = event.data["token"] as Map<String, dynamic>;
-                        sendLog("connecting to node ${appToken["node"]}..");
-                        createSpaceConnection(appToken["domain"], appToken["token"]);
-                      });
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
 
                       testLoading.value = false;
 
