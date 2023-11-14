@@ -8,6 +8,8 @@ class ErrorTranslations extends Translations {
     'en_US': {
       'error': 'Error',
       'server.error': 'Something went wrong on the server, please try again later.',
+      'node.error': 'The chat server didn\'t respond, please try again later.',
+      'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
       'new.version': 'A new version is available, please update the app.',
 
       // Friends
@@ -19,6 +21,8 @@ class ErrorTranslations extends Translations {
     'de_DE': {
       'error': 'Fehler',
       'server.error': 'Auf dem Server ist ein Fehler aufgetreten, bitte versuche es später erneut.',
+      'node.error': 'Der Chat-Server hat nicht geantwortet, bitte versuche es später erneut.',
+      'not.setup': 'Der Chat-Server ist noch nicht eingerichtet, vielleicht versuchst du es mit dem Update auf die neueste Version?',
       'new.version': 'Eine neue Version ist verfügbar, bitte aktualisiere die App.',
 
       // Friends
