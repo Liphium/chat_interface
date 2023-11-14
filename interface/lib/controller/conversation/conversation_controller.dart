@@ -66,14 +66,16 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  void updateMessageRead(String conversation) {
+  void updateMessageRead(String conversation, {bool increment = true}) {
     (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
     
     // Swap in the map
     _insertToOrder(conversation);
     conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
-    conversations[conversation]!.notificationCount.value += 1;
-    sendLog(conversations[conversation]!.notificationCount.value.toString());
+    if(increment) {
+      conversations[conversation]!.notificationCount.value += 1;
+      sendLog(conversations[conversation]!.notificationCount.value.toString());
+    }
   }
 
   void finishedLoading(Map<String, dynamic> readStates) async {
@@ -112,10 +114,9 @@ class Conversation {
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.token, this.container, this.key, int updatedAt, int readAt) {
+  Conversation(this.id, this.token, this.container, this.key, int updatedAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
-    this.readAt.value = readAt;
   }
   Conversation.fromJson(Map<String, dynamic> json) 
   : this(
@@ -124,7 +125,6 @@ class Conversation {
     ConversationContainer.fromJson(json["data"]), 
     unpackageSymmetricKey(json["key"]), 
     json["update"] ?? DateTime.now().millisecondsSinceEpoch,
-    DateTime.now().millisecondsSinceEpoch
   );
   Conversation.fromData(ConversationData data) 
   : this(
@@ -133,7 +133,6 @@ class Conversation {
     ConversationContainer.fromJson(jsonDecode(data.data)), 
     unpackageSymmetricKey(data.key),
     data.updatedAt.toInt(),
-    data.readAt.toInt()
   );
 
   void addMember(Member member) {
@@ -142,7 +141,7 @@ class Conversation {
 
   Future<bool> fetchNotificationCount() async {
     final count = await db.customSelect(
-      "SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at < ?", 
+      "SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?", 
       variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))],
       readsFrom: {db.message}
     ).getSingle();

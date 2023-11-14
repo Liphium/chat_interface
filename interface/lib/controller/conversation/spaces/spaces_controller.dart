@@ -11,7 +11,9 @@ import 'package:chat_interface/controller/conversation/spaces/audio_controller.d
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/ffi.dart';
+import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
+import 'package:chat_interface/pages/chat/components/spaces/gamemode/spaces_game_hub.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -32,6 +34,10 @@ class SpacesController extends GetxController {
   final title = "Space".obs;
   final start = DateTime.now().obs;
 
+  //* Game mode 
+  final playMode = false.obs;
+  final gameShelf = false.obs;
+
   //* Space information
   final id = "".obs;
   SecureKey? key;
@@ -51,6 +57,21 @@ class SpacesController extends GetxController {
 
   void createAndConnect(String conversationId) {
     _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toInviteJson(), () => {}));
+  }
+
+  void switchToPlayMode() {
+    playMode.value = !playMode.value;
+    if(playMode.value) {
+      Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
+      fullScreen.value = true;
+    } else {
+      fullScreen.value = false;
+      Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+    }
+  }
+  
+  void openShelf() {
+    gameShelf.value = !gameShelf.value;
   }
 
   void setSpaceTitle(String title) {

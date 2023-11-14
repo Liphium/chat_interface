@@ -32,57 +32,103 @@ class _CallControlsState extends State<CallControls> {
   @override
   Widget build(BuildContext context) {
 
+    final controller = Get.find<SpacesController>();
     ThemeData theme = Theme.of(context);
 
-    return Material(
-      color: theme.colorScheme.primaryContainer,
-      borderRadius: BorderRadius.circular(50),
-      child: Padding(
-        padding: const EdgeInsets.all(defaultSpacing * 0.5),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
 
-            //* Microphone button
-            GetX<AudioController>(
-              builder: (controller) {
-                return LoadingIconButton(
-                  loading: controller.muteLoading,
-                  onTap: () => controller.setMuted(!controller.muted.value),
-                  icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-                  iconSize: 35,
-                  color: theme.colorScheme.onSurface
-                ); 
-              },
-            ),
-
-            horizontalSpacing(defaultSpacing * 0.5),
-
-            //* Audio output
-            GetX<AudioController>(
-              builder: (controller) {
-                return LoadingIconButton(
-                  loading: controller.deafenLoading,
-                  onTap: () => controller.setDeafened(!controller.deafened.value),
-                  icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-                  iconSize: 35,
-                  color: theme.colorScheme.onSurface
-                ); 
-              },
-            ),
-
-            horizontalSpacing(defaultSpacing * 0.5),
-
-            //* End call button
-            LoadingIconButton(
-              loading: false.obs,
-              onTap: () => Get.find<SpacesController>().leaveCall(),
-              icon: Icons.close_rounded,
-              color: theme.colorScheme.error,
-              iconSize: 35,
-            )
-          ],
+        //* Microphone button
+        CallButtonBorder(
+          child: GetX<AudioController>(
+            builder: (controller) {
+              return LoadingIconButton(
+                loading: controller.muteLoading,
+                onTap: () => controller.setMuted(!controller.muted.value),
+                icon: controller.muted.value ? Icons.mic_off : Icons.mic,
+                iconSize: 35,
+                color: theme.colorScheme.onSurface
+              ); 
+            },
+          ),
         ),
+
+        horizontalSpacing(defaultSpacing),
+
+        //* Audio output
+        CallButtonBorder(
+          child: GetX<AudioController>(
+            builder: (controller) {
+              return LoadingIconButton(
+                loading: controller.deafenLoading,
+                onTap: () => controller.setDeafened(!controller.deafened.value),
+                icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+                iconSize: 35,
+                color: theme.colorScheme.onSurface
+              ); 
+            },
+          ),
+        ),
+
+        horizontalSpacing(defaultSpacing),
+
+        //* Play mode
+        Obx(() =>
+          CallButtonBorder(
+            gradient: true,
+            child: LoadingIconButton(
+              loading: false.obs,
+              onTap: () => Get.find<SpacesController>().switchToPlayMode(),
+              icon: controller.playMode.value ? Icons.graphic_eq : Icons.videogame_asset,
+              color: theme.colorScheme.tertiary,
+              iconSize: 35,
+            ),
+          )
+        ),
+        
+        horizontalSpacing(defaultSpacing),
+
+        //* End call button
+        CallButtonBorder(
+          child: LoadingIconButton(
+            loading: false.obs,
+            onTap: () => Get.find<SpacesController>().leaveCall(),
+            icon: Icons.call_end,
+            color: theme.colorScheme.error,
+            iconSize: 35,
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class CallButtonBorder extends StatelessWidget {
+
+  final bool gradient;
+  final Widget child;
+
+  const CallButtonBorder({super.key, required this.child, this.gradient = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Get.theme.colorScheme.primaryContainer,
+        gradient: gradient ? LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Get.theme.colorScheme.primaryContainer,
+            Get.theme.colorScheme.tertiaryContainer
+          ]
+        ) : null
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(elementSpacing),
+        child: child,
       ),
     );
   }

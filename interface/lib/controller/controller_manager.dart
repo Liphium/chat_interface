@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -33,6 +34,7 @@ void initializeControllers() {
 
   // Space controls
   Get.put(SpacesController());
+  Get.put(GameHubController());
   Get.put(SpaceMemberController());
   Get.put(AudioController());
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -355,6 +357,24 @@ class _SidebarState extends State<Sidebar> {
                                         ],
                                       ),
                                     ),
+                                    Obx(() {
+                                      final notifications = conversation.notificationCount.value;
+                                      return Visibility(
+                                        visible: notifications > 0,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Get.theme.colorScheme.error.withOpacity(0.8),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
+                                            child: Center(child: 
+                                              Text(min(notifications, 99).toString(), style: theme.textTheme.labelSmall)
+                                            ),
+                                          ),
+                                        )
+                                      );
+                                    }),
                                   ]
                                 ),
                               ),
