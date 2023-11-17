@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
@@ -7,6 +8,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
 class SpacesGameHub extends StatefulWidget {
   const SpacesGameHub({super.key});
@@ -38,61 +40,78 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                 child: Container(
                   color: Get.theme.colorScheme.onBackground,
                   width: min(max(constraints.maxWidth / 4, 350), 450),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: sectionSpacing),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        verticalSpacing(sectionSpacing),
-                        Text("Playing".tr, style: Get.textTheme.headlineMedium),
-              
-                        verticalSpacing(sectionSpacing * 2),
-                        Text("Games".tr, style: Get.textTheme.headlineMedium),
-
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: gameController.games.length,
-                          itemBuilder: (context, index) {
-                            final game = gameController.games[index];
-
-                            return AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: defaultSpacing),
-                                child: InkWell(
-                                  onTap: () => {},
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      image: DecorationImage(
-                                        image: AssetImage(game.coverImageAsset),
-                                        fit: BoxFit.cover
-                                      )
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(defaultSpacing),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          Text(game.name, style: Get.textTheme.labelLarge),
-                                          verticalSpacing(defaultSpacing / 2),
-                                          Text(game.description, style: Get.textTheme.bodyMedium),
-                                        ],
+                  child: DynMouseScroll(
+                    scrollSpeed: 0.3,
+                    builder: (context, controller, physics) {
+                      return SingleChildScrollView(
+                        controller: controller,
+                        physics: physics,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: sectionSpacing),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              verticalSpacing(sectionSpacing),
+                              Text("Playing".tr, style: Get.textTheme.headlineMedium),
+                                      
+                              verticalSpacing(sectionSpacing * 2),
+                              Text("Games".tr, style: Get.textTheme.headlineMedium),
+                          
+                              ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: gameController.games.length,
+                                itemBuilder: (context, index) {
+                                  final game = gameController.games[index];
+                          
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: sectionSpacing),
+                                    child: InkWell(
+                                      onTap: () => {},
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(sectionSpacing),
+                                          color: Get.theme.colorScheme.primaryContainer,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(sectionSpacing),
+                                              child: AspectRatio(
+                                                aspectRatio: 16 / 6,
+                                                child: Image.asset(
+                                                  game.coverImageAsset, fit: BoxFit.cover
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(sectionSpacing),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(game.name, style: Get.textTheme.titleMedium),
+                                                  verticalSpacing(elementSpacing),
+                                                  Text(game.description, overflow: TextOverflow.ellipsis, style: Get.textTheme.bodyMedium),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                              )
-                            );
-                          },
-                        )
-                      ],
-                    ),
+                                  );
+                                },
+                              ),
+                              verticalSpacing(sectionSpacing)
+                            ],
+                          ),
+                        ),
+                      );
+                    }
                   )
                 ),
               ),
-              Expanded(
+              const Expanded(
                 child: CallRectangle()
               ),
             ],

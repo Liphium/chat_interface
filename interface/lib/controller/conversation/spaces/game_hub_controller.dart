@@ -3,7 +3,11 @@ import 'package:get/get.dart';
 class GameHubController extends GetxController {
 
   final games = [
-    Game("chess", "Chess", "Play chess with your friends", "assets/img/logo.png"),
+    Game("chess", "Chess", "Play chess with your friends", "assets/img/chess.jpg"),
+    Game("chess", "Chess", "Play chess with your friends", "assets/img/chess.jpg"),
+    Game("chess", "Chess", "Play chess with your friends", "assets/img/chess.jpg"),
+    Game("chess", "Chess", "Play chess with your friends", "assets/img/chess.jpg"),
+
   ];
 
 }
