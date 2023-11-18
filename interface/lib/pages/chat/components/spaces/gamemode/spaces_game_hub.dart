@@ -1,9 +1,11 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/components/spaces/call_rectangle.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -20,9 +22,10 @@ class SpacesGameHub extends StatefulWidget {
 class _SpacesGameHubState extends State<SpacesGameHub> {
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<SpacesController>();
+    final memberController = Get.find<SpaceMemberController>();
     final gameController = Get.find<GameHubController>();
     return Scaffold(
+      backgroundColor: Get.theme.colorScheme.background,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Row(
@@ -40,6 +43,7 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                 child: Container(
                   color: Get.theme.colorScheme.onBackground,
                   width: min(max(constraints.maxWidth / 4, 350), 450),
+                  height: constraints.maxHeight,
                   child: DynMouseScroll(
                     scrollSpeed: 0.3,
                     builder: (context, controller, physics) {
@@ -53,7 +57,69 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                             children: [
                               verticalSpacing(sectionSpacing),
                               Text("Playing".tr, style: Get.textTheme.headlineMedium),
-                                      
+                              
+                              Obx(() => 
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: gameController.sessions.length,
+                                  itemBuilder: (context, index) {
+                                    final session = gameController.sessions.values.elementAt(index);
+                                    final game = gameController.games[session.game]!;
+                            
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: sectionSpacing),
+                                      child: InkWell(
+                                        onTap: () => {},
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(sectionSpacing),
+                                            color: Get.theme.colorScheme.primaryContainer,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.all(sectionSpacing),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Obx(() {
+
+                                                      final int max = min(session.members.length, 5);
+                                                      return Row(
+                                                        children: List.generate(max, (index) {
+                                                          final member = memberController.members[session.members[index]];
+                                                          return Padding(
+                                                            padding: const EdgeInsets.only(right: elementSpacing),
+                                                            child: Tooltip(
+                                                              message: member?.friend.name ?? "Unknown",
+                                                              child: SizedBox(
+                                                                width: 40,
+                                                                height: 40,
+                                                                child: CircleAvatar(
+                                                                  backgroundColor: index % 2 == 0 ? Get.theme.colorScheme.primary : Get.theme.colorScheme.tertiaryContainer,
+                                                                  child: Icon(Icons.person, size: 23, color: Get.theme.colorScheme.onSurface),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }),
+                                                      );
+                                                    }),
+                                                    verticalSpacing(defaultSpacing),
+                                                    Text(game.name, style: Get.textTheme.titleMedium),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              ),
+
                               verticalSpacing(sectionSpacing * 2),
                               Text("Games".tr, style: Get.textTheme.headlineMedium),
                           
@@ -61,12 +127,17 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                                 shrinkWrap: true,
                                 itemCount: gameController.games.length,
                                 itemBuilder: (context, index) {
-                                  final game = gameController.games[index];
+                                  final game = gameController.games.values.elementAt(index);
                           
                                   return Padding(
                                     padding: const EdgeInsets.only(top: sectionSpacing),
                                     child: InkWell(
-                                      onTap: () => {},
+                                      onTap: () {
+                                        if(gameController.sessionLoading.value) {
+                                          return;
+                                        }
+                                        gameController.newSession(game.serverId);
+                                      },
                                       child: Container(
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(sectionSpacing),

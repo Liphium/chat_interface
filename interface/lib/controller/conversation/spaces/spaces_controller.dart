@@ -8,6 +8,7 @@ import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/ffi.dart';
@@ -207,6 +208,7 @@ class SpacesController extends GetxController {
     Get.find<StatusController>().stopSharing();
     Get.find<SpaceMemberController>().onDisconnect();
     Get.find<AudioController>().disconnect();
+    Get.find<GameHubController>().leaveCall();
   }
 }
 
