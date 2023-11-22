@@ -15,6 +15,9 @@ class ErrorTranslations extends Translations {
       // Friends
       'requests.already.exists': 'Already sent',
       'requests.already.exists.text': "I know you want to be this person's friend, but you already sent them a request. So please chill a little bit.",
+
+      // Game
+      'no.start': 'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
     },
 
     //* German
@@ -28,6 +31,9 @@ class ErrorTranslations extends Translations {
       // Friends
       'requests.already.exists': 'Bereits gesendet',
       'requests.already.exists.text': "Ich weiß, dass du mit dieser Person befreundet sein willst, aber du hast bereits eine Anfrage gesendet. Also chill mal ein bisschen.",
+    
+      // Game
+      'no.start': 'Das Spiel konnte nicht gestartet werden. Wir entschuldigen uns für die Unannehmlichkeiten, bitte melde dich bei Support, wenn du auf dieses Problem stößt.',
     },
   };
 }

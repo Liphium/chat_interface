@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
+import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/call_settings.dart';
@@ -16,6 +17,7 @@ class SettingController extends GetxController {
     addVideoSettings(this);
     addCallAppearanceSettings(this);
     addLanguageSettings(this);
+    SpacesSettings.addSpacesSettings(this);
     ThemeSettings.addThemeSettings(this);
     
   }

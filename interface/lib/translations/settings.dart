@@ -23,6 +23,7 @@ class SettingsTranslations extends Translations {
       'settings.call_app': 'Call appearance',
       'settings.requests': 'Friend requests',
       'settings.encryption': 'Encryption',
+      'settings.spaces': 'Spaces',
 
       // Audio settings
       'audio.device': 'Select a device',
@@ -53,6 +54,9 @@ class SettingsTranslations extends Translations {
       'custom.none': 'None',
       'custom.colored': 'Primary color',
       'theme.apply': 'Apply your theme',
+
+      // Spaces settings
+      'game.music': 'Play music in Game Mode',
     },
 
     //* German
@@ -74,6 +78,7 @@ class SettingsTranslations extends Translations {
       'settings.call_app': 'Anrufe',
       'settings.requests': 'Freundschaftsanfragen',
       'settings.encryption': 'Verschlüsselung',
+      'settings.spaces': 'Spaces',
 
       // Audio settings
       'audio.device': 'Wähle ein Gerät aus',
@@ -104,6 +109,9 @@ class SettingsTranslations extends Translations {
       'custom.none': 'Keine',
       'custom.colored': 'Primärfarbe',
       'theme.apply': 'Design anwenden',
+
+      // Spaces settings
+      'game.music': 'Musik im Spielmodus abspielen',
     }
   };
 }

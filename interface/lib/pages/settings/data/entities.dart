@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
+import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/call_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
@@ -17,7 +18,7 @@ enum SettingLabel {
   ]),
 
   app("settings.tab.app", [
-    //SettingCategory("video", Icons.photo_camera, VideoSettingsPage()),
+    SettingCategory("spaces", Icons.auto_awesome, SpacesSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage()),
     SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("language", Icons.public, LanguageSettingsPage()),

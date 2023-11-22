@@ -9,7 +9,8 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/spaces/call_rectangle.dart';
+import 'package:chat_interface/pages/chat/components/message/conversation_members.dart';
+import 'package:chat_interface/pages/spaces/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/components/message/message_bar.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_renderer.dart';
@@ -79,59 +80,74 @@ class _MessageFeedState extends State<MessageFeed> {
           
           //* Header
           Obx(() => MessageBar(conversation: controller.selectedConversation.value)),
-
+      
           Expanded(
-            flex: 2,
-            child: SingleChildScrollView(
-              reverse: true,
-              child: Column(
-                children: [
-            
-                  //* Message list
-                  Obx(() {
-                    final messages = controller.messages;
-                    return ListView.builder(
-                      itemCount: messages.length + 1,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SingleChildScrollView(
                       reverse: true,
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                      itemBuilder: (context, index) {
-
-                        if(index == 0) {
-                          return verticalSpacing(defaultSpacing);
-                        }
-                          
-                        final message = controller.messages[index - 1];
-                        final conversationToken = controller.selectedConversation.value.members[message.sender]!;
-                        final sender = friendController.friends[conversationToken.account];
-                        final self = conversationToken.account == statusController.id.value;
-            
-                        bool last = false;
-                        if(index != controller.messages.length) {
-                          final lastMessage = controller.messages[index];
-                          last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text;
-                        }
-                          
-                        switch(message.type) {
-                          
-                          case MessageType.text:
-                            return MessageRenderer(message: message, self: self, last: last,
-                            sender: self ? Friend.me() : sender);
-            
-                          case MessageType.call:
-                            return SpaceMessageRenderer(message: message, self: self, last: last,
-                            sender: self ? Friend.me() : sender);
-                        }
-                      },
-                    );
-              }),
-            
-                  //* Message input
-                  conversation.borked ?
-                  const SizedBox.shrink() :
-                  const MessageInput()
-                ],
-              ),
+                      child: Column(
+                        children: [
+                    
+                          //* Message list
+                          Obx(() {
+                            final messages = controller.messages;
+                            return ListView.builder(
+                              itemCount: messages.length + 1,
+                              reverse: true,
+                              shrinkWrap: true,
+                              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                              itemBuilder: (context, index) {
+                                  
+                                if(index == 0) {
+                                  return verticalSpacing(defaultSpacing);
+                                }
+                                  
+                                final message = controller.messages[index - 1];
+                                final conversationToken = controller.selectedConversation.value.members[message.sender]!;
+                                final sender = friendController.friends[conversationToken.account];
+                                final self = conversationToken.account == statusController.id.value;
+                    
+                                bool last = false;
+                                if(index != controller.messages.length) {
+                                  final lastMessage = controller.messages[index];
+                                  last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text;
+                                }
+                                  
+                                switch(message.type) {
+                                  
+                                  case MessageType.text:
+                                    return MessageRenderer(message: message, self: self, last: last,
+                                    sender: self ? Friend.me() : sender);
+                    
+                                  case MessageType.call:
+                                    return SpaceMessageRenderer(message: message, self: self, last: last,
+                                    sender: self ? Friend.me() : sender);
+                                }
+                              },
+                            );
+                      }),
+                    
+                          //* Message input
+                          conversation.borked ?
+                          const SizedBox.shrink() :
+                          const MessageInput()
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Visibility(
+                  child: Container(
+                    color: Get.theme.colorScheme.onBackground,
+                    width: 350,
+                    child: const ConversationMembers(),
+                  )
+                )
+              ],
             ),
           ),
         ],

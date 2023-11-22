@@ -15,7 +15,9 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/chat/components/spaces/gamemode/spaces_game_hub.dart';
+import 'package:chat_interface/pages/spaces/gamemode/spaces_game_hub.dart';
+import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -64,25 +66,38 @@ class SpacesController extends GetxController {
     _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toInviteJson(), () => {}));
   }
 
+  StreamSubscription<void>? _sub;
+
   void switchToPlayMode() {
     playMode.value = !playMode.value;
     if(playMode.value) {
       Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
       fullScreen.value = true;
-      audioPlayer = AudioPlayer();
-      audioPlayer!.onSeekComplete.listen((event) {
-        audioPlayer!.play(loopSource, volume: 0.01, mode: PlayerMode.mediaPlayer);
-        audioPlayer!.setReleaseMode(ReleaseMode.loop);
-      });
-      audioPlayer!.play(AssetSource("music/arcade_full.wav"), volume: 0.01);
+      if(Get.find<SettingController>().settings[SpacesSettings.gameMusic]!.getValue()) {
+        playMusic();
+      }
     } else {
-      audioPlayer?.stop();
-      audioPlayer = null;
+      stopMusic();
       fullScreen.value = false;
       Get.offAll(const ChatPage(), transition: Transition.fadeIn);
     }
   }
   
+  void playMusic() {
+    audioPlayer = AudioPlayer();
+    _sub = audioPlayer!.onSeekComplete.listen((event) {
+      audioPlayer!.setReleaseMode(ReleaseMode.loop);
+      audioPlayer!.play(loopSource, volume: 0.01, mode: PlayerMode.mediaPlayer);
+    });
+    audioPlayer!.play(AssetSource("music/arcade_full.wav"), volume: 0.01);
+  }
+
+  void stopMusic() {
+    _sub?.cancel();
+    audioPlayer?.dispose();
+    audioPlayer = null;
+  }
+
   void openShelf() {
     gameShelf.value = !gameShelf.value;
   }
@@ -221,6 +236,8 @@ class SpacesController extends GetxController {
     Get.find<SpaceMemberController>().onDisconnect();
     Get.find<AudioController>().disconnect();
     Get.find<GameHubController>().leaveCall();
+
+    Get.offAll(const ChatPage(), transition: Transition.fadeIn);
   }
 }
 

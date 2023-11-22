@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class WordgridEngine extends Engine {
 
-  WordgridEngine(GameSession session) : super(session);
+  WordgridEngine(String session) : super(session);
 
   @override
   void receiveEvent(String event, dynamic data) {
@@ -13,7 +13,7 @@ class WordgridEngine extends Engine {
 
   @override
   Widget build(BuildContext context) {
-   
+
     const gridSize = 6;
     const fontSize = 50.0;
    

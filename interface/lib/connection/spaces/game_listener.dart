@@ -18,11 +18,16 @@ void handleSessionUpdate(Event event) {
   if(controller.sessions.containsKey(session)) {
 
     // Update member list
-    controller.sessions[session]!.members.value = event.data["members"];
+    controller.sessions[session]!.members.clear();
+    for(var member in event.data["members"]) {
+      controller.sessions[session]!.members.add(member);
+    }
+    controller.sessions[session]!.gameState.value = event.data["state"];
   } else {
 
     // Add new session
-    controller.sessions[session] = GameSession(session, event.data["game"]);
+    controller.sessions[session] = GameSession(session, event.data["game"], event.data["min"], event.data["max"]);
+    controller.sessions[session]!.gameState.value = event.data["state"];
     sendLog("New session: ${event.data["members"]}");
     for(var member in event.data["members"]) {
       controller.sessions[session]!.members.add(member);
@@ -36,7 +41,7 @@ void handleSessionClose(Event event) {
 
   if(controller.sessions.containsKey(session)) {
     controller.sessions.remove(session);
-    if(controller.engine.value?.session.id == session) {
+    if(controller.engine.value?.sessionId == session) {
       controller.engine.value = null;
     }
   }

@@ -1,7 +1,9 @@
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/games/wordgrid_engine.dart';
+import 'package:chat_interface/pages/spaces/gamemode/lobby_view.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,7 +11,7 @@ class GameHubController extends GetxController {
 
   // All games (mainly for UI)
   final games = {
-    "chess": Game("chess", "Chess", "Play chess with your friends", "It's very complicated yk", "assets/img/chess.jpg"),
+    "wordgrid": Game("wordgrid", "Word grid", "Play chess with your friends", "It's very complicated yk", "assets/img/chess.jpg"),
   };
 
   // Current sessions on the server
@@ -29,8 +31,8 @@ class GameHubController extends GetxController {
       
       if(event.data["success"]) {
         sendLog("Game session created");
-        final session = GameSession(event.data["session"], game);
-        engine.value = WordgridEngine(session);
+        final session = GameSession(event.data["session"], game, event.data["min"], event.data["max"]);
+        engine.value = WordgridEngine(session.id);
       }
 
     },);
@@ -57,29 +59,59 @@ class Game {
 // Abstract class for game engines (to be implemented by each game)
 abstract class Engine {
 
-  final GameSession session;
+  final String sessionId;
 
-  Engine(this.session);
+  Engine(this.sessionId);
 
   Widget build(BuildContext context);
+
+  Widget render(BuildContext context) {
+    return Obx(() {
+      final session = Get.find<GameHubController>().sessions[sessionId]!;
+      if(session.gameState.value == gameStateLobby) {
+        return LobbyView(session: session);
+      } else {
+        return build(context);
+      }
+    });
+  }
 
   void receiveEvent(String event, dynamic data);
 
   void sendEvent(String event, dynamic data) {
     spaceConnector.sendAction(Message("game_event", <String, dynamic>{
-      "session": session.id,
+      "session": sessionId,
       "name": event,
       "data": data
     }));
   }
 }
 
+const gameStateLobby = 1;
+
 // The actual game session from the server
 class GameSession {
   final String id;
   final String game;
-  final members = <String>[].obs;
+  final int minPlayers;
+  final int maxPlayers;
 
-  GameSession(this.id, this.game);
+  final gameState = gameStateLobby.obs;
+  final members = <String>[].obs;
+  var _loading = false;
+
+  GameSession(this.id, this.game, this.minPlayers, this.maxPlayers);
+
+  void start() {
+    _loading = true;
+    spaceConnector.sendAction(Message("game_start", {
+      "session": id,
+    }), handler: (event) {
+      _loading = false;
+      if(!event.data["success"]) {
+        showErrorPopup("error".tr, event.data["message"].toString().tr);
+      }
+    });
+  }
 
 }

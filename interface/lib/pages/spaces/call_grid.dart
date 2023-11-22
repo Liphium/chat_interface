@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/pages/chat/components/spaces/entities/entity_renderer.dart';
+import 'package:chat_interface/pages/spaces/entities/entity_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,8 +10,9 @@ import 'package:get/get.dart';
 class CallGridView extends StatefulWidget {
 
   final BoxConstraints constraints;
+  final RxList<String>? filter;
 
-  const CallGridView({super.key, required this.constraints});
+  const CallGridView({super.key, required this.constraints, this.filter});
 
   @override
   State<CallGridView> createState() => _CallGridViewState();
@@ -34,8 +35,12 @@ class _CallGridViewState extends State<CallGridView> {
         );
       }
 
-      // Render entities
       int people = spaceMemberController.members.length;
+      if(people == 0) {
+        return const Center(
+          child: Text("No one is here"),
+        );
+      }
 
       // Calculate the available height for every participant
       double computedHeight = _calculateSmallRectangleHeight(widget.constraints.maxWidth, widget.constraints.maxHeight, people);

@@ -3,12 +3,11 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
-import 'package:chat_interface/pages/chat/components/spaces/call_grid.dart';
-import 'package:chat_interface/pages/chat/components/spaces/call_page.dart';
-import 'package:chat_interface/pages/chat/components/spaces/widgets/call_controls.dart';
+import 'package:chat_interface/pages/spaces/call_grid.dart';
+import 'package:chat_interface/pages/spaces/call_page.dart';
+import 'package:chat_interface/pages/spaces/widgets/call_controls.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +23,6 @@ class CallRectangle extends StatefulWidget {
 }
 
 class _CallRectangleState extends State<CallRectangle> {
-
-  final _show = false.obs;
 
   Timer? timer;
 

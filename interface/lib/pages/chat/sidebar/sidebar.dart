@@ -364,7 +364,7 @@ class _SidebarState extends State<Sidebar> {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: Get.theme.colorScheme.error.withOpacity(0.8),
+                                            color: Get.theme.colorScheme.error,
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),

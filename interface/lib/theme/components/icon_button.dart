@@ -12,7 +12,7 @@ class LoadingIconButton extends StatelessWidget {
   final Function() onTap;
   final Function(BuildContext)? onTapContext;
 
-  const LoadingIconButton({super.key, required this.loading, required this.onTap, this.onTapContext, required this.icon, this.color, this.iconSize = 23, this.padding = defaultSpacing});
+  const LoadingIconButton({super.key, required this.loading, required this.onTap, this.onTapContext, required this.icon, this.color, this.iconSize = 23, this.padding = 0});
 
   @override
   Widget build(BuildContext context) {
