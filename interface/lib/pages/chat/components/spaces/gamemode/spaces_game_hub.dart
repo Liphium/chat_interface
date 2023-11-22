@@ -1,11 +1,9 @@
 import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/components/spaces/call_rectangle.dart';
-import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/pages/chat/components/spaces/widgets/call_controls.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -39,10 +37,15 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                     axis: Axis.horizontal,
                   )
                 ],
+                onInit: (controller) {
+                  if(gameController.engine.value != null) {
+                    controller.value = 1.0;
+                  }
+                },
                 target: 1.0,
                 child: Container(
                   color: Get.theme.colorScheme.onBackground,
-                  width: min(max(constraints.maxWidth / 4, 350), 450),
+                  width: min(max(constraints.maxWidth / 4, 350), 420),
                   height: constraints.maxHeight,
                   child: DynMouseScroll(
                     scrollSpeed: 0.3,
@@ -68,53 +71,55 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                             
                                     return Padding(
                                       padding: const EdgeInsets.only(top: sectionSpacing),
-                                      child: InkWell(
-                                        onTap: () => {},
-                                        child: Container(
-                                          decoration: BoxDecoration(
+                                      child: Obx(() {
+                                        final selected = gameController.engine.value?.session.id == session.id;
+                                        return Material(
+                                          borderRadius: BorderRadius.circular(sectionSpacing),
+                                          color: selected ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                                          child: InkWell(
                                             borderRadius: BorderRadius.circular(sectionSpacing),
-                                            color: Get.theme.colorScheme.primaryContainer,
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.all(sectionSpacing),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Obx(() {
-
-                                                      final int max = min(session.members.length, 5);
-                                                      return Row(
-                                                        children: List.generate(max, (index) {
-                                                          final member = memberController.members[session.members[index]];
-                                                          return Padding(
-                                                            padding: const EdgeInsets.only(right: elementSpacing),
-                                                            child: Tooltip(
-                                                              message: member?.friend.name ?? "Unknown",
-                                                              child: SizedBox(
-                                                                width: 40,
-                                                                height: 40,
-                                                                child: CircleAvatar(
-                                                                  backgroundColor: index % 2 == 0 ? Get.theme.colorScheme.primary : Get.theme.colorScheme.tertiaryContainer,
-                                                                  child: Icon(Icons.person, size: 23, color: Get.theme.colorScheme.onSurface),
+                                            onTap: () => {},
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.all(sectionSpacing),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Obx(() {
+                                        
+                                                        final int max = min(session.members.length, 5);
+                                                        return Row(
+                                                          children: List.generate(max, (index) {
+                                                            final member = memberController.members[session.members[index]];
+                                                            return Padding(
+                                                              padding: const EdgeInsets.only(right: elementSpacing),
+                                                              child: Tooltip(
+                                                                message: member?.friend.name ?? "Unknown",
+                                                                child: SizedBox(
+                                                                  width: 40,
+                                                                  height: 40,
+                                                                  child: CircleAvatar(
+                                                                    backgroundColor: selected ? Get.theme.colorScheme.onBackground : index % 2 == 0 ? Get.theme.colorScheme.primary : Get.theme.colorScheme.tertiaryContainer,
+                                                                    child: Icon(Icons.person, size: 23, color: Get.theme.colorScheme.onSurface),
+                                                                  ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          );
-                                                        }),
-                                                      );
-                                                    }),
-                                                    verticalSpacing(defaultSpacing),
-                                                    Text(game.name, style: Get.textTheme.titleMedium),
-                                                  ],
+                                                            );
+                                                          }),
+                                                        );
+                                                      }),
+                                                      verticalSpacing(defaultSpacing),
+                                                      Text(game.name, style: Get.textTheme.titleMedium),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ),
+                                        );
+                                      })
                                     );
                                   },
                                 )
@@ -182,8 +187,32 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                   )
                 ),
               ),
-              const Expanded(
-                child: CallRectangle()
+              Expanded(
+                child: Obx(() {
+                  if(gameController.engine.value != null) {
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: gameController.engine.value!.build(context)
+                        ),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Container(
+                              color: Get.theme.colorScheme.background,
+                              padding: const EdgeInsets.all(defaultSpacing),
+                              width: constraints.maxWidth,
+                              child: const Center(
+                                child: CallControls()
+                              )
+                            );
+                          }
+                        )
+                      ],
+                    );
+                  }
+
+                  return const CallRectangle();
+                }),
               ),
             ],
           );

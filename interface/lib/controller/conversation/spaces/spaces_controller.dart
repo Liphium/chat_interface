@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
@@ -38,6 +39,9 @@ class SpacesController extends GetxController {
   //* Game mode 
   final playMode = false.obs;
   final gameShelf = false.obs;
+  AudioPlayer? audioPlayer;
+
+  final loopSource = AssetSource("music/arcade_loop.wav");
 
   //* Space information
   final id = "".obs;
@@ -65,7 +69,15 @@ class SpacesController extends GetxController {
     if(playMode.value) {
       Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
       fullScreen.value = true;
+      audioPlayer = AudioPlayer();
+      audioPlayer!.onSeekComplete.listen((event) {
+        audioPlayer!.play(loopSource, volume: 0.01, mode: PlayerMode.mediaPlayer);
+        audioPlayer!.setReleaseMode(ReleaseMode.loop);
+      });
+      audioPlayer!.play(AssetSource("music/arcade_full.wav"), volume: 0.01);
     } else {
+      audioPlayer?.stop();
+      audioPlayer = null;
       fullScreen.value = false;
       Get.offAll(const ChatPage(), transition: Transition.fadeIn);
     }

@@ -35,6 +35,7 @@ dependencies:
   file_selector: ^1.0.1
   drift_db_viewer: ^2.0.0
   smooth_scroll_multiplatform: ^1.0.8
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -62,3 +63,4 @@ flutter:
 
   assets:
   - assets/img/
+  - assets/music/

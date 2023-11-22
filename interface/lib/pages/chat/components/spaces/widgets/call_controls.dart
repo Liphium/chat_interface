@@ -35,71 +35,78 @@ class _CallControlsState extends State<CallControls> {
     final controller = Get.find<SpacesController>();
     ThemeData theme = Theme.of(context);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-
-        //* Microphone button
-        CallButtonBorder(
-          child: GetX<AudioController>(
-            builder: (controller) {
-              return LoadingIconButton(
-                loading: controller.muteLoading,
-                onTap: () => controller.setMuted(!controller.muted.value),
-                icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-                iconSize: 35,
-                color: theme.colorScheme.onSurface
-              ); 
-            },
-          ),
-        ),
-
-        horizontalSpacing(defaultSpacing),
-
-        //* Audio output
-        CallButtonBorder(
-          child: GetX<AudioController>(
-            builder: (controller) {
-              return LoadingIconButton(
-                loading: controller.deafenLoading,
-                onTap: () => controller.setDeafened(!controller.deafened.value),
-                icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-                iconSize: 35,
-                color: theme.colorScheme.onSurface
-              ); 
-            },
-          ),
-        ),
-
-        horizontalSpacing(defaultSpacing),
-
-        //* Play mode
-        Obx(() =>
+    return Hero(
+      tag: "call_controls",
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+    
+          //* Microphone button
           CallButtonBorder(
-            gradient: true,
+            child: GetX<AudioController>(
+              builder: (controller) {
+                return LoadingIconButton(
+                  padding: defaultSpacing + elementSpacing,
+                  loading: controller.muteLoading,
+                  onTap: () => controller.setMuted(!controller.muted.value),
+                  icon: controller.muted.value ? Icons.mic_off : Icons.mic,
+                  iconSize: 35,
+                  color: theme.colorScheme.onSurface
+                ); 
+              },
+            ),
+          ),
+    
+          horizontalSpacing(defaultSpacing),
+    
+          //* Audio output
+          CallButtonBorder(
+            child: GetX<AudioController>(
+              builder: (controller) {
+                return LoadingIconButton(
+                  padding: defaultSpacing + elementSpacing,
+                  loading: controller.deafenLoading,
+                  onTap: () => controller.setDeafened(!controller.deafened.value),
+                  icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+                  iconSize: 35,
+                  color: theme.colorScheme.onSurface
+                ); 
+              },
+            ),
+          ),
+    
+          horizontalSpacing(defaultSpacing),
+    
+          //* Play mode
+          Obx(() =>
+            CallButtonBorder(
+              gradient: true,
+              child: LoadingIconButton(
+                padding: defaultSpacing + elementSpacing,
+                loading: false.obs,
+                onTap: () => Get.find<SpacesController>().switchToPlayMode(),
+                icon: controller.playMode.value ? Icons.graphic_eq : Icons.videogame_asset,
+                color: theme.colorScheme.tertiary,
+                iconSize: 35,
+              ),
+            )
+          ),
+          
+          horizontalSpacing(defaultSpacing),
+    
+          //* End call button
+          CallButtonBorder(
             child: LoadingIconButton(
+              padding: defaultSpacing + elementSpacing,
               loading: false.obs,
-              onTap: () => Get.find<SpacesController>().switchToPlayMode(),
-              icon: controller.playMode.value ? Icons.graphic_eq : Icons.videogame_asset,
-              color: theme.colorScheme.tertiary,
+              onTap: () => Get.find<SpacesController>().leaveCall(),
+              icon: Icons.call_end,
+              color: theme.colorScheme.error,
               iconSize: 35,
             ),
           )
-        ),
-        
-        horizontalSpacing(defaultSpacing),
-
-        //* End call button
-        CallButtonBorder(
-          child: LoadingIconButton(
-            loading: false.obs,
-            onTap: () => Get.find<SpacesController>().leaveCall(),
-            icon: Icons.call_end,
-            color: theme.colorScheme.error,
-            iconSize: 35,
-          ),
-        )
-      ],
+        ],
+      ),
     );
   }
 }
@@ -126,10 +133,7 @@ class CallButtonBorder extends StatelessWidget {
           ]
         ) : null
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(elementSpacing),
-        child: child,
-      ),
+      child: child,
     );
   }
 }

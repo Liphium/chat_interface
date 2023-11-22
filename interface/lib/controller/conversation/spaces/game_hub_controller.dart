@@ -1,7 +1,8 @@
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
-import 'package:chat_interface/controller/conversation/spaces/games/kanagrid_engine.dart';
+import 'package:chat_interface/controller/conversation/spaces/games/wordgrid_engine.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GameHubController extends GetxController {
@@ -15,7 +16,7 @@ class GameHubController extends GetxController {
   final sessions = <String, GameSession>{}.obs;
 
   // Current game session
-  Engine? engine;
+  final engine = Rx<Engine?>(null);
   final sessionLoading = false.obs;
 
   void newSession(String game) {
@@ -29,7 +30,7 @@ class GameHubController extends GetxController {
       if(event.data["success"]) {
         sendLog("Game session created");
         final session = GameSession(event.data["session"], game);
-        engine = KanagridEngine(session);
+        engine.value = WordgridEngine(session);
       }
 
     },);
@@ -37,7 +38,7 @@ class GameHubController extends GetxController {
   }
 
   void leaveCall() {
-    engine = null;
+    engine.value = null;
     sessions.clear();
   }
 
@@ -59,6 +60,8 @@ abstract class Engine {
   final GameSession session;
 
   Engine(this.session);
+
+  Widget build(BuildContext context);
 
   void receiveEvent(String event, dynamic data);
 
