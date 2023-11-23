@@ -10,7 +10,8 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
+
+String ownAccountId = "";
 
 class StatusController extends GetxController {
 
@@ -43,7 +44,10 @@ class StatusController extends GetxController {
 
   void setName(String value) => name.value = value;
   void setTag(String value) => tag.value = value;
-  void setId(String value) => id.value = value;
+  void setId(String value) {
+    id.value = value;
+    ownAccountId = value;
+  }
 
   String statusJson() => jsonEncode(<String, dynamic>{
     "s": status.value,

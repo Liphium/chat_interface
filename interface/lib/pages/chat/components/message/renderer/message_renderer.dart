@@ -1,6 +1,7 @@
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -44,14 +45,7 @@ class _MessageRendererState extends State<MessageRenderer> {
               Visibility(
                 visible: !widget.last,
                 replacement: const SizedBox(width: 50), //* Show timestamp instead
-                child: SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: CircleAvatar(
-                    backgroundColor: widget.self ? theme.colorScheme.tertiaryContainer : theme.colorScheme.primary,
-                    child: Icon(Icons.person, size: 30, color: theme.colorScheme.onSurface),
-                  ),
-                ),
+                child: UserAvatar(id: sender.id, size: 50),
               ),
               horizontalSpacing(sectionSpacing),
 
@@ -70,7 +64,6 @@ class _MessageRendererState extends State<MessageRenderer> {
                           Text(
                             sender.name, 
                             style: theme.textTheme.titleLarge,
-                            textHeightBehavior: noTextHeight,
                           ),
                           horizontalSpacing(defaultSpacing),
                           Text(

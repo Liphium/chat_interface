@@ -5,6 +5,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/message_sp
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/duration_renderer.dart';
+import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/own_profile.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -98,11 +99,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                             Expanded(
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.person,
-                                    color: Theme.of(context).colorScheme.tertiary,
-                                    size: 35,
-                                  ),
+                                  UserAvatar(id: ownAccountId, size: 40),
                                   horizontalSpacing(defaultSpacing * 0.75),
                                   Expanded(
                                     child: Obx(() =>

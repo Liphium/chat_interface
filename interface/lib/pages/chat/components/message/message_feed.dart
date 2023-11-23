@@ -140,11 +140,14 @@ class _MessageFeedState extends State<MessageFeed> {
                     ),
                   ),
                 ),
-                Visibility(
-                  child: Container(
-                    color: Get.theme.colorScheme.onBackground,
-                    width: 350,
-                    child: const ConversationMembers(),
+                Obx(() => 
+                  Visibility(
+                    visible: controller.selectedConversation.value.isGroup,
+                    child: Container(
+                      color: Get.theme.colorScheme.onBackground,
+                      width: 300,
+                      child: const ConversationMembers(),
+                    )
                   )
                 )
               ],

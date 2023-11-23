@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
-import 'package:chat_interface/pages/status/error/server_offline_page.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
