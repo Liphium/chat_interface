@@ -33,6 +33,8 @@ class ColorFactory {
   Color getBackground2() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, clampDouble(lum + (lumJumps * themeMode), 0.0, 1.0)).toColor();
   Color getBackground3() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, clampDouble(lum + (lumJumps * 2 * themeMode), 0.0, 1.0)).toColor();
 
+  Color completeBackground() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, 0.0).toColor();
+
   Color customHue(double hue) => HSLColor.fromAHSL(1.0, hue * 360.0, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
   Color customHueContainer(double hue) => HSLColor.fromAHSL(1.0, hue * 360.0, sat, themeMode == -1 ? _containerBlack : _containerWhite).toColor();
 
@@ -185,6 +187,17 @@ ThemeData getThemeData() {
         titleSmall: defaultDarkTheme.textTheme.titleSmall!.copyWith(
           fontSize: 16,
           fontWeight: FontWeight.w400,
+          color: factory.getFontColor(),
+        ),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: factory.completeBackground(),
+          borderRadius: BorderRadius.circular(defaultSpacing),
+        ),
+        textStyle: defaultDarkTheme.textTheme.labelMedium!.copyWith(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
           color: factory.getFontColor(),
         ),
       )

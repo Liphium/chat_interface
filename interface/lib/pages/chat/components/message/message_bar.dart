@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class _MessageBarState extends State<MessageBar> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<SettingController>();
 
     if(widget.conversation.borked) {
       return Material(
@@ -72,12 +74,17 @@ class _MessageBarState extends State<MessageBar> {
                 ),
 
                 horizontalSpacing(elementSpacing),
-                IconButton(
-                  iconSize: 27,
-                  icon: const Icon(Icons.sticky_note_2),
-                  onPressed: () {
-                    widget.conversation.delete();
-                  },
+                Visibility(
+                  visible: widget.conversation.isGroup,
+                  child: Obx(() =>
+                    IconButton(
+                      iconSize: 27,
+                      icon: Icon(Icons.group, color: controller.settings[AppSettings.showGroupMembers]!.value.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
+                      onPressed: () {
+                        controller.settings[AppSettings.showGroupMembers]!.setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
+                      },
+                    )
+                  ),
                 ),
               ],
             ),

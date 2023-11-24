@@ -8,12 +8,13 @@ import 'package:get/get.dart';
 
 class MessageRenderer extends StatefulWidget {
 
+  final String accountId;
   final Message message;
   final bool self;
   final bool last;
   final Friend? sender;
 
-  const MessageRenderer({super.key, required this.message, this.self = false, this.last = false, this.sender});
+  const MessageRenderer({super.key, required this.message, required this.accountId, this.self = false, this.last = false, this.sender});
 
   @override
   State<MessageRenderer> createState() => _MessageRendererState();
@@ -23,7 +24,7 @@ class _MessageRendererState extends State<MessageRenderer> {
   @override
   Widget build(BuildContext context) {
 
-    Friend sender = widget.sender ?? Friend.system();
+    Friend sender = widget.sender ?? Friend.unknown(widget.accountId);
     ThemeData theme = Theme.of(context);
 
     return Padding(

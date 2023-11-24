@@ -67,7 +67,7 @@ class UserRenderer extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(friend.name, style: Get.theme.textTheme.bodyMedium),
+                  Text(friend.name, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium),
                   horizontalSpacing(defaultSpacing),
                   Obx(() =>
                     StatusRenderer(status: own ? statusController!.type.value : friend!.statusType.value)
@@ -77,7 +77,7 @@ class UserRenderer extends StatelessWidget {
               Obx(() =>
                 Visibility(
                   visible: own ? statusController!.status.value != "-" : friend!.status.value != "-",
-                  child: Text(own ? statusController!.status.value : friend!.status.value, style: Get.theme.textTheme.bodySmall)
+                  child: Text(own ? statusController!.status.value : friend!.status.value, style: Get.theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis,)
                 )
               )
             ],

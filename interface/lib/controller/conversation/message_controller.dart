@@ -64,9 +64,15 @@ class MessageController extends GetxController {
   }
 
   void storeMessage(Message message) {
-    Get.find<ConversationController>().updateMessageRead(message.conversation, increment: selectedConversation.value.id != message.conversation);
+    Get.find<ConversationController>().updateMessageRead(
+      message.conversation, 
+      increment: selectedConversation.value.id != message.conversation, 
+      messageSendTime: message.createdAt.millisecondsSinceEpoch
+    );
     if(selectedConversation.value.id == message.conversation) {
-      overwriteRead(selectedConversation.value);
+      if(message.sender != selectedConversation.value.token.id) {
+        overwriteRead(selectedConversation.value);
+      }
       if(messages.isNotEmpty && messages[0].id != message.id) {
         messages.insert(0, message);        
       } else if(messages.isEmpty) {

@@ -66,15 +66,14 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  void updateMessageRead(String conversation, {bool increment = true}) {
+  void updateMessageRead(String conversation, {bool increment = true, required int messageSendTime}) {
     (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
     
     // Swap in the map
     _insertToOrder(conversation);
     conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
-    if(increment) {
+    if(increment && conversations[conversation]!.readAt.value < messageSendTime) {
       conversations[conversation]!.notificationCount.value += 1;
-      sendLog(conversations[conversation]!.notificationCount.value.toString());
     }
   }
 
@@ -82,11 +81,8 @@ class ConversationController extends GetxController {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
     for(var conversation in conversations.values) {
-      if(readStates.containsKey(conversation.id)) {
-        conversation.readAt.value = readStates[conversation.id]!;
-        await conversation.fetchNotificationCount();
-        sendLog(conversation.notificationCount.value.toString());
-      }
+      conversation.readAt.value = readStates[conversation.id] ?? 0;
+      conversation.fetchNotificationCount();
     }
     loaded.value = true;
   }
@@ -151,7 +147,7 @@ class Conversation {
 
   bool get isGroup => !container.name.startsWith(directMessagePrefix);
   String get dmName => (Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] ?? Friend.unknown(container.name)).name;  
-  bool get borked => Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] == null;
+  bool get borked => !isGroup && Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] == null;
 
   ConversationData get entity => ConversationData(
     id: id, 

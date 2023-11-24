@@ -57,7 +57,6 @@ class _FriendsPageState extends State<FriendsPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-            
                 SizedBox(
                   height: 48,
                   child: Material(

@@ -92,6 +92,7 @@ class Friend {
   String vaultId;
   KeyStorage keyStorage;
   var status = "-".obs;
+  bool unknown = false;
   bool answerStatus = true;
   final statusType = 0.obs;
   Timer? _timer;
@@ -117,7 +118,9 @@ class Friend {
         : name = 'fj-$id',
           tag = 'tag',
           vaultId = '',
-          keyStorage = KeyStorage.empty();
+          keyStorage = KeyStorage.empty() {
+    unknown = true;
+  }
 
   Friend.fromEntity(FriendData data)
         : id = data.id,
