@@ -147,7 +147,7 @@ class _MessageFeedState extends State<MessageFeed> {
                   child: Container(
                     color: Get.theme.colorScheme.onBackground,
                     width: 300,
-                    child: const ConversationMembers(),
+                    child: ConversationMembers(conversation: conversation,),
                   )
                 )
               )

@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -9,11 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ConversationMembers extends StatelessWidget {
-  const ConversationMembers({super.key});
+
+  final Conversation conversation;
+
+  const ConversationMembers({super.key, required this.conversation});
 
   @override
   Widget build(BuildContext context) {
 
+    final ownRole = conversation.members[conversation.token.id]!.role;
     final controller = Get.find<MessageController>();
 
     return Padding(
@@ -51,20 +56,29 @@ class ConversationMembers extends StatelessWidget {
                             size: box.size.width.toInt(),
                             actions: (friend) {
                               return [
-                                ProfileAction(
-                                  icon: Icons.add_moderator, 
-                                  label: "chat.make_admin".tr, 
-                                  loading: false.obs, 
-                                  onTap: (f, l) => {}
-                                ),
-                                ProfileAction(
-                                  icon: Icons.person_remove, 
-                                  label: "chat.remove_member".tr, 
-                                  loading: false.obs,
-                                  color: Get.theme.colorScheme.errorContainer,
-                                  iconColor: Get.theme.colorScheme.error,
-                                  onTap: (f, l) => {}
-                                ),
+                                if(ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
+                                  ProfileAction(
+                                    icon: Icons.add_moderator, 
+                                    label: "chat.make_moderator".tr, 
+                                    loading: false.obs, 
+                                    onTap: (f, l) => {}
+                                  )
+                                else if(ownRole == MemberRole.admin && member.role == MemberRole.moderator)
+                                  ProfileAction(
+                                    icon: Icons.add_moderator, 
+                                    label: "chat.make_admin".tr, 
+                                    loading: false.obs, 
+                                    onTap: (f, l) => {}
+                                  ),
+                                if(ownRole.higherOrEqual(MemberRole.moderator) && member.role.lowerThan(ownRole))
+                                  ProfileAction(
+                                    icon: Icons.person_remove, 
+                                    label: "chat.remove_member".tr, 
+                                    loading: false.obs,
+                                    color: Get.theme.colorScheme.errorContainer,
+                                    iconColor: Get.theme.colorScheme.error,
+                                    onTap: (f, l) => {}
+                                  ),
                               ] + ProfileDefaults.buildDefaultActions(friend);
                             },
                           ));

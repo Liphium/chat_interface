@@ -43,6 +43,22 @@ enum MemberRole {
 
   const MemberRole(this.value);
 
+  bool lowerOrEqual(MemberRole role) {
+    return value <= role.value;
+  }
+
+  bool higherOrEqual(MemberRole role) {
+    return value >= role.value;
+  }
+
+  bool higherThan(MemberRole role) {
+    return value > role.value;
+  }
+
+  bool lowerThan(MemberRole role) {
+    return value < role.value;
+  }
+
   static MemberRole fromValue(int value) {
     switch(value) {
       case 2:
