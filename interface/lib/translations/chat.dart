@@ -43,6 +43,16 @@ class ChatPageTranslations extends Translations {
       'chat.message': 'Say something',
       'chat.members': '@count members',
 
+      // Conversation members
+      'chat.make_moderator': 'Make moderator',
+      'chat.remove_moderator': 'Remove moderator',
+      'chat.remove_admin': 'Remove admin',
+      'chat.make_admin': 'Make admin',
+      'chat.remove_member': 'Remove member',
+      'chat.add_member': 'Add member',
+      'chat.admin': 'Admin',
+      'chat.moderator': 'Moderator',
+
       // Spaces
       'join.space': 'Join Space',
       'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
@@ -86,6 +96,16 @@ class ChatPageTranslations extends Translations {
       'conversations.name': 'Gruppenname',
       'chat.message': 'Sag etwas',
       'chat.members': '@count Mitglieder',
+
+      // Conversation members
+      'chat.make_moderator': 'Zum Moderator machen',
+      'chat.remove_moderator': 'Moderator entfernen',
+      'chat.remove_admin': 'Admin entfernen',
+      'chat.make_admin': 'Zum Admin machen',
+      'chat.remove_member': 'Mitglied entfernen',
+      'chat.add_member': 'Mitglied hinzufügen',
+      'chat.admin': 'Admin',
+      'chat.moderator': 'Moderator',
 
       // Spaces
       'join.space': 'Space beitreten',
