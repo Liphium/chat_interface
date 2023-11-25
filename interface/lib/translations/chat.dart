@@ -31,7 +31,7 @@ class ChatPageTranslations extends Translations {
       'friend.removed': 'You removed this person.',
       'friends.add': 'Add friend',
       'friends.message': 'Start direct message',
-      'friends.invite_to_space': 'Invite to current space',
+      'friends.invite_to_space': 'Invite to current Space',
       'friends.requests_sent': 'Requests sent',
       'friends.requests': 'Requests',
 
@@ -42,6 +42,7 @@ class ChatPageTranslations extends Translations {
       'conversations.name': 'Conversation name',
       'chat.message': 'Say something',
       'chat.members': '@count members',
+      'chat.start_space': 'Start private Space',
 
       // Conversation members
       'chat.make_moderator': 'Make moderator',
@@ -96,6 +97,7 @@ class ChatPageTranslations extends Translations {
       'conversations.name': 'Gruppenname',
       'chat.message': 'Sag etwas',
       'chat.members': '@count Mitglieder',
+      'chat.start_space': 'Privaten Space starten',
 
       // Conversation members
       'chat.make_moderator': 'Zum Moderator machen',

@@ -4,6 +4,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -67,9 +68,25 @@ class _MessageBarState extends State<MessageBar> {
                   icon: Icons.call,
                   iconSize: 27,
                   loading: callLoading,
+                  tooltip: "chat.start_space".tr,
                   onTap: () {
                     final controller = Get.find<SpacesController>();
                     controller.createAndConnect(Get.find<MessageController>().selectedConversation.value.id);
+                  },
+                ),
+                horizontalSpacing(elementSpacing),
+
+                //* Start call
+                LoadingIconButton(
+                  icon: Icons.hardware,
+                  iconSize: 27,
+                  loading: callLoading,
+                  tooltip: "profile.test".tr,
+                  onTap: () {
+
+                    postNodeJSON("/conversations/message/send_system", {
+                      "conversation": Get.find<MessageController>().selectedConversation.value.id,
+                    });
                   },
                 ),
 

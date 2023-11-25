@@ -10,6 +10,9 @@ import 'package:get/get.dart';
 
 class MessageController extends GetxController {
 
+  // Constants
+  static String systemSender = "6969"; 
+
   final loaded = false.obs;
   final selectedConversation = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
   final messages = <Message>[].obs;
@@ -87,9 +90,9 @@ class MessageController extends GetxController {
 class Message {
     
   final String id;
-  MessageType type; // text, audio, call, stream
+  MessageType type;
   String content;
-  String attachments;
+  List<String> attachments;
   bool verified;
   final String certificate;
   final String sender;
@@ -102,11 +105,11 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) {
 
     // Convert to message
-    final message = Message(
+    var message = Message(
       json["id"],
       MessageType.text,
       json["data"],
-      "",
+      [""],
       json["certificate"],
       json["sender"],
       DateTime.fromMillisecondsSinceEpoch(json["creation"]),
@@ -117,28 +120,40 @@ class Message {
 
     // Decrypt content
     final conversation = Get.find<ConversationController>().conversations[json["conversation"]]!;
-    message.content = decryptSymmetric(message.content, conversation.key);
-    // TODO: Add a signature (check it ig)
+    if(message.sender == MessageController.systemSender) {
+      message.verified = true;
+      message.type = MessageType.system;
+      message.loadContent();
+      return message;
+    }
 
-    // Parse content and check signature
-    final contentJson = jsonDecode(message.content);
-
+    // TODO: Add a signature (and verify it)
     // Check signature
     message.verified = true;
-    message.type = MessageType.fromString(contentJson["t"] ?? "text");
-    if(message.type == MessageType.text) {
-      message.content = utf8.decode(base64Decode(contentJson["c"]));
-    }
-    message.attachments = contentJson["a"] ?? "";
+    message.content = decryptSymmetric(message.content, conversation.key);
+    message.loadContent();
 
     return message;
   }
 
+  void loadContent() {
+    final contentJson = jsonDecode(content);
+    if(type != MessageType.system) {
+      type = MessageType.values[contentJson["t"] ?? 0];
+      if(type == MessageType.text) {
+        content = utf8.decode(base64Decode(contentJson["c"]));
+      }
+    } else {
+      content = contentJson["c"];
+    }
+    attachments = contentJson["a"] ?? [""];
+  }
+
   Message.fromMessageData(MessageData messageData)
       : id = messageData.id,
-        type = MessageType.fromString(messageData.type),
+        type = MessageType.values[messageData.type],
         content = messageData.content,
-        attachments = messageData.attachments,
+        attachments = jsonDecode(messageData.attachments),
         certificate = messageData.certificate,
         sender = messageData.sender!,
         createdAt = messageData.createdAt,
@@ -148,9 +163,9 @@ class Message {
 
   MessageData get entity => MessageData(
         id: id,
-        type: type.name,
+        type: type.index,
         content: content,
-        attachments: attachments,
+        attachments: jsonEncode(attachments),
         certificate: certificate,
         sender: sender,
         createdAt: createdAt,
@@ -166,22 +181,7 @@ class Message {
 }
 
 enum MessageType {
-  text("text"),
-  call("call");
-
-  final String name;
-
-  const MessageType(this.name);
-
-  static MessageType fromString(String name) {
-    switch (name) {
-      case "text":
-        return MessageType.text;
-      case "call":
-        return MessageType.call;
-      default:
-        return MessageType.text;
-    }
-  }
-
+  text,
+  system,
+  call;
 }

@@ -98,16 +98,16 @@ class GameSession {
 
   final gameState = gameStateLobby.obs;
   final members = <String>[].obs;
-  var _loading = false;
+  var loading = false;
 
   GameSession(this.id, this.game, this.minPlayers, this.maxPlayers);
 
   void start() {
-    _loading = true;
+    loading = true;
     spaceConnector.sendAction(Message("game_start", {
       "session": id,
     }), handler: (event) {
-      _loading = false;
+      loading = false;
       if(!event.data["success"]) {
         showErrorPopup("error".tr, event.data["message"].toString().tr);
       }

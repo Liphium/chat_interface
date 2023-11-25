@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/conversation_members.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/system_message_renderer.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/spaces/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/components/message/message_bar.dart';
@@ -108,6 +109,9 @@ class _MessageFeedState extends State<MessageFeed> {
                               }
                                 
                               final message = controller.messages[index - 1];
+                              if(message.type == MessageType.system) {
+                                return SystemMessageRenderer(message: message, accountId: MessageController.systemSender);
+                              }
                               final conversationToken = controller.selectedConversation.value.members[message.sender]!;
                               final sender = friendController.friends[conversationToken.account];
                               final self = conversationToken.account == statusController.id.value;
@@ -127,6 +131,9 @@ class _MessageFeedState extends State<MessageFeed> {
                                 case MessageType.call:
                                   return SpaceMessageRenderer(message: message, self: self, last: last,
                                   sender: self ? Friend.me() : sender);
+
+                                case MessageType.system:
+                                  return SystemMessageRenderer(message: message, accountId: conversationToken.account);
                               }
                             },
                           );

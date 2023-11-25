@@ -618,9 +618,9 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+  late final GeneratedColumn<int> type = GeneratedColumn<int>(
       'type', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _contentMeta =
       const VerificationMeta('content');
   @override
@@ -761,7 +761,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       verified: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
       type: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
       attachments: attachedDatabase.typeMapping
@@ -788,7 +788,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
 class MessageData extends DataClass implements Insertable<MessageData> {
   final String id;
   final bool verified;
-  final String type;
+  final int type;
   final String content;
   final String attachments;
   final String certificate;
@@ -812,7 +812,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['verified'] = Variable<bool>(verified);
-    map['type'] = Variable<String>(type);
+    map['type'] = Variable<int>(type);
     map['content'] = Variable<String>(content);
     map['attachments'] = Variable<String>(attachments);
     map['certificate'] = Variable<String>(certificate);
@@ -851,7 +851,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
       verified: serializer.fromJson<bool>(json['verified']),
-      type: serializer.fromJson<String>(json['type']),
+      type: serializer.fromJson<int>(json['type']),
       content: serializer.fromJson<String>(json['content']),
       attachments: serializer.fromJson<String>(json['attachments']),
       certificate: serializer.fromJson<String>(json['certificate']),
@@ -867,7 +867,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'verified': serializer.toJson<bool>(verified),
-      'type': serializer.toJson<String>(type),
+      'type': serializer.toJson<int>(type),
       'content': serializer.toJson<String>(content),
       'attachments': serializer.toJson<String>(attachments),
       'certificate': serializer.toJson<String>(certificate),
@@ -881,7 +881,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   MessageData copyWith(
           {String? id,
           bool? verified,
-          String? type,
+          int? type,
           String? content,
           String? attachments,
           String? certificate,
@@ -941,7 +941,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
 class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> id;
   final Value<bool> verified;
-  final Value<String> type;
+  final Value<int> type;
   final Value<String> content;
   final Value<String> attachments;
   final Value<String> certificate;
@@ -966,7 +966,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   MessageCompanion.insert({
     required String id,
     required bool verified,
-    required String type,
+    required int type,
     required String content,
     required String attachments,
     required String certificate,
@@ -986,7 +986,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   static Insertable<MessageData> custom({
     Expression<String>? id,
     Expression<bool>? verified,
-    Expression<String>? type,
+    Expression<int>? type,
     Expression<String>? content,
     Expression<String>? attachments,
     Expression<String>? certificate,
@@ -1014,7 +1014,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   MessageCompanion copyWith(
       {Value<String>? id,
       Value<bool>? verified,
-      Value<String>? type,
+      Value<int>? type,
       Value<String>? content,
       Value<String>? attachments,
       Value<String>? certificate,
@@ -1048,7 +1048,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       map['verified'] = Variable<bool>(verified.value);
     }
     if (type.present) {
-      map['type'] = Variable<String>(type.value);
+      map['type'] = Variable<int>(type.value);
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);

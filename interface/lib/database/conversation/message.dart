@@ -4,7 +4,7 @@ class Message extends Table {
   
   TextColumn get id => text()();
   BoolColumn get verified => boolean()();
-  TextColumn get type => text()();
+  IntColumn get type => integer()();
   TextColumn get content => text()();
   TextColumn get attachments => text()();
   TextColumn get certificate => text()();
