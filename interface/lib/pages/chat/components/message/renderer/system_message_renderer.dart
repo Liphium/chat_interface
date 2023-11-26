@@ -1,6 +1,7 @@
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,6 +23,7 @@ class SystemMessageRenderer extends StatefulWidget {
 class _MessageRendererState extends State<SystemMessageRenderer> {
   @override
   Widget build(BuildContext context) {
+    final message = SystemMessages.messages[widget.message.content]!;
 
     return Padding(
       padding: const EdgeInsets.only(top: defaultSpacing),
@@ -37,12 +39,12 @@ class _MessageRendererState extends State<SystemMessageRenderer> {
             //* Icon
             SizedBox(
               width: 50,
-              child: Center(child: Icon(Icons.arrow_forward, size: 30, color: Get.theme.colorScheme.onPrimary)),
+              child: Center(child: Icon(message.icon, size: 30, color: Get.theme.colorScheme.onPrimary)),
             ),
             horizontalSpacing(sectionSpacing),
 
             //* Space info
-            Text("Julian wurde von test2 hinzugefügt.", style: Get.theme.textTheme.labelLarge,),
+            Text(message.translation.call(widget.message.attachments), style: Get.theme.textTheme.labelLarge,),
 
             horizontalSpacing(defaultSpacing),
 

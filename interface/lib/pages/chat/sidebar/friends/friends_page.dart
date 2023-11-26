@@ -163,12 +163,12 @@ class _FriendsPageState extends State<FriendsPage> {
                                           target: hashtag ? 1.0 : 0.0,
                                           child: Padding(
                                             padding: const EdgeInsets.only(bottom: defaultSpacing),
-                                            child: Text("Seems like you don't have any friend with that name.", style: theme.textTheme.bodyMedium),
+                                            child: Text("friends.empty".tr, style: theme.textTheme.bodyMedium),
                                           ),
                                         ),
                                         hashtag ?
-                                        Text("Now just press 'Enter' whenever you're done typing. And we'll find your friend for you.", style: theme.textTheme.labelMedium) :
-                                        Text("If you want to add someone, please provide username#tag. Example: Julian#1234", style: theme.textTheme.labelMedium),
+                                        Text("friends.send_request".tr, style: theme.textTheme.labelMedium) :
+                                        Text("friends.example".tr, style: theme.textTheme.labelMedium),
                                       ],
                                     ),
                                   ),

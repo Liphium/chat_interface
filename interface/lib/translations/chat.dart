@@ -34,6 +34,10 @@ class ChatPageTranslations extends Translations {
       'friends.invite_to_space': 'Invite to current Space',
       'friends.requests_sent': 'Requests sent',
       'friends.requests': 'Requests',
+      'request.sent': 'Request successfully sent!',
+      'friends.empty': 'Seems like you don\'t have any friends with that name.',
+      'friends.send_request': 'Now just press \'Enter\' whenever you\'re done typing. And we\'ll find your friend for you.',
+      'friends.example': 'If you want to add someone, please provide their username#tag. Example: Julian#1234',
 
       // Conversations
       'conversations.placeholder': 'Search',
@@ -89,6 +93,10 @@ class ChatPageTranslations extends Translations {
       'friends.invite_to_space': 'Zum Space einladen',
       'friends.requests_sent': 'Gesendete Anfragen',
       'friends.requests': 'Anfragen',
+      'request.sent': 'Anfrage erfolgreich gesendet!',
+      'friends.empty': 'Es scheint, als hättest du keine Freunde mit diesem Namen.',
+      'friends.send_request': 'Drücke einfach \'Enter\', wenn du fertig bist. Und wir finden deinen Freund für dich.',
+      'friends.example': 'Wenn du jemanden hinzufügen willst, gib bitte Benutzername#Tag ein. Beispiel: Julian#1234',
 
       // Conversations
       'conversations.placeholder': 'Suche',

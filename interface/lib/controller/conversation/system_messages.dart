@@ -12,7 +12,7 @@ class SystemMessages {
       },
       translation: (attachments) {
         final selected = Get.find<MessageController>().selectedConversation.value;
-        return "";
+        return "hello world lmfao";
       }
     )
   };

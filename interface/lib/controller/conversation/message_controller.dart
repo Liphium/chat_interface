@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -83,6 +84,12 @@ class MessageController extends GetxController {
       }
     }
     db.into(db.message).insertOnConflictUpdate(message.entity);
+
+    // Handle system messages
+    if(message.type == MessageType.system) {
+      SystemMessages.messages[message.content]?.handler.call(message.attachments);
+    }
+ 
   }
 
 }
