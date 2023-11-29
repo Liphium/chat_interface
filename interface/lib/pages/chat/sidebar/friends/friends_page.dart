@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
@@ -33,13 +34,32 @@ class _FriendsPageState extends State<FriendsPage> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
+    final random = Random();
+    final randomOffset = random.nextDouble() * 8 + 5;
+    final randomHz = random.nextDouble() * 1 + 1;
+
     return Animate(
       effects: [
         ScaleEffect(
+          delay: 100.ms,
           duration: 500.ms,
           begin: const Offset(0, 0),
           end: const Offset(1, 1),
-          curve: scaleAnimationCurve
+          alignment: Alignment.center,
+          curve: const ElasticOutCurve(0.8)
+        ),
+        ShakeEffect(
+          delay: 100.ms,
+          duration: 400.ms,
+          hz: randomHz,
+          offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+          rotation: 0,
+          curve: Curves.decelerate
+        ),
+        FadeEffect(
+          delay: 100.ms,
+          duration: 250.ms,
+          curve: Curves.easeOut
         )
       ],
       child: Center(

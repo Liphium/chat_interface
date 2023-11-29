@@ -63,7 +63,7 @@ class SpacesController extends GetxController {
   }
 
   void createAndConnect(String conversationId) {
-    _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, "", container.toInviteJson(), () => {}));
+    _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, [], container.toInviteJson(), () => {}));
   }
 
   StreamSubscription<void>? _sub;

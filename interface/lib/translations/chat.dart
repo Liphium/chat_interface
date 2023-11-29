@@ -38,6 +38,8 @@ class ChatPageTranslations extends Translations {
       'friends.empty': 'Seems like you don\'t have any friends with that name.',
       'friends.send_request': 'Now just press \'Enter\' whenever you\'re done typing. And we\'ll find your friend for you.',
       'friends.example': 'If you want to add someone, please provide their username#tag. Example: Julian#1234',
+      'request.confirm.title': 'Confirm request',
+      'request.confirm.text': 'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
 
       // Conversations
       'conversations.placeholder': 'Search',
@@ -57,6 +59,13 @@ class ChatPageTranslations extends Translations {
       'chat.add_member': 'Add member',
       'chat.admin': 'Admin',
       'chat.moderator': 'Moderator',
+      'chat.user': 'User',
+
+      // Rank messages
+      'chat.rank_change.0->1': '@name was promoted to Moderator by @sender.',
+      'chat.rank_change.1->2': '@name was promoted to Admin by @sender.',
+      'chat.rank_change.1->0': '@name has been demoted to a normal member by @sender.',
+      'chat.rank_change.2->1': '@name has been demoted to Moderator by @sender.',
 
       // Spaces
       'join.space': 'Join Space',
@@ -97,6 +106,8 @@ class ChatPageTranslations extends Translations {
       'friends.empty': 'Es scheint, als hättest du keine Freunde mit diesem Namen.',
       'friends.send_request': 'Drücke einfach \'Enter\', wenn du fertig bist. Und wir finden deinen Freund für dich.',
       'friends.example': 'Wenn du jemanden hinzufügen willst, gib bitte Benutzername#Tag ein. Beispiel: Julian#1234',
+      'request.confirm.title': 'Anfrage bestätigen',
+      'request.confirm.text': 'Wenn du eine Freundschaftsanfrage sendest, wird die andere Person dein Profil (Profilbild, Beschreibung, usw.) dauerhaft sehen können, es sei denn, du änderst deine Schlüssel. Bist du sicher, dass du dieser Person diese Informationen geben willst?',
 
       // Conversations
       'conversations.placeholder': 'Suche',
@@ -116,6 +127,13 @@ class ChatPageTranslations extends Translations {
       'chat.add_member': 'Mitglied hinzufügen',
       'chat.admin': 'Admin',
       'chat.moderator': 'Moderator',
+      'chat.user': 'Mitglied',
+
+      // Rank messages
+      'chat.rank_change.0->1': '@name wurde von @sender zum Moderator befördert.',
+      'chat.rank_change.1->2': '@name wurde von @sender zum Admin befördert.',
+      'chat.rank_change.1->0': '@name wurde von @sender zu einem normalen Mitglied degradiert.',
+      'chat.rank_change.2->1': '@name wurde von @sender zu einem Moderator degradiert.',
 
       // Spaces
       'join.space': 'Space beitreten',

@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
+import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
@@ -173,7 +174,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     });
     return true;
   }
-  token["token"] = json["token"];
+  token["token"] = json["token"]; // Set new token (from activation request)
   
   final key = unpackageSymmetricKey(actionJson["key"]);
   final members = <Member>[];
@@ -185,7 +186,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
 
   final container = ConversationContainer.decrypt(json["data"], key);
   final convToken = ConversationToken.fromJson(token);
-  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], convToken, container, key, DateTime.now().millisecondsSinceEpoch), members);
+  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], model.ConversationType.values[json["type"]], convToken, container, key, DateTime.now().millisecondsSinceEpoch), members);
   final statusController = Get.find<StatusController>();
   subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), convToken);
 

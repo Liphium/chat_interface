@@ -14,6 +14,12 @@ class $ConversationTable extends Conversation
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumnWithTypeConverter<ConversationType, int> type =
+      GeneratedColumn<int>('type', aliasedName, false,
+              type: DriftSqlType.int, requiredDuringInsert: true)
+          .withConverter<ConversationType>($ConversationTable.$convertertype);
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
   late final GeneratedColumn<String> data = GeneratedColumn<String>(
@@ -42,7 +48,7 @@ class $ConversationTable extends Conversation
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, data, token, key, updatedAt, readAt];
+      [id, type, data, token, key, updatedAt, readAt];
   @override
   String get aliasedName => _alias ?? 'conversation';
   @override
@@ -57,6 +63,7 @@ class $ConversationTable extends Conversation
     } else if (isInserting) {
       context.missing(_idMeta);
     }
+    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('data')) {
       context.handle(
           _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
@@ -98,6 +105,9 @@ class $ConversationTable extends Conversation
     return ConversationData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      type: $ConversationTable.$convertertype.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
       data: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
       token: attachedDatabase.typeMapping
@@ -115,11 +125,15 @@ class $ConversationTable extends Conversation
   $ConversationTable createAlias(String alias) {
     return $ConversationTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<ConversationType, int, int> $convertertype =
+      const EnumIndexConverter<ConversationType>(ConversationType.values);
 }
 
 class ConversationData extends DataClass
     implements Insertable<ConversationData> {
   final String id;
+  final ConversationType type;
   final String data;
   final String token;
   final String key;
@@ -127,6 +141,7 @@ class ConversationData extends DataClass
   final BigInt readAt;
   const ConversationData(
       {required this.id,
+      required this.type,
       required this.data,
       required this.token,
       required this.key,
@@ -136,6 +151,10 @@ class ConversationData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    {
+      final converter = $ConversationTable.$convertertype;
+      map['type'] = Variable<int>(converter.toSql(type));
+    }
     map['data'] = Variable<String>(data);
     map['token'] = Variable<String>(token);
     map['key'] = Variable<String>(key);
@@ -147,6 +166,7 @@ class ConversationData extends DataClass
   ConversationCompanion toCompanion(bool nullToAbsent) {
     return ConversationCompanion(
       id: Value(id),
+      type: Value(type),
       data: Value(data),
       token: Value(token),
       key: Value(key),
@@ -160,6 +180,8 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConversationData(
       id: serializer.fromJson<String>(json['id']),
+      type: $ConversationTable.$convertertype
+          .fromJson(serializer.fromJson<int>(json['type'])),
       data: serializer.fromJson<String>(json['data']),
       token: serializer.fromJson<String>(json['token']),
       key: serializer.fromJson<String>(json['key']),
@@ -172,6 +194,8 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'type': serializer
+          .toJson<int>($ConversationTable.$convertertype.toJson(type)),
       'data': serializer.toJson<String>(data),
       'token': serializer.toJson<String>(token),
       'key': serializer.toJson<String>(key),
@@ -182,6 +206,7 @@ class ConversationData extends DataClass
 
   ConversationData copyWith(
           {String? id,
+          ConversationType? type,
           String? data,
           String? token,
           String? key,
@@ -189,6 +214,7 @@ class ConversationData extends DataClass
           BigInt? readAt}) =>
       ConversationData(
         id: id ?? this.id,
+        type: type ?? this.type,
         data: data ?? this.data,
         token: token ?? this.token,
         key: key ?? this.key,
@@ -199,6 +225,7 @@ class ConversationData extends DataClass
   String toString() {
     return (StringBuffer('ConversationData(')
           ..write('id: $id, ')
+          ..write('type: $type, ')
           ..write('data: $data, ')
           ..write('token: $token, ')
           ..write('key: $key, ')
@@ -209,12 +236,14 @@ class ConversationData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, data, token, key, updatedAt, readAt);
+  int get hashCode =>
+      Object.hash(id, type, data, token, key, updatedAt, readAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationData &&
           other.id == this.id &&
+          other.type == this.type &&
           other.data == this.data &&
           other.token == this.token &&
           other.key == this.key &&
@@ -224,6 +253,7 @@ class ConversationData extends DataClass
 
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<String> id;
+  final Value<ConversationType> type;
   final Value<String> data;
   final Value<String> token;
   final Value<String> key;
@@ -232,6 +262,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<int> rowid;
   const ConversationCompanion({
     this.id = const Value.absent(),
+    this.type = const Value.absent(),
     this.data = const Value.absent(),
     this.token = const Value.absent(),
     this.key = const Value.absent(),
@@ -241,6 +272,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   });
   ConversationCompanion.insert({
     required String id,
+    required ConversationType type,
     required String data,
     required String token,
     required String key,
@@ -248,6 +280,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     required BigInt readAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
+        type = Value(type),
         data = Value(data),
         token = Value(token),
         key = Value(key),
@@ -255,6 +288,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
         readAt = Value(readAt);
   static Insertable<ConversationData> custom({
     Expression<String>? id,
+    Expression<int>? type,
     Expression<String>? data,
     Expression<String>? token,
     Expression<String>? key,
@@ -264,6 +298,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (type != null) 'type': type,
       if (data != null) 'data': data,
       if (token != null) 'token': token,
       if (key != null) 'key': key,
@@ -275,6 +310,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
 
   ConversationCompanion copyWith(
       {Value<String>? id,
+      Value<ConversationType>? type,
       Value<String>? data,
       Value<String>? token,
       Value<String>? key,
@@ -283,6 +319,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       Value<int>? rowid}) {
     return ConversationCompanion(
       id: id ?? this.id,
+      type: type ?? this.type,
       data: data ?? this.data,
       token: token ?? this.token,
       key: key ?? this.key,
@@ -297,6 +334,10 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (type.present) {
+      final converter = $ConversationTable.$convertertype;
+      map['type'] = Variable<int>(converter.toSql(type.value));
     }
     if (data.present) {
       map['data'] = Variable<String>(data.value);
@@ -323,6 +364,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   String toString() {
     return (StringBuffer('ConversationCompanion(')
           ..write('id: $id, ')
+          ..write('type: $type, ')
           ..write('data: $data, ')
           ..write('token: $token, ')
           ..write('key: $key, ')

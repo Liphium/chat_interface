@@ -53,7 +53,6 @@ class _ProfileState extends State<OwnProfile> {
 
     StatusController controller = Get.find();
     ThemeData theme = Theme.of(context);
-    ThemeManager manager = Get.find();
 
     _status.text = controller.status.value;
     statusMessage.value = controller.status.value;
@@ -67,7 +66,7 @@ class _ProfileState extends State<OwnProfile> {
           width: widget.size.toDouble(),
           child: Material(
             borderRadius: BorderRadius.circular(defaultSpacing),
-            color: theme.colorScheme.background,
+            color: theme.colorScheme.onBackground,
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
               child: Column(
@@ -101,10 +100,7 @@ class _ProfileState extends State<OwnProfile> {
                       )
                     ],
                   ),
-
-                  Divider(
-                    color: theme.dividerColor,
-                  ),
+                  verticalSpacing(defaultSpacing),
 
                   //* Status
 
@@ -122,7 +118,7 @@ class _ProfileState extends State<OwnProfile> {
                             final bool selected = statusController.type.value == index;
                                       
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: defaultSpacing * 0.25),
+                              padding: const EdgeInsets.only(bottom: elementSpacing),
                               child: Material(
                                 color: selected ? theme.colorScheme.primary : theme.colorScheme.background,
                                 borderRadius: BorderRadius.circular(defaultSpacing),
@@ -233,10 +229,7 @@ class _ProfileState extends State<OwnProfile> {
                       )
                     ],
                   ),
-
-                  Divider(
-                    color: theme.dividerColor,
-                  ),
+                  verticalSpacing(defaultSpacing),
                         
                   //* Profile settings
                   ProfileButton(
@@ -245,6 +238,7 @@ class _ProfileState extends State<OwnProfile> {
                     onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
                     loading: false.obs
                   ),
+                  verticalSpacing(elementSpacing),
 
                   //* Friends page
                   ProfileButton(
@@ -253,6 +247,7 @@ class _ProfileState extends State<OwnProfile> {
                     onTap: () => Get.dialog(const FriendsPage()),
                     loading: false.obs
                   ),
+                  verticalSpacing(elementSpacing),
 
                   //* Files page
                   ProfileButton(
@@ -261,6 +256,7 @@ class _ProfileState extends State<OwnProfile> {
                     onTap: () => Get.dialog(const FilesPage()),
                     loading: false.obs
                   ),
+                  verticalSpacing(elementSpacing),
 
                   //* Hide profile
                   ProfileButton(

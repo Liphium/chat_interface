@@ -73,7 +73,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 Friend friend = friendController.friends.values.elementAt(index);
                       
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                  padding: const EdgeInsets.only(bottom: elementSpacing),
                   child: Obx(() => Material(
                     color: _members.contains(friend) ? theme.colorScheme.primary : Colors.transparent,
                     borderRadius: BorderRadius.circular(defaultSpacing),
@@ -103,9 +103,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
               },
             )),
           ),
-                
-          Divider(color: Get.theme.dividerColor),
-                
+          verticalSpacing(defaultSpacing - elementSpacing),
+                                
           //* Create conversation button
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,34 +117,33 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       ExpandEffect(
                         axis: Axis.vertical,
                         duration: 250.ms,
-                        curve: Curves.easeInOut,
-                      ),
-                      ScaleEffect(
-                        alignment: Alignment.center,
-                        begin: const Offset(0,0),
-                        duration: 250.ms,
-                        curve: Curves.easeInOut,
+                        curve: Curves.ease,
+                        alignment: Alignment.center
                       ),
                     ],
                     target: _length.value > 1 ? 1 : 0,
               
-                    child: FJTextField(
-                      controller: _controller,
-                      hintText: "conversations.name".tr,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: defaultSpacing),
+                      child: FJTextField(
+                        controller: _controller,
+                        hintText: "conversations.name".tr,
+                      ),
                     ),
                   )
                 ),
               ),
-              verticalSpacing(defaultSpacing * 0.5),
               Obx(() => 
                 Visibility(
                   visible: _errorText.value.isNotEmpty,
-                  child: Text(_errorText.value, 
-                    style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.error)
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: defaultSpacing),
+                    child: Text(_errorText.value, 
+                      style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.error)
+                    ),
                   ),
                 )
               ),
-              verticalSpacing(defaultSpacing * 0.5),
               FJElevatedLoadingButton(
                 onTap: () async {
                 

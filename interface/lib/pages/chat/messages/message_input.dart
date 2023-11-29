@@ -1,12 +1,9 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/chat/messages/writing_status.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,7 +57,7 @@ class _MessageInputState extends State<MessageInput> {
         onInvoke: (SendIntent intent) {
           final controller = Get.find<MessageController>();
           if(files.isEmpty) {
-            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, "", handleMessageFinish); 
+            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], handleMessageFinish); 
           }
 
           sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, files, handleMessageFinish);

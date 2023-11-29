@@ -19,10 +19,10 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
   }
 
   loading.value = false;
-  sendActualMessage(loading, conversationId, MessageType.text, jsonEncode(attachments), base64Encode(utf8.encode(message)), callback);
+  sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
 
-void sendTextMessage(RxBool loading, String conversationId, String message, String attachments, Function() callback) async {
+void sendTextMessage(RxBool loading, String conversationId, String message, List<String> attachments, Function() callback) async {
   if(loading.value) {
     return;
   }
@@ -30,7 +30,7 @@ void sendTextMessage(RxBool loading, String conversationId, String message, Stri
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
 
-void sendActualMessage(RxBool loading, String conversationId, MessageType type, String attachments, String message, Function() callback) async {
+void sendActualMessage(RxBool loading, String conversationId, MessageType type, List<String> attachments, String message, Function() callback) async {
   loading.value = true;
 
   // Encrypt message with signature
@@ -41,7 +41,7 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
 
   var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{
     "c": message,
-    "t": type.name,
+    "t": type.index,
     "a": attachments
   }), key);
 

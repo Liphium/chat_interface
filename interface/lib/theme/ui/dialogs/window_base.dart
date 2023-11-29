@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -67,6 +69,11 @@ class SlidingWindowBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final random = math.Random();
+    final randomOffset = random.nextDouble() * 3 + 2;
+    final randomHz = random.nextDouble() * 1 + 1.5;
+
     return Stack(
       children: [
         Positioned(
@@ -75,10 +82,17 @@ class SlidingWindowBase extends StatelessWidget {
           child: Animate(
             effects: [
               MoveEffect(
-                begin: const Offset(0,-50),
-                duration: 500.ms,
-                curve: scaleAnimationCurve,
-              )
+                duration: 400.ms,
+                begin: const Offset(0, -100),
+                curve: scaleAnimationCurve
+              ),
+              ShakeEffect(
+                duration: 350.ms,
+                hz: randomHz,
+                offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+                rotation: 0,
+                curve: Curves.decelerate
+              ),
             ],
             target: 1,
             child: SizedBox(

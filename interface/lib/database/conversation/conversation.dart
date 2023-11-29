@@ -1,8 +1,14 @@
 import 'package:drift/drift.dart';
 
+enum ConversationType {
+  directMessage,
+  group
+}
+
 class Conversation extends Table {
 
   TextColumn get id => text()();
+  IntColumn get type => intEnum<ConversationType>()();
   TextColumn get data => text()();
   TextColumn get token => text()();
   TextColumn get key => text()();

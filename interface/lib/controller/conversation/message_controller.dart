@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
+import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -15,11 +16,11 @@ class MessageController extends GetxController {
   static String systemSender = "6969"; 
 
   final loaded = false.obs;
-  final selectedConversation = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
+  final selectedConversation = Conversation("0", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
   final messages = <Message>[].obs;
 
   void unselectConversation() {
-    selectedConversation.value = Conversation("0", ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
+    selectedConversation.value = Conversation("0", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
     messages.clear();
   }
 
@@ -87,7 +88,7 @@ class MessageController extends GetxController {
 
     // Handle system messages
     if(message.type == MessageType.system) {
-      SystemMessages.messages[message.content]?.handler.call(message.attachments);
+      SystemMessages.messages[message.content]?.handler.call(message);
     }
  
   }
@@ -153,14 +154,14 @@ class Message {
     } else {
       content = contentJson["c"];
     }
-    attachments = contentJson["a"] ?? [""];
+    attachments = List<String>.from(contentJson["a"] ?? [""]);
   }
 
   Message.fromMessageData(MessageData messageData)
       : id = messageData.id,
         type = MessageType.values[messageData.type],
         content = messageData.content,
-        attachments = jsonDecode(messageData.attachments),
+        attachments = List<String>.from(jsonDecode(messageData.attachments)),
         certificate = messageData.certificate,
         sender = messageData.sender!,
         createdAt = messageData.createdAt,

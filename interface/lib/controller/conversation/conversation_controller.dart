@@ -7,8 +7,10 @@ import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
+import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -99,6 +101,7 @@ class ConversationController extends GetxController {
 class Conversation {
   
   final String id;
+  final model.ConversationType type;
   final ConversationToken token;
   final ConversationContainer container;
   final updatedAt = 0.obs;
@@ -110,13 +113,14 @@ class Conversation {
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.token, this.container, this.key, int updatedAt) {
+  Conversation(this.id, this.type, this.token, this.container, this.key, int updatedAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
   Conversation.fromJson(Map<String, dynamic> json) 
   : this(
-    json["id"], 
+    json["id"],
+    model.ConversationType.values[json["type"]],
     ConversationToken.fromJson(json["token"]), 
     ConversationContainer.fromJson(json["data"]), 
     unpackageSymmetricKey(json["key"]), 
@@ -124,7 +128,8 @@ class Conversation {
   );
   Conversation.fromData(ConversationData data) 
   : this(
-    data.id, 
+    data.id,
+    data.type,
     ConversationToken.fromJson(jsonDecode(data.token)), 
     ConversationContainer.fromJson(jsonDecode(data.data)), 
     unpackageSymmetricKey(data.key),
@@ -145,12 +150,13 @@ class Conversation {
     return true;
   }
 
-  bool get isGroup => !container.name.startsWith(directMessagePrefix);
+  bool get isGroup => type == model.ConversationType.group;
   String get dmName => (Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] ?? Friend.unknown(container.name)).name;  
   bool get borked => !isGroup && Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] == null;
 
   ConversationData get entity => ConversationData(
-    id: id, 
+    id: id,
+    type: type,
     token: token.toJson(), 
     key: packageSymmetricKey(key), 
     data: container.toJson(), 
@@ -159,6 +165,7 @@ class Conversation {
   );
   String toJson() => jsonEncode(<String, dynamic>{
     "id": id,
+    "type": type.index,
     "token": token.toJson(),
     "key": packageSymmetricKey(key),
     "update": updatedAt.value.toInt(),
@@ -172,5 +179,51 @@ class Conversation {
     db.member.deleteWhere((tbl) => tbl.conversationId.equals(id));
     Get.find<MessageController>().unselectConversation();
     Get.find<ConversationController>().conversations.remove(id);
+  }
+
+  void save() {
+    db.conversation.insertOnConflictUpdate(entity);
+    for(var member in members.values) {
+      db.member.insertOnConflictUpdate(member.toData(id));
+    }
+  }
+
+  DateTime? lastMemberFetch; // Makes sure we only do it once when multiple methods call it 
+
+  // Re-fetch members of conversation (and save to database)
+  void fetchMembers(DateTime message) async {
+    if(membersLoading.value) {
+      return;
+    }
+
+    if(lastMemberFetch != null) { // Just making sure, not sure if this is actually needed
+      if(message.isBefore(lastMemberFetch!)) {
+        return;
+      }
+    }
+
+    membersLoading.value = true;
+    final json = await postNodeJSON("/conversations/tokens", {
+      "id": token.id,
+      "token": token.token,
+    });
+
+    if(!json["success"]) {
+      // TODO: Add to some sort of error collection
+      return;
+    }
+
+    final members = <String, Member>{};
+    for(var memberData in json["members"]) {
+      sendLog(memberData);
+      final memberContainer = MemberContainer.decrypt(memberData["data"], key);
+      members[memberData["id"]] = Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"]));
+    }
+
+    this.members.value = members;
+    membersLoading.value = false;
+    save();
+
+    lastMemberFetch = DateTime.now();
   }
 }
