@@ -43,6 +43,7 @@ class _MessageFeedState extends State<MessageFeed> {
 
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
+  final textNode = FocusNode();
 
   @override
   void dispose() {
@@ -95,49 +96,53 @@ class _MessageFeedState extends State<MessageFeed> {
                       children: [
                   
                         //* Message list
-                        Obx(() {
-                          final messages = controller.messages;
-                          return ListView.builder(
-                            itemCount: messages.length + 1,
-                            reverse: true,
-                            shrinkWrap: true,
-                            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                            itemBuilder: (context, index) {
-                                
-                              if(index == 0) {
-                                return verticalSpacing(defaultSpacing);
-                              }
-                                
-                              final message = controller.messages[index - 1];
-                              if(message.type == MessageType.system) {
-                                return SystemMessageRenderer(message: message, accountId: MessageController.systemSender);
-                              }
-                              final conversationToken = controller.selectedConversation.value.members[message.sender]!;
-                              final sender = friendController.friends[conversationToken.account];
-                              final self = conversationToken.account == statusController.id.value;
-                  
-                              bool last = false;
-                              if(index != controller.messages.length) {
-                                final lastMessage = controller.messages[index];
-                                last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text;
-                              }
-                                
-                              switch(message.type) {
-                                
-                                case MessageType.text:
-                                  return MessageRenderer(message: message, accountId: conversationToken.account, self: self, last: last,
-                                  sender: self ? Friend.me() : sender);
-                  
-                                case MessageType.call:
-                                  return SpaceMessageRenderer(message: message, self: self, last: last,
-                                  sender: self ? Friend.me() : sender);
-
-                                case MessageType.system:
-                                  return SystemMessageRenderer(message: message, accountId: conversationToken.account);
-                              }
-                            },
-                          );
-                    }),
+                        SelectableRegion(
+                          focusNode: textNode,
+                          selectionControls: desktopTextSelectionControls,
+                          child: Obx(() {
+                            final messages = controller.messages;
+                            return ListView.builder(
+                              itemCount: messages.length + 1,
+                              reverse: true,
+                              shrinkWrap: true,
+                              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                              itemBuilder: (context, index) {
+                                  
+                                if(index == 0) {
+                                  return verticalSpacing(defaultSpacing);
+                                }
+                                  
+                                final message = controller.messages[index - 1];
+                                if(message.type == MessageType.system) {
+                                  return SystemMessageRenderer(message: message, accountId: MessageController.systemSender);
+                                }
+                                final conversationToken = controller.selectedConversation.value.members[message.sender]!;
+                                final sender = friendController.friends[conversationToken.account];
+                                final self = conversationToken.account == statusController.id.value;
+                                          
+                                bool last = false;
+                                if(index != controller.messages.length) {
+                                  final lastMessage = controller.messages[index];
+                                  last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text;
+                                }
+                                  
+                                switch(message.type) {
+                                  
+                                  case MessageType.text:
+                                    return MessageRenderer(message: message, accountId: conversationToken.account, self: self, last: last,
+                                    sender: self ? Friend.me() : sender);
+                                          
+                                  case MessageType.call:
+                                    return SpaceMessageRenderer(message: message, self: self, last: last,
+                                    sender: self ? Friend.me() : sender);
+                        
+                                  case MessageType.system:
+                                    return SystemMessageRenderer(message: message, accountId: conversationToken.account);
+                                }
+                              },
+                            );
+                                            }),
+                        ),
                   
                         //* Message input
                         conversation.borked ?

@@ -83,6 +83,11 @@ class FriendController extends GetxController {
     await db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id));
     return true;
   }
+
+  Friend getFriend(String account) {
+    if(ownAccountId == account) return Friend.me();
+    return friends[account] ?? Friend.unknown(account);
+  }
 }
 
 class Friend {

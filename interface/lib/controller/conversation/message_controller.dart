@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -88,9 +89,8 @@ class MessageController extends GetxController {
 
     // Handle system messages
     if(message.type == MessageType.system) {
-      SystemMessages.messages[message.content]?.handler.call(message);
+      SystemMessages.messages[message.content]?.handle(message);
     }
- 
   }
 
 }
@@ -185,6 +185,16 @@ class Message {
   Map<String, dynamic> toJson() {
   
     return <String, dynamic>{};
+  }
+
+  void decryptSystemMessageAttachments() {
+    final conv = Get.find<ConversationController>().conversations[conversation]!;
+    for (var i = 0; i < attachments.length; i++) {
+      if(attachments[i].startsWith("a:")) {
+        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), conv.key))["id"];
+      }
+    }
+    db.message.insertOnConflictUpdate(entity);
   }
 }
 

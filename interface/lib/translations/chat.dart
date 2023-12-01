@@ -61,11 +61,14 @@ class ChatPageTranslations extends Translations {
       'chat.moderator': 'Moderator',
       'chat.user': 'User',
 
-      // Rank messages
+      // System messages
       'chat.rank_change.0->1': '@name was promoted to Moderator by @sender.',
       'chat.rank_change.1->2': '@name was promoted to Admin by @sender.',
       'chat.rank_change.1->0': '@name has been demoted to a normal member by @sender.',
       'chat.rank_change.2->1': '@name has been demoted to Moderator by @sender.',
+      'chat.token_change': '@name has generated a new conversation token.',
+      'chat.member_join': '@name has joined the conversation.',
+      'chat.member_leave': '@name has left the conversation.',
 
       // Spaces
       'join.space': 'Join Space',

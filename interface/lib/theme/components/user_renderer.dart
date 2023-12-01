@@ -26,12 +26,14 @@ class UserAvatar extends StatelessWidget {
       child: CircleAvatar(
         backgroundColor: Get.theme.colorScheme.primaryContainer,
         radius: size ?? 45,
-        child: Text(
-          friend != null ? friend.name.substring(0,1) : id.substring(0, 1), 
-          style: Get.theme.textTheme.labelMedium!.copyWith(
-            fontSize: (size ?? 45) * 0.5,
-            fontWeight: FontWeight.bold,
-            color: id == ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary
+        child: SelectionContainer.disabled(
+          child: Text(
+            friend != null ? friend.name.substring(0,1) : id.substring(0, 1), 
+            style: Get.theme.textTheme.labelMedium!.copyWith(
+              fontSize: (size ?? 45) * 0.5,
+              fontWeight: FontWeight.bold,
+              color: id == ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary
+            )
           )
         ),
       ),

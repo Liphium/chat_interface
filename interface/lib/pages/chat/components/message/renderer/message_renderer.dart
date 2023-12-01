@@ -29,72 +29,71 @@ class _MessageRendererState extends State<MessageRenderer> {
 
     return Padding(
       padding: EdgeInsets.only(top: !widget.last ? defaultSpacing : 0),
-      child: InkWell(
-        splashFactory: NoSplash.splashFactory,
-        splashColor: theme.hoverColor,
-        onTap: () => {},
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: elementSpacing,
-            horizontal: sectionSpacing,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: elementSpacing,
+          horizontal: sectionSpacing,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
 
-              //* Avatar
-              Visibility(
-                visible: !widget.last,
-                replacement: const SizedBox(width: 50), //* Show timestamp instead
-                child: UserAvatar(id: sender.id, size: 50),
-              ),
-              horizontalSpacing(sectionSpacing),
+            //* Avatar
+            Visibility(
+              visible: !widget.last,
+              replacement: const SizedBox(width: 50), //* Show timestamp instead
+              child: UserAvatar(id: sender.id, size: 50),
+            ),
+            horizontalSpacing(sectionSpacing),
 
-              //* Message
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-              
-                    //* Message info
-                    Visibility(
-                      visible: !widget.last,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
+            //* Message
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+            
+                  //* Message info
+                  Visibility(
+                    visible: !widget.last,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        SelectionContainer.disabled(
+                          child: Text(
                             sender.name, 
                             style: theme.textTheme.titleLarge,
-                          ),
-                          horizontalSpacing(defaultSpacing),
-                          Text(
+                          )
+                        ),
+                        horizontalSpacing(defaultSpacing),
+                        SelectionContainer.disabled(
+                          child: Text(
                             formatTime(widget.message.createdAt),
                             style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
+                          )
+                        ),
+                      ],
                     ),
-              
-                    //* Content
-                    Text(widget.message.content, style: theme.textTheme.bodyLarge)
-                  ],
+                  ),
+            
+                  //* Content
+                  Text(widget.message.content, style: theme.textTheme.bodyLarge)
+                ],
+              ),
+            ),
+
+            horizontalSpacing(defaultSpacing),
+
+            Visibility(
+              visible: !widget.message.verified,
+              child: Tooltip(
+                message: "not.signed".tr,
+                child: const Icon(
+                  Icons.warning_rounded,
+                  color: Colors.amber,
                 ),
               ),
-
-              horizontalSpacing(defaultSpacing),
-
-              Visibility(
-                visible: !widget.message.verified,
-                child: Tooltip(
-                  message: "not.signed".tr,
-                  child: const Icon(
-                    Icons.warning_rounded,
-                    color: Colors.amber,
-                  ),
-                ),
-              )
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );
