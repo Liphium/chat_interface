@@ -10,7 +10,6 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
-import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -79,11 +78,15 @@ class ConversationController extends GetxController {
     }
   }
 
-  void finishedLoading(Map<String, dynamic> readStates) async {
+  void finishedLoading(Map<String, dynamic> readStates, {bool overwriteReads = true}) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
     for(var conversation in conversations.values) {
-      conversation.readAt.value = readStates[conversation.id] ?? 0;
+      if(overwriteReads) {
+        conversation.readAt.value = readStates[conversation.id] ?? 0;
+      } else if(readStates[conversation.id] != null) {
+        conversation.readAt.value = readStates[conversation.id];
+      }
       conversation.fetchNotificationCount();
     }
     loaded.value = true;

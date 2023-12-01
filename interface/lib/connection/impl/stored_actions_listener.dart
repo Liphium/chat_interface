@@ -169,6 +169,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   });
   if(!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
+    // TODO: Could also mean it has been activated on another device
     Future.delayed(500.ms, () async {
       await refreshVault();
     });
