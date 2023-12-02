@@ -17,11 +17,11 @@ class MessageController extends GetxController {
   static String systemSender = "6969"; 
 
   final loaded = false.obs;
-  final selectedConversation = Conversation("0", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
+  final selectedConversation = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
   final messages = <Message>[].obs;
 
   void unselectConversation() {
-    selectedConversation.value = Conversation("0", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
+    selectedConversation.value = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
     messages.clear();
   }
 

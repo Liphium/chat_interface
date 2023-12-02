@@ -8,10 +8,11 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -178,7 +179,6 @@ class _SidebarState extends State<Sidebar> {
                   final statusController = Get.find<StatusController>();
                   final length = controller.order.length + statusController.sharedContent.length;
                   int additional = 0;
-                  sendLog(controller.order);
                   bool renderedShared = false;
                   return ListView.builder(
                     itemCount: length,
@@ -228,6 +228,7 @@ class _SidebarState extends State<Sidebar> {
                         friend = friendController.friends[id];
                       }
                   
+                      // Hover menu
                       final hover = false.obs;
                       
                       //* Conversation item
@@ -363,6 +364,18 @@ class _SidebarState extends State<Sidebar> {
                                     ),
                                     Obx(() {
                                       final notifications = conversation.notificationCount.value;
+                                      if(hover.value) {
+                                        return IconButton(
+                                          onPressed: () => showConfirmPopup(ConfirmWindow(
+                                            title: "conversations.remove".tr, 
+                                            text: "conversations.remove.text".tr, 
+                                            onConfirm: () => conversation.delete(), 
+                                            onDecline: () => {},
+                                          )),
+                                          icon: const Icon(Icons.close),
+                                        );
+                                      }
+
                                       return Visibility(
                                         visible: notifications > 0,
                                         child: Container(

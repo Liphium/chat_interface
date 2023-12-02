@@ -122,7 +122,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   //* Send the stuff to all other members
   final conversationController = Get.find<ConversationController>();
 
-  final conversation = Conversation(body["conversation"], model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]), conversationContainer, conversationKey, DateTime.now().millisecondsSinceEpoch);
+  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]), conversationContainer, conversationKey, DateTime.now().millisecondsSinceEpoch);
   final members = <Member>[];
   final packagedKey = packageSymmetricKey(conversationKey);
   for(var friend in friends) {

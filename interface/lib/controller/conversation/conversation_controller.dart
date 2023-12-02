@@ -56,7 +56,13 @@ class ConversationController extends GetxController {
     }
 
     // Add to vault
-    await addToVault(Constants.conversationTag, conversation.toJson());
+    final vaultId = await addToVault(Constants.conversationTag, conversation.toJson());
+    if(vaultId == null) {
+      // TODO: refresh the vault or something
+      sendLog("COULDNT STORE IN VAULT; SOMETHING WENT WRONG");
+      return false;
+    }
+    conversation.vaultId = vaultId;
 
     // Store in database
     await db.conversation.insertOnConflictUpdate(conversation.entity);
@@ -104,6 +110,7 @@ class ConversationController extends GetxController {
 class Conversation {
   
   final String id;
+  String vaultId;
   final model.ConversationType type;
   final ConversationToken token;
   final ConversationContainer container;
@@ -116,13 +123,14 @@ class Conversation {
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.type, this.token, this.container, this.key, int updatedAt) {
+  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.key, int updatedAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
-  Conversation.fromJson(Map<String, dynamic> json) 
+  Conversation.fromJson(Map<String, dynamic> json, String vaultId) 
   : this(
     json["id"],
+    vaultId,
     model.ConversationType.values[json["type"]],
     ConversationToken.fromJson(json["token"]), 
     ConversationContainer.fromJson(json["data"]), 
@@ -132,6 +140,7 @@ class Conversation {
   Conversation.fromData(ConversationData data) 
   : this(
     data.id,
+    data.vaultId,
     data.type,
     ConversationToken.fromJson(jsonDecode(data.token)), 
     ConversationContainer.fromJson(jsonDecode(data.data)), 
@@ -159,6 +168,7 @@ class Conversation {
 
   ConversationData get entity => ConversationData(
     id: id,
+    vaultId: vaultId,
     type: type,
     token: token.toJson(), 
     key: packageSymmetricKey(key), 
@@ -168,6 +178,7 @@ class Conversation {
   );
   String toJson() => jsonEncode(<String, dynamic>{
     "id": id,
+    "vault_id": vaultId,
     "type": type.index,
     "token": token.toJson(),
     "key": packageSymmetricKey(key),
@@ -175,7 +186,8 @@ class Conversation {
     "data": container.toJson(),
   });
 
-  void delete() {
+  void delete() async {
+    await removeFromVault(this.id);
     // TODO: Delete on the server
     db.conversation.deleteWhere((tbl) => tbl.id.equals(id));
     db.message.deleteWhere((tbl) => tbl.conversationId.equals(id));

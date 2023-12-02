@@ -8,6 +8,7 @@ enum ConversationType {
 class Conversation extends Table {
 
   TextColumn get id => text()();
+  TextColumn get vaultId => text()();
   IntColumn get type => intEnum<ConversationType>()();
   TextColumn get data => text()();
   TextColumn get token => text()();

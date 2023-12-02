@@ -46,21 +46,23 @@ class _AnimatedContainerState extends State<TransitionContainer> {
       builder: (controller) {
         return IgnorePointer(
           ignoring: controller.transition.value,
-          child: Hero(
-            tag: widget.tag,
-            child: Container(
-              width: widget.width,
-              decoration: BoxDecoration(
-                borderRadius: widget.borderRadius,
-                color: widget.color ?? Theme.of(context).colorScheme.onBackground,
-              ),
-              child: Animate(
-                target: controller.transition.value ? 0 : 1,
-                effects: [
-                  mainEffect
-                ],
-                child: widget.child,
-              ),
+          child: Container(
+            width: widget.width,
+            decoration: BoxDecoration(
+              borderRadius: widget.borderRadius,
+              color: widget.color ?? Theme.of(context).colorScheme.onBackground,
+            ),
+            child: Animate(
+              target: controller.transition.value ? 0 : 1,
+              effects: [
+                mainEffect,
+                ExpandEffect(
+                  duration: 250.ms,
+                  axis: Axis.vertical,
+                  alignment: Alignment.center,
+                )
+              ],
+              child: widget.child,
             ),
           ),
         );

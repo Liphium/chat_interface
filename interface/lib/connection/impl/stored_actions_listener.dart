@@ -187,7 +187,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
 
   final container = ConversationContainer.decrypt(json["data"], key);
   final convToken = ConversationToken.fromJson(token);
-  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], model.ConversationType.values[json["type"]], convToken, container, key, DateTime.now().millisecondsSinceEpoch), members);
+  await Get.find<ConversationController>().addCreated(Conversation(actionJson["id"], "", model.ConversationType.values[json["type"]], convToken, container, key, DateTime.now().millisecondsSinceEpoch), members);
   final statusController = Get.find<StatusController>();
   subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), convToken);
 

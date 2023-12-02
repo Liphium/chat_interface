@@ -14,6 +14,12 @@ class $ConversationTable extends Conversation
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _vaultIdMeta =
+      const VerificationMeta('vaultId');
+  @override
+  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+      'vault_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<ConversationType, int> type =
@@ -48,11 +54,12 @@ class $ConversationTable extends Conversation
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, type, data, token, key, updatedAt, readAt];
+      [id, vaultId, type, data, token, key, updatedAt, readAt];
   @override
-  String get aliasedName => _alias ?? 'conversation';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'conversation';
+  String get actualTableName => $name;
+  static const String $name = 'conversation';
   @override
   VerificationContext validateIntegrity(Insertable<ConversationData> instance,
       {bool isInserting = false}) {
@@ -62,6 +69,12 @@ class $ConversationTable extends Conversation
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('vault_id')) {
+      context.handle(_vaultIdMeta,
+          vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
+    } else if (isInserting) {
+      context.missing(_vaultIdMeta);
     }
     context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('data')) {
@@ -105,6 +118,8 @@ class $ConversationTable extends Conversation
     return ConversationData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      vaultId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
       type: $ConversationTable.$convertertype.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
@@ -133,6 +148,7 @@ class $ConversationTable extends Conversation
 class ConversationData extends DataClass
     implements Insertable<ConversationData> {
   final String id;
+  final String vaultId;
   final ConversationType type;
   final String data;
   final String token;
@@ -141,6 +157,7 @@ class ConversationData extends DataClass
   final BigInt readAt;
   const ConversationData(
       {required this.id,
+      required this.vaultId,
       required this.type,
       required this.data,
       required this.token,
@@ -151,6 +168,7 @@ class ConversationData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    map['vault_id'] = Variable<String>(vaultId);
     {
       final converter = $ConversationTable.$convertertype;
       map['type'] = Variable<int>(converter.toSql(type));
@@ -166,6 +184,7 @@ class ConversationData extends DataClass
   ConversationCompanion toCompanion(bool nullToAbsent) {
     return ConversationCompanion(
       id: Value(id),
+      vaultId: Value(vaultId),
       type: Value(type),
       data: Value(data),
       token: Value(token),
@@ -180,6 +199,7 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConversationData(
       id: serializer.fromJson<String>(json['id']),
+      vaultId: serializer.fromJson<String>(json['vaultId']),
       type: $ConversationTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
       data: serializer.fromJson<String>(json['data']),
@@ -194,6 +214,7 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'vaultId': serializer.toJson<String>(vaultId),
       'type': serializer
           .toJson<int>($ConversationTable.$convertertype.toJson(type)),
       'data': serializer.toJson<String>(data),
@@ -206,6 +227,7 @@ class ConversationData extends DataClass
 
   ConversationData copyWith(
           {String? id,
+          String? vaultId,
           ConversationType? type,
           String? data,
           String? token,
@@ -214,6 +236,7 @@ class ConversationData extends DataClass
           BigInt? readAt}) =>
       ConversationData(
         id: id ?? this.id,
+        vaultId: vaultId ?? this.vaultId,
         type: type ?? this.type,
         data: data ?? this.data,
         token: token ?? this.token,
@@ -225,6 +248,7 @@ class ConversationData extends DataClass
   String toString() {
     return (StringBuffer('ConversationData(')
           ..write('id: $id, ')
+          ..write('vaultId: $vaultId, ')
           ..write('type: $type, ')
           ..write('data: $data, ')
           ..write('token: $token, ')
@@ -237,12 +261,13 @@ class ConversationData extends DataClass
 
   @override
   int get hashCode =>
-      Object.hash(id, type, data, token, key, updatedAt, readAt);
+      Object.hash(id, vaultId, type, data, token, key, updatedAt, readAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationData &&
           other.id == this.id &&
+          other.vaultId == this.vaultId &&
           other.type == this.type &&
           other.data == this.data &&
           other.token == this.token &&
@@ -253,6 +278,7 @@ class ConversationData extends DataClass
 
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<String> id;
+  final Value<String> vaultId;
   final Value<ConversationType> type;
   final Value<String> data;
   final Value<String> token;
@@ -262,6 +288,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<int> rowid;
   const ConversationCompanion({
     this.id = const Value.absent(),
+    this.vaultId = const Value.absent(),
     this.type = const Value.absent(),
     this.data = const Value.absent(),
     this.token = const Value.absent(),
@@ -272,6 +299,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   });
   ConversationCompanion.insert({
     required String id,
+    required String vaultId,
     required ConversationType type,
     required String data,
     required String token,
@@ -280,6 +308,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     required BigInt readAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
+        vaultId = Value(vaultId),
         type = Value(type),
         data = Value(data),
         token = Value(token),
@@ -288,6 +317,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
         readAt = Value(readAt);
   static Insertable<ConversationData> custom({
     Expression<String>? id,
+    Expression<String>? vaultId,
     Expression<int>? type,
     Expression<String>? data,
     Expression<String>? token,
@@ -298,6 +328,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (vaultId != null) 'vault_id': vaultId,
       if (type != null) 'type': type,
       if (data != null) 'data': data,
       if (token != null) 'token': token,
@@ -310,6 +341,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
 
   ConversationCompanion copyWith(
       {Value<String>? id,
+      Value<String>? vaultId,
       Value<ConversationType>? type,
       Value<String>? data,
       Value<String>? token,
@@ -319,6 +351,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       Value<int>? rowid}) {
     return ConversationCompanion(
       id: id ?? this.id,
+      vaultId: vaultId ?? this.vaultId,
       type: type ?? this.type,
       data: data ?? this.data,
       token: token ?? this.token,
@@ -335,8 +368,12 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
+    if (vaultId.present) {
+      map['vault_id'] = Variable<String>(vaultId.value);
+    }
     if (type.present) {
       final converter = $ConversationTable.$convertertype;
+
       map['type'] = Variable<int>(converter.toSql(type.value));
     }
     if (data.present) {
@@ -364,6 +401,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   String toString() {
     return (StringBuffer('ConversationCompanion(')
           ..write('id: $id, ')
+          ..write('vaultId: $vaultId, ')
           ..write('type: $type, ')
           ..write('data: $data, ')
           ..write('token: $token, ')
@@ -406,9 +444,10 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   @override
   List<GeneratedColumn> get $columns => [id, conversationId, accountId, roleId];
   @override
-  String get aliasedName => _alias ?? 'member';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'member';
+  String get actualTableName => $name;
+  static const String $name = 'member';
   @override
   VerificationContext validateIntegrity(Insertable<MemberData> instance,
       {bool isInserting = false}) {
@@ -720,9 +759,10 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
         edited
       ];
   @override
-  String get aliasedName => _alias ?? 'message';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'message';
+  String get actualTableName => $name;
+  static const String $name = 'message';
   @override
   VerificationContext validateIntegrity(Insertable<MessageData> instance,
       {bool isInserting = false}) {
@@ -1156,9 +1196,10 @@ class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
   @override
   List<GeneratedColumn> get $columns => [key, value];
   @override
-  String get aliasedName => _alias ?? 'setting';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'setting';
+  String get actualTableName => $name;
+  static const String $name = 'setting';
   @override
   VerificationContext validateIntegrity(Insertable<SettingData> instance,
       {bool isInserting = false}) {
@@ -1353,9 +1394,10 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   @override
   List<GeneratedColumn> get $columns => [id, name, tag, vaultId, keys];
   @override
-  String get aliasedName => _alias ?? 'friend';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'friend';
+  String get actualTableName => $name;
+  static const String $name = 'friend';
   @override
   VerificationContext validateIntegrity(Insertable<FriendData> instance,
       {bool isInserting = false}) {
@@ -1661,9 +1703,10 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   List<GeneratedColumn> get $columns =>
       [id, name, tag, self, vaultId, storedActionId, keys];
   @override
-  String get aliasedName => _alias ?? 'request';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'request';
+  String get actualTableName => $name;
+  static const String $name = 'request';
   @override
   VerificationContext validateIntegrity(Insertable<RequestData> instance,
       {bool isInserting = false}) {

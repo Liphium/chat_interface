@@ -68,6 +68,7 @@ Future<String?> refreshVault() async {
   for(var unparsedEntry in json["entries"]) {
     final entry = VaultEntry.fromJson(unparsedEntry);
     sendLog(entry);
+    // TODO: Parse conversations from vault
   }
 
   await finishFetch();
