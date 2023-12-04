@@ -292,7 +292,7 @@ class _SidebarState extends State<Sidebar> {
                                                 Obx(() {
               
                                                   if(conversation.isGroup) {
-                                                    return Text(conversation.containerSub.value.name, 
+                                                    return Text(conversation.vaultId, 
                                                       style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                       textHeightBehavior: noTextHeight,
                                                     );
@@ -367,8 +367,8 @@ class _SidebarState extends State<Sidebar> {
                                       if(hover.value) {
                                         return IconButton(
                                           onPressed: () => showConfirmPopup(ConfirmWindow(
-                                            title: "conversations.remove".tr, 
-                                            text: "conversations.remove.text".tr, 
+                                            title: "conversations.leave".tr, 
+                                            text: "conversations.leave.text".tr, 
                                             onConfirm: () => conversation.delete(), 
                                             onDecline: () => {},
                                           )),

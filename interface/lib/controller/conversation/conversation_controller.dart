@@ -63,6 +63,7 @@ class ConversationController extends GetxController {
       return false;
     }
     conversation.vaultId = vaultId;
+    sendLog("STORED IN VAULT: $vaultId");
 
     // Store in database
     await db.conversation.insertOnConflictUpdate(conversation.entity);
@@ -103,6 +104,11 @@ class ConversationController extends GetxController {
       order.remove(id);
     }
     order.insert(0, id);
+  }
+
+  void removeConversation(String id) {
+    conversations.remove(id);
+    order.remove(id);
   }
 
 }
@@ -186,14 +192,31 @@ class Conversation {
     "data": container.toJson(),
   });
 
+  // Delete conversation from vault and database
   void delete() async {
-    await removeFromVault(this.id);
-    // TODO: Delete on the server
+    final err = await removeFromVault(vaultId);
+    if(err != null) {
+      sendLog("Error deleting conversation from vault: $err");
+      showErrorPopup("error".tr, "error.not_delete_conversation".tr);
+      return;
+    }
+  
+    final json = await postNodeJSON("/conversations/leave", {
+      "id": token.id,
+      "token": token.token,
+    });
+
+    if(!json["success"]) {
+      sendLog("Error deleting conversation from vault: ${json["error"]}");
+      showErrorPopup("error".tr, "error.not_delete_conversation".tr);
+      return;
+    }
+
     db.conversation.deleteWhere((tbl) => tbl.id.equals(id));
     db.message.deleteWhere((tbl) => tbl.conversationId.equals(id));
     db.member.deleteWhere((tbl) => tbl.conversationId.equals(id));
-    Get.find<MessageController>().unselectConversation();
-    Get.find<ConversationController>().conversations.remove(id);
+    Get.find<MessageController>().unselectConversation(id: id);
+    Get.find<ConversationController>().removeConversation(id);
   }
 
   void save() {

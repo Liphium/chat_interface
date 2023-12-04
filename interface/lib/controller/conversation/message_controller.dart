@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -20,7 +19,10 @@ class MessageController extends GetxController {
   final selectedConversation = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
   final messages = <Message>[].obs;
 
-  void unselectConversation() {
+  void unselectConversation({String? id}) {
+    if(id != null && selectedConversation.value.id != id) {
+      return;
+    }
     selectedConversation.value = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
     messages.clear();
   }

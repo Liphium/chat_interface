@@ -65,6 +65,21 @@ class SystemMessages {
         });
       }
     ),
+
+    // Called when the conversation should be deleted
+    // Format: []
+    "group.deleted": SystemMessage(
+      Icons.delete,
+      store: false,
+      render: false,
+      handler: (msg) {
+        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
+        conversation.delete();
+      },
+      translation: (msg) {
+        return "chat.deleted".tr;
+      }
+    )
   };
 }
 

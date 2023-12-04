@@ -49,6 +49,8 @@ class ChatPageTranslations extends Translations {
       'chat.message': 'Say something',
       'chat.members': '@count members',
       'chat.start_space': 'Start a private Space',
+      'conversations.leave': 'Leave conversation',
+      'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
 
       // Conversation members
       'chat.make_moderator': 'Make moderator',
@@ -120,6 +122,8 @@ class ChatPageTranslations extends Translations {
       'chat.message': 'Sag etwas',
       'chat.members': '@count Mitglieder',
       'chat.start_space': 'Privates Space starten',
+      'conversations.leave': 'Chat verlassen',
+      'conversations.leave.text': 'Bist du sicher, dass du diesen Chat verlassen willst? Du kannst nicht wieder beitreten, es sei denn, jemand lädt dich wieder ein.',
 
       // Conversation members
       'chat.make_moderator': 'Zum Moderator machen',
