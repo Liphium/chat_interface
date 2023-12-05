@@ -246,7 +246,10 @@ class Conversation {
       "token": token.token,
     });
 
+    sendLog("REFETCH");
+
     if(!json["success"]) {
+      sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING");
       // TODO: Add to some sort of error collection
       return;
     }
@@ -256,6 +259,12 @@ class Conversation {
       sendLog(memberData);
       final memberContainer = MemberContainer.decrypt(memberData["data"], key);
       members[memberData["id"]] = Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"]));
+    }
+
+    for(var currentMember in this.members.values) {
+      if(!members.containsKey(currentMember.tokenId)) {
+        db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId));
+      }
     }
 
     this.members.value = members;

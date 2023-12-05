@@ -66,9 +66,24 @@ class SystemMessages {
       }
     ),
 
+    // Called when a member is promoted to admin after the only admin in a group leaves
+    // Format: [memberId]
+    "group.new_admin": SystemMessage(
+      Icons.shield,
+      handler: (msg) {
+        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
+        conversation.fetchMembers(msg.createdAt);
+      },
+      translation: (msg) {
+        return "chat.new_admin".trParams({
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+        });
+      }
+    ),
+
     // Called when the conversation should be deleted
     // Format: []
-    "group.deleted": SystemMessage(
+    "conv.deleted": SystemMessage(
       Icons.delete,
       store: false,
       render: false,

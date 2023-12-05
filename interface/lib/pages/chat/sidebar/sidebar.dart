@@ -292,7 +292,7 @@ class _SidebarState extends State<Sidebar> {
                                                 Obx(() {
               
                                                   if(conversation.isGroup) {
-                                                    return Text(conversation.vaultId, 
+                                                    return Text(conversation.containerSub.value.name, 
                                                       style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                       textHeightBehavior: noTextHeight,
                                                     );

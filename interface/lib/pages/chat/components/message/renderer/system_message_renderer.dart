@@ -44,7 +44,7 @@ class _MessageRendererState extends State<SystemMessageRenderer> {
             horizontalSpacing(sectionSpacing),
 
             //* Space info
-            Expanded(child: Text(message.translation.call(widget.message), style: Get.theme.textTheme.labelLarge, overflow: TextOverflow.ellipsis,)),
+            Expanded(child: Text(message.translation.call(widget.message), style: Get.theme.textTheme.labelLarge, overflow: TextOverflow.visible,)),
 
             horizontalSpacing(defaultSpacing),
 

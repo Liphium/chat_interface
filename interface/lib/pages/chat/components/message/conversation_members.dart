@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -26,9 +27,19 @@ class ConversationMembers extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
-            child: Text('chat.members'.trParams({"count":controller.selectedConversation.value.members.length.toString()}), style: Theme.of(context).textTheme.titleMedium),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
+                child: Obx(() => Text('chat.members'.trParams({"count":controller.selectedConversation.value.members.length.toString()}), style: Theme.of(context).textTheme.titleMedium)),
+              ),
+              LoadingIconButton(
+                loading: conversation.membersLoading,
+                onTap: () => conversation.fetchMembers(DateTime.now()), 
+                icon: Icons.refresh,
+              ),
+            ],
           ),
           verticalSpacing(defaultSpacing),
           Padding(

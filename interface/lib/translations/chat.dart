@@ -68,9 +68,10 @@ class ChatPageTranslations extends Translations {
       'chat.rank_change.1->2': '@name was promoted to Admin by @sender.',
       'chat.rank_change.1->0': '@name has been demoted to a normal member by @sender.',
       'chat.rank_change.2->1': '@name has been demoted to Moderator by @sender.',
-      'chat.token_change': '@name has generated a new conversation token.',
+      'chat.token_change': '@name has generated a new conversation invite.',
       'chat.member_join': '@name has joined the conversation.',
       'chat.member_leave': '@name has left the conversation.',
+      'chat.new_admin': '@name is now an Admin because the original Admin left the conversation.',
 
       // Spaces
       'join.space': 'Join Space',
@@ -136,11 +137,15 @@ class ChatPageTranslations extends Translations {
       'chat.moderator': 'Moderator',
       'chat.user': 'Mitglied',
 
-      // Rank messages
+      // System messages
       'chat.rank_change.0->1': '@name wurde von @sender zum Moderator befördert.',
       'chat.rank_change.1->2': '@name wurde von @sender zum Admin befördert.',
       'chat.rank_change.1->0': '@name wurde von @sender zu einem normalen Mitglied degradiert.',
       'chat.rank_change.2->1': '@name wurde von @sender zu einem Moderator degradiert.',
+      'chat.token_change': '@name hat eine neue Einladung zum Chat erstellt.',
+      'chat.member_join': '@name ist dem Chat beigetreten.',
+      'chat.member_leave': '@name hat den Chat verlassen.',
+      'chat.new_admin': '@name ist jetzt Admin, weil der ursprüngliche Admin den Chat verlassen hat.',
 
       // Spaces
       'join.space': 'Space beitreten',
