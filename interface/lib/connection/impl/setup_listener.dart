@@ -80,7 +80,7 @@ void subscribeToConversation(String status, String friendId, ConversationToken t
   final tokens = <Map<String, dynamic>>[token.toMap()];
 
   // Subscribe
-  _sub(status, tokens);
+  _sub(status, tokens, startup: false);
 }
 
 String generateStatusData(String status, String friendId) {
@@ -90,7 +90,7 @@ String generateStatusData(String status, String friendId) {
   return status;
 }
 
-void _sub(String status, List<Map<String, dynamic>> tokens) {
+void _sub(String status, List<Map<String, dynamic>> tokens, {bool startup = true}) {
   connector.sendAction(Message("conv_sub", <String, dynamic>{
     "tokens": tokens,
     "status": status,
@@ -101,6 +101,6 @@ void _sub(String status, List<Map<String, dynamic>> tokens) {
       return;
     }
     Get.find<StatusController>().statusLoading.value = false;
-    Get.find<ConversationController>().finishedLoading();
+    Get.find<ConversationController>().finishedLoading(event.data["read"], overwriteReads: startup);
   });
 }

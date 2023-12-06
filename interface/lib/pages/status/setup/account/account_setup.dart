@@ -34,6 +34,7 @@ class AccountSetup extends Setup {
     controller.name.value = account["username"];
     controller.tag.value = account["tag"];
     controller.id.value = account["id"];
+    ownAccountId = account["id"];
     return null;
   }
 }

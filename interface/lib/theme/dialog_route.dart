@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+void navigateToHeroDialog(Widget widget) {
+  navigator!.push(HeroDialogRoute(builder: (context) => widget));
+}
 
 class HeroDialogRoute<T> extends PageRoute<T> {
   final WidgetBuilder builder;

@@ -1,4 +1,8 @@
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 
 class MemberController extends GetxController {
@@ -32,6 +36,42 @@ class Member {
 
   MemberData toData(String conversation) => MemberData(id: tokenId, accountId: account, roleId: role.value, conversationId: conversation);
 
+  Friend getFriend([FriendController? controller]) {
+    if(ownAccountId == account) return Friend.me();
+    controller ??= Get.find();
+    return controller!.friends[account] ?? Friend.unknown(account);
+  }
+
+  Future<bool> promote(String conversationId) async {
+    final conversation = Get.find<ConversationController>().conversations[conversationId]!;
+    final json = await postNodeJSON("/conversations/promote_token", {
+      "id": conversation.token.id,
+      "token": conversation.token.token,
+      "user": tokenId,
+    });
+
+    if(!json["success"]) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<bool> demote(String conversationId) async {
+    final conversation = Get.find<ConversationController>().conversations[conversationId]!;
+    final json = await postNodeJSON("/conversations/demote_token", {
+      "id": conversation.token.id,
+      "token": conversation.token.token,
+      "user": tokenId,
+    });
+
+    if(!json["success"]) {
+      return false;
+    }
+
+    return true;
+  }
+
 }
 
 enum MemberRole {
@@ -42,6 +82,22 @@ enum MemberRole {
   final int value;
 
   const MemberRole(this.value);
+
+  bool lowerOrEqual(MemberRole role) {
+    return value <= role.value;
+  }
+
+  bool higherOrEqual(MemberRole role) {
+    return value >= role.value;
+  }
+
+  bool higherThan(MemberRole role) {
+    return value > role.value;
+  }
+
+  bool lowerThan(MemberRole role) {
+    return value < role.value;
+  }
 
   static MemberRole fromValue(int value) {
     switch(value) {

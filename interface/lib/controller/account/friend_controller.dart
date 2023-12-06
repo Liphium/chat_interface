@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
@@ -82,6 +83,11 @@ class FriendController extends GetxController {
     await db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id));
     return true;
   }
+
+  Friend getFriend(String account) {
+    if(ownAccountId == account) return Friend.me();
+    return friends[account] ?? Friend.unknown(account);
+  }
 }
 
 class Friend {
@@ -91,7 +97,10 @@ class Friend {
   String vaultId;
   KeyStorage keyStorage;
   var status = "-".obs;
+  bool unknown = false;
+  bool answerStatus = true;
   final statusType = 0.obs;
+  Timer? _timer;
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
@@ -114,7 +123,9 @@ class Friend {
         : name = 'fj-$id',
           tag = 'tag',
           vaultId = '',
-          keyStorage = KeyStorage.empty();
+          keyStorage = KeyStorage.empty() {
+    unknown = true;
+  }
 
   Friend.fromEntity(FriendData data)
         : id = data.id,
@@ -149,6 +160,18 @@ class Friend {
     final data = jsonDecode(message);
     status.value = data["s"];
     statusType.value = data["t"];
+
+    _timer?.cancel();
+    _timer = Timer(const Duration(minutes: 2), () {
+      setOffline();
+      answerStatus = true;
+      _timer = null;
+    });
+  }
+
+  void setOffline() {
+    status.value = "-";
+    statusType.value = 0;
   }
 
   //* Remove friend

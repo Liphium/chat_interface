@@ -2,8 +2,10 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
+import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/duration_renderer.dart';
+import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/own_profile.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -97,11 +99,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                             Expanded(
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.person,
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    size: 35,
-                                  ),
+                                  UserAvatar(id: ownAccountId, size: 40),
                                   horizontalSpacing(defaultSpacing * 0.75),
                                   Expanded(
                                     child: Obx(() =>
@@ -165,6 +163,10 @@ class _SidebarProfileState extends State<SidebarProfile> {
                             horizontalSpacing(defaultSpacing),
                             Row(
                               children: [
+                                IconButton(
+                                  onPressed: () => Get.dialog(const FriendsPage()),
+                                  icon: const Icon(Icons.group, color: Colors.white),
+                                ),
                                 horizontalSpacing(defaultSpacing * 0.5),
                                 IconButton(
                                   onPressed: () => Get.to(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),

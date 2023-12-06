@@ -8,8 +8,9 @@ class FJElevatedButton extends StatelessWidget {
   final Widget child;
   final bool shadow;
   final bool smallCorners;
+  final bool secondary;
 
-  const FJElevatedButton({super.key, required this.onTap, required this.child, this.shadow = false, this.smallCorners = false});
+  const FJElevatedButton({super.key, required this.onTap, required this.child, this.shadow = false, this.secondary = false, this.smallCorners = false});
 
   @override
   Widget build(BuildContext context) {
@@ -52,14 +53,14 @@ class FJElevatedLoadingButton extends StatelessWidget {
         child: Obx(() => 
         loading.value ? 
         SizedBox(
-          height: Get.theme.textTheme.titleMedium!.fontSize! + defaultSpacing,
-          width: Get.theme.textTheme.titleMedium!.fontSize! + defaultSpacing,
+          height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+          width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
           child: const Padding(
             padding: EdgeInsets.all(defaultSpacing * 0.25),
             child: CircularProgressIndicator(strokeWidth: 3.0,),
           ),
         ) : 
-        Text(label, style: Get.theme.textTheme.titleMedium)
+        Text(label, style: Get.theme.textTheme.labelLarge)
       ),
       )  
     );

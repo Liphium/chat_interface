@@ -114,6 +114,7 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
                 .collect();
             
             for key in keys_to_remove {
+                logger::send_log(logger::TAG_AUDIO, "stopped talking");
                 util::send_action(api::Action {
                     action: super::ACTION_STOPPED_TALKING.to_string(),
                     data: key.clone(),
@@ -162,6 +163,14 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
 
             // TODO: Replace with multiple tokio threads
 
+            let prev = talking.insert(packet.id.clone(), SystemTime::now());
+            if prev == None {
+                util::send_action(api::Action{
+                    action: super::ACTION_STARTED_TALKING.to_string(),
+                    data: packet.id.clone(),
+                });
+            }
+
             let item = players.entry(packet.id.clone()).or_insert_with(|| {
                 let (voice_sender, voice_receiver) = tokio::sync::mpsc::channel(10usize);
                 let (packet_sender, packet_receiver) = tokio::sync::mpsc::channel(10usize);
@@ -175,14 +184,6 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
             //     decoders.remove(&packet.id);
             //     continue;
             // }
-            // let prev = talking.insert(packet.id.clone(), SystemTime::now());
-            // if prev == None {
-            //     util::send_action(api::Action{
-            //         action: super::ACTION_STARTED_TALKING.to_string(),
-            //         data: packet.id.clone(),
-            //     });
-            // }
-            // let decoded = decode(voice_data, audio::encode::FRAME_SIZE, &mut item.decoder);
 
             // //logger::send_log(logger::TAG_AUDIO, format!("delay {}ns", SystemTime::now().duration_since(last_packet).unwrap().as_nanos()).as_str());
             // //last_packet = SystemTime::now();

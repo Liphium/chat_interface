@@ -14,7 +14,7 @@ class ChatApp extends StatelessWidget {
       builder: (manager) {
         return GetMaterialApp(
           title: 'fj.chat',
-          theme: manager.themes[manager.currentTheme.value].getData(manager.brightness.value),
+          theme: manager.currentTheme.value,
           translations: MainTranslations(),
           locale: Get.deviceLocale,
           fallbackLocale: const Locale("en", "US"),

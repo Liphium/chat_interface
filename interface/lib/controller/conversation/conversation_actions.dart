@@ -68,9 +68,6 @@ Future<bool> openDirectMessage(Friend friend) async {
 }
 
 Future<bool> openGroupConversation(List<Friend> friends, String name) {
-
-  // TODO: Check if it exists and open in UI
-
   return _openConversation(friends, name);
 }
 
@@ -95,7 +92,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   final conversationContainer = ConversationContainer(name);
   final encryptedData = conversationContainer.encrypted(conversationKey);
 
-  sendLog(name.length.toString() + " | " + name + " | " + specialConstants["max_conversation_name_length"].toString());
+  sendLog("${name.length} | $name | ${specialConstants["max_conversation_name_length"]}");
 
   if(name.length > specialConstants["max_conversation_name_length"]) {
     showErrorPopup("conversations.error".tr, "conversations.name.length".trParams({
@@ -125,7 +122,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   //* Send the stuff to all other members
   final conversationController = Get.find<ConversationController>();
 
-  final conversation = Conversation(body["conversation"], ConversationToken.fromJson(body["admin_token"]), conversationContainer, conversationKey);
+  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]), conversationContainer, conversationKey, DateTime.now().millisecondsSinceEpoch);
   final members = <Member>[];
   final packagedKey = packageSymmetricKey(conversationKey);
   for(var friend in friends) {

@@ -19,10 +19,12 @@ class SettingsTranslations extends Translations {
       'settings.audio': 'Audio',
       'settings.notifications': 'Notifications',
       'settings.language': 'Language',
-      'settings.theme': 'Theme',
+      'settings.colors': 'Colors',
       'settings.call_app': 'Call appearance',
       'settings.requests': 'Friend requests',
       'settings.encryption': 'Encryption',
+      'settings.spaces': 'Spaces',
+      'settings.files': 'Files',
 
       // Audio settings
       'audio.device': 'Select a device',
@@ -35,6 +37,36 @@ class SettingsTranslations extends Translations {
       'audio.microphone.sensitivity.text': 'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
       'audio.output': 'Output',
       'audio.output.device': 'Or you just select one of these devices:',
+
+      // Theme settings
+      'theme.presets': 'Presets',
+      'theme.default_dark': 'Advanched Dark',
+      'theme.default_light': 'Advanched Light',
+      'theme.winter': 'Winter',
+      'theme.custom': 'Create your own',
+      'theme.custom.title': 'Custom theme',
+      'custom.primary_hue': 'Primary hue',
+      'custom.secondary_hue': 'Secondary hue',
+      'custom.base_saturation': 'Base saturation',
+      'custom.theme_mode': 'Theme brightness',
+      'custom.dark': 'Dark',
+      'custom.light': 'Light',
+      'custom.background_mode': 'What color should the background have?',
+      'custom.none': 'None',
+      'custom.colored': 'Primary color',
+      'theme.apply': 'Apply your theme',
+
+      // File settings
+      'auto_download.images': 'Automatically download images',
+      'auto_download.videos': 'Automatically download videos',
+      'auto_download.audio': 'Automatically download audio',
+      'settings.file.auto_download.types': 'Types of files to automatically download',
+      'settings.file.max_size': 'Maximum file size for automatic downloads',
+      'settings.file.max_size.description': 'Files larger than this will not be downloaded automatically.',
+      'settings.file.mb': 'MB',
+
+      // Spaces settings
+      'game.music': 'Play music in Game Mode',
     },
 
     //* German
@@ -52,10 +84,12 @@ class SettingsTranslations extends Translations {
       'settings.audio': 'Audio',
       'settings.notifications': 'Benachrichtigungen',
       'settings.language': 'Sprache',
-      'settings.theme': 'Design',
+      'settings.colors': 'Farben',
       'settings.call_app': 'Anrufe',
       'settings.requests': 'Freundschaftsanfragen',
       'settings.encryption': 'Verschlüsselung',
+      'settings.spaces': 'Spaces',
+      'settings.files': 'Dateien',
 
       // Audio settings
       'audio.device': 'Wähle ein Gerät aus',
@@ -68,6 +102,27 @@ class SettingsTranslations extends Translations {
       'audio.microphone.sensitivity.text': 'Die grüne Linie ist deine aktuelle Lautstärke. Ziehe den Regler an die Stelle, an der andere dich hören sollen.',
       'audio.output': 'Ausgabe',
       'audio.output.device': 'Oder du wählst einfach eines dieser Geräte aus:',
+
+      // Theme settings
+      'theme.presets': 'Vorlagen',
+      'theme.default_dark': 'Dunkel',
+      'theme.default_light': 'Hell',
+      'theme.winter': 'Winter',
+      'theme.custom': 'Erstelle dein eigenes',
+      'theme.custom.title': 'Eigenes Design',
+      'custom.primary_hue': 'Primärfarbe',
+      'custom.secondary_hue': 'Sekundärfarbe',
+      'custom.base_saturation': 'Sättigung',
+      'custom.theme_mode': 'Helligkeit',
+      'custom.dark': 'Dunkel',
+      'custom.light': 'Hell',
+      'custom.background_mode': 'Welche Farbe soll der Hintergrund haben?',
+      'custom.none': 'Keine',
+      'custom.colored': 'Primärfarbe',
+      'theme.apply': 'Design anwenden',
+
+      // Spaces settings
+      'game.music': 'Musik im Spielmodus abspielen',
     }
   };
 }

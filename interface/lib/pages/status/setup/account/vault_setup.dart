@@ -8,6 +8,7 @@ import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -25,7 +26,7 @@ class VaultSetup extends Setup {
 
     // Load conversations from the database
     final conversationController = Get.find<ConversationController>();
-    final conversations = await (db.select(db.conversation)).get();
+    final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
     for(var conversation in conversations) {
       await conversationController.add(Conversation.fromData(conversation));
     }
@@ -67,6 +68,7 @@ Future<String?> refreshVault() async {
   for(var unparsedEntry in json["entries"]) {
     final entry = VaultEntry.fromJson(unparsedEntry);
     sendLog(entry);
+    // TODO: Parse conversations from vault
   }
 
   await finishFetch();

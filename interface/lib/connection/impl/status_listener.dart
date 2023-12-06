@@ -1,11 +1,13 @@
+import 'dart:convert';
+
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/status/error/error_page.dart';
-import 'package:chat_interface/theme/ui/dialogs/error_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
@@ -15,6 +17,8 @@ void setupStatusListener() {
   connector.listen("acc_st", (event) {
     final friend = handleStatus(event);
     if(friend == null) return;
+    if(!friend.answerStatus) return;
+    friend.answerStatus = false;
 
     // Send back status
     final controller = Get.find<StatusController>();
@@ -27,9 +31,8 @@ void setupStatusListener() {
       "id": dm.token.id,
       "token": dm.token.token,
       "status": status,
-    }), handler: (event) {
-      Get.dialog(ErrorWindow(title: "send back " + event.data["success"].toString(), error: "you suck or sth",));
-    });
+      "data": controller.sharedContentPacket(),
+    }));
 
   }, afterSetup: true);
 
@@ -55,5 +58,30 @@ Friend? handleStatus(Event event) {
   }
 
   controller.friendIdLookup[status[0]]!.loadStatus(status[1]);
+  
+  // Extract shared content
+  final sharedData = event.data["d"] as String;
+  if(sharedData != "") {
+    sendLog("RECEIVED SHARED CONTENT");
+    final sharedJson = decryptSymmetric(sharedData, friend.keyStorage.profileKey);
+    final shared = jsonDecode(sharedJson) as Map<String, dynamic>;
+    switch(ShareType.values[shared["type"] as int]) {
+
+      // Shared space
+      case ShareType.space:
+        final existing = Get.find<StatusController>().sharedContent[friend.id];
+        final container = SpaceConnectionContainer.fromJson(shared);
+        if(existing == null || existing is! SpaceConnectionContainer) {
+          Get.find<StatusController>().sharedContent[friend.id] = container;
+        } else if(existing.roomId != container.roomId) {
+          Get.find<StatusController>().sharedContent[friend.id] = container;
+        }
+        break;
+    }
+  } else {
+    final container = Get.find<StatusController>().sharedContent.remove(friend.id);
+    container?.onDrop();
+  }
+  
   return friend;
 }

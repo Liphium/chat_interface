@@ -3,6 +3,8 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/chat/sidebar/files/files_page.dart';
+import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
@@ -11,6 +13,7 @@ import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -50,7 +53,6 @@ class _ProfileState extends State<OwnProfile> {
 
     StatusController controller = Get.find();
     ThemeData theme = Theme.of(context);
-    ThemeManager manager = Get.find();
 
     _status.text = controller.status.value;
     statusMessage.value = controller.status.value;
@@ -64,7 +66,7 @@ class _ProfileState extends State<OwnProfile> {
           width: widget.size.toDouble(),
           child: Material(
             borderRadius: BorderRadius.circular(defaultSpacing),
-            color: theme.colorScheme.background,
+            color: theme.colorScheme.onBackground,
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
               child: Column(
@@ -98,10 +100,7 @@ class _ProfileState extends State<OwnProfile> {
                       )
                     ],
                   ),
-
-                  Divider(
-                    color: theme.dividerColor,
-                  ),
+                  verticalSpacing(defaultSpacing),
 
                   //* Status
 
@@ -119,7 +118,7 @@ class _ProfileState extends State<OwnProfile> {
                             final bool selected = statusController.type.value == index;
                                       
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: defaultSpacing * 0.25),
+                              padding: const EdgeInsets.only(bottom: elementSpacing),
                               child: Material(
                                 color: selected ? theme.colorScheme.primary : theme.colorScheme.background,
                                 borderRadius: BorderRadius.circular(defaultSpacing),
@@ -230,10 +229,7 @@ class _ProfileState extends State<OwnProfile> {
                       )
                     ],
                   ),
-
-                  Divider(
-                    color: theme.dividerColor,
-                  ),
+                  verticalSpacing(defaultSpacing),
                         
                   //* Profile settings
                   ProfileButton(
@@ -242,16 +238,25 @@ class _ProfileState extends State<OwnProfile> {
                     onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
                     loading: false.obs
                   ),
+                  verticalSpacing(elementSpacing),
 
-                  // Theme button
-                  Obx(() =>
-                    ProfileButton(
-                      icon: manager.brightness.value == Brightness.light ? Icons.dark_mode : Icons.light_mode,
-                      label: 'profile.theme.${manager.brightness.value.toString().split(".")[1]}'.tr, // profile.theme.light and profile.theme.dark
-                      onTap: () => manager.changeBrightness(manager.brightness.value == Brightness.light ? Brightness.dark : Brightness.light),
-                      loading: false.obs
-                    ),
+                  //* Friends page
+                  ProfileButton(
+                    icon: Icons.group,
+                    label: 'profile.friends'.tr,
+                    onTap: () => Get.dialog(const FriendsPage()),
+                    loading: false.obs
                   ),
+                  verticalSpacing(elementSpacing),
+
+                  //* Files page
+                  ProfileButton(
+                    icon: Icons.folder,
+                    label: 'profile.files'.tr,
+                    onTap: () => Get.dialog(const FilesPage()),
+                    loading: false.obs
+                  ),
+                  verticalSpacing(elementSpacing),
 
                   //* Hide profile
                   ProfileButton(
@@ -259,17 +264,8 @@ class _ProfileState extends State<OwnProfile> {
                     label: 'profile.test'.tr,
                     onTap: () async {
                       testLoading.value = true;
-                      
-                      connector.sendAction(Message("spc_start", <String, dynamic>{}), handler: (event) {
 
-                        if(!event.data["success"]) {
-                          testLoading.value = false;
-                          return;
-                        }
-                        final appToken = event.data["token"] as Map<String, dynamic>;
-                        sendLog("connecting to node ${appToken["node"]}..");
-                        createSpaceConnection(appToken["domain"], appToken["token"]);
-                      });
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
 
                       testLoading.value = false;
 

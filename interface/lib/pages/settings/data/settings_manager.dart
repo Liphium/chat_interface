@@ -1,11 +1,18 @@
-import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
-import 'package:chat_interface/pages/settings/appearance/call/call_settings.dart';
-import 'package:chat_interface/pages/settings/app/speech/speech_settings.dart';
-import 'package:chat_interface/pages/settings/app/video/video_settings.dart';
+import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
+import 'package:chat_interface/pages/settings/app/speech_settings.dart';
+import 'package:chat_interface/pages/settings/app/video_settings.dart';
+import 'package:chat_interface/pages/settings/appearance/call_settings.dart';
+import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:drift/drift.dart';
 import 'package:get/get.dart';
+
+class AppSettings {
+
+  static String showGroupMembers = "chat.group_members";
+
+}
 
 class SettingController extends GetxController {
 
@@ -17,6 +24,12 @@ class SettingController extends GetxController {
     addVideoSettings(this);
     addCallAppearanceSettings(this);
     addLanguageSettings(this);
+    SpacesSettings.addSpacesSettings(this);
+    ThemeSettings.addThemeSettings(this);
+    FileSettings.addSettings(this);
+
+    // Add app settings (not in settings page)
+    addSetting(Setting<bool>(AppSettings.showGroupMembers, true));
     
   }
 

@@ -1,6 +1,7 @@
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/connection/spaces/game_listener.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -20,6 +21,8 @@ void setupSpaceListeners() {
   spaceConnector.listen("room_data", (event) => handleRoomData(event)); // Sent on change
   spaceConnector.listen("room_info", (event) => handleRoomData(event)); // Sent on join
   spaceConnector.listen("member_update", (event) => handleMemberUpdate(event)); // Sent on member update
+
+  setupGameListeners();
 }
 
 void handleRoomData(Event event) {

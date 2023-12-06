@@ -65,7 +65,46 @@ void main() async {
   // Initialize controllers
   initializeControllers();
 
-  runApp(const ChatApp());
+  runApp(ChatApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Clipping Example'),
+        ),
+        body: Center(
+          child: SizedBox(
+            width: 200,
+            child: OverflowBox(
+              minWidth: 0.0,
+              maxWidth: double.infinity,
+              minHeight: 0.0,
+              maxHeight: double.infinity,
+              alignment: Alignment.center,
+              child: Column(
+                children: [
+                  Container(
+                    color: Colors.blue,
+                    height: 100.0,
+                    child: Center(
+                      child: Text(
+                        'This is some text that overflows ausdhasdiha sdah usdhuasudha shuduhas uhdauhsduhasuhdasui asdasduisahduash dahud uhasuhduh asuhd auhsd uhuah sduh auhsduhasuhdhuasduashudasuhduhasdusahudsaudhd',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 Future<bool> encryptionTest() async {

@@ -1,4 +1,5 @@
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -37,7 +38,7 @@ class _AnimatedContainerState extends State<TransitionContainer> {
         duration: 500.ms,
         begin: const Offset(0, 0),
         end: const Offset(1, 1),
-        curve: const ElasticOutCurve(0.9),
+        curve: scaleAnimationCurve
       );
     }
 
@@ -45,21 +46,23 @@ class _AnimatedContainerState extends State<TransitionContainer> {
       builder: (controller) {
         return IgnorePointer(
           ignoring: controller.transition.value,
-          child: Hero(
-            tag: widget.tag,
-            child: Container(
-              width: widget.width,
-              decoration: BoxDecoration(
-                borderRadius: widget.borderRadius,
-                color: widget.color ?? Theme.of(context).colorScheme.onBackground,
-              ),
-              child: Animate(
-                target: controller.transition.value ? 0 : 1,
-                effects: [
-                  mainEffect
-                ],
-                child: widget.child,
-              ),
+          child: Container(
+            width: widget.width,
+            decoration: BoxDecoration(
+              borderRadius: widget.borderRadius,
+              color: widget.color ?? Theme.of(context).colorScheme.onBackground,
+            ),
+            child: Animate(
+              target: controller.transition.value ? 0 : 1,
+              effects: [
+                mainEffect,
+                ExpandEffect(
+                  duration: 250.ms,
+                  axis: Axis.vertical,
+                  alignment: Alignment.center,
+                )
+              ],
+              child: widget.child,
             ),
           ),
         );
