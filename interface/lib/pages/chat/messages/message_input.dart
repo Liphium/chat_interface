@@ -60,7 +60,8 @@ class _MessageInputState extends State<MessageInput> {
             sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], handleMessageFinish); 
           }
 
-          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, files, handleMessageFinish);
+          testFileUpload(files[0]);
+          //sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, files, handleMessageFinish);
           return null;
         },
       ),

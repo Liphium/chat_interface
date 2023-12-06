@@ -24,6 +24,7 @@ class SettingsTranslations extends Translations {
       'settings.requests': 'Friend requests',
       'settings.encryption': 'Encryption',
       'settings.spaces': 'Spaces',
+      'settings.files': 'Files',
 
       // Audio settings
       'audio.device': 'Select a device',
@@ -55,6 +56,15 @@ class SettingsTranslations extends Translations {
       'custom.colored': 'Primary color',
       'theme.apply': 'Apply your theme',
 
+      // File settings
+      'auto_download.images': 'Automatically download images',
+      'auto_download.videos': 'Automatically download videos',
+      'auto_download.audio': 'Automatically download audio',
+      'settings.file.auto_download.types': 'Types of files to automatically download',
+      'settings.file.max_size': 'Maximum file size for automatic downloads',
+      'settings.file.max_size.description': 'Files larger than this will not be downloaded automatically.',
+      'settings.file.mb': 'MB',
+
       // Spaces settings
       'game.music': 'Play music in Game Mode',
     },
@@ -79,6 +89,7 @@ class SettingsTranslations extends Translations {
       'settings.requests': 'Freundschaftsanfragen',
       'settings.encryption': 'Verschlüsselung',
       'settings.spaces': 'Spaces',
+      'settings.files': 'Dateien',
 
       // Audio settings
       'audio.device': 'Wähle ein Gerät aus',

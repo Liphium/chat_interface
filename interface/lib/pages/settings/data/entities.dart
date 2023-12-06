@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
-import 'package:chat_interface/pages/settings/appearance/call_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,25 +13,26 @@ enum SettingLabel {
   account("settings.tab.account", [
     SettingCategory("data", Icons.account_circle, null),
     //SettingCategory("profile", Icons.assignment, null),
-    SettingCategory("security", Icons.security, null),
-    SettingCategory("devices", Icons.phone_android, null),
+    //SettingCategory("security", Icons.security, null),
+    //SettingCategory("devices", Icons.phone_android, null),
   ]),
 
   app("settings.tab.app", [
     SettingCategory("spaces", Icons.auto_awesome, SpacesSettingsPage()),
+    SettingCategory("files", Icons.folder, FileSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage()),
-    SettingCategory("notifications", Icons.notifications, null),
+    //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("language", Icons.public, LanguageSettingsPage()),
   ]),
 
   appearance("settings.tab.appearance", [
     SettingCategory("colors", Icons.color_lens, ThemeSettingsPage()),
-    SettingCategory("call_app", Icons.cable, CallSettingsPage()),
+    //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 
   privacy("settings.tab.privacy", [
-    SettingCategory("requests", Icons.group, null),
-    SettingCategory("encryption", Icons.key, null),
+    //SettingCategory("requests", Icons.group, null),
+    //SettingCategory("encryption", Icons.key, null),
   ]);
 
   final String _label;

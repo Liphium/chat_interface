@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
@@ -25,6 +26,7 @@ class SettingController extends GetxController {
     addLanguageSettings(this);
     SpacesSettings.addSpacesSettings(this);
     ThemeSettings.addThemeSettings(this);
+    FileSettings.addSettings(this);
 
     // Add app settings (not in settings page)
     addSetting(Setting<bool>(AppSettings.showGroupMembers, true));

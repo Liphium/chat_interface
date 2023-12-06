@@ -1,5 +1,11 @@
 part of 'message_feed.dart';
 
+void testFileUpload(XFile file) {
+  _attachFile(file).then((value) {
+    sendLog("File upload: ${value.success} - ${value.message} - ${value.data}");
+  });
+}
+
 void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<XFile> files, Function() callback) async {
   if(loading.value) {
     return;
@@ -79,10 +85,8 @@ class _FileUploadResponse {
 
 Future<_FileUploadResponse> _attachFile(XFile file) async {
   final bytes = await file.readAsBytes();
-  sendLog("Original size: ${bytes.length}");
   final key = randomSymmetricKey();
   final encrypted = encryptSymmetricBytes(bytes, key);
-  sendLog("Encrypted size: ${encrypted.length}");
   final name = encryptSymmetric(file.name, key);
 
   // Upload file
@@ -105,11 +109,21 @@ Future<_FileUploadResponse> _attachFile(XFile file) async {
 
   final json = jsonDecode(await res.stream.bytesToString());
   if(!json["success"]) {
-    return _FileUploadResponse(false, json["message"], "");
+    return _FileUploadResponse(false, json["error"], "");
   }
+
+  // Copy file to cloud_files directory
+  final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files");
+  final dir = Directory(instanceFolder);
+  await dir.create();
+
+  final file2 = File(path.join(dir.path, json["id"].toString()));
+  await file2.writeAsBytes(bytes);
+  db.cloudFile.insertOne(CloudFileCompanion.insert(id: json["id"], name: file.name, path: json["url"], key: packageSymmetricKey(key)));
 
   return _FileUploadResponse(true, "success", jsonEncode({
     "id": json["id"],
+    "name": file.name,
     "key": packageSymmetricKey(key),
     "url": json["url"]
   }));

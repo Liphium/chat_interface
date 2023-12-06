@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/theme/components/fj_slider.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +12,9 @@ class DoubleSelectionSetting extends StatefulWidget {
   final String description;
   final double min;
   final double max;
+  final String unit;
  
-  const DoubleSelectionSetting({super.key, required this.settingName, required this.description, required this.min, required this.max});
+  const DoubleSelectionSetting({super.key, required this.settingName, required this.description, required this.min, required this.max, this.unit = ""});
 
   @override
   State<DoubleSelectionSetting> createState() => _ListSelectionSettingState();
@@ -34,29 +36,41 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
-        verticalSpacing(elementSpacing),
-        Obx(() =>
-          Slider(
-            value: clampDouble(current.value, widget.min, widget.max),
-            min: widget.min,
-            max: widget.max,
-            inactiveColor: Get.theme.colorScheme.onBackground,
-            thumbColor: Get.theme.colorScheme.onPrimary,
-            activeColor: Get.theme.colorScheme.onPrimary,
-            secondaryActiveColor: Get.theme.colorScheme.secondary,
-            onChanged: (value) {
-              current.value = value;
-              if(DateTime.now().difference(lastSet ?? DateTime.now()).inMilliseconds > 100) {
-                lastSet = DateTime.now();
-                setting.setValue(value);
-              }
-            },
-            onChangeEnd: (value) {
-              setting.setValue(value);
-            },
+        Visibility(
+          visible: widget.description.isNotEmpty,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: elementSpacing),
+            child: Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
           )
         ),
+        Obx(() {
+          final value = current.value;
+          final roundedCurrent = value.toStringAsFixed(1);
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: FJSlider(
+                  value: clampDouble(value, widget.min, widget.max),
+                  min: widget.min,
+                  max: widget.max,
+                  onChanged: (value) {
+                    current.value = value;
+                    if(DateTime.now().difference(lastSet ?? DateTime.now()).inMilliseconds > 100) {
+                      lastSet = DateTime.now();
+                      setting.setValue(value);
+                    }
+                  },
+                  onChangeEnd: (value) {
+                    setting.setValue(value);
+                  },
+                ),
+              ),
+              horizontalSpacing(defaultSpacing),
+              Text("${roundedCurrent} ${widget.unit.tr}", style: Get.theme.textTheme.bodyMedium),
+            ],
+          );
+        }),
       ],
     );
   }

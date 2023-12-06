@@ -4,6 +4,8 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+part 'file_actions.dart';
+
 class FilesPage extends StatefulWidget {
   const FilesPage({super.key});
 

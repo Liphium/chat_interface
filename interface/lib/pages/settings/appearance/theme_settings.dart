@@ -22,7 +22,7 @@ class ThemePreset extends SelectableItem {
   final int themeMode;
   final int backgroundMode;
 
-  const ThemePreset(String label, IconData icon, this.primaryHue, this.secondaryHue, this.baseSaturation, this.themeMode, this.backgroundMode) : super(label, icon);
+  const ThemePreset(super.label, super.icon, this.primaryHue, this.secondaryHue, this.baseSaturation, this.themeMode, this.backgroundMode);
 }
 
 class ThemeSettings {

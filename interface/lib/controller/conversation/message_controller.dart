@@ -5,9 +5,13 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/settings/app/file_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 
 class MessageController extends GetxController {
@@ -93,6 +97,36 @@ class MessageController extends GetxController {
     if(message.type == MessageType.system) {
       SystemMessages.messages[message.content]?.handle(message);
     }
+
+    // Handle attachments
+    if(message.attachments.isNotEmpty && message.type != MessageType.system) {
+      for(var attachment in message.attachments) {
+        final container = AttachmentContainer.fromJson(jsonDecode(attachment));
+        final extension = container.url.split(".").last;
+
+        if(FileSettings.imageTypes.contains(extension)) {
+          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
+          if(download) {
+            downloadAttachment(container);
+          }
+        } else if(FileSettings.videoTypes.contains(extension)) {
+          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
+          if(download) {
+            downloadAttachment(container);
+          }
+        } else if(FileSettings.audioTypes.contains(extension)) {
+          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
+          if(download) {
+            downloadAttachment(container);
+          }
+        }
+      }
+    }
+  }
+
+  void downloadAttachment(AttachmentContainer container) {
+    sendLog("Downloading...");
+    // TODO: Do this
   }
 
 }
@@ -204,4 +238,31 @@ enum MessageType {
   text,
   system,
   call;
+}
+
+class AttachmentContainer {
+  final String id;
+  final String name;
+  final String url;
+  final SecureKey key;
+
+  AttachmentContainer(this.id, this.name, this.url, this.key);
+
+  factory AttachmentContainer.fromJson(Map<String, dynamic> json) {
+    return AttachmentContainer(
+      json["id"],
+      json["name"],
+      json["url"],
+      unpackageSymmetricKey(json["key"])
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      "id": id,
+      "name": name,
+      "url": url,
+      "key": packageSymmetricKey(key)
+    };
+  }
 }

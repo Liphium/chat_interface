@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:chat_interface/pages/settings/app/language_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
