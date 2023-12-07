@@ -31,6 +31,15 @@ String decryptSymmetric(String data, SecureKey key, [Sodium? sd]) {
   return String.fromCharCodes(sodium.crypto.secretBox.openEasy(key: key, nonce: nonce, cipherText: encrypted));
 }
 
+Uint8List decryptSymmetricBytes(Uint8List data, SecureKey key, [Sodium? sd]) {
+
+  final sodium = sd ?? sodiumLib;
+  final nonce = data.sublist(0, sodium.crypto.secretBox.nonceBytes);
+  final encrypted = data.sublist(sodium.crypto.secretBox.nonceBytes);
+
+  return sodium.crypto.secretBox.openEasy(key: key, nonce: nonce, cipherText: encrypted);
+}
+
 
 SecureKey randomSymmetricKey([Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;

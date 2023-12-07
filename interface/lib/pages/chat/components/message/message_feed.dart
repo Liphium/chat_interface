@@ -11,6 +11,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/conversation_members.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/system_message_renderer.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -24,6 +25,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:dio/dio.dart' as dio_rs;
 import 'package:drift/drift.dart' as drift;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';

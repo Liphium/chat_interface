@@ -37,7 +37,7 @@ class FileSettingsPage extends StatelessWidget {
       children: [
 
         //* Auto download types
-        Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelMedium),
+        Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
         const BoolSettingSmall(settingName: FileSettings.autoDownloadImages),
@@ -46,7 +46,7 @@ class FileSettingsPage extends StatelessWidget {
         verticalSpacing(sectionSpacing),
 
         //* Max file size
-        Text("settings.file.max_size".tr, style: Get.theme.textTheme.labelMedium),
+        Text("settings.file.max_size".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
         const DoubleSelectionSetting(

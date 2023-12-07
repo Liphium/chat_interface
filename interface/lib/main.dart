@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:logger/logger.dart' as log;
@@ -12,6 +13,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 import 'app.dart';
 
 var logger = log.Logger();
+final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;
 const appVersion = 1; // TODO: ALWAYS change to the new one saved in the node backend

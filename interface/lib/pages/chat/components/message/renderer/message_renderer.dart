@@ -1,6 +1,10 @@
 
+import 'dart:convert';
+
 import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +25,29 @@ class MessageRenderer extends StatefulWidget {
 }
 
 class _MessageRendererState extends State<MessageRenderer> {
+
+  final attachments = <AttachmentContainer>[].obs;
+
+  @override
+  void initState() {
+    super.initState();
+    initAttachments();
+  }
+
+  void initAttachments() async {
+    if(widget.message.attachments.isNotEmpty) {
+      for (var attachment in widget.message.attachments) {
+        final decoded = AttachmentContainer.fromJson(jsonDecode(attachment));
+        final container = await Get.find<AttachmentController>().findLocalFile(decoded);
+        if(container == null) {
+          attachments.add(decoded);
+        } else {
+          attachments.add(container);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -76,7 +103,26 @@ class _MessageRendererState extends State<MessageRenderer> {
                   ),
             
                   //* Content
-                  Text(widget.message.content, style: theme.textTheme.bodyLarge)
+                  Visibility(
+                    visible: widget.message.content.isNotEmpty,
+                    child: Text(widget.message.content, style: theme.textTheme.bodyLarge)
+                  ),
+
+                  //* Attachments
+                  SelectionContainer.disabled(
+                    child: Obx(() => 
+                      Visibility(
+                        visible: attachments.isNotEmpty,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: elementSpacing),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: attachments.map((e) => AttachmentRenderer(container: e)).toList(),
+                          ),
+                        ),
+                      )
+                    ),
+                  ), 
                 ],
               ),
             ),

@@ -6,10 +6,7 @@ class ErrorContainer extends StatelessWidget {
   /// Translation required
   final String message;
 
-  /// Translation required
-  final String description;
-
-  const ErrorContainer({super.key, required this.message, required this.description});
+  const ErrorContainer({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -24,25 +21,12 @@ class ErrorContainer extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.error, color: Theme.of(context).colorScheme.error),
           horizontalSpacing(defaultSpacing),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(message, style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: theme.colorScheme.onSurface
-                )),
-                verticalSpacing(defaultSpacing * 0.5),
-                Text(description, style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: theme.colorScheme.onSurface
-                )),
-              ],
-            ),
-          )
+          Text(message, style: Theme.of(context).textTheme.labelMedium)
         ],
       ),
     );

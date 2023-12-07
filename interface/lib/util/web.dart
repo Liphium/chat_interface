@@ -148,6 +148,11 @@ Future<Response> postRqNode(String path, Map<String, dynamic> body) async {
   );
 }
 
+// Post request to the backend with remote id
+Future<Map<String, dynamic>> postRemoteJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+  return postAuthJSON(path, body, randomRemoteID());
+}
+
 // Post request to chat-node with any token (node needs to be connected already) (new)
 Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
 

@@ -1,12 +1,19 @@
 part of 'message_feed.dart';
 
 void testFileUpload(XFile file) {
-  _attachFile(file).then((value) {
+  _attachFile(UploadData(file)).then((value) {
     sendLog("File upload: ${value.success} - ${value.message} - ${value.data}");
   });
 }
 
-void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<XFile> files, Function() callback) async {
+class UploadData {
+  final XFile file;
+  final progress = 0.0.obs;
+
+  UploadData(this.file);
+}
+
+void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<UploadData> files, Function() callback) async {
   if(loading.value) {
     return;
   }
@@ -16,6 +23,7 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
   final attachments = <String>[];
   for(var file in files) {
     final res = await _attachFile(file);
+    sendLog("attached");
     if(!res.success) {
       showErrorPopup("error", res.message);
       callback.call();
@@ -23,6 +31,8 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
     }
     attachments.add(res.data);
   }
+
+  sendLog("sending...");
 
   loading.value = false;
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
@@ -83,31 +93,51 @@ class _FileUploadResponse {
   _FileUploadResponse(this.success, this.message, this.data);
 }
 
-Future<_FileUploadResponse> _attachFile(XFile file) async {
-  final bytes = await file.readAsBytes();
+Future<_FileUploadResponse> _attachFile(UploadData data) async {
+  final bytes = await data.file.readAsBytes();
   final key = randomSymmetricKey();
   final encrypted = encryptSymmetricBytes(bytes, key);
-  final name = encryptSymmetric(file.name, key);
+  final name = encryptSymmetric(data.file.name, key);
 
   // Upload file
-  final request = http.MultipartRequest("POST", server("/account/files/upload"));
+  //final request = http.MultipartRequest("POST", server("/account/files/upload"));
+  final formData = dio_rs.FormData.fromMap({
+    "file": dio_rs.MultipartFile.fromBytes(encrypted, filename: name),
+    "name": name,
+    "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
+    "extension": data.file.name.split(".").last
+  });
+  /*
   request.files.add(http.MultipartFile.fromBytes("file", encrypted, filename: name));
   request.fields.addAll(<String, String>{
     "name": name,
     "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
-    "extension": file.name.split(".").last
+    "extension": data.file.name.split(".").last
   });
   request.headers.addAll({
     "Content-Type": "multipart/form-data",
     "Authorization": "Bearer $sessionToken"
-  });
+  });*/
 
-  final res = await request.send();
+  sendLog(server("/account/files/upload").toString());
+  final res = await dio.post(
+    server("/account/files/upload").toString(), 
+    data: formData, 
+    options: dio_rs.Options(headers: {
+      "Content-Type": "multipart/form-data",
+      "Authorization": "Bearer $sessionToken"
+    }), 
+    onSendProgress: (count, total) {
+      data.progress.value = count / total;
+      sendLog(data.progress.value);
+    },
+  );
+
   if(res.statusCode != 200) {
     return _FileUploadResponse(false, "server.error", "");
   }
 
-  final json = jsonDecode(await res.stream.bytesToString());
+  final json = res.data;
   if(!json["success"]) {
     return _FileUploadResponse(false, json["error"], "");
   }
@@ -119,11 +149,11 @@ Future<_FileUploadResponse> _attachFile(XFile file) async {
 
   final file2 = File(path.join(dir.path, json["id"].toString()));
   await file2.writeAsBytes(bytes);
-  db.cloudFile.insertOne(CloudFileCompanion.insert(id: json["id"], name: file.name, path: json["url"], key: packageSymmetricKey(key)));
+  db.cloudFile.insertOne(CloudFileCompanion.insert(id: json["id"], name: data.file.name, path: json["url"], key: packageSymmetricKey(key)));
 
   return _FileUploadResponse(true, "success", jsonEncode({
     "id": json["id"],
-    "name": file.name,
+    "name": data.file.name,
     "key": packageSymmetricKey(key),
     "url": json["url"]
   }));

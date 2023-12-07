@@ -22,6 +22,9 @@ class ErrorTranslations extends Translations {
 
       // Chat
       'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
+      'file.not_uploaded': 'File not found. Maybe it was deleted?',
+      'file.too_large': 'The maximum file size is 10MB.',
+      'chat.add_file': 'Attach a file',
 
       // Game
       'no.start': 'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
@@ -45,6 +48,9 @@ class ErrorTranslations extends Translations {
 
       // Chat
       'error.not_delete_conversation': 'Konnte die Konversation nicht löschen. Versuche die App neu zu starten, wenn diese Konversation gerade erst erstellt wurde.',
+      'file.not_uploaded': 'Datei nicht gefunden. Vielleicht wurde sie gelöscht?',
+      'file.too_large': 'Die maximale Dateigröße beträgt 10MB.',
+      'chat.add_file': 'Datei anhängen',
 
       // Game
       'no.start': 'Das Spiel konnte nicht gestartet werden. Wir entschuldigen uns für die Unannehmlichkeiten, bitte melde dich bei Support, wenn du auf dieses Problem stößt.',

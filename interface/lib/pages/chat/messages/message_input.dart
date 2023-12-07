@@ -4,6 +4,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,7 +28,7 @@ class _MessageInputState extends State<MessageInput> {
   final loading = false.obs;
   StreamSubscription<Conversation>? _sub;
 
-  final files = <XFile>[].obs;
+  final files = <UploadData>[].obs;
 
   @override
   void dispose() {
@@ -38,6 +39,7 @@ class _MessageInputState extends State<MessageInput> {
 
   void handleMessageFinish() {
     _message.clear();
+    files.clear();
     loading.value = false;
   }
 
@@ -60,8 +62,7 @@ class _MessageInputState extends State<MessageInput> {
             sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], handleMessageFinish); 
           }
 
-          testFileUpload(files[0]);
-          //sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, files, handleMessageFinish);
+          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, files, handleMessageFinish);
           return null;
         },
       ),
@@ -139,11 +140,16 @@ class _MessageInputState extends State<MessageInput> {
                             if(result == null) {
                               return;
                             }
-                            files.add(result);
+                            final size = await result.length();
+                            if(size > 10 * 1000 * 1000) {
+                              showErrorPopup("error".tr, "file.too_large".tr);
+                              return;
+                            }
+                            files.add(UploadData(result));
                           },
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,
-                          tooltip: "soon",
+                          tooltip: "chat.add_file".tr,
                         ),
                         horizontalSpacing(defaultSpacing),
                         Expanded(
