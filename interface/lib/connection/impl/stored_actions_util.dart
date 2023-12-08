@@ -25,7 +25,7 @@ Future<bool> sendAuthenticatedStoredAction(Friend friend, String payload) async 
   // Send stored action
   final res = await postRq("/account/stored_actions/send_auth", <String, dynamic>{
     "account": friend.id,
-    "payload": encryptAsymmetricAnonymous(friend.keyStorage.publicKey, payload),
+    "payload": createPayload(payload, friend.keyStorage.publicKey),
     "key": friend.keyStorage.storedActionKey,
   });
 
@@ -48,7 +48,7 @@ Future<bool> sendStoredAction(String account, Uint8List publicKey, String payloa
   // Send stored action
   final res = await postRqAuth("/account/stored_actions/send", <String, dynamic>{
     "account": account,
-    "payload": encryptAsymmetricAnonymous(publicKey, payload),
+    "payload": createPayload(payload, publicKey),
   }, randomRemoteID());
 
   if(res.statusCode != 200) {
@@ -63,4 +63,8 @@ Future<bool> sendStoredAction(String account, Uint8List publicKey, String payloa
   }
 
   return true;
+}
+
+String createPayload(String payload, Uint8List publicKey) {
+  return encryptAsymmetricAnonymous(publicKey, payload);
 }

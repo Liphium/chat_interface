@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:chat_interface/connection/encryption/hash.dart';
+import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -202,17 +204,19 @@ class Message {
       return message;
     }
 
-    // TODO: Add a signature (and verify it)
     // Check signature
-    message.verified = true;
     message.content = decryptSymmetric(message.content, conversation.key);
-    message.loadContent();
+    final hash = hashSha(message.content + message.conversation); // TODO: Finish signatures here in the future (with some other system)
+    final decoded = jsonDecode(message.content);
+    message.verified = true;
+    //message.verified = checkSignature(decoded["s"], , hash);
+    message.loadContent(json: decoded);
 
     return message;
   }
 
-  void loadContent() {
-    final contentJson = jsonDecode(content);
+  void loadContent({Map<String, dynamic>? json}) {
+    final contentJson = json ?? jsonDecode(content);
     if(type != MessageType.system) {
       type = MessageType.values[contentJson["t"] ?? 0];
       if(type == MessageType.text) {

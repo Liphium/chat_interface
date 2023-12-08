@@ -52,12 +52,13 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   ConversationController controller = Get.find();
   final conversation = controller.conversations[conversationId]!;
   var key = conversation.key;
-  var hash = hashSha(message); // TODO: Signatures
+  var hash = hashSha(message + conversationId);
 
   var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{
     "c": message,
     "t": type.index,
-    "a": attachments
+    "a": attachments,
+    "s": signMessage(signatureKeyPair.secretKey, hash)
   }), key);
 
   // Send message

@@ -103,6 +103,15 @@ class SettingsTranslations extends Translations {
       'audio.output': 'Ausgabe',
       'audio.output.device': 'Oder du wählst einfach eines dieser Geräte aus:',
 
+      // File settings
+      'auto_download.images': 'Bilder automatisch herunterladen',
+      'auto_download.videos': 'Videos automatisch herunterladen',
+      'auto_download.audio': 'Audio automatisch herunterladen',
+      'settings.file.auto_download.types': 'Dateitypen, die automatisch heruntergeladen werden sollen',
+      'settings.file.max_size': 'Maximale Dateigröße für automatische Downloads',
+      'settings.file.max_size.description': 'Dateien, die größer sind, werden nicht automatisch heruntergeladen.',
+      'settings.file.mb': 'MB',
+
       // Theme settings
       'theme.presets': 'Vorlagen',
       'theme.default_dark': 'Dunkel',

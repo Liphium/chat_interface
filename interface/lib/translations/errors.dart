@@ -11,6 +11,7 @@ class ErrorTranslations extends Translations {
       'node.error': 'The chat server didn\'t respond, please try again later.',
       'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
       'new.version': 'A new version is available, please update the app.',
+      'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
 
       // Friends
       'request.self': 'Are you trying to add yourself as a friend?',
@@ -37,6 +38,7 @@ class ErrorTranslations extends Translations {
       'node.error': 'Der Chat-Server hat nicht geantwortet, bitte versuche es später erneut.',
       'not.setup': 'Der Chat-Server ist noch nicht eingerichtet, vielleicht versuchst du es mit dem Update auf die neueste Version?',
       'new.version': 'Eine neue Version ist verfügbar, bitte aktualisiere die App.',
+      'key.error': 'Es ist ein Fehler mit deinen Schlüsseln aufgetreten. Vielleicht versuchst du es mit dem Neustart der App oder kontaktierst den Support?',
 
       // Friends
       'request.self': 'Versuchst du dich selbst als Freund hinzuzufügen?',

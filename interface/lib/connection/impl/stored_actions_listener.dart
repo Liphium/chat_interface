@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/hash.dart';
+import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
@@ -71,24 +73,19 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   }
 
   // Get friend by name and tag
-  var res = await postRqAuth("/account/stored_actions/details", {
+  final resJson = await postRemoteJSON("/account/stored_actions/details", {
     "username": json["name"],
     "tag": json["tag"]
-  }, randomRemoteID());
+  });
 
-  if(res.statusCode != 200) {
-    sendLog("invalid friend request: invalid request");
-    return true;
-  }
-
-  var resJson = jsonDecode(res.body);
   if(!resJson["success"]) {
     sendLog("invalid friend request: ${json["error"]}");
     return true;
   }
 
   // Check "signature"
-  final publicKey = unpackagePublicKey(resJson["key"]); 
+  final publicKey = unpackagePublicKey(resJson["key"]);
+  final signatureKey = unpackagePublicKey(resJson["sg"]);
   final statusController = Get.find<StatusController>();
   final signedMessage = "${statusController.name.value}#${statusController.tag.value}";
   final result = decryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, json["s"]);
@@ -136,7 +133,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     json["tag"],
     "",
     actionId,
-    KeyStorage(publicKey, profileKey, json["sa"])
+    KeyStorage(publicKey, signatureKey, profileKey, json["sa"])
   );
 
   final vaultId = await storeInFriendsVault(request.toStoredPayload(false));
@@ -161,8 +158,18 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     sendLog("WARNING: couldn't delete stored action");
   }
 
+  final friend = Get.find<FriendController>().friends[actionJson["s"]];
+  if(friend == null) {
+    sendLog("invalid conversation opening: friend doesn't exist");
+    return true;
+  }
+
+  if(!checkSignature(actionJson["sg"], friend.keyStorage.signatureKey, "${actionJson["id"]}$ownAccountId")) {
+    sendLog("invalid conversation opening: invalid signature");
+    return true;
+  }
+
   final token = jsonDecode(actionJson["token"]);
-  sendLog(token["token"].length);
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{
     "id": token["id"],
     "token": token["token"]
