@@ -45,7 +45,6 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
-    MessageController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
     // Clear message input when conversation changes

@@ -9,7 +9,7 @@ class Message extends Table {
   TextColumn get attachments => text()();
   TextColumn get certificate => text()();
   TextColumn get sender => text().nullable()();
-  DateTimeColumn get createdAt => dateTime()();
+  Int64Column get createdAt => int64()();
   TextColumn get conversationId => text().nullable()();
   BoolColumn get edited => boolean()();
 

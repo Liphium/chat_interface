@@ -41,9 +41,9 @@ class LoadingIconButton extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all(padding),
               child: Obx(() => loading.value ? 
-              const Padding(
-                padding: EdgeInsets.all(defaultSpacing * 0.25),
-                child: CircularProgressIndicator(strokeWidth: 3.0,),
+              Padding(
+                padding: const EdgeInsets.all(defaultSpacing),
+                child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
               ) : 
               Icon(icon, color: color ?? Colors.white, size: iconSize),
               ),

@@ -84,9 +84,8 @@ class _MessageBarState extends State<MessageBar> {
                   tooltip: "profile.test".tr,
                   onTap: () {
 
-                    postNodeJSON("/conversations/message/send_system", {
-                      "conversation": Get.find<MessageController>().selectedConversation.value.id,
-                    });
+                    MessageController controller = Get.find();
+                    controller.addMessageToSelected(Message("", MessageType.text, "test hello world", [], "", controller.selectedConversation.value.token.id, DateTime.now().subtract(Duration(minutes: 15)), "", false, false));
                   },
                 ),
 

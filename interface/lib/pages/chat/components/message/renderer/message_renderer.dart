@@ -1,8 +1,5 @@
 
-import 'dart:convert';
-
 import 'package:chat_interface/controller/account/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -26,33 +23,12 @@ class MessageRenderer extends StatefulWidget {
 
 class _MessageRendererState extends State<MessageRenderer> {
 
-  final attachments = <AttachmentContainer>[].obs;
-
-  @override
-  void initState() {
-    super.initState();
-    initAttachments();
-  }
-
-  void initAttachments() async {
-    if(widget.message.attachments.isNotEmpty) {
-      for (var attachment in widget.message.attachments) {
-        final decoded = AttachmentContainer.fromJson(jsonDecode(attachment));
-        final container = await Get.find<AttachmentController>().findLocalFile(decoded);
-        if(container == null) {
-          attachments.add(decoded);
-        } else {
-          attachments.add(container);
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
 
     Friend sender = widget.sender ?? Friend.unknown(widget.accountId);
     ThemeData theme = Theme.of(context);
+    widget.message.initAttachments();
 
     return Padding(
       padding: EdgeInsets.only(top: !widget.last ? defaultSpacing : 0),
@@ -110,18 +86,19 @@ class _MessageRendererState extends State<MessageRenderer> {
 
                   //* Attachments
                   SelectionContainer.disabled(
-                    child: Obx(() => 
-                      Visibility(
-                        visible: attachments.isNotEmpty,
+                    child: Obx(() {
+                      final renderer = widget.message.attachmentsRenderer;
+                      return Visibility(
+                        visible: widget.message.attachmentsRenderer.isNotEmpty,
                         child: Padding(
                           padding: const EdgeInsets.only(top: elementSpacing),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            children: attachments.map((e) => AttachmentRenderer(container: e)).toList(),
+                            children: renderer.map((e) => AttachmentRenderer(container: e)).toList(),
                           ),
                         ),
-                      )
-                    ),
+                      );
+                    }),
                   ), 
                 ],
               ),
@@ -132,7 +109,7 @@ class _MessageRendererState extends State<MessageRenderer> {
             Visibility(
               visible: !widget.message.verified,
               child: Tooltip(
-                message: "not.signed".tr,
+                message: "chat.not.signed".tr,
                 child: const Icon(
                   Icons.warning_rounded,
                   color: Colors.amber,

@@ -72,6 +72,8 @@ class AttachmentController extends GetxController {
     final file2 = File(path.join(dir.path, json["id"].toString()));
     await file2.writeAsBytes(bytes);
     final container = AttachmentContainer(json["id"], data.file.name, json["url"], key);
+    sendLog("SENT ATTACHMENT: " + container.id);
+    container.downloaded.value = true;
     attachments[container.id] = container;
     db.cloudFile.insertOnConflictUpdate(container.toData());
 
@@ -100,7 +102,7 @@ class AttachmentController extends GetxController {
     if(container.downloading) return true;
     final localFile = await findLocalFile(container);
     if(localFile != null && !retry) {
-      sendLog("already exists ${container.name}");
+      sendLog("already exists ${container.name} ${container.id}");
       return true;
     }
     attachments[container.id] = container;

@@ -728,9 +728,9 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
       'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   static const VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   @override
@@ -853,7 +853,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       sender: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}sender']),
       createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
       conversationId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}conversation_id']),
       edited: attachedDatabase.typeMapping
@@ -875,7 +875,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final String attachments;
   final String certificate;
   final String? sender;
-  final DateTime createdAt;
+  final BigInt createdAt;
   final String? conversationId;
   final bool edited;
   const MessageData(
@@ -901,7 +901,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     if (!nullToAbsent || sender != null) {
       map['sender'] = Variable<String>(sender);
     }
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_at'] = Variable<BigInt>(createdAt);
     if (!nullToAbsent || conversationId != null) {
       map['conversation_id'] = Variable<String>(conversationId);
     }
@@ -938,7 +938,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       attachments: serializer.fromJson<String>(json['attachments']),
       certificate: serializer.fromJson<String>(json['certificate']),
       sender: serializer.fromJson<String?>(json['sender']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdAt: serializer.fromJson<BigInt>(json['createdAt']),
       conversationId: serializer.fromJson<String?>(json['conversationId']),
       edited: serializer.fromJson<bool>(json['edited']),
     );
@@ -954,7 +954,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       'attachments': serializer.toJson<String>(attachments),
       'certificate': serializer.toJson<String>(certificate),
       'sender': serializer.toJson<String?>(sender),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdAt': serializer.toJson<BigInt>(createdAt),
       'conversationId': serializer.toJson<String?>(conversationId),
       'edited': serializer.toJson<bool>(edited),
     };
@@ -968,7 +968,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           String? attachments,
           String? certificate,
           Value<String?> sender = const Value.absent(),
-          DateTime? createdAt,
+          BigInt? createdAt,
           Value<String?> conversationId = const Value.absent(),
           bool? edited}) =>
       MessageData(
@@ -1028,7 +1028,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> attachments;
   final Value<String> certificate;
   final Value<String?> sender;
-  final Value<DateTime> createdAt;
+  final Value<BigInt> createdAt;
   final Value<String?> conversationId;
   final Value<bool> edited;
   final Value<int> rowid;
@@ -1053,7 +1053,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required String attachments,
     required String certificate,
     this.sender = const Value.absent(),
-    required DateTime createdAt,
+    required BigInt createdAt,
     this.conversationId = const Value.absent(),
     required bool edited,
     this.rowid = const Value.absent(),
@@ -1073,7 +1073,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     Expression<String>? attachments,
     Expression<String>? certificate,
     Expression<String>? sender,
-    Expression<DateTime>? createdAt,
+    Expression<BigInt>? createdAt,
     Expression<String>? conversationId,
     Expression<bool>? edited,
     Expression<int>? rowid,
@@ -1101,7 +1101,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<String>? attachments,
       Value<String>? certificate,
       Value<String?>? sender,
-      Value<DateTime>? createdAt,
+      Value<BigInt>? createdAt,
       Value<String?>? conversationId,
       Value<bool>? edited,
       Value<int>? rowid}) {
@@ -1145,7 +1145,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       map['sender'] = Variable<String>(sender.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      map['created_at'] = Variable<BigInt>(createdAt.value);
     }
     if (conversationId.present) {
       map['conversation_id'] = Variable<String>(conversationId.value);

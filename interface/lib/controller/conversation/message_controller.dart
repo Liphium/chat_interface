@@ -6,8 +6,10 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
@@ -74,28 +76,7 @@ class MessageController extends GetxController {
     }
   }
 
-  void storeMessage(Message message) {
-    Get.find<ConversationController>().updateMessageRead(
-      message.conversation, 
-      increment: selectedConversation.value.id != message.conversation, 
-      messageSendTime: message.createdAt.millisecondsSinceEpoch
-    );
-    if(selectedConversation.value.id == message.conversation) {
-      if(message.sender != selectedConversation.value.token.id) {
-        overwriteRead(selectedConversation.value);
-      }
-      if(messages.isNotEmpty && messages[0].id != message.id) {
-        messages.insert(0, message);        
-      } else if(messages.isEmpty) {
-        messages.insert(0, message);
-      }
-    }
-    db.into(db.message).insertOnConflictUpdate(message.entity);
-
-    // Handle system messages
-    if(message.type == MessageType.system) {
-      SystemMessages.messages[message.content]?.handle(message);
-    }
+  void storeMessage(Message message) async {
 
     // Handle attachments
     if(message.attachments.isNotEmpty && message.type != MessageType.system) {
@@ -106,21 +87,57 @@ class MessageController extends GetxController {
         if(FileSettings.imageTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
           if(download) {
-            Get.find<AttachmentController>().downloadAttachment(container);
+            await Get.find<AttachmentController>().downloadAttachment(container);
           }
         } else if(FileSettings.videoTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
           if(download) {
-            Get.find<AttachmentController>().downloadAttachment(container);
+            await Get.find<AttachmentController>().downloadAttachment(container);
           }
         } else if(FileSettings.audioTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
           if(download) {
-            Get.find<AttachmentController>().downloadAttachment(container);
+            await Get.find<AttachmentController>().downloadAttachment(container);
           }
         }
       }
     }
+
+    Get.find<ConversationController>().updateMessageRead(
+      message.conversation, 
+      increment: selectedConversation.value.id != message.conversation, 
+      messageSendTime: message.createdAt.millisecondsSinceEpoch
+    );
+    if(selectedConversation.value.id == message.conversation) {
+      if(message.sender != selectedConversation.value.token.id) {
+        overwriteRead(selectedConversation.value);
+      }
+      sendLog("MESSAGE RECEIVED ${message.id}");
+      if(messages.isNotEmpty && messages[0].id != message.id) {
+        addMessageToSelected(message);
+      } else if(messages.isEmpty) {
+        addMessageToSelected(message);
+      }
+    }
+    db.into(db.message).insertOnConflictUpdate(message.entity);
+
+    // Handle system messages
+    if(message.type == MessageType.system) {
+      SystemMessages.messages[message.content]?.handle(message);
+    }
+  }
+
+  void addMessageToSelected(Message message) {
+    int index = 0;
+    for(var msg in messages) {
+      index++;
+      if(msg.createdAt.isAfter(message.createdAt)) {
+        continue;
+      }
+      index -= 1;
+      break;
+    }
+    messages.insert(index, message);
   }
 
 }
@@ -137,6 +154,26 @@ class Message {
   final DateTime createdAt;
   final String conversation;
   final bool edited;
+
+  final attachmentsRenderer = <AttachmentContainer>[].obs;
+
+  void initAttachments() async {
+    if(attachmentsRenderer.isNotEmpty) {
+      return;
+    }
+    if(attachments.isNotEmpty) {
+      for (var attachment in attachments) {
+        final decoded = AttachmentContainer.fromJson(jsonDecode(attachment));
+        final container = await Get.find<AttachmentController>().findLocalFile(decoded);
+        sendLog(container?.filePath);
+        if(container == null) {
+          attachmentsRenderer.add(decoded);
+        } else {
+          attachmentsRenderer.add(container);
+        }
+      }
+    }
+  }
 
   Message(this.id, this.type, this.content, this.attachments, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, this.verified);
 
@@ -194,7 +231,7 @@ class Message {
         attachments = List<String>.from(jsonDecode(messageData.attachments)),
         certificate = messageData.certificate,
         sender = messageData.sender!,
-        createdAt = messageData.createdAt,
+        createdAt = DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
         conversation = messageData.conversationId!,
         edited = messageData.edited,
         verified = messageData.verified;
@@ -206,7 +243,7 @@ class Message {
         attachments: jsonEncode(attachments),
         certificate: certificate,
         sender: sender,
-        createdAt: createdAt,
+        createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
         conversationId: conversation,
         edited: edited,
         verified: verified
