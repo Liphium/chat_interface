@@ -52,7 +52,8 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   ConversationController controller = Get.find();
   final conversation = controller.conversations[conversationId]!;
   var key = conversation.key;
-  var hash = hashSha(message + conversationId);
+  final stamp = DateTime.now().millisecondsSinceEpoch;
+  var hash = hashSha(message + stamp.toStringAsFixed(0) + conversationId); // Adding a time stamp to the message to prevent replay attacks
   sendLog("MESSAGE HASH SENT: $hash ${message + conversationId}");
 
   var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{
@@ -67,6 +68,7 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
     "conversation": conversation.id,
     "token_id": conversation.token.id,
     "token": conversation.token.token,
+    "timestamp": stamp,
     "data": encrypted
   });
 

@@ -105,11 +105,14 @@ class MessageController extends GetxController {
       }
     }
 
+    // Update message reading
     Get.find<ConversationController>().updateMessageRead(
       message.conversation, 
       increment: selectedConversation.value.id != message.conversation, 
       messageSendTime: message.createdAt.millisecondsSinceEpoch
     );
+
+    // Add message to message history if it's the selected one
     if(selectedConversation.value.id == message.conversation) {
       if(message.sender != selectedConversation.value.token.id) {
         overwriteRead(selectedConversation.value);
@@ -121,6 +124,8 @@ class MessageController extends GetxController {
         addMessageToSelected(message);
       }
     }
+
+    // Store message in database
     db.into(db.message).insertOnConflictUpdate(message.entity);
 
     // Handle system messages
@@ -151,6 +156,7 @@ class Message {
   String content;
   List<String> attachments;
   final verified = true.obs;
+  String signature;
   final String certificate;
   final String sender;
   final DateTime createdAt;
@@ -159,6 +165,7 @@ class Message {
 
   final attachmentsRenderer = <AttachmentContainer>[].obs;
 
+  /// Extracts and decrypts the attachments
   void initAttachments() async {
     if(attachmentsRenderer.isNotEmpty) {
       return;
@@ -177,7 +184,7 @@ class Message {
     }
   }
 
-  Message(this.id, this.type, this.content, this.attachments, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, bool verified) {
+  Message(this.id, this.type, this.content, this.attachments, this.signature, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, bool verified) {
     this.verified.value = verified;
   }
 
@@ -189,6 +196,7 @@ class Message {
       MessageType.text,
       json["data"],
       [""],
+      "",
       json["certificate"],
       json["sender"],
       DateTime.fromMillisecondsSinceEpoch(json["creation"]),
@@ -208,13 +216,13 @@ class Message {
 
     // Check signature
     message.content = decryptSymmetric(message.content, conversation.key);
-    final decoded = jsonDecode(message.content);
-    message.loadContent(json: decoded);
-    message.verifySignature(decoded["s"]);
+    message.loadContent();
+    message.verifySignature();
 
     return message;
   }
 
+  /// Loads the content from the message (signature, type, content)
   void loadContent({Map<String, dynamic>? json}) {
     final contentJson = json ?? jsonDecode(content);
     if(type != MessageType.system) {
@@ -222,21 +230,24 @@ class Message {
       if(type == MessageType.text) {
         content = utf8.decode(base64Decode(contentJson["c"]));
       }
+      signature = contentJson["s"];
     } else {
       content = contentJson["c"];
     }
     attachments = List<String>.from(contentJson["a"] ?? [""]);
   }
 
-  void verifySignature(String signature) async {
+  /// Verifies the signature of the message
+  void verifySignature() async {
     final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
+    sendLog(conversation.members.toString() + " | " + this.sender);
     final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
     if(sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;
       return;
     }
-    final hash = hashSha(base64Encode(utf8.encode(content)) + conversation.id);
+    final hash = hashSha(base64Encode(utf8.encode(content)) + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
     sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
     verified.value = checkSignature(signature, sender.signatureKey, hash);
     db.message.insertOnConflictUpdate(entity);
@@ -256,6 +267,7 @@ class Message {
         sender = messageData.sender!,
         createdAt = DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
         conversation = messageData.conversationId!,
+        signature = messageData.signature,
         edited = messageData.edited {
     verified.value = messageData.verified;
   }
@@ -264,6 +276,7 @@ class Message {
         id: id,
         type: type.index,
         content: content,
+        signature: signature,
         attachments: jsonEncode(attachments),
         certificate: certificate,
         sender: sender,
@@ -278,6 +291,7 @@ class Message {
     return <String, dynamic>{};
   }
 
+  /// Decrypts the account ids of a system message
   void decryptSystemMessageAttachments() {
     final conv = Get.find<ConversationController>().conversations[conversation]!;
     for (var i = 0; i < attachments.length; i++) {

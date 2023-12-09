@@ -44,18 +44,29 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
   
   // Decrypt stored action payload
   final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, action["payload"]);
+  if(payload == "") {
+
+    // Delete the action (invalid)
+    sendLog("invalid stored action: couldn't decrypt payload (DELETED)");
+    final response = await deleteStoredAction(action["id"]);
+    if(!response) {
+      sendLog("WARNING: couldn't delete stored action");
+    }
+    return true;
+  }
 
   final json = jsonDecode(payload);
-  sendLog(json);
   switch(json["a"]) {
     
     // Handle friend requests
     case "fr_rq":
+      sendLog("handling friend request");
       await _handleFriendRequestAction(action["id"], json);
       break;
 
     // Handle conversation opening
     case "conv":
+    sendLog("handling conversation opening");
       await _handleConversationOpening(action["id"], json);
       break;
   }
@@ -108,7 +119,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 
     // Add friend
     final controller = Get.find<FriendController>();
-    controller.addFromRequest(request);
+    await controller.addFromRequest(request);
 
     return true;
   }
@@ -158,14 +169,10 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     sendLog("WARNING: couldn't delete stored action");
   }
 
+  sendLog("opening conversation with ${actionJson["s"]}");
   final friend = Get.find<FriendController>().friends[actionJson["s"]];
   if(friend == null) {
     sendLog("invalid conversation opening: friend doesn't exist");
-    return true;
-  }
-
-  if(!checkSignature(actionJson["sg"], friend.keyStorage.signatureKey, "${actionJson["id"]}$ownAccountId")) {
-    sendLog("invalid conversation opening: invalid signature");
     return true;
   }
 

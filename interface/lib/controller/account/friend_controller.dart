@@ -39,6 +39,8 @@ class FriendController extends GetxController {
   // Add friend (also sends data to server vault)
   Future<bool> addFromRequest(Request request) async {
 
+    sendLog("adding friend from request ${request.friend.id}");
+
     // Remove from requests controller
     Get.find<RequestController>().deleteSentRequest(request);
 
@@ -71,6 +73,7 @@ class FriendController extends GetxController {
   }
 
   void add(Friend friend) {
+    sendLog("registered friend ${friend.id}");
     friends[friend.id] = friend;
     db.friend.insertOnConflictUpdate(friend.entity());
     friendIdLookup[friendId(friend)] = friend;
