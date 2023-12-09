@@ -33,7 +33,7 @@ dependencies:
   flutter_rust_bridge: any
   freezed_annotation: any
   file_selector: ^1.0.1
-  drift_db_viewer: ^2.0.0
+  drift_db_viewer: any
   smooth_scroll_multiplatform: ^1.0.8
   audioplayers: ^5.2.1
   dio: ^5.4.0

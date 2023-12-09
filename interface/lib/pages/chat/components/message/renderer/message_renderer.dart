@@ -106,15 +106,17 @@ class _MessageRendererState extends State<MessageRenderer> {
 
             horizontalSpacing(defaultSpacing),
 
-            Visibility(
-              visible: !widget.message.verified,
-              child: Tooltip(
-                message: "chat.not.signed".tr,
-                child: const Icon(
-                  Icons.warning_rounded,
-                  color: Colors.amber,
+            Obx(() =>
+              Visibility(
+                visible: !widget.message.verified.value,
+                child: Tooltip(
+                  message: "chat.not.signed".tr,
+                  child: const Icon(
+                    Icons.warning_rounded,
+                    color: Colors.amber,
+                  ),
                 ),
-              ),
+              )
             )
           ],
         ),

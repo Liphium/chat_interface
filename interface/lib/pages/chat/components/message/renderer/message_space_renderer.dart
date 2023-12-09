@@ -105,15 +105,18 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
 
               horizontalSpacing(defaultSpacing),
 
-              Visibility(
-                visible: !widget.message.verified,
-                child: Tooltip(
-                  message: "not.signed".tr,
-                  child: const Icon(
-                    Icons.warning_rounded,
-                    color: Colors.amber,
+              //* Verified
+              Obx(() =>
+                Visibility(
+                  visible: !widget.message.verified.value,
+                  child: Tooltip(
+                    message: "chat.not.signed".tr,
+                    child: const Icon(
+                      Icons.warning_rounded,
+                      color: Colors.amber,
+                    ),
                   ),
-                ),
+                )
               )
             ],
           ),

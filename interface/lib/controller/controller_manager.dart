@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
@@ -19,6 +20,7 @@ void initializeControllers() {
   
   // Conversation controls
   Get.put(MessageController());
+  Get.put(UnknownController());
   Get.put(AttachmentController());
   Get.put(ConversationController());
 

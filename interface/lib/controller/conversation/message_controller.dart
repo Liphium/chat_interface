@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -150,7 +150,7 @@ class Message {
   MessageType type;
   String content;
   List<String> attachments;
-  bool verified;
+  final verified = true.obs;
   final String certificate;
   final String sender;
   final DateTime createdAt;
@@ -177,7 +177,9 @@ class Message {
     }
   }
 
-  Message(this.id, this.type, this.content, this.attachments, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, this.verified);
+  Message(this.id, this.type, this.content, this.attachments, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, bool verified) {
+    this.verified.value = verified;
+  }
 
   factory Message.fromJson(Map<String, dynamic> json) {
 
@@ -198,7 +200,7 @@ class Message {
     // Decrypt content
     final conversation = Get.find<ConversationController>().conversations[json["conversation"]]!;
     if(message.sender == MessageController.systemSender) {
-      message.verified = true;
+      message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();
       return message;
@@ -206,11 +208,9 @@ class Message {
 
     // Check signature
     message.content = decryptSymmetric(message.content, conversation.key);
-    final hash = hashSha(message.content + message.conversation); // TODO: Finish signatures here in the future (with some other system)
     final decoded = jsonDecode(message.content);
-    message.verified = true;
-    //message.verified = checkSignature(decoded["s"], , hash);
     message.loadContent(json: decoded);
+    message.verifySignature(decoded["s"]);
 
     return message;
   }
@@ -228,6 +228,25 @@ class Message {
     attachments = List<String>.from(contentJson["a"] ?? [""]);
   }
 
+  void verifySignature(String signature) async {
+    final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
+    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
+    if(sender == null) {
+      sendLog("NO SENDER FOUND");
+      verified.value = false;
+      return;
+    }
+    final hash = hashSha(base64Encode(utf8.encode(content)) + conversation.id);
+    sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
+    verified.value = checkSignature(signature, sender.signatureKey, hash);
+    db.message.insertOnConflictUpdate(entity);
+    if(!verified.value) {
+      sendLog("invalid signature");
+    } else {
+      sendLog("valid signature");
+    }
+  }
+
   Message.fromMessageData(MessageData messageData)
       : id = messageData.id,
         type = MessageType.values[messageData.type],
@@ -237,8 +256,9 @@ class Message {
         sender = messageData.sender!,
         createdAt = DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
         conversation = messageData.conversationId!,
-        edited = messageData.edited,
-        verified = messageData.verified;
+        edited = messageData.edited {
+    verified.value = messageData.verified;
+  }
 
   MessageData get entity => MessageData(
         id: id,
@@ -250,7 +270,7 @@ class Message {
         createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
         conversationId: conversation,
         edited: edited,
-        verified: verified
+        verified: verified.value,
       );
 
   Map<String, dynamic> toJson() {

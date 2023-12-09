@@ -53,6 +53,7 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   final conversation = controller.conversations[conversationId]!;
   var key = conversation.key;
   var hash = hashSha(message + conversationId);
+  sendLog("MESSAGE HASH SENT: $hash ${message + conversationId}");
 
   var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{
     "c": message,

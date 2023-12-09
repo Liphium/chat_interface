@@ -2282,6 +2282,263 @@ class CloudFileCompanion extends UpdateCompanion<CloudFileData> {
   }
 }
 
+class $UnknownProfileTable extends UnknownProfile
+    with TableInfo<$UnknownProfileTable, UnknownProfileData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UnknownProfileTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _tagMeta = const VerificationMeta('tag');
+  @override
+  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
+      'tag', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _keysMeta = const VerificationMeta('keys');
+  @override
+  late final GeneratedColumn<String> keys = GeneratedColumn<String>(
+      'keys', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, tag, keys];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'unknown_profile';
+  @override
+  VerificationContext validateIntegrity(Insertable<UnknownProfileData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('tag')) {
+      context.handle(
+          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
+    } else if (isInserting) {
+      context.missing(_tagMeta);
+    }
+    if (data.containsKey('keys')) {
+      context.handle(
+          _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
+    } else if (isInserting) {
+      context.missing(_keysMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UnknownProfileData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UnknownProfileData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      tag: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+      keys: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
+    );
+  }
+
+  @override
+  $UnknownProfileTable createAlias(String alias) {
+    return $UnknownProfileTable(attachedDatabase, alias);
+  }
+}
+
+class UnknownProfileData extends DataClass
+    implements Insertable<UnknownProfileData> {
+  final String id;
+  final String name;
+  final String tag;
+  final String keys;
+  const UnknownProfileData(
+      {required this.id,
+      required this.name,
+      required this.tag,
+      required this.keys});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['tag'] = Variable<String>(tag);
+    map['keys'] = Variable<String>(keys);
+    return map;
+  }
+
+  UnknownProfileCompanion toCompanion(bool nullToAbsent) {
+    return UnknownProfileCompanion(
+      id: Value(id),
+      name: Value(name),
+      tag: Value(tag),
+      keys: Value(keys),
+    );
+  }
+
+  factory UnknownProfileData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UnknownProfileData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      tag: serializer.fromJson<String>(json['tag']),
+      keys: serializer.fromJson<String>(json['keys']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'tag': serializer.toJson<String>(tag),
+      'keys': serializer.toJson<String>(keys),
+    };
+  }
+
+  UnknownProfileData copyWith(
+          {String? id, String? name, String? tag, String? keys}) =>
+      UnknownProfileData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        tag: tag ?? this.tag,
+        keys: keys ?? this.keys,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('UnknownProfileData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('tag: $tag, ')
+          ..write('keys: $keys')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, tag, keys);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UnknownProfileData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.tag == this.tag &&
+          other.keys == this.keys);
+}
+
+class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> tag;
+  final Value<String> keys;
+  final Value<int> rowid;
+  const UnknownProfileCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.tag = const Value.absent(),
+    this.keys = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  UnknownProfileCompanion.insert({
+    required String id,
+    required String name,
+    required String tag,
+    required String keys,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        tag = Value(tag),
+        keys = Value(keys);
+  static Insertable<UnknownProfileData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? tag,
+    Expression<String>? keys,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (tag != null) 'tag': tag,
+      if (keys != null) 'keys': keys,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  UnknownProfileCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? tag,
+      Value<String>? keys,
+      Value<int>? rowid}) {
+    return UnknownProfileCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      tag: tag ?? this.tag,
+      keys: keys ?? this.keys,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (tag.present) {
+      map['tag'] = Variable<String>(tag.value);
+    }
+    if (keys.present) {
+      map['keys'] = Variable<String>(keys.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UnknownProfileCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('tag: $tag, ')
+          ..write('keys: $keys, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   late final $ConversationTable conversation = $ConversationTable(this);
@@ -2291,10 +2548,19 @@ abstract class _$Database extends GeneratedDatabase {
   late final $FriendTable friend = $FriendTable(this);
   late final $RequestTable request = $RequestTable(this);
   late final $CloudFileTable cloudFile = $CloudFileTable(this);
+  late final $UnknownProfileTable unknownProfile = $UnknownProfileTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [conversation, member, message, setting, friend, request, cloudFile];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        conversation,
+        member,
+        message,
+        setting,
+        friend,
+        request,
+        cloudFile,
+        unknownProfile
+      ];
 }
