@@ -5,7 +5,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class UserAvatar extends StatelessWidget {
+class UserAvatar extends StatefulWidget {
 
   final String id;
   final double? size;
@@ -15,28 +15,68 @@ class UserAvatar extends StatelessWidget {
   const UserAvatar({super.key, required this.id, this.size, this.controller, this.user});
 
   @override
+  State<UserAvatar> createState() => _UserAvatarState();
+}
+
+class _UserAvatarState extends State<UserAvatar> {
+
+  @override
+  void initState() {
+    var friend = getFriend();
+    friend.loadProfilePicture();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    getFriend().disposeProfilePicture();
+    super.dispose();
+  }
+
+  Friend getFriend() {
+    return (widget.user ?? (widget.controller ?? Get.find<FriendController>()).friends[widget.id]) ?? Friend.unknown(widget.id);
+  }
+
+  @override
   Widget build(BuildContext context) {
 
-    var friend = (user ?? (controller ?? Get.find<FriendController>()).friends[id]);
-    if(id == ownAccountId) friend = Friend.me();
+    var friend = getFriend();
 
     return SizedBox(
-      width: size ?? 45,
-      height: size ?? 45,
-      child: CircleAvatar(
-        backgroundColor: Get.theme.colorScheme.primaryContainer,
-        radius: size ?? 45,
-        child: SelectionContainer.disabled(
-          child: Text(
-            friend != null ? friend.name.substring(0,1) : id.substring(0, 1), 
-            style: Get.theme.textTheme.labelMedium!.copyWith(
-              fontSize: (size ?? 45) * 0.5,
-              fontWeight: FontWeight.bold,
-              color: id == ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary
+      width: widget.size ?? 45,
+      height: widget.size ?? 45,
+      child: Obx(() {
+
+        if(friend.profilePictureImage.value != null) {
+          return ClipOval(
+            child: SizedBox(
+              height: 300,
+              width: 300,
+              child: RawImage(
+                fit: BoxFit.none,
+                scale: friend.profilePictureData.scaleFactor,
+                image: friend.profilePictureImage.value!,
+                alignment: Alignment(friend.profilePictureData.moveX, friend.profilePictureData.moveY),
+              ),
+            ),
+          );
+        }
+
+        return CircleAvatar(
+          backgroundColor: Get.theme.colorScheme.primaryContainer,
+          radius: widget.size ?? 45,
+          child: SelectionContainer.disabled(
+            child: Text(
+              friend.name.substring(0,1), 
+              style: Get.theme.textTheme.labelMedium!.copyWith(
+                fontSize: (widget.size ?? 45) * 0.5,
+                fontWeight: FontWeight.bold,
+                color: widget.id == ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary
+              )
             )
-          )
-        ),
-      ),
+          ),
+        );
+      })
     );
   }
 }

@@ -102,6 +102,9 @@ class FriendsSetup extends Setup {
       }
       return false;
     });
+
+    // Add own account so status and stuff can be tracked there
+    Get.find<FriendController>().addSelf();
     
     return null;
   }

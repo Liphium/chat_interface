@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_slider.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -30,15 +31,6 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
 
   final _image = Rx<ui.Image?>(null);
 
-  Future<ui.Image> _loadImage(String path) async {
-    final Uint8List data = await File(widget.file.path).readAsBytes();
-    final Completer<ui.Image> completer = Completer();
-    ui.decodeImageFromList(data, (ui.Image img) {
-      return completer.complete(img);
-    });
-    return completer.future;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -46,7 +38,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
   }
 
   void initImage() async {
-    final image = await _loadImage(widget.file.path);
+    final image = await ProfilePictureHelper.loadImage(widget.file.path);
 
     // Calculate the scale factor to fit the image into the window
     if(image.width < image.height) {

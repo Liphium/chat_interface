@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
+import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
@@ -28,8 +30,11 @@ class FriendController extends GetxController {
     for(FriendData data in await db.friend.select().get()) {
       friends[data.id] = Friend.fromEntity(data);
     }
-
     return true;
+  }
+
+  void addSelf() {
+    friends[ownAccountId] = Friend.me();
   }
 
   void reset() {
@@ -99,10 +104,7 @@ class Friend {
   String tag;
   String vaultId;
   KeyStorage keyStorage;
-  var status = "-".obs;
   bool unknown = false;
-  bool answerStatus = true;
-  final statusType = 0.obs;
   Timer? _timer;
 
   /// Loading state for open conversation buttons
@@ -158,6 +160,11 @@ class Friend {
     return jsonEncode(reqPayload);
   }
 
+  //* Status
+  final status = "-".obs;
+  bool answerStatus = true;
+  final statusType = 0.obs;
+
   void loadStatus(String message) {
     message = decryptSymmetric(message, keyStorage.profileKey);
     final data = jsonDecode(message);
@@ -175,6 +182,33 @@ class Friend {
   void setOffline() {
     status.value = "-";
     statusType.value = 0;
+  }
+
+  //* Profile picture
+  var profilePictureUsages = 0;
+  final profilePictureImage = Rx<ui.Image?>(null);
+  var profilePictureData = ProfilePictureData(1, 0, 0);
+
+  /// Update the profile picture of this friend
+  void updateProfilePicture(String picture, ProfilePictureData data) {
+    profilePictureData = data;
+    profilePicture.value = picture;
+  }
+
+  /// Load the profile picture of this friend
+  void loadProfilePicture() async {
+    if(profilePicture.value != null) return;
+    profilePictureUsages++;
+
+    // Load the image
+    profilePictureImage.value = await ProfilePictureHelper.loadImage(profilePicture.value!);
+  }
+
+  void disposeProfilePicture() {
+    profilePictureUsages--;
+    if(profilePictureUsages == 0) {
+      profilePictureImage.value = null;
+    }
   }
 
   //* Remove friend

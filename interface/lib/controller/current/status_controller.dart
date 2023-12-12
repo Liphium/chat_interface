@@ -6,6 +6,7 @@ import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
@@ -39,8 +40,18 @@ class StatusController extends GetxController {
   // Shared content by friends
   final sharedContent = RxMap<String, ShareContainer>();
 
+  // Own profile picture
+  final profilePicture = "".obs;
+  var profilePictureData = ProfilePictureData(1, 0, 0);
+
   // Current shared content (by this account)
   ShareContainer? _container;
+
+  /// Set the profile picture of the current account
+  void newProfilePicture(String fileId, ProfilePictureData data) {
+    profilePictureData = data;
+    profilePicture.value = fileId;
+  }
 
   void setName(String value) => name.value = value;
   void setTag(String value) => tag.value = value;
