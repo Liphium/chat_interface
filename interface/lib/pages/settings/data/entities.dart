@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
@@ -11,7 +12,7 @@ import 'package:get/get.dart';
 
 enum SettingLabel {
   account("settings.tab.account", [
-    SettingCategory("data", Icons.account_circle, null),
+    SettingCategory("data", Icons.account_circle, DataSettingsPage()),
     //SettingCategory("profile", Icons.assignment, null),
     //SettingCategory("security", Icons.security, null),
     //SettingCategory("devices", Icons.phone_android, null),

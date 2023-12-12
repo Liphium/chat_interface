@@ -65,6 +65,13 @@ class SettingsTranslations extends Translations {
       'settings.file.max_size.description': 'Files larger than this will not be downloaded automatically.',
       'settings.file.mb': 'MB',
 
+      // Data settings
+      'settings.data.profile_picture': 'Profile picture',
+      'settings.data.profile_picture.select': 'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
+      'settings.data.profile_picture.requirements': 'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',
+      'settings.data.profile_picture.remove': 'Remove profile picture',
+      'settings.data.profile_picture.remove.confirm': 'Are you sure you want to remove your profile picture?',
+
       // Spaces settings
       'game.music': 'Play music in Game Mode',
     },
@@ -129,6 +136,13 @@ class SettingsTranslations extends Translations {
       'custom.none': 'Keine',
       'custom.colored': 'Primärfarbe',
       'theme.apply': 'Design anwenden',
+
+      // Data settings
+      'settings.data.profile_picture': 'Profilbild',
+      'settings.data.profile_picture.select': 'Wähle dein neuestes Meme aus, damit jeder sehen kann, wie cool du bist!',
+      'settings.data.profile_picture.requirements': 'Kann nur ein JPEG oder PNG sein und darf nicht größer als 10 MB sein.',
+      'settings.data.profile_picture.remove': 'Profilbild entfernen',
+      'settings.data.profile_picture.remove.confirm': 'Bist du sicher, dass du dein Profilbild entfernen möchtest?',
 
       // Spaces settings
       'game.music': 'Musik im Spielmodus abspielen',

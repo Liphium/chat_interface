@@ -56,12 +56,12 @@ class AttachmentController extends GetxController {
     );
 
     if(res.statusCode != 200) {
-      return FileUploadResponse(false, "server.error", "");
+      return FileUploadResponse(false, "server.error", AttachmentContainer("", "", "", key));
     }
 
     final json = res.data;
     if(!json["success"]) {
-      return FileUploadResponse(false, json["error"], "");
+      return FileUploadResponse(false, json["error"], AttachmentContainer("", "", "", key));
     }
 
     // Copy file to cloud_files directory
@@ -77,7 +77,7 @@ class AttachmentController extends GetxController {
     attachments[container.id] = container;
     db.cloudFile.insertOnConflictUpdate(container.toData());
 
-    return FileUploadResponse(true, "success", jsonEncode(container.toJson()));
+    return FileUploadResponse(true, "success", container);
   }
 
   /// Find a local file
@@ -178,9 +178,11 @@ class AttachmentController extends GetxController {
 class FileUploadResponse {
   final bool success;
   final String message;
-  final String data;
+  final AttachmentContainer container;
 
-  FileUploadResponse(this.success, this.message, this.data);
+  FileUploadResponse(this.success, this.message, this.container);
+
+  String get data => jsonEncode(container.toJson());
 }
 
 class AttachmentContainer {

@@ -2576,6 +2576,265 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
   }
 }
 
+class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProfileTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pictureIdMeta =
+      const VerificationMeta('pictureId');
+  @override
+  late final GeneratedColumn<String> pictureId = GeneratedColumn<String>(
+      'picture_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pictureDataMeta =
+      const VerificationMeta('pictureData');
+  @override
+  late final GeneratedColumn<String> pictureData = GeneratedColumn<String>(
+      'picture_data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, pictureId, pictureData, data];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'profile';
+  @override
+  VerificationContext validateIntegrity(Insertable<ProfileData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('picture_id')) {
+      context.handle(_pictureIdMeta,
+          pictureId.isAcceptableOrUnknown(data['picture_id']!, _pictureIdMeta));
+    } else if (isInserting) {
+      context.missing(_pictureIdMeta);
+    }
+    if (data.containsKey('picture_data')) {
+      context.handle(
+          _pictureDataMeta,
+          pictureData.isAcceptableOrUnknown(
+              data['picture_data']!, _pictureDataMeta));
+    } else if (isInserting) {
+      context.missing(_pictureDataMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProfileData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProfileData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      pictureId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}picture_id'])!,
+      pictureData: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}picture_data'])!,
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+    );
+  }
+
+  @override
+  $ProfileTable createAlias(String alias) {
+    return $ProfileTable(attachedDatabase, alias);
+  }
+}
+
+class ProfileData extends DataClass implements Insertable<ProfileData> {
+  final String id;
+  final String pictureId;
+  final String pictureData;
+  final String data;
+  const ProfileData(
+      {required this.id,
+      required this.pictureId,
+      required this.pictureData,
+      required this.data});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['picture_id'] = Variable<String>(pictureId);
+    map['picture_data'] = Variable<String>(pictureData);
+    map['data'] = Variable<String>(data);
+    return map;
+  }
+
+  ProfileCompanion toCompanion(bool nullToAbsent) {
+    return ProfileCompanion(
+      id: Value(id),
+      pictureId: Value(pictureId),
+      pictureData: Value(pictureData),
+      data: Value(data),
+    );
+  }
+
+  factory ProfileData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProfileData(
+      id: serializer.fromJson<String>(json['id']),
+      pictureId: serializer.fromJson<String>(json['pictureId']),
+      pictureData: serializer.fromJson<String>(json['pictureData']),
+      data: serializer.fromJson<String>(json['data']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'pictureId': serializer.toJson<String>(pictureId),
+      'pictureData': serializer.toJson<String>(pictureData),
+      'data': serializer.toJson<String>(data),
+    };
+  }
+
+  ProfileData copyWith(
+          {String? id, String? pictureId, String? pictureData, String? data}) =>
+      ProfileData(
+        id: id ?? this.id,
+        pictureId: pictureId ?? this.pictureId,
+        pictureData: pictureData ?? this.pictureData,
+        data: data ?? this.data,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ProfileData(')
+          ..write('id: $id, ')
+          ..write('pictureId: $pictureId, ')
+          ..write('pictureData: $pictureData, ')
+          ..write('data: $data')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, pictureId, pictureData, data);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProfileData &&
+          other.id == this.id &&
+          other.pictureId == this.pictureId &&
+          other.pictureData == this.pictureData &&
+          other.data == this.data);
+}
+
+class ProfileCompanion extends UpdateCompanion<ProfileData> {
+  final Value<String> id;
+  final Value<String> pictureId;
+  final Value<String> pictureData;
+  final Value<String> data;
+  final Value<int> rowid;
+  const ProfileCompanion({
+    this.id = const Value.absent(),
+    this.pictureId = const Value.absent(),
+    this.pictureData = const Value.absent(),
+    this.data = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProfileCompanion.insert({
+    required String id,
+    required String pictureId,
+    required String pictureData,
+    required String data,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        pictureId = Value(pictureId),
+        pictureData = Value(pictureData),
+        data = Value(data);
+  static Insertable<ProfileData> custom({
+    Expression<String>? id,
+    Expression<String>? pictureId,
+    Expression<String>? pictureData,
+    Expression<String>? data,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pictureId != null) 'picture_id': pictureId,
+      if (pictureData != null) 'picture_data': pictureData,
+      if (data != null) 'data': data,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProfileCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? pictureId,
+      Value<String>? pictureData,
+      Value<String>? data,
+      Value<int>? rowid}) {
+    return ProfileCompanion(
+      id: id ?? this.id,
+      pictureId: pictureId ?? this.pictureId,
+      pictureData: pictureData ?? this.pictureData,
+      data: data ?? this.data,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (pictureId.present) {
+      map['picture_id'] = Variable<String>(pictureId.value);
+    }
+    if (pictureData.present) {
+      map['picture_data'] = Variable<String>(pictureData.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProfileCompanion(')
+          ..write('id: $id, ')
+          ..write('pictureId: $pictureId, ')
+          ..write('pictureData: $pictureData, ')
+          ..write('data: $data, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   late final $ConversationTable conversation = $ConversationTable(this);
@@ -2586,6 +2845,7 @@ abstract class _$Database extends GeneratedDatabase {
   late final $RequestTable request = $RequestTable(this);
   late final $CloudFileTable cloudFile = $CloudFileTable(this);
   late final $UnknownProfileTable unknownProfile = $UnknownProfileTable(this);
+  late final $ProfileTable profile = $ProfileTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2598,6 +2858,7 @@ abstract class _$Database extends GeneratedDatabase {
         friend,
         request,
         cloudFile,
-        unknownProfile
+        unknownProfile,
+        profile
       ];
 }

@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/profile_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
@@ -28,6 +29,7 @@ void initializeControllers() {
   Get.put(RequestController());
   Get.put(FriendController());
   Get.put(WritingController());
+  Get.put(ProfileController());
 
   // App controls
   Get.put(StatusController());

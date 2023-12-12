@@ -15,6 +15,13 @@ class GeneralTranslations extends Translations {
       'yeah': 'Yeah',
       'yes': 'Yes',
       'no': 'No',
+      'change': 'Change',
+      'save': 'Save',
+      'delete': 'Delete',
+      'select': 'Select',
+      'zoom': 'Zoom',
+      'x': 'X',
+      'y': 'Y',
 
       // Time TODO: Differentiate between PM and AM
       'time.now': 'Today at @hour:@minute',
@@ -32,6 +39,13 @@ class GeneralTranslations extends Translations {
       'yeah': 'Natürlich',
       'yes': 'Ja',
       'no': 'Nein',
+      'change': 'Ändern',
+      'save': 'Speichern',
+      'delete': 'Löschen',
+      'select': 'Auswählen',
+      'zoom': 'Zoom',
+      'x': 'X',
+      'y': 'Y',
 
       // Time
       'time.now': 'Heute um @hour:@minute',

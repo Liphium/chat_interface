@@ -29,19 +29,40 @@ class WindowBase extends StatelessWidget {
 class DialogBase extends StatelessWidget {
 
   final Widget child;
+  final double maxWidth;
 
-  const DialogBase({super.key, required this.child});
+  const DialogBase({super.key, required this.child, this.maxWidth = 300});
 
   @override
   Widget build(BuildContext context) {
+
+    final random = math.Random();
+    final randomOffset = random.nextDouble() * 8 + 5;
+    final randomHz = random.nextDouble() * 1 + 1;
+
     return Center(
       child: Animate(
         effects: [
           ScaleEffect(
+            delay: 100.ms,
             duration: 500.ms,
             begin: const Offset(0, 0),
             end: const Offset(1, 1),
-            curve: scaleAnimationCurve
+            alignment: Alignment.center,
+            curve: const ElasticOutCurve(0.8)
+          ),
+          ShakeEffect(
+            delay: 100.ms,
+            duration: 400.ms,
+            hz: randomHz,
+            offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+            rotation: 0,
+            curve: Curves.decelerate
+          ),
+          FadeEffect(
+            delay: 100.ms,
+            duration: 250.ms,
+            curve: Curves.easeOut
           )
         ],
         target: 1,
@@ -50,7 +71,7 @@ class DialogBase extends StatelessWidget {
           color: Get.theme.colorScheme.onBackground,
           borderRadius: BorderRadius.circular(dialogBorderRadius),
           child: Container(
-            width: 300,
+            width: maxWidth,
             padding: const EdgeInsets.all(dialogPadding),
             child: child
           ),

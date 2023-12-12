@@ -19,13 +19,17 @@ class ErrorTranslations extends Translations {
       'requests.already.exists': 'Already sent',
       'requests.already.exists.text': "I know you want to be this person's friend, but you already sent them a request. So please chill a little bit.",
       'request.not.found': 'User not found',
-      'request.not.found.text': "You sure this is your friend? Maybe you just met that person in your dreams?",
+      'request.not.found.text': "You sure this is your friend? Maybe you just met them in your dreams?",
 
       // Chat
       'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
       'file.not_uploaded': 'File not found. Maybe it was deleted?',
       'file.too_large': 'The maximum file size is 10MB.',
       'chat.add_file': 'Attach a file',
+
+      // Settings
+      'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
+      'profile_picture.not_set': 'Your profile picture couldn\'t be set. Please try again later or contact support.',
 
       // Game
       'no.start': 'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
