@@ -29,6 +29,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
   final moveX = 0.0.obs;
   final moveY = 0.0.obs;
 
+  final uploading = false.obs;
   final _image = Rx<ui.Image?>(null);
 
   @override
@@ -137,9 +138,16 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
               ],
             ),
             verticalSpacing(sectionSpacing),
-            FJElevatedButton(
-              onTap: () => {}, 
-              child: Center(child: Text("select".tr, style: Get.theme.textTheme.labelLarge))
+            FJElevatedLoadingButton(
+              loading: uploading,
+              onTap: () async {
+                if(uploading.value) return;
+                uploading.value = true;
+                await ProfilePictureHelper.uploadProfilePicture(widget.file, ProfilePictureData(scaleFactor.value, moveX.value, moveY.value));
+                uploading.value = false;
+                Get.back();
+              }, 
+              label: "select".tr,
             ),
           ],
         );

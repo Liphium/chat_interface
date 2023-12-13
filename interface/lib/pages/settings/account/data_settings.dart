@@ -1,4 +1,6 @@
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/profile_picture_window.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -76,9 +78,10 @@ class DataSettingsPage extends StatelessWidget {
                   )
                 ],
               ),
-              ClipOval(
-                child: Image.asset("assets/img/chess.jpg", width: 100, height: 100, fit: BoxFit.cover)
-              ),
+              UserAvatar(
+                id: ownAccountId,
+                size: 100,
+              )
             ],
           ),
         )

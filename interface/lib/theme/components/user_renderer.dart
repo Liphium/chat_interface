@@ -48,16 +48,14 @@ class _UserAvatarState extends State<UserAvatar> {
       child: Obx(() {
 
         if(friend.profilePictureImage.value != null) {
+          final image = friend.profilePictureImage.value!;
+          final scale = friend.profilePictureData.scaleFactor * (300 / (widget.size ?? 45));
           return ClipOval(
-            child: SizedBox(
-              height: 300,
-              width: 300,
-              child: RawImage(
-                fit: BoxFit.none,
-                scale: friend.profilePictureData.scaleFactor,
-                image: friend.profilePictureImage.value!,
-                alignment: Alignment(friend.profilePictureData.moveX, friend.profilePictureData.moveY),
-              ),
+            child: RawImage(
+              fit: BoxFit.none,
+              scale: scale,
+              image: image,
+              alignment: Alignment(friend.profilePictureData.moveX, friend.profilePictureData.moveY),
             ),
           );
         }

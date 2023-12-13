@@ -63,6 +63,8 @@ class SettingsTranslations extends Translations {
       'settings.file.auto_download.types': 'Types of files to automatically download',
       'settings.file.max_size': 'Maximum file size for automatic downloads',
       'settings.file.max_size.description': 'Files larger than this will not be downloaded automatically.',
+      'settings.file.cache': 'File cache',
+      'settings.file.cache.description': 'The file cache stores all files that have been automatically downloaded. This includes profile pictures and all other data you\'ve selected above. When it is full old files will automatically be deleted. In the future you might even be able to turn this off. You can select the size of it with the slider below.',
       'settings.file.mb': 'MB',
 
       // Data settings
@@ -117,6 +119,8 @@ class SettingsTranslations extends Translations {
       'settings.file.auto_download.types': 'Dateitypen, die automatisch heruntergeladen werden sollen',
       'settings.file.max_size': 'Maximale Dateigröße für automatische Downloads',
       'settings.file.max_size.description': 'Dateien, die größer sind, werden nicht automatisch heruntergeladen.',
+      'settings.file.cache': 'Dateicache',
+      'settings.file.cache.description': 'Der Dateicache speichert alle Dateien, die automatisch heruntergeladen wurden. Dazu gehören Profilbilder und alle anderen Daten, die du oben ausgewählt hast. Wenn er voll ist, werden alte Dateien automatisch gelöscht. In Zukunft kannst du ihn vielleicht sogar ausschalten. Du kannst die Größe mit dem Regler unten auswählen.',
       'settings.file.mb': 'MB',
 
       // Theme settings

@@ -153,7 +153,35 @@ class AttachmentController extends GetxController {
     container.downloading = false;
     container.error.value = false;
     container.downloaded.value = true;
+    cleanUpCache();
     return true;
+  }
+
+  /// Clean the cache until the size is below the max cache size
+  void cleanUpCache() async {
+
+    // TODO: Test this stuff properly
+
+    // Move into isolate in the future?
+    final maxSize = Get.find<SettingController>().settings[FileSettings.maxCacheSize]!.getValue() * 1000 * 1000; // Convert to bytes
+    final dir = Directory(getFilePath());
+    final files = await dir.list().toList();
+    var cacheSize = files.fold(0, (previousValue, element) => previousValue + element.statSync().size);
+    sendLog("Cache size: $cacheSize");
+    if(cacheSize < maxSize) return;
+
+    // Delete oldest files
+    files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
+    for(final file in files) {
+      await db.cloudFile.deleteWhere((tbl) => tbl.id.equals(path.basename(file.path)));
+      final size = file.statSync().size;
+      await file.delete();
+      sendLog("Deleted file ${file.path} with size $size");
+      cacheSize -= size;
+      if(cacheSize < maxSize) {
+        break;
+      }
+    }
   }
 
   static String _cachedPath = "";
@@ -167,6 +195,10 @@ class AttachmentController extends GetxController {
 
   static String getFilePath() {
     return _cachedPath;
+  }
+
+  static String getFilePathForId(String id) {
+    return path.join(_cachedPath, id);
   }
 
   static Directory getFileDirectory() {

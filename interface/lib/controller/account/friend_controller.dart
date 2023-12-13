@@ -8,6 +8,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
@@ -188,20 +189,46 @@ class Friend {
   var profilePictureUsages = 0;
   final profilePictureImage = Rx<ui.Image?>(null);
   var profilePictureData = ProfilePictureData(1, 0, 0);
+  DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Update the profile picture of this friend
-  void updateProfilePicture(String picture, ProfilePictureData data) {
+  void updateProfilePicture(String picture, ProfilePictureData data) async {
     profilePictureData = data;
-    profilePicture.value = picture;
+    profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
+
+    // Update database
+    db.profile.insertOnConflictUpdate(ProfileData(
+      id: id, 
+      pictureId: picture, 
+      pictureData: jsonEncode(data.toJson()), 
+      data: ""
+    ));
   }
 
   /// Load the profile picture of this friend
   void loadProfilePicture() async {
-    if(profilePicture.value != null) return;
     profilePictureUsages++;
 
+    if(DateTime.now().difference(lastProfilePictureUpdate).inMinutes > 2) {
+      
+      final result = await ProfilePictureHelper.downloadProfilePicture(this);
+      if(result != null) {
+        return;
+      }
+
+      lastProfilePictureUpdate = DateTime.now();
+    }
+
+    // Return if images is already loaded
+    if(profilePictureImage.value != null) return;
+
     // Load the image
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(profilePicture.value!);
+    final data = await ProfilePictureHelper.getProfilePictureLocal(id);
+    if(data == null) {
+      return;
+    }
+    profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
+    profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
   }
 
   void disposeProfilePicture() {
