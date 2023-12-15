@@ -174,7 +174,7 @@ class Message {
       for (var attachment in attachments) {
         final decoded = AttachmentContainer.fromJson(jsonDecode(attachment));
         final container = await Get.find<AttachmentController>().findLocalFile(decoded);
-        sendLog(container?.filePath);
+        sendLog("FOUND: ${container?.filePath}");
         if(container == null) {
           attachmentsRenderer.add(decoded);
         } else {

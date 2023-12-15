@@ -11,6 +11,7 @@ import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -119,7 +120,7 @@ class Friend {
           name = '',
           tag = '',
           vaultId = '',
-          keyStorage = KeyStorage.empty() {
+          keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, "") {
     final StatusController statusController = controller ?? Get.find();
     id = statusController.id.value;
     name = statusController.name.value;
@@ -193,8 +194,6 @@ class Friend {
 
   /// Update the profile picture of this friend
   void updateProfilePicture(String picture, ProfilePictureData data) async {
-    profilePictureData = data;
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
 
     // Update database
     db.profile.insertOnConflictUpdate(ProfileData(
@@ -203,6 +202,18 @@ class Friend {
       pictureData: jsonEncode(data.toJson()), 
       data: ""
     ));
+
+    profilePictureData = data;
+    profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
+    if(profilePictureImage.value == null) {
+
+      // Redownload the profile picture
+      final result = await ProfilePictureHelper.downloadProfilePicture(this);
+      if(result == null) {
+        return;
+      }
+      profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
+    }
   }
 
   /// Load the profile picture of this friend
@@ -210,13 +221,12 @@ class Friend {
     profilePictureUsages++;
 
     if(DateTime.now().difference(lastProfilePictureUpdate).inMinutes > 2) {
-      
+      lastProfilePictureUpdate = DateTime.now();      
+
       final result = await ProfilePictureHelper.downloadProfilePicture(this);
       if(result != null) {
         return;
       }
-
-      lastProfilePictureUpdate = DateTime.now();
     }
 
     // Return if images is already loaded
@@ -225,10 +235,23 @@ class Friend {
     // Load the image
     final data = await ProfilePictureHelper.getProfilePictureLocal(id);
     if(data == null) {
+      sendLog("NOTHING FOUND");
       return;
     }
     profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
     profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
+    if(profilePictureImage.value == null) {
+
+      sendLog("NO PFP");
+
+      // Redownload the profile picture
+      final result = await ProfilePictureHelper.downloadProfilePicture(this);
+      if(result == null) {
+        return;
+      }
+      profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
+    }
+    sendLog("LOADED!!");
   }
 
   void disposeProfilePicture() {

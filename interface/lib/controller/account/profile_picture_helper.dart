@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -21,15 +22,9 @@ class ProfilePictureHelper {
   /// Download the profile picture of a friend.
   /// Returns the file ID associated with the profile picture.
   static Future<String?> downloadProfilePicture(Friend friend) async {
-    if(friend.id == ownAccountId) {
-      return null;
-    }
 
     // Remove old profile picture
     final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id))).getSingleOrNull();
-    if(oldProfile != null) {
-      await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id))).go();
-    }
 
     final json = await postRemoteJSON("/account/profile/get", <String, dynamic>{
       "id": friend.id,
@@ -39,8 +34,11 @@ class ProfilePictureHelper {
       return null;
     }
 
-    if(json["profile"]["picture"] == oldProfile?.pictureId) {
-      return null; // Nothing changed
+    if(oldProfile != null) {
+      final exists = await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).exists();
+      if(json["profile"]["picture"] == oldProfile.pictureId && exists) {
+        return null; // Nothing changed
+      }
     }
 
     // Decrypt the profile picture data
@@ -51,11 +49,30 @@ class ProfilePictureHelper {
       return null;
     }
 
+    if(oldProfile != null) {
+      
+      // Check if there is an attachment in any message using the file from the old profile picture
+      final messages = await (db.message.select()..where((tbl) => tbl.attachments.contains(oldProfile.pictureId))).get();
+      if(messages.isEmpty) {
+        final exists = await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).exists();
+        if(exists) {
+         await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).delete();
+        }
+      }
+    }
+
     // Download the file
+    sendLog("downloading new pfp..");
     final success = await Get.find<AttachmentController>().downloadAttachment(container);
     if(!success) {
       return null;
     }
+
+    if(oldProfile != null) {
+      await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id))).go();
+    }
+
+    sendLog("UPDATED");
 
     // Save the profile picture data
     friend.updateProfilePicture(json["profile"]["picture"], profileData);
@@ -97,7 +114,13 @@ class ProfilePictureHelper {
     return profile;
   }
 
-  static Future<ui.Image> loadImage(String path) async {
+  static Future<ui.Image?> loadImage(String path) async {
+    final file = File(path);
+    final exists = await file.exists();
+    if(!exists) {
+      sendLog("DOESNT EXIST: $path");
+      return null;
+    }    
     final Uint8List data = await File(path).readAsBytes();
     final Completer<ui.Image> completer = Completer();
     ui.decodeImageFromList(data, (ui.Image img) {

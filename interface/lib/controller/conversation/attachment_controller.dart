@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
@@ -11,7 +10,6 @@ import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio_rs;
 import 'package:path_provider/path_provider.dart';
@@ -75,7 +73,6 @@ class AttachmentController extends GetxController {
     sendLog("SENT ATTACHMENT: " + container.id);
     container.downloaded.value = true;
     attachments[container.id] = container;
-    db.cloudFile.insertOnConflictUpdate(container.toData());
 
     return FileUploadResponse(true, "success", container);
   }
@@ -86,15 +83,17 @@ class AttachmentController extends GetxController {
       return attachments[container.id];
     }
 
-    final res = await (db.cloudFile.select()..where((tbl) => tbl.id.equals(container.id))).getSingleOrNull();
-    if(res != null) {
-      attachments[res.id] = AttachmentContainer.fromData(res);
-      attachments[res.id]!.downloaded.value = true;
-      return attachments[res.id];
+    final file = File(getFilePathForId(container.id));
+    final exists = await file.exists();
+    if(!exists) {
+      container.error.value = true;
+      return null;
     }
-    container.error.value = true;
 
-    return null;
+    container.downloaded.value = true;
+    attachments[container.id] = container;
+
+    return container;
   }
 
   /// Download an attachment
@@ -147,9 +146,6 @@ class AttachmentController extends GetxController {
     final decrypted = decryptSymmetricBytes(encrypted, container.key);
     await file.writeAsBytes(decrypted);
 
-    // Add to database
-    await db.cloudFile.insertOnConflictUpdate(container.toData());
-
     container.downloading = false;
     container.error.value = false;
     container.downloaded.value = true;
@@ -173,7 +169,6 @@ class AttachmentController extends GetxController {
     // Delete oldest files
     files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
     for(final file in files) {
-      await db.cloudFile.deleteWhere((tbl) => tbl.id.equals(path.basename(file.path)));
       final size = file.statSync().size;
       await file.delete();
       sendLog("Deleted file ${file.path} with size $size");
@@ -244,15 +239,6 @@ class AttachmentContainer {
     );
   }
 
-  factory AttachmentContainer.fromData(CloudFileData data) {
-    return AttachmentContainer(
-      data.id,
-      data.name,
-      data.path,
-      unpackageSymmetricKey(data.key)
-    );
-  }
-
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       "id": id,
@@ -260,14 +246,5 @@ class AttachmentContainer {
       "url": url,
       "key": packageSymmetricKey(key)
     };
-  }
-
-  CloudFileData toData() {
-    return CloudFileData(
-      id: id,
-      name: name,
-      path: filePath,
-      key: packageSymmetricKey(key),
-    );
   }
 }

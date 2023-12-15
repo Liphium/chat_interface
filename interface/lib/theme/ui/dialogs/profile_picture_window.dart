@@ -40,6 +40,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
 
   void initImage() async {
     final image = await ProfilePictureHelper.loadImage(widget.file.path);
+    if(image == null) return;
 
     // Calculate the scale factor to fit the image into the window
     if(image.width < image.height) {
