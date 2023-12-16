@@ -37,6 +37,7 @@ dependencies:
   smooth_scroll_multiplatform: ^1.0.8
   audioplayers: ^5.2.1
   dio: ^5.4.0
+  encrypt: ^5.0.3
 
 dev_dependencies:
   flutter_test:
