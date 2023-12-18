@@ -1,5 +1,6 @@
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/ffi.dart';
@@ -49,9 +50,10 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
+  sendLog(packageRSAPublicKey(generateRSAKey(2048).publicKey));
+
   // Initialize sodium
   await initSodium();
-  print(packageSymmetricKey(randomSymmetricKey()));
 
   // Initialize logging from the native side
   api.createLogStream().listen((event) {

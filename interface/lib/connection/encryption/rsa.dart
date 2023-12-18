@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/export.dart';
+import 'package:sodium_libs/sodium_libs.dart';
+
+const standardKeySize = 2048;
 
 /// Generate a new RSA key pair.
 AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAKey(int keySize) {
@@ -24,25 +27,26 @@ SecureRandom _secureRandom() {
 }
 
 /// Package a public key into a string.
+///* Packaging order: modulus, exponent
 String packageRSAPublicKey(RSAPublicKey key) {
-  return base64Encode(utf8.encode("${key.modulus}:${key.exponent}"));
+  return base64Encode("${key.modulus!.toRadixString(36)}:${key.exponent!.toRadixString(36)}".toCharArray().unsignedView());
 }
 
 /// Unpackage a public key from a string.
 RSAPublicKey unpackageRSAPublicKey(String key) {
-  final parts = utf8.decode(base64Decode(key)).split(":");
-  return RSAPublicKey(BigInt.parse(parts[0]), BigInt.parse(parts[1]));
+  final parts = key.split(":");
+  return RSAPublicKey(BigInt.parse(parts[0], radix: 36), BigInt.parse(parts[1], radix: 36));
 }
-
 /// Package a private key into a string.
+///* Packaging order: modulus, public exponent, private exponent, p, q
 String packagePrivateKey(RSAPrivateKey key) {
-  return base64Encode(utf8.encode("${key.modulus}:${key.exponent}:${key.p}:${key.q}"));
+  return "${key.modulus!.toRadixString(36)}:${key.publicExponent!.toRadixString(36)}:${key.privateExponent!.toRadixString(36)}:${key.p!.toRadixString(36)}:${key.q!.toRadixString(36)}";
 }
 
 /// Unpackage a private key from a string.
 RSAPrivateKey unpackagePrivateKey(String key) {
   final parts = utf8.decode(base64Decode(key)).split(":");
-  return RSAPrivateKey(BigInt.parse(parts[0]), BigInt.parse(parts[1]), BigInt.parse(parts[2]), BigInt.parse(parts[3]));
+  return RSAPrivateKey(BigInt.parse(parts[0], radix: 36), BigInt.parse(parts[2], radix: 36), BigInt.parse(parts[3], radix: 36), BigInt.parse(parts[4], radix: 36));
 }
 
 /// Turn a public and private key into an [AsymmetricKeyPair].
