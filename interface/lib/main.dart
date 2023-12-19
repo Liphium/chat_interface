@@ -1,7 +1,6 @@
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -70,46 +69,7 @@ void main() async {
   // Initialize controllers
   initializeControllers();
 
-  runApp(ChatApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Clipping Example'),
-        ),
-        body: Center(
-          child: SizedBox(
-            width: 200,
-            child: OverflowBox(
-              minWidth: 0.0,
-              maxWidth: double.infinity,
-              minHeight: 0.0,
-              maxHeight: double.infinity,
-              alignment: Alignment.center,
-              child: Column(
-                children: [
-                  Container(
-                    color: Colors.blue,
-                    height: 100.0,
-                    child: Center(
-                      child: Text(
-                        'This is some text that overflows ausdhasdiha sdah usdhuasudha shuduhas uhdauhsduhasuhdasui asdasduisahduash dahud uhasuhduh asuhd auhsd uhuah sduh auhsduhasuhdhuasduashudasuhduhasdusahudsaudhd',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  runApp(const ChatApp());
 }
 
 Future<bool> encryptionTest() async {

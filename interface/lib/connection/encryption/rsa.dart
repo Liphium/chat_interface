@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/export.dart';
@@ -84,4 +85,22 @@ String encryptRSA64(String message, RSAPublicKey key) {
   final iv = enc.IV.fromLength(16);
 
   return encrypter.encrypt(message, iv: iv).base64;
+}
+
+// Encrypt bytes with a public key.
+Uint8List encryptRSA(Uint8List message, RSAPublicKey key) {
+  
+  final encrypter = enc.Encrypter(enc.RSA(publicKey: key));
+  final iv = enc.IV.fromLength(16);
+
+  return encrypter.encryptBytes(message, iv: iv).bytes;
+}
+
+// Decrypt bytes with a private key.
+List<int> decryptRSA(Uint8List encrypted, RSAPrivateKey key) {
+  
+  final encrypter = enc.Encrypter(enc.RSA(privateKey: key));
+  final iv = enc.IV.fromLength(16);
+
+  return encrypter.decryptBytes(enc.Encrypted(encrypted), iv: iv);
 }
