@@ -7,6 +7,8 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+const apiVersion = "v1";
+
 class ServerSetup extends Setup {
   ServerSetup() : super('loading.server', true);
 
@@ -18,7 +20,7 @@ class ServerSetup extends Setup {
     if(server == null) {
       return const ServerSelectorPage();
     } else {
-      basePath = server.value;
+      basePath = "${server.value}/$apiVersion";
       return null;
     }
   }

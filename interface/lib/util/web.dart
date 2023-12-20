@@ -1,8 +1,14 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/encryption/aes.dart';
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:http/http.dart';
+import 'package:pointycastle/export.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 String sessionToken = '';
 String refreshToken = '';
@@ -23,6 +29,7 @@ String tokensToPayload() {
 
 String nodeProtocol = "http://";
 String basePath = 'http://localhost:3000';
+RSAPublicKey? serverPublicKey;
 
 Uri server(String path) {
   return Uri.parse('$basePath$path');
@@ -39,6 +46,7 @@ Future<Response> postRq(String path, Map<String, dynamic> body) async {
   );
 }
 
+/*
 // Post request to node-backend (new)
 Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
 
@@ -66,6 +74,63 @@ Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {S
   }
 
   return jsonDecode(res.body);
+}
+*/
+
+/// Grab the public key from the server
+Future<bool> grabServerPublicKey() async {
+  
+  final res = await post(server("/pub"));
+  if(res.statusCode != 200) {
+    return false;
+  }
+
+  final json = jsonDecode(res.body);
+  serverPublicKey = unpackageRSAPublicKey(json['pub']);
+  sendLog("RETRIEVED SERVER PUBLIC KEY: $serverPublicKey");
+  
+  return true;
+}
+
+/// Post request to node-backend (with Through Cloudflare Protection)
+Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+
+  if(serverPublicKey == null) {
+    final success = await grabServerPublicKey();
+    if(!success) {
+      return <String, dynamic>{
+        "success": false,
+        "error": defaultError
+      };
+    }	
+  }
+
+  final aesKey = randomAESKey();
+  Response? res;
+  try {
+    res = await post(
+      server(path),
+      headers: <String, String>{
+        'AES-Key': base64Encode(encryptRSA(aesKey, serverPublicKey!)),
+        'Content-Type': 'application/json',
+      },
+      body: encryptRSA(jsonEncode(body).toCharArray().unsignedView(), serverPublicKey!),
+    );
+  } catch (e) {
+    return <String, dynamic> {
+      "success": false,
+      "error": "server.error"
+    };
+  }
+
+  if(res.statusCode != 200) {
+    return <String, dynamic>{
+      "success": false,
+      "error": defaultError
+    };
+  }
+
+  return jsonDecode(String.fromCharCodes(decryptAES(res.bodyBytes, base64Encode(aesKey))));
 }
 
 // Post request to node-backend with any token
