@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
@@ -22,13 +20,7 @@ class KeySetup extends Setup {
   Future<Widget?> load() async {
 
     // Get keys from the server
-    final publicRes = await postRqAuthorized("/account/keys/public/get", <String, dynamic>{});
-
-    if(publicRes.statusCode != 200) {
-      return const ErrorPage(title: "key.error");
-    }
-
-    final pubBody = jsonDecode(publicRes.body);
+    final pubBody = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});
     var privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
 
     if(!pubBody["success"]) {
@@ -80,13 +72,7 @@ class KeySetup extends Setup {
     }
 
     // Grab profile key from server
-    final res = await postRqAuthorized("/account/keys/profile/get", <String, dynamic>{});
-
-    if(res.statusCode != 200) {
-      return const ErrorPage(title: "key.error");
-    }
-
-    final json = jsonDecode(res.body);
+    final json = await postAuthorizedJSON("/account/keys/profile/get", <String, dynamic>{});
     if(!json["success"]) {
       return const ErrorPage(title: "key.error");
     }

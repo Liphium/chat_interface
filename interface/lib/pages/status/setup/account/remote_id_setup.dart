@@ -17,12 +17,7 @@ String randomRemoteID() {
 // Add a new remote ID (returns error message if failed)
 Future<String?> addNewRemoteID() async {
   
-  final res = await postRqAuthorized("/account/remote_id", <String, dynamic>{});
-  if(res.statusCode != 200) {
-    return "server.error";
-  }
-
-  final json = jsonDecode(res.body);
+  final json = await postAuthorizedJSON("/account/remote_id", <String, dynamic>{});
   if(!json["success"]) {
     return json["error"];
   }

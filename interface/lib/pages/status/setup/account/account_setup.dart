@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/error/server_offline_page.dart';
-import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -15,13 +12,7 @@ class AccountSetup extends Setup {
   Future<Widget?> load() async {
 
     // Get account from database
-    var res = await postRqAuthorized("/account/me", <String, dynamic>{});
-
-    if(res.statusCode != 200) {
-      return const LoginPage();
-    }
-
-    var body = jsonDecode(res.body);
+    final body = await postAuthorizedJSON("/account/me", <String, dynamic>{});
     var account = body["account"];
 
     if(!body["success"]) {
