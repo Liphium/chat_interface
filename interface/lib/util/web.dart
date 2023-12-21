@@ -67,7 +67,6 @@ Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {S
   final aesBase64 = base64Encode(aesKey);
   Response? res;
   final authTag = base64Encode(encryptRSA(aesKey, serverPublicKey!));
-  sendLog(authTag);
   try {
     res = await post(
       server(path),
