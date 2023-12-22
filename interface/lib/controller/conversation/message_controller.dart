@@ -229,6 +229,8 @@ class Message {
       type = MessageType.values[contentJson["t"] ?? 0];
       if(type == MessageType.text) {
         content = utf8.decode(base64Decode(contentJson["c"]));
+      } else {
+        content = contentJson["c"];
       }
       signature = contentJson["s"];
     } else {
@@ -247,7 +249,12 @@ class Message {
       verified.value = false;
       return;
     }
-    final hash = hashSha(base64Encode(utf8.encode(content)) + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+    String hash;
+    if(type != MessageType.text) {
+      hash = hashSha(content + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+    } else {
+      hash = hashSha(base64Encode(utf8.encode(content)) + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+    }
     sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
     verified.value = checkSignature(signature, sender.signatureKey, hash);
     db.message.insertOnConflictUpdate(entity);

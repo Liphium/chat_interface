@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
@@ -63,13 +62,19 @@ Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {S
     }	
   }
 
+  return _postTCP(serverPublicKey!, server(path).toString(), body, defaultError: defaultError, token: token);
+}
+
+/// Post request to any server (with Through Cloudflare Protection)
+Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) async {
+
   final aesKey = randomAESKey();
   final aesBase64 = base64Encode(aesKey);
   Response? res;
-  final authTag = base64Encode(encryptRSA(aesKey, serverPublicKey!));
+  final authTag = base64Encode(encryptRSA(aesKey, key));
   try {
     res = await post(
-      server(path),
+      Uri.parse(url),
       headers: <String, String>{
         if(token != null) "Authorization": "Bearer $token",
         "Content-Type": "application/json",

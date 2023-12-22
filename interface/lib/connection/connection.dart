@@ -1,4 +1,7 @@
 
+import 'dart:convert';
+
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
@@ -6,6 +9,9 @@ import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/web.dart';
+import 'package:http/http.dart';
+import 'package:pointycastle/export.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'impl/setup_listener.dart';
@@ -23,12 +29,23 @@ class Connector {
   final _afterSetupQueue = <Event>[];
   bool initialized = false;
   bool _connected = false;
+  late final RSAPublicKey nodePublicKey;
 
-  void connect(String url, String token, {bool restart = true, Function()? onDone}) {
+  Future<bool> connect(String url, String token, {bool restart = true, Function()? onDone}) async {
     initialized = true;
     connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
     _connected = true;
 
+    // Grab public key from the node
+    final res = await post(Uri.parse("$nodeProtocol$nodeDomain/pub"));
+    if(res.statusCode != 200) {
+      return false;
+    }
+
+    final json = jsonDecode(res.body);
+    nodePublicKey = unpackageRSAPublicKey(json['pub']);
+    sendLog("RETRIEVED NODE PUBLIC KEY: $serverPublicKey");
+    
     connection.stream.listen((msg) {
         sendLog(msg);
         Event event = Event.fromJson(msg);
@@ -57,6 +74,8 @@ class Connector {
         }
       },
     );
+
+    return true;
   }
 
   void disconnect() {
@@ -104,9 +123,12 @@ class Connector {
 
 Connector connector = Connector();
 
-void startConnection(String node, String connectionToken) async {
-  if(connector.initialized) return;
-  connector.connect("ws://$node/gateway", connectionToken);
+Future<bool> startConnection(String node, String connectionToken) async {
+  if(connector.initialized) return false;
+  final res = await connector.connect("ws://$node/gateway", connectionToken);
+  if(!res) {
+    return false;
+  }
 
   setupSetupListeners();
   setupStoredActionListener();
@@ -115,4 +137,6 @@ void startConnection(String node, String connectionToken) async {
 
   // Add listeners for Spaces
   setupSpaceListeners();
+
+  return true;
 }

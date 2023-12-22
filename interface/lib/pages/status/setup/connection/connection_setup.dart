@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
@@ -22,15 +20,17 @@ class ConnectionSetup extends Setup {
       "token": refreshToken,
     });
     if(!body["success"]) {
-
       return ErrorPage(title: body["error"]);
     }
 
-    // Start connection
-    startConnection(body["domain"], body["token"]);
-
     nodeId = body["id"];
     nodeDomain = body["domain"];
+
+    // Start connection
+    final res = await startConnection(body["domain"], body["token"]);
+    if(!res) {
+      return const ErrorPage(title: "server.error");
+    }
 
     await Future.delayed(500.ms);
 
