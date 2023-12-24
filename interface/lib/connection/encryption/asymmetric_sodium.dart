@@ -36,7 +36,7 @@ DecryptionResult decryptAsymmetricAuth(Uint8List publicKey, SecureKey secretKey,
   final nonce = cipherText.sublist(0, sodium.crypto.secretBox.nonceBytes);
   final encrypted = cipherText.sublist(sodium.crypto.secretBox.nonceBytes);
 
-  final decrypted;
+  final Uint8List decrypted;
   try {
     decrypted = sodium.crypto.box.openEasy(
       cipherText: encrypted,

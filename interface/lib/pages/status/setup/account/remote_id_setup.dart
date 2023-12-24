@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:chat_interface/pages/status/error/error_page.dart';

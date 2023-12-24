@@ -1,10 +1,12 @@
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/widgets.dart';
+import 'package:pointycastle/export.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 import '../setup_manager.dart';
@@ -12,12 +14,16 @@ import '../setup_manager.dart';
 late SecureKey profileKey;
 late KeyPair asymmetricKeyPair;
 late KeyPair signatureKeyPair;
+late AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> rsaKeyPair;
 
 class KeySetup extends Setup {
   KeySetup() : super("loading.keys", false);
 
   @override
   Future<Widget?> load() async {
+
+    // Generate RSA key pair
+    rsaKeyPair = generateRSAKey(standardKeySize);
 
     // Get keys from the server
     final pubBody = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});

@@ -11,7 +11,6 @@ import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';

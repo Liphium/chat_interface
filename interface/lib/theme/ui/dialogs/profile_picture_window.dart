@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';

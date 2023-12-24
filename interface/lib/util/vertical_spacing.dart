@@ -41,7 +41,7 @@ String formatTime(DateTime time) {
 
 class ExpandEffect extends CustomEffect {
 
-  ExpandEffect({Curve? curve, Duration? duration, Axis? axis, Alignment? alignment, Duration? delay}) : super(builder: (context, value, child) {
+  ExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, super.delay}) : super(builder: (context, value, child) {
     return ClipRect(
       child: Align(
         alignment: alignment ?? Alignment.topCenter,
@@ -50,13 +50,13 @@ class ExpandEffect extends CustomEffect {
         child: child,
       ),
     );
-  }, curve: curve, duration: duration, delay: delay);
+  });
 
 }
 
 class ReverseExpandEffect extends CustomEffect {
 
-  ReverseExpandEffect({Curve? curve, Duration? duration, Axis? axis, Alignment? alignment, Duration? delay}) : super(builder: (context, value, child) {
+  ReverseExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, super.delay}) : super(builder: (context, value, child) {
     return ClipRect(
       child: Align(
         alignment: alignment ?? Alignment.topCenter,
@@ -65,6 +65,6 @@ class ReverseExpandEffect extends CustomEffect {
         child: child,
       ),
     );
-  }, curve: curve, duration: duration, delay: delay);
+  });
 
 }

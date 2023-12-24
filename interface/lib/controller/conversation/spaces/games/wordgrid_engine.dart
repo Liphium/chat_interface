@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class WordgridEngine extends Engine {
 
-  WordgridEngine(String session) : super(session);
+  WordgridEngine(super.session);
 
   @override
   void receiveEvent(String event, dynamic data) {

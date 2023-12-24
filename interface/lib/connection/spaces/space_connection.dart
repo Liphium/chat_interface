@@ -7,14 +7,17 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_member_cont
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
+/// Connector the the space node.
 Connector spaceConnector = Connector();
 
+/// Connect to the space node.
 void createSpaceConnection(String domain, String token) {
   spaceConnector.connect("ws://$domain/gateway", token, restart: false, onDone: (() {
     Get.find<SpacesController>().leaveCall();
   }));
 }
 
+/// Setup listeners for space events.
 void setupSpaceListeners() {
   
   // Listen for room data changes

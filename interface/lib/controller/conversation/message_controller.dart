@@ -242,7 +242,7 @@ class Message {
   /// Verifies the signature of the message
   void verifySignature() async {
     final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
-    sendLog(conversation.members.toString() + " | " + this.sender);
+    sendLog("${conversation.members} | ${this.sender}");
     final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
     if(sender == null) {
       sendLog("NO SENDER FOUND");

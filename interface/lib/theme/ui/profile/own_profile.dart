@@ -1,16 +1,11 @@
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/sidebar/files/files_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
-import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:drift_db_viewer/drift_db_viewer.dart';

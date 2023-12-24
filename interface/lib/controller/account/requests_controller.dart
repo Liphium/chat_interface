@@ -119,7 +119,7 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
 void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
   
   // Encrypt friend request
-  sendLog("OWN STORED ACTION KEY: ${storedActionKey}");
+  sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
     "tag": controller.tag.value,

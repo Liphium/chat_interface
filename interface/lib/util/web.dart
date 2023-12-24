@@ -117,23 +117,14 @@ Future<Map<String, dynamic>> postRemoteJSON(String path, Map<String, dynamic> bo
 // Post request to chat-node with any token (node needs to be connected already) (new)
 Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
 
-  final res = await post(
-    Uri.parse("$nodeProtocol$nodeDomain$path"),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${randomRemoteID()}'
-    },
-    body: jsonEncode(body),
-  );
-
-  if(res.statusCode != 200) {
+  if(connector.nodePublicKey == null) {
     return <String, dynamic>{
       "success": false,
       "error": defaultError
     };
   }
 
-  return jsonDecode(res.body);
+  return _postTCP(connector.nodePublicKey!, "$nodeProtocol$nodeDomain$path", body, defaultError: defaultError, token: randomRemoteID());
 }
 
 String padBase64(String str) {

@@ -70,7 +70,7 @@ class AttachmentController extends GetxController {
     final file2 = File(path.join(dir.path, json["id"].toString()));
     await file2.writeAsBytes(bytes);
     final container = AttachmentContainer(json["id"], data.file.name, json["url"], key);
-    sendLog("SENT ATTACHMENT: " + container.id);
+    sendLog("SENT ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
     attachments[container.id] = container;
 
