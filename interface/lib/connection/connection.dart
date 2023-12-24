@@ -11,6 +11,7 @@ import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart'
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -36,9 +37,10 @@ class Connector {
   String? aesBase64;
 
   Future<bool> connect(String url, String token, {bool restart = true, Function()? onDone}) async {
-    initialized = true;
-    connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token]);
-    _connected = true;
+
+    // Generate an AES key for the connection
+    aesKey = randomAESKey();  
+    aesBase64 = base64Encode(aesKey!);
 
     // Grab public key from the node
     final res = await post(Uri.parse("$nodeProtocol$nodeDomain/pub"));
@@ -49,11 +51,30 @@ class Connector {
     final json = jsonDecode(res.body);
     nodePublicKey = unpackageRSAPublicKey(json['pub']);
     sendLog("RETRIEVED NODE PUBLIC KEY: $nodePublicKey");
-    
+
+    // Encrypt AES key for the node
+    final encryptedKey = encryptRSA(aesKey!, nodePublicKey!);
+
+    initialized = true;
+    connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token, base64Encode(encryptedKey)]);
+    _connected = true;
+
     connection.stream.listen((encrypted) {
 
+        if(encrypted is! Uint8List) {
+          sendLog("RECEIVED INVALID MESSAGE: $encrypted");
+          return;
+        }
+
         // Decrypt the message (using the AES key)
-        final msg = decryptAES(encrypted, aesBase64!);
+        Uint8List msg;
+        try {
+          msg = decryptAES(encrypted, aesBase64!);
+        } catch(e) {
+          sendLog("FAILED TO DECRYPT MESSAGE: ${String.fromCharCodes(encrypted)} ${aesBase64!}");
+          e.printError();
+          return;
+        }
 
         // Decode the message
         Event event = Event.fromJson(String.fromCharCodes(msg));
@@ -113,6 +134,8 @@ class Connector {
   /// Optionally, you can specify a [waiter] to wait for the response.
   void sendAction(Message message, {Function(Event)? handler, Function()? waiter}) {
 
+    sendLog("SENDING ACTION: ${message.action}");
+
     // Register the handler and waiter
     if(handler != null) {
       _handlers[message.action] = handler;
@@ -121,19 +144,8 @@ class Connector {
       _waiters[message.action] = waiter;
     }
 
-    //* Encryption stuff
-    // Check if AES key is set
-    aesKey = randomAESKey();
-    aesBase64 = base64Encode(aesKey!);
-
-    // Compute the message (Format: [encrypted AES key (with RSA)][encrypted message (with AES)])
-    final encryptedKey = encryptRSA(aesKey!, nodePublicKey!);
-    sendLog(encryptedKey.length);
-    final messageBytes = encryptedKey.toList();
-    messageBytes.addAll(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
-
-    // Send the message
-    connection.sink.add(messageBytes);
+    // Send and encrypt the message (using AES key)
+    connection.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
   }
 
   void wait(String action, Function() waiter) {
