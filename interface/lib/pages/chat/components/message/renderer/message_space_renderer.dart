@@ -35,12 +35,9 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
     sendLog(widget.message.content);
     final container = SpaceConnectionContainer.fromJson(jsonDecode(widget.message.content));
 
-    return Padding(
-      padding: const EdgeInsets.only(top: defaultSpacing),
-      child: InkWell(
-        splashFactory: NoSplash.splashFactory,
-        splashColor: theme.hoverColor,
-        onTap: () => {},
+    return SelectionContainer.disabled(
+      child: Padding(
+        padding: const EdgeInsets.only(top: defaultSpacing),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             vertical: elementSpacing,
@@ -49,14 +46,14 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
+        
               //* Icon
               SizedBox(
                 width: 50,
                 child: Center(child: Icon(Icons.speaker_group, size: 30, color: theme.colorScheme.onPrimary)),
               ),
               horizontalSpacing(sectionSpacing),
-
+        
               //* Space info
               Expanded(
                 child: Column(
@@ -69,7 +66,7 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
                         Text(" invited you to a space.", style: theme.textTheme.bodyLarge),
                       ],
                     ),
-
+        
                     verticalSpacing(defaultSpacing * 0.5),
                     
                     //* Space embed
@@ -91,7 +88,7 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
                             ]
                           ),
                           horizontalSpacing(sectionSpacing),
-
+        
                           //* Join button
                           FJElevatedButton(
                             smallCorners: true,
@@ -104,9 +101,9 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
                   ],
                 )
               ),
-
+        
               horizontalSpacing(defaultSpacing),
-
+        
               //* Verified
               Obx(() =>
                 Visibility(
