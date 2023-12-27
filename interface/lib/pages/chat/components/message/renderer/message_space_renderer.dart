@@ -4,7 +4,9 @@ import 'dart:math';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -35,91 +37,64 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
     sendLog(widget.message.content);
     final container = SpaceConnectionContainer.fromJson(jsonDecode(widget.message.content));
 
-    return SelectionContainer.disabled(
-      child: Padding(
-        padding: const EdgeInsets.only(top: defaultSpacing),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: elementSpacing,
-            horizontal: sectionSpacing,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-        
-              //* Icon
-              SizedBox(
-                width: 50,
-                child: Center(child: Icon(Icons.speaker_group, size: 30, color: theme.colorScheme.onPrimary)),
-              ),
-              horizontalSpacing(sectionSpacing),
-        
-              //* Space info
-              Expanded(
-                child: Column(
+    return RepaintBoundary(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: elementSpacing,
+              horizontal: sectionSpacing,
+            ),
+            child: Row(
+              textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+              
+                //* Avatar
+                Visibility(
+                  visible: !widget.last,
+                  replacement: const SizedBox(width: 34), //* Show timestamp instead
+                  child: Tooltip(
+                    message: sender.name,
+                    child: UserAvatar(id: sender.id, size: 34)
+                  ),
+                ),
+                horizontalSpacing(defaultSpacing),
+              
+                //* Message
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(sender.name, style: theme.textTheme.labelLarge),
-                        Text(" invited you to a space.", style: theme.textTheme.bodyLarge),
-                      ],
-                    ),
-        
-                    verticalSpacing(defaultSpacing * 0.5),
-                    
-                    //* Space embed
-                    Container(
-                      padding: const EdgeInsets.all(defaultSpacing),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: theme.colorScheme.onBackground,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Space ${container.roomId}", style: theme.textTheme.labelLarge),
-                              verticalSpacing(elementSpacing),
-                              renderMiniAvatars(10),
-                            ]
-                          ),
-                          horizontalSpacing(sectionSpacing),
-        
-                          //* Join button
-                          FJElevatedButton(
-                            smallCorners: true,
-                            onTap: () => Get.find<SpacesController>().join(container), 
-                            child: Text("Join the fun!", style: theme.textTheme.labelMedium)
-                          )
-                        ],
-                      ),
-                    )
+                                      
+                    //* Content
+                    SpaceRenderer(container: container),
                   ],
-                )
-              ),
-        
-              horizontalSpacing(defaultSpacing),
-        
-              //* Verified
-              Obx(() =>
-                Visibility(
-                  visible: !widget.message.verified.value,
-                  child: Tooltip(
-                    message: "chat.not.signed".tr,
-                    child: const Icon(
-                      Icons.warning_rounded,
-                      color: Colors.amber,
+                ),
+              
+                horizontalSpacing(defaultSpacing),
+              
+                Obx(() {
+                  final verified = widget.message.verified.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: elementSpacing),
+                    child: Visibility(
+                      visible: !verified,
+                      child: Tooltip(
+                        message: "chat.not.signed".tr,
+                        child: const Icon(
+                          Icons.warning_rounded,
+                          color: Colors.amber,
+                        ),
+                      ),
                     ),
-                  ),
-                )
-              )
-            ],
+                  );
+                })
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -23,7 +23,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:sodium_libs/sodium_libs.dart';
 
 class SpacesController extends GetxController {
@@ -312,15 +312,20 @@ class SpaceConnectionContainer extends ShareContainer {
   }
 
   Future<SpaceInfo> getInfo({bool timer = false}) async {
-    final req = await post(
-      Uri.parse("$nodeProtocol$node/info"),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "room": roomId
-      }),
-    );
+    final http.Response req;
+    try {
+      req = await http.post(
+        Uri.parse("$nodeProtocol$node/info"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "room": roomId
+        }),
+      );
+    } catch (e) {
+      return SpaceInfo.notLoaded();
+    }
     if(req.statusCode != 200) {
       return SpaceInfo.notLoaded();
     }

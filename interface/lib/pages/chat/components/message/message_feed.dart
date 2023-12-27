@@ -19,6 +19,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/message_sp
 import 'package:chat_interface/pages/chat/components/message/renderer/message_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -100,48 +101,87 @@ class _MessageFeedState extends State<MessageFeed> {
                           child: SelectableRegion(
                             focusNode: textNode,
                             selectionControls: desktopTextSelectionControls,
-                            child: Obx(() {
-                              return ListView.builder(
-                                itemCount: controller.messages.length + 1,
-                                reverse: true,
-                                shrinkWrap: true,
-                                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                                itemBuilder: (context, index) {
-                                    
-                                  if(index == 0) {
-                                    return verticalSpacing(defaultSpacing);
-                                  }
-                                    
-                                  final message = controller.messages[index - 1];
-                                  if(message.type == MessageType.system) {
-                                    return SystemMessageRenderer(message: message, accountId: MessageController.systemSender);
-                                  }
-                                  final conversationToken = controller.selectedConversation.value.members[message.sender]!;
-                                  final sender = friendController.friends[conversationToken.account];
-                                  final self = conversationToken.account == statusController.id.value;
-                                            
-                                  bool last = false;
-                                  if(index != controller.messages.length) {
-                                    final lastMessage = controller.messages[index];
-                                    last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text && message.createdAt.difference(lastMessage.createdAt).inMinutes < 10;
-                                  }
-                                    
-                                  switch(message.type) {
-                                    
-                                    case MessageType.text:
-                                      return MessageRenderer(message: message, accountId: conversationToken.account, self: self, last: last,
-                                      sender: self ? Friend.me() : sender);
-                                            
-                                    case MessageType.call:
-                                      return SpaceMessageRenderer(message: message, self: self, last: last,
-                                      sender: self ? Friend.me() : sender);
-                          
-                                    case MessageType.system:
-                                      return SystemMessageRenderer(message: message, accountId: conversationToken.account);
-                                  }
-                                },
-                              );
-                            }),
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 1200),
+                                child: Obx(() {
+                                  return ListView.builder(
+                                    itemCount: controller.messages.length + 1,
+                                    reverse: true,
+                                    shrinkWrap: true,
+                                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                    itemBuilder: (context, index) {
+                                        
+                                      if(index == 0) {
+                                        return verticalSpacing(defaultSpacing);
+                                      }
+                                        
+                                      final message = controller.messages[index - 1];
+                                      if(message.type == MessageType.system) {
+                                        return SystemMessageRenderer(message: message, accountId: MessageController.systemSender);
+                                      }
+                                      final conversationToken = controller.selectedConversation.value.members[message.sender]!;
+                                      final sender = friendController.friends[conversationToken.account];
+                                      final self = conversationToken.account == statusController.id.value;
+                                                
+                                      bool last = false;
+                                      if(index != controller.messages.length) {
+                                        final lastMessage = controller.messages[index];
+                                        last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text && message.createdAt.difference(lastMessage.createdAt).inMinutes < 10;
+                                      }
+
+                                      final Widget renderer;
+                                      switch(message.type) {
+                                        
+                                        case MessageType.text:
+                                          renderer = MessageRenderer(message: message, accountId: conversationToken.account, self: self, last: last,
+                                          sender: self ? Friend.me() : sender);
+                                                
+                                        case MessageType.call:
+                                          renderer =  SpaceMessageRenderer(message: message, self: self, last: last,
+                                          sender: self ? Friend.me() : sender);
+                                                          
+                                        case MessageType.system:
+                                          renderer = SystemMessageRenderer(message: message, accountId: conversationToken.account);
+                                      }
+
+                                      final hovering = false.obs;
+                                      return MouseRegion(
+                                        onEnter: (event) => hovering.value = true,
+                                        onExit: (event) => hovering.value = false,
+                                        child: Row(
+                                          textDirection: self ? TextDirection.rtl : TextDirection.ltr,
+                                          children: [
+                                            Flexible(
+                                              child: renderer,
+                                            ),
+                                            Obx(() =>
+                                              SizedBox(
+                                                height: 34,
+                                                child: Visibility(
+                                                  visible: hovering.value,
+                                                  child: Row(
+                                                    children: [
+                                                      LoadingIconButton(
+                                                        iconSize: 22,
+                                                        extra: 4,
+                                                        padding: 4,
+                                                        onTap: () {}, 
+                                                        icon: Icons.more_horiz
+                                                      )
+                                                    ],
+                                                  )
+                                                ),
+                                              )
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }),
+                              ),
+                            ),
                           ),
                         ),
                       ),

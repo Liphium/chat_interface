@@ -4,32 +4,36 @@ import 'package:get/get.dart';
 
 class LoadingIconButton extends StatelessWidget {
 
-  final RxBool loading;
+  final RxBool? loading;
   final IconData icon;
   final Color? color;
   final String? tooltip;
   final double iconSize;
+  final double extra;
   final double padding;
   final Function() onTap;
   final Function(BuildContext)? onTapContext;
 
-  const LoadingIconButton({super.key, required this.loading, required this.onTap, this.tooltip, this.onTapContext, required this.icon, this.color, this.iconSize = 23, this.padding = 0});
+  const LoadingIconButton({super.key, this.loading, required this.onTap, this.tooltip, this.onTapContext, required this.icon, this.color, this.extra = 17, this.iconSize = 23, this.padding = 0});
 
   @override
   Widget build(BuildContext context) {
+
     return Tooltip(
       message: tooltip ?? "",
       child: SizedBox(
-        width: iconSize+17+padding,
-        height: iconSize+17+padding,
+        width: iconSize+extra+padding,
+        height: iconSize+extra+padding,
         child: Material(
           borderRadius: BorderRadius.circular(50),
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(50),
             onTap: () {
-              if(loading.value) {
-                return;
+              if(loading != null) {
+                if(loading!.value) {
+                  return;
+                }
               }
     
               onTap();
@@ -40,13 +44,13 @@ class LoadingIconButton extends StatelessWidget {
             hoverColor: Get.theme.hoverColor,
             child: Padding(
               padding: EdgeInsets.all(padding),
-              child: Obx(() => loading.value ? 
+              child: loading != null ? Obx(() => loading!.value ? 
               Padding(
                 padding: const EdgeInsets.all(defaultSpacing),
                 child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
               ) : 
               Icon(icon, color: color ?? Colors.white, size: iconSize),
-              ),
+              ) : Icon(icon, color: color ?? Colors.white, size: iconSize)
             ),
           ),
         ),
