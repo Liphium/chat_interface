@@ -20,6 +20,9 @@ import 'package:chat_interface/pages/chat/components/message/renderer/message_re
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -145,6 +148,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                           renderer = SystemMessageRenderer(message: message, accountId: conversationToken.account);
                                       }
 
+                                      final GlobalKey contextMenuKey = GlobalKey();
                                       final hovering = false.obs;
                                       return MouseRegion(
                                         onEnter: (event) => hovering.value = true,
@@ -163,10 +167,13 @@ class _MessageFeedState extends State<MessageFeed> {
                                                   child: Row(
                                                     children: [
                                                       LoadingIconButton(
+                                                        key: contextMenuKey,
                                                         iconSize: 22,
                                                         extra: 4,
                                                         padding: 4,
-                                                        onTap: () {}, 
+                                                        onTap: () {
+                                                          Get.dialog(MessageOptionsWindow(data: ContextMenuData.fromKey(contextMenuKey)));
+                                                        }, 
                                                         icon: Icons.more_horiz
                                                       )
                                                     ],

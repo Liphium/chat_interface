@@ -3,11 +3,9 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/duration_renderer.dart';
-import 'package:chat_interface/theme/ui/dialogs/join_space_dialog.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 class SpaceRenderer extends StatefulWidget {
 
@@ -64,7 +62,6 @@ class _SpaceRendererState extends State<SpaceRenderer> {
       
         // TODO: Make this better and compatible with messages too
 
-        var returnNotExisting = _loading.value || _info.value == null;
         if(_loading.value || _info.value == null) {
           return Center(child: Padding(
             padding: const EdgeInsets.all(defaultSpacing),

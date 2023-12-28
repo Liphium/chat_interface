@@ -5,7 +5,6 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -33,7 +32,6 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
   Widget build(BuildContext context) {
 
     Friend sender = widget.sender ?? Friend.system();
-    ThemeData theme = Theme.of(context);
     sendLog(widget.message.content);
     final container = SpaceConnectionContainer.fromJson(jsonDecode(widget.message.content));
 

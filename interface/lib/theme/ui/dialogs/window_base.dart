@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -83,7 +84,7 @@ class DialogBase extends StatelessWidget {
 
 class SlidingWindowBase extends StatelessWidget {
 
-  final Offset position;
+  final ContextMenuData position;
   final Widget child;
 
   const SlidingWindowBase({super.key, required this.position, required this.child});
@@ -98,8 +99,10 @@ class SlidingWindowBase extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          left: position.dx,
-          top: position.dy,
+          left: position.fromLeft ? position.start.dx : null,
+          right: position.fromLeft ? null : position.start.dx,
+          top: position.fromTop ? position.start.dy : null,
+          bottom: position.fromTop ? null : position.start.dy,
           child: Animate(
             effects: [
               MoveEffect(
@@ -133,4 +136,61 @@ class SlidingWindowBase extends StatelessWidget {
       ],
     );
   }
+}
+
+class ContextMenuData {
+  final Offset start;
+  final bool fromTop;
+  final bool fromLeft;
+
+  const ContextMenuData(this.start, this.fromTop, this.fromLeft);
+
+  factory ContextMenuData.fromKey(GlobalKey key) {
+    
+    final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
+    var position = renderBox.localToGlobal(Offset.zero);
+    final widgetDimensions = renderBox.size;
+    final screenDimensions = Get.mediaQuery.size;
+
+    // Calculate y position
+    final bool fromTop;
+    if(position.dy > screenDimensions.height/2) {
+      fromTop = false;
+      position = Offset(position.dx, screenDimensions.height - position.dy - widgetDimensions.height);
+    } else {
+      fromTop = true;
+    }
+
+    // Calculate x position
+    final bool fromLeft;
+    if(position.dx > screenDimensions.width - 300) {
+      fromLeft = false;
+      position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
+    } else {
+      sendLog("from left");
+      fromLeft = true;
+      position = Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
+    }
+    sendLog(fromLeft);
+
+    return ContextMenuData(position, fromTop, fromLeft);
+
+  }
+}
+
+Offset getContextMenuCoordiantes(GlobalKey key) {
+  final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
+  var position = renderBox.localToGlobal(Offset.zero);
+  final widgetDimensions = renderBox.size;
+  final screenDimensions = Get.mediaQuery.size;
+
+  if(position.dx + 500 + widgetDimensions.width > screenDimensions.width) {
+    position = Offset(position.dx - 300 + widgetDimensions.width, position.dy + widgetDimensions.height + defaultSpacing);
+  }
+
+  if(position.dy > screenDimensions.height) {
+    position = Offset(position.dx, position.dy - 500 + widgetDimensions.height);
+  }
+
+  return position;
 }

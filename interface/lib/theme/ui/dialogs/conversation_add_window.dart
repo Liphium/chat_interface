@@ -44,7 +44,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
     FriendController friendController = Get.find();
 
     return SlidingWindowBase(
-      position: widget.position,
+      position: ContextMenuData(widget.position, true, true),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -38,7 +38,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
     ThemeData theme = Theme.of(context);
 
     return SlidingWindowBase(
-      position: widget.position,
+      position: ContextMenuData(widget.position, true, true),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
