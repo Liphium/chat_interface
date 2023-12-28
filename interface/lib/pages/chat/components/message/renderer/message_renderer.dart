@@ -62,66 +62,70 @@ class _MessageRendererState extends State<MessageRenderer> {
                 ),
                 horizontalSpacing(defaultSpacing),
               
-                //* Message
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                //* Message content
+                Row(
+                  textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                                      
-                    //* Content
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: widget.self ? theme.colorScheme.primary : theme.colorScheme.primaryContainer,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Visibility(
-                            visible: widget.message.content.isNotEmpty,
-                            child: Text(widget.message.content, style: theme.textTheme.labelLarge)
-                          ),
-                        ],
-                      ),
-                    ),
-                                    
-                    //* Attachments
-                    SelectionContainer.disabled(
-                      child: Obx(() {
-                        final renderer = widget.message.attachmentsRenderer;
-                        return Visibility(
-                          visible: widget.message.attachmentsRenderer.isNotEmpty,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: elementSpacing),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: renderer.map((e) => AttachmentRenderer(container: e)).toList(),
+                    Column(
+                      crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                      children: [
+                                          
+                        //* Message content (text)
+                        Visibility(
+                          visible: widget.message.content.isNotEmpty,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              color: widget.self ? theme.colorScheme.primary : theme.colorScheme.primaryContainer,
                             ),
+                            child: Text(widget.message.content, style: theme.textTheme.labelLarge),
                           ),
-                        );
-                      }),
-                    ), 
-                  ],
-                ),
-              
-                horizontalSpacing(defaultSpacing),
-              
-                Obx(() {
-                  final verified = widget.message.verified.value;
-                  return Padding(
-                    padding: const EdgeInsets.only(top: elementSpacing),
-                    child: Visibility(
-                      visible: !verified,
-                      child: Tooltip(
-                        message: "chat.not.signed".tr,
-                        child: const Icon(
-                          Icons.warning_rounded,
-                          color: Colors.amber,
                         ),
-                      ),
+                                        
+                        //* Attachments
+                        SelectionContainer.disabled(
+                          child: Obx(() {
+                            final renderer = widget.message.attachmentsRenderer;
+                            return Visibility(
+                              visible: widget.message.attachmentsRenderer.isNotEmpty,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: renderer.map((e) => AttachmentRenderer(container: e)).toList(),
+                                ),
+                              ),
+                            );
+                          }),
+                        ), 
+                      ],
                     ),
-                  );
-                })
+
+                    horizontalSpacing(defaultSpacing),
+
+                    //* Timestamp
+                    Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                  
+                    horizontalSpacing(defaultSpacing),
+                  
+                    //* Verified indicator
+                    Obx(() {
+                      final verified = widget.message.verified.value;
+                      return Visibility(
+                        visible: !verified,
+                        child: Tooltip(
+                          message: "chat.not.signed".tr,
+                          child: const Icon(
+                            Icons.warning_rounded,
+                            color: Colors.amber,
+                          ),
+                        ),
+                      );
+                    })
+                  ],
+                )
               ],
             ),
           ),

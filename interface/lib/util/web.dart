@@ -37,7 +37,12 @@ Uri server(String path) {
 /// Grab the public key from the server
 Future<bool> grabServerPublicKey() async {
   
-  final res = await post(server("/pub"));
+  final Response res;
+  try {
+    res = await post(server("/pub"));
+  } catch(e) {
+    return false;
+  }
   if(res.statusCode != 200) {
     return false;
   }

@@ -74,6 +74,12 @@ class ChatPageTranslations extends Translations {
       'chat.member_leave': '@name has left the conversation.',
       'chat.new_admin': '@name is now an Admin because the original Admin left the conversation.',
 
+      // Message menu
+      'message.info': 'Info',
+      'message.copy': 'Copy content',
+      'message.profile': 'Open profile',
+      'message.delete': 'Delete message',
+
       // Spaces
       'join.space': 'Join Space',
       'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',

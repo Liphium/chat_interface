@@ -85,9 +85,10 @@ class DialogBase extends StatelessWidget {
 class SlidingWindowBase extends StatelessWidget {
 
   final ContextMenuData position;
+  final bool lessPadding;
   final Widget child;
 
-  const SlidingWindowBase({super.key, required this.position, required this.child});
+  const SlidingWindowBase({super.key, required this.position, this.lessPadding = false, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +108,7 @@ class SlidingWindowBase extends StatelessWidget {
             effects: [
               MoveEffect(
                 duration: 400.ms,
-                begin: const Offset(0, -100),
+                begin: Offset(0, -100 * (position.fromTop ? 1 : -1)),
                 curve: scaleAnimationCurve
               ),
               ShakeEffect(
@@ -126,7 +127,7 @@ class SlidingWindowBase extends StatelessWidget {
                 color: Get.theme.colorScheme.onBackground,
                 borderRadius: BorderRadius.circular(dialogBorderRadius),
                 child: Padding(
-                  padding: const EdgeInsets.all(dialogPadding),
+                  padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
                   child: child,
                 )
               )
@@ -145,6 +146,7 @@ class ContextMenuData {
 
   const ContextMenuData(this.start, this.fromTop, this.fromLeft);
 
+  // Compute the position of the context menu based on a widget it should be next to
   factory ContextMenuData.fromKey(GlobalKey key) {
     
     final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
@@ -163,11 +165,10 @@ class ContextMenuData {
 
     // Calculate x position
     final bool fromLeft;
-    if(position.dx > screenDimensions.width - 300) {
+    if(position.dx > screenDimensions.width - 350) {
       fromLeft = false;
       position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
     } else {
-      sendLog("from left");
       fromLeft = true;
       position = Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
     }
@@ -176,21 +177,4 @@ class ContextMenuData {
     return ContextMenuData(position, fromTop, fromLeft);
 
   }
-}
-
-Offset getContextMenuCoordiantes(GlobalKey key) {
-  final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
-  var position = renderBox.localToGlobal(Offset.zero);
-  final widgetDimensions = renderBox.size;
-  final screenDimensions = Get.mediaQuery.size;
-
-  if(position.dx + 500 + widgetDimensions.width > screenDimensions.width) {
-    position = Offset(position.dx - 300 + widgetDimensions.width, position.dy + widgetDimensions.height + defaultSpacing);
-  }
-
-  if(position.dy > screenDimensions.height) {
-    position = Offset(position.dx, position.dy - 500 + widgetDimensions.height);
-  }
-
-  return position;
 }

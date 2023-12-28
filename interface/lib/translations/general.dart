@@ -24,6 +24,7 @@ class GeneralTranslations extends Translations {
       'y': 'Y',
 
       // Time TODO: Differentiate between PM and AM
+      'message.time': '@hour:@minute',
       'time.now': 'Today at @hour:@minute',
       'time': '@month/@day/@year @hour:@minute',
     },
@@ -48,6 +49,7 @@ class GeneralTranslations extends Translations {
       'y': 'Y',
 
       // Time
+      'message.time': '@hour:@minute',
       'time.now': 'Heute um @hour:@minute',
       'time': '@day.@month.@year @hour:@minute',
     }

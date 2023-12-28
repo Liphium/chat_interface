@@ -58,6 +58,9 @@ class _MessageFeedState extends State<MessageFeed> {
   @override
   Widget build(BuildContext context) {
 
+    // Used in message rendering
+    var lastCount = 0;
+
     if(widget.id == null || widget.id == "0") {
 
       if(Get.find<SpacesController>().inSpace.value) {
@@ -128,9 +131,12 @@ class _MessageFeedState extends State<MessageFeed> {
                                       final self = conversationToken.account == statusController.id.value;
                                                 
                                       bool last = false;
-                                      if(index != controller.messages.length) {
+                                      if(index != controller.messages.length && lastCount < 5) {
                                         final lastMessage = controller.messages[index];
-                                        last = lastMessage.sender == message.sender && lastMessage.type == MessageType.text && message.createdAt.difference(lastMessage.createdAt).inMinutes < 10;
+                                        last = lastMessage.sender == message.sender;
+                                        lastCount++;
+                                      } else {
+                                        lastCount = 0;
                                       }
 
                                       final Widget renderer;
@@ -172,7 +178,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                                         extra: 4,
                                                         padding: 4,
                                                         onTap: () {
-                                                          Get.dialog(MessageOptionsWindow(data: ContextMenuData.fromKey(contextMenuKey)));
+                                                          Get.dialog(MessageOptionsWindow(data: ContextMenuData.fromKey(contextMenuKey), self: self, message: message,));
                                                         }, 
                                                         icon: Icons.more_horiz
                                                       )

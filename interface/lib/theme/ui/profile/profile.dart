@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -108,72 +109,59 @@ class _ProfileState extends State<Profile> {
     }
 
     //* Context menu
-    return Stack(
-      children: [
-        Positioned(
-          top: widget.position.dy,
-          left: widget.leftAligned ? widget.position.dx : null,
-          right: widget.leftAligned ? null : widget.position.dx,
-          width: widget.size.toDouble(),
-          child: Material(
-            borderRadius: BorderRadius.circular(defaultSpacing),
-            color: Get.theme.colorScheme.onBackground,
-            child: Padding(
-              padding: const EdgeInsets.all(defaultSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return SlidingWindowBase(
+      lessPadding: true,
+      position: ContextMenuData(widget.position, true, widget.leftAligned),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+            
+              //* Profile info
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-            
-                      //* Profile info
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
-                          horizontalSpacing(defaultSpacing),
-                          Text(widget.friend.name, style: theme.textTheme.titleMedium),
-                          Text("#${widget.friend.tag}", style: theme.textTheme.titleMedium!
-                          .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
-                        ],
-                      ),
-            
-                      //* Call button
-                      LoadingIconButton(
-                        loading: false.obs,
-                        onTap: () => {},
-                        icon: Icons.call
-                      )
-                    ],
-                  ),
-                  Text(widget.friend.status.value, style: theme.textTheme.bodyMedium),
-                  verticalSpacing(defaultSpacing),
-
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: actions.length,
-                    itemBuilder: (context, index) {
-                      ProfileAction action = actions[index];
-                      return Padding(
-                        padding: EdgeInsets.only(top: index == 0 ? 0 : action.category ? defaultSpacing : elementSpacing),
-                        child: ProfileButton(
-                          icon: action.icon,
-                          label: action.label,
-                          onTap: () => action.onTap.call(widget.friend, action.loading),
-                          loading: action.loading,
-                          color: action.color,
-                          iconColor: action.iconColor,
-                        ),
-                      );
-                    }
-                  ),
+                  Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
+                  horizontalSpacing(defaultSpacing),
+                  Text(widget.friend.name, style: theme.textTheme.titleMedium),
+                  Text("#${widget.friend.tag}", style: theme.textTheme.titleMedium!
+                  .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
                 ],
               ),
-            ),
-          )
-        ),
-      ],
+            
+              //* Call button
+              LoadingIconButton(
+                loading: false.obs,
+                onTap: () => {},
+                icon: Icons.call
+              )
+            ],
+          ),
+          Text(widget.friend.status.value, style: theme.textTheme.bodyMedium),
+          verticalSpacing(defaultSpacing),
+          
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: actions.length,
+            itemBuilder: (context, index) {
+              ProfileAction action = actions[index];
+              return Padding(
+                padding: EdgeInsets.only(top: index == 0 ? 0 : action.category ? defaultSpacing : elementSpacing),
+                child: ProfileButton(
+                  icon: action.icon,
+                  label: action.label,
+                  onTap: () => action.onTap.call(widget.friend, action.loading),
+                  loading: action.loading,
+                  color: action.color,
+                  iconColor: action.iconColor,
+                ),
+              );
+            }
+          ),
+        ],
+      ),
     );
   }
 }

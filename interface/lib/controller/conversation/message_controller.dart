@@ -78,6 +78,24 @@ class MessageController extends GetxController {
     }
   }
 
+  // Delete a message from the client with an id
+  void deleteMessageFromClient(String id) async {
+
+    // Get the message from the database on the client
+    final data = await (db.message.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    if(data == null) {
+      return;
+    }
+
+    // Check if message is in the selected conversation
+    if(selectedConversation.value.id == data.conversationId!) {
+      messages.removeWhere((element) => element.id == id);
+    }
+
+    // Delete from the client database
+    db.message.deleteWhere((tbl) => tbl.id.equals(id));
+  }
+
   void storeMessage(Message message) async {
 
     // Handle attachments
@@ -118,15 +136,33 @@ class MessageController extends GetxController {
         overwriteRead(selectedConversation.value);
       }
       sendLog("MESSAGE RECEIVED ${message.id}");
-      if(messages.isNotEmpty && messages[0].id != message.id) {
-        addMessageToSelected(message);
-      } else if(messages.isEmpty) {
-        addMessageToSelected(message);
+
+      // Check if it is a system message and if it should be rendered or not
+      if(message.type == MessageType.system) {
+        if(SystemMessages.messages[message.content]?.render == true) {
+          addMessageToSelected(message);
+        }
+      } else {
+
+        // Store normal type of message
+        if(messages.isNotEmpty && messages[0].id != message.id) {
+          addMessageToSelected(message);
+        } else if(messages.isEmpty) {
+          addMessageToSelected(message);
+        }
       }
     }
 
     // Store message in database
-    db.into(db.message).insertOnConflictUpdate(message.entity);
+    sendLog(message.type);
+    if(message.type == MessageType.system) {
+      if(SystemMessages.messages[message.content]?.store == true) {
+        sendLog("STORING " + message.content);
+        db.into(db.message).insertOnConflictUpdate(message.entity);
+      }
+    } else {
+      db.into(db.message).insertOnConflictUpdate(message.entity);
+    }
 
     // Handle system messages
     if(message.type == MessageType.system) {
@@ -308,6 +344,36 @@ class Message {
     }
     db.message.insertOnConflictUpdate(entity);
   }
+
+  /// Delete message on the server (and on the client)
+  ///
+  /// Returns null if successful, otherwise an error message
+  Future<String?> delete() async {
+
+    // Check if the message is sent by the user
+    final token = Get.find<ConversationController>().conversations[conversation]!.token;
+    if(sender != token.id) {
+      return "no.permission";
+    }
+
+    // Send a request to the server
+    final json = await postNodeJSON("/conversations/message/delete", {
+      "certificate": certificate,
+      "id": token.id,
+    	"token": token.token,
+    });
+    sendLog(json);
+
+    if(!json["success"]) {
+
+      if(json["error"] == "server.error") {
+        return "message.delete_error";
+      }
+      return json["error"];
+    }
+
+    return null;
+  } 
 }
 
 enum MessageType {

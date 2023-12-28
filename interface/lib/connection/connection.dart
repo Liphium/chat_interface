@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:chat_interface/connection/encryption/aes.dart';
+import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/connection/impl/status_listener.dart';
@@ -71,10 +72,13 @@ class Connector {
         try {
           msg = decryptAES(encrypted, aesBase64!);
         } catch(e) {
-          sendLog("FAILED TO DECRYPT MESSAGE: ${String.fromCharCodes(encrypted)} ${aesBase64!}");
+          sendLog("HASH: ${hashShaBytes(encrypted)}");
+
+          sendLog("FAILED TO DECRYPT MESSAGE with key ${aesBase64!}");
+          sendLog("This is most likely due to another client being in the same network, connected over the same port as you are. We can't do anything about this and this will not occur in production.");
           e.printError();
           return;
-        }
+        } // xcLwjQiuEIWkj04su0pK6uFwoEJ4y6mhEWoHNPF2d4w= xcLwjQiuEIWkj04su0pK6uFwoEJ4y6mhEWoHNPF2d4w=
 
         // Decode the message
         Event event = Event.fromJson(String.fromCharCodes(msg));

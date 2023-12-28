@@ -12,6 +12,8 @@ class ErrorTranslations extends Translations {
       'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
       'new.version': 'A new version is available, please update the app.',
       'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
+      'already.deleted': 'This object was already deleted.',
+      'no.permission': 'You don\'t have permission to do that.',
 
       // Friends
       'request.self': 'Are you trying to add yourself as a friend?',
@@ -26,6 +28,7 @@ class ErrorTranslations extends Translations {
       'file.not_uploaded': 'File not found. Maybe it was deleted?',
       'file.too_large': 'The maximum file size is 10MB.',
       'chat.add_file': 'Attach a file',
+      'message.delete_error': 'Couldn\'t delete message. Please try again later.',
 
       // Settings
       'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
@@ -43,6 +46,7 @@ class ErrorTranslations extends Translations {
       'not.setup': 'Der Chat-Server ist noch nicht eingerichtet, vielleicht versuchst du es mit dem Update auf die neueste Version?',
       'new.version': 'Eine neue Version ist verfügbar, bitte aktualisiere die App.',
       'key.error': 'Es ist ein Fehler mit deinen Schlüsseln aufgetreten. Vielleicht versuchst du es mit dem Neustart der App oder kontaktierst den Support?',
+      'already.deleted': 'Dieses Objekt wurde bereits gelöscht.',
 
       // Friends
       'request.self': 'Versuchst du dich selbst als Freund hinzuzufügen?',
@@ -57,6 +61,7 @@ class ErrorTranslations extends Translations {
       'file.not_uploaded': 'Datei nicht gefunden. Vielleicht wurde sie gelöscht?',
       'file.too_large': 'Die maximale Dateigröße beträgt 10MB.',
       'chat.add_file': 'Datei anhängen',
+      'message.delete_error': 'Die Nachricht konnte nicht gelöscht werden. Bitte versuche es später erneut.',
 
       // Game
       'no.start': 'Das Spiel konnte nicht gestartet werden. Wir entschuldigen uns für die Unannehmlichkeiten, bitte melde dich bei Support, wenn du auf dieses Problem stößt.',
