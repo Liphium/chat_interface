@@ -76,12 +76,12 @@ class ProfileAction {
 class Profile extends StatefulWidget {
 
   final bool leftAligned;
-  final Offset position;
+  final Offset? position;
   final Friend friend;
   final int size;
   final List<ProfileAction>Function(Friend)? actions;
 
-  const Profile({super.key, required this.position, required this.friend, this.size = 300, this.leftAligned = true, this.actions});
+  const Profile({super.key, this.position, required this.friend, this.size = 300, this.leftAligned = true, this.actions});
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -95,7 +95,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
 
     actions.clear();
     if(widget.actions == null) {
@@ -109,59 +108,68 @@ class _ProfileState extends State<Profile> {
     }
 
     //* Context menu
-    return SlidingWindowBase(
-      lessPadding: true,
-      position: ContextMenuData(widget.position, true, widget.leftAligned),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    if(widget.position != null) {
+      return SlidingWindowBase(
+        lessPadding: true,
+        position: ContextMenuData(widget.position!, true, widget.leftAligned),
+        child: buildProfile(),
+      );
+    } else {
+      return DialogBase(
+        child: buildProfile(),
+      );
+    }
+  }
+
+  Widget buildProfile() => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+        
+          //* Profile info
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-            
-              //* Profile info
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
-                  horizontalSpacing(defaultSpacing),
-                  Text(widget.friend.name, style: theme.textTheme.titleMedium),
-                  Text("#${widget.friend.tag}", style: theme.textTheme.titleMedium!
-                  .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
-                ],
-              ),
-            
-              //* Call button
-              LoadingIconButton(
-                loading: false.obs,
-                onTap: () => {},
-                icon: Icons.call
-              )
+              Icon(Icons.person, size: 30.0, color: Get.theme.colorScheme.onPrimary),
+              horizontalSpacing(defaultSpacing),
+              Text(widget.friend.name, style: Get.theme.textTheme.titleMedium),
+              Text("#${widget.friend.tag}", style: Get.theme.textTheme.titleMedium!
+              .copyWith(fontWeight: FontWeight.normal, color: Get.theme.colorScheme.onPrimary)),
             ],
           ),
-          Text(widget.friend.status.value, style: theme.textTheme.bodyMedium),
-          verticalSpacing(defaultSpacing),
-          
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: actions.length,
-            itemBuilder: (context, index) {
-              ProfileAction action = actions[index];
-              return Padding(
-                padding: EdgeInsets.only(top: index == 0 ? 0 : action.category ? defaultSpacing : elementSpacing),
-                child: ProfileButton(
-                  icon: action.icon,
-                  label: action.label,
-                  onTap: () => action.onTap.call(widget.friend, action.loading),
-                  loading: action.loading,
-                  color: action.color,
-                  iconColor: action.iconColor,
-                ),
-              );
-            }
-          ),
+        
+          //* Call button
+          LoadingIconButton(
+            loading: false.obs,
+            onTap: () => {},
+            icon: Icons.call
+          )
         ],
       ),
-    );
-  }
+      Text(widget.friend.status.value, style: Get.theme.textTheme.bodyMedium),
+      verticalSpacing(defaultSpacing),
+      
+      ListView.builder(
+        shrinkWrap: true,
+        itemCount: actions.length,
+        itemBuilder: (context, index) {
+          ProfileAction action = actions[index];
+          return Padding(
+            padding: EdgeInsets.only(top: index == 0 ? 0 : action.category ? defaultSpacing : elementSpacing),
+            child: ProfileButton(
+              icon: action.icon,
+              label: action.label,
+              onTap: () => action.onTap.call(widget.friend, action.loading),
+              loading: action.loading,
+              color: action.color,
+              iconColor: action.iconColor,
+            ),
+          );
+        }
+      ),
+    ]
+  );
 }

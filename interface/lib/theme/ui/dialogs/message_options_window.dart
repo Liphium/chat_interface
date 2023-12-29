@@ -1,11 +1,15 @@
 
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class MessageOptionsWindow extends StatefulWidget {
@@ -27,6 +31,9 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
   @override
   Widget build(BuildContext context) {
 
+    final member = Get.find<ConversationController>().conversations[widget.message.conversation]!.members[widget.message.sender]!;
+    final friend = Get.find<FriendController>().friends[member.account];
+
     return SlidingWindowBase(
       lessPadding: true,
       position: widget.data,
@@ -43,13 +50,16 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             }, 
             loading: false.obs,
           ),
-          if(widget.message.type == MessageType.text)
+          if(widget.message.type == MessageType.text && widget.message.content != "")
             Padding(
               padding: const EdgeInsets.only(top: elementSpacing),
               child: ProfileButton(
                 icon: Icons.copy, 
                 label: "message.copy".tr, 
-                onTap: () => {}, 
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: widget.message.content));
+                  Get.back();
+                }, 
                 loading: false.obs,
               ),
             ),
@@ -57,7 +67,10 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
           ProfileButton(
             icon: Icons.person, 
             label: "message.profile".tr, 
-            onTap: () => {}, 
+            onTap: () {
+              Get.back();
+              Get.dialog(Profile(friend: friend ?? Friend.unknown(member.account)));
+            },
             loading: false.obs,
           ),
           if(widget.self)

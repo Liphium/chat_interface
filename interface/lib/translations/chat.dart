@@ -31,7 +31,7 @@ class ChatPageTranslations extends Translations {
       'friend.removed': 'You removed this person.',
       'friends.add': 'Add friend',
       'friends.message': 'Start direct message',
-      'friends.invite_to_space': 'Invite to current Space',
+      'friends.invite_to_space': 'Invite to current space',
       'friends.requests_sent': 'Requests sent',
       'friends.requests': 'Requests',
       'request.sent': 'Request successfully sent!',

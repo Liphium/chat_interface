@@ -27,8 +27,8 @@ class _SettingsPageState extends State<SettingsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 240,
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 300),
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing),
                   child: ListView.builder(
@@ -58,30 +58,31 @@ class _SettingsPageState extends State<SettingsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            verticalSpacing(defaultSpacing),
-                            Text(current.label.tr, style: Theme.of(context).textTheme.titleMedium),
+                            verticalSpacing(sectionSpacing),
+                            Text(current.label.tr, style: Theme.of(context).textTheme.titleLarge),
                             verticalSpacing(defaultSpacing * 0.5),
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: current.categories.map((element) => 
                                 Padding(
-                                  padding: const EdgeInsets.only(top: defaultSpacing * 0.5),
+                                  padding: const EdgeInsets.only(top: defaultSpacing),
                                   child: Obx(() => Material(
-                                    color: currentCategory.value == element ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                                    color: currentCategory.value == element ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
                                     borderRadius: BorderRadius.circular(defaultSpacing),
                                     child: InkWell(
                                       onTap: () => currentCategory.value = element,
                                       borderRadius: BorderRadius.circular(defaultSpacing),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(defaultSpacing * 0.5),
+                                        padding: const EdgeInsets.all(defaultSpacing),
                                         child: Row(
                                           children: [
                                             Icon(
                                               element.icon,
                                               color: Theme.of(context).colorScheme.onPrimary,
+                                              size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
                                             ),
                                             horizontalSpacing(defaultSpacing * 0.5),
-                                            Text("settings.${element.label}".tr, style: Theme.of(context).textTheme.labelMedium!),
+                                            Text("settings.${element.label}".tr, style: Theme.of(context).textTheme.labelLarge!),
                                           ],
                                         ),
                                       ),
