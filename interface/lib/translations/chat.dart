@@ -79,6 +79,10 @@ class ChatPageTranslations extends Translations {
       'message.copy': 'Copy content',
       'message.profile': 'Open profile',
       'message.delete': 'Delete message',
+      'message.info.text': 'This message was sent by @account (@token) at @hour:@minute on @day.@month.@year.',
+      'message.info.copy_signature': 'Copy signature',
+      'message.info.copy_sender': 'Copy sender ID',
+      'message.info.copy_cert': 'Copy certificate',
 
       // Spaces
       'join.space': 'Join Space',
@@ -133,6 +137,16 @@ class ChatPageTranslations extends Translations {
       'conversations.leave': 'Chat verlassen',
       'conversations.leave.text': 'Bist du sicher, dass du diesen Chat verlassen willst? Du kannst nicht wieder beitreten, es sei denn, jemand lädt dich wieder ein.',
       'chat.not.signed': 'Diese Nachricht könnte von jemand anderem gesendet worden sein oder vom Server verändert worden sein.',
+
+      // Message menu
+      'message.info': 'Info',
+      'message.copy': 'Text kopieren',
+      'message.profile': 'Profil öffnen',
+      'message.delete': 'Nachricht löschen',
+      'message.info.text': 'Diese Nachricht wurde von @sender (@senderid) um @hour:@minute am @day.@month.@year gesendet.',
+      'message.info.copy_signature': 'Signatur kopieren',
+      'message.info.copy_sender': 'Sender ID kopieren',
+      'message.info.copy_cert': 'Zertifikat kopieren',
 
       // Conversation members
       'chat.make_moderator': 'Zum Moderator machen',

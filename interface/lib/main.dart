@@ -19,7 +19,7 @@ const appId = 1;
 const appVersion = 1; // TODO: ALWAYS change to the new one saved in the node backend
 const bool isDebug = true; // TODO: Set to false before release
 const bool checkVersion = false; // TODO: Set to true in release builds
-const bool driftLogger = false;
+const bool driftLogger = true;
 
 // Authentication types
 enum AuthType {

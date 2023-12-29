@@ -28,14 +28,15 @@ const dialogBorderRadius = defaultSpacing * 1.5;
 const dialogPadding = defaultSpacing * 1.5;
 const scaleAnimationCurve = ElasticOutCurve(1.1);
 
-String formatTime(DateTime time) {
+String formatDay(DateTime time) {
   final now = DateTime.now();
 
   if(time.day == now.day) {
-    return "time.now".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0")});
+    return "time.today".tr;
+  } else if(time.day == now.day - 1) {
+    return "time.yesterday".tr;
   } else {
-    return "time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0"),
-    "day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+    return "time".trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
   }
 }
 

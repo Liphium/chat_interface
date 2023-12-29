@@ -66,18 +66,6 @@ class MessageController extends GetxController {
     }
   }
 
-  void newMessages(dynamic messages) async {
-    loaded.value = true;
-    if(messages == null) {
-      return;
-    }
-    
-    for (var msg in messages) {
-      final message = Message.fromJson(msg);
-      await db.into(db.message).insertOnConflictUpdate(message.entity);
-    }
-  }
-
   // Delete a message from the client with an id
   void deleteMessageFromClient(String id) async {
 
@@ -161,6 +149,7 @@ class MessageController extends GetxController {
         db.into(db.message).insertOnConflictUpdate(message.entity);
       }
     } else {
+      sendLog("WE ARE STORING");
       db.into(db.message).insertOnConflictUpdate(message.entity);
     }
 
@@ -247,6 +236,7 @@ class Message {
       message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();
+      sendLog("SYSTEM MESSAGE");
       return message;
     }
 
@@ -342,7 +332,9 @@ class Message {
         attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), conv.key))["id"];
       }
     }
-    db.message.insertOnConflictUpdate(entity);
+    if(SystemMessages.messages[content]?.store == true) {
+      db.message.insertOnConflictUpdate(entity);
+    }
   }
 
   /// Delete message on the server (and on the client)

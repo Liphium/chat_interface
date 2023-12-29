@@ -131,12 +131,21 @@ class _MessageFeedState extends State<MessageFeed> {
                                       final self = conversationToken.account == statusController.id.value;
                                                 
                                       bool last = false;
-                                      if(index != controller.messages.length && lastCount < 5) {
+                                      bool newHeading = false;
+                                      if(index != controller.messages.length) {
                                         final lastMessage = controller.messages[index];
-                                        last = lastMessage.sender == message.sender;
-                                        lastCount++;
-                                      } else {
-                                        lastCount = 0;
+
+                                        // Check if the last message was a day before the current one
+                                        if(lastMessage.createdAt.day != message.createdAt.day) {
+                                          newHeading = true;
+                                        }
+
+                                        if(lastMessage.sender == message.sender && lastCount < 5 && !newHeading) {
+                                          last = true;
+                                          lastCount++;
+                                        } else {
+                                          lastCount = 0;
+                                        }
                                       }
 
                                       final Widget renderer;
@@ -156,39 +165,48 @@ class _MessageFeedState extends State<MessageFeed> {
 
                                       final GlobalKey contextMenuKey = GlobalKey();
                                       final hovering = false.obs;
-                                      return MouseRegion(
-                                        onEnter: (event) => hovering.value = true,
-                                        onExit: (event) => hovering.value = false,
-                                        child: Row(
-                                          textDirection: self ? TextDirection.rtl : TextDirection.ltr,
-                                          children: [
-                                            Flexible(
-                                              child: renderer,
+                                      return Column(
+                                        children: [
+                                          if(newHeading || index == controller.messages.length)
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
+                                              child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
                                             ),
-                                            Obx(() =>
-                                              SizedBox(
-                                                height: 34,
-                                                child: Visibility(
-                                                  visible: hovering.value,
-                                                  child: Row(
-                                                    children: [
-                                                      LoadingIconButton(
-                                                        key: contextMenuKey,
-                                                        iconSize: 22,
-                                                        extra: 4,
-                                                        padding: 4,
-                                                        onTap: () {
-                                                          Get.dialog(MessageOptionsWindow(data: ContextMenuData.fromKey(contextMenuKey), self: self, message: message,));
-                                                        }, 
-                                                        icon: Icons.more_horiz
+                                          MouseRegion(
+                                            onEnter: (event) => hovering.value = true,
+                                            onExit: (event) => hovering.value = false,
+                                            child: Row(
+                                              textDirection: self ? TextDirection.rtl : TextDirection.ltr,
+                                              children: [
+                                                Flexible(
+                                                  child: renderer,
+                                                ),
+                                                Obx(() =>
+                                                  SizedBox(
+                                                    height: 34,
+                                                    child: Visibility(
+                                                      visible: hovering.value,
+                                                      child: Row(
+                                                        children: [
+                                                          LoadingIconButton(
+                                                            key: contextMenuKey,
+                                                            iconSize: 22,
+                                                            extra: 4,
+                                                            padding: 4,
+                                                            onTap: () {
+                                                              Get.dialog(MessageOptionsWindow(data: ContextMenuData.fromKey(contextMenuKey), self: self, message: message,));
+                                                            }, 
+                                                            icon: Icons.more_horiz
+                                                          )
+                                                        ],
                                                       )
-                                                    ],
+                                                    ),
                                                   )
                                                 ),
-                                              )
+                                              ],
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       );
                                     },
                                   );

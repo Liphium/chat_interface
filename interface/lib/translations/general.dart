@@ -22,11 +22,13 @@ class GeneralTranslations extends Translations {
       'zoom': 'Zoom',
       'x': 'X',
       'y': 'Y',
+      'close': 'Close',
 
       // Time TODO: Differentiate between PM and AM
       'message.time': '@hour:@minute',
-      'time.now': 'Today at @hour:@minute',
-      'time': '@month/@day/@year @hour:@minute',
+      'time.yesterday': 'Yesterday',
+      'time.today': 'Today',
+      'time': '@month/@day/@year',
     },
 
     //* German
@@ -47,11 +49,13 @@ class GeneralTranslations extends Translations {
       'zoom': 'Zoom',
       'x': 'X',
       'y': 'Y',
+      'close': 'Schließen',
 
       // Time
       'message.time': '@hour:@minute',
-      'time.now': 'Heute um @hour:@minute',
-      'time': '@day.@month.@year @hour:@minute',
+      'time.yesterday': 'Gestern',
+      'time.today': 'Heute',
+      'time': '@day.@month.@year',
     }
   };
 }

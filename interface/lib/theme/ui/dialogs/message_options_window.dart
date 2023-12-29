@@ -1,5 +1,6 @@
 
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -36,16 +37,22 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
           ProfileButton(
             icon: Icons.info, 
             label: "message.info".tr, 
-            onTap: () => {}, 
+            onTap: () {
+              Get.back();
+              Get.dialog(MessageInfoWindow(message: widget.message));
+            }, 
             loading: false.obs,
           ),
-          verticalSpacing(elementSpacing),
-          ProfileButton(
-            icon: Icons.copy, 
-            label: "message.copy".tr, 
-            onTap: () => {}, 
-            loading: false.obs,
-          ),
+          if(widget.message.type == MessageType.text)
+            Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.copy, 
+                label: "message.copy".tr, 
+                onTap: () => {}, 
+                loading: false.obs,
+              ),
+            ),
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.person, 
@@ -75,6 +82,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                     return;
                   }
 
+                  Get.back();
                 }, 
                 loading: messageDeletionLoading,
               ),
