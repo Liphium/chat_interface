@@ -104,7 +104,7 @@ class _SidebarState extends State<Sidebar> {
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(defaultSpacing),
-                            child: Icon(Icons.auto_awesome, color: theme.colorScheme.onPrimary),
+                            child: Icon(Icons.rocket_launch, color: theme.colorScheme.onPrimary),
                           ),
                         )
                       ),

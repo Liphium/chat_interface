@@ -24,9 +24,9 @@ class FileSettings {
 
   static void addSettings(SettingController controller) {
     controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, true);
-    controller.settings[autoDownloadVideos] = Setting<bool>(autoDownloadVideos, true);
-    controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, true);
-    controller.settings[maxFileSize] = Setting<double>(maxFileSize, 10.0);
+    controller.settings[autoDownloadVideos] = Setting<bool>(autoDownloadVideos, false);
+    controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, false);
+    controller.settings[maxFileSize] = Setting<double>(maxFileSize, 5.0);
     controller.settings[maxCacheSize] = Setting<double>(maxCacheSize, 500.0);
   }
 }

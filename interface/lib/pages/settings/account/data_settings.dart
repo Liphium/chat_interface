@@ -84,7 +84,14 @@ class DataSettingsPage extends StatelessWidget {
               )
             ],
           ),
-        )
+        ),
+        verticalSpacing(sectionSpacing),
+
+        //* Profile picture
+        Text("settings.data.permissions".tr, style: Get.theme.textTheme.labelLarge),
+        verticalSpacing(defaultSpacing),
+        Text("settings.data.permissions.description".tr, style: Get.theme.textTheme.bodyMedium),
+        Text(StatusController.permissions.join(", "), style: Get.theme.textTheme.labelMedium),
       ],
     );
   }

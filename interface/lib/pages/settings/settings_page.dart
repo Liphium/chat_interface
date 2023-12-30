@@ -28,7 +28,7 @@ class _SettingsPageState extends State<SettingsPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 300),
+                constraints: const BoxConstraints(maxWidth: 250),
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing),
                   child: ListView.builder(
@@ -82,7 +82,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                               size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
                                             ),
                                             horizontalSpacing(defaultSpacing),
-                                            Text("settings.${element.label}".tr, style: Theme.of(context).textTheme.labelLarge!),
+                                            Expanded(
+                                              child: Text("settings.${element.label}".tr, style: Theme.of(context).textTheme.labelLarge!, overflow: TextOverflow.ellipsis,)
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -112,12 +114,13 @@ class _SettingsPageState extends State<SettingsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Obx(() =>
+                              currentCategory.value.displayTitle ?
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
+                                padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
                                 child: Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
-                              )
+                              ) :
+                              const SizedBox()
                             ),
-                            verticalSpacing(elementSpacing),
                             Obx(() => currentCategory.value.widget ?? const Placeholder()),
                           ],
                         ),

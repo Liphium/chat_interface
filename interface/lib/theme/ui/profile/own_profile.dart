@@ -245,13 +245,14 @@ class _ProfileState extends State<OwnProfile> {
                   verticalSpacing(elementSpacing),
 
                   //* Files page
+                  /*
                   ProfileButton(
                     icon: Icons.folder,
                     label: 'profile.files'.tr,
                     onTap: () => Get.dialog(const FilesPage()),
                     loading: false.obs
                   ),
-                  verticalSpacing(elementSpacing),
+                  verticalSpacing(elementSpacing), */
 
                   //* Hide profile
                   ProfileButton(

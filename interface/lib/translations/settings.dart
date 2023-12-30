@@ -25,6 +25,8 @@ class SettingsTranslations extends Translations {
       'settings.encryption': 'Encryption',
       'settings.spaces': 'Spaces',
       'settings.files': 'Files',
+      'settings.invites': 'Invites',
+      'settings.invites.title': 'You have @count invites left.',
 
       // Audio settings
       'audio.device': 'Select a device',
@@ -73,6 +75,16 @@ class SettingsTranslations extends Translations {
       'settings.data.profile_picture.requirements': 'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',
       'settings.data.profile_picture.remove': 'Remove profile picture',
       'settings.data.profile_picture.remove.confirm': 'Are you sure you want to remove your profile picture?',
+      'settings.data.permissions': 'Permissions',
+      'settings.data.permissions.description': 'If you don\'t know what this is, it\'s fine. This is just data from the server that we can ask you for in case of problems. Here\'s which permissions you have:',
+
+      // Invite settings (this is mostly alpha only)
+      'settings.invites.description': "Invites are a token required for creating an account on the chat app. If you want one of your friends to be on here, send them an invite! They are distributed randomly in waves to prevent an influx of too many new users at once and also guarantee that the new users getting in are actually your friends.",
+      'settings.invites.generate': 'Generate invite',
+      'settings.invites.generated': 'Invite generated! It was copied to your clipboard.',
+      'settings.invites.history': 'History',
+      'settings.invites.history.description': 'Here are all the invites you already generated. Hover over them to see the token.',
+      'settings.invites.history.empty': 'You haven\'t generated any invites yet or they have all been redeemed.',
 
       // Spaces settings
       'game.music': 'Play music in Game Mode',
@@ -99,6 +111,8 @@ class SettingsTranslations extends Translations {
       'settings.encryption': 'Verschlüsselung',
       'settings.spaces': 'Spaces',
       'settings.files': 'Dateien',
+      'settings.invites': 'Einladungen',
+      'settings.invites.title': 'Du hast @count Einladungen übrig.',
 
       // Audio settings
       'audio.device': 'Wähle ein Gerät aus',
@@ -147,6 +161,16 @@ class SettingsTranslations extends Translations {
       'settings.data.profile_picture.requirements': 'Kann nur ein JPEG oder PNG sein und darf nicht größer als 10 MB sein.',
       'settings.data.profile_picture.remove': 'Profilbild entfernen',
       'settings.data.profile_picture.remove.confirm': 'Bist du sicher, dass du dein Profilbild entfernen möchtest?',
+      'settings.data.permissions': 'Berechtigungen',
+      'settings.data.permissions.description': 'Falls du nicht weißt, was das hier ist, ist es nicht schlimm. Das hier sind einfach nur Daten vom Server nach denen wir dich im Fall von Problemen fragen können. Hier sind deine Berechtigungen:',
+
+      // Invite settings (this is mostly alpha only)
+      'settings.invites.description': "Einladungen sind ein Token, der zum Erstellen eines Kontos in der Chat-App erforderlich ist. Wenn du willst, dass einer deiner Freunde hier ist, schick ihm eine Einladung! Sie werden zufällig in Wellen verteilt, um einen Zustrom von zu vielen neuen Benutzern auf einmal zu verhindern und garantieren auch, dass die neuen Benutzer, die hereinkommen, tatsächlich deine Freunde sind.",
+      'settings.invites.generate': 'Einladung generieren',
+      'settings.invites.generated': 'Einladung generiert! Sie wurde in deine Zwischenablage kopiert.',
+      'settings.invites.history': 'Verlauf',
+      'settings.invites.history.description': 'Hier sind alle Einladungen, die du bereits generiert hast. Halte den Mauszeiger darüber, um den Token zu sehen.',
+      'settings.invites.history.empty': 'Du hast noch keine Einladungen generiert oder sie wurden alle eingelöst.',
 
       // Spaces settings
       'game.music': 'Musik im Spielmodus abspielen',

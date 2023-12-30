@@ -7,6 +7,7 @@ class GeneralTranslations extends Translations {
     //* English US
     'en_US': {
       // Actions
+      'success': 'Success',
       'create': 'Create',
       'ok': 'Okay',
       'retry': 'Retry',
@@ -34,6 +35,7 @@ class GeneralTranslations extends Translations {
     //* German
     'de_DE': {
       // Actions
+      'success': 'Erfolg',
       'create': 'Erstellen',
       'ok': 'Verstanden',
       'retry': 'Nochmal versuchen',

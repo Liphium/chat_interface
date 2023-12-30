@@ -66,3 +66,31 @@ class FJElevatedLoadingButton extends StatelessWidget {
     );
   }
 }
+
+class FJElevatedLoadingButtonCustom extends StatelessWidget {
+
+  final Function() onTap;
+  final Widget child;
+  final RxBool loading;
+
+  const FJElevatedLoadingButtonCustom({super.key, required this.onTap, required this.child, required this.loading});
+
+  @override
+  Widget build(BuildContext context) {
+    return FJElevatedButton(
+      onTap: () => loading.value ? null : onTap(), 
+      child: Obx(() => 
+        loading.value ? 
+        SizedBox(
+          height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+          width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+          child: Padding(
+            padding: const EdgeInsets.all(defaultSpacing * 0.25),
+            child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+          ),
+        ) : 
+        child
+      )  
+    );
+  }
+}
