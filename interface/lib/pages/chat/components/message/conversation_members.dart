@@ -60,7 +60,7 @@ class ConversationMembers extends StatelessWidget {
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         onTap: () {
                           final friend = Get.find<FriendController>().friends[member.account];
-                          if(ownAccountId != member.account) {
+                          if(StatusController.ownAccountId != member.account) {
                             final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                             Get.dialog(Profile(
                               position: box.localToGlobal(box.size.bottomLeft(Offset.zero)), 

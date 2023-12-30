@@ -69,7 +69,7 @@ class _UserAvatarState extends State<UserAvatar> {
               style: Get.theme.textTheme.labelMedium!.copyWith(
                 fontSize: (widget.size ?? 45) * 0.5,
                 fontWeight: FontWeight.bold,
-                color: widget.id == ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary
+                color: widget.id == StatusController.ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary
               )
             )
           ),
@@ -90,7 +90,7 @@ class UserRenderer extends StatelessWidget {
   Widget build(BuildContext context) {
 
     var friend = (controller ?? Get.find<FriendController>()).friends[id];
-    final own = id == ownAccountId;
+    final own = id == StatusController.ownAccountId;
     StatusController? statusController = own ? Get.find<StatusController>() : null;
     if(own) friend = Friend.me(statusController);
     friend ??= Friend.unknown(id);

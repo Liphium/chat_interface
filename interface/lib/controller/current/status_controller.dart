@@ -12,9 +12,10 @@ import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.d
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:get/get.dart';
 
-String ownAccountId = "";
-
 class StatusController extends GetxController {
+
+  static String ownAccountId = "";
+  static List<String> permissions = [];
 
   Timer? _timer;
   StatusController() {
@@ -57,7 +58,7 @@ class StatusController extends GetxController {
   void setTag(String value) => tag.value = value;
   void setId(String value) {
     id.value = value;
-    ownAccountId = value;
+    StatusController.ownAccountId = value;
   }
 
   String statusJson() => jsonEncode(<String, dynamic>{

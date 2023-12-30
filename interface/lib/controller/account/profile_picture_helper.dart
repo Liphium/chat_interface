@@ -102,7 +102,7 @@ class ProfilePictureHelper {
       return false;
     }
     Get.find<StatusController>().newProfilePicture(response.container.id, data);
-    Get.find<FriendController>().friends[ownAccountId]!.updateProfilePicture(response.container.id, data);
+    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container.id, data);
 
     // TODO: Update for other devices
     return true;

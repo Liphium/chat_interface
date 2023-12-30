@@ -148,7 +148,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             )),
                       
                             Obx(() {
-                              final found = friendController.friends.values.any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()) && friend.id != ownAccountId);
+                              final found = friendController.friends.values.any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()) && friend.id != StatusController.ownAccountId);
                               final hashtag = query.value.contains("#");
                               return Animate(
                                 effects: [
@@ -309,7 +309,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                             final friend = friendController.friends.values.elementAt(index);
                                             final visible = query.value.isEmpty || friend.name.toLowerCase().startsWith(query.value.toLowerCase());
                                             return Visibility(
-                                              visible: friend.id != ownAccountId,
+                                              visible: friend.id != StatusController.ownAccountId,
                                               child: Animate(
                                                 effects: [
                                                   ReverseExpandEffect(

@@ -13,19 +13,22 @@ class AccountSetup extends Setup {
 
     // Get account from database
     final body = await postAuthorizedJSON("/account/me", <String, dynamic>{});
-    var account = body["account"];
+    final account = body["account"];
 
     if(!body["success"]) {
       return const ServerOfflinePage();
     }
 
-    // Set account
+    // Set all account data
     StatusController controller = Get.find();
-
     controller.name.value = account["username"];
     controller.tag.value = account["tag"];
     controller.id.value = account["id"];
-    ownAccountId = account["id"];
+    StatusController.ownAccountId = account["id"];
+
+    // Set all permissions
+    StatusController.permissions = List<String>.from(body["permissions"]);
+
     return null;
   }
 }

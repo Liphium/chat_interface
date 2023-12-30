@@ -129,7 +129,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
     final token = ConversationToken.fromJson(body["tokens"][hashSha(memberContainers[friend.id]!)]);
     final signature = signMessage(signatureKeyPair.secretKey, "${body["conversation"]}${friend.id}");
     await sendAuthenticatedStoredAction(friend, storedAction("conv", <String, dynamic>{
-      "s": ownAccountId,
+      "s": StatusController.ownAccountId,
       "id": body["conversation"],
       "sg": signature,
       "token": token.toJson(),

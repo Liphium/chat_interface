@@ -79,7 +79,7 @@ class DataSettingsPage extends StatelessWidget {
                 ],
               ),
               UserAvatar(
-                id: ownAccountId,
+                id: StatusController.ownAccountId,
                 size: 100,
               )
             ],

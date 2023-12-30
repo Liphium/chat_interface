@@ -15,7 +15,7 @@ class UnknownController extends GetxController {
 
   Future<UnknownAccount?> loadUnknownProfile(String id) async {
 
-    if(id == ownAccountId) {
+    if(id == StatusController.ownAccountId) {
       return UnknownAccount(id, "", "", signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
     }
 

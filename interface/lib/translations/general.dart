@@ -28,7 +28,7 @@ class GeneralTranslations extends Translations {
       'message.time': '@hour:@minute',
       'time.yesterday': 'Yesterday',
       'time.today': 'Today',
-      'time': '@month/@day/@year',
+      'time': '@day/@month/@year',
     },
 
     //* German

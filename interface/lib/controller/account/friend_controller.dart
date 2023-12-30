@@ -35,7 +35,7 @@ class FriendController extends GetxController {
   }
 
   void addSelf() {
-    friends[ownAccountId] = Friend.me();
+    friends[StatusController.ownAccountId] = Friend.me();
   }
 
   void reset() {
@@ -94,7 +94,7 @@ class FriendController extends GetxController {
   }
 
   Friend getFriend(String account) {
-    if(ownAccountId == account) return Friend.me();
+    if(StatusController.ownAccountId == account) return Friend.me();
     return friends[account] ?? Friend.unknown(account);
   }
 }

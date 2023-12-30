@@ -81,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                               color: Theme.of(context).colorScheme.onPrimary,
                                               size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
                                             ),
-                                            horizontalSpacing(defaultSpacing * 0.5),
+                                            horizontalSpacing(defaultSpacing),
                                             Text("settings.${element.label}".tr, style: Theme.of(context).textTheme.labelLarge!),
                                           ],
                                         ),

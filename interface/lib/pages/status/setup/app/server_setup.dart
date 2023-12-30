@@ -50,7 +50,7 @@ class ServerSelectorPage extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FJElevatedButton(
-                    onTap: () => chooseServer("http://localhost:3000"),
+                    onTap: () => chooseServer("http://localhost:3000/v1"),
                     child: Center(child: Text("Localhost", style: Get.theme.textTheme.labelLarge)),
                   ),
                 ),

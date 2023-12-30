@@ -37,7 +37,7 @@ class Member {
   MemberData toData(String conversation) => MemberData(id: tokenId, accountId: account, roleId: role.value, conversationId: conversation);
 
   Friend getFriend([FriendController? controller]) {
-    if(ownAccountId == account) return Friend.me();
+    if(StatusController.ownAccountId == account) return Friend.me();
     controller ??= Get.find();
     return controller!.friends[account] ?? Friend.unknown(account);
   }
