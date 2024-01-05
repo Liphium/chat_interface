@@ -5,7 +5,6 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -81,10 +80,10 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   }
 
   // Get public key and id of the user
-  var json = await postAuthJSON("/account/stored_actions/details", <String, dynamic>{
+  var json = await postAuthorizedJSON("/account/stored_actions/details", <String, dynamic>{
     "username": name,
     "tag": tag,
-  }, randomRemoteID());
+  });
   if(!json["success"]) {
     showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
     requestsLoading.value = false;

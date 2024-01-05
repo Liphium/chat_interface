@@ -34,10 +34,10 @@ Future<bool> sendAuthenticatedStoredAction(Friend friend, String payload) async 
 Future<bool> sendStoredAction(String account, Uint8List publicKey, String payload) async {
 
   // Send stored action
-  final json = await postAuthJSON("/account/stored_actions/send", <String, dynamic>{
+  final json = await postAuthorizedJSON("/account/stored_actions/send", <String, dynamic>{
     "account": account,
     "payload": createPayload(payload, publicKey),
-  }, randomRemoteID());
+  });
 
   if(!json["success"]) {
     sendLog("couldn't send stored action: ${json["error"]}");

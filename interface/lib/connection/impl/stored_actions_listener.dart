@@ -11,7 +11,6 @@ import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
-import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/web.dart';
@@ -82,7 +81,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   }
 
   // Get friend by name and tag
-  final resJson = await postRemoteJSON("/account/stored_actions/details", {
+  final resJson = await postAuthorizedJSON("/account/stored_actions/details", {
     "username": json["name"],
     "tag": json["tag"]
   });

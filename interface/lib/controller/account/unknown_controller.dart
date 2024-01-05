@@ -30,7 +30,7 @@ class UnknownController extends GetxController {
       }
     }
 
-    final json = await postRemoteJSON("/account/get", {
+    final json = await postAuthorizedJSON("/account/get", {
       "id": id,
     });
 

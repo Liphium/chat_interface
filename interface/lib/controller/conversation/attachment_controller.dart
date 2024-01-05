@@ -109,7 +109,7 @@ class AttachmentController extends GetxController {
     sendLog("Downloading ${container.name}...");
     final maxSize = Get.find<SettingController>().settings[FileSettings.maxFileSize]!.getValue();
 
-    final json = await postRemoteJSON("/account/files/info", {
+    final json = await postAuthorizedJSON("/account/files/info", {
       "id": container.id,
     });
 

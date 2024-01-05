@@ -26,7 +26,7 @@ class ProfilePictureHelper {
     // Remove old profile picture
     final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id))).getSingleOrNull();
 
-    final json = await postRemoteJSON("/account/profile/get", <String, dynamic>{
+    final json = await postAuthorizedJSON("/account/profile/get", <String, dynamic>{
       "id": friend.id,
     });
 

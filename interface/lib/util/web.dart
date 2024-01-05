@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
@@ -114,11 +113,6 @@ Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic
   return postJSON(path, body, token: sessionToken);
 }
 
-// Post request to the backend with remote id
-Future<Map<String, dynamic>> postRemoteJSON(String path, Map<String, dynamic> body) async {
-  return postAuthJSON(path, body, randomRemoteID());
-}
-
 // Post request to chat-node with any token (node needs to be connected already) (new)
 Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
 
@@ -129,7 +123,7 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
     };
   }
 
-  return _postTCP(connector.nodePublicKey!, "$nodeProtocol$nodeDomain$path", body, defaultError: defaultError, token: randomRemoteID());
+  return _postTCP(connector.nodePublicKey!, "$nodeProtocol$nodeDomain$path", body, defaultError: defaultError, token: sessionToken);
 }
 
 String padBase64(String str) {
