@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/status/error/server_offline_page.dart';
+import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +16,7 @@ class AccountSetup extends Setup {
     final account = body["account"];
 
     if(!body["success"]) {
-      return const ServerOfflinePage();
+      return ErrorPage(title: "server.error".tr);
     }
 
     // Set all account data
