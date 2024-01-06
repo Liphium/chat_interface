@@ -15,7 +15,6 @@ class CallControls extends StatefulWidget {
 }
 
 class _CallControlsState extends State<CallControls> {
-
   StreamSubscription<dynamic>? subscription;
 
   @override
@@ -31,8 +30,6 @@ class _CallControlsState extends State<CallControls> {
 
   @override
   Widget build(BuildContext context) {
-
-    final controller = Get.find<SpacesController>();
     ThemeData theme = Theme.of(context);
 
     return Hero(
@@ -40,46 +37,44 @@ class _CallControlsState extends State<CallControls> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-    
           //* Microphone button
           CallButtonBorder(
             child: GetX<AudioController>(
               builder: (controller) {
                 return LoadingIconButton(
-                  padding: defaultSpacing + elementSpacing,
-                  loading: controller.muteLoading,
-                  onTap: () => controller.setMuted(!controller.muted.value),
-                  icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-                  iconSize: 35,
-                  color: theme.colorScheme.onSurface
-                ); 
+                    padding: defaultSpacing + elementSpacing,
+                    loading: controller.muteLoading,
+                    onTap: () => controller.setMuted(!controller.muted.value),
+                    icon: controller.muted.value ? Icons.mic_off : Icons.mic,
+                    iconSize: 35,
+                    color: theme.colorScheme.onSurface);
               },
             ),
           ),
-    
+
           horizontalSpacing(defaultSpacing),
-    
+
           //* Audio output
           CallButtonBorder(
             child: GetX<AudioController>(
               builder: (controller) {
                 return LoadingIconButton(
-                  padding: defaultSpacing + elementSpacing,
-                  loading: controller.deafenLoading,
-                  onTap: () => controller.setDeafened(!controller.deafened.value),
-                  icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-                  iconSize: 35,
-                  color: theme.colorScheme.onSurface
-                ); 
+                    padding: defaultSpacing + elementSpacing,
+                    loading: controller.deafenLoading,
+                    onTap: () => controller.setDeafened(!controller.deafened.value),
+                    icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+                    iconSize: 35,
+                    color: theme.colorScheme.onSurface);
               },
             ),
           ),
-    
+
           horizontalSpacing(defaultSpacing),
-    
-          //* Play mode
-          Obx(() =>
-            CallButtonBorder(
+
+          //* Play mode (reintroduced in the future maybe :)
+          /*
+          Obx(
+            () => CallButtonBorder(
               gradient: true,
               child: LoadingIconButton(
                 padding: defaultSpacing + elementSpacing,
@@ -89,11 +84,10 @@ class _CallControlsState extends State<CallControls> {
                 color: theme.colorScheme.tertiary,
                 iconSize: 35,
               ),
-            )
+            ),
           ),
-          
           horizontalSpacing(defaultSpacing),
-    
+          */
           //* End call button
           CallButtonBorder(
             child: LoadingIconButton(
@@ -112,7 +106,6 @@ class _CallControlsState extends State<CallControls> {
 }
 
 class CallButtonBorder extends StatelessWidget {
-
   final bool gradient;
   final Widget child;
 
@@ -122,17 +115,14 @@ class CallButtonBorder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Get.theme.colorScheme.primaryContainer,
-        gradient: gradient ? LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Get.theme.colorScheme.primaryContainer,
-            Get.theme.colorScheme.tertiaryContainer
-          ]
-        ) : null
-      ),
+          shape: BoxShape.circle,
+          color: Get.theme.colorScheme.primaryContainer,
+          gradient: gradient
+              ? LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Get.theme.colorScheme.primaryContainer, Get.theme.colorScheme.tertiaryContainer])
+              : null),
       child: child,
     );
   }

@@ -13,7 +13,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-
   final ThemeData theme = Get.theme;
   final currentCategory = SettingLabel.values[0].categories[0].obs;
 
@@ -32,24 +31,22 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing),
                   child: ListView.builder(
-                    itemCount: SettingLabel.values.length+1,
+                    itemCount: SettingLabel.values.length + 1,
                     itemBuilder: (context, index) {
-                      if(index == 0) {
+                      if (index == 0) {
                         return FJElevatedButton(
                           onTap: () => Get.back(),
                           child: Row(
                             children: [
                               Icon(Icons.arrow_back, color: theme.colorScheme.onPrimary),
                               horizontalSpacing(defaultSpacing * 0.5),
-                              Text("back".tr, style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                color: theme.colorScheme.onSurface
-                              )),
+                              Text("back".tr, style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onSurface)),
                             ],
-                          )
+                          ),
                         );
                       }
 
-                      final current = SettingLabel.values[index-1];
+                      final current = SettingLabel.values[index - 1];
 
                       //* Sidebar buttons
                       return Padding(
@@ -63,42 +60,52 @@ class _SettingsPageState extends State<SettingsPage> {
                             verticalSpacing(defaultSpacing * 0.5),
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
-                              children: current.categories.map((element) => 
-                                Padding(
-                                  padding: const EdgeInsets.only(top: defaultSpacing),
-                                  child: Obx(() => Material(
-                                    color: currentCategory.value == element ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(defaultSpacing),
-                                    child: InkWell(
-                                      onTap: () => currentCategory.value = element,
-                                      borderRadius: BorderRadius.circular(defaultSpacing),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(defaultSpacing),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              element.icon,
-                                              color: Theme.of(context).colorScheme.onPrimary,
-                                              size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
+                              children: current.categories
+                                  .map(
+                                    (element) => Padding(
+                                      padding: const EdgeInsets.only(top: defaultSpacing),
+                                      child: Obx(
+                                        () => Material(
+                                          color: currentCategory.value == element
+                                              ? Get.theme.colorScheme.primary
+                                              : Get.theme.colorScheme.primaryContainer,
+                                          borderRadius: BorderRadius.circular(defaultSpacing),
+                                          child: InkWell(
+                                            onTap: () => currentCategory.value = element,
+                                            borderRadius: BorderRadius.circular(defaultSpacing),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(defaultSpacing),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    element.icon,
+                                                    color: Theme.of(context).colorScheme.onPrimary,
+                                                    size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
+                                                  ),
+                                                  horizontalSpacing(defaultSpacing),
+                                                  Expanded(
+                                                    child: Text(
+                                                      "settings.${element.label}".tr,
+                                                      style: Theme.of(context).textTheme.labelLarge!,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                            horizontalSpacing(defaultSpacing),
-                                            Expanded(
-                                              child: Text("settings.${element.label}".tr, style: Theme.of(context).textTheme.labelLarge!, overflow: TextOverflow.ellipsis,)
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  )),
-                                )
-                              ).toList(),
+                                  )
+                                  .toList(),
                             )
-                          ] 
-                        )
+                          ],
+                        ),
                       );
                     },
                   ),
-                )
+                ),
               ),
 
               //* Content
@@ -113,13 +120,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Obx(() =>
-                              currentCategory.value.displayTitle ?
-                              Padding(
-                                padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
-                                child: Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
-                              ) :
-                              const SizedBox()
+                            Obx(
+                              () => currentCategory.value.displayTitle
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
+                                      child: Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
+                                    )
+                                  : const SizedBox(),
                             ),
                             Obx(() => currentCategory.value.widget ?? const Placeholder()),
                           ],
@@ -131,10 +138,9 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
-
           const NotificationRenderer(position: Offset(20, 20))
         ],
-      )
+      ),
     );
   }
 }

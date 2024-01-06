@@ -27,7 +27,6 @@ import 'package:http/http.dart' as http;
 import 'package:sodium_libs/sodium_libs.dart';
 
 class SpacesController extends GetxController {
-
   //* Call status
   @Deprecated("Not used anymore")
   final livekit = false.obs;
@@ -38,7 +37,7 @@ class SpacesController extends GetxController {
   final title = "Space".obs;
   final start = DateTime.now().obs;
 
-  //* Game mode 
+  //* Game mode
   final playMode = false.obs;
   final gameShelf = false.obs;
   AudioPlayer? audioPlayer;
@@ -56,7 +55,7 @@ class SpacesController extends GetxController {
 
   void createSpace(String title, bool publish) {
     _startSpace((container) {
-      if(publish) {
+      if (publish) {
         Get.find<StatusController>().share(container);
       }
     }, connectedCallback: () => setSpaceTitle(title));
@@ -70,10 +69,10 @@ class SpacesController extends GetxController {
 
   void switchToPlayMode() {
     playMode.value = !playMode.value;
-    if(playMode.value) {
+    if (playMode.value) {
       Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
       fullScreen.value = true;
-      if(Get.find<SettingController>().settings[SpacesSettings.gameMusic]!.getValue()) {
+      if (Get.find<SettingController>().settings[SpacesSettings.gameMusic]!.getValue()) {
         playMusic();
       }
     } else {
@@ -82,7 +81,7 @@ class SpacesController extends GetxController {
       Get.offAll(const ChatPage(), transition: Transition.fadeIn);
     }
   }
-  
+
   void playMusic() {
     audioPlayer = AudioPlayer();
     _sub = audioPlayer!.onSeekComplete.listen((event) {
@@ -103,11 +102,9 @@ class SpacesController extends GetxController {
   }
 
   void setSpaceTitle(String title) {
-    if(connected.value) {
-      spaceConnector.sendAction(msg.Message("set_data", {
-        "data": encryptSymmetric(title, key!)
-      }), handler: (event) {
-        if(!event.data["success"]) {
+    if (connected.value) {
+      spaceConnector.sendAction(msg.Message("set_data", {"data": encryptSymmetric(title, key!)}), handler: (event) {
+        if (!event.data["success"]) {
           showErrorPopup("error", "server.error");
           return;
         }
@@ -117,15 +114,15 @@ class SpacesController extends GetxController {
   }
 
   void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {
-    if(connected.value) {
+    if (connected.value) {
       showErrorPopup("error", "already.calling");
       return;
     }
     spaceLoading.value = true;
-                      
+
     connector.sendAction(msg.Message("spc_start", <String, dynamic>{}), handler: (event) {
-      if(!event.data["success"]) {
-        if(event.data["message"] == "server.error") {
+      if (!event.data["success"]) {
+        if (event.data["message"] == "server.error") {
           spaceLoading.value = false;
           return _openNotAvailable();
         }
@@ -146,39 +143,42 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces",
+        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
-
-    connector.sendAction(msg.Message("spc_join", <String, dynamic>{
-      "id": container.roomId,
-    }), handler: (event) {
-      if(!event.data["success"]) {
-       
-        if(event.data["message"] == "already.in.space") {
-          showConfirmPopup(ConfirmWindow(title: "Spaces", text: "Do you really want to leave the current space?", 
+    connector.sendAction(
+        msg.Message("spc_join", <String, dynamic>{
+          "id": container.roomId,
+        }), handler: (event) {
+      if (!event.data["success"]) {
+        if (event.data["message"] == "already.in.space") {
+          showConfirmPopup(ConfirmWindow(
+            title: "Spaces",
+            text: "Do you really want to leave the current space?",
             onDecline: () => {},
             onConfirm: () {
               connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) {
-                if(!event.data["success"]) {
-                  if(event.data["message"] == "server.error") {
+                if (!event.data["success"]) {
+                  if (event.data["message"] == "server.error") {
                     return _openNotAvailable();
                   }
-                  return showErrorPopup("How?", "I don't understand this world anymore. I'm sorry. It seems like this feature is currently pretty broken for you, tell the admins about it and we'll fix it sometime, yk like never?");
+                  return showErrorPopup("How?",
+                      "I don't understand this world anymore. I'm sorry. It seems like this feature is currently pretty broken for you, tell the admins about it and we'll fix it sometime, yk like never?");
                 }
 
                 // Try joining again
                 join(container);
               });
-            }, 
+            },
           ));
           return;
         }
-        
+
         return showErrorPopup("error", "server.error");
       }
-    
+
       // Load information from space container
       id.value = container.roomId;
       key = container.key;
@@ -188,8 +188,8 @@ class SpacesController extends GetxController {
     });
   }
 
-  void _connectToRoom(String id, Map<String, dynamic> appToken, {Function()? connectedCallback}) {
-    if(key == null) {
+  void _connectToRoom(String id, Map<String, dynamic> appToken, {Function()? connectedCallback}) async {
+    if (key == null) {
       sendLog("key is null: can't connect to space");
       return;
     }
@@ -198,33 +198,45 @@ class SpacesController extends GetxController {
     Get.find<AudioController>().onConnect();
     Get.find<SpaceMemberController>().onConnect(key!);
 
-    createSpaceConnection(appToken["domain"], appToken["token"]);
-    spaceConnector.sendAction(msg.Message("setup", <String, dynamic>{
-      "data": encryptSymmetric(Get.find<StatusController>().id.value, key!)
-    }), handler: (event) async {
-      if(!event.data["success"]) {
-        showErrorPopup("error", "server.error");
-        spaceLoading.value = false;
-        return;
-      }
-
-      // Connect to UDP
-      final domain = (appToken["domain"] as String).split(":")[0];
-      await api.startVoice(
-        clientId: event.data["id"], 
-        verificationKey: event.data["key"], 
-        encryptionKey: packageSymmetricKey(key!), 
-        address: '$domain:${event.data["port"]}',
-      );
-
-      connected.value = true;
-      inSpace.value = true;
+    // Connect to space node
+    final result = await createSpaceConnection(appToken["domain"], appToken["token"]);
+    sendLog("COULD CONNECT TO SPACE NODE: $result");
+    if (!result) {
+      showErrorPopup("error", "server.error");
       spaceLoading.value = false;
-      connectedCallback?.call();
-    });
+      return;
+    }
+
+    spaceConnector.sendAction(
+      msg.Message(
+        "setup",
+        <String, dynamic>{"data": encryptSymmetric(Get.find<StatusController>().id.value, key!)},
+      ),
+      handler: (event) async {
+        if (!event.data["success"]) {
+          showErrorPopup("error", "server.error");
+          spaceLoading.value = false;
+          return;
+        }
+
+        // Connect to UDP
+        final domain = (appToken["domain"] as String).split(":")[0];
+        await api.startVoice(
+          clientId: event.data["id"],
+          verificationKey: event.data["key"],
+          encryptionKey: packageSymmetricKey(key!),
+          address: '$domain:${event.data["port"]}',
+        );
+
+        connected.value = true;
+        inSpace.value = true;
+        spaceLoading.value = false;
+        connectedCallback?.call();
+      },
+    );
   }
 
-  void leaveCall() async {
+  void leaveCall({error = false}) async {
     inSpace.value = false;
     connected.value = false;
     await api.stop();
@@ -237,7 +249,9 @@ class SpacesController extends GetxController {
     Get.find<AudioController>().disconnect();
     Get.find<GameHubController>().leaveCall();
 
-    Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+    if (!error) {
+      Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+    }
   }
 }
 
@@ -251,14 +265,14 @@ class SpaceInfo {
   SpaceInfo(this.title, this.start, this.members) {
     exists = true;
     final controller = Get.find<FriendController>();
-    for(var member in members) {
+    for (var member in members) {
       final friend = controller.friends[member];
-      if(friend != null) friends.add(friend);
+      if (friend != null) friends.add(friend);
     }
   }
 
   SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
-    if(json["data"] != "") {
+    if (json["data"] != "") {
       title = decryptSymmetric(json["data"], container.key);
     } else {
       title = "";
@@ -266,11 +280,11 @@ class SpaceInfo {
     start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
     members = List<String>.from(json["members"].map((e) => decryptSymmetric(e, container.key)));
     exists = true;
-  
+
     final controller = Get.find<FriendController>();
-    for(var member in members) {
+    for (var member in members) {
       final friend = controller.friends[member];
-      if(friend != null) friends.add(friend);
+      if (friend != null) friends.add(friend);
     }
   }
 
@@ -280,7 +294,7 @@ class SpaceInfo {
   }
 }
 
-class SpaceConnectionContainer extends ShareContainer {  
+class SpaceConnectionContainer extends ShareContainer {
   final String node; // Node domain
   final String roomId; // Token required for joining (even though it's not really a token)
   final SecureKey key; // Symmetric key
@@ -289,22 +303,15 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
+      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      "node": node,
-      "id": roomId,
-      "key": packageSymmetricKey(key)
-    };
+    return {"node": node, "id": roomId, "key": packageSymmetricKey(key)};
   }
 
-  String toInviteJson() => jsonEncode({
-    "node": node,
-    "id": roomId,
-    "key": packageSymmetricKey(key)
-  });
+  String toInviteJson() => jsonEncode({"node": node, "id": roomId, "key": packageSymmetricKey(key)});
 
   @override
   void onDrop() {
@@ -319,24 +326,22 @@ class SpaceConnectionContainer extends ShareContainer {
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          "room": roomId
-        }),
+        body: jsonEncode({"room": roomId}),
       );
     } catch (e) {
       return SpaceInfo.notLoaded();
     }
-    if(req.statusCode != 200) {
+    if (req.statusCode != 200) {
       return SpaceInfo.notLoaded();
     }
     final body = jsonDecode(req.body);
-    if(!body["success"]) {
+    if (!body["success"]) {
       return SpaceInfo.notLoaded();
     }
-    if(timer && _timer == null) {
+    if (timer && _timer == null) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
         final info = await getInfo();
-        if(info.exists) {
+        if (info.exists) {
           this.info.value = info;
         } else {
           timer.cancel();

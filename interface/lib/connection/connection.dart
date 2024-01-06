@@ -25,7 +25,6 @@ int nodeId = 0;
 String nodeDomain = "";
 
 class Connector {
-
   late WebSocketChannel connection;
   final _handlers = <String, Function(Event)>{};
   final _waiters = <String, Function()>{};
@@ -37,15 +36,16 @@ class Connector {
   Uint8List? aesKey;
   String? aesBase64;
 
-  Future<bool> connect(String url, String token, {bool restart = true, Function()? onDone}) async {
-
+  Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
     // Generate an AES key for the connection
-    aesKey = randomAESKey();  
+    aesKey = randomAESKey();
     aesBase64 = base64Encode(aesKey!);
 
     // Grab public key from the node
-    final res = await post(Uri.parse("$nodeProtocol$nodeDomain/pub"));
-    if(res.statusCode != 200) {
+    final normalizedUrl = url.replaceAll("ws://", "").replaceAll("wss://", "").split("/")[0];
+    final res = await post(Uri.parse("$nodeProtocol$normalizedUrl/pub"));
+    if (res.statusCode != 200) {
+      sendLog("COULDN'T GET NODE PUBLIC KEY");
       return false;
     }
 
@@ -57,12 +57,18 @@ class Connector {
     final encryptedKey = encryptRSA(aesKey!, nodePublicKey!);
 
     initialized = true;
-    connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token, base64Encode(encryptedKey)]);
+    try {
+      connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token, base64Encode(encryptedKey)]);
+    } catch (e) {
+      sendLog("FAILED TO CONNECT TO $url");
+      e.printError();
+      return false;
+    }
     _connected = true;
 
-    connection.stream.listen((encrypted) {
-
-        if(encrypted is! Uint8List) {
+    connection.stream.listen(
+      (encrypted) {
+        if (encrypted is! Uint8List) {
           sendLog("RECEIVED INVALID MESSAGE: $encrypted");
           return;
         }
@@ -71,39 +77,46 @@ class Connector {
         Uint8List msg;
         try {
           msg = decryptAES(encrypted, aesBase64!);
-        } catch(e) {
+        } catch (e) {
           sendLog("HASH: ${hashShaBytes(encrypted)}");
 
           sendLog("FAILED TO DECRYPT MESSAGE with key ${aesBase64!}");
-          sendLog("This is most likely due to another client being in the same network, connected over the same port as you are. We can't do anything about this and this will not occur in production.");
+          sendLog(
+              "This is most likely due to another client being in the same network, connected over the same port as you are. We can't do anything about this and this will not occur in production.");
           e.printError();
           return;
         } // xcLwjQiuEIWkj04su0pK6uFwoEJ4y6mhEWoHNPF2d4w= xcLwjQiuEIWkj04su0pK6uFwoEJ4y6mhEWoHNPF2d4w=
 
         // Decode the message
         Event event = Event.fromJson(String.fromCharCodes(msg));
-        if(_handlers[event.name] == null) return;
+        if (_handlers[event.name] == null) return;
 
-        if(_afterSetup[event.name] == true && !setupFinished) {
+        if (_afterSetup[event.name] == true && !setupFinished) {
           _afterSetupQueue.add(event);
           return;
         }
         _handlers[event.name]!(event);
-        
+
         _waiters[event.name]?.call();
         _waiters.remove(event.name);
       },
       cancelOnError: false,
       onDone: () {
         _connected = false;
-        if(onDone != null) {
-          onDone();
+        if (onDone != null) {
+          onDone(false);
         }
-        if(restart) {
+        if (restart) {
           sendLog("restarting..");
           initialized = false;
           setupManager.restart();
         }
+      },
+      onError: (e) {
+        sendLog("ERROR: $e");
+        e.printError();
+        onDone?.call(true);
+        _connected = false;
       },
     );
 
@@ -115,7 +128,7 @@ class Connector {
   }
 
   void runAfterSetupQueue() {
-    for(var event in _afterSetupQueue) {
+    for (var event in _afterSetupQueue) {
       _handlers[event.name]!(event);
     }
   }
@@ -125,7 +138,7 @@ class Connector {
   }
 
   /// Listen for an [Event] from the node.
-  /// 
+  ///
   /// [afterSetup] specifies whether the handler should be called after the setup is finished.
   void listen(String event, Function(Event) handler, {afterSetup = false}) {
     _handlers[event] = handler;
@@ -133,18 +146,21 @@ class Connector {
   }
 
   /// Send a [Message] to the node.
-  /// 
+  ///
   /// Optionally, you can specify a [handler] to handle the response (this will be called multiple times if there are multiple responses).
   /// Optionally, you can specify a [waiter] to wait for the response.
   void sendAction(Message message, {Function(Event)? handler, Function()? waiter}) {
-
+    if (!_connected) {
+      sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${message.action}");
+      return;
+    }
     sendLog("SENDING ACTION: ${message.action}");
 
     // Register the handler and waiter
-    if(handler != null) {
+    if (handler != null) {
       _handlers[message.action] = handler;
     }
-    if(waiter != null) {
+    if (waiter != null) {
       _waiters[message.action] = waiter;
     }
 
@@ -155,7 +171,6 @@ class Connector {
   void wait(String action, Function() waiter) {
     _waiters[action] = waiter;
   }
-
 }
 
 /// The [Connector] to the chat node.
@@ -163,9 +178,9 @@ Connector connector = Connector();
 
 /// Initialize the connection to the chat node.
 Future<bool> startConnection(String node, String connectionToken) async {
-  if(connector.initialized) return false;
+  if (connector.initialized) return false;
   final res = await connector.connect("ws://$node/gateway", connectionToken);
-  if(!res) {
+  if (!res) {
     return false;
   }
 
