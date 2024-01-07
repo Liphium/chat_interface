@@ -14,10 +14,9 @@ class ServerSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-
     final server = await (db.select(db.setting)..where((tbl) => tbl.key.equals("server"))).getSingleOrNull();
 
-    if(server == null) {
+    if (server == null) {
       return const ServerSelectorPage();
     } else {
       basePath = "${server.value}/$apiVersion";
@@ -45,12 +44,15 @@ class ServerSelectorPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("${'setup.choose.server'.tr}.", style: Get.textTheme.headlineMedium,),
+                Text(
+                  "${'setup.choose.server'.tr}.",
+                  style: Get.textTheme.headlineMedium,
+                ),
                 verticalSpacing(sectionSpacing),
                 SizedBox(
                   width: double.infinity,
                   child: FJElevatedButton(
-                    onTap: () => chooseServer("http://localhost:3000/v1"),
+                    onTap: () => chooseServer("http://localhost:3000"),
                     child: Center(child: Text("Localhost", style: Get.theme.textTheme.labelLarge)),
                   ),
                 ),

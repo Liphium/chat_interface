@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/register/register_page.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
@@ -20,7 +21,9 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
 
   final _loading = false.obs;
-  final _emailError = ''.obs;
+  final _errorText = ''.obs;
+  bool reminded = false;
+  final _reminderText = ''.obs;
 
   @override
   void dispose() {
@@ -37,12 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Center(
         child: TransitionContainer(
           tag: "login",
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(defaultSpacing * 1.5),
-            topRight: Radius.circular(defaultSpacing * 1.5),
-            bottomLeft: Radius.circular(defaultSpacing * 1.5),
-            bottomRight: Radius.circular(defaultSpacing * 1.5),
-          ),
+          borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
           color: theme.colorScheme.onBackground,
           width: 370,
           child: Padding(
@@ -50,41 +48,44 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("${"input.email".tr}.", textAlign: TextAlign.start,
-                    style: theme.textTheme.headlineMedium),
+                Text("${"input.email".tr}.", textAlign: TextAlign.start, style: theme.textTheme.headlineMedium),
                 verticalSpacing(defaultSpacing * 2),
-                Obx(
-                  () => FJTextField(
-                    hintText: 'placeholder.email'.tr,
-                    errorText: _emailError.value == '' ? null : _emailError.value,
-                    controller: _emailController,
-                  ),
+                AnimatedInfoContainer(
+                  padding: const EdgeInsets.only(bottom: defaultSpacing),
+                  message: _reminderText,
+                  expand: true,
                 ),
-                verticalSpacing(defaultSpacing * 1.5),
+                FJTextField(
+                  hintText: 'placeholder.email'.tr,
+                  controller: _emailController,
+                ),
+                verticalSpacing(defaultSpacing),
+                AnimatedErrorContainer(
+                  padding: const EdgeInsets.only(bottom: defaultSpacing),
+                  message: _errorText,
+                  expand: true,
+                ),
                 FJElevatedButton(
                   onTap: () {
                     if (_loading.value) return;
                     _loading.value = true;
-                
+                    _errorText.value = ''.tr;
+                    _reminderText.value = ''.tr;
+
                     if (_emailController.text == '') {
-                      _emailError.value = 'input.email'.tr;
+                      _errorText.value = 'email.invalid'.tr;
+                      if (!reminded) {
+                        _reminderText.value = 'login.register_reminder'.tr;
+                      }
+                      reminded = true;
                       _loading.value = false;
                       return;
                     }
-                
-                    _emailError.value = '';
-                
-                    loginStart(_emailController.text,
-                        success: () async {
-                          _loading.value = false;
+
+                    loginStart(_emailController.text, success: () async {
+                      _loading.value = false;
                     }, failure: (msg) {
-                      Get.snackbar("login.failed".tr, msg.tr);
-                
-                      switch (msg) {
-                        case "invalid.email":
-                          _emailError.value = msg.tr;
-                          break;
-                      }
+                      _errorText.value = msg.tr;
                       _loading.value = false;
                     });
                   },
@@ -99,18 +100,23 @@ class _LoginPageState extends State<LoginPage> {
                         : Text('login.next'.tr, style: theme.textTheme.labelLarge)),
                   ),
                 ),
-                verticalSpacing(defaultSpacing * 1.5),
+                verticalSpacing(defaultSpacing),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("login.no_account.text".tr),
                     horizontalSpacing(defaultSpacing),
                     TextButton(
+                      style: ButtonStyle(
+                        foregroundColor: MaterialStateProperty.all(theme.colorScheme.onPrimary),
+                        backgroundColor: MaterialStateProperty.resolveWith(
+                            (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
+                      ),
                       onPressed: () => Get.find<TransitionController>().modelTransition(const RegisterPage()),
                       child: Text('login.no_account'.tr),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),

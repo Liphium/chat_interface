@@ -4,7 +4,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class TransitionController extends GetxController {
-
   final transitionDuration = 500.ms; // constant
   final transition = false.obs;
 
@@ -15,8 +14,7 @@ class TransitionController extends GetxController {
   }
 
   void transitionTo(dynamic page, Function(dynamic) goTo) {
-
-    if(currentTimer != null) {
+    if (currentTimer != null) {
       currentTimer!.cancel();
     }
 
@@ -24,11 +22,10 @@ class TransitionController extends GetxController {
 
     currentTimer = Timer(transitionDuration, () {
       goTo(page);
-    
+
       currentTimer = Timer(transitionDuration, () {
         transition.value = false;
       });
     });
   }
-
 }

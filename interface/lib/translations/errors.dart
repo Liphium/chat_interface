@@ -33,9 +33,10 @@ class ErrorTranslations extends Translations {
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
           'profile_picture.not_set': 'Your profile picture couldn\'t be set. Please try again later or contact support.',
-          'tag.invalid': 'Your tag is doesn\'t match the requirements. Please make it longer than 3 characters.',
+          'tag.invalid': 'Your tag is doesn\'t match the requirements. Please make it longer than 3 characters and don\'t use special characters.',
           'username.invalid': 'Your username doesn\'t match the requirements. Please make it longer than 3 characters.',
           'username.taken': 'This combination of username and tag is taken, please choose something else.',
+          'password.mismatch': 'The passwords don\'t match.',
 
           // Game
           'no.start': 'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
@@ -67,6 +68,14 @@ class ErrorTranslations extends Translations {
           'file.too_large': 'Die maximale Dateigröße beträgt 10MB.',
           'chat.add_file': 'Datei anhängen',
           'message.delete_error': 'Die Nachricht konnte nicht gelöscht werden. Bitte versuche es später erneut.',
+
+          // Settings
+          'profile_picture.not_uploaded': 'Dein Profilbild konnte nicht hochgeladen werden. Bitte versuche es später erneut oder kontaktiere den Support.',
+          'profile_picture.not_set': 'Dein Profilbild konnte nicht gesetzt werden. Bitte versuche es später erneut oder kontaktiere den Support.',
+          'tag.invalid': 'Dein Tag entspricht nicht den Anforderungen. Bitte mache es länger als 3 Zeichen und verwende nur Buchstaben und Zahlen.',
+          'username.invalid': 'Dein Benutzername entspricht nicht den Anforderungen. Bitte mache ihn länger als 3 Zeichen und verwende nur Buchstaben und Zahlen.',
+          'username.taken': 'Diese Kombination aus Benutzername und Tag ist bereits vergeben, bitte wähle etwas anderes.',
+          'password.mismatch': 'Die Passwörter stimmen nicht überein.',
 
           // Game
           'no.start': 'Das Spiel konnte nicht gestartet werden. Wir entschuldigen uns für die Unannehmlichkeiten, bitte melde dich bei Support, wenn du auf dieses Problem stößt.',

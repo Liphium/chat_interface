@@ -25,6 +25,7 @@ class GeneralTranslations extends Translations {
           'close': 'Close',
           'username': 'Username',
           'password': 'Password',
+          'invite': 'Invite',
           'email': 'Email',
           'under.dev': 'This featue is still under development. Sorry for the inconvenience. Please contact support if this is something important.',
 
@@ -58,6 +59,7 @@ class GeneralTranslations extends Translations {
           'username': 'Benutzername',
           'password': 'Passwort',
           'email': 'Email',
+          'invite': 'Einladung',
           'under.dev': 'Dieses Feature ist noch in Entwicklung. Sorry für die Unannehmlichkeiten. Bitte kontaktiere den Support, wenn es um etwas Wichtiges geht.',
 
           // Time
