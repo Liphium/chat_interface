@@ -23,12 +23,11 @@ part 'key_container.dart';
 part 'friends_vault.dart';
 
 class FriendController extends GetxController {
-  
   final friends = <String, Friend>{}.obs;
   final friendIdLookup = <String, Friend>{};
 
   Future<bool> loadFriends() async {
-    for(FriendData data in await db.friend.select().get()) {
+    for (FriendData data in await db.friend.select().get()) {
       friends[data.id] = Friend.fromEntity(data);
     }
     return true;
@@ -44,7 +43,6 @@ class FriendController extends GetxController {
 
   // Add friend (also sends data to server vault)
   Future<bool> addFromRequest(Request request) async {
-
     sendLog("adding friend from request ${request.friend.id}");
 
     // Remove from requests controller
@@ -53,7 +51,7 @@ class FriendController extends GetxController {
     // Remove request from server
     sendLog(request.vaultId);
     final friendsVault = await removeFromFriendsVault(request.vaultId);
-    if(!friendsVault) {
+    if (!friendsVault) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
       sendLog("ADDING REGARDLESS");
       return false;
@@ -61,12 +59,12 @@ class FriendController extends GetxController {
 
     // Remove stored action from server
     await deleteStoredAction(request.storedActionId);
-    
+
     // Add friend to vault
     final id = await storeInFriendsVault(request.friend.toStoredPayload());
     sendLog("STORING IN FRIENDS VAULT");
 
-    if(id == null) {
+    if (id == null) {
       add(request.friend); // probably already in the vault (from other device)
       return false;
     }
@@ -86,7 +84,7 @@ class FriendController extends GetxController {
   }
 
   Future<bool> remove(Friend friend, {removal = true}) async {
-    if(removal) {
+    if (removal) {
       friends.remove(friend.id);
     }
     await db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id));
@@ -94,7 +92,7 @@ class FriendController extends GetxController {
   }
 
   Friend getFriend(String account) {
-    if(StatusController.ownAccountId == account) return Friend.me();
+    if (StatusController.ownAccountId == account) return Friend.me();
     return friends[account] ?? Friend.unknown(account);
   }
 }
@@ -113,35 +111,40 @@ class Friend {
 
   Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage);
 
-  Friend.system() : id = "system", name = "System", tag = "fjc", vaultId = "", keyStorage = KeyStorage.empty();
+  Friend.system()
+      : id = "system",
+        name = "System",
+        tag = "fjc",
+        vaultId = "",
+        keyStorage = KeyStorage.empty();
   Friend.me([StatusController? controller])
-        : id = '',
-          name = '',
-          tag = '',
-          vaultId = '',
-          keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, "") {
+      : id = '',
+        name = '',
+        tag = '',
+        vaultId = '',
+        keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, "") {
     final StatusController statusController = controller ?? Get.find();
     id = statusController.id.value;
     name = statusController.name.value;
     tag = statusController.tag.value;
   }
-  Friend.unknown(this.id) 
-        : name = 'fj-$id',
-          tag = 'tag',
-          vaultId = '',
-          keyStorage = KeyStorage.empty() {
+  Friend.unknown(this.id)
+      : name = 'fj-$id',
+        tag = 'tag',
+        vaultId = '',
+        keyStorage = KeyStorage.empty() {
     unknown = true;
   }
 
   Friend.fromEntity(FriendData data)
-        : id = data.id,
-          name = data.name,
-          tag = data.tag,
-          vaultId = data.vaultId,
-          keyStorage = KeyStorage.fromJson(jsonDecode(data.keys));
+      : id = data.id,
+        name = data.name,
+        tag = data.tag,
+        vaultId = data.vaultId,
+        keyStorage = KeyStorage.fromJson(jsonDecode(data.keys));
 
-  Friend.fromStoredPayload(Map<String, dynamic> json) :
-        id = json["id"],
+  Friend.fromStoredPayload(Map<String, dynamic> json)
+      : id = json["id"],
         name = json["name"],
         tag = json["tag"],
         vaultId = "",
@@ -149,7 +152,6 @@ class Friend {
 
   // Convert to a stored payload for the server
   String toStoredPayload() {
-
     final reqPayload = <String, dynamic>{
       "rq": false,
       "id": id,
@@ -159,6 +161,23 @@ class Friend {
     reqPayload.addAll(keyStorage.toJson());
 
     return jsonEncode(reqPayload);
+  }
+
+  // Update in database
+  Future<bool> update() async {
+    if (id == StatusController.ownAccountId) {
+      return false;
+    }
+    await removeFromFriendsVault(vaultId);
+    final result = await storeInFriendsVault(toStoredPayload());
+    if (result == null) {
+      // TODO: Log somewhere
+      sendLog("FRIEND CONFLICT: Couldn't update in vault!");
+      return true;
+    }
+    vaultId = result;
+    await db.friend.insertOnConflictUpdate(entity());
+    return true;
   }
 
   //* Status
@@ -193,22 +212,15 @@ class Friend {
 
   /// Update the profile picture of this friend
   void updateProfilePicture(String picture, ProfilePictureData data) async {
-
     // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(
-      id: id, 
-      pictureId: picture, 
-      pictureData: jsonEncode(data.toJson()), 
-      data: ""
-    ));
+    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureId: picture, pictureData: jsonEncode(data.toJson()), data: ""));
 
     profilePictureData = data;
     profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
-    if(profilePictureImage.value == null) {
-
+    if (profilePictureImage.value == null) {
       // Redownload the profile picture
       final result = await ProfilePictureHelper.downloadProfilePicture(this);
-      if(result == null) {
+      if (result == null) {
         return;
       }
       profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
@@ -219,33 +231,32 @@ class Friend {
   void loadProfilePicture() async {
     profilePictureUsages++;
 
-    if(DateTime.now().difference(lastProfilePictureUpdate).inMinutes > 2) {
-      lastProfilePictureUpdate = DateTime.now();      
+    if (DateTime.now().difference(lastProfilePictureUpdate).inMinutes > 2) {
+      lastProfilePictureUpdate = DateTime.now();
 
       final result = await ProfilePictureHelper.downloadProfilePicture(this);
-      if(result != null) {
+      if (result != null) {
         return;
       }
     }
 
     // Return if images is already loaded
-    if(profilePictureImage.value != null) return;
+    if (profilePictureImage.value != null) return;
 
     // Load the image
     final data = await ProfilePictureHelper.getProfilePictureLocal(id);
-    if(data == null) {
+    if (data == null) {
       sendLog("NOTHING FOUND");
       return;
     }
     profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
     profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
-    if(profilePictureImage.value == null) {
-
+    if (profilePictureImage.value == null) {
       sendLog("NO PFP");
 
       // Redownload the profile picture
       final result = await ProfilePictureHelper.downloadProfilePicture(this);
-      if(result == null) {
+      if (result == null) {
         return;
       }
       profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
@@ -255,7 +266,7 @@ class Friend {
 
   void disposeProfilePicture() {
     profilePictureUsages--;
-    if(profilePictureUsages == 0) {
+    if (profilePictureUsages == 0) {
       profilePictureImage.value = null;
     }
   }
@@ -276,10 +287,10 @@ class Friend {
   bool canBeDeleted() => vaultId != "";
 
   FriendData entity() => FriendData(
-    id: id,
-    name: name,
-    tag: tag,
-    vaultId: vaultId,
-    keys: jsonEncode(keyStorage.toJson()),
-  );
+        id: id,
+        name: name,
+        tag: tag,
+        vaultId: vaultId,
+        keys: jsonEncode(keyStorage.toJson()),
+      );
 }

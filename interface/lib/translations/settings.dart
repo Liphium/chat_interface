@@ -32,12 +32,10 @@ class SettingsTranslations extends Translations {
           'audio.device.default': "If you don't know what to select here, the default is probably fine:",
           'audio.device.default.button': 'Use system default',
           'audio.microphone': 'Microphone',
-          'audio.microphone.device':
-              'Or you just select one of these devices (the green verified indicator tries detecting the best microphone):',
+          'audio.microphone.device': 'Or you just select one of these devices (the green verified indicator tries detecting the best microphone):',
           'audio.microphone.muted': 'Start muted in Spaces',
           'audio.microphone.sensitivity': 'Microphone sensitivity',
-          'audio.microphone.sensitivity.text':
-              'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
+          'audio.microphone.sensitivity.text': 'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
           'audio.output': 'Output',
           'audio.output.device': 'Or you just select one of these devices:',
 
@@ -73,8 +71,7 @@ class SettingsTranslations extends Translations {
 
           // Data settings
           'settings.data.profile_picture': 'Profile picture',
-          'settings.data.profile_picture.select':
-              'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
+          'settings.data.profile_picture.select': 'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
           'settings.data.profile_picture.requirements': 'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',
           'settings.data.profile_picture.remove': 'Remove profile picture',
           'settings.data.profile_picture.remove.confirm': 'Are you sure you want to remove your profile picture?',
@@ -84,12 +81,14 @@ class SettingsTranslations extends Translations {
           'settings.data.account': 'Account data',
           'settings.data.password.description': 'We\'ll not show your password here. That would be stupid.',
           'settings.data.log_out': 'Log out of your account',
-          'settings.data.log_out.description':
-              'This feature is still in development. Just wanted to let you know so you don\'t keep searching for it.',
+          'settings.data.log_out.description': 'This feature is still in development. Just wanted to let you know so you don\'t keep searching for it.',
           'settings.data.danger_zone': 'Danger zone',
           'settings.data.danger_zone.description':
               'Hello, and welcome down here! Hope you haven\'t come here to delete your account. If you have, you can do that here. But please don\'t. We\'ll miss you. :( ... Anyways thanks for freeing some storage in our database!',
           'settings.data.danger_zone.delete_account': 'Delete account',
+          'settings.data.danger_zone.delete_account.confirm':
+              'This is just a request and your actual data will be deleted in 30 days. We do this to make sure you didn\'t just accidentally click this button and that you are the actual owner of this account. Are you sure you want to delete your account?',
+          'settings.data.change_name.dialog': 'Let\'s get you a fresh username and tag. But please don\'t change it to something stupid. Your friends will thank you.',
 
           // Invite settings (this is mostly alpha only)
           'settings.invites.description':
@@ -133,12 +132,10 @@ class SettingsTranslations extends Translations {
           'audio.device.default': 'Wenn du nicht weißt, was du hier auswählen sollst, ist oft das Standardgerät in Ordnung:',
           'audio.device.default.button': 'Systemstandard verwenden',
           'audio.microphone': 'Mikrofon',
-          'audio.microphone.device':
-              'Oder du wählst einfach eines dieser Geräte aus (der grüne Verifizierungsindikator steht für das beste Mikrofon):',
+          'audio.microphone.device': 'Oder du wählst einfach eines dieser Geräte aus (der grüne Verifizierungsindikator steht für das beste Mikrofon):',
           'audio.microphone.muted': 'In einem Space stummgeschaltet starten',
           'audio.microphone.sensitivity': 'Mikrofonempfindlichkeit',
-          'audio.microphone.sensitivity.text':
-              'Die grüne Linie ist deine aktuelle Lautstärke. Ziehe den Regler an die Stelle, an der andere dich hören sollen.',
+          'audio.microphone.sensitivity.text': 'Die grüne Linie ist deine aktuelle Lautstärke. Ziehe den Regler an die Stelle, an der andere dich hören sollen.',
           'audio.output': 'Ausgabe',
           'audio.output.device': 'Oder du wählst einfach eines dieser Geräte aus:',
 
@@ -175,20 +172,23 @@ class SettingsTranslations extends Translations {
           // Data settings
           'settings.data.profile_picture': 'Profilbild',
           'settings.data.profile_picture.select': 'Wähle dein neuestes Meme aus, damit jeder sehen kann, wie cool du bist!',
-          'settings.data.profile_picture.requirements': 'Kann nur ein JPEG oder PNG sein und darf nicht größer als 10 MB sein.',
+          'settings.data.profile_picture.requirements': 'Kann nur ein JPEG- oder PNG-Bild sein und darf nicht größer als 10 MB sein.',
           'settings.data.profile_picture.remove': 'Profilbild entfernen',
           'settings.data.profile_picture.remove.confirm': 'Bist du sicher, dass du dein Profilbild entfernen möchtest?',
           'settings.data.permissions': 'Berechtigungen',
           'settings.data.permissions.description':
               'Falls du nicht weißt, was das hier ist, ist es nicht schlimm. Das hier sind einfach nur Daten vom Server nach denen wir dich im Fall von Problemen fragen können. Hier sind deine Berechtigungen:',
           'settings.data.account': 'Kontodaten',
+          'settings.data.password.description': 'Wir zeigen dir dein Passwort hier nicht an. Das wäre dumm.',
           'settings.data.log_out': 'Von deinem Konto abmelden',
-          'settings.data.log_out.description':
-              'Diese Funktion ist noch in Entwicklung. Ich wollte dich nur wissen lassen, damit du nicht weiter danach suchst.',
+          'settings.data.log_out.description': 'Diese Funktion ist noch in Entwicklung. Wir wollten es dich nur wissen lassen, damit du nicht weiter danach suchst.',
           'settings.data.danger_zone': 'Gefahrenzone',
           'settings.data.danger_zone.description':
               'Hallo und willkommen hier unten! Ich hoffe, du bist nicht hierher gekommen, um dein Konto zu löschen. Wenn doch, kannst du das hier tun. Aber bitte nicht. Wir werden dich vermissen. :( ... Wie auch immer, danke, dass du etwas Speicherplatz in unserer Datenbank freigibst!',
           'settings.data.danger_zone.delete_account': 'Konto löschen',
+          'settings.data.danger_zone.delete_account.confirm':
+              'Das ist nur eine Anfrage und deine eigentlichen Daten werden in 30 Tagen gelöscht. Wir tun das, um sicherzustellen, dass du nicht versehentlich auf diesen Button geklickt hast und dass du der eigentliche Besitzer dieses Kontos bist. Bist du sicher, dass du dein Konto löschen möchtest?',
+          'settings.data.change_name.dialog': 'Lass uns dir einen neuen Benutzernamen und Tag geben. Aber bitte ändere ihn nicht zu etwas Dummem. Deine Freunde werden dir danken.',
 
           // Invite settings (this is mostly alpha only)
           'settings.invites.description':
@@ -196,8 +196,7 @@ class SettingsTranslations extends Translations {
           'settings.invites.generate': 'Einladung generieren',
           'settings.invites.generated': 'Einladung generiert! Sie wurde in deine Zwischenablage kopiert.',
           'settings.invites.history': 'Verlauf',
-          'settings.invites.history.description':
-              'Hier sind alle Einladungen, die du bereits generiert hast. Halte den Mauszeiger darüber, um den Token zu sehen.',
+          'settings.invites.history.description': 'Hier sind alle Einladungen, die du bereits generiert hast. Halte den Mauszeiger darüber, um den Token zu sehen.',
           'settings.invites.history.empty': 'Du hast noch keine Einladungen generiert oder sie wurden alle eingelöst.',
 
           // Spaces settings

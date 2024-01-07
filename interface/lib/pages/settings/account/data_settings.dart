@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -117,7 +118,7 @@ class DataSettingsPage extends StatelessWidget {
               ),
               FJElevatedButton(
                 smallCorners: true,
-                onTap: () => {},
+                onTap: () => Get.dialog(const ChangeNameWindow()),
                 child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
               ),
             ],
@@ -210,7 +211,14 @@ class DataSettingsPage extends StatelessWidget {
         //* Danger zone actions
         FJElevatedButton(
           smallCorners: true,
-          onTap: () => {},
+          onTap: () {
+            showConfirmPopup(ConfirmWindow(
+              title: "settings.data.danger_zone.delete_account".tr,
+              text: "settings.data.danger_zone.delete_account.confirm".tr,
+              onConfirm: () => {},
+              onDecline: () => {},
+            ));
+          },
           color: Get.theme.colorScheme.errorContainer,
           child: Row(
             mainAxisSize: MainAxisSize.min,

@@ -18,25 +18,30 @@ import 'package:file_selector/file_selector.dart';
 import 'package:get/get.dart';
 
 class ProfilePictureHelper {
-
   /// Download the profile picture of a friend.
   /// Returns the file ID associated with the profile picture.
   static Future<String?> downloadProfilePicture(Friend friend) async {
-
-    // Remove old profile picture
+    // Get old profile picture
     final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id))).getSingleOrNull();
 
     final json = await postAuthorizedJSON("/account/profile/get", <String, dynamic>{
       "id": friend.id,
     });
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       return null;
     }
 
-    if(oldProfile != null) {
+    // Check if there is a new name and tag (also handled by the profile endpoint)
+    if (json["name"] != friend.name || json["tag"] != friend.tag) {
+      friend.name = json["name"];
+      friend.tag = json["tag"];
+      await friend.update();
+    }
+
+    if (oldProfile != null) {
       final exists = await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).exists();
-      if(json["profile"]["picture"] == oldProfile.pictureId && exists) {
+      if (json["profile"]["picture"] == oldProfile.pictureId && exists) {
         return null; // Nothing changed
       }
     }
@@ -45,34 +50,31 @@ class ProfilePictureHelper {
     final profileData = ProfilePictureData.fromJson(jsonDecode(decryptSymmetric(json["profile"]["picture_data"], friend.keyStorage.profileKey)));
     final container = AttachmentContainer.fromJson(jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
 
-    if(container.id != json["profile"]["picture"]) {
+    if (container.id != json["profile"]["picture"]) {
       return null;
     }
 
-    if(oldProfile != null) {
-      
+    if (oldProfile != null) {
       // Check if there is an attachment in any message using the file from the old profile picture
       final messages = await (db.message.select()..where((tbl) => tbl.attachments.contains(oldProfile.pictureId))).get();
-      if(messages.isEmpty) {
+      if (messages.isEmpty) {
         final exists = await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).exists();
-        if(exists) {
-         await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).delete();
+        if (exists) {
+          await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).delete();
         }
       }
     }
 
     // Download the file
-    sendLog("downloading new pfp..");
     final success = await Get.find<AttachmentController>().downloadAttachment(container);
-    if(!success) {
+    if (!success) {
       return null;
     }
 
-    if(oldProfile != null) {
+    // Delete old profile
+    if (oldProfile != null) {
       await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id))).go();
     }
-
-    sendLog("UPDATED");
 
     // Save the profile picture data
     friend.updateProfilePicture(json["profile"]["picture"], profileData);
@@ -82,22 +84,18 @@ class ProfilePictureHelper {
 
   /// Upload a profile picture to the server and set it as the current profile picture
   static Future<bool> uploadProfilePicture(XFile file, ProfilePictureData data) async {
-
     // Upload the file
     final response = await Get.find<AttachmentController>().uploadFile(UploadData(file));
-    if(!response.success) {
+    if (!response.success) {
       showErrorPopup("error", "profile_picture.not_uploaded");
       return false;
     }
 
     // Update the profile picture
-    final json = await postAuthorizedJSON("/account/profile/set_picture", {
-      "file": response.container.id,
-      "data": encryptSymmetric(jsonEncode(data.toJson()), profileKey),
-      "container": encryptSymmetric(jsonEncode(response.container.toJson()), profileKey)
-    });
+    final json = await postAuthorizedJSON("/account/profile/set_picture",
+        {"file": response.container.id, "data": encryptSymmetric(jsonEncode(data.toJson()), profileKey), "container": encryptSymmetric(jsonEncode(response.container.toJson()), profileKey)});
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       showErrorPopup("error", "profile_picture.not_set");
       return false;
     }
@@ -117,10 +115,10 @@ class ProfilePictureHelper {
   static Future<ui.Image?> loadImage(String path) async {
     final file = File(path);
     final exists = await file.exists();
-    if(!exists) {
+    if (!exists) {
       sendLog("DOESNT EXIST: $path");
       return null;
-    }    
+    }
     final Uint8List data = await File(path).readAsBytes();
     final Completer<ui.Image> completer = Completer();
     ui.decodeImageFromList(data, (ui.Image img) {
@@ -128,7 +126,6 @@ class ProfilePictureHelper {
     });
     return completer.future;
   }
-
 }
 
 /// Class for storing the data of a profile picture (scale factor, x/y position)
@@ -137,14 +134,14 @@ class ProfilePictureData {
   ProfilePictureData(this.scaleFactor, this.moveX, this.moveY);
 
   factory ProfilePictureData.fromJson(Map<String, dynamic> json) => ProfilePictureData(
-    json["s"],
-    json["x"],
-    json["y"],
-  );
+        json["s"],
+        json["x"],
+        json["y"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "s": scaleFactor,
-    "x": moveX,
-    "y": moveY,
-  };
+        "s": scaleFactor,
+        "x": moveX,
+        "y": moveY,
+      };
 }

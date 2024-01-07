@@ -26,12 +26,13 @@ class GeneralTranslations extends Translations {
           'username': 'Username',
           'password': 'Password',
           'email': 'Email',
+          'under.dev': 'This featue is still under development. Sorry for the inconvenience. Please contact support if this is something important.',
 
           // Time TODO: Differentiate between PM and AM
           'message.time': '@hour:@minute',
           'time.yesterday': 'Yesterday',
           'time.today': 'Today',
-          'time': '@day/@month/@year',
+          'time': '@month/@day/@year',
         },
 
         //* German
@@ -57,6 +58,7 @@ class GeneralTranslations extends Translations {
           'username': 'Benutzername',
           'password': 'Passwort',
           'email': 'Email',
+          'under.dev': 'Dieses Feature ist noch in Entwicklung. Sorry für die Unannehmlichkeiten. Bitte kontaktiere den Support, wenn es um etwas Wichtiges geht.',
 
           // Time
           'message.time': '@hour:@minute',
