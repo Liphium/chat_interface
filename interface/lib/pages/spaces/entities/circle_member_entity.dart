@@ -1,10 +1,11 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 class CircleMemberEntity extends StatefulWidget {
-
   final SpaceMember member;
 
   final double bottomPadding;
@@ -17,36 +18,33 @@ class CircleMemberEntity extends StatefulWidget {
 }
 
 class _MemberEntityState extends State<CircleMemberEntity> {
-  
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-
     return Padding(
       padding: EdgeInsets.only(bottom: widget.bottomPadding, right: widget.rightPadding),
       child: Stack(
         children: [
-          Obx(() =>
-            Container(
+          Obx(
+            () => Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: widget.member.isSpeaking.value ? Colors.green : Colors.transparent,
+                  width: 4,
+                ),
+              ),
               width: 100,
               height: 100,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(200),
-                border: widget.member.isSpeaking.value ? Border.all(color: Colors.green, width: 2) : null,
+              child: UserAvatar(
+                id: widget.member.friend.id,
+                size: 100,
               ),
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(defaultSpacing),
-                  child: Text(widget.member.friend.name, style: theme.textTheme.bodyLarge!.copyWith(fontSize: 17), overflow: TextOverflow.ellipsis,)
-                )
-              )
-            )
+            ),
           ),
-    
+
           //* Muted indicator
-          Obx(() =>
-            Visibility(
+          Obx(
+            () => Visibility(
               visible: widget.member.isMuted.value,
               child: Positioned(
                 right: 0,
@@ -55,23 +53,29 @@ class _MemberEntityState extends State<CircleMemberEntity> {
                   decoration: BoxDecoration(
                     color: Get.theme.colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(200),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Get.theme.colorScheme.primaryContainer,
+                        blurRadius: 10,
+                      ),
+                    ],
                   ),
                   width: 30,
                   height: 30,
-                  child: const Center(
+                  child: Center(
                     child: Icon(
                       Icons.mic_off,
-                      color: Colors.white,
-                    )
-                  )
+                      color: Get.theme.colorScheme.error,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-    
-          //* Speaker indicator
-          Obx(() =>
-            Visibility(
+
+          //* Deafened indicator
+          Obx(
+            () => Visibility(
               visible: widget.member.isDeafened.value,
               child: Positioned(
                 right: 0,
@@ -80,15 +84,22 @@ class _MemberEntityState extends State<CircleMemberEntity> {
                   decoration: BoxDecoration(
                     color: Get.theme.colorScheme.errorContainer,
                     borderRadius: BorderRadius.circular(200),
+                    boxShadow: [
+                      if (!widget.member.isMuted.value)
+                        BoxShadow(
+                          color: Get.theme.colorScheme.primaryContainer,
+                          blurRadius: 10,
+                        ),
+                    ],
                   ),
                   width: 30,
                   height: 30,
-                  child: const Center(
+                  child: Center(
                     child: Icon(
                       Icons.volume_off,
-                      color: Colors.white,
-                    )
-                  )
+                      color: Get.theme.colorScheme.error,
+                    ),
+                  ),
                 ),
               ),
             ),

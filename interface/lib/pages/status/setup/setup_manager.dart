@@ -1,7 +1,7 @@
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
-import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/settings_setup.dart';
@@ -27,7 +27,7 @@ abstract class Setup {
   final String name;
   final bool once;
   bool executed = false;
-  
+
   Setup(this.name, this.once);
 
   Future<Widget?> load();
@@ -36,13 +36,11 @@ abstract class Setup {
 SetupManager setupManager = SetupManager();
 
 class SetupManager {
-  
   final _steps = <Setup>[];
   int current = -1;
   final message = 'setup.loading'.obs;
 
   SetupManager() {
-
     // Initialize setups
 
     // Setup app
@@ -61,7 +59,6 @@ class SetupManager {
     _steps.add(KeySetup());
 
     // Fetch data
-    _steps.add(RemoteIDSetup());
     _steps.add(SettingsSetup());
     _steps.add(FriendsSetup());
 
@@ -82,19 +79,20 @@ class SetupManager {
   void restart() {
     current = -1;
     Get.find<TransitionController>().modelTransition(const StartingPage());
+    db.close();
   }
 
-  void next({bool open = true})  async {
+  void next({bool open = true}) async {
     if (_steps.isEmpty) return;
 
-    if(open) {
+    if (open) {
       Get.find<TransitionController>().modelTransition(const StartingPage());
     }
 
     current++;
     if (current < _steps.length) {
       final setup = _steps[current];
-      if(setup.executed && setup.once) {
+      if (setup.executed && setup.once) {
         next(open: false);
         return;
       }
@@ -103,7 +101,7 @@ class SetupManager {
       sendLog("Setup: ${setup.name}");
 
       Widget? ready;
-      if(isDebug) {
+      if (isDebug) {
         ready = await setup.load();
       } else {
         try {
@@ -113,7 +111,7 @@ class SetupManager {
           return;
         }
       }
-      
+
       if (ready != null) {
         Get.find<TransitionController>().modelTransition(ready);
         return;
@@ -121,13 +119,11 @@ class SetupManager {
 
       setup.executed = true;
       next(open: false);
-      
     } else {
       sendLog("opening");
       Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
     }
   }
-
 
   void error(String error) {
     Get.find<TransitionController>().modelTransition(ErrorPage(title: error));

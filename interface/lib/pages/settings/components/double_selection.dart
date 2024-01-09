@@ -67,7 +67,7 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
                 ),
               ),
               horizontalSpacing(defaultSpacing),
-              Text("${roundedCurrent} ${widget.unit.tr}", style: Get.theme.textTheme.bodyMedium),
+              Text("$roundedCurrent ${widget.unit.tr}", style: Get.theme.textTheme.bodyMedium),
             ],
           );
         }),

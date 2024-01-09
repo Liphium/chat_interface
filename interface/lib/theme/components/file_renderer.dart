@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +76,7 @@ class FilePreview extends StatelessWidget {
 
 class SquareFileRenderer extends StatefulWidget {
 
-  final XFile file;
+  final UploadData file;
   final VoidCallback? onRemove;
 
   const SquareFileRenderer({super.key, required this.file, required this.onRemove});
@@ -105,7 +106,7 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                 color: Get.theme.colorScheme.primaryContainer,
                 width: 200,
                 height: 200,
-                child: FilePreview(file: widget.file)
+                child: FilePreview(file: widget.file.file)
               ),
               Align(
                 alignment: Alignment.topRight,
@@ -120,13 +121,30 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         horizontalSpacing(defaultSpacing),
-                        Expanded(child: Text(widget.file.name, overflow: TextOverflow.ellipsis,)),
+                        Expanded(child: Text(widget.file.file.name, overflow: TextOverflow.ellipsis,)),
                         horizontalSpacing(defaultSpacing),
-                        IconButton(
-                          onPressed: () {
-                            widget.onRemove?.call();
-                          },
-                          icon: const Icon(Icons.close),
+                        Obx(() => 
+                          Visibility(
+                            visible: widget.file.progress.value == 0,
+                            replacement: Padding(
+                              padding: const EdgeInsets.all(defaultSpacing),
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  value: widget.file.progress.value,
+                                  strokeWidth: 3,
+                                  color: Get.theme.colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                widget.onRemove?.call();
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
+                          )
                         ),
                       ],
                     ),

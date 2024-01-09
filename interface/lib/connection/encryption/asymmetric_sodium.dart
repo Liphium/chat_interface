@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 /// Generates a new asymmetric key pair (secret key = private key)
@@ -35,7 +36,7 @@ DecryptionResult decryptAsymmetricAuth(Uint8List publicKey, SecureKey secretKey,
   final nonce = cipherText.sublist(0, sodium.crypto.secretBox.nonceBytes);
   final encrypted = cipherText.sublist(sodium.crypto.secretBox.nonceBytes);
 
-  final decrypted;
+  final Uint8List decrypted;
   try {
     decrypted = sodium.crypto.box.openEasy(
       cipherText: encrypted,
@@ -78,12 +79,17 @@ String encryptAsymmetricAnonymous(Uint8List publicKey, String message, [Sodium? 
 String decryptAsymmetricAnonymous(Uint8List publicKey, SecureKey secretKey, String message, [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   final cipherText = base64Decode(message);
-  final decrypted = sodium.crypto.box.sealOpen(
-    cipherText: cipherText,
-    publicKey: publicKey,
-    secretKey: secretKey,
-  );
-  return String.fromCharCodes(decrypted);
+  var decrypted = "";
+  try {
+    decrypted = String.fromCharCodes(sodium.crypto.box.sealOpen(
+      cipherText: cipherText,
+      publicKey: publicKey,
+      secretKey: secretKey,
+    ));
+  } catch(e) {
+    sendLog("WARNING: couldn't decrypt message");
+  }
+  return decrypted;
 }
 
 /* This would require other things, for now we can use authenticated encryption to "sign" messages

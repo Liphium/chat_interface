@@ -15,7 +15,7 @@ class LanguageSettings {
 
 class LanguageSelection extends SelectableItem {
   final Locale locale;
-  const LanguageSelection(String label, IconData icon, this.locale) : super(label, icon);
+  const LanguageSelection(super.label, super.icon, this.locale);
 }
 
 void addLanguageSettings(SettingController controller) {

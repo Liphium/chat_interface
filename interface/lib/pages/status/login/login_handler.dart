@@ -1,7 +1,3 @@
-
-
-import 'dart:convert';
-
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
@@ -10,29 +6,15 @@ import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart' as g;
-import 'package:http/http.dart';
 
 import 'login_step_page.dart';
 
 void loginStart(String email, {Function()? success, Function(String)? failure}) async {
 
-  Response res;
-  try {
-    res = await postRq("/auth/login/start", <String, String>{
-      "email": email,
-      "device": "desktop" // TODO: Let user enter this
-    });
-  } catch (e) {
-    failure?.call("error.network");
-    return;
-  }
-
-  if(res.statusCode != 200) {
-    failure?.call("server.error");
-    return;
-  }
-
-  var body = jsonDecode(res.body);
+  final body = await postJSON("/auth/login/start", <String, String>{
+    "email": email,
+    "device": "desktop" // TODO: Let user enter this
+  });
 
   if(!body["success"]) {
     failure?.call(body["error"]);
@@ -53,23 +35,10 @@ void loginStep(String token, String secret, AuthType type, {Function()? success,
 
   secret = _transformForAuth(secret, type);
 
-  Response res;
-  try {
-    res = await postRqAuth("/auth/login/step", <String, dynamic>{
-      "type": type.id,
-      "secret": secret
-    }, token);
-  } catch (e) {
-    failure?.call("error.network");
-    return;
-  }
-
-  if(res.statusCode != 200) {
-    failure?.call("server.error");
-    return;
-  }
-
-  var body = jsonDecode(res.body) as Map<String, dynamic>;
+  final body = await postAuthJSON("/auth/login/step", <String, dynamic>{
+    "type": type.id,
+    "secret": secret
+  }, token);
 
   if(!body["success"]) {
     failure?.call(body["error"]);

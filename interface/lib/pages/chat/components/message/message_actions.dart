@@ -1,12 +1,13 @@
 part of 'message_feed.dart';
 
-void testFileUpload(XFile file) {
-  _attachFile(file).then((value) {
-    sendLog("File upload: ${value.success} - ${value.message} - ${value.data}");
-  });
+class UploadData {
+  final XFile file;
+  final progress = 0.0.obs;
+
+  UploadData(this.file);
 }
 
-void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<XFile> files, Function() callback) async {
+void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<UploadData> files, Function() callback) async {
   if(loading.value) {
     return;
   }
@@ -15,7 +16,8 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
   // Upload files
   final attachments = <String>[];
   for(var file in files) {
-    final res = await _attachFile(file);
+    final res = await Get.find<AttachmentController>().uploadFile(file);
+    sendLog("attached");
     if(!res.success) {
       showErrorPopup("error", res.message);
       callback.call();
@@ -23,6 +25,8 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
     }
     attachments.add(res.data);
   }
+
+  sendLog("sending...");
 
   loading.value = false;
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
@@ -37,18 +41,26 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
 }
 
 void sendActualMessage(RxBool loading, String conversationId, MessageType type, List<String> attachments, String message, Function() callback) async {
+  
+  if(message.isEmpty && attachments.isEmpty) {
+    callback.call();
+    return;
+  }
   loading.value = true;
 
   // Encrypt message with signature
   ConversationController controller = Get.find();
   final conversation = controller.conversations[conversationId]!;
   var key = conversation.key;
-  var hash = hashSha(message); // TODO: Signatures
+  final stamp = DateTime.now().millisecondsSinceEpoch;
+  var hash = hashSha(message + stamp.toStringAsFixed(0) + conversationId); // Adding a time stamp to the message to prevent replay attacks
+  sendLog("MESSAGE HASH SENT: $hash ${message + conversationId}");
 
   var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{
     "c": message,
     "t": type.index,
-    "a": attachments
+    "a": attachments,
+    "s": signMessage(signatureKeyPair.secretKey, hash)
   }), key);
 
   // Send message
@@ -56,6 +68,7 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
     "conversation": conversation.id,
     "token_id": conversation.token.id,
     "token": conversation.token.token,
+    "timestamp": stamp,
     "data": encrypted
   });
 
@@ -73,58 +86,4 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
 
   // Store message
   Get.find<MessageController>().storeMessage(Message.fromJson(json["message"]));
-}
-
-class _FileUploadResponse {
-  final bool success;
-  final String message;
-  final String data;
-
-  _FileUploadResponse(this.success, this.message, this.data);
-}
-
-Future<_FileUploadResponse> _attachFile(XFile file) async {
-  final bytes = await file.readAsBytes();
-  final key = randomSymmetricKey();
-  final encrypted = encryptSymmetricBytes(bytes, key);
-  final name = encryptSymmetric(file.name, key);
-
-  // Upload file
-  final request = http.MultipartRequest("POST", server("/account/files/upload"));
-  request.files.add(http.MultipartFile.fromBytes("file", encrypted, filename: name));
-  request.fields.addAll(<String, String>{
-    "name": name,
-    "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
-    "extension": file.name.split(".").last
-  });
-  request.headers.addAll({
-    "Content-Type": "multipart/form-data",
-    "Authorization": "Bearer $sessionToken"
-  });
-
-  final res = await request.send();
-  if(res.statusCode != 200) {
-    return _FileUploadResponse(false, "server.error", "");
-  }
-
-  final json = jsonDecode(await res.stream.bytesToString());
-  if(!json["success"]) {
-    return _FileUploadResponse(false, json["error"], "");
-  }
-
-  // Copy file to cloud_files directory
-  final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files");
-  final dir = Directory(instanceFolder);
-  await dir.create();
-
-  final file2 = File(path.join(dir.path, json["id"].toString()));
-  await file2.writeAsBytes(bytes);
-  db.cloudFile.insertOne(CloudFileCompanion.insert(id: json["id"], name: file.name, path: json["url"], key: packageSymmetricKey(key)));
-
-  return _FileUploadResponse(true, "success", jsonEncode({
-    "id": json["id"],
-    "name": file.name,
-    "key": packageSymmetricKey(key),
-    "url": json["url"]
-  }));
 }

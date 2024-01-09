@@ -94,18 +94,32 @@ class SystemMessages {
       translation: (msg) {
         return "chat.deleted".tr;
       }
-    )
+    ),
+
+    // Called when a message is deleted
+    // Format: [messageId]
+    "msg.deleted": SystemMessage(
+      Icons.delete,
+      store: false,
+      render: false,
+      handler: (msg) {
+        Get.find<MessageController>().deleteMessageFromClient(msg.attachments[0]);
+      },
+      translation: (msg) {
+        return "msg.deleted".tr;
+      }
+    ),
   };
 }
 
 class SystemMessage {
   final IconData icon;
-  final bool render; // TODO: Implement
-  final bool store; // TODO: Implement
+  final bool render;
+  final bool store;
   final String Function(Message) translation;
   final Function(Message) handler;
 
-  SystemMessage(this.icon, {required this.handler, required this.translation, this.render = false, this.store = false});
+  SystemMessage(this.icon, {required this.handler, required this.translation, this.render = true, this.store = true});
 
   void handle(Message message) {
     message.decryptSystemMessageAttachments();

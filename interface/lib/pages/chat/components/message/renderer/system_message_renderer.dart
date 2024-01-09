@@ -47,17 +47,6 @@ class _MessageRendererState extends State<SystemMessageRenderer> {
             Expanded(child: Text(message.translation.call(widget.message), style: Get.theme.textTheme.labelLarge, overflow: TextOverflow.visible,)),
 
             horizontalSpacing(defaultSpacing),
-
-            Visibility(
-              visible: !widget.message.verified,
-              child: Tooltip(
-                message: "not.signed".tr,
-                child: const Icon(
-                  Icons.warning_rounded,
-                  color: Colors.amber,
-                ),
-              ),
-            )
           ],
         ),
       ),

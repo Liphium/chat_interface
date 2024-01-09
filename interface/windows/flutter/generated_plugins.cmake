@@ -7,7 +7,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   file_selector_windows
   flutter_webrtc
-  flutter_window_close
   livekit_client
   record_windows
   sodium_libs

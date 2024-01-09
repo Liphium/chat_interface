@@ -1,8 +1,13 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
+import 'package:chat_interface/connection/encryption/aes.dart';
+import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:http/http.dart';
+import 'package:pointycastle/export.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 String sessionToken = '';
 String refreshToken = '';
@@ -23,151 +28,87 @@ String tokensToPayload() {
 
 String nodeProtocol = "http://";
 String basePath = 'http://localhost:3000';
+RSAPublicKey? serverPublicKey;
 
 Uri server(String path) {
   return Uri.parse('$basePath$path');
 }
 
-// Post request to node-backend
-Future<Response> postRq(String path, Map<String, dynamic> body) async {
-  return await post(
-    server(path),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode(body),
-  );
+/// Grab the public key from the server
+Future<bool> grabServerPublicKey() async {
+  final Response res;
+  try {
+    res = await post(server("/pub"));
+  } catch (e) {
+    return false;
+  }
+  if (res.statusCode != 200) {
+    return false;
+  }
+
+  final json = jsonDecode(res.body);
+  serverPublicKey = unpackageRSAPublicKey(json['pub']);
+  sendLog("RETRIEVED SERVER PUBLIC KEY: $serverPublicKey");
+
+  return true;
 }
 
-// Post request to node-backend (new)
-Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+/// Post request to node-backend (with Through Cloudflare Protection)
+Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) async {
+  if (serverPublicKey == null) {
+    final success = await grabServerPublicKey();
+    if (!success) {
+      return <String, dynamic>{"success": false, "error": defaultError};
+    }
+  }
 
+  return _postTCP(serverPublicKey!, server(path).toString(), body, defaultError: defaultError, token: token);
+}
+
+/// Post request to any server (with Through Cloudflare Protection)
+Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) async {
+  final aesKey = randomAESKey();
+  final aesBase64 = base64Encode(aesKey);
   Response? res;
+  final authTag = base64Encode(encryptRSA(aesKey, key));
   try {
     res = await post(
-      server(path),
+      Uri.parse(url),
       headers: <String, String>{
-        'Content-Type': 'application/json',
+        if (token != null) "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+        "Auth-Tag": authTag,
       },
-      body: jsonEncode(body),
+      body: encryptAES(jsonEncode(body).toCharArray().unsignedView(), aesBase64),
     );
   } catch (e) {
-    return <String, dynamic> {
-      "success": false,
-      "error": "server.error"
-    };
+    return <String, dynamic>{"success": false, "error": "error.network"};
   }
 
-  if(res.statusCode != 200) {
-    return <String, dynamic>{
-      "success": false,
-      "error": defaultError
-    };
+  if (res.statusCode != 200) {
+    return <String, dynamic>{"success": false, "error": defaultError};
   }
 
-  return jsonDecode(res.body);
-}
-
-// Post request to node-backend with any token
-Future<Response> postRqAuth(String path, Map<String, dynamic> body, String token) async {
-  return await post(
-    server(path),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token'
-    },
-    body: jsonEncode(body),
-  );
+  return jsonDecode(String.fromCharCodes(decryptAES(res.bodyBytes, aesBase64)));
 }
 
 // Post request to node-backend with any token (new)
-Future<Map<String, dynamic>> postAuthJSON(String path, Map<String, dynamic> body, String token, {String defaultError = "server.error"}) async {
-
-  final res = await post(
-    server(path),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token'
-    },
-    body: jsonEncode(body),
-  );
-
-  if(res.statusCode != 200) {
-    return <String, dynamic>{
-      "success": false,
-      "error": defaultError
-    };
-  }
-
-  return jsonDecode(res.body);
-}
-
-// Post request to node-backend with session token
-Future<Response> postRqAuthorized(String path, Map<String, dynamic> body) async {
-  return await post(
-    server(path),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $sessionToken'
-    },
-    body: jsonEncode(body),
-  );
+Future<Map<String, dynamic>> postAuthJSON(String path, Map<String, dynamic> body, String token) async {
+  return postJSON(path, body, token: token);
 }
 
 // Post request to node-backend with session token (new)
-Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
-  
-  final res = await post(
-    server(path),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $sessionToken'
-    },
-    body: jsonEncode(body),
-  );
-
-  if(res.statusCode != 200) {
-    return <String, dynamic>{
-      "success": false,
-      "error": defaultError
-    };
-  }
-
-  return jsonDecode(res.body);
-}
-
-// Post request to chat-node with any token (node needs to be connected already)
-Future<Response> postRqNode(String path, Map<String, dynamic> body) async {
-  return await post(
-    Uri.parse("$nodeProtocol$nodeDomain$path"),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${randomRemoteID()}'
-    },
-    body: jsonEncode(body),
-  );
+Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic> body) async {
+  return postJSON(path, body, token: sessionToken);
 }
 
 // Post request to chat-node with any token (node needs to be connected already) (new)
 Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
-
-  final res = await post(
-    Uri.parse("$nodeProtocol$nodeDomain$path"),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${randomRemoteID()}'
-    },
-    body: jsonEncode(body),
-  );
-
-  if(res.statusCode != 200) {
-    return <String, dynamic>{
-      "success": false,
-      "error": defaultError
-    };
+  if (connector.nodePublicKey == null) {
+    return <String, dynamic>{"success": false, "error": defaultError};
   }
 
-  return jsonDecode(res.body);
+  return _postTCP(connector.nodePublicKey!, "$nodeProtocol$nodeDomain$path", body, defaultError: defaultError, token: sessionToken);
 }
 
 String padBase64(String str) {
@@ -178,13 +119,12 @@ String getSessionFromJWT(String token) {
   final parts = token.split('.');
   final padded = padBase64(parts[1]);
   final decoded = utf8.decode(base64Decode(padded));
-  
+
   return jsonDecode(decoded)['ses'];
 }
 
 // Creates a stored action with the given name and payload
 String storedAction(String name, Map<String, dynamic> payload) {
-
   final prefixJson = <String, dynamic>{
     "a": name,
   };
@@ -192,4 +132,3 @@ String storedAction(String name, Map<String, dynamic> payload) {
 
   return jsonEncode(prefixJson);
 }
-

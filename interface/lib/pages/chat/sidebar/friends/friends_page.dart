@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friend_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/request_button.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
@@ -147,7 +148,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             )),
                       
                             Obx(() {
-                              final found = friendController.friends.values.any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()));
+                              final found = friendController.friends.values.any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()) && friend.id != StatusController.ownAccountId);
                               final hashtag = query.value.contains("#");
                               return Animate(
                                 effects: [
@@ -289,7 +290,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                 
                             //* Friends
                             Visibility(
-                              visible: friendController.friends.isNotEmpty,
+                              visible: friendController.friends.length > 1,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -297,7 +298,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                 children: [
                                   Builder(
                                     builder: (context) {
-                                      if (friendController.friends.isEmpty) {
+                                      if (friendController.friends.length <= 1) {
                                         return const SizedBox.shrink();
                                       }
                                       return ListView.builder(
@@ -307,19 +308,22 @@ class _FriendsPageState extends State<FriendsPage> {
                                           return Obx(() {
                                             final friend = friendController.friends.values.elementAt(index);
                                             final visible = query.value.isEmpty || friend.name.toLowerCase().startsWith(query.value.toLowerCase());
-                                            return Animate(
-                                              effects: [
-                                                ReverseExpandEffect(
-                                                  curve: Curves.easeInOut,
-                                                  duration: 250.ms,
-                                                  axis: Axis.vertical,
+                                            return Visibility(
+                                              visible: friend.id != StatusController.ownAccountId,
+                                              child: Animate(
+                                                effects: [
+                                                  ReverseExpandEffect(
+                                                    curve: Curves.easeInOut,
+                                                    duration: 250.ms,
+                                                    axis: Axis.vertical,
+                                                  )
+                                                ],
+                                                target: visible ? 0.0 : 1.0,
+                                                child: Padding(
+                                                  padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
+                                                  child: FriendButton(friend: friend, position: position),
                                                 )
-                                              ],
-                                              target: visible ? 0.0 : 1.0,
-                                              child: Padding(
-                                                padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
-                                                child: FriendButton(friend: friend, position: position),
-                                              )
+                                              ),
                                             );
                                           });
                                         },

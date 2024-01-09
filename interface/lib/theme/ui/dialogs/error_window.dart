@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class ErrorWindow extends StatelessWidget {
-
   final String title;
   final String error;
 
@@ -41,8 +40,10 @@ class ErrorWindow extends StatelessWidget {
                       Text(error, style: Get.theme.textTheme.bodyMedium),
                       verticalSpacing(sectionSpacing),
                       FJElevatedButton(
-                        onTap: () => Get.back(), 
-                        child: Center(child: Text("ok".tr, style: Get.theme.textTheme.titleMedium),)
+                        onTap: () => Get.back(),
+                        child: Center(
+                          child: Text("ok".tr, style: Get.theme.textTheme.titleMedium),
+                        ),
                       )
                     ],
                   ),

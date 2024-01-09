@@ -1,6 +1,10 @@
 import 'dart:convert';
 
+import 'package:chat_interface/connection/encryption/hash.dart';
+import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/account/unknown_controller.dart';
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
@@ -11,7 +15,6 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 
 class MessageController extends GetxController {
@@ -63,40 +66,25 @@ class MessageController extends GetxController {
     }
   }
 
-  void newMessages(dynamic messages) async {
-    loaded.value = true;
-    if(messages == null) {
+  // Delete a message from the client with an id
+  void deleteMessageFromClient(String id) async {
+
+    // Get the message from the database on the client
+    final data = await (db.message.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    if(data == null) {
       return;
     }
-    
-    for (var msg in messages) {
-      final message = Message.fromJson(msg);
-      await db.into(db.message).insertOnConflictUpdate(message.entity);
+
+    // Check if message is in the selected conversation
+    if(selectedConversation.value.id == data.conversationId!) {
+      messages.removeWhere((element) => element.id == id);
     }
+
+    // Delete from the client database
+    db.message.deleteWhere((tbl) => tbl.id.equals(id));
   }
 
-  void storeMessage(Message message) {
-    Get.find<ConversationController>().updateMessageRead(
-      message.conversation, 
-      increment: selectedConversation.value.id != message.conversation, 
-      messageSendTime: message.createdAt.millisecondsSinceEpoch
-    );
-    if(selectedConversation.value.id == message.conversation) {
-      if(message.sender != selectedConversation.value.token.id) {
-        overwriteRead(selectedConversation.value);
-      }
-      if(messages.isNotEmpty && messages[0].id != message.id) {
-        messages.insert(0, message);        
-      } else if(messages.isEmpty) {
-        messages.insert(0, message);
-      }
-    }
-    db.into(db.message).insertOnConflictUpdate(message.entity);
-
-    // Handle system messages
-    if(message.type == MessageType.system) {
-      SystemMessages.messages[message.content]?.handle(message);
-    }
+  void storeMessage(Message message) async {
 
     // Handle attachments
     if(message.attachments.isNotEmpty && message.type != MessageType.system) {
@@ -107,26 +95,81 @@ class MessageController extends GetxController {
         if(FileSettings.imageTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
           if(download) {
-            downloadAttachment(container);
+            await Get.find<AttachmentController>().downloadAttachment(container);
           }
         } else if(FileSettings.videoTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
           if(download) {
-            downloadAttachment(container);
+            await Get.find<AttachmentController>().downloadAttachment(container);
           }
         } else if(FileSettings.audioTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
           if(download) {
-            downloadAttachment(container);
+            await Get.find<AttachmentController>().downloadAttachment(container);
           }
         }
       }
     }
+
+    // Update message reading
+    Get.find<ConversationController>().updateMessageRead(
+      message.conversation, 
+      increment: selectedConversation.value.id != message.conversation, 
+      messageSendTime: message.createdAt.millisecondsSinceEpoch
+    );
+
+    // Add message to message history if it's the selected one
+    if(selectedConversation.value.id == message.conversation) {
+      if(message.sender != selectedConversation.value.token.id) {
+        overwriteRead(selectedConversation.value);
+      }
+      sendLog("MESSAGE RECEIVED ${message.id}");
+
+      // Check if it is a system message and if it should be rendered or not
+      if(message.type == MessageType.system) {
+        if(SystemMessages.messages[message.content]?.render == true) {
+          addMessageToSelected(message);
+        }
+      } else {
+
+        // Store normal type of message
+        if(messages.isNotEmpty && messages[0].id != message.id) {
+          addMessageToSelected(message);
+        } else if(messages.isEmpty) {
+          addMessageToSelected(message);
+        }
+      }
+    }
+
+    // Store message in database
+    sendLog(message.type);
+    if(message.type == MessageType.system) {
+      if(SystemMessages.messages[message.content]?.store == true) {
+        sendLog("STORING " + message.content);
+        db.into(db.message).insertOnConflictUpdate(message.entity);
+      }
+    } else {
+      sendLog("WE ARE STORING");
+      db.into(db.message).insertOnConflictUpdate(message.entity);
+    }
+
+    // Handle system messages
+    if(message.type == MessageType.system) {
+      SystemMessages.messages[message.content]?.handle(message);
+    }
   }
 
-  void downloadAttachment(AttachmentContainer container) {
-    sendLog("Downloading...");
-    // TODO: Do this
+  void addMessageToSelected(Message message) {
+    int index = 0;
+    for(var msg in messages) {
+      index++;
+      if(msg.createdAt.isAfter(message.createdAt)) {
+        continue;
+      }
+      index -= 1;
+      break;
+    }
+    messages.insert(index, message);
   }
 
 }
@@ -137,14 +180,38 @@ class Message {
   MessageType type;
   String content;
   List<String> attachments;
-  bool verified;
+  final verified = true.obs;
+  String signature;
   final String certificate;
   final String sender;
   final DateTime createdAt;
   final String conversation;
   final bool edited;
 
-  Message(this.id, this.type, this.content, this.attachments, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, this.verified);
+  final attachmentsRenderer = <AttachmentContainer>[].obs;
+
+  /// Extracts and decrypts the attachments
+  void initAttachments() async {
+    if(attachmentsRenderer.isNotEmpty) {
+      return;
+    }
+    if(attachments.isNotEmpty) {
+      for (var attachment in attachments) {
+        final decoded = AttachmentContainer.fromJson(jsonDecode(attachment));
+        final container = await Get.find<AttachmentController>().findLocalFile(decoded);
+        sendLog("FOUND: ${container?.filePath}");
+        if(container == null) {
+          attachmentsRenderer.add(decoded);
+        } else {
+          attachmentsRenderer.add(container);
+        }
+      }
+    }
+  }
+
+  Message(this.id, this.type, this.content, this.attachments, this.signature, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, bool verified) {
+    this.verified.value = verified;
+  }
 
   factory Message.fromJson(Map<String, dynamic> json) {
 
@@ -154,6 +221,7 @@ class Message {
       MessageType.text,
       json["data"],
       [""],
+      "",
       json["certificate"],
       json["sender"],
       DateTime.fromMillisecondsSinceEpoch(json["creation"]),
@@ -165,32 +233,62 @@ class Message {
     // Decrypt content
     final conversation = Get.find<ConversationController>().conversations[json["conversation"]]!;
     if(message.sender == MessageController.systemSender) {
-      message.verified = true;
+      message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();
+      sendLog("SYSTEM MESSAGE");
       return message;
     }
 
-    // TODO: Add a signature (and verify it)
     // Check signature
-    message.verified = true;
     message.content = decryptSymmetric(message.content, conversation.key);
     message.loadContent();
+    message.verifySignature();
 
     return message;
   }
 
-  void loadContent() {
-    final contentJson = jsonDecode(content);
+  /// Loads the content from the message (signature, type, content)
+  void loadContent({Map<String, dynamic>? json}) {
+    final contentJson = json ?? jsonDecode(content);
     if(type != MessageType.system) {
       type = MessageType.values[contentJson["t"] ?? 0];
       if(type == MessageType.text) {
         content = utf8.decode(base64Decode(contentJson["c"]));
+      } else {
+        content = contentJson["c"];
       }
+      signature = contentJson["s"];
     } else {
       content = contentJson["c"];
     }
     attachments = List<String>.from(contentJson["a"] ?? [""]);
+  }
+
+  /// Verifies the signature of the message
+  void verifySignature() async {
+    final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
+    sendLog("${conversation.members} | ${this.sender}");
+    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
+    if(sender == null) {
+      sendLog("NO SENDER FOUND");
+      verified.value = false;
+      return;
+    }
+    String hash;
+    if(type != MessageType.text) {
+      hash = hashSha(content + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+    } else {
+      hash = hashSha(base64Encode(utf8.encode(content)) + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+    }
+    sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
+    verified.value = checkSignature(signature, sender.signatureKey, hash);
+    db.message.insertOnConflictUpdate(entity);
+    if(!verified.value) {
+      sendLog("invalid signature");
+    } else {
+      sendLog("valid signature");
+    }
   }
 
   Message.fromMessageData(MessageData messageData)
@@ -200,22 +298,25 @@ class Message {
         attachments = List<String>.from(jsonDecode(messageData.attachments)),
         certificate = messageData.certificate,
         sender = messageData.sender!,
-        createdAt = messageData.createdAt,
+        createdAt = DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
         conversation = messageData.conversationId!,
-        edited = messageData.edited,
-        verified = messageData.verified;
+        signature = messageData.signature,
+        edited = messageData.edited {
+    verified.value = messageData.verified;
+  }
 
   MessageData get entity => MessageData(
         id: id,
         type: type.index,
         content: content,
+        signature: signature,
         attachments: jsonEncode(attachments),
         certificate: certificate,
         sender: sender,
-        createdAt: createdAt,
+        createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
         conversationId: conversation,
         edited: edited,
-        verified: verified
+        verified: verified.value,
       );
 
   Map<String, dynamic> toJson() {
@@ -223,6 +324,7 @@ class Message {
     return <String, dynamic>{};
   }
 
+  /// Decrypts the account ids of a system message
   void decryptSystemMessageAttachments() {
     final conv = Get.find<ConversationController>().conversations[conversation]!;
     for (var i = 0; i < attachments.length; i++) {
@@ -230,39 +332,44 @@ class Message {
         attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), conv.key))["id"];
       }
     }
-    db.message.insertOnConflictUpdate(entity);
+    if(SystemMessages.messages[content]?.store == true) {
+      db.message.insertOnConflictUpdate(entity);
+    }
   }
+
+  /// Delete message on the server (and on the client)
+  ///
+  /// Returns null if successful, otherwise an error message
+  Future<String?> delete() async {
+
+    // Check if the message is sent by the user
+    final token = Get.find<ConversationController>().conversations[conversation]!.token;
+    if(sender != token.id) {
+      return "no.permission";
+    }
+
+    // Send a request to the server
+    final json = await postNodeJSON("/conversations/message/delete", {
+      "certificate": certificate,
+      "id": token.id,
+    	"token": token.token,
+    });
+    sendLog(json);
+
+    if(!json["success"]) {
+
+      if(json["error"] == "server.error") {
+        return "message.delete_error";
+      }
+      return json["error"];
+    }
+
+    return null;
+  } 
 }
 
 enum MessageType {
   text,
   system,
   call;
-}
-
-class AttachmentContainer {
-  final String id;
-  final String name;
-  final String url;
-  final SecureKey key;
-
-  AttachmentContainer(this.id, this.name, this.url, this.key);
-
-  factory AttachmentContainer.fromJson(Map<String, dynamic> json) {
-    return AttachmentContainer(
-      json["id"],
-      json["name"],
-      json["url"],
-      unpackageSymmetricKey(json["key"])
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      "id": id,
-      "name": name,
-      "url": url,
-      "key": packageSymmetricKey(key)
-    };
-  }
 }

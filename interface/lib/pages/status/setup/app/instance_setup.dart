@@ -47,7 +47,7 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
   }
   final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
   final file = File(path.join(dbFolder, '$name.db'));
-  db = Database(NativeDatabase.createInBackground(file, logStatements: true));
+  db = Database(NativeDatabase.createInBackground(file, logStatements: driftLogger));
 
   sendLog("going on");
 

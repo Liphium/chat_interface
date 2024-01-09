@@ -14,6 +14,9 @@ class FileSettings {
   static const String autoDownloadAudio = "auto_download.audio";
   static const String maxFileSize = "auto_download.max_size"; // MB
 
+  // Maximum size of files stored in the cache
+  static const String maxCacheSize = "files.max_cache_size"; // MB
+
   // File types for auto download
   static const List<String> imageTypes = ["png", "jpg", "jpeg", "gif"];
   static const List<String> videoTypes = ["mp4", "mov", "avi", "mkv"];
@@ -21,9 +24,10 @@ class FileSettings {
 
   static void addSettings(SettingController controller) {
     controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, true);
-    controller.settings[autoDownloadVideos] = Setting<bool>(autoDownloadVideos, true);
-    controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, true);
-    controller.settings[maxFileSize] = Setting<double>(maxFileSize, 10.0);
+    controller.settings[autoDownloadVideos] = Setting<bool>(autoDownloadVideos, false);
+    controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, false);
+    controller.settings[maxFileSize] = Setting<double>(maxFileSize, 5.0);
+    controller.settings[maxCacheSize] = Setting<double>(maxCacheSize, 500.0);
   }
 }
 
@@ -37,7 +41,7 @@ class FileSettingsPage extends StatelessWidget {
       children: [
 
         //* Auto download types
-        Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelMedium),
+        Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
         const BoolSettingSmall(settingName: FileSettings.autoDownloadImages),
@@ -46,7 +50,7 @@ class FileSettingsPage extends StatelessWidget {
         verticalSpacing(sectionSpacing),
 
         //* Max file size
-        Text("settings.file.max_size".tr, style: Get.theme.textTheme.labelMedium),
+        Text("settings.file.max_size".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
         const DoubleSelectionSetting(
@@ -54,6 +58,19 @@ class FileSettingsPage extends StatelessWidget {
           description: "settings.file.max_size.description",
           min: 1.0, 
           max: 10.0,
+          unit: "settings.file.mb",
+        ),
+        verticalSpacing(sectionSpacing),
+
+        //* Max file size
+        Text("settings.file.cache".tr, style: Get.theme.textTheme.labelLarge),
+        verticalSpacing(defaultSpacing),
+
+        const DoubleSelectionSetting(
+          settingName: FileSettings.maxCacheSize, 
+          description: "settings.file.cache.description",
+          min: 100.0, 
+          max: 3000.0,
           unit: "settings.file.mb",
         ),
       ],

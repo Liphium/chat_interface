@@ -16,9 +16,9 @@ class SpacesSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
-        const BoolSettingSmall(settingName: SpacesSettings.gameMusic)
+        BoolSettingSmall(settingName: SpacesSettings.gameMusic)
       ],
     );
   }

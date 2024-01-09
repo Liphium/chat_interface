@@ -7,18 +7,19 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+const apiVersion = "v1";
+
 class ServerSetup extends Setup {
   ServerSetup() : super('loading.server', true);
 
   @override
   Future<Widget?> load() async {
-
     final server = await (db.select(db.setting)..where((tbl) => tbl.key.equals("server"))).getSingleOrNull();
 
-    if(server == null) {
+    if (server == null) {
       return const ServerSelectorPage();
     } else {
-      basePath = server.value;
+      basePath = "${server.value}/$apiVersion";
       return null;
     }
   }
@@ -43,7 +44,10 @@ class ServerSelectorPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("${'setup.choose.server'.tr}.", style: Get.textTheme.headlineMedium,),
+                Text(
+                  "${'setup.choose.server'.tr}.",
+                  style: Get.textTheme.headlineMedium,
+                ),
                 verticalSpacing(sectionSpacing),
                 SizedBox(
                   width: double.infinity,

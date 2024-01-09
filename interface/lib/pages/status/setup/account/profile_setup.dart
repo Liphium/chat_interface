@@ -7,7 +7,6 @@ import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ProfileSetup extends Setup {
   ProfileSetup() : super('loading.profile', false);
@@ -47,7 +46,6 @@ class ProfileSetup extends Setup {
         return const ErrorPage(title: "server.error");
       }
 
-      Get.snackbar("loading.profile".tr, body["error"].tr);
       return const LoginPage();
     }
 

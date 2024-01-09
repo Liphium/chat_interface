@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
-import 'package:chat_interface/pages/status/error/server_offline_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -17,27 +14,23 @@ class ConnectionSetup extends Setup {
   @override
   Future<Widget?> load() async {
 
-    var res = await postRqAuthorized("/node/connect", <String, dynamic>{
+    var body = await postAuthorizedJSON("/node/connect", <String, dynamic>{
       "cluster": connectedCluster.id,
       "app": appId,
       "token": refreshToken,
     });
-
-    if(res.statusCode != 200) {
-      return const ServerOfflinePage();
-    }
-
-    var body = jsonDecode(res.body);
     if(!body["success"]) {
-
       return ErrorPage(title: body["error"]);
     }
 
-    // Start connection
-    startConnection(body["domain"], body["token"]);
-
     nodeId = body["id"];
     nodeDomain = body["domain"];
+
+    // Start connection
+    final res = await startConnection(body["domain"], body["token"]);
+    if(!res) {
+      return const ErrorPage(title: "server.error");
+    }
 
     await Future.delayed(500.ms);
 

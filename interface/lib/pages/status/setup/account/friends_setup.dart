@@ -23,13 +23,7 @@ class FriendsSetup extends Setup {
     await Get.find<FriendController>().loadFriends();
 
     // Load friends from vault
-    final res = await postRqAuthorized("/account/friends/list", <String, dynamic>{});
-
-    if(res.statusCode != 200) {
-      return const ErrorPage(title: "friends.error");
-    }
-
-    final json = jsonDecode(res.body);
+    final json = await postAuthorizedJSON("/account/friends/list", <String, dynamic>{});
     if(!json["success"]) {
       return const ErrorPage(title: "friends.error");
     }
@@ -102,6 +96,9 @@ class FriendsSetup extends Setup {
       }
       return false;
     });
+
+    // Add own account so status and stuff can be tracked there
+    Get.find<FriendController>().addSelf();
     
     return null;
   }

@@ -5,7 +5,6 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/account/remote_id_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -81,10 +80,10 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   }
 
   // Get public key and id of the user
-  var json = await postAuthJSON("/account/stored_actions/details", <String, dynamic>{
+  var json = await postAuthorizedJSON("/account/stored_actions/details", <String, dynamic>{
     "username": name,
     "tag": tag,
-  }, randomRemoteID());
+  });
   if(!json["success"]) {
     showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
     requestsLoading.value = false;
@@ -93,6 +92,7 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
 
   final id = json["account"];
   final publicKey = unpackagePublicKey(json["key"]);
+  final signatureKey = unpackagePublicKey(json["sg"]);
 
   //* Prompt with confirm popup
   var declined = true;
@@ -103,7 +103,7 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(controller, name, tag, id, publicKey, success);
+      sendFriendRequest(controller, name, tag, id, publicKey, signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -115,10 +115,10 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   return;
 }
 
-void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Function(String) success) async {
+void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
   
   // Encrypt friend request
-  sendLog("OWN STORED ACTION KEY: ${storedActionKey}");
+  sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
     "tag": controller.tag.value,
@@ -146,7 +146,7 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
   } else {
 
     // Save friend request in own vault
-    var request = Request(id, name, tag, "", "", KeyStorage(publicKey, profileKey, ""));
+    var request = Request(id, name, tag, "", "", KeyStorage(publicKey, signatureKey, profileKey, ""));
     final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
 
     if(vaultId == null) {
@@ -224,7 +224,7 @@ class Request {
 
   // Accept friend request
   void accept(Function(String) success) {
-    sendFriendRequest(Get.find<StatusController>(), name, tag, id, keyStorage.publicKey, (msg) async {
+    sendFriendRequest(Get.find<StatusController>(), name, tag, id, keyStorage.publicKey, keyStorage.signatureKey, (msg) async {
       success(msg);
     });
   }

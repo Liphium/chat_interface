@@ -6,19 +6,11 @@ Future<String?> storeInFriendsVault(String data, {errorPopup = false, prefix = "
   final hash = hashSha(data);
   final payload = encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, data);
 
-  final res = await postRqAuthorized("/account/friends/add", <String, dynamic>{
+  final json = await postAuthorizedJSON("/account/friends/add", <String, dynamic>{
     "hash": hash,
     "payload": payload,
   });
 
-  if(res.statusCode != 200) {
-    if(errorPopup) {
-      showErrorPopup("error.network", "error.network.text");
-    }
-    return null;
-  }
-
-  final json = jsonDecode(res.body);
   sendLog(json);
   if(!json["success"]) {
     if(errorPopup) {
@@ -33,16 +25,9 @@ Future<String?> storeInFriendsVault(String data, {errorPopup = false, prefix = "
 // Remove friend from vault (returns true if successful)
 Future<bool> removeFromFriendsVault(String id, {errorPopup = false}) async {
   
-    final res = await postRqAuthorized("/account/friends/remove", <String, dynamic>{
+    final json = await postAuthorizedJSON("/account/friends/remove", <String, dynamic>{
       "id": id,
     });
-  
-    if(res.statusCode != 200) {
-      return false;
-    }
-  
-    final json = jsonDecode(res.body);
-    sendLog(json);
-    sendLog(id);
+
     return json["success"] as bool;
   }

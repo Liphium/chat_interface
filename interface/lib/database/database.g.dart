@@ -708,6 +708,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
       'content', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _signatureMeta =
+      const VerificationMeta('signature');
+  @override
+  late final GeneratedColumn<String> signature = GeneratedColumn<String>(
+      'signature', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _attachmentsMeta =
       const VerificationMeta('attachments');
   @override
@@ -728,9 +734,9 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
       'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   static const VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   @override
@@ -751,6 +757,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
         verified,
         type,
         content,
+        signature,
         attachments,
         certificate,
         sender,
@@ -790,6 +797,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           content.isAcceptableOrUnknown(data['content']!, _contentMeta));
     } else if (isInserting) {
       context.missing(_contentMeta);
+    }
+    if (data.containsKey('signature')) {
+      context.handle(_signatureMeta,
+          signature.isAcceptableOrUnknown(data['signature']!, _signatureMeta));
+    } else if (isInserting) {
+      context.missing(_signatureMeta);
     }
     if (data.containsKey('attachments')) {
       context.handle(
@@ -846,6 +859,8 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      signature: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}signature'])!,
       attachments: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!,
       certificate: attachedDatabase.typeMapping
@@ -853,7 +868,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       sender: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}sender']),
       createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
       conversationId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}conversation_id']),
       edited: attachedDatabase.typeMapping
@@ -872,10 +887,11 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final bool verified;
   final int type;
   final String content;
+  final String signature;
   final String attachments;
   final String certificate;
   final String? sender;
-  final DateTime createdAt;
+  final BigInt createdAt;
   final String? conversationId;
   final bool edited;
   const MessageData(
@@ -883,6 +899,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       required this.verified,
       required this.type,
       required this.content,
+      required this.signature,
       required this.attachments,
       required this.certificate,
       this.sender,
@@ -896,12 +913,13 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     map['verified'] = Variable<bool>(verified);
     map['type'] = Variable<int>(type);
     map['content'] = Variable<String>(content);
+    map['signature'] = Variable<String>(signature);
     map['attachments'] = Variable<String>(attachments);
     map['certificate'] = Variable<String>(certificate);
     if (!nullToAbsent || sender != null) {
       map['sender'] = Variable<String>(sender);
     }
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_at'] = Variable<BigInt>(createdAt);
     if (!nullToAbsent || conversationId != null) {
       map['conversation_id'] = Variable<String>(conversationId);
     }
@@ -915,6 +933,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       verified: Value(verified),
       type: Value(type),
       content: Value(content),
+      signature: Value(signature),
       attachments: Value(attachments),
       certificate: Value(certificate),
       sender:
@@ -935,10 +954,11 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       verified: serializer.fromJson<bool>(json['verified']),
       type: serializer.fromJson<int>(json['type']),
       content: serializer.fromJson<String>(json['content']),
+      signature: serializer.fromJson<String>(json['signature']),
       attachments: serializer.fromJson<String>(json['attachments']),
       certificate: serializer.fromJson<String>(json['certificate']),
       sender: serializer.fromJson<String?>(json['sender']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdAt: serializer.fromJson<BigInt>(json['createdAt']),
       conversationId: serializer.fromJson<String?>(json['conversationId']),
       edited: serializer.fromJson<bool>(json['edited']),
     );
@@ -951,10 +971,11 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       'verified': serializer.toJson<bool>(verified),
       'type': serializer.toJson<int>(type),
       'content': serializer.toJson<String>(content),
+      'signature': serializer.toJson<String>(signature),
       'attachments': serializer.toJson<String>(attachments),
       'certificate': serializer.toJson<String>(certificate),
       'sender': serializer.toJson<String?>(sender),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdAt': serializer.toJson<BigInt>(createdAt),
       'conversationId': serializer.toJson<String?>(conversationId),
       'edited': serializer.toJson<bool>(edited),
     };
@@ -965,10 +986,11 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           bool? verified,
           int? type,
           String? content,
+          String? signature,
           String? attachments,
           String? certificate,
           Value<String?> sender = const Value.absent(),
-          DateTime? createdAt,
+          BigInt? createdAt,
           Value<String?> conversationId = const Value.absent(),
           bool? edited}) =>
       MessageData(
@@ -976,6 +998,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
         verified: verified ?? this.verified,
         type: type ?? this.type,
         content: content ?? this.content,
+        signature: signature ?? this.signature,
         attachments: attachments ?? this.attachments,
         certificate: certificate ?? this.certificate,
         sender: sender.present ? sender.value : this.sender,
@@ -991,6 +1014,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           ..write('verified: $verified, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
+          ..write('signature: $signature, ')
           ..write('attachments: $attachments, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
@@ -1002,8 +1026,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, verified, type, content, attachments,
-      certificate, sender, createdAt, conversationId, edited);
+  int get hashCode => Object.hash(id, verified, type, content, signature,
+      attachments, certificate, sender, createdAt, conversationId, edited);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1012,6 +1036,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           other.verified == this.verified &&
           other.type == this.type &&
           other.content == this.content &&
+          other.signature == this.signature &&
           other.attachments == this.attachments &&
           other.certificate == this.certificate &&
           other.sender == this.sender &&
@@ -1025,10 +1050,11 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<bool> verified;
   final Value<int> type;
   final Value<String> content;
+  final Value<String> signature;
   final Value<String> attachments;
   final Value<String> certificate;
   final Value<String?> sender;
-  final Value<DateTime> createdAt;
+  final Value<BigInt> createdAt;
   final Value<String?> conversationId;
   final Value<bool> edited;
   final Value<int> rowid;
@@ -1037,6 +1063,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.verified = const Value.absent(),
     this.type = const Value.absent(),
     this.content = const Value.absent(),
+    this.signature = const Value.absent(),
     this.attachments = const Value.absent(),
     this.certificate = const Value.absent(),
     this.sender = const Value.absent(),
@@ -1050,10 +1077,11 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required bool verified,
     required int type,
     required String content,
+    required String signature,
     required String attachments,
     required String certificate,
     this.sender = const Value.absent(),
-    required DateTime createdAt,
+    required BigInt createdAt,
     this.conversationId = const Value.absent(),
     required bool edited,
     this.rowid = const Value.absent(),
@@ -1061,6 +1089,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
         verified = Value(verified),
         type = Value(type),
         content = Value(content),
+        signature = Value(signature),
         attachments = Value(attachments),
         certificate = Value(certificate),
         createdAt = Value(createdAt),
@@ -1070,10 +1099,11 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     Expression<bool>? verified,
     Expression<int>? type,
     Expression<String>? content,
+    Expression<String>? signature,
     Expression<String>? attachments,
     Expression<String>? certificate,
     Expression<String>? sender,
-    Expression<DateTime>? createdAt,
+    Expression<BigInt>? createdAt,
     Expression<String>? conversationId,
     Expression<bool>? edited,
     Expression<int>? rowid,
@@ -1083,6 +1113,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       if (verified != null) 'verified': verified,
       if (type != null) 'type': type,
       if (content != null) 'content': content,
+      if (signature != null) 'signature': signature,
       if (attachments != null) 'attachments': attachments,
       if (certificate != null) 'certificate': certificate,
       if (sender != null) 'sender': sender,
@@ -1098,10 +1129,11 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<bool>? verified,
       Value<int>? type,
       Value<String>? content,
+      Value<String>? signature,
       Value<String>? attachments,
       Value<String>? certificate,
       Value<String?>? sender,
-      Value<DateTime>? createdAt,
+      Value<BigInt>? createdAt,
       Value<String?>? conversationId,
       Value<bool>? edited,
       Value<int>? rowid}) {
@@ -1110,6 +1142,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       verified: verified ?? this.verified,
       type: type ?? this.type,
       content: content ?? this.content,
+      signature: signature ?? this.signature,
       attachments: attachments ?? this.attachments,
       certificate: certificate ?? this.certificate,
       sender: sender ?? this.sender,
@@ -1135,6 +1168,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     if (content.present) {
       map['content'] = Variable<String>(content.value);
     }
+    if (signature.present) {
+      map['signature'] = Variable<String>(signature.value);
+    }
     if (attachments.present) {
       map['attachments'] = Variable<String>(attachments.value);
     }
@@ -1145,7 +1181,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       map['sender'] = Variable<String>(sender.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      map['created_at'] = Variable<BigInt>(createdAt.value);
     }
     if (conversationId.present) {
       map['conversation_id'] = Variable<String>(conversationId.value);
@@ -1166,6 +1202,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
           ..write('verified: $verified, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
+          ..write('signature: $signature, ')
           ..write('attachments: $attachments, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
@@ -2026,12 +2063,12 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   }
 }
 
-class $CloudFileTable extends CloudFile
-    with TableInfo<$CloudFileTable, CloudFileData> {
+class $UnknownProfileTable extends UnknownProfile
+    with TableInfo<$UnknownProfileTable, UnknownProfileData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $CloudFileTable(this.attachedDatabase, [this._alias]);
+  $UnknownProfileTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -2042,25 +2079,25 @@ class $CloudFileTable extends CloudFile
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  static const VerificationMeta _tagMeta = const VerificationMeta('tag');
   @override
-  late final GeneratedColumn<String> path = GeneratedColumn<String>(
-      'path', aliasedName, false,
+  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
+      'tag', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
-  late final GeneratedColumn<String> key = GeneratedColumn<String>(
-      'key', aliasedName, false,
+  late final GeneratedColumn<String> keys = GeneratedColumn<String>(
+      'keys', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, name, path, key];
+  List<GeneratedColumn> get $columns => [id, name, tag, keys];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'cloud_file';
+  static const String $name = 'unknown_profile';
   @override
-  VerificationContext validateIntegrity(Insertable<CloudFileData> instance,
+  VerificationContext validateIntegrity(Insertable<UnknownProfileData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -2075,17 +2112,17 @@ class $CloudFileTable extends CloudFile
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('path')) {
+    if (data.containsKey('tag')) {
       context.handle(
-          _pathMeta, path.isAcceptableOrUnknown(data['path']!, _pathMeta));
+          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
     } else if (isInserting) {
-      context.missing(_pathMeta);
+      context.missing(_tagMeta);
     }
-    if (data.containsKey('key')) {
+    if (data.containsKey('keys')) {
       context.handle(
-          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+          _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
     } else if (isInserting) {
-      context.missing(_keyMeta);
+      context.missing(_keysMeta);
     }
     return context;
   }
@@ -2093,63 +2130,64 @@ class $CloudFileTable extends CloudFile
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  CloudFileData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  UnknownProfileData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CloudFileData(
+    return UnknownProfileData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      path: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}path'])!,
-      key: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      tag: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+      keys: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
     );
   }
 
   @override
-  $CloudFileTable createAlias(String alias) {
-    return $CloudFileTable(attachedDatabase, alias);
+  $UnknownProfileTable createAlias(String alias) {
+    return $UnknownProfileTable(attachedDatabase, alias);
   }
 }
 
-class CloudFileData extends DataClass implements Insertable<CloudFileData> {
+class UnknownProfileData extends DataClass
+    implements Insertable<UnknownProfileData> {
   final String id;
   final String name;
-  final String path;
-  final String key;
-  const CloudFileData(
+  final String tag;
+  final String keys;
+  const UnknownProfileData(
       {required this.id,
       required this.name,
-      required this.path,
-      required this.key});
+      required this.tag,
+      required this.keys});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
-    map['path'] = Variable<String>(path);
-    map['key'] = Variable<String>(key);
+    map['tag'] = Variable<String>(tag);
+    map['keys'] = Variable<String>(keys);
     return map;
   }
 
-  CloudFileCompanion toCompanion(bool nullToAbsent) {
-    return CloudFileCompanion(
+  UnknownProfileCompanion toCompanion(bool nullToAbsent) {
+    return UnknownProfileCompanion(
       id: Value(id),
       name: Value(name),
-      path: Value(path),
-      key: Value(key),
+      tag: Value(tag),
+      keys: Value(keys),
     );
   }
 
-  factory CloudFileData.fromJson(Map<String, dynamic> json,
+  factory UnknownProfileData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CloudFileData(
+    return UnknownProfileData(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      path: serializer.fromJson<String>(json['path']),
-      key: serializer.fromJson<String>(json['key']),
+      tag: serializer.fromJson<String>(json['tag']),
+      keys: serializer.fromJson<String>(json['keys']),
     );
   }
   @override
@@ -2158,92 +2196,92 @@ class CloudFileData extends DataClass implements Insertable<CloudFileData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'path': serializer.toJson<String>(path),
-      'key': serializer.toJson<String>(key),
+      'tag': serializer.toJson<String>(tag),
+      'keys': serializer.toJson<String>(keys),
     };
   }
 
-  CloudFileData copyWith(
-          {String? id, String? name, String? path, String? key}) =>
-      CloudFileData(
+  UnknownProfileData copyWith(
+          {String? id, String? name, String? tag, String? keys}) =>
+      UnknownProfileData(
         id: id ?? this.id,
         name: name ?? this.name,
-        path: path ?? this.path,
-        key: key ?? this.key,
+        tag: tag ?? this.tag,
+        keys: keys ?? this.keys,
       );
   @override
   String toString() {
-    return (StringBuffer('CloudFileData(')
+    return (StringBuffer('UnknownProfileData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('path: $path, ')
-          ..write('key: $key')
+          ..write('tag: $tag, ')
+          ..write('keys: $keys')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, path, key);
+  int get hashCode => Object.hash(id, name, tag, keys);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is CloudFileData &&
+      (other is UnknownProfileData &&
           other.id == this.id &&
           other.name == this.name &&
-          other.path == this.path &&
-          other.key == this.key);
+          other.tag == this.tag &&
+          other.keys == this.keys);
 }
 
-class CloudFileCompanion extends UpdateCompanion<CloudFileData> {
+class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
   final Value<String> id;
   final Value<String> name;
-  final Value<String> path;
-  final Value<String> key;
+  final Value<String> tag;
+  final Value<String> keys;
   final Value<int> rowid;
-  const CloudFileCompanion({
+  const UnknownProfileCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.path = const Value.absent(),
-    this.key = const Value.absent(),
+    this.tag = const Value.absent(),
+    this.keys = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  CloudFileCompanion.insert({
+  UnknownProfileCompanion.insert({
     required String id,
     required String name,
-    required String path,
-    required String key,
+    required String tag,
+    required String keys,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
-        path = Value(path),
-        key = Value(key);
-  static Insertable<CloudFileData> custom({
+        tag = Value(tag),
+        keys = Value(keys);
+  static Insertable<UnknownProfileData> custom({
     Expression<String>? id,
     Expression<String>? name,
-    Expression<String>? path,
-    Expression<String>? key,
+    Expression<String>? tag,
+    Expression<String>? keys,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (path != null) 'path': path,
-      if (key != null) 'key': key,
+      if (tag != null) 'tag': tag,
+      if (keys != null) 'keys': keys,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  CloudFileCompanion copyWith(
+  UnknownProfileCompanion copyWith(
       {Value<String>? id,
       Value<String>? name,
-      Value<String>? path,
-      Value<String>? key,
+      Value<String>? tag,
+      Value<String>? keys,
       Value<int>? rowid}) {
-    return CloudFileCompanion(
+    return UnknownProfileCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      path: path ?? this.path,
-      key: key ?? this.key,
+      tag: tag ?? this.tag,
+      keys: keys ?? this.keys,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2257,11 +2295,11 @@ class CloudFileCompanion extends UpdateCompanion<CloudFileData> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (path.present) {
-      map['path'] = Variable<String>(path.value);
+    if (tag.present) {
+      map['tag'] = Variable<String>(tag.value);
     }
-    if (key.present) {
-      map['key'] = Variable<String>(key.value);
+    if (keys.present) {
+      map['keys'] = Variable<String>(keys.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -2271,11 +2309,270 @@ class CloudFileCompanion extends UpdateCompanion<CloudFileData> {
 
   @override
   String toString() {
-    return (StringBuffer('CloudFileCompanion(')
+    return (StringBuffer('UnknownProfileCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('path: $path, ')
-          ..write('key: $key, ')
+          ..write('tag: $tag, ')
+          ..write('keys: $keys, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProfileTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pictureIdMeta =
+      const VerificationMeta('pictureId');
+  @override
+  late final GeneratedColumn<String> pictureId = GeneratedColumn<String>(
+      'picture_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pictureDataMeta =
+      const VerificationMeta('pictureData');
+  @override
+  late final GeneratedColumn<String> pictureData = GeneratedColumn<String>(
+      'picture_data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, pictureId, pictureData, data];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'profile';
+  @override
+  VerificationContext validateIntegrity(Insertable<ProfileData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('picture_id')) {
+      context.handle(_pictureIdMeta,
+          pictureId.isAcceptableOrUnknown(data['picture_id']!, _pictureIdMeta));
+    } else if (isInserting) {
+      context.missing(_pictureIdMeta);
+    }
+    if (data.containsKey('picture_data')) {
+      context.handle(
+          _pictureDataMeta,
+          pictureData.isAcceptableOrUnknown(
+              data['picture_data']!, _pictureDataMeta));
+    } else if (isInserting) {
+      context.missing(_pictureDataMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProfileData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProfileData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      pictureId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}picture_id'])!,
+      pictureData: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}picture_data'])!,
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+    );
+  }
+
+  @override
+  $ProfileTable createAlias(String alias) {
+    return $ProfileTable(attachedDatabase, alias);
+  }
+}
+
+class ProfileData extends DataClass implements Insertable<ProfileData> {
+  final String id;
+  final String pictureId;
+  final String pictureData;
+  final String data;
+  const ProfileData(
+      {required this.id,
+      required this.pictureId,
+      required this.pictureData,
+      required this.data});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['picture_id'] = Variable<String>(pictureId);
+    map['picture_data'] = Variable<String>(pictureData);
+    map['data'] = Variable<String>(data);
+    return map;
+  }
+
+  ProfileCompanion toCompanion(bool nullToAbsent) {
+    return ProfileCompanion(
+      id: Value(id),
+      pictureId: Value(pictureId),
+      pictureData: Value(pictureData),
+      data: Value(data),
+    );
+  }
+
+  factory ProfileData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProfileData(
+      id: serializer.fromJson<String>(json['id']),
+      pictureId: serializer.fromJson<String>(json['pictureId']),
+      pictureData: serializer.fromJson<String>(json['pictureData']),
+      data: serializer.fromJson<String>(json['data']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'pictureId': serializer.toJson<String>(pictureId),
+      'pictureData': serializer.toJson<String>(pictureData),
+      'data': serializer.toJson<String>(data),
+    };
+  }
+
+  ProfileData copyWith(
+          {String? id, String? pictureId, String? pictureData, String? data}) =>
+      ProfileData(
+        id: id ?? this.id,
+        pictureId: pictureId ?? this.pictureId,
+        pictureData: pictureData ?? this.pictureData,
+        data: data ?? this.data,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ProfileData(')
+          ..write('id: $id, ')
+          ..write('pictureId: $pictureId, ')
+          ..write('pictureData: $pictureData, ')
+          ..write('data: $data')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, pictureId, pictureData, data);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProfileData &&
+          other.id == this.id &&
+          other.pictureId == this.pictureId &&
+          other.pictureData == this.pictureData &&
+          other.data == this.data);
+}
+
+class ProfileCompanion extends UpdateCompanion<ProfileData> {
+  final Value<String> id;
+  final Value<String> pictureId;
+  final Value<String> pictureData;
+  final Value<String> data;
+  final Value<int> rowid;
+  const ProfileCompanion({
+    this.id = const Value.absent(),
+    this.pictureId = const Value.absent(),
+    this.pictureData = const Value.absent(),
+    this.data = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProfileCompanion.insert({
+    required String id,
+    required String pictureId,
+    required String pictureData,
+    required String data,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        pictureId = Value(pictureId),
+        pictureData = Value(pictureData),
+        data = Value(data);
+  static Insertable<ProfileData> custom({
+    Expression<String>? id,
+    Expression<String>? pictureId,
+    Expression<String>? pictureData,
+    Expression<String>? data,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pictureId != null) 'picture_id': pictureId,
+      if (pictureData != null) 'picture_data': pictureData,
+      if (data != null) 'data': data,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProfileCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? pictureId,
+      Value<String>? pictureData,
+      Value<String>? data,
+      Value<int>? rowid}) {
+    return ProfileCompanion(
+      id: id ?? this.id,
+      pictureId: pictureId ?? this.pictureId,
+      pictureData: pictureData ?? this.pictureData,
+      data: data ?? this.data,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (pictureId.present) {
+      map['picture_id'] = Variable<String>(pictureId.value);
+    }
+    if (pictureData.present) {
+      map['picture_data'] = Variable<String>(pictureData.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProfileCompanion(')
+          ..write('id: $id, ')
+          ..write('pictureId: $pictureId, ')
+          ..write('pictureData: $pictureData, ')
+          ..write('data: $data, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2290,11 +2587,20 @@ abstract class _$Database extends GeneratedDatabase {
   late final $SettingTable setting = $SettingTable(this);
   late final $FriendTable friend = $FriendTable(this);
   late final $RequestTable request = $RequestTable(this);
-  late final $CloudFileTable cloudFile = $CloudFileTable(this);
+  late final $UnknownProfileTable unknownProfile = $UnknownProfileTable(this);
+  late final $ProfileTable profile = $ProfileTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [conversation, member, message, setting, friend, request, cloudFile];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        conversation,
+        member,
+        message,
+        setting,
+        friend,
+        request,
+        unknownProfile,
+        profile
+      ];
 }

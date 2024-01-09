@@ -1,9 +1,10 @@
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:logger/logger.dart' as log;
@@ -12,11 +13,13 @@ import 'package:sodium_libs/sodium_libs.dart';
 import 'app.dart';
 
 var logger = log.Logger();
+final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;
 const appVersion = 1; // TODO: ALWAYS change to the new one saved in the node backend
 const bool isDebug = true; // TODO: Set to false before release
 const bool checkVersion = false; // TODO: Set to true in release builds
+const bool driftLogger = true;
 
 // Authentication types
 enum AuthType {
@@ -46,9 +49,10 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
+  sendLog(packageRSAPublicKey(generateRSAKey(2048).publicKey));
+
   // Initialize sodium
   await initSodium();
-  print(packageSymmetricKey(randomSymmetricKey()));
 
   // Initialize logging from the native side
   api.createLogStream().listen((event) {
@@ -60,51 +64,13 @@ void main() async {
 
   if(isDebug) {
     await encryptionTest();
+    testEncryptionRSA();
   }
   
   // Initialize controllers
   initializeControllers();
 
-  runApp(ChatApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Clipping Example'),
-        ),
-        body: Center(
-          child: SizedBox(
-            width: 200,
-            child: OverflowBox(
-              minWidth: 0.0,
-              maxWidth: double.infinity,
-              minHeight: 0.0,
-              maxHeight: double.infinity,
-              alignment: Alignment.center,
-              child: Column(
-                children: [
-                  Container(
-                    color: Colors.blue,
-                    height: 100.0,
-                    child: Center(
-                      child: Text(
-                        'This is some text that overflows ausdhasdiha sdah usdhuasudha shuduhas uhdauhsduhasuhdasui asdasduisahduash dahud uhasuhduh asuhd auhsd uhuah sduh auhsduhasuhdhuasduashudasuhduhasdusahudsaudhd',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  runApp(const ChatApp());
 }
 
 Future<bool> encryptionTest() async {

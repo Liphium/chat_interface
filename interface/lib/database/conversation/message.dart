@@ -6,10 +6,11 @@ class Message extends Table {
   BoolColumn get verified => boolean()();
   IntColumn get type => integer()();
   TextColumn get content => text()();
+  TextColumn get signature => text()();
   TextColumn get attachments => text()();
   TextColumn get certificate => text()();
   TextColumn get sender => text().nullable()();
-  DateTimeColumn get createdAt => dateTime()();
+  Int64Column get createdAt => int64()();
   TextColumn get conversationId => text().nullable()();
   BoolColumn get edited => boolean()();
 

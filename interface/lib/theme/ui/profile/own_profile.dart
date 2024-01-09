@@ -1,16 +1,11 @@
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/sidebar/files/files_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
-import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:drift_db_viewer/drift_db_viewer.dart';
@@ -20,7 +15,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class OwnProfile extends StatefulWidget {
-
   final Offset position;
   final int size;
 
@@ -31,7 +25,6 @@ class OwnProfile extends StatefulWidget {
 }
 
 class _ProfileState extends State<OwnProfile> {
-
   //* Edit state for buttons
   final edit = false.obs;
 
@@ -50,7 +43,6 @@ class _ProfileState extends State<OwnProfile> {
 
   @override
   Widget build(BuildContext context) {
-
     StatusController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
@@ -76,28 +68,32 @@ class _ProfileState extends State<OwnProfile> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-            
                       //* Profile info
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
-                          Text(controller.name.value, style: theme.textTheme.titleMedium, textHeightBehavior: noTextHeight,),
-                          Text("#${controller.tag.value}", textHeightBehavior: noTextHeight, style: theme.textTheme.titleMedium!
-                          .copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
+                          Text(
+                            controller.name.value,
+                            style: theme.textTheme.titleMedium,
+                            textHeightBehavior: noTextHeight,
+                          ),
+                          Text("#${controller.tag.value}",
+                              textHeightBehavior: noTextHeight,
+                              style:
+                                  theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
                         ],
                       ),
 
                       //* Copy button
                       LoadingIconButton(
-                        loading: false.obs,
-                        onTap: () {
-                          db.conversation.deleteAll();
-                          db.message.deleteAll();
-                        },
-                        icon: Icons.copy
-                      )
+                          loading: false.obs,
+                          onTap: () {
+                            db.conversation.deleteAll();
+                            db.message.deleteAll();
+                          },
+                          icon: Icons.copy)
                     ],
                   ),
                   verticalSpacing(defaultSpacing),
@@ -106,50 +102,45 @@ class _ProfileState extends State<OwnProfile> {
 
                   //* Current status type
                   RepaintBoundary(
-                    child: GetX<StatusController>(
-                      builder: (statusController) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: List.generate(4, (index) {
-                                      
-                            // Get details
-                            Color color = getStatusColor(theme, index);
-                            IconData icon = getStatusIcon(index);
-                            final bool selected = statusController.type.value == index;
-                                      
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: elementSpacing),
-                              child: Material(
-                                color: selected ? theme.colorScheme.primary : theme.colorScheme.background,
+                    child: GetX<StatusController>(builder: (statusController) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: List.generate(4, (index) {
+                          // Get details
+                          Color color = getStatusColor(theme, index);
+                          IconData icon = getStatusIcon(index);
+                          final bool selected = statusController.type.value == index;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: elementSpacing),
+                            child: Material(
+                              color: selected ? theme.colorScheme.primary : theme.colorScheme.background,
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              child: InkWell(
                                 borderRadius: BorderRadius.circular(defaultSpacing),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(defaultSpacing),
-                                  onTap: () {
-                                    controller.setStatus(type: index, success: () => Get.back());
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(defaultSpacing),
-                                    child: Row(
-                                      children: [
-                                        //* Status icon
-                                        Icon(icon, size: 13.0, color: color),
-                                        horizontalSpacing(defaultSpacing),
-                                        Text("status.${index.toString()}".tr, 
-                                          style: theme.textTheme.bodyMedium!.copyWith(
-                                            color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface
-                                          ), 
-                                          textHeightBehavior: noTextHeight
-                                        ),
-                                      ],
-                                    ),
+                                onTap: () {
+                                  controller.setStatus(type: index, success: () => Get.back());
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(defaultSpacing),
+                                  child: Row(
+                                    children: [
+                                      //* Status icon
+                                      Icon(icon, size: 13.0, color: color),
+                                      horizontalSpacing(defaultSpacing),
+                                      Text("status.${index.toString()}".tr,
+                                          style: theme.textTheme.bodyMedium!
+                                              .copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface),
+                                          textHeightBehavior: noTextHeight),
+                                    ],
                                   ),
                                 ),
                               ),
-                            );
-                          }),
-                        );
-                      }
-                    ),
+                            ),
+                          );
+                        }),
+                      );
+                    }),
                   ),
 
                   //* Status message
@@ -157,7 +148,6 @@ class _ProfileState extends State<OwnProfile> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-            
                       //* Profile id
                       Expanded(
                         child: GestureDetector(
@@ -165,10 +155,11 @@ class _ProfileState extends State<OwnProfile> {
                             edit.value = true;
                             _statusFocus.requestFocus();
                           },
-                          child: Obx(() => 
-                            Visibility(
+                          child: Obx(
+                            () => Visibility(
                               visible: edit.value,
-                              replacement: Text(controller.status.value == "-" ? 'status.message.add'.tr : controller.status.value,
+                              replacement: Text(
+                                controller.status.value == "-" ? 'status.message.add'.tr : controller.status.value,
                                 style: theme.textTheme.bodyMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -183,14 +174,14 @@ class _ProfileState extends State<OwnProfile> {
                                   hintText: 'status.message'.tr,
                                 ),
                                 style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
-                                                
+
                                 //* Save status
                                 onEditingComplete: () {
-                                  if(_status.text == "") _status.text = "-";
+                                  if (_status.text == "") _status.text = "-";
                                   controller.setStatus(message: _status.text);
                                   edit.value = false;
                                 },
-                                                
+
                                 inputFormatters: [
                                   LengthLimitingTextInputFormatter(70),
                                 ],
@@ -200,82 +191,80 @@ class _ProfileState extends State<OwnProfile> {
                           ),
                         ),
                       ),
-            
+
                       //* Close button
-                      Obx(() =>
-                        LoadingIconButton(
+                      Obx(
+                        () => LoadingIconButton(
                           loading: controller.statusLoading,
                           onTap: () {
-                            if(controller.status.value == "-" && !edit.value) {
+                            if (controller.status.value == "-" && !edit.value) {
                               edit.value = true;
                               _status.text = "";
                               _statusFocus.requestFocus();
                               return;
                             }
 
-                            if(!edit.value) {
+                            if (!edit.value) {
                               controller.setStatus(message: "-");
                               _status.text = "";
                               return;
                             }
-                          
+
                             edit.value = false;
                             _statusFocus.unfocus();
                             controller.setStatus(message: _status.text);
                           },
-                          icon: statusMessage.value == "-" ? Icons.add : edit.value ? Icons.done : Icons.close,
+                          icon: statusMessage.value == "-"
+                              ? Icons.add
+                              : edit.value
+                                  ? Icons.done
+                                  : Icons.close,
                           color: theme.colorScheme.onPrimary,
-                        )
+                        ),
                       )
                     ],
                   ),
                   verticalSpacing(defaultSpacing),
-                        
+
                   //* Profile settings
                   ProfileButton(
-                    icon: Icons.settings,
-                    label: 'profile.settings'.tr,
-                    onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
-                    loading: false.obs
-                  ),
+                      icon: Icons.settings,
+                      label: 'profile.settings'.tr,
+                      onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
+                      loading: false.obs),
                   verticalSpacing(elementSpacing),
 
                   //* Friends page
                   ProfileButton(
-                    icon: Icons.group,
-                    label: 'profile.friends'.tr,
-                    onTap: () => Get.dialog(const FriendsPage()),
-                    loading: false.obs
-                  ),
+                      icon: Icons.group, label: 'profile.friends'.tr, onTap: () => Get.dialog(const FriendsPage()), loading: false.obs),
                   verticalSpacing(elementSpacing),
 
                   //* Files page
+                  /*
                   ProfileButton(
                     icon: Icons.folder,
                     label: 'profile.files'.tr,
                     onTap: () => Get.dialog(const FilesPage()),
                     loading: false.obs
                   ),
-                  verticalSpacing(elementSpacing),
+                  verticalSpacing(elementSpacing), */
 
                   //* Hide profile
                   ProfileButton(
-                    icon: Icons.hardware,
-                    label: 'profile.test'.tr,
-                    onTap: () async {
-                      testLoading.value = true;
+                      icon: Icons.hardware,
+                      label: 'profile.test'.tr,
+                      onTap: () async {
+                        testLoading.value = true;
 
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
 
-                      testLoading.value = false;
-
-                    },
-                    loading: testLoading
-                  ),
+                        testLoading.value = false;
+                      },
+                      loading: testLoading),
                 ],
               ),
             ),
-          )
+          ),
         ),
       ],
     );

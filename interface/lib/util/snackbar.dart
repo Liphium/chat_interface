@@ -40,6 +40,7 @@ void showMessage(SnackbarType type, String message) {
   Get.find<NotificationController>().set(type, message);
 }
 
+/// Automatically translated
 void showErrorPopup(String title, String message) {
   Get.dialog(ErrorWindow(title: title.tr, error: message.tr));
 }

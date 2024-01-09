@@ -1,13 +1,13 @@
-
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MessageRenderer extends StatefulWidget {
-
   final String accountId;
   final Message message;
   final bool self;
@@ -21,80 +21,108 @@ class MessageRenderer extends StatefulWidget {
 }
 
 class _MessageRendererState extends State<MessageRenderer> {
+  final hovering = false.obs;
+
   @override
   Widget build(BuildContext context) {
-
     Friend sender = widget.sender ?? Friend.unknown(widget.accountId);
     ThemeData theme = Theme.of(context);
+    widget.message.initAttachments();
 
-    return Padding(
-      padding: EdgeInsets.only(top: !widget.last ? defaultSpacing : 0),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: elementSpacing,
-          horizontal: sectionSpacing,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-            //* Avatar
-            Visibility(
-              visible: !widget.last,
-              replacement: const SizedBox(width: 50), //* Show timestamp instead
-              child: UserAvatar(id: sender.id, size: 50),
+    return RepaintBoundary(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: elementSpacing,
+              horizontal: sectionSpacing,
             ),
-            horizontalSpacing(sectionSpacing),
+            child: Row(
+              textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                //* Avatar
+                Visibility(
+                  visible: !widget.last,
+                  replacement: const SizedBox(width: 34), //* Show timestamp instead
+                  child: Tooltip(
+                      message: sender.name,
+                      child: InkWell(
+                          borderRadius: BorderRadius.circular(100),
+                          onTap: () => Get.dialog(Profile(friend: sender)),
+                          child: UserAvatar(id: sender.id, size: 34))),
+                ),
+                horizontalSpacing(defaultSpacing),
 
-            //* Message
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-            
-                  //* Message info
-                  Visibility(
-                    visible: !widget.last,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                //* Message content
+                Row(
+                  textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                       children: [
-                        SelectionContainer.disabled(
-                          child: Text(
-                            sender.name, 
-                            style: theme.textTheme.titleLarge,
-                          )
+                        //* Message content (text)
+                        Visibility(
+                          visible: widget.message.content.isNotEmpty,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              color: widget.self ? theme.colorScheme.primary : theme.colorScheme.primaryContainer,
+                            ),
+                            child: Text(widget.message.content, style: theme.textTheme.labelLarge),
+                          ),
                         ),
-                        horizontalSpacing(defaultSpacing),
+
+                        //* Attachments
                         SelectionContainer.disabled(
-                          child: Text(
-                            formatTime(widget.message.createdAt),
-                            style: theme.textTheme.bodyMedium,
-                          )
+                          child: Obx(() {
+                            final renderer = widget.message.attachmentsRenderer;
+                            return Visibility(
+                              visible: widget.message.attachmentsRenderer.isNotEmpty,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: renderer.map((e) => AttachmentRenderer(container: e)).toList(),
+                                ),
+                              ),
+                            );
+                          }),
                         ),
                       ],
                     ),
-                  ),
-            
-                  //* Content
-                  Text(widget.message.content, style: theme.textTheme.bodyLarge)
-                ],
-              ),
+
+                    horizontalSpacing(defaultSpacing),
+
+                    //* Timestamp
+                    Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+
+                    horizontalSpacing(defaultSpacing),
+
+                    //* Verified indicator
+                    Obx(() {
+                      final verified = widget.message.verified.value;
+                      return Visibility(
+                        visible: !verified,
+                        child: Tooltip(
+                          message: "chat.not.signed".tr,
+                          child: const Icon(
+                            Icons.warning_rounded,
+                            color: Colors.amber,
+                          ),
+                        ),
+                      );
+                    })
+                  ],
+                )
+              ],
             ),
-
-            horizontalSpacing(defaultSpacing),
-
-            Visibility(
-              visible: !widget.message.verified,
-              child: Tooltip(
-                message: "not.signed".tr,
-                child: const Icon(
-                  Icons.warning_rounded,
-                  color: Colors.amber,
-                ),
-              ),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -68,14 +68,7 @@ class _ClusterSelectionPageState extends State<ClusterSelectionPage> {
   void fetchClusters() async {
 
     // Send request
-    var res = await postRqAuthorized("/cluster/list", <String, dynamic>{});
-
-    if(res.statusCode != 200) {
-      setupManager.error("server.offline");
-      return;
-    }
-
-    var body = jsonDecode(res.body);
+    final body = await postAuthorizedJSON("/cluster/list", <String, dynamic>{});
     if(!body["success"]) {
       setupManager.error(body["error"]);
       return;
