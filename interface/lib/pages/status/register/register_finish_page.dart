@@ -1,5 +1,6 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
+import 'package:chat_interface/pages/status/register/register_handler.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
@@ -104,11 +105,12 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                   expand: true,
                 ),
                 FJElevatedLoadingButtonCustom(
-                  onTap: () {
+                  onTap: () async {
                     if (_loading.value) return;
                     _loading.value = true;
                     _errorText.value = "";
 
+                    // Check all the stuff
                     if (_usernameController.text == '') {
                       _errorText.value = 'username.invalid'.tr;
                       _loading.value = false;
@@ -133,6 +135,15 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                       return;
                     }
 
+                    // Send registration finish request
+                    final error = await RegisterHandler.finishRegistration(_loading, _usernameController.text, _tagController.text, _passwordController.text);
+                    if (error != null) {
+                      _errorText.value = error;
+                      return;
+                    }
+
+                    // Transition to the next page
+                    Get.find<TransitionController>().modelTransition(const LoginPage());
                     sendLog("registration finished");
                   },
                   loading: _loading,

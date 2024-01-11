@@ -86,14 +86,12 @@ class FJElevatedLoadingButtonCustom extends StatelessWidget {
     return FJElevatedButton(
       onTap: () => loading.value ? null : onTap(),
       child: Obx(() => loading.value
-          ? Center(
-              child: SizedBox(
-                height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                child: Padding(
-                  padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                  child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
-                ),
+          ? SizedBox(
+              height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+              width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+              child: Padding(
+                padding: const EdgeInsets.all(defaultSpacing * 0.25),
+                child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
               ),
             )
           : child),

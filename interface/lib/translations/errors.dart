@@ -8,12 +8,14 @@ class ErrorTranslations extends Translations {
           'error': 'Error',
           'server.error': 'Something went wrong on the server, please try again later.',
           'node.error': 'The chat server didn\'t respond, please try again later.',
+          'mail.error': 'There was an error with our mail servers. Please try again later or contact support.',
           'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
           'new.version': 'A new version is available, please update the app.',
           'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
           'already.deleted': 'This object was already deleted.',
           'no.permission': 'You don\'t have permission to do that.',
           'spaces.connection_error': 'Something went wrong with the spaces connection. Please try again later.',
+          'invalid.method': 'This is incorrect. Please try again.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',

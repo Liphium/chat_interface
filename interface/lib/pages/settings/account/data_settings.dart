@@ -34,53 +34,55 @@ class DataSettingsPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("settings.data.profile_picture.requirements".tr, style: Get.theme.textTheme.bodyMedium),
-                  verticalSpacing(defaultSpacing),
-                  Row(
-                    children: [
-                      FJElevatedButton(
-                        smallCorners: true,
-                        onTap: () async {
-                          final result = await openFile();
-                          if (result == null) {
-                            return;
-                          }
-                          final size = await result.length();
-                          if (size > 10 * 1000 * 1000) {
-                            showErrorPopup("error".tr, "settings.data.profile_picture.requirements".tr);
-                            return;
-                          }
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("settings.data.profile_picture.requirements".tr, style: Get.theme.textTheme.bodyMedium),
+                    verticalSpacing(defaultSpacing),
+                    Row(
+                      children: [
+                        FJElevatedButton(
+                          smallCorners: true,
+                          onTap: () async {
+                            final result = await openFile();
+                            if (result == null) {
+                              return;
+                            }
+                            final size = await result.length();
+                            if (size > 10 * 1000 * 1000) {
+                              showErrorPopup("error".tr, "settings.data.profile_picture.requirements".tr);
+                              return;
+                            }
 
-                          final fileType = result.path.split(".").last;
-                          if (!["jpeg", "jpg", "png"].contains(fileType)) {
-                            showErrorPopup("error".tr, "settings.data.profile_picture.requirements".tr);
-                            return;
-                          }
+                            final fileType = result.path.split(".").last;
+                            if (!["jpeg", "jpg", "png"].contains(fileType)) {
+                              showErrorPopup("error".tr, "settings.data.profile_picture.requirements".tr);
+                              return;
+                            }
 
-                          Get.dialog(ProfilePictureWindow(file: result));
-                        },
-                        child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
-                      ),
-                      horizontalSpacing(defaultSpacing),
-                      IconButton(
-                        tooltip: "settings.data.profile_picture.remove".tr,
-                        onPressed: () => showConfirmPopup(
-                          ConfirmWindow(
-                            title: "settings.data.profile_picture.remove".tr,
-                            text: "settings.data.profile_picture.remove.confirm".tr,
-                            onConfirm: () => {},
-                            onDecline: () => {},
-                          ),
+                            Get.dialog(ProfilePictureWindow(file: result));
+                          },
+                          child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
                         ),
-                        icon: Icon(Icons.delete, color: Get.theme.colorScheme.onPrimary),
-                      )
-                    ],
-                  )
-                ],
+                        horizontalSpacing(defaultSpacing),
+                        IconButton(
+                          tooltip: "settings.data.profile_picture.remove".tr,
+                          onPressed: () => showConfirmPopup(
+                            ConfirmWindow(
+                              title: "settings.data.profile_picture.remove".tr,
+                              text: "settings.data.profile_picture.remove.confirm".tr,
+                              onConfirm: () => {},
+                              onDecline: () => {},
+                            ),
+                          ),
+                          icon: Icon(Icons.delete, color: Get.theme.colorScheme.onPrimary),
+                        )
+                      ],
+                    )
+                  ],
+                ),
               ),
               UserAvatar(
                 id: StatusController.ownAccountId,
@@ -116,6 +118,7 @@ class DataSettingsPage extends StatelessWidget {
                   ),
                 ],
               ),
+              horizontalSpacing(defaultSpacing),
               FJElevatedButton(
                 smallCorners: true,
                 onTap: () => Get.dialog(const ChangeNameWindow()),
@@ -136,14 +139,17 @@ class DataSettingsPage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("password".tr, style: Get.theme.textTheme.labelMedium),
-                  verticalSpacing(elementSpacing),
-                  Text("settings.data.password.description".tr, style: Get.theme.textTheme.bodyMedium),
-                ],
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("password".tr, style: Get.theme.textTheme.labelMedium),
+                    verticalSpacing(elementSpacing),
+                    Text("settings.data.password.description".tr, style: Get.theme.textTheme.bodyMedium),
+                  ],
+                ),
               ),
+              horizontalSpacing(defaultSpacing),
               FJElevatedButton(
                 smallCorners: true,
                 onTap: () => {},
@@ -164,14 +170,17 @@ class DataSettingsPage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("email".tr, style: Get.theme.textTheme.labelMedium),
-                  verticalSpacing(elementSpacing),
-                  Text("someemail@gmail.com", style: Get.theme.textTheme.bodyMedium),
-                ],
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("email".tr, style: Get.theme.textTheme.labelMedium),
+                    verticalSpacing(elementSpacing),
+                    Text("settings.data.email.description".tr, style: Get.theme.textTheme.bodyMedium),
+                  ],
+                ),
               ),
+              horizontalSpacing(defaultSpacing),
               FJElevatedButton(
                 smallCorners: true,
                 onTap: () => {},

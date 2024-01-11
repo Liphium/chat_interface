@@ -1,6 +1,5 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
-import 'package:chat_interface/pages/status/register/register_code_page.dart';
-import 'package:chat_interface/pages/status/register/register_page.dart';
+import 'package:chat_interface/pages/status/register/register_handler.dart';
 import 'package:chat_interface/pages/status/register/register_start_page.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
@@ -115,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                         backgroundColor: MaterialStateProperty.resolveWith(
                             (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
                       ),
-                      onPressed: () => Get.find<TransitionController>().modelTransition(const RegisterStartPage()),
+                      onPressed: () => RegisterHandler.goToRegistration(),
                       child: Text('login.no_account'.tr),
                     ),
                   ],

@@ -74,18 +74,26 @@ class _RegisterPageState extends State<RegisterCodePage> {
                   expand: true,
                 ),
                 FJElevatedLoadingButtonCustom(
-                  onTap: () {
+                  onTap: () async {
                     if (_loading.value) return;
                     _loading.value = true;
                     _errorText.value = "";
 
+                    // Check if the code is valid
                     if (_inviteController.text == '') {
                       _errorText.value = 'code.invalid'.tr;
                       _loading.value = false;
                       return;
                     }
 
-                    sendLog("code verification");
+                    // Verify the code
+                    final error = await RegisterHandler.verifyCode(_loading, _inviteController.text);
+                    if (error != null) {
+                      _errorText.value = error;
+                      return;
+                    }
+
+                    // Go to the next page
                     Get.find<TransitionController>().modelTransition(const RegisterFinishPage());
                   },
                   loading: _loading,

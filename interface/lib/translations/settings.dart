@@ -80,6 +80,7 @@ class SettingsTranslations extends Translations {
               'If you don\'t know what this is, it\'s fine. This is just data from the server that we can ask you for in case of problems. Here\'s which permissions you have:',
           'settings.data.account': 'Account data',
           'settings.data.password.description': 'We\'ll not show your password here. That would be stupid.',
+          'settings.data.email.description': 'Showing your email would be work. And I don\'t like that, you know.',
           'settings.data.log_out': 'Log out of your account',
           'settings.data.log_out.description': 'This feature is still in development. Just wanted to let you know so you don\'t keep searching for it.',
           'settings.data.danger_zone': 'Danger zone',

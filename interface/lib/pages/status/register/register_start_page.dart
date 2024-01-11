@@ -1,6 +1,7 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/register/register_code_page.dart';
+import 'package:chat_interface/pages/status/register/register_handler.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
@@ -79,11 +80,12 @@ class _RegisterPageState extends State<RegisterStartPage> {
                   expand: true,
                 ),
                 FJElevatedLoadingButtonCustom(
-                  onTap: () {
+                  onTap: () async {
                     if (_loading.value) return;
                     _loading.value = true;
                     _errorText.value = "";
 
+                    // Check all the stuff
                     if (_inviteController.text == '') {
                       _errorText.value = 'invite.invalid'.tr;
                       _loading.value = false;
@@ -96,7 +98,14 @@ class _RegisterPageState extends State<RegisterStartPage> {
                       return;
                     }
 
-                    sendLog("register and stuff");
+                    // Send registration start request
+                    final error = await RegisterHandler.startRegister(_loading, _emailController.text, _inviteController.text);
+                    if (error != null) {
+                      _errorText.value = error;
+                      return;
+                    }
+
+                    // Transition to the next page
                     Get.find<TransitionController>().modelTransition(const RegisterCodePage());
                   },
                   loading: _loading,
