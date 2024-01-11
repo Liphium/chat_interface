@@ -30,18 +30,20 @@ class _AnimatedContainerState extends State<TransitionContainer> {
         end: 1,
       );
     } else {
-      mainEffect = ScaleEffect(duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), curve: scaleAnimationCurve);
+      mainEffect = FadeEffect(
+        duration: 250.ms,
+        begin: 0,
+        end: 1,
+      );
+      //mainEffect = ScaleEffect(duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), curve: scaleAnimationCurve);
     }
 
     return GetX<TransitionController>(
       builder: (controller) {
         return IgnorePointer(
           ignoring: controller.transition.value,
-          child: Animate(
-            effects: [
-              mainEffect,
-            ],
-            target: controller.transition.value ? 0 : 1,
+          child: Hero(
+            tag: "login",
             child: Container(
               width: widget.width,
               decoration: BoxDecoration(
@@ -49,15 +51,10 @@ class _AnimatedContainerState extends State<TransitionContainer> {
                 color: widget.color ?? Theme.of(context).colorScheme.onBackground,
               ),
               child: Animate(
-                target: controller.transition.value ? 0 : 1,
                 effects: [
-                  ScaleEffect(
-                    duration: 500.ms,
-                    begin: const Offset(0, 0),
-                    end: const Offset(1, 1),
-                    curve: const ElasticOutCurve(1.6),
-                  ),
+                  mainEffect,
                 ],
+                target: controller.transition.value ? 0 : 1,
                 child: widget.child,
               ),
             ),

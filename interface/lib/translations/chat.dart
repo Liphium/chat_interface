@@ -90,6 +90,7 @@ class ChatPageTranslations extends Translations {
 
         //* German
         'de_DE': {
+          /*
           // App
           'app.title': 'The chat app',
           'app.welcome': 'Danke, dass du mich auf dieser Reise begleitest!',
@@ -171,6 +172,7 @@ class ChatPageTranslations extends Translations {
           // Spaces
           'join.space': 'Space beitreten',
           'join.space.popup': 'Manche klicken darauf ausversehen, also willst du wirklich diesem Space beitreten?',
+          */
         }
       };
 }

@@ -1,41 +1,39 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/register/register_code_page.dart';
-import 'package:chat_interface/pages/status/register/register_page.dart';
-import 'package:chat_interface/pages/status/register/register_start_page.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'login_handler.dart';
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterStartPage extends StatefulWidget {
+  const RegisterStartPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterStartPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterStartPage> {
+  final _inviteController = TextEditingController();
   final _emailController = TextEditingController();
 
   final _loading = false.obs;
-  final _errorText = ''.obs;
-  bool reminded = false;
-  final _reminderText = ''.obs;
+  final _errorText = "".obs;
 
   @override
   void dispose() {
+    _inviteController.dispose();
     _emailController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    ThemeData theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -48,66 +46,69 @@ class _LoginPageState extends State<LoginPage> {
           child: Padding(
             padding: const EdgeInsets.all(defaultSpacing * 2),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("${"input.email".tr}.", textAlign: TextAlign.start, style: theme.textTheme.headlineMedium),
-                verticalSpacing(defaultSpacing * 2),
-                AnimatedInfoContainer(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing),
-                  message: _reminderText,
-                  expand: true,
+                Text("register.title".tr, textAlign: TextAlign.left, style: theme.textTheme.headlineMedium),
+                verticalSpacing(sectionSpacing),
+
+                // Invite
+                Tooltip(
+                  message: "invite.info".tr,
+                  child: Text("invite".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
                 ),
+                verticalSpacing(elementSpacing),
+                FJTextField(
+                  hintText: 'placeholder.invite'.tr,
+                  controller: _inviteController,
+                ),
+                verticalSpacing(defaultSpacing),
+
+                // Email
+                Text("email".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
+                verticalSpacing(elementSpacing),
                 FJTextField(
                   hintText: 'placeholder.email'.tr,
                   controller: _emailController,
                 ),
                 verticalSpacing(defaultSpacing),
+
                 AnimatedErrorContainer(
                   padding: const EdgeInsets.only(bottom: defaultSpacing),
                   message: _errorText,
                   expand: true,
                 ),
-                FJElevatedButton(
+                FJElevatedLoadingButtonCustom(
                   onTap: () {
                     if (_loading.value) return;
                     _loading.value = true;
-                    _errorText.value = ''.tr;
-                    _reminderText.value = ''.tr;
+                    _errorText.value = "";
 
-                    if (_emailController.text == '') {
-                      _errorText.value = 'email.invalid'.tr;
-                      if (!reminded) {
-                        _reminderText.value = 'login.register_reminder'.tr;
-                      }
-                      reminded = true;
+                    if (_inviteController.text == '') {
+                      _errorText.value = 'invite.invalid'.tr;
                       _loading.value = false;
                       return;
                     }
 
-                    loginStart(_emailController.text, success: () async {
+                    if (_emailController.text == '') {
+                      _errorText.value = 'email.invalid'.tr;
                       _loading.value = false;
-                    }, failure: (msg) {
-                      _errorText.value = msg.tr;
-                      _loading.value = false;
-                    });
+                      return;
+                    }
+
+                    sendLog("register and stuff");
+                    Get.find<TransitionController>().modelTransition(const RegisterCodePage());
                   },
+                  loading: _loading,
                   child: Center(
-                    child: Obx(() => _loading.value
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Get.theme.colorScheme.onPrimary,
-                              strokeWidth: 2.0,
-                            ))
-                        : Text('login.next'.tr, style: theme.textTheme.labelLarge)),
+                    child: Text('login.next'.tr, style: theme.textTheme.labelLarge),
                   ),
                 ),
                 verticalSpacing(defaultSpacing),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("login.no_account.text".tr),
+                    Text('register.account.text'.tr),
                     horizontalSpacing(defaultSpacing),
                     TextButton(
                       style: ButtonStyle(
@@ -115,8 +116,8 @@ class _LoginPageState extends State<LoginPage> {
                         backgroundColor: MaterialStateProperty.resolveWith(
                             (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
                       ),
-                      onPressed: () => Get.find<TransitionController>().modelTransition(const RegisterStartPage()),
-                      child: Text('login.no_account'.tr),
+                      onPressed: () => Get.find<TransitionController>().modelTransition(const LoginPage()),
+                      child: Text('register.login'.tr),
                     ),
                   ],
                 ),

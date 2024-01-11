@@ -44,6 +44,7 @@ class ErrorTranslations extends Translations {
 
         //* German
         'de_DE': {
+          /*
           'error': 'Fehler',
           'server.error': 'Auf dem Server ist ein Fehler aufgetreten, bitte versuche es später erneut.',
           'node.error': 'Der Chat-Server hat nicht geantwortet, bitte versuche es später erneut.',
@@ -79,6 +80,7 @@ class ErrorTranslations extends Translations {
 
           // Game
           'no.start': 'Das Spiel konnte nicht gestartet werden. Wir entschuldigen uns für die Unannehmlichkeiten, bitte melde dich bei Support, wenn du auf dieses Problem stößt.',
+          */
         },
       };
 }

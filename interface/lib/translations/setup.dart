@@ -23,6 +23,10 @@ class SetupTranslations extends Translations {
           'invite.invalid': 'Please enter a valid invite code.',
           'invite.info': 'Invite codes are your way to get into the app. You can get one from a friend or from official sources.',
           'placeholder.email': 'your@email.com',
+          'register.verify': 'Verify your email.',
+          'register.final': 'Finish your account.',
+          'register.email_validation': 'We sent an email to @email. Please check your inbox and put the code we sent you into the input box below. Oh, and don\'t forget to check the spam folder!',
+          'placeholder.code': 'abcdef',
           'email.invalid': 'Please enter a valid email.',
           'register.register': 'Register',
           'register.account.text': 'Already have an account?',
@@ -39,6 +43,7 @@ class SetupTranslations extends Translations {
 
         //* German
         'de_DE': {
+          /*
           // Error page
           'retry.text.1': 'Versuche es in',
           'retry.text.2': 'Sekunden erneut.',
@@ -69,6 +74,7 @@ class SetupTranslations extends Translations {
           'input.password': 'Dein Passwort, bitte',
           'login.forgot.text': 'Passwort vergessen?',
           'login.forgot': 'Zurücksetzen',
+          */
         }
       };
 }

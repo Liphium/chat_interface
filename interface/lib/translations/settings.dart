@@ -105,6 +105,7 @@ class SettingsTranslations extends Translations {
 
         //* German
         'de_DE': {
+          /*
           // Categories
           'settings.tab.account': 'Konto',
           'settings.tab.appearance': 'Aussehen',
@@ -201,6 +202,7 @@ class SettingsTranslations extends Translations {
 
           // Spaces settings
           'game.music': 'Musik im Spielmodus abspielen',
+          */
         }
       };
 }

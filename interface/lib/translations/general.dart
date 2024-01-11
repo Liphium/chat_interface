@@ -27,6 +27,7 @@ class GeneralTranslations extends Translations {
           'password': 'Password',
           'invite': 'Invite',
           'email': 'Email',
+          'code': 'Code',
           'under.dev': 'This featue is still under development. Sorry for the inconvenience. Please contact support if this is something important.',
 
           // Time TODO: Differentiate between PM and AM
@@ -38,6 +39,7 @@ class GeneralTranslations extends Translations {
 
         //* German
         'de_DE': {
+          /*
           // Actions
           'success': 'Erfolg',
           'create': 'Erstellen',
@@ -60,6 +62,7 @@ class GeneralTranslations extends Translations {
           'password': 'Passwort',
           'email': 'Email',
           'invite': 'Einladung',
+          'code': 'Code',
           'under.dev': 'Dieses Feature ist noch in Entwicklung. Sorry für die Unannehmlichkeiten. Bitte kontaktiere den Support, wenn es um etwas Wichtiges geht.',
 
           // Time
@@ -67,6 +70,7 @@ class GeneralTranslations extends Translations {
           'time.yesterday': 'Gestern',
           'time.today': 'Heute',
           'time': '@day.@month.@year',
+          */
         }
       };
 }
