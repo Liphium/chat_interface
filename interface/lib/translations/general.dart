@@ -25,6 +25,7 @@ class GeneralTranslations extends Translations {
           'close': 'Close',
           'username': 'Username',
           'password': 'Password',
+          'password.current': 'Current password',
           'invite': 'Invite',
           'email': 'Email',
           'code': 'Code',

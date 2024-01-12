@@ -16,6 +16,8 @@ class ErrorTranslations extends Translations {
           'no.permission': 'You don\'t have permission to do that.',
           'spaces.connection_error': 'Something went wrong with the spaces connection. Please try again later.',
           'invalid.method': 'This is incorrect. Please try again.',
+          'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
+          'password.incorrect': 'Your password is incorrect. Please try again.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',

@@ -3,48 +3,56 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class StatusRenderer extends StatelessWidget {
-  
   final int status;
-  
-  const StatusRenderer({super.key, required this.status});
+  final bool text;
+
+  const StatusRenderer({super.key, required this.status, this.text = true});
 
   @override
   Widget build(BuildContext context) {
-
     ThemeData theme = Theme.of(context);
     final Color color = getStatusColor(theme, status);
     final IconData icon = getStatusIcon(status);
 
+    if (!text) {
+      return Icon(
+        icon,
+        color: color,
+        size: 16,
+      );
+    }
+
     return Container(
-      decoration: BoxDecoration(
-        color: color.withAlpha(100),
-        borderRadius: BorderRadius.circular(50),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5, vertical: defaultSpacing * 0.25),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 13,
-          ),
-          const SizedBox(width: elementSpacing),
-          Text(
-            "status.${status.toString().toLowerCase()}".tr,
-            style: theme.textTheme.bodySmall!.copyWith(
-              color: theme.colorScheme.onSurface,
+        decoration: BoxDecoration(
+          color: color.withAlpha(100),
+          borderRadius: BorderRadius.circular(50),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: elementSpacing, vertical: text ? elementSpacing * 0.5 : elementSpacing),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 13,
             ),
-          ),
-          const SizedBox(width: elementSpacing * 0.5),
-        ],
-      )
-    );
+            if (text)
+              Padding(
+                padding: const EdgeInsets.only(left: elementSpacing, right: elementSpacing * 0.5),
+                child: Text(
+                  "status.${status.toString().toLowerCase()}".tr,
+                  style: theme.textTheme.bodySmall!.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
+          ],
+        ));
   }
 }
 
 // Get the status icon
 IconData getStatusIcon(int status) {
-  switch(status) {
+  switch (status) {
     case statusOffline:
       return Icons.circle;
     case statusOnline:
@@ -60,7 +68,7 @@ IconData getStatusIcon(int status) {
 
 // Get the status color
 Color getStatusColor(ThemeData theme, int status) {
-  switch(status) {
+  switch (status) {
     case statusOffline:
       return theme.colorScheme.surface;
     case statusOnline:

@@ -86,7 +86,7 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
   }
 
   if (res.statusCode != 200) {
-    return <String, dynamic>{"success": false, "error": defaultError};
+    return <String, dynamic>{"success": false, "code": res.statusCode, "error": defaultError};
   }
 
   return jsonDecode(String.fromCharCodes(decryptAES(res.bodyBytes, aesBase64)));

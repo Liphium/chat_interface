@@ -25,7 +25,7 @@ class _AnimatedContainerState extends State<TransitionContainer> {
 
     if (widget.fade) {
       mainEffect = FadeEffect(
-        duration: 500.ms,
+        duration: 250.ms,
         begin: 0,
         end: 1,
       );
@@ -35,7 +35,6 @@ class _AnimatedContainerState extends State<TransitionContainer> {
         begin: 0,
         end: 1,
       );
-      //mainEffect = ScaleEffect(duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), curve: scaleAnimationCurve);
     }
 
     return GetX<TransitionController>(

@@ -143,16 +143,10 @@ class _MessageFeedState extends State<MessageFeed> {
                                       final Widget renderer;
                                       switch (message.type) {
                                         case MessageType.text:
-                                          renderer = MessageRenderer(
-                                              message: message,
-                                              accountId: conversationToken.account,
-                                              self: self,
-                                              last: last,
-                                              sender: self ? Friend.me() : sender);
+                                          renderer = MessageRenderer(message: message, accountId: conversationToken.account, self: self, last: last, sender: self ? Friend.me() : sender);
 
                                         case MessageType.call:
-                                          renderer = SpaceMessageRenderer(
-                                              message: message, self: self, last: last, sender: self ? Friend.me() : sender);
+                                          renderer = SpaceMessageRenderer(message: message, self: self, last: last, sender: self ? Friend.me() : sender);
 
                                         case MessageType.system:
                                           renderer = SystemMessageRenderer(message: message, accountId: conversationToken.account);
@@ -184,18 +178,21 @@ class _MessageFeedState extends State<MessageFeed> {
                                                       child: Row(
                                                         children: [
                                                           LoadingIconButton(
-                                                              key: contextMenuKey,
-                                                              iconSize: 22,
-                                                              extra: 4,
-                                                              padding: 4,
-                                                              onTap: () {
-                                                                Get.dialog(MessageOptionsWindow(
+                                                            key: contextMenuKey,
+                                                            iconSize: 22,
+                                                            extra: 4,
+                                                            padding: 4,
+                                                            onTap: () {
+                                                              Get.dialog(
+                                                                MessageOptionsWindow(
                                                                   data: ContextMenuData.fromKey(contextMenuKey),
                                                                   self: self,
                                                                   message: message,
-                                                                ));
-                                                              },
-                                                              icon: Icons.more_horiz)
+                                                                ),
+                                                              );
+                                                            },
+                                                            icon: Icons.more_horiz,
+                                                          )
                                                         ],
                                                       ),
                                                     ),
@@ -223,8 +220,7 @@ class _MessageFeedState extends State<MessageFeed> {
               ),
               Obx(
                 () => Visibility(
-                  visible: controller.selectedConversation.value.isGroup &&
-                      settingController.settings[AppSettings.showGroupMembers]!.value.value,
+                  visible: controller.selectedConversation.value.isGroup && settingController.settings[AppSettings.showGroupMembers]!.value.value,
                   child: Container(
                     color: Get.theme.colorScheme.onBackground,
                     width: 300,

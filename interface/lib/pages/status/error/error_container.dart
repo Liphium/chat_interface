@@ -53,6 +53,8 @@ class AnimatedErrorContainer extends StatefulWidget {
 }
 
 class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
+  final message = "".obs;
+  final showing = false.obs;
   AnimationController? controller;
   StreamSubscription<String>? _sub;
   String? prev;
@@ -64,7 +66,13 @@ class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
         controller?.loop(count: 1, reverse: true);
       }
       if (p0 != "") {
+        sendLog("show");
+        message.value = p0;
+        showing.value = true;
         prev = p0;
+      } else {
+        sendLog("unshow");
+        showing.value = false;
       }
     });
     super.initState();
@@ -97,7 +105,7 @@ class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
               duration: 250.ms,
             ),
           ],
-          target: widget.message.value.isNotEmpty ? 1 : 0,
+          target: showing.value ? 1 : 0,
           child: Padding(
             padding: widget.padding,
             child: Container(
@@ -111,7 +119,7 @@ class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
                   Icon(Icons.error, color: Theme.of(context).colorScheme.error),
                   horizontalSpacing(defaultSpacing),
                   Flexible(
-                    child: Text(widget.message.value, style: Theme.of(context).textTheme.labelMedium),
+                    child: Text(message.value, style: Theme.of(context).textTheme.labelMedium),
                   ),
                 ],
               ),

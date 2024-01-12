@@ -8,22 +8,25 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 class StatusController extends GetxController {
-
   static String ownAccountId = "";
   static List<String> permissions = [];
 
   Timer? _timer;
   StatusController() {
-    if(_timer != null) _timer!.cancel();
+    if (_timer != null) _timer!.cancel();
 
     // Update status every minute
     _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      if(connector.isConnected()) {
+      if (connector.isConnected()) {
         setStatus();
       }
     });
@@ -62,14 +65,14 @@ class StatusController extends GetxController {
   }
 
   String statusJson() => jsonEncode(<String, dynamic>{
-    "s": status.value,
-    "t": type.value,
-  });
+        "s": status.value,
+        "t": type.value,
+      });
 
   String newStatusJson(String status, int type) => jsonEncode(<String, dynamic>{
-    "s": status,
-    "t": type,
-  });
+        "s": status,
+        "t": type,
+      });
 
   void fromStatusJson(String json) {
     final data = jsonDecode(json);
@@ -84,23 +87,23 @@ class StatusController extends GetxController {
   String statusPacket(String statusJson) {
     return "${generateFriendId()}:${encryptSymmetric(statusJson, profileKey)}";
   }
-  
+
   String sharedContentPacket() {
-    if(_container == null) {
+    if (_container == null) {
       return "";
     }
     return encryptSymmetric(_container!.toJson(), profileKey);
   }
 
   Future<bool> share(ShareContainer container) async {
-    if(_container != null) return false;
+    if (_container != null) return false;
     _container = container;
     await setStatus();
     return true;
   }
 
   void stopSharing() {
-    if(_container == null) {
+    if (_container == null) {
       return;
     }
     _container = null;
@@ -108,44 +111,50 @@ class StatusController extends GetxController {
   }
 
   Future<bool> setStatus({String? message, int? type, Function()? success}) async {
-    if(statusLoading.value) return false;
+    if (statusLoading.value) return false;
     statusLoading.value = true;
 
     final tokens = <Map<String, dynamic>>[];
-    for(var conversation in Get.find<ConversationController>().conversations.values) {
-      if(conversation.members.length == 2) {
+    for (var conversation in Get.find<ConversationController>().conversations.values) {
+      if (conversation.members.length == 2) {
         tokens.add(conversation.token.toMap());
       }
     }
 
-    connector.sendAction(Message("st_send", <String, dynamic>{
-      "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
-      "tokens": tokens,
-      "data": sharedContentPacket(),
-    }), handler: (event) {
+    connector.sendAction(
+        Message("st_send", <String, dynamic>{
+          "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
+          "tokens": tokens,
+          "data": sharedContentPacket(),
+        }), handler: (event) {
       statusLoading.value = false;
       success?.call();
-      if(event.data["success"] == true) {
-        if(message != null) status.value = message;
-        if(type != null) this.type.value = type;
+      if (event.data["success"] == true) {
+        if (message != null) status.value = message;
+        if (type != null) this.type.value = type;
       }
     });
 
     return true;
   }
 
+  // Log out of this account
+  void logOut() {
+    // Delete the session information
+    db.setting.deleteWhere((tbl) => tbl.key.equals("profile"));
+
+    // Go back to login
+    setupManager.restart();
+  }
 }
 
 String friendId(Friend friend) {
   return hashSha(friend.id + friend.name + friend.tag + friend.keyStorage.storedActionKey);
 }
 
-enum ShareType {
-  space
-}
+enum ShareType { space }
 
 abstract class ShareContainer {
-
   final Friend? sender;
   final ShareType type;
 

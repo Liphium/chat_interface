@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
+import 'package:chat_interface/pages/settings/account/change_password_window.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -113,7 +116,7 @@ class DataSettingsPage extends StatelessWidget {
                   Text("username".tr, style: Get.theme.textTheme.labelMedium),
                   verticalSpacing(elementSpacing),
                   Text(
-                    "${controller.name.value}#${controller.tag.value.toCharArray().map((e) => "*").toList().join("")}",
+                    "${controller.name.value}#${List.generate(Random().nextInt(3) + 3, (index) => "*").join("")}",
                     style: Get.theme.textTheme.bodyMedium,
                   ),
                 ],
@@ -152,7 +155,7 @@ class DataSettingsPage extends StatelessWidget {
               horizontalSpacing(defaultSpacing),
               FJElevatedButton(
                 smallCorners: true,
-                onTap: () => {},
+                onTap: () => Get.dialog(const ChangePasswordWindow()),
                 child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
               ),
             ],
