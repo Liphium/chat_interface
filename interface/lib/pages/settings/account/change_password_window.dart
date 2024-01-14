@@ -96,7 +96,7 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> {
 
               final json = await postAuthorizedJSON("/account/settings/change_password", {
                 "current": _currentPasswordController.text,
-                "new": hashSha(_passwordController.text),
+                "new": _passwordController.text,
               });
 
               if (!json["success"]) {

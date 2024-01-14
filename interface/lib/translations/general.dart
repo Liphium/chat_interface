@@ -36,6 +36,12 @@ class GeneralTranslations extends Translations {
           'time.yesterday': 'Yesterday',
           'time.today': 'Today',
           'time': '@month/@day/@year',
+
+          // Log out thing
+          'log_out': 'Log out',
+          'log_out.dialog':
+              'This will delete all the data on this device. If you don\'t have your keys as a file or on another logged in device, you will not be able to recover your account. Are you sure you want to log out?',
+          'log_out.delete_files': 'Delete files',
         },
 
         //* German

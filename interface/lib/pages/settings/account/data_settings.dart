@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_password_window.dart';
+import 'package:chat_interface/pages/settings/account/log_out_window.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -161,9 +162,10 @@ class DataSettingsPage extends StatelessWidget {
             ],
           ),
         ),
-        verticalSpacing(defaultSpacing),
+        verticalSpacing(sectionSpacing),
 
-        //* Email
+        /*
+        / Email
         Container(
           decoration: BoxDecoration(
             color: Get.theme.colorScheme.primaryContainer,
@@ -192,12 +194,30 @@ class DataSettingsPage extends StatelessWidget {
             ],
           ),
         ),
-        verticalSpacing(sectionSpacing),
+        verticalSpacing(sectionSpacing), */
 
         //* Log out
         Text("settings.data.log_out".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
         Text("settings.data.log_out.description".tr, style: Get.theme.textTheme.bodyMedium),
+        verticalSpacing(defaultSpacing),
+
+        //* Danger zone actions
+        FJElevatedButton(
+          smallCorners: true,
+          onTap: () {
+            Get.dialog(const LogOutWindow());
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.logout, color: Get.theme.colorScheme.onPrimary),
+              horizontalSpacing(defaultSpacing),
+              Text("log_out".tr, style: Get.theme.textTheme.labelMedium),
+            ],
+          ),
+        ),
+
         /*
         verticalSpacing(defaultSpacing),
         FJElevatedButton(

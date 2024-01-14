@@ -7,6 +7,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
@@ -139,9 +140,21 @@ class StatusController extends GetxController {
   }
 
   // Log out of this account
-  void logOut() {
+  void logOut({deleteEverything = false, deleteFiles = false}) async {
     // Delete the session information
     db.setting.deleteWhere((tbl) => tbl.key.equals("profile"));
+
+    // Delete all data
+    if (deleteEverything) {
+      for (var table in db.allTables) {
+        await table.deleteAll();
+      }
+    }
+
+    // Delete all files
+    if (deleteFiles) {
+      await Get.find<AttachmentController>().deleteAllFiles();
+    }
 
     // Go back to login
     setupManager.restart();

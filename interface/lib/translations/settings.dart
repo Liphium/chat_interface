@@ -83,7 +83,8 @@ class SettingsTranslations extends Translations {
           'settings.data.change_password.dialog': 'Let\'s make sure your account is secure again. All your devices (also this one) will be logged out after you click "Save".',
           'settings.data.email.description': 'Showing your email would be work. And I don\'t like that, you know.',
           'settings.data.log_out': 'Log out of your account',
-          'settings.data.log_out.description': 'This feature is still in development. Just wanted to let you know so you don\'t keep searching for it.',
+          'settings.data.log_out.description':
+              'If you log out of your account, we\'ll delete all your data from this device. This includes the keys we use to encrypt stuff on our servers. If you don\'t have these on another device, you will NEVER be able to recover your friends.',
           'settings.data.danger_zone': 'Danger zone',
           'settings.data.danger_zone.description':
               'Hello, and welcome down here! Hope you haven\'t come here to delete your account. If you have, you can do that here. But please don\'t. We\'ll miss you. :(',

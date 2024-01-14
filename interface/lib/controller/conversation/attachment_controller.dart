@@ -17,7 +17,6 @@ import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
 class AttachmentController extends GetxController {
-
   AttachmentController() {
     initFilePath();
   }
@@ -41,24 +40,21 @@ class AttachmentController extends GetxController {
 
     sendLog(server("/account/files/upload").toString());
     final res = await dio.post(
-      server("/account/files/upload").toString(), 
-      data: formData, 
-      options: dio_rs.Options(headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": "Bearer $sessionToken"
-      }), 
+      server("/account/files/upload").toString(),
+      data: formData,
+      options: dio_rs.Options(headers: {"Content-Type": "multipart/form-data", "Authorization": "Bearer $sessionToken"}),
       onSendProgress: (count, total) {
         data.progress.value = count / total;
         sendLog(data.progress.value);
       },
     );
 
-    if(res.statusCode != 200) {
+    if (res.statusCode != 200) {
       return FileUploadResponse(false, "server.error", AttachmentContainer("", "", "", key));
     }
 
     final json = res.data;
-    if(!json["success"]) {
+    if (!json["success"]) {
       return FileUploadResponse(false, json["error"], AttachmentContainer("", "", "", key));
     }
 
@@ -79,13 +75,13 @@ class AttachmentController extends GetxController {
 
   /// Find a local file
   Future<AttachmentContainer?> findLocalFile(AttachmentContainer container) async {
-    if(attachments.containsKey(container.id)) {
+    if (attachments.containsKey(container.id)) {
       return attachments[container.id];
     }
 
     final file = File(getFilePathForId(container.id));
     final exists = await file.exists();
-    if(!exists) {
+    if (!exists) {
       container.error.value = true;
       return null;
     }
@@ -98,9 +94,9 @@ class AttachmentController extends GetxController {
 
   /// Download an attachment
   Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false}) async {
-    if(container.downloading) return true;
+    if (container.downloading) return true;
     final localFile = await findLocalFile(container);
-    if(localFile != null && !retry) {
+    if (localFile != null && !retry) {
       sendLog("already exists ${container.name} ${container.id}");
       return true;
     }
@@ -113,28 +109,28 @@ class AttachmentController extends GetxController {
       "id": container.id,
     });
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       container.error.value = true;
       return false;
     }
 
     final size = json["file"]["size"] / 1000.0 / 1000.0; // Convert to MB
     sendLog(size);
-    if(size > maxSize) {
+    if (size > maxSize) {
       container.error.value = true;
       return false;
     }
 
     // Download and show progress
     final res = await dio.download(
-      container.url, 
+      container.url,
       path.join(getFilePath(), container.id),
       onReceiveProgress: (count, total) {
-        container.percentage.value = count/total;
+        container.percentage.value = count / total;
       },
     );
 
-    if(res.statusCode != 200) {
+    if (res.statusCode != 200) {
       container.error.value = true;
       container.downloaded.value = false;
       return false;
@@ -155,7 +151,6 @@ class AttachmentController extends GetxController {
 
   /// Clean the cache until the size is below the max cache size
   void cleanUpCache() async {
-
     // TODO: Test this stuff properly
 
     // Move into isolate in the future?
@@ -164,19 +159,28 @@ class AttachmentController extends GetxController {
     final files = await dir.list().toList();
     var cacheSize = files.fold(0, (previousValue, element) => previousValue + element.statSync().size);
     sendLog("Cache size: $cacheSize");
-    if(cacheSize < maxSize) return;
+    if (cacheSize < maxSize) return;
 
     // Delete oldest files
     files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
-    for(final file in files) {
+    for (final file in files) {
       final size = file.statSync().size;
       await file.delete();
       sendLog("Deleted file ${file.path} with size $size");
       cacheSize -= size;
-      if(cacheSize < maxSize) {
+      if (cacheSize < maxSize) {
         break;
       }
     }
+  }
+
+  // Delete all files from the device with a specific account id
+  Future<bool> deleteAllFiles() async {
+    final dir = Directory(getFilePath());
+    for (var file in dir.listSync()) {
+      await file.delete();
+    }
+    return true;
   }
 
   static String _cachedPath = "";
@@ -199,7 +203,6 @@ class AttachmentController extends GetxController {
   static Directory getFileDirectory() {
     return Directory(_cachedPath);
   }
-
 }
 
 class FileUploadResponse {
@@ -213,7 +216,6 @@ class FileUploadResponse {
 }
 
 class AttachmentContainer {
-
   late final String filePath;
   final String id;
   final String name;
@@ -231,20 +233,10 @@ class AttachmentContainer {
   }
 
   factory AttachmentContainer.fromJson(Map<String, dynamic> json) {
-    return AttachmentContainer(
-      json["id"],
-      json["name"],
-      json["url"],
-      unpackageSymmetricKey(json["key"])
-    );
+    return AttachmentContainer(json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
   }
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      "id": id,
-      "name": name,
-      "url": url,
-      "key": packageSymmetricKey(key)
-    };
+    return <String, dynamic>{"id": id, "name": name, "url": url, "key": packageSymmetricKey(key)};
   }
 }

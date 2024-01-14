@@ -80,7 +80,7 @@ class RegisterHandler {
       "token": registrationToken,
       "username": username,
       "tag": tag,
-      "password": hashSha(password),
+      "password": password,
     });
     loading.value = false;
 

@@ -217,14 +217,6 @@ class Friend {
 
     profilePictureData = data;
     profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
-    if (profilePictureImage.value == null) {
-      // Redownload the profile picture
-      final result = await ProfilePictureHelper.downloadProfilePicture(this);
-      if (result == null) {
-        return;
-      }
-      profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
-    }
   }
 
   /// Load the profile picture of this friend
@@ -232,6 +224,7 @@ class Friend {
     profilePictureUsages++;
 
     if (DateTime.now().difference(lastProfilePictureUpdate).inMinutes > 2) {
+      sendLog("REDOWNLOADING");
       lastProfilePictureUpdate = DateTime.now();
 
       final result = await ProfilePictureHelper.downloadProfilePicture(this);
@@ -251,16 +244,6 @@ class Friend {
     }
     profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
     profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
-    if (profilePictureImage.value == null) {
-      sendLog("NO PFP");
-
-      // Redownload the profile picture
-      final result = await ProfilePictureHelper.downloadProfilePicture(this);
-      if (result == null) {
-        return;
-      }
-      profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
-    }
     sendLog("LOADED!!");
   }
 
