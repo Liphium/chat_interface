@@ -73,6 +73,7 @@ class ServerSelectorPage extends StatelessWidget {
   }
 
   void chooseServer(String path) {
+    path += "/$apiVersion";
     basePath = path;
     db.into(db.setting).insert(SettingCompanion.insert(key: "server", value: path));
     setupManager.next();

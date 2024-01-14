@@ -108,11 +108,12 @@ class _LoginPageState extends State<LoginStepPage> {
                         },
                         child: Center(
                           child: Obx(() => _loading.value
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 20,
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.0,
+                                    color: Get.theme.colorScheme.onPrimary,
                                   ))
                               : Text('login.next'.tr, style: theme.textTheme.labelLarge)),
                         ),

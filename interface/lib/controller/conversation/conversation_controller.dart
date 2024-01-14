@@ -25,7 +25,6 @@ import 'member_controller.dart';
 part 'conversation_actions.dart';
 
 class ConversationController extends GetxController {
-
   final loaded = false.obs;
   final order = <String>[].obs; // List of conversation IDs in order of last updated
   final conversations = <String, Conversation>{};
@@ -35,10 +34,10 @@ class ConversationController extends GetxController {
     _insertToOrder(conversation.id);
     conversations[conversation.id] = conversation;
 
-    if(conversation.members.isEmpty) {
+    if (conversation.members.isEmpty) {
       final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
 
-      for(var member in members) {
+      for (var member in members) {
         conversation.addMember(Member.fromData(member));
       }
     }
@@ -50,16 +49,16 @@ class ConversationController extends GetxController {
     conversations[conversation.id] = conversation;
     _insertToOrder(conversation.id);
 
-    for(var member in members) {
+    for (var member in members) {
       conversation.addMember(member);
     }
-    if(admin != null) {
+    if (admin != null) {
       conversation.addMember(admin);
     }
 
     // Add to vault
     final vaultId = await addToVault(Constants.conversationTag, conversation.toJson());
-    if(vaultId == null) {
+    if (vaultId == null) {
       // TODO: refresh the vault or something
       sendLog("COULDNT STORE IN VAULT; SOMETHING WENT WRONG");
       return false;
@@ -69,7 +68,7 @@ class ConversationController extends GetxController {
 
     // Store in database
     await db.conversation.insertOnConflictUpdate(conversation.entity);
-    for(var member in conversation.members.values) {
+    for (var member in conversation.members.values) {
       await db.member.insertOnConflictUpdate(member.toData(conversation.id));
     }
 
@@ -78,11 +77,11 @@ class ConversationController extends GetxController {
 
   void updateMessageRead(String conversation, {bool increment = true, required int messageSendTime}) {
     (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
-    
+
     // Swap in the map
     _insertToOrder(conversation);
     conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
-    if(increment && conversations[conversation]!.readAt.value < messageSendTime) {
+    if (increment && conversations[conversation]!.readAt.value < messageSendTime) {
       conversations[conversation]!.notificationCount.value += 1;
     }
   }
@@ -90,10 +89,10 @@ class ConversationController extends GetxController {
   void finishedLoading(Map<String, dynamic> readStates, {bool overwriteReads = true}) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
-    for(var conversation in conversations.values) {
-      if(overwriteReads) {
+    for (var conversation in conversations.values) {
+      if (overwriteReads) {
         conversation.readAt.value = readStates[conversation.id] ?? 0;
-      } else if(readStates[conversation.id] != null) {
+      } else if (readStates[conversation.id] != null) {
         conversation.readAt.value = readStates[conversation.id];
       }
       conversation.fetchNotificationCount();
@@ -102,7 +101,7 @@ class ConversationController extends GetxController {
   }
 
   void _insertToOrder(String id) {
-    if(order.contains(id)) {
+    if (order.contains(id)) {
       order.remove(id);
     }
     order.insert(0, id);
@@ -112,11 +111,9 @@ class ConversationController extends GetxController {
     conversations.remove(id);
     order.remove(id);
   }
-
 }
 
 class Conversation {
-  
   final String id;
   String vaultId;
   final model.ConversationType type;
@@ -135,80 +132,81 @@ class Conversation {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
-  Conversation.fromJson(Map<String, dynamic> json, String vaultId) 
-  : this(
-    json["id"],
-    vaultId,
-    model.ConversationType.values[json["type"]],
-    ConversationToken.fromJson(json["token"]), 
-    ConversationContainer.fromJson(json["data"]), 
-    unpackageSymmetricKey(json["key"]), 
-    json["update"] ?? DateTime.now().millisecondsSinceEpoch,
-  );
-  Conversation.fromData(ConversationData data) 
-  : this(
-    data.id,
-    data.vaultId,
-    data.type,
-    ConversationToken.fromJson(jsonDecode(data.token)), 
-    ConversationContainer.fromJson(jsonDecode(data.data)), 
-    unpackageSymmetricKey(data.key),
-    data.updatedAt.toInt(),
-  );
+  Conversation.fromJson(Map<String, dynamic> json, String vaultId)
+      : this(
+          json["id"],
+          vaultId,
+          model.ConversationType.values[json["type"]],
+          ConversationToken.fromJson(json["token"]),
+          ConversationContainer.fromJson(json["data"]),
+          unpackageSymmetricKey(json["key"]),
+          json["update"] ?? DateTime.now().millisecondsSinceEpoch,
+        );
+  Conversation.fromData(ConversationData data)
+      : this(
+          data.id,
+          data.vaultId,
+          data.type,
+          ConversationToken.fromJson(jsonDecode(data.token)),
+          ConversationContainer.fromJson(jsonDecode(data.data)),
+          unpackageSymmetricKey(data.key),
+          data.updatedAt.toInt(),
+        );
 
   void addMember(Member member) {
     members[member.tokenId] = member;
   }
 
   Future<bool> fetchNotificationCount() async {
-    final count = await db.customSelect(
-      "SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?", 
-      variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))],
-      readsFrom: {db.message}
-    ).getSingle();
+    final count = await db.customSelect("SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?",
+        variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))], readsFrom: {db.message}).getSingle();
     notificationCount.value += (count.data["c"] ?? 0) as int;
     return true;
   }
 
   bool get isGroup => type == model.ConversationType.group;
-  String get dmName => (Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] ?? Friend.unknown(container.name)).name;  
-  bool get borked => !isGroup && Get.find<FriendController>().friends[members.values.firstWhere((element) => element.account != Get.find<StatusController>().id.value).account] == null;
+  String get dmName => (Get.find<FriendController>().friends[members.values
+              .firstWhere(
+                (element) => element.account != Get.find<StatusController>().id.value,
+                orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user),
+              )
+              .account] ??
+          Friend.unknown(container.name))
+      .name;
+  bool get borked =>
+      !isGroup &&
+      Get.find<FriendController>().friends[members.values
+              .firstWhere((element) => element.account != Get.find<StatusController>().id.value, orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
+              .account] ==
+          null;
 
   ConversationData get entity => ConversationData(
-    id: id,
-    vaultId: vaultId,
-    type: type,
-    token: token.toJson(), 
-    key: packageSymmetricKey(key), 
-    data: container.toJson(), 
-    updatedAt: BigInt.from(updatedAt.value),
-    readAt: BigInt.from(readAt.value)
-  );
+      id: id, vaultId: vaultId, type: type, token: token.toJson(), key: packageSymmetricKey(key), data: container.toJson(), updatedAt: BigInt.from(updatedAt.value), readAt: BigInt.from(readAt.value));
   String toJson() => jsonEncode(<String, dynamic>{
-    "id": id,
-    "vault_id": vaultId,
-    "type": type.index,
-    "token": token.toJson(),
-    "key": packageSymmetricKey(key),
-    "update": updatedAt.value.toInt(),
-    "data": container.toJson(),
-  });
+        "id": id,
+        "vault_id": vaultId,
+        "type": type.index,
+        "token": token.toJson(),
+        "key": packageSymmetricKey(key),
+        "update": updatedAt.value.toInt(),
+        "data": container.toJson(),
+      });
 
   // Delete conversation from vault and database
   void delete() async {
     final err = await removeFromVault(vaultId);
-    if(err != null) {
+    if (err != null) {
       sendLog("Error deleting conversation from vault: $err");
       showErrorPopup("error".tr, "error.not_delete_conversation".tr);
       return;
     }
-  
+
     final json = await postNodeJSON("/conversations/leave", {
       "id": token.id,
       "token": token.token,
     });
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       sendLog("Error deleting conversation from vault: ${json["error"]}");
       showErrorPopup("error".tr, "error.not_delete_conversation".tr);
       return;
@@ -223,21 +221,22 @@ class Conversation {
 
   void save() {
     db.conversation.insertOnConflictUpdate(entity);
-    for(var member in members.values) {
+    for (var member in members.values) {
       db.member.insertOnConflictUpdate(member.toData(id));
     }
   }
 
-  DateTime? lastMemberFetch; // Makes sure we only do it once when multiple methods call it 
+  DateTime? lastMemberFetch; // Makes sure we only do it once when multiple methods call it
 
   // Re-fetch members of conversation (and save to database)
   void fetchMembers(DateTime message) async {
-    if(membersLoading.value) {
+    if (membersLoading.value) {
       return;
     }
 
-    if(lastMemberFetch != null) { // Just making sure, not sure if this is actually needed
-      if(message.isBefore(lastMemberFetch!)) {
+    if (lastMemberFetch != null) {
+      // Just making sure, not sure if this is actually needed
+      if (message.isBefore(lastMemberFetch!)) {
         return;
       }
     }
@@ -250,21 +249,21 @@ class Conversation {
 
     sendLog("REFETCH");
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING");
       // TODO: Add to some sort of error collection
       return;
     }
 
     final members = <String, Member>{};
-    for(var memberData in json["members"]) {
+    for (var memberData in json["members"]) {
       sendLog(memberData);
       final memberContainer = MemberContainer.decrypt(memberData["data"], key);
       members[memberData["id"]] = Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"]));
     }
 
-    for(var currentMember in this.members.values) {
-      if(!members.containsKey(currentMember.tokenId)) {
+    for (var currentMember in this.members.values) {
+      if (!members.containsKey(currentMember.tokenId)) {
         db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId));
       }
     }

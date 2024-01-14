@@ -66,12 +66,10 @@ class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
         controller?.loop(count: 1, reverse: true);
       }
       if (p0 != "") {
-        sendLog("show");
         message.value = p0;
         showing.value = true;
         prev = p0;
       } else {
-        sendLog("unshow");
         showing.value = false;
       }
     });
