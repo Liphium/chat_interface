@@ -79,9 +79,22 @@ class ChatPageTranslations extends Translations {
           'message.profile': 'Open profile',
           'message.delete': 'Delete message',
           'message.info.text': 'This message was sent by @account (@token) at @hour:@minute on @month/@day/@year.',
+          'message.info.copy_id': 'Copy ID',
           'message.info.copy_signature': 'Copy signature',
           'message.info.copy_sender': 'Copy sender ID',
           'message.info.copy_cert': 'Copy certificate',
+
+          // Conversation info
+          'conversation.info.id': 'Conversation ID: @id',
+          'conversation.info.read': 'Read at @clock on @date',
+          'conversation.info.members': 'Members: @count',
+          'conversation.info.copy_id': 'Copy ID',
+          'conversation.info.copy_token': 'Copy token',
+
+          // Files
+          'file.dialog': '@name is @size MB large. Choose an option to download it:',
+          'download.folder': 'Download into folder',
+          'download.app': 'Download into app',
 
           // Spaces
           'join.space': 'Join Space',

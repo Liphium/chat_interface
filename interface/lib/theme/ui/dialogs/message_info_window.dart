@@ -1,4 +1,3 @@
-
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -9,9 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class MessageInfoWindow extends StatefulWidget {
-
   final Message message;
-  
+
   const MessageInfoWindow({super.key, required this.message});
 
   @override
@@ -19,12 +17,10 @@ class MessageInfoWindow extends StatefulWidget {
 }
 
 class _ConversationAddWindowState extends State<MessageInfoWindow> {
-
   final messageDeletionLoading = false.obs;
 
   @override
   Widget build(BuildContext context) {
-
     final conversationToken = Get.find<ConversationController>().conversations[widget.message.conversation]!.members[widget.message.sender]!;
 
     return DialogBase(
@@ -32,22 +28,34 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
-          Text("message.info.text".trParams({
-            "account": conversationToken.account,
-            "token": conversationToken.tokenId,
-            "hour": widget.message.createdAt.hour.toString(),
-            "minute": widget.message.createdAt.minute.toString(),
-            "day": widget.message.createdAt.day.toString(),
-            "month": widget.message.createdAt.month.toString(),
-            "year": widget.message.createdAt.year.toString(),
-          }), style: Get.textTheme.bodyMedium),
-          
-          verticalSpacing(defaultSpacing),
+          Text(
+            "message.info.text".trParams({
+              "account": conversationToken.account,
+              "token": conversationToken.tokenId,
+              "hour": widget.message.createdAt.hour.toString(),
+              "minute": widget.message.createdAt.minute.toString(),
+              "day": widget.message.createdAt.day.toString(),
+              "month": widget.message.createdAt.month.toString(),
+              "year": widget.message.createdAt.year.toString(),
+            }),
+            style: Get.textTheme.bodyMedium,
+          ),
 
+          // Buttons
+          verticalSpacing(defaultSpacing),
           ProfileButton(
-            icon: Icons.copy, 
-            label: "message.info.copy_signature".tr, 
+            icon: Icons.copy,
+            label: "message.info.copy_id".tr,
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: widget.message.id));
+              Get.back();
+            },
+            loading: false.obs,
+          ),
+          verticalSpacing(elementSpacing),
+          ProfileButton(
+            icon: Icons.copy,
+            label: "message.info.copy_signature".tr,
             onTap: () {
               Clipboard.setData(ClipboardData(text: widget.message.signature));
               Get.back();
@@ -56,31 +64,31 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
-            icon: Icons.copy, 
-            label: "message.info.copy_sender".tr, 
+            icon: Icons.copy,
+            label: "message.info.copy_sender".tr,
             onTap: () {
               Clipboard.setData(ClipboardData(text: conversationToken.tokenId));
               Get.back();
-            }, 
+            },
             loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
-            icon: Icons.copy, 
-            label: "message.info.copy_cert".tr, 
+            icon: Icons.copy,
+            label: "message.info.copy_cert".tr,
             onTap: () {
               Clipboard.setData(ClipboardData(text: widget.message.certificate));
               Get.back();
-            }, 
+            },
             loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
             color: Get.theme.colorScheme.onError,
             iconColor: Get.theme.colorScheme.error,
-            icon: Icons.close, 
-            label: "close".tr, 
-            onTap: () => Get.back(), 
+            icon: Icons.close,
+            label: "close".tr,
+            onTap: () => Get.back(),
             loading: false.obs,
           ),
         ],

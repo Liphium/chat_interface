@@ -38,6 +38,7 @@ dependencies:
   audioplayers: any
   dio: any
   encrypt: any
+  open_app_file: ^4.0.2
 
 dev_dependencies:
   flutter_test:

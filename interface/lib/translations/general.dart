@@ -18,11 +18,14 @@ class GeneralTranslations extends Translations {
           'change': 'Change',
           'save': 'Save',
           'delete': 'Delete',
+          'remove': 'Remove',
           'select': 'Select',
+          'search': 'Search',
           'zoom': 'Zoom',
           'x': 'X',
           'y': 'Y',
           'close': 'Close',
+          'open': 'Open',
           'username': 'Username',
           'password': 'Password',
           'password.current': 'Current password',
@@ -30,6 +33,8 @@ class GeneralTranslations extends Translations {
           'email': 'Email',
           'code': 'Code',
           'under.dev': 'This featue is still under development. Sorry for the inconvenience. Please contact support if this is something important.',
+          'no.friends': 'You have no friends yet. If you want to add some, you can do that in the friends page.',
+          'open.friends': 'Open friends page',
 
           // Time TODO: Differentiate between PM and AM
           'message.time': '@hour:@minute',

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FileSettings {
-
   // Auto download
   static const String autoDownloadImages = "auto_download.images";
   static const String autoDownloadVideos = "auto_download.videos";
@@ -39,7 +38,6 @@ class FileSettingsPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         //* Auto download types
         Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
@@ -54,9 +52,9 @@ class FileSettingsPage extends StatelessWidget {
         verticalSpacing(defaultSpacing),
 
         const DoubleSelectionSetting(
-          settingName: FileSettings.maxFileSize, 
+          settingName: FileSettings.maxFileSize,
           description: "settings.file.max_size.description",
-          min: 1.0, 
+          min: 1.0,
           max: 10.0,
           unit: "settings.file.mb",
         ),
@@ -67,9 +65,9 @@ class FileSettingsPage extends StatelessWidget {
         verticalSpacing(defaultSpacing),
 
         const DoubleSelectionSetting(
-          settingName: FileSettings.maxCacheSize, 
+          settingName: FileSettings.maxCacheSize,
           description: "settings.file.cache.description",
-          min: 100.0, 
+          min: 100.0,
           max: 3000.0,
           unit: "settings.file.mb",
         ),

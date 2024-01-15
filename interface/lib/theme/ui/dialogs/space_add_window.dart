@@ -1,4 +1,6 @@
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_switch.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
@@ -33,6 +35,28 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
+
+    if (Get.find<FriendController>().friends.length == 1) {
+      return SlidingWindowBase(
+        position: ContextMenuData(widget.position, true, true),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("no.friends".tr, style: theme.textTheme.bodyMedium),
+            verticalSpacing(defaultSpacing),
+            FJElevatedButton(
+              onTap: () {
+                Get.back();
+                Get.dialog(const FriendsPage());
+              },
+              child: Center(
+                child: Text("open.friends".tr, style: theme.textTheme.labelLarge),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return SlidingWindowBase(
       position: ContextMenuData(widget.position, true, true),

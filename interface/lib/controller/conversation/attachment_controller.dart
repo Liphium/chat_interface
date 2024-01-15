@@ -117,7 +117,6 @@ class AttachmentController extends GetxController {
     final size = json["file"]["size"] / 1000.0 / 1000.0; // Convert to MB
     sendLog(size);
     if (size > maxSize) {
-      container.error.value = true;
       return false;
     }
 

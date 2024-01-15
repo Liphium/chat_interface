@@ -1,15 +1,17 @@
 import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/file_info_window.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:open_app_file/open_app_file.dart';
 
 class AttachmentRenderer extends StatefulWidget {
-
   final AttachmentContainer container;
 
   const AttachmentRenderer({super.key, required this.container});
@@ -21,9 +23,8 @@ class AttachmentRenderer extends StatefulWidget {
 class _AttachmentRendererState extends State<AttachmentRenderer> {
   @override
   Widget build(BuildContext context) {
-
     return Obx(() {
-      if(widget.container.error.value) {
+      if (widget.container.error.value) {
         return Row(
           children: [
             ErrorContainer(message: "file.not_uploaded".tr),
@@ -32,7 +33,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               width: 35,
               height: 35,
               child: IconButton(
-                onPressed: () => Get.find<AttachmentController>().downloadAttachment(widget.container, retry: true), 
+                onPressed: () => Get.find<AttachmentController>().downloadAttachment(widget.container, retry: true),
                 iconSize: 20,
                 icon: const Icon(Icons.refresh),
               ),
@@ -41,7 +42,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         );
       }
 
-      if(!widget.container.downloaded.value) {
+      if (!widget.container.downloaded.value) {
         final percentage = widget.container.percentage.value;
         return Container(
           padding: const EdgeInsets.all(defaultSpacing),
@@ -65,23 +66,22 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               horizontalSpacing(defaultSpacing),
               Text("file.downloading".tr)
             ],
-          )
+          ),
         );
       }
 
       final type = widget.container.id.split(".").last;
-      if(FileSettings.imageTypes.contains(type)) {
+      if (FileSettings.imageTypes.contains(type)) {
         return InkWell(
           onTap: () => Get.dialog(AttachmentWindow(container: widget.container)),
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(defaultSpacing),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: 350,
-              ),
-              child: Image.file(File(widget.container.filePath), fit: BoxFit.cover)
-            ),
+                constraints: const BoxConstraints(
+                  maxHeight: 350,
+                ),
+                child: Image.file(File(widget.container.filePath), fit: BoxFit.cover)),
           ),
         );
       }
@@ -104,13 +104,18 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               width: 35,
               height: 35,
               child: IconButton(
-                onPressed: () => {}, 
+                onPressed: () async {
+                  final result = await OpenAppFile.open(widget.container.filePath);
+                  if (result.type == ResultType.error) {
+                    showErrorPopup("error", result.message);
+                  }
+                },
                 iconSize: 20,
                 icon: const Icon(Icons.launch),
               ),
             ),
           ],
-        )
+        ),
       );
     });
   }
