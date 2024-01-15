@@ -12,6 +12,7 @@ import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -125,7 +126,7 @@ class _SidebarState extends State<Sidebar> {
                             final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
 
                             //* Open conversation add window
-                            Get.dialog(ConversationAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                            Get.dialog(ConversationAddWindow(position: ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true)));
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(defaultSpacing),

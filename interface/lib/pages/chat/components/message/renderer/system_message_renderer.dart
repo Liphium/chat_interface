@@ -1,4 +1,3 @@
-
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SystemMessageRenderer extends StatefulWidget {
-
   final String accountId;
   final Message message;
   final bool self;
@@ -33,18 +31,24 @@ class _MessageRendererState extends State<SystemMessageRenderer> {
           horizontal: sectionSpacing,
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
             //* Icon
             SizedBox(
               width: 50,
               child: Center(child: Icon(message.icon, size: 30, color: Get.theme.colorScheme.onPrimary)),
             ),
-            horizontalSpacing(sectionSpacing),
+            horizontalSpacing(defaultSpacing),
 
             //* Space info
-            Expanded(child: Text(message.translation.call(widget.message), style: Get.theme.textTheme.labelLarge, overflow: TextOverflow.visible,)),
+            Flexible(
+              child: Text(
+                message.translation.call(widget.message),
+                style: Get.theme.textTheme.labelLarge,
+                overflow: TextOverflow.visible,
+              ),
+            ),
 
             horizontalSpacing(defaultSpacing),
           ],

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class UserAvatar extends StatefulWidget {
-
   final String id;
   final double? size;
   final FriendController? controller;
@@ -19,7 +18,6 @@ class UserAvatar extends StatefulWidget {
 }
 
 class _UserAvatarState extends State<UserAvatar> {
-
   @override
   void initState() {
     var friend = getFriend();
@@ -39,48 +37,47 @@ class _UserAvatarState extends State<UserAvatar> {
 
   @override
   Widget build(BuildContext context) {
-
     var friend = getFriend();
 
     return SizedBox(
       width: widget.size ?? 45,
       height: widget.size ?? 45,
-      child: Obx(() {
+      child: Obx(
+        () {
+          if (friend.profilePictureImage.value != null) {
+            final image = friend.profilePictureImage.value!;
+            final scale = friend.profilePictureData.scaleFactor * (300 / (widget.size ?? 45));
+            return ClipOval(
+              child: RawImage(
+                fit: BoxFit.none,
+                scale: scale,
+                image: image,
+                alignment: Alignment(friend.profilePictureData.moveX, friend.profilePictureData.moveY),
+              ),
+            );
+          }
 
-        if(friend.profilePictureImage.value != null) {
-          final image = friend.profilePictureImage.value!;
-          final scale = friend.profilePictureData.scaleFactor * (300 / (widget.size ?? 45));
-          return ClipOval(
-            child: RawImage(
-              fit: BoxFit.none,
-              scale: scale,
-              image: image,
-              alignment: Alignment(friend.profilePictureData.moveX, friend.profilePictureData.moveY),
+          return CircleAvatar(
+            backgroundColor: Get.theme.colorScheme.primaryContainer,
+            radius: widget.size ?? 45,
+            child: SelectionContainer.disabled(
+              child: Text(
+                friend.name.substring(0, 1),
+                style: Get.theme.textTheme.labelMedium!.copyWith(
+                  fontSize: (widget.size ?? 45) * 0.5,
+                  fontWeight: FontWeight.bold,
+                  color: widget.id == StatusController.ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary,
+                ),
+              ),
             ),
           );
-        }
-
-        return CircleAvatar(
-          backgroundColor: Get.theme.colorScheme.primaryContainer,
-          radius: widget.size ?? 45,
-          child: SelectionContainer.disabled(
-            child: Text(
-              friend.name.substring(0,1), 
-              style: Get.theme.textTheme.labelMedium!.copyWith(
-                fontSize: (widget.size ?? 45) * 0.5,
-                fontWeight: FontWeight.bold,
-                color: widget.id == StatusController.ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary
-              )
-            )
-          ),
-        );
-      })
+        },
+      ),
     );
   }
 }
 
 class UserRenderer extends StatelessWidget {
-
   final String id;
   final FriendController? controller;
 
@@ -88,11 +85,10 @@ class UserRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     var friend = (controller ?? Get.find<FriendController>()).friends[id];
     final own = id == StatusController.ownAccountId;
     StatusController? statusController = own ? Get.find<StatusController>() : null;
-    if(own) friend = Friend.me(statusController);
+    if (own) friend = Friend.me(statusController);
     friend ??= Friend.unknown(id);
 
     return Row(
@@ -109,16 +105,18 @@ class UserRenderer extends StatelessWidget {
                 children: [
                   Text(friend.name, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium),
                   horizontalSpacing(defaultSpacing),
-                  Obx(() =>
-                    StatusRenderer(status: own ? statusController!.type.value : friend!.statusType.value)
-                  ),
+                  Obx(() => StatusRenderer(status: own ? statusController!.type.value : friend!.statusType.value)),
                 ],
               ),
-              Obx(() =>
-                Visibility(
+              Obx(
+                () => Visibility(
                   visible: own ? statusController!.status.value != "-" : friend!.status.value != "-",
-                  child: Text(own ? statusController!.status.value : friend!.status.value, style: Get.theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis,)
-                )
+                  child: Text(
+                    own ? statusController!.status.value : friend!.status.value,
+                    style: Get.theme.textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               )
             ],
           ),

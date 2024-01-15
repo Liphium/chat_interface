@@ -6,7 +6,6 @@ import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 
 class MemberController extends GetxController {
-
   final members = <Member>[].obs;
 
   void loadConversation(RxBool loading, String id) async {
@@ -17,28 +16,26 @@ class MemberController extends GetxController {
     members.clear();
     members.addAll(membersDb.map((e) => Member.fromData(e)));
   }
-
 }
 
 class Member {
-  
   final String tokenId; // Token id
   final String account; // Account id
   final MemberRole role;
 
   Member(this.tokenId, this.account, this.role);
-  Member.fromJson(Map<String, dynamic> json) : 
-    tokenId = json['id'],
-    account = json['account'],
-    role = MemberRole.fromValue(json['role']);
-  
+  Member.fromJson(Map<String, dynamic> json)
+      : tokenId = json['id'],
+        account = json['account'],
+        role = MemberRole.fromValue(json['role']);
+
   Member.fromData(MemberData data) : this(data.id, data.accountId, MemberRole.fromValue(data.roleId));
 
   MemberData toData(String conversation) => MemberData(id: tokenId, accountId: account, roleId: role.value, conversationId: conversation);
 
   Friend getFriend([FriendController? controller]) {
-    if(StatusController.ownAccountId == account) return Friend.me();
-    controller ??= Get.find();
+    if (StatusController.ownAccountId == account) return Friend.me();
+    controller ??= Get.find<FriendController>();
     return controller!.friends[account] ?? Friend.unknown(account);
   }
 
@@ -50,7 +47,7 @@ class Member {
       "user": tokenId,
     });
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       return false;
     }
 
@@ -65,13 +62,12 @@ class Member {
       "user": tokenId,
     });
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       return false;
     }
 
     return true;
   }
-
 }
 
 enum MemberRole {
@@ -100,7 +96,7 @@ enum MemberRole {
   }
 
   static MemberRole fromValue(int value) {
-    switch(value) {
+    switch (value) {
       case 2:
         return MemberRole.admin;
       case 1:

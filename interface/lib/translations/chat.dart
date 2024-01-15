@@ -39,6 +39,8 @@ class ChatPageTranslations extends Translations {
           'request.confirm.title': 'Confirm request',
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
+          'request.already.exists': 'Already exists',
+          'request.already.exists.text': 'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
 
           // Conversations
           'conversations.placeholder': 'Search',
@@ -51,6 +53,9 @@ class ChatPageTranslations extends Translations {
           'conversations.leave': 'Leave conversation',
           'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
           'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
+          'conversations.add': 'Add a member',
+          'conversations.add.create': 'Create new conversation',
+          'choose.members': 'Choose more than one member to create a group chat.',
 
           // Conversation members
           'chat.make_moderator': 'Make moderator',

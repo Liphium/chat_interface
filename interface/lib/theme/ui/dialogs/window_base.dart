@@ -30,7 +30,7 @@ class DialogBase extends StatelessWidget {
   final Widget child;
   final double maxWidth;
 
-  const DialogBase({super.key, required this.child, this.maxWidth = 350});
+  const DialogBase({super.key, required this.child, this.maxWidth = 300});
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +66,15 @@ class SlidingWindowBase extends StatelessWidget {
   final ContextMenuData position;
   final bool lessPadding;
   final Widget child;
+  final double maxSize;
 
-  const SlidingWindowBase({super.key, required this.position, this.lessPadding = false, required this.child});
+  const SlidingWindowBase({
+    super.key,
+    required this.position,
+    this.lessPadding = false,
+    required this.child,
+    this.maxSize = 350,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -83,26 +90,30 @@ class SlidingWindowBase extends StatelessWidget {
           top: position.fromTop ? position.start.dy : null,
           bottom: position.fromTop ? null : position.start.dy,
           child: Animate(
-              effects: [
-                MoveEffect(duration: 400.ms, begin: Offset(0, -100 * (position.fromTop ? 1 : -1)), curve: scaleAnimationCurve),
-                ShakeEffect(
-                    duration: 350.ms,
-                    hz: randomHz,
-                    offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
-                    rotation: 0,
-                    curve: Curves.decelerate),
-              ],
-              target: 1,
-              child: SizedBox(
-                  width: 300,
-                  child: Material(
-                      elevation: 2.0,
-                      color: Get.theme.colorScheme.onBackground,
-                      borderRadius: BorderRadius.circular(dialogBorderRadius),
-                      child: Padding(
-                        padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
-                        child: child,
-                      )))),
+            effects: [
+              MoveEffect(duration: 400.ms, begin: Offset(0, -100 * (position.fromTop ? 1 : -1)), curve: scaleAnimationCurve),
+              ShakeEffect(
+                duration: 350.ms,
+                hz: randomHz,
+                offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+                rotation: 0,
+                curve: Curves.decelerate,
+              ),
+            ],
+            target: 1,
+            child: SizedBox(
+              width: maxSize,
+              child: Material(
+                elevation: 2.0,
+                color: Get.theme.colorScheme.onBackground,
+                borderRadius: BorderRadius.circular(dialogBorderRadius),
+                child: Padding(
+                  padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
+                  child: child,
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );

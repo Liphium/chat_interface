@@ -2,12 +2,12 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
+import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -19,7 +19,7 @@ class ConversationAddWindow extends StatefulWidget {
   final String action;
   final bool nameField;
   final List<Friend>? initial;
-  final Offset position;
+  final ContextMenuData position;
 
   /// Called when clicking the action button (returns error text or closed on null)
   final Future<String?> Function(List<Friend>, String?)? onDone;
@@ -36,6 +36,37 @@ class ConversationAddWindow extends StatefulWidget {
 
   @override
   State<ConversationAddWindow> createState() => _ConversationAddWindowState();
+
+  static Future<String?> createConversationAction(List<Friend> friends, String? name) async {
+    if (friends.isEmpty) {
+      return "choose.members".tr;
+    }
+
+    if (friends.length > specialConstants["max_conversation_members"]) {
+      return "choose.members".tr;
+    }
+
+    if (name == null && friends.length > 1) {
+      return "enter.name".tr;
+    }
+
+    if (name!.isEmpty && friends.length > 1) {
+      return "enter.name".tr;
+    }
+
+    if (name.length > specialConstants["max_conversation_name_length"] && friends.length > 1) {
+      return "too.long".trParams({"limit": specialConstants["max_conversation_name_length"].toString()});
+    }
+
+    var result = false;
+    if (friends.length == 1) {
+      result = await openDirectMessage(friends.first);
+    } else {
+      result = await openGroupConversation(friends, name);
+    }
+
+    return result ? null : "server.error".tr;
+  }
 }
 
 class _ConversationAddWindowState extends State<ConversationAddWindow> {
@@ -66,38 +97,6 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
     super.dispose();
   }
 
-  Future<String?> createConversationAction(List<Friend> friends, String? name) async {
-    if (friends.isEmpty) {
-      return "choose.members".tr;
-    }
-
-    if (friends.length > specialConstants["max_conversation_members"]) {
-      return "choose.members".tr;
-    }
-
-    if (_controller.text.isEmpty && _members.length > 1) {
-      return "enter.name".tr;
-    }
-
-    if (_controller.text.length > specialConstants["max_conversation_name_length"] && _members.length > 1) {
-      return "too.long".trParams({"limit": specialConstants["max_conversation_name_length"].toString()});
-    }
-
-    _conversationLoading.value = true;
-    var result = false;
-    if (_members.length == 1) {
-      result = await openDirectMessage(_members.first);
-    } else {
-      result = await openGroupConversation(_members, _controller.text);
-    }
-
-    if (result) {
-      Get.back();
-    }
-
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
@@ -105,7 +104,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
     if (friendController.friends.length == 1) {
       return SlidingWindowBase(
-        position: ContextMenuData(widget.position, true, true),
+        position: widget.position,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -126,7 +125,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
     }
 
     return SlidingWindowBase(
-      position: ContextMenuData(widget.position, true, true),
+      position: widget.position,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -162,8 +161,10 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     onSubmitted: (value) {
                       // Make the first friend that matches the search the selected one
                       if (friendController.friends.isNotEmpty) {
-                        final member = friendController.friends.values.firstWhere((element) => element.name.toLowerCase().contains(value.toLowerCase()), orElse: () => Friend.unknown("-"));
-                        sendLog(member);
+                        final member = friendController.friends.values.firstWhere(
+                          (element) => element.name.toLowerCase().contains(value.toLowerCase()) && element.id != StatusController.ownAccountId,
+                          orElse: () => Friend.unknown("-"),
+                        );
                         if (member.id != "-") {
                           if (_members.contains(member)) {
                             _members.remove(member);
@@ -263,14 +264,10 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       ),
                     )),
               ),
-              Obx(
-                () => Visibility(
-                  visible: _errorText.value.isNotEmpty,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: defaultSpacing),
-                    child: Text(_errorText.value, style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.error)),
-                  ),
-                ),
+              AnimatedErrorContainer(
+                expand: true,
+                padding: const EdgeInsets.only(bottom: defaultSpacing),
+                message: _errorText,
               ),
               FJElevatedLoadingButton(
                 onTap: () async {
@@ -283,14 +280,14 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     }
                     return;
                   }
-                  final error = await createConversationAction(_members, _controller.text);
+                  final error = await ConversationAddWindow.createConversationAction(_members, _controller.text);
                   if (error != null) {
                     _errorText.value = error;
                   } else {
                     Get.back();
                   }
                 },
-                label: "create".tr,
+                label: widget.action.tr,
                 loading: _conversationLoading,
               ),
             ],

@@ -16,6 +16,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -249,9 +250,11 @@ class Friend {
 
   void disposeProfilePicture() {
     profilePictureUsages--;
-    if (profilePictureUsages == 0) {
-      profilePictureImage.value = null;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (profilePictureUsages == 0) {
+        profilePictureImage.value = null;
+      }
+    });
   }
 
   //* Remove friend
