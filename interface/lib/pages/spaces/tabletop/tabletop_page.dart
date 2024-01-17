@@ -25,8 +25,7 @@ class _TabletopViewState extends State<TabletopView> {
         children: [
           Listener(
             onPointerHover: (event) {
-              sendLog("move");
-              mousePos.value = (event.localPosition / scale.value) - offset.value;
+              mousePos.value = calculateMousePos(event.localPosition, scale.value) - offset.value;
             },
             onPointerSignal: (event) {
               if (event is PointerScrollEvent) {
@@ -37,18 +36,20 @@ class _TabletopViewState extends State<TabletopView> {
                 if (scale.value + scrollDelta > 2) return;
 
                 final zoomFactor = (scale.value + scrollDelta) / scale.value;
-                final focalPoint = (event.localPosition / scale.value) - offset.value;
-                final newFocalPoint = (event.localPosition / (scale.value + scrollDelta)) - offset.value;
+                final focalPoint = calculateMousePos(event.localPosition, scale.value) - offset.value;
+                final newFocalPoint = calculateMousePos(event.localPosition, scale.value + scrollDelta) - offset.value;
 
                 offset.value -= focalPoint - newFocalPoint;
                 scale.value *= zoomFactor;
-                mousePos.value = (event.localPosition / scale.value) - offset.value;
+                mousePos.value = calculateMousePos(event.localPosition, scale.value) - offset.value;
               }
             },
             child: GestureDetector(
               onPanDown: (details) {},
               onPanUpdate: (details) {
-                offset.value += details.delta * (1 / scale.value);
+                final old = calculateMousePos(details.localPosition, scale.value);
+                final newPos = calculateMousePos(details.localPosition + details.delta, scale.value);
+                offset.value += newPos - old;
               },
               onPanEnd: (details) {},
               child: SizedBox.expand(
@@ -91,5 +92,17 @@ class _TabletopViewState extends State<TabletopView> {
         ],
       ),
     );
+  }
+
+  Offset calculateMousePos(Offset local, double scale) {
+    final angle = math.atan(local.dy / local.dx);
+    final mouseAngle = angle - rotation.value;
+    sendLog("angle: ${angle * 180 / math.pi}");
+
+    // Find position in circle
+    final radius = local.distance;
+    final x = radius * math.cos(mouseAngle);
+    final y = radius * math.sin(mouseAngle);
+    return Offset(x, y) / scale;
   }
 }
