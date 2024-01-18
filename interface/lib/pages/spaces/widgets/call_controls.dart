@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

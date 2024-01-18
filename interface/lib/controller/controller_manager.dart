@@ -12,7 +12,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_member_cont
 import 'package:chat_interface/controller/current/notification_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:get/get.dart';

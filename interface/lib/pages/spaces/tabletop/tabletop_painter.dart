@@ -28,12 +28,13 @@ class TabletopPainter extends CustomPainter {
 
     // Rotate and stuff
     canvas.rotate(rotation);
+    canvas.scale(scale);
     for (var rect in rects) {
-      final newRect = Rect.fromLTWH((rect.left + offset.dx) * scale, (rect.top + offset.dy) * scale, rect.width * scale, rect.height * scale);
+      final newRect = Rect.fromLTWH((rect.left + offset.dx), (rect.top + offset.dy), rect.width, rect.height);
       canvas.drawRect(newRect, Paint()..color = Colors.red);
     }
 
-    canvas.drawCircle((mousePosition + offset) * scale, 5 * scale, Paint()..color = Colors.red);
+    canvas.drawCircle((mousePosition + offset), 5, Paint()..color = Colors.red);
   }
 
   @override
