@@ -1,6 +1,7 @@
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/game_listener.dart';
+import 'package:chat_interface/connection/spaces/tabletop_listener.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -28,6 +29,7 @@ void setupSpaceListeners() {
   spaceConnector.listen("member_update", (event) => handleMemberUpdate(event)); // Sent on member update
 
   setupGameListeners();
+  setupTabletopListeners();
 }
 
 void handleRoomData(Event event) {

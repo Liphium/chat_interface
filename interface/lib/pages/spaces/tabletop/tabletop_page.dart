@@ -97,7 +97,6 @@ class _TabletopViewState extends State<TabletopView> {
   Offset calculateMousePos(Offset local, double scale) {
     final angle = math.atan(local.dy / local.dx);
     final mouseAngle = angle - rotation.value;
-    sendLog("angle: ${angle * 180 / math.pi}");
 
     // Find position in circle
     final radius = local.distance;

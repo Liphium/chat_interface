@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
+import 'package:chat_interface/pages/status/starting_page.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/translations/translations.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +16,7 @@ class ChatApp extends StatelessWidget {
         translations: MainTranslations(),
         locale: Get.deviceLocale,
         fallbackLocale: const Locale("en", "US"),
-        home: const TabletopView(), // const StartingPage(),
+        home: const StartingPage(),
         debugShowCheckedModeBanner: false,
       );
     });

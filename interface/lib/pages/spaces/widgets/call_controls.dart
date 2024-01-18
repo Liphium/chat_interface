@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,8 @@ class _CallControlsState extends State<CallControls> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
+    ThemeData theme = Get.theme;
+    final tableController = Get.find<TabletopController>();
 
     return Hero(
       tag: "call_controls",
@@ -42,12 +44,13 @@ class _CallControlsState extends State<CallControls> {
             child: GetX<AudioController>(
               builder: (controller) {
                 return LoadingIconButton(
-                    padding: defaultSpacing + elementSpacing,
-                    loading: controller.muteLoading,
-                    onTap: () => controller.setMuted(!controller.muted.value),
-                    icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-                    iconSize: 35,
-                    color: theme.colorScheme.onSurface);
+                  padding: defaultSpacing + elementSpacing,
+                  loading: controller.muteLoading,
+                  onTap: () => controller.setMuted(!controller.muted.value),
+                  icon: controller.muted.value ? Icons.mic_off : Icons.mic,
+                  iconSize: 35,
+                  color: theme.colorScheme.onSurface,
+                );
               },
             ),
           ),
@@ -59,12 +62,13 @@ class _CallControlsState extends State<CallControls> {
             child: GetX<AudioController>(
               builder: (controller) {
                 return LoadingIconButton(
-                    padding: defaultSpacing + elementSpacing,
-                    loading: controller.deafenLoading,
-                    onTap: () => controller.setDeafened(!controller.deafened.value),
-                    icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-                    iconSize: 35,
-                    color: theme.colorScheme.onSurface);
+                  padding: defaultSpacing + elementSpacing,
+                  loading: controller.deafenLoading,
+                  onTap: () => controller.setDeafened(!controller.deafened.value),
+                  icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+                  iconSize: 35,
+                  color: theme.colorScheme.onSurface,
+                );
               },
             ),
           ),
@@ -72,22 +76,27 @@ class _CallControlsState extends State<CallControls> {
           horizontalSpacing(defaultSpacing),
 
           //* Play mode (reintroduced in the future maybe :)
-          /*
           Obx(
             () => CallButtonBorder(
               gradient: true,
               child: LoadingIconButton(
                 padding: defaultSpacing + elementSpacing,
                 loading: false.obs,
-                onTap: () => Get.find<SpacesController>().switchToPlayMode(),
-                icon: controller.playMode.value ? Icons.graphic_eq : Icons.videogame_asset,
-                color: theme.colorScheme.tertiary,
+                onTap: () {
+                  if (tableController.enabled.value) {
+                    tableController.disconnect();
+                  } else {
+                    tableController.connect();
+                  }
+                },
+                color: theme.colorScheme.onPrimary,
+                icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
                 iconSize: 35,
               ),
             ),
           ),
           horizontalSpacing(defaultSpacing),
-          */
+
           //* End call button
           CallButtonBorder(
             child: LoadingIconButton(
@@ -115,14 +124,9 @@ class CallButtonBorder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Get.theme.colorScheme.primaryContainer,
-          gradient: gradient
-              ? LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Get.theme.colorScheme.primaryContainer, Get.theme.colorScheme.tertiaryContainer])
-              : null),
+        shape: BoxShape.circle,
+        color: gradient ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+      ),
       child: child,
     );
   }

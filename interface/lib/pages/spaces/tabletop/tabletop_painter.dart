@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class TabletopPainter extends CustomPainter {
   List<Rect> rects = [
@@ -17,7 +18,7 @@ class TabletopPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     //define canvas background color
-    Paint background = Paint()..color = Colors.black;
+    Paint background = Paint()..color = Get.theme.colorScheme.background;
 
     //define canvas size
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
