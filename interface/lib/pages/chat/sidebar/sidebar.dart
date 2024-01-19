@@ -215,6 +215,8 @@ class _SidebarState extends State<Sidebar> {
                                       child: SpaceRenderer(
                                         container: container,
                                         pollNewData: true,
+                                        clickable: true,
+                                        sidebar: true,
                                       ),
                                     ),
                                   ),

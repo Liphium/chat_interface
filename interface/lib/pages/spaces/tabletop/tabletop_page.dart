@@ -1,7 +1,10 @@
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
 
@@ -12,22 +15,69 @@ class TabletopView extends StatefulWidget {
   State<TabletopView> createState() => _TabletopViewState();
 }
 
-class _TabletopViewState extends State<TabletopView> {
+class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin {
   final mousePos = const Offset(0, 0).obs;
   final offset = const Offset(0, 0).obs;
   final scale = 1.0.obs;
   final rotation = 0.0.obs;
 
+  final updater = false.obs;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: 50.ms);
+    _controller.loop();
+
+    // Update every frame
+    _controller.addListener(() {
+      updater.value = !updater.value;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final tableController = Get.find<TabletopController>();
     return Scaffold(
       body: Stack(
         children: [
           Listener(
             onPointerHover: (event) {
-              mousePos.value = calculateMousePos(event.localPosition, scale.value) - offset.value;
+              tableController.heldObject = null;
+              mousePos.value = calculateMousePos(event.localPosition, scale.value, offset.value);
+            },
+            onPointerDown: (event) {
+              if (event.buttons == 2) {
+                final obj = tableController.newObject(TableObjectType.square, "", calculateMousePos(event.localPosition, scale.value, offset.value), Size(100, 100), "");
+                obj.sendAdd();
+                return;
+              }
+            },
+            onPointerMove: (event) {
+              sendLog(event.buttons);
+              if (event.buttons == 4) {
+                final old = calculateMousePos(event.localPosition, scale.value, offset.value);
+                final newPos = calculateMousePos(event.localPosition + event.delta, scale.value, offset.value);
+                offset.value += newPos - old;
+              } else if (event.buttons == 1) {
+                if (tableController.hoveringObject != null) {
+                  tableController.heldObject = tableController.hoveringObject;
+                  final old = calculateMousePos(event.localPosition, scale.value, offset.value);
+                  final newPos = calculateMousePos(event.localPosition + event.delta, scale.value, offset.value);
+                  tableController.hoveringObject!.location += newPos - old;
+                }
+              }
+              mousePos.value = calculateMousePos(event.localPosition, scale.value, offset.value);
             },
             onPointerSignal: (event) {
+              sendLog(event.runtimeType);
               if (event is PointerScrollEvent) {
                 final scrollDelta = event.scrollDelta.dy / 500 * -1;
                 if (scale.value + scrollDelta < 0.5) {
@@ -36,28 +86,25 @@ class _TabletopViewState extends State<TabletopView> {
                 if (scale.value + scrollDelta > 2) return;
 
                 final zoomFactor = (scale.value + scrollDelta) / scale.value;
-                final focalPoint = calculateMousePos(event.localPosition, scale.value) - offset.value;
-                final newFocalPoint = calculateMousePos(event.localPosition, scale.value + scrollDelta) - offset.value;
+                final focalPoint = calculateMousePos(event.localPosition, scale.value, offset.value);
+                final newFocalPoint = calculateMousePos(event.localPosition, scale.value + scrollDelta, offset.value);
 
                 offset.value -= focalPoint - newFocalPoint;
                 scale.value *= zoomFactor;
-                mousePos.value = calculateMousePos(event.localPosition, scale.value) - offset.value;
+                mousePos.value = calculateMousePos(event.localPosition, scale.value, offset.value);
               }
             },
-            child: GestureDetector(
-              onPanDown: (details) {},
-              onPanUpdate: (details) {
-                final old = calculateMousePos(details.localPosition, scale.value);
-                final newPos = calculateMousePos(details.localPosition + details.delta, scale.value);
-                offset.value += newPos - old;
-              },
-              onPanEnd: (details) {},
-              child: SizedBox.expand(
-                child: ClipRRect(
+            child: SizedBox.expand(
+              child: ClipRRect(
+                child: RepaintBoundary(
                   child: Obx(
                     () {
+                      updater.value;
                       return CustomPaint(
+                        willChange: true,
+                        isComplex: true,
                         painter: TabletopPainter(
+                          controller: tableController,
                           mousePosition: mousePos.value,
                           offset: offset.value,
                           scale: scale.value,
@@ -94,7 +141,7 @@ class _TabletopViewState extends State<TabletopView> {
     );
   }
 
-  Offset calculateMousePos(Offset local, double scale) {
+  Offset calculateMousePos(Offset local, double scale, Offset movement) {
     final angle = math.atan(local.dy / local.dx);
     final mouseAngle = angle - rotation.value;
 
@@ -102,6 +149,6 @@ class _TabletopViewState extends State<TabletopView> {
     final radius = local.distance;
     final x = radius * math.cos(mouseAngle);
     final y = radius * math.sin(mouseAngle);
-    return Offset(x, y) / scale;
+    return Offset(x, y) / scale - movement;
   }
 }

@@ -34,82 +34,79 @@ class _CallControlsState extends State<CallControls> {
     ThemeData theme = Get.theme;
     final tableController = Get.find<TabletopController>();
 
-    return Hero(
-      tag: "call_controls",
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          //* Microphone button
-          CallButtonBorder(
-            child: GetX<AudioController>(
-              builder: (controller) {
-                return LoadingIconButton(
-                  padding: defaultSpacing + elementSpacing,
-                  loading: controller.muteLoading,
-                  onTap: () => controller.setMuted(!controller.muted.value),
-                  icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-                  iconSize: 35,
-                  color: theme.colorScheme.onSurface,
-                );
-              },
-            ),
-          ),
-
-          horizontalSpacing(defaultSpacing),
-
-          //* Audio output
-          CallButtonBorder(
-            child: GetX<AudioController>(
-              builder: (controller) {
-                return LoadingIconButton(
-                  padding: defaultSpacing + elementSpacing,
-                  loading: controller.deafenLoading,
-                  onTap: () => controller.setDeafened(!controller.deafened.value),
-                  icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-                  iconSize: 35,
-                  color: theme.colorScheme.onSurface,
-                );
-              },
-            ),
-          ),
-
-          horizontalSpacing(defaultSpacing),
-
-          //* Play mode (reintroduced in the future maybe :)
-          Obx(
-            () => CallButtonBorder(
-              gradient: true,
-              child: LoadingIconButton(
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        //* Microphone button
+        CallButtonBorder(
+          child: GetX<AudioController>(
+            builder: (controller) {
+              return LoadingIconButton(
                 padding: defaultSpacing + elementSpacing,
-                loading: false.obs,
-                onTap: () {
-                  if (tableController.enabled.value) {
-                    tableController.disconnect();
-                  } else {
-                    tableController.connect();
-                  }
-                },
-                color: theme.colorScheme.onPrimary,
-                icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
+                loading: controller.muteLoading,
+                onTap: () => controller.setMuted(!controller.muted.value),
+                icon: controller.muted.value ? Icons.mic_off : Icons.mic,
                 iconSize: 35,
-              ),
-            ),
+                color: theme.colorScheme.onSurface,
+              );
+            },
           ),
-          horizontalSpacing(defaultSpacing),
+        ),
 
-          //* End call button
-          CallButtonBorder(
+        horizontalSpacing(defaultSpacing),
+
+        //* Audio output
+        CallButtonBorder(
+          child: GetX<AudioController>(
+            builder: (controller) {
+              return LoadingIconButton(
+                padding: defaultSpacing + elementSpacing,
+                loading: controller.deafenLoading,
+                onTap: () => controller.setDeafened(!controller.deafened.value),
+                icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+                iconSize: 35,
+                color: theme.colorScheme.onSurface,
+              );
+            },
+          ),
+        ),
+
+        horizontalSpacing(defaultSpacing),
+
+        //* Play mode (reintroduced in the future maybe :)
+        Obx(
+          () => CallButtonBorder(
+            gradient: true,
             child: LoadingIconButton(
               padding: defaultSpacing + elementSpacing,
               loading: false.obs,
-              onTap: () => Get.find<SpacesController>().leaveCall(),
-              icon: Icons.call_end,
-              color: theme.colorScheme.error,
+              onTap: () {
+                if (tableController.enabled.value) {
+                  tableController.disconnect();
+                } else {
+                  tableController.connect();
+                }
+              },
+              color: theme.colorScheme.onPrimary,
+              icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
               iconSize: 35,
             ),
-          )
-        ],
-      ),
+          ),
+        ),
+        horizontalSpacing(defaultSpacing),
+
+        //* End call button
+        CallButtonBorder(
+          child: LoadingIconButton(
+            padding: defaultSpacing + elementSpacing,
+            loading: false.obs,
+            onTap: () => Get.find<SpacesController>().leaveCall(),
+            icon: Icons.call_end,
+            color: theme.colorScheme.error,
+            iconSize: 35,
+          ),
+        )
+      ],
     );
   }
 }

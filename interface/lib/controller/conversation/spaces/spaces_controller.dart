@@ -335,18 +335,16 @@ class SpaceConnectionContainer extends ShareContainer {
       return SpaceInfo.notLoaded();
     }
     final body = jsonDecode(req.body);
-    if (!body["success"]) {
-      return SpaceInfo.notLoaded();
-    }
     if (timer && _timer == null) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
         final info = await getInfo();
         if (info.exists) {
           this.info.value = info;
-        } else {
-          timer.cancel();
         }
       });
+    }
+    if (!body["success"]) {
+      return SpaceInfo.notLoaded();
     }
     info.value = SpaceInfo.fromJson(this, body);
     return info.value!;

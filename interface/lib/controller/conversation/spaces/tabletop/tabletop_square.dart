@@ -5,7 +5,7 @@ class SquareObject extends TableObject {
   SquareObject(super.id, super.location, super.size, super.type);
 
   @override
-  void render(Canvas canvas) {
+  void render(Canvas canvas, Offset location) {
     canvas.drawRect(Rect.fromLTWH(location.dx, location.dy, size.width, size.height), Paint()..color = Colors.red);
   }
 }
