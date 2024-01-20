@@ -86,10 +86,16 @@ class ConversationController extends GetxController {
     }
   }
 
-  void finishedLoading(Map<String, dynamic> readStates, {bool overwriteReads = true}) async {
+  void finishedLoading(Map<String, dynamic> readStates, List<dynamic> deleted, {bool overwriteReads = true}) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
     for (var conversation in conversations.values) {
+      // Check if it was deleted
+      if (deleted.contains(conversation.token.id)) {
+        conversation.delete(request: false, popup: false);
+        continue;
+      }
+
       if (overwriteReads) {
         conversation.readAt.value = readStates[conversation.id] ?? 0;
       } else if (readStates[conversation.id] != null) {
@@ -97,6 +103,7 @@ class ConversationController extends GetxController {
       }
       conversation.fetchNotificationCount();
     }
+
     loaded.value = true;
   }
 
@@ -193,23 +200,25 @@ class Conversation {
       });
 
   // Delete conversation from vault and database
-  void delete() async {
+  void delete({request = true, popup = true}) async {
     final err = await removeFromVault(vaultId);
     if (err != null) {
       sendLog("Error deleting conversation from vault: $err");
-      showErrorPopup("error".tr, "error.not_delete_conversation".tr);
+      if (popup) showErrorPopup("error".tr, "error.not_delete_conversation".tr);
       return;
     }
 
-    final json = await postNodeJSON("/conversations/leave", {
-      "id": token.id,
-      "token": token.token,
-    });
+    if (request) {
+      final json = await postNodeJSON("/conversations/leave", {
+        "id": token.id,
+        "token": token.token,
+      });
 
-    if (!json["success"]) {
-      sendLog("Error deleting conversation from vault: ${json["error"]}");
-      showErrorPopup("error".tr, "error.not_delete_conversation".tr);
-      return;
+      if (!json["success"]) {
+        sendLog("Error deleting conversation from vault: ${json["error"]}");
+        if (popup) showErrorPopup("error".tr, "error.not_delete_conversation".tr);
+        return;
+      }
     }
 
     db.conversation.deleteWhere((tbl) => tbl.id.equals(id));

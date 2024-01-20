@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 
 class SystemMessages {
   static final messages = {
-
     // Called when a member is promoted/demoted
     // Format: [prevRole, newRole, memberId, senderId]
     "group.rank_change": SystemMessage(
@@ -21,7 +20,7 @@ class SystemMessages {
           "name": friendController.getFriend(msg.attachments[2]).name,
           "sender": friendController.getFriend(msg.attachments[3]).name, // NZJNP232RS5g
         });
-      }
+      },
     ),
 
     // Called when a member generates a new conversation token
@@ -33,7 +32,7 @@ class SystemMessages {
         return "chat.token_change".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
-      }
+      },
     ),
 
     // Called when a member joins the conversation
@@ -48,7 +47,7 @@ class SystemMessages {
         return "chat.member_join".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
-      }
+      },
     ),
 
     // Called when a member leaves the conversation
@@ -63,7 +62,7 @@ class SystemMessages {
         return "chat.member_leave".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
-      }
+      },
     ),
 
     // Called when a member is promoted to admin after the only admin in a group leaves
@@ -78,22 +77,7 @@ class SystemMessages {
         return "chat.new_admin".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
-      }
-    ),
-
-    // Called when the conversation should be deleted
-    // Format: []
-    "conv.deleted": SystemMessage(
-      Icons.delete,
-      store: false,
-      render: false,
-      handler: (msg) {
-        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        conversation.delete();
       },
-      translation: (msg) {
-        return "chat.deleted".tr;
-      }
     ),
 
     // Called when a message is deleted
@@ -107,7 +91,7 @@ class SystemMessages {
       },
       translation: (msg) {
         return "msg.deleted".tr;
-      }
+      },
     ),
   };
 }

@@ -55,7 +55,7 @@ Future<bool> subscribeToConversations(String status, String friendId) async {
   return true;
 }
 
-void subscribeToConversation(String status, String friendId, ConversationToken token) {
+void subscribeToConversation(String status, String friendId, ConversationToken token, {deletions = true}) {
   // Encrypt status with profile key
   status = generateStatusData(status, friendId);
 
@@ -63,7 +63,7 @@ void subscribeToConversation(String status, String friendId, ConversationToken t
   final tokens = <Map<String, dynamic>>[token.toMap()];
 
   // Subscribe
-  _sub(status, tokens, startup: false);
+  _sub(status, tokens, startup: false, deletions: deletions);
 }
 
 String generateStatusData(String status, String friendId) {
@@ -73,7 +73,7 @@ String generateStatusData(String status, String friendId) {
   return status;
 }
 
-void _sub(String status, List<Map<String, dynamic>> tokens, {bool startup = true}) async {
+void _sub(String status, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
   // Get last message received
   final lastMessage = await (db.message.select()
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
@@ -92,6 +92,6 @@ void _sub(String status, List<Map<String, dynamic>> tokens, {bool startup = true
       return;
     }
     Get.find<StatusController>().statusLoading.value = false;
-    Get.find<ConversationController>().finishedLoading(event.data["read"], overwriteReads: startup);
+    Get.find<ConversationController>().finishedLoading(event.data["read"], deletions ? (event.data["missing"] ?? []) : [], overwriteReads: startup);
   });
 }

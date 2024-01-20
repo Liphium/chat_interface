@@ -61,7 +61,6 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               }
             },
             onPointerMove: (event) {
-              sendLog(event.buttons);
               if (event.buttons == 4) {
                 final old = calculateMousePos(event.localPosition, scale.value, offset.value);
                 final newPos = calculateMousePos(event.localPosition + event.delta, scale.value, offset.value);
@@ -76,8 +75,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               }
               mousePos.value = calculateMousePos(event.localPosition, scale.value, offset.value);
             },
+            onPointerUp: (event) => tableController.heldObject = null,
             onPointerSignal: (event) {
-              sendLog(event.runtimeType);
               if (event is PointerScrollEvent) {
                 final scrollDelta = event.scrollDelta.dy / 500 * -1;
                 if (scale.value + scrollDelta < 0.5) {

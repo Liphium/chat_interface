@@ -123,7 +123,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
 
   final statusController = Get.find<StatusController>();
   await conversationController.addCreated(conversation, members, admin: Member(conversation.token.id, statusController.id.value, MemberRole.admin));
-  subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), conversation.token);
+  subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), conversation.token, deletions: false);
 
   return true;
 }
