@@ -7,12 +7,14 @@ class TabletopPainter extends CustomPainter {
   final Offset offset;
   final Offset mousePosition;
   final double scale;
+  final double individualScale;
   final double rotation;
 
   TabletopPainter({
     required this.controller,
     required this.offset,
     required this.mousePosition,
+    required this.individualScale,
     this.scale = 1.0,
     this.rotation = 0,
   });
@@ -34,18 +36,22 @@ class TabletopPainter extends CustomPainter {
     canvas.translate(offset.dx, offset.dy);
 
     final now = DateTime.now();
-    final primary = Get.theme.colorScheme.onPrimary;
-    controller.hoveringObject = controller.raycast(mousePosition);
-
-    if (controller.hoveringObject != null) {
-      final object = controller.hoveringObject!;
-      final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
-      canvas.drawRect(Rect.fromLTWH(location.dx - 2, location.dy - 2, object.size.width + 4, object.size.height + 4), Paint()..color = primary);
-    }
+    controller.hoveringObjects = controller.raycast(mousePosition);
 
     for (var object in controller.objects.values) {
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
-      object.render(canvas, location);
+      if (controller.hoveringObjects.contains(object)) {
+        canvas.save();
+        canvas.scale(individualScale);
+        canvas.translate(
+          -(location.dx + object.size.width / 2) * ((individualScale - 1) / individualScale),
+          -(location.dy + object.size.height / 2) * ((individualScale - 1) / individualScale),
+        );
+      }
+      object.render(canvas, location, controller);
+      if (controller.hoveringObjects.contains(object)) {
+        canvas.restore();
+      }
     }
   }
 

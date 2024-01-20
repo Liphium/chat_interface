@@ -156,4 +156,31 @@ class ContextMenuData {
 
     return ContextMenuData(position, fromTop, fromLeft);
   }
+
+  // Compute the position of the context menu based on a widget it should be next to
+  factory ContextMenuData.fromPosition(Offset position) {
+    final screenDimensions = Get.mediaQuery.size;
+
+    // Calculate y position
+    final bool fromTop;
+    if (position.dy > screenDimensions.height / 2) {
+      fromTop = false;
+      position = Offset(position.dx, screenDimensions.height - position.dy);
+    } else {
+      fromTop = true;
+    }
+
+    // Calculate x position
+    final bool fromLeft;
+    if (position.dx > screenDimensions.width - 350) {
+      fromLeft = false;
+      position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
+    } else {
+      fromLeft = true;
+      position = Offset(position.dx + defaultSpacing, position.dy);
+    }
+    sendLog(fromLeft);
+
+    return ContextMenuData(position, fromTop, fromLeft);
+  }
 }

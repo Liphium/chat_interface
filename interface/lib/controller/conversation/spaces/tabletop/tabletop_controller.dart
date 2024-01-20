@@ -1,18 +1,18 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_square.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class TabletopController extends GetxController {
   final loading = false.obs;
   final enabled = false.obs;
 
-  TableObject? hoveringObject;
+  List<TableObject> hoveringObjects = [];
   TableObject? heldObject;
   final objects = <String, TableObject>{}.obs;
 
@@ -107,15 +107,15 @@ class TabletopController extends GetxController {
   }
 
   /// Get the object at a location
-  TableObject? raycast(Offset location) {
-    final object = objects.values.firstWhere((element) {
-      final rect = Rect.fromLTWH(element.location.dx, element.location.dy, element.size.width, element.size.height);
-      return rect.contains(location);
-    }, orElse: () => SquareObject("", Offset.zero, Size.zero, TableObjectType.square));
-    if (object.id == "") {
-      return null;
+  List<TableObject> raycast(Offset location) {
+    final objects = <TableObject>[];
+    for (var object in this.objects.values) {
+      final rect = Rect.fromLTWH(object.location.dx, object.location.dy, object.size.width, object.size.height);
+      if (rect.contains(location)) {
+        objects.add(object);
+      }
     }
-    return object;
+    return objects;
   }
 }
 
@@ -159,7 +159,15 @@ abstract class TableObject {
   }
 
   /// Render with rotation and scale applied (used for movable objects)
-  void render(Canvas canvas, Offset location) {}
+  void render(Canvas canvas, Offset location, TabletopController controller) {}
+
+  /// Called when the object is clicked
+  void runAction(TabletopController controller) {}
+
+  /// Called when the object is right clicked
+  List<ContextMenuAction> getContextMenuAdditions() {
+    return [];
+  }
 
   /// Add a new object
   void sendAdd() {
@@ -174,8 +182,26 @@ abstract class TableObject {
 
   /// Remove an object
   void sendRemove() {
-    spaceConnector.sendAction(Message("tobj_remove", <String, dynamic>{
+    spaceConnector.sendAction(Message("tobj_delete", <String, dynamic>{
       "id": id,
     }));
   }
+}
+
+class ContextMenuAction {
+  final IconData icon;
+  final bool category;
+  final String label;
+  final Color? color;
+  final Color? iconColor;
+  final Function(TabletopController) onTap;
+
+  const ContextMenuAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.category = false,
+    this.color,
+    this.iconColor,
+  });
 }

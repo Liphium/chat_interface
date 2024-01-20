@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
-import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +17,12 @@ class TabletopView extends StatefulWidget {
 }
 
 class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin {
-  final mousePos = const Offset(0, 0).obs;
-  final offset = const Offset(0, 0).obs;
-  final scale = 1.0.obs;
+  var mousePos = const Offset(0, 0);
+  var offset = const Offset(0, 0);
+  var scale = 1.0;
+  var individualScale = 1.0;
   final rotation = 0.0.obs;
+  bool moved = false;
 
   final updater = false.obs;
   late AnimationController _controller;
@@ -51,46 +54,81 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
           Listener(
             onPointerHover: (event) {
               tableController.heldObject = null;
-              mousePos.value = calculateMousePos(event.localPosition, scale.value, offset.value);
+              mousePos = calculateMousePos(event.localPosition, scale, offset);
+              if (tableController.hoveringObjects.isEmpty) {
+                individualScale = 1;
+              }
             },
             onPointerDown: (event) {
               if (event.buttons == 2) {
-                final obj = tableController.newObject(TableObjectType.square, "", calculateMousePos(event.localPosition, scale.value, offset.value), Size(100, 100), "");
+                if (tableController.hoveringObjects.isNotEmpty) {
+                  final screenWidth = Get.mediaQuery.size.width;
+                  final screenHeight = Get.mediaQuery.size.height;
+
+                  // Convert local to global position
+                  final globalPos = Offset(
+                    event.localPosition.dx + (screenWidth - context.size!.width),
+                    event.localPosition.dy + (screenHeight - context.size!.height),
+                  );
+
+                  Get.dialog(ObjectContextMenu(
+                    data: ContextMenuData.fromPosition(globalPos),
+                    object: tableController.hoveringObjects.first,
+                  ));
+                  return;
+                }
+                final obj = tableController.newObject(TableObjectType.square, "", calculateMousePos(event.localPosition, scale, offset), Size(100, 100), "");
                 obj.sendAdd();
-                return;
+              } else if (event.buttons == 1) {
+                moved = false;
               }
             },
             onPointerMove: (event) {
               if (event.buttons == 4) {
-                final old = calculateMousePos(event.localPosition, scale.value, offset.value);
-                final newPos = calculateMousePos(event.localPosition + event.delta, scale.value, offset.value);
-                offset.value += newPos - old;
+                final old = calculateMousePos(event.localPosition, scale, offset);
+                final newPos = calculateMousePos(event.localPosition + event.delta, scale, offset);
+                offset += newPos - old;
               } else if (event.buttons == 1) {
-                if (tableController.hoveringObject != null) {
-                  tableController.heldObject = tableController.hoveringObject;
-                  final old = calculateMousePos(event.localPosition, scale.value, offset.value);
-                  final newPos = calculateMousePos(event.localPosition + event.delta, scale.value, offset.value);
-                  tableController.hoveringObject!.location += newPos - old;
+                if (tableController.hoveringObjects.isNotEmpty) {
+                  moved = true;
+                  tableController.heldObject ??= tableController.hoveringObjects.first;
+                  final old = calculateMousePos(event.localPosition, scale, offset);
+                  final newPos = calculateMousePos(event.localPosition + event.delta, scale, offset);
+                  tableController.heldObject!.location += newPos - old;
                 }
               }
-              mousePos.value = calculateMousePos(event.localPosition, scale.value, offset.value);
+              mousePos = calculateMousePos(event.localPosition, scale, offset);
             },
-            onPointerUp: (event) => tableController.heldObject = null,
+            onPointerUp: (event) {
+              individualScale = 1;
+              if (tableController.hoveringObjects.isNotEmpty && !moved) {
+                tableController.hoveringObjects.first.runAction(tableController);
+              }
+              tableController.heldObject = null;
+            },
             onPointerSignal: (event) {
               if (event is PointerScrollEvent) {
                 final scrollDelta = event.scrollDelta.dy / 500 * -1;
-                if (scale.value + scrollDelta < 0.5) {
+
+                // Check if hover scale should be applied
+                if (tableController.hoveringObjects.isNotEmpty) {
+                  individualScale += scrollDelta * 2;
+                  individualScale = individualScale.clamp(1, 5);
                   return;
                 }
-                if (scale.value + scrollDelta > 2) return;
 
-                final zoomFactor = (scale.value + scrollDelta) / scale.value;
-                final focalPoint = calculateMousePos(event.localPosition, scale.value, offset.value);
-                final newFocalPoint = calculateMousePos(event.localPosition, scale.value + scrollDelta, offset.value);
+                if (scale + scrollDelta < 0.5) {
+                  return;
+                }
+                if (scale + scrollDelta > 2) return;
 
-                offset.value -= focalPoint - newFocalPoint;
-                scale.value *= zoomFactor;
-                mousePos.value = calculateMousePos(event.localPosition, scale.value, offset.value);
+                final zoomFactor = (scale + scrollDelta) / scale;
+                final focalPoint = calculateMousePos(event.localPosition, scale, offset);
+                final newFocalPoint = calculateMousePos(event.localPosition, scale + scrollDelta, offset);
+
+                offset -= focalPoint - newFocalPoint;
+                scale *= zoomFactor;
+                mousePos = calculateMousePos(event.localPosition, scale, offset);
               }
             },
             child: SizedBox.expand(
@@ -104,9 +142,10 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                         isComplex: true,
                         painter: TabletopPainter(
                           controller: tableController,
-                          mousePosition: mousePos.value,
-                          offset: offset.value,
-                          scale: scale.value,
+                          mousePosition: mousePos,
+                          individualScale: individualScale,
+                          offset: offset,
+                          scale: scale,
                           rotation: rotation.value,
                         ),
                       );
@@ -127,7 +166,14 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 child: Obx(
                   () => Slider(
                     value: rotation.value,
-                    onChanged: (value) => rotation.value = value,
+                    onChanged: (value) {
+                      final center = Offset(context.size!.width / 2, context.size!.height / 2);
+                      final focalPoint = calculateMousePos(center, scale, offset);
+                      rotation.value = value;
+                      final newFocalPoint = calculateMousePos(center, scale, offset);
+
+                      offset -= focalPoint - newFocalPoint;
+                    },
                     min: 0,
                     max: 2 * math.pi,
                   ),
