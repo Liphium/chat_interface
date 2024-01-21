@@ -122,7 +122,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 
   // Add friend request to vault
   final profileKey = unpackageSymmetricKey(json["pf"]);
-  request = Request(id, json["name"], json["tag"], "", actionId, KeyStorage(publicKey, signatureKey, profileKey, json["sa"]));
+  request = Request(id, json["name"], json["tag"], "", actionId, KeyStorage(publicKey, signatureKey, profileKey, json["sa"]), DateTime.now().millisecondsSinceEpoch);
 
   final vaultId = await storeInFriendsVault(request.toStoredPayload(false));
   if (vaultId == null) {

@@ -23,6 +23,7 @@ class SettingsTranslations extends Translations {
           'settings.requests': 'Friend requests',
           'settings.encryption': 'Encryption',
           'settings.spaces': 'Spaces',
+          'settings.tabletop': 'Tabletop',
           'settings.files': 'Files',
           'settings.invites': 'Invites',
           'settings.invites.title': 'You have @count invites left.',
@@ -66,7 +67,9 @@ class SettingsTranslations extends Translations {
           'settings.file.max_size.description': 'Files larger than this will not be downloaded automatically.',
           'settings.file.cache': 'File cache',
           'settings.file.cache.description':
-              'The file cache stores all files that have been automatically downloaded. This includes profile pictures and all other data you\'ve selected above. When it is full old files will automatically be deleted. In the future you might even be able to turn this off. You can select the size of it with the slider below.',
+              'The file cache stores all files that have been automatically downloaded. This includes profile pictures and all other data you\'ve selected above. When it is full old files will automatically be deleted. You can select the size with the slider below or make it unlimited.',
+          'settings.file.cache_type.unlimited': 'Unlimited',
+          'settings.file.cache_type.size': 'Size',
           'settings.file.mb': 'MB',
 
           // Data settings

@@ -26,6 +26,7 @@ void setupSetupListeners() {
     }
 
     // Decrypt status with profile key
+    sendLog(data);
     final args = data.split(":");
     final decrypted = decryptSymmetric(args[1], profileKey);
     controller.fromStatusJson(decrypted);

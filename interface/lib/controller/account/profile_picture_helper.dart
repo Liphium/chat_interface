@@ -107,7 +107,7 @@ class ProfilePictureHelper {
   }
 
   /// Get the file id of the profile picture of a friend
-  static Future<ProfileData?> getProfilePictureLocal(String id) async {
+  static Future<ProfileData?> getProfileDataLocal(String id) async {
     final profile = await (db.profile.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
     return profile;
   }

@@ -1,4 +1,3 @@
-
 //* These will be loaded from the server (in the future)
 final Map<String, dynamic> specialConstants = <String, dynamic>{
   "max_conversation_amount": 500,
@@ -8,9 +7,9 @@ final Map<String, dynamic> specialConstants = <String, dynamic>{
 
 //* These are just normal constants
 class Constants {
-  
   // Vault
-  static const String conversationTag = "c"; 
+  static const String conversationTag = "c";
+  static const String deckTag = "d";
 
   // Errors
   static const String unknownError = "error.unknown";

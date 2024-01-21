@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:math';
 
@@ -25,7 +24,6 @@ class FriendsPage extends StatefulWidget {
 }
 
 class _FriendsPageState extends State<FriendsPage> {
-
   final position = const Offset(0, 0).obs;
   final query = "".obs;
   final loading = false.obs;
@@ -41,27 +39,15 @@ class _FriendsPageState extends State<FriendsPage> {
 
     return Animate(
       effects: [
-        ScaleEffect(
-          delay: 100.ms,
-          duration: 500.ms,
-          begin: const Offset(0, 0),
-          end: const Offset(1, 1),
-          alignment: Alignment.center,
-          curve: const ElasticOutCurve(0.8)
-        ),
+        ScaleEffect(delay: 100.ms, duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), alignment: Alignment.center, curve: const ElasticOutCurve(0.8)),
         ShakeEffect(
-          delay: 100.ms,
-          duration: 400.ms,
-          hz: randomHz,
-          offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
-          rotation: 0,
-          curve: Curves.decelerate
-        ),
-        FadeEffect(
-          delay: 100.ms,
-          duration: 250.ms,
-          curve: Curves.easeOut
-        )
+            delay: 100.ms,
+            duration: 400.ms,
+            hz: randomHz,
+            offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+            rotation: 0,
+            curve: Curves.decelerate),
+        FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
       ],
       child: Center(
         child: ConstrainedBox(
@@ -110,47 +96,28 @@ class _FriendsPageState extends State<FriendsPage> {
                               cursorColor: Get.theme.colorScheme.onPrimary,
                             ),
                           ),
-                          LoadingIconButton(
-                            loading: requestsLoading,
-                            onTap: () => doAction(), 
-                            icon: Icons.check
-                          )
+                          LoadingIconButton(loading: requestsLoading, onTap: () => doAction(), icon: Icons.check)
                         ],
                       ),
                     ),
                   ),
                 ),
-                
+
                 //* Friends list
                 Flexible(
                   child: RepaintBoundary(
                     child: Obx(() {
                       final friendController = Get.find<FriendController>();
                       final requestController = Get.find<RequestController>();
-    
+
                       //* Friends, requests, sent requests list
                       return SingleChildScrollView(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-    
-                            Obx(() => Animate(
-                              effects: [
-                                ExpandEffect(
-                                  curve: Curves.easeInOut,
-                                  duration: 250.ms,
-                                  axis: Axis.vertical,
-                                )
-                              ],
-                              target: revealSuccess.value ? 1.0 : 0.0,
-                              child: SuccessContainer(text: "request.sent".tr),
-                            )),
-                      
-                            Obx(() {
-                              final found = friendController.friends.values.any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()) && friend.id != StatusController.ownAccountId);
-                              final hashtag = query.value.contains("#");
-                              return Animate(
+                            Obx(
+                              () => Animate(
                                 effects: [
                                   ExpandEffect(
                                     curve: Curves.easeInOut,
@@ -158,136 +125,144 @@ class _FriendsPageState extends State<FriendsPage> {
                                     axis: Axis.vertical,
                                   )
                                 ],
-                                target: found ? 0.0 : 1.0,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: defaultSpacing),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(defaultSpacing),
-                                      color: theme.colorScheme.onBackground,
+                                target: revealSuccess.value ? 1.0 : 0.0,
+                                child: SuccessContainer(text: "request.sent".tr),
+                              ),
+                            ),
+
+                            Obx(() {
+                              final found =
+                                  friendController.friends.values.any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()) && friend.id != StatusController.ownAccountId);
+                              final hashtag = query.value.contains("#");
+                              return Animate(
+                                  effects: [
+                                    ExpandEffect(
+                                      curve: Curves.easeInOut,
+                                      duration: 250.ms,
+                                      axis: Axis.vertical,
+                                    )
+                                  ],
+                                  target: found ? 0.0 : 1.0,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: defaultSpacing),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(defaultSpacing),
+                                        color: theme.colorScheme.onBackground,
+                                      ),
+                                      padding: const EdgeInsets.all(defaultSpacing),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Animate(
+                                            effects: [ReverseExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical, alignment: Alignment.topLeft)],
+                                            target: hashtag ? 1.0 : 0.0,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(bottom: defaultSpacing),
+                                              child: Text("friends.empty".tr, style: theme.textTheme.bodyMedium),
+                                            ),
+                                          ),
+                                          hashtag ? Text("friends.send_request".tr, style: theme.textTheme.labelMedium) : Text("friends.example".tr, style: theme.textTheme.labelMedium),
+                                        ],
+                                      ),
                                     ),
-                                    padding: const EdgeInsets.all(defaultSpacing),
+                                  ));
+                            }),
+
+                            //* Requests
+                            Obx(() => Animate(
+                                  effects: [
+                                    ReverseExpandEffect(
+                                      curve: Curves.easeInOut,
+                                      duration: 250.ms,
+                                      axis: Axis.vertical,
+                                    )
+                                  ],
+                                  target: query.value.isEmpty ? 0.0 : 1.0,
+                                  child: Visibility(
+                                      visible: requestController.requests.isNotEmpty,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          verticalSpacing(sectionSpacing),
+                                          Text("friends.requests".tr, style: theme.textTheme.labelLarge),
+                                          verticalSpacing(elementSpacing),
+                                          Builder(
+                                            builder: (context) {
+                                              if (requestController.requests.isEmpty) {
+                                                return const SizedBox.shrink();
+                                              }
+                                              return Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: requestController.requests.map((request) {
+                                                  return RequestButton(request: request, self: false);
+                                                }).toList(),
+                                              );
+                                            },
+                                          ),
+                                          Visibility(
+                                            visible: friendController.friends.length > 1 || requestController.requestsSent.isNotEmpty,
+                                            child: verticalSpacing(sectionSpacing - elementSpacing),
+                                          )
+                                        ],
+                                      )),
+                                )),
+
+                            //* Sent requests
+                            Obx(
+                              () => Animate(
+                                effects: [
+                                  ReverseExpandEffect(
+                                    curve: Curves.easeInOut,
+                                    duration: 250.ms,
+                                    axis: Axis.vertical,
+                                  )
+                                ],
+                                target: query.value.isEmpty ? 0.0 : 1.0,
+                                child: Visibility(
+                                  visible: requestController.requestsSent.isNotEmpty,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: sectionSpacing),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Animate(
-                                          effects: [
-                                            ReverseExpandEffect(
-                                              curve: Curves.easeInOut,
-                                              duration: 250.ms,
-                                              axis: Axis.vertical,
-                                              alignment: Alignment.topLeft
-                                            )
-                                          ],
-                                          target: hashtag ? 1.0 : 0.0,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(bottom: defaultSpacing),
-                                            child: Text("friends.empty".tr, style: theme.textTheme.bodyMedium),
-                                          ),
+                                        Text("friends.requests_sent".tr, style: theme.textTheme.labelLarge),
+                                        verticalSpacing(elementSpacing),
+                                        Builder(
+                                          builder: (context) {
+                                            if (requestController.requestsSent.isEmpty) {
+                                              return const SizedBox.shrink();
+                                            }
+                                            return ListView.builder(
+                                              shrinkWrap: true,
+                                              itemCount: requestController.requestsSent.length,
+                                              itemBuilder: (context, index) {
+                                                final request = requestController.requestsSent.elementAt(index);
+                                                return Padding(
+                                                  padding: const EdgeInsets.only(bottom: elementSpacing),
+                                                  child: RequestButton(request: request, self: true),
+                                                );
+                                              },
+                                            );
+                                          },
                                         ),
-                                        hashtag ?
-                                        Text("friends.send_request".tr, style: theme.textTheme.labelMedium) :
-                                        Text("friends.example".tr, style: theme.textTheme.labelMedium),
+                                        Visibility(
+                                          visible: friendController.friends.length > 1,
+                                          child: verticalSpacing(sectionSpacing - elementSpacing),
+                                        )
                                       ],
                                     ),
                                   ),
-                                )
-                              );
-                            }),
-                      
-                            //* Requests
-                            Obx(() => Animate(
-                              effects: [
-                                ReverseExpandEffect(
-                                  curve: Curves.easeInOut,
-                                  duration: 250.ms,
-                                  axis: Axis.vertical,
-                                )
-                              ],
-                              target: query.value.isEmpty ? 0.0 : 1.0,
-                              child: Visibility(
-                                visible: requestController.requests.isNotEmpty,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    verticalSpacing(sectionSpacing),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                                      child: Text("friends.requests".tr, style: theme.textTheme.labelLarge),
-                                    ),
-                                    verticalSpacing(elementSpacing),
-                                    Builder(
-                                      builder: (context) {
-                                        if (requestController.requests.isEmpty) {
-                                          return const SizedBox.shrink();
-                                        }
-                                        return Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: requestController.requests.map((request) {
-                                            return RequestButton(request: request, self: false);
-                                          }).toList(),
-                                        );
-                                      },
-                                    ),
-                                    verticalSpacing(sectionSpacing),
-                                  ],
-                                )
+                                ),
                               ),
-                            )),
-                                
-                            //* Sent requests
-                            Obx(() => Animate(
-                              effects: [
-                                ReverseExpandEffect(
-                                  curve: Curves.easeInOut,
-                                  duration: 250.ms,
-                                  axis: Axis.vertical,
-                                )
-                              ],
-                              target: query.value.isEmpty ? 0.0 : 1.0,
-                              child: Visibility(
-                                visible: requestController.requestsSent.isNotEmpty,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: sectionSpacing),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                                        child: Text("friends.requests_sent".tr, style: theme.textTheme.labelLarge),
-                                      ),                                
-                                      verticalSpacing(elementSpacing),
-                                      Builder(
-                                        builder: (context) {
-                                          if (requestController.requestsSent.isEmpty) {
-                                            return const SizedBox.shrink();
-                                          }
-                                          return ListView.builder(
-                                            shrinkWrap: true,
-                                            itemCount: requestController.requestsSent.length,
-                                            itemBuilder: (context, index) {
-                                              final request = requestController.requestsSent.elementAt(index);
-                                              return Padding(
-                                                padding: const EdgeInsets.only(bottom: elementSpacing),
-                                                child: RequestButton(request: request, self: true),
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                      verticalSpacing(sectionSpacing - elementSpacing),
-                                    ],
-                                  ),
-                                )
-                              )
-                            )),
-                                
+                            ),
+
                             //* Friends
                             Visibility(
                               visible: friendController.friends.length > 1,
@@ -305,35 +280,37 @@ class _FriendsPageState extends State<FriendsPage> {
                                         shrinkWrap: true,
                                         itemCount: friendController.friends.length,
                                         itemBuilder: (context, index) {
-                                          return Obx(() {
-                                            final friend = friendController.friends.values.elementAt(index);
-                                            final visible = query.value.isEmpty || friend.name.toLowerCase().startsWith(query.value.toLowerCase());
-                                            return Visibility(
-                                              visible: friend.id != StatusController.ownAccountId,
-                                              child: Animate(
-                                                effects: [
-                                                  ReverseExpandEffect(
-                                                    curve: Curves.easeInOut,
-                                                    duration: 250.ms,
-                                                    axis: Axis.vertical,
-                                                  )
-                                                ],
-                                                target: visible ? 0.0 : 1.0,
-                                                child: Padding(
-                                                  padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
-                                                  child: FriendButton(friend: friend, position: position),
-                                                )
-                                              ),
-                                            );
-                                          });
+                                          return Obx(
+                                            () {
+                                              final friend = friendController.friends.values.elementAt(index);
+                                              final visible = query.value.isEmpty || friend.name.toLowerCase().startsWith(query.value.toLowerCase());
+                                              return Visibility(
+                                                visible: friend.id != StatusController.ownAccountId,
+                                                child: Animate(
+                                                  effects: [
+                                                    ReverseExpandEffect(
+                                                      curve: Curves.easeInOut,
+                                                      duration: 250.ms,
+                                                      axis: Axis.vertical,
+                                                    )
+                                                  ],
+                                                  target: visible ? 0.0 : 1.0,
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
+                                                    child: FriendButton(friend: friend, position: position),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
                                         },
                                       );
                                     },
                                   ),
                                 ],
-                              )
+                              ),
                             ),
-                          verticalSpacing(dialogPadding),
+                            verticalSpacing(dialogPadding),
                           ],
                         ),
                       );

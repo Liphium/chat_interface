@@ -92,6 +92,7 @@ class ChatPageTranslations extends Translations {
           // Conversation info
           'conversation.info.id': 'Conversation ID: @id',
           'conversation.info.read': 'Read at @clock on @date',
+          'conversation.info.update': 'Updated at @clock on @date',
           'conversation.info.members': 'Members: @count',
           'conversation.info.copy_id': 'Copy ID',
           'conversation.info.copy_token': 'Copy token',

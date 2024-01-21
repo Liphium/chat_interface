@@ -18,7 +18,6 @@ import 'package:get/get.dart';
 import 'friend_controller.dart';
 
 class RequestController extends GetxController {
-
   final requestsSent = <Request>[].obs;
   final requests = <Request>[].obs;
 
@@ -27,8 +26,8 @@ class RequestController extends GetxController {
   }
 
   Future<bool> loadRequests() async {
-    for(RequestData data in await db.request.select().get()) {
-      if(data.self) {
+    for (RequestData data in await db.request.select().get()) {
+      if (data.self) {
         requestsSent.add(Request.fromEntity(data));
       } else {
         requests.add(Request.fromEntity(data));
@@ -49,7 +48,7 @@ class RequestController extends GetxController {
   }
 
   Future<bool> deleteSentRequest(Request request, {removal = true}) async {
-    if(removal) {
+    if (removal) {
       requestsSent.remove(request);
     }
     await db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
@@ -57,23 +56,21 @@ class RequestController extends GetxController {
   }
 
   Future<bool> deleteRequest(Request request, {removal = true}) async {
-    if(removal) {
+    if (removal) {
       requests.remove(request);
     }
     await db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
     return true;
   }
-
 }
 
 final requestsLoading = false.obs;
 
 void newFriendRequest(String name, String tag, Function(String) success) async {
-
   requestsLoading.value = true;
 
   final controller = Get.find<StatusController>();
-  if(name == controller.name.value && tag == controller.tag.value) {
+  if (name == controller.name.value && tag == controller.tag.value) {
     showErrorPopup("request.self", "request.self.text");
     requestsLoading.value = false;
     return;
@@ -84,7 +81,7 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
     "username": name,
     "tag": tag,
   });
-  if(!json["success"]) {
+  if (!json["success"]) {
     showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
     requestsLoading.value = false;
     return;
@@ -110,13 +107,11 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
     },
   ));
 
-
   requestsLoading.value = !declined;
   return;
 }
 
 void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
-  
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
@@ -129,7 +124,7 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
 
   // Send stored action
   final result = await sendStoredAction(id, publicKey, payload);
-  if(!result) {
+  if (!result) {
     showErrorPopup(Constants.unknownError.tr, Constants.unknownErrorText.tr);
     requestsLoading.value = false;
     return;
@@ -138,18 +133,16 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
   // Accept friend request if there is one from the other user
   final requestController = Get.find<RequestController>();
   final requestSent = requestController.requests.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
-  if(requestSent.id != "hi") {
-
+  if (requestSent.id != "hi") {
     requestController.deleteRequest(requestSent);
     await Get.find<FriendController>().addFromRequest(requestSent);
     success("request.accepted");
   } else {
-
     // Save friend request in own vault
-    var request = Request(id, name, tag, "", "", KeyStorage(publicKey, signatureKey, profileKey, ""));
+    var request = Request(id, name, tag, "", "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
     final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
 
-    if(vaultId == null) {
+    if (vaultId == null) {
       requestsLoading.value = false;
       return;
     }
@@ -162,31 +155,38 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
     success("request.sent");
   }
 
-  requestsLoading.value = false;  
+  requestsLoading.value = false;
   return;
 }
 
 class Request {
-
   final String id;
   final String name;
   final String tag;
   String vaultId;
   String storedActionId;
+  int updatedAt;
   final KeyStorage keyStorage;
   final loading = false.obs;
 
-  Request.mock(this.id) : name = "fj-$id", tag = "tag", vaultId = "", storedActionId = "", keyStorage = KeyStorage.empty();
-  Request(this.id, this.name, this.tag, this.vaultId, this.storedActionId, this.keyStorage);
+  Request.mock(this.id)
+      : name = "fj-$id",
+        tag = "tag",
+        vaultId = "",
+        storedActionId = "",
+        keyStorage = KeyStorage.empty(),
+        updatedAt = 0;
+  Request(this.id, this.name, this.tag, this.vaultId, this.storedActionId, this.keyStorage, this.updatedAt);
   Request.fromEntity(RequestData data)
       : name = data.name,
         tag = data.tag,
         vaultId = data.vaultId,
         storedActionId = data.storedActionId,
         keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
-        id = data.id;
+        id = data.id,
+        updatedAt = data.updatedAt.toInt();
 
-  Request.fromStoredPayload(Map<String, dynamic> json)
+  Request.fromStoredPayload(Map<String, dynamic> json, this.updatedAt)
       : name = json["name"],
         tag = json["tag"],
         vaultId = "",
@@ -196,7 +196,6 @@ class Request {
 
   // Convert to a payload for the friends vault (on the server)
   String toStoredPayload(bool self) {
-
     final reqPayload = <String, dynamic>{
       "rq": true,
       "id": id,
@@ -211,16 +210,17 @@ class Request {
   }
 
   RequestData entity(bool self) => RequestData(
-    id: id,
-    name: name,
-    tag: tag,
-    vaultId: vaultId,
-    storedActionId: storedActionId,
-    keys: jsonEncode(keyStorage.toJson()),
-    self: self
-  );
+        id: id,
+        name: name,
+        tag: tag,
+        vaultId: vaultId,
+        storedActionId: storedActionId,
+        keys: jsonEncode(keyStorage.toJson()),
+        self: self,
+        updatedAt: BigInt.from(updatedAt),
+      );
 
-  Friend get friend => Friend(id, name, tag, vaultId, keyStorage);
+  Friend get friend => Friend(id, name, tag, vaultId, keyStorage, updatedAt);
 
   // Accept friend request
   void accept(Function(String) success) {
@@ -231,7 +231,6 @@ class Request {
 
   // Decline friend request
   void ignore() async {
-    
     // Delete from friends vault
     await removeFromFriendsVault(vaultId);
     await deleteStoredAction(storedActionId);
@@ -243,7 +242,6 @@ class Request {
 
   // Cancel friend request (only for sent requests)
   void cancel() async {
-
     // Delete from friends vault
     await removeFromFriendsVault(vaultId);
 
@@ -255,5 +253,4 @@ class Request {
   void save(bool self) {
     db.request.insertOnConflictUpdate(entity(self));
   }
-
 }

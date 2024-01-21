@@ -106,24 +106,27 @@ class Friend {
   KeyStorage keyStorage;
   bool unknown = false;
   Timer? _timer;
+  int updatedAt;
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage);
+  Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage, this.updatedAt);
 
   Friend.system()
       : id = "system",
         name = "System",
         tag = "fjc",
         vaultId = "",
-        keyStorage = KeyStorage.empty();
+        keyStorage = KeyStorage.empty(),
+        updatedAt = 0;
   Friend.me([StatusController? controller])
       : id = '',
         name = '',
         tag = '',
         vaultId = '',
-        keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, "") {
+        keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+        updatedAt = 0 {
     final StatusController statusController = controller ?? Get.find();
     id = statusController.id.value;
     name = statusController.name.value;
@@ -133,7 +136,8 @@ class Friend {
       : name = 'fj-$id',
         tag = 'tag',
         vaultId = '',
-        keyStorage = KeyStorage.empty() {
+        keyStorage = KeyStorage.empty(),
+        updatedAt = 0 {
     unknown = true;
   }
 
@@ -142,9 +146,10 @@ class Friend {
         name = data.name,
         tag = data.tag,
         vaultId = data.vaultId,
-        keyStorage = KeyStorage.fromJson(jsonDecode(data.keys));
+        keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
+        updatedAt = data.updatedAt.toInt();
 
-  Friend.fromStoredPayload(Map<String, dynamic> json)
+  Friend.fromStoredPayload(Map<String, dynamic> json, this.updatedAt)
       : id = json["id"],
         name = json["name"],
         tag = json["tag"],
@@ -238,7 +243,7 @@ class Friend {
     if (profilePictureImage.value != null) return;
 
     // Load the image
-    final data = await ProfilePictureHelper.getProfilePictureLocal(id);
+    final data = await ProfilePictureHelper.getProfileDataLocal(id);
     if (data == null) {
       sendLog("NOTHING FOUND");
       return;
@@ -278,5 +283,6 @@ class Friend {
         tag: tag,
         vaultId: vaultId,
         keys: jsonEncode(keyStorage.toJson()),
+        updatedAt: BigInt.from(updatedAt),
       );
 }

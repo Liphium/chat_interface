@@ -1,12 +1,8 @@
 import 'package:drift/drift.dart';
 
-enum ConversationType {
-  directMessage,
-  group
-}
+enum ConversationType { directMessage, group }
 
 class Conversation extends Table {
-
   TextColumn get id => text()();
   TextColumn get vaultId => text()();
   IntColumn get type => intEnum<ConversationType>()();
@@ -21,14 +17,13 @@ class Conversation extends Table {
 }
 
 class Member extends Table {
-  
-    TextColumn get id => text()();
-    TextColumn get conversationId => text().nullable()();
-    TextColumn get accountId => text()();
+  TextColumn get id => text()();
+  TextColumn get conversationId => text().nullable()();
+  TextColumn get accountId => text()();
 
-    // 1 - member, 2 - admin, 3 - owner
-    IntColumn get roleId => integer()();
+  // 1 - member, 2 - admin, 3 - owner
+  IntColumn get roleId => integer()();
 
-    @override
-    Set<Column<Object>>? get primaryKey => {id};
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
 }
