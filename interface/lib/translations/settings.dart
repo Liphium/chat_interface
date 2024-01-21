@@ -107,6 +107,23 @@ class SettingsTranslations extends Translations {
 
           // Spaces settings
           'game.music': 'Play music in Game Mode',
+
+          // Tabletop settings
+          'settings.tabletop.decks': 'Decks',
+          'settings.tabletop.decks.error':
+              'An error occurred while loading your decks. This is probably something you\'ll need to report to us or it\'s just your connection. You can also try to see if there\'s a new version of the app available or try again later.',
+          'settings.tabletop.decks.limit': 'Decks (@count/@limit)',
+          'decks.description': 'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
+          'decks.create': 'Create a new deck',
+          'decks.dialog.delete.title': 'Delete deck',
+          'decks.dialog.delete': 'Are you sure you want to delete this deck? Think about all the cards you\'ll lose!',
+          'decks.dialog.new_name': 'Type a new name for your deck here. This won\'t delete the cards in it, it\'ll just change the name.',
+          'decks.dialog.name': 'First of all, please give your deck a nice name. You know, something actually good.',
+          'decks.dialog.name.placeholder': 'Deck name',
+          'decks.dialog.name.error': 'Please make the name for your deck longer than 3 characters.',
+          'decks.limit_reached': 'You have reached the maximum amount of decks you can create. Please delete one of your existing decks to create a new one.',
+          'decks.cards': '@count cards',
+          'decks.add_cards': 'Add cards',
         },
 
         //* German

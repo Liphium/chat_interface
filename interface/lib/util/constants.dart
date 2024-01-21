@@ -14,4 +14,8 @@ class Constants {
   // Errors
   static const String unknownError = "error.unknown";
   static const String unknownErrorText = "error.unknown.text";
+
+  // Limits
+  static const int normalNameLimit = 50;
+  static const int maxDecks = 10;
 }

@@ -29,7 +29,7 @@ class ErrorContainer extends StatelessWidget {
         children: [
           Icon(Icons.error, color: Theme.of(context).colorScheme.error),
           horizontalSpacing(defaultSpacing),
-          Text(message, style: Theme.of(context).textTheme.labelMedium),
+          Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium)),
         ],
       ),
     );

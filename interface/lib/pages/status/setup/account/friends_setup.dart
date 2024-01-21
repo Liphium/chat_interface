@@ -30,8 +30,6 @@ class FriendsSetup extends Setup {
       return const ErrorPage(title: "friends.error");
     }
 
-    sendLog(json);
-
     final requestsDone = <String>[], friendsDone = <String>[];
     for (var friend in json["friends"]) {
       final decrypted = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, friend["friend"]);
