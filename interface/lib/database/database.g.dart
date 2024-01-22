@@ -2053,9 +2053,9 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _pictureIdMeta = const VerificationMeta('pictureId');
+  static const VerificationMeta _pictureContainerMeta = const VerificationMeta('pictureContainer');
   @override
-  late final GeneratedColumn<String> pictureId = GeneratedColumn<String>('picture_id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> pictureContainer = GeneratedColumn<String>('picture_container', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _pictureDataMeta = const VerificationMeta('pictureData');
   @override
   late final GeneratedColumn<String> pictureData = GeneratedColumn<String>('picture_data', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
@@ -2063,7 +2063,7 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
   @override
   late final GeneratedColumn<String> data = GeneratedColumn<String>('data', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, pictureId, pictureData, data];
+  List<GeneratedColumn> get $columns => [id, pictureContainer, pictureData, data];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2078,10 +2078,10 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('picture_id')) {
-      context.handle(_pictureIdMeta, pictureId.isAcceptableOrUnknown(data['picture_id']!, _pictureIdMeta));
+    if (data.containsKey('picture_container')) {
+      context.handle(_pictureContainerMeta, pictureContainer.isAcceptableOrUnknown(data['picture_container']!, _pictureContainerMeta));
     } else if (isInserting) {
-      context.missing(_pictureIdMeta);
+      context.missing(_pictureContainerMeta);
     }
     if (data.containsKey('picture_data')) {
       context.handle(_pictureDataMeta, pictureData.isAcceptableOrUnknown(data['picture_data']!, _pictureDataMeta));
@@ -2103,7 +2103,7 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ProfileData(
       id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      pictureId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}picture_id'])!,
+      pictureContainer: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}picture_container'])!,
       pictureData: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}picture_data'])!,
       data: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}data'])!,
     );
@@ -2117,15 +2117,15 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
 
 class ProfileData extends DataClass implements Insertable<ProfileData> {
   final String id;
-  final String pictureId;
+  final String pictureContainer;
   final String pictureData;
   final String data;
-  const ProfileData({required this.id, required this.pictureId, required this.pictureData, required this.data});
+  const ProfileData({required this.id, required this.pictureContainer, required this.pictureData, required this.data});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['picture_id'] = Variable<String>(pictureId);
+    map['picture_container'] = Variable<String>(pictureContainer);
     map['picture_data'] = Variable<String>(pictureData);
     map['data'] = Variable<String>(data);
     return map;
@@ -2134,7 +2134,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
   ProfileCompanion toCompanion(bool nullToAbsent) {
     return ProfileCompanion(
       id: Value(id),
-      pictureId: Value(pictureId),
+      pictureContainer: Value(pictureContainer),
       pictureData: Value(pictureData),
       data: Value(data),
     );
@@ -2144,7 +2144,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ProfileData(
       id: serializer.fromJson<String>(json['id']),
-      pictureId: serializer.fromJson<String>(json['pictureId']),
+      pictureContainer: serializer.fromJson<String>(json['pictureContainer']),
       pictureData: serializer.fromJson<String>(json['pictureData']),
       data: serializer.fromJson<String>(json['data']),
     );
@@ -2154,15 +2154,15 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'pictureId': serializer.toJson<String>(pictureId),
+      'pictureContainer': serializer.toJson<String>(pictureContainer),
       'pictureData': serializer.toJson<String>(pictureData),
       'data': serializer.toJson<String>(data),
     };
   }
 
-  ProfileData copyWith({String? id, String? pictureId, String? pictureData, String? data}) => ProfileData(
+  ProfileData copyWith({String? id, String? pictureContainer, String? pictureData, String? data}) => ProfileData(
         id: id ?? this.id,
-        pictureId: pictureId ?? this.pictureId,
+        pictureContainer: pictureContainer ?? this.pictureContainer,
         pictureData: pictureData ?? this.pictureData,
         data: data ?? this.data,
       );
@@ -2170,7 +2170,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
   String toString() {
     return (StringBuffer('ProfileData(')
           ..write('id: $id, ')
-          ..write('pictureId: $pictureId, ')
+          ..write('pictureContainer: $pictureContainer, ')
           ..write('pictureData: $pictureData, ')
           ..write('data: $data')
           ..write(')'))
@@ -2178,55 +2178,55 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, pictureId, pictureData, data);
+  int get hashCode => Object.hash(id, pictureContainer, pictureData, data);
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is ProfileData && other.id == this.id && other.pictureId == this.pictureId && other.pictureData == this.pictureData && other.data == this.data);
+      identical(this, other) || (other is ProfileData && other.id == this.id && other.pictureContainer == this.pictureContainer && other.pictureData == this.pictureData && other.data == this.data);
 }
 
 class ProfileCompanion extends UpdateCompanion<ProfileData> {
   final Value<String> id;
-  final Value<String> pictureId;
+  final Value<String> pictureContainer;
   final Value<String> pictureData;
   final Value<String> data;
   final Value<int> rowid;
   const ProfileCompanion({
     this.id = const Value.absent(),
-    this.pictureId = const Value.absent(),
+    this.pictureContainer = const Value.absent(),
     this.pictureData = const Value.absent(),
     this.data = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProfileCompanion.insert({
     required String id,
-    required String pictureId,
+    required String pictureContainer,
     required String pictureData,
     required String data,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        pictureId = Value(pictureId),
+        pictureContainer = Value(pictureContainer),
         pictureData = Value(pictureData),
         data = Value(data);
   static Insertable<ProfileData> custom({
     Expression<String>? id,
-    Expression<String>? pictureId,
+    Expression<String>? pictureContainer,
     Expression<String>? pictureData,
     Expression<String>? data,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (pictureId != null) 'picture_id': pictureId,
+      if (pictureContainer != null) 'picture_container': pictureContainer,
       if (pictureData != null) 'picture_data': pictureData,
       if (data != null) 'data': data,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  ProfileCompanion copyWith({Value<String>? id, Value<String>? pictureId, Value<String>? pictureData, Value<String>? data, Value<int>? rowid}) {
+  ProfileCompanion copyWith({Value<String>? id, Value<String>? pictureContainer, Value<String>? pictureData, Value<String>? data, Value<int>? rowid}) {
     return ProfileCompanion(
       id: id ?? this.id,
-      pictureId: pictureId ?? this.pictureId,
+      pictureContainer: pictureContainer ?? this.pictureContainer,
       pictureData: pictureData ?? this.pictureData,
       data: data ?? this.data,
       rowid: rowid ?? this.rowid,
@@ -2239,8 +2239,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (pictureId.present) {
-      map['picture_id'] = Variable<String>(pictureId.value);
+    if (pictureContainer.present) {
+      map['picture_container'] = Variable<String>(pictureContainer.value);
     }
     if (pictureData.present) {
       map['picture_data'] = Variable<String>(pictureData.value);
@@ -2258,7 +2258,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
   String toString() {
     return (StringBuffer('ProfileCompanion(')
           ..write('id: $id, ')
-          ..write('pictureId: $pictureId, ')
+          ..write('pictureContainer: $pictureContainer, ')
           ..write('pictureData: $pictureData, ')
           ..write('data: $data, ')
           ..write('rowid: $rowid')

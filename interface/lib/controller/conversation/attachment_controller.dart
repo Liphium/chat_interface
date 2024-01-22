@@ -17,10 +17,6 @@ import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
 class AttachmentController extends GetxController {
-  AttachmentController() {
-    initFilePath();
-  }
-
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
@@ -185,19 +181,19 @@ class AttachmentController extends GetxController {
   static String _pathTemporary = "";
   static String _pathPermanent = "";
 
-  static void initFilePath() async {
+  static void initFilePath(String accountId) async {
     // Init folder for cached files
-    final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache");
+    final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
     _pathCache = cacheFolder;
     await Directory(cacheFolder).create();
 
     // Init folder for temporary files
-    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files");
+    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_$accountId");
     _pathTemporary = fileFolder;
     await Directory(fileFolder).create();
 
     // Init folder for permanent files
-    final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files");
+    final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_$accountId");
     _pathPermanent = saveFolder;
     await Directory(saveFolder).create();
   }

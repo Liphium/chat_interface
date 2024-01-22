@@ -39,10 +39,12 @@ class ProfilePictureHelper {
       await friend.update();
     }
 
+    String? oldPictureId;
     String? oldPath;
     if (oldProfile != null) {
-      oldPath = await AttachmentController.getFilePathFor(oldProfile.pictureId);
-      if (json["profile"]["picture"] == oldProfile.pictureId && oldPath != null) {
+      oldPictureId = jsonDecode(oldProfile.pictureContainer)["id"];
+      oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
+      if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
         return null; // Nothing changed
       }
     }
@@ -57,7 +59,7 @@ class ProfilePictureHelper {
 
     if (oldProfile != null && oldPath != null) {
       // Check if there is an attachment in any message using the file from the old profile picture
-      final messages = await (db.message.select()..where((tbl) => tbl.attachments.contains(oldProfile.pictureId))).get();
+      final messages = await (db.message.select()..where((tbl) => tbl.attachments.contains(oldPictureId!))).get();
       if (messages.isEmpty) {
         await File(oldPath).delete();
       }
@@ -100,7 +102,6 @@ class ProfilePictureHelper {
       showErrorPopup("error", "profile_picture.not_set");
       return false;
     }
-    Get.find<StatusController>().newProfilePicture(response.container!.id, data);
     Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!, data);
 
     // TODO: Update for other devices

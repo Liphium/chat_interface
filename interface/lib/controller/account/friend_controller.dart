@@ -220,7 +220,7 @@ class Friend {
   /// Update the profile picture of this friend
   void updateProfilePicture(AttachmentContainer picture, ProfilePictureData data) async {
     // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureId: picture.id, pictureData: jsonEncode(data.toJson()), data: ""));
+    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: jsonEncode(picture.toJson()), pictureData: jsonEncode(data.toJson()), data: ""));
 
     profilePicture = picture;
     profilePictureData = data;
@@ -251,8 +251,9 @@ class Friend {
       return;
     }
 
-    final type = await AttachmentController.checkLocations(data.pictureId, StorageType.permanent);
-    profilePicture = AttachmentContainer.fromJson(type, jsonDecode(decryptSymmetric(data.data, keyStorage.profileKey)));
+    final json = jsonDecode(data.pictureContainer);
+    final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
+    profilePicture = AttachmentContainer.fromJson(type, json);
     profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
     profilePictureImage.value = await ProfilePictureHelper.loadImage(profilePicture!.filePath);
     sendLog("LOADED!!");
