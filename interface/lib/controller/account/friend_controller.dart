@@ -212,17 +212,19 @@ class Friend {
 
   //* Profile picture
   var profilePictureUsages = 0;
+  AttachmentContainer? profilePicture;
   final profilePictureImage = Rx<ui.Image?>(null);
   var profilePictureData = ProfilePictureData(1, 0, 0);
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Update the profile picture of this friend
-  void updateProfilePicture(String picture, ProfilePictureData data) async {
+  void updateProfilePicture(AttachmentContainer picture, ProfilePictureData data) async {
     // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureId: picture, pictureData: jsonEncode(data.toJson()), data: ""));
+    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureId: picture.id, pictureData: jsonEncode(data.toJson()), data: ""));
 
+    profilePicture = picture;
     profilePictureData = data;
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
+    profilePictureImage.value = await ProfilePictureHelper.loadImage(picture.filePath);
   }
 
   /// Load the profile picture of this friend
@@ -248,16 +250,20 @@ class Friend {
       sendLog("NOTHING FOUND");
       return;
     }
+
+    final type = await AttachmentController.checkLocations(data.pictureId, StorageType.permanent);
+    profilePicture = AttachmentContainer.fromJson(type, jsonDecode(decryptSymmetric(data.data, keyStorage.profileKey)));
     profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
+    profilePictureImage.value = await ProfilePictureHelper.loadImage(profilePicture!.filePath);
     sendLog("LOADED!!");
   }
 
   void disposeProfilePicture() {
     profilePictureUsages--;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (profilePictureUsages == 0) {
+      if (profilePictureUsages <= 0) {
         profilePictureImage.value = null;
+        profilePicture = null;
       }
     });
   }

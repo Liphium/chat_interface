@@ -1,27 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:path/path.dart' as path;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:get/get.dart';
 
 class TabletopDecks {
-  static String? _cachedPath;
-
-  static void getFilePathForCard(String id) async {
-    if (_cachedPath == null) {
-      final fileFolder = path.join((await getApplicationCacheDirectory()).path, ".tabletop_cache");
-      final dir = Directory(fileFolder);
-      _cachedPath = dir.path;
-      await dir.create();
-    }
-  }
-
   static Future<List<TabletopDeck>?> listDecks() async {
     final json = await postAuthorizedJSON("/account/vault/list", {
       "after": 0,
@@ -43,6 +30,7 @@ class TabletopDecks {
 class TabletopDeck {
   String? vaultId;
   String name;
+  final List<Map<String, dynamic>> encodedCards = [];
   final List<AttachmentContainer> cards = [];
 
   TabletopDeck(this.name, {this.vaultId});
@@ -54,10 +42,10 @@ class TabletopDeck {
       decrypted['name'],
       vaultId: entry.id,
     );
-    for (var card in decrypted['cards']) {
-      final container = AttachmentContainer.fromJson(card);
-      deck.cards.add(container);
+    if (json['cards'] == null) {
+      return deck;
     }
+    deck.encodedCards.addAll(json['cards']);
     return deck;
   }
 
@@ -80,6 +68,16 @@ class TabletopDeck {
     }
     vaultId = id;
     return true;
+  }
+
+  /// usecase is the type of storage to use for the cards (for downloaded ones it should be "cache" for example)
+  void loadCards(StorageType usecase) async {
+    for (var card in encodedCards) {
+      final type = await AttachmentController.checkLocations(card['id'], usecase, types: [StorageType.permanent, StorageType.cache]);
+      final container = AttachmentContainer.fromJson(type, card);
+      cards.add(container);
+    }
+    encodedCards.clear();
   }
 
   Future<bool> delete() async {

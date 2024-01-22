@@ -24,7 +24,7 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data) async {
+  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
@@ -50,12 +50,12 @@ class AttachmentController extends GetxController {
     );
 
     if (res.statusCode != 200) {
-      return FileUploadResponse(false, "server.error", AttachmentContainer("", "", "", key));
+      return FileUploadResponse("server.error", null);
     }
 
     final json = res.data;
     if (!json["success"]) {
-      return FileUploadResponse(false, json["error"], AttachmentContainer("", "", "", key));
+      return FileUploadResponse(json["error"], null);
     }
 
     // Copy file to cloud_files directory
@@ -65,21 +65,21 @@ class AttachmentController extends GetxController {
 
     final file2 = File(path.join(dir.path, json["id"].toString()));
     await file2.writeAsBytes(bytes);
-    final container = AttachmentContainer(json["id"], data.file.name, json["url"], key);
+    final container = AttachmentContainer(StorageType.temporary, json["id"], data.file.name, json["url"], key);
     sendLog("SENT ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
     attachments[container.id] = container;
 
-    return FileUploadResponse(true, "success", container);
+    return FileUploadResponse("success", container);
   }
 
   /// Find a local file
-  Future<AttachmentContainer?> findLocalFile(AttachmentContainer container) async {
+  Future<AttachmentContainer?> findLocalFile(AttachmentContainer container, {save = true}) async {
     if (attachments.containsKey(container.id)) {
       return attachments[container.id];
     }
 
-    final file = File(getFilePathForId(container.id));
+    final file = File(container.filePath);
     final exists = await file.exists();
     if (!exists) {
       container.error.value = true;
@@ -87,7 +87,9 @@ class AttachmentController extends GetxController {
     }
 
     container.downloaded.value = true;
-    attachments[container.id] = container;
+    if (save) {
+      attachments[container.id] = container;
+    }
 
     return container;
   }
@@ -123,7 +125,7 @@ class AttachmentController extends GetxController {
     // Download and show progress
     final res = await dio.download(
       container.url,
-      path.join(getFilePath(), container.id),
+      path.join(container.filePath, container.id),
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
       },
@@ -136,7 +138,7 @@ class AttachmentController extends GetxController {
     }
 
     // Decrypt file
-    final file = File(path.join(getFilePath(), container.id));
+    final file = File(container.filePath);
     final encrypted = await file.readAsBytes();
     final decrypted = decryptSymmetricBytes(encrypted, container.key);
     await file.writeAsBytes(decrypted);
@@ -153,11 +155,12 @@ class AttachmentController extends GetxController {
     // TODO: Test this stuff properly
 
     // Move into isolate in the future?
+    final cacheType = Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue();
+    if (cacheType == 0) return;
     final maxSize = Get.find<SettingController>().settings[FileSettings.maxCacheSize]!.getValue() * 1000 * 1000; // Convert to bytes
-    final dir = Directory(getFilePath());
+    final dir = Directory(getFilePathForType(StorageType.temporary));
     final files = await dir.list().toList();
     var cacheSize = files.fold(0, (previousValue, element) => previousValue + element.statSync().size);
-    sendLog("Cache size: $cacheSize");
     if (cacheSize < maxSize) return;
 
     // Delete oldest files
@@ -165,7 +168,6 @@ class AttachmentController extends GetxController {
     for (final file in files) {
       final size = file.statSync().size;
       await file.delete();
-      sendLog("Deleted file ${file.path} with size $size");
       cacheSize -= size;
       if (cacheSize < maxSize) {
         break;
@@ -173,49 +175,100 @@ class AttachmentController extends GetxController {
     }
   }
 
-  // Delete all files from the device with a specific account id
+  // Delete all files from the device
   Future<bool> deleteAllFiles() async {
-    final dir = Directory(getFilePath());
-    for (var file in dir.listSync()) {
-      await file.delete();
-    }
+    var dir = Directory(_pathTemporary);
+    await dir.delete(recursive: true);
+    dir = Directory(_pathCache);
+    await dir.delete(recursive: true);
+    dir = Directory(_pathPermanent);
+    await dir.delete(recursive: true);
     return true;
   }
 
-  static String _cachedPath = "";
+  static String _pathCache = "";
+  static String _pathTemporary = "";
+  static String _pathPermanent = "";
 
   static void initFilePath() async {
-    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files");
-    final dir = Directory(fileFolder);
-    _cachedPath = dir.path;
-    await dir.create();
+    // Init folder for cached files
+    final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache");
+    _pathCache = cacheFolder;
+    await Directory(cacheFolder).create();
+
+    // Init folder for temporary files
+    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files");
+    _pathTemporary = fileFolder;
+    await Directory(fileFolder).create();
+
+    // Init folder for permanent files
+    final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files");
+    _pathPermanent = saveFolder;
+    await Directory(saveFolder).create();
   }
 
-  static String getFilePath() {
-    return _cachedPath;
+  static String getFilePathForType(StorageType type) {
+    switch (type) {
+      case StorageType.cache:
+        return _pathCache;
+      case StorageType.temporary:
+        return _pathTemporary;
+      case StorageType.permanent:
+        return _pathPermanent;
+    }
   }
 
-  static String getFilePathForId(String id) {
-    return path.join(_cachedPath, id);
+  /// Get the storage type for a file (or the default type)
+  static Future<StorageType> checkLocations(String id, StorageType defaultType, {types = StorageType.values}) async {
+    // Check if the file is in any of the existing folders
+    for (final type in types) {
+      final file = File(path.join(getFilePathForType(type), id));
+      if (await file.exists()) {
+        return type;
+      }
+    }
+
+    return defaultType;
   }
 
-  static Directory getFileDirectory() {
-    return Directory(_cachedPath);
+  /// Check if a file exists (and get the file path if it does)
+  static Future<String?> getFilePathFor(String id, {types = StorageType.values}) async {
+    // Check if the file is in any of the existing folders
+    for (final type in types) {
+      final file = File(path.join(getFilePathForType(type), id));
+      if (await file.exists()) {
+        return file.path;
+      }
+    }
+
+    return null;
   }
 }
 
+/// The type of storage the file is in on device
+enum StorageType {
+  /// The file is stored only cached (and should be deleted after closing the app)
+  cache,
+
+  /// The file is stored as a message attachment (it will be deleted when the max file cache setting is reached, and when it is old enough)
+  temporary,
+
+  /// The file is stored permanently (for example when it's part of a deck)
+  permanent,
+}
+
 class FileUploadResponse {
-  final bool success;
   final String message;
-  final AttachmentContainer container;
+  final AttachmentContainer? container;
 
-  FileUploadResponse(this.success, this.message, this.container);
+  FileUploadResponse(this.message, this.container);
 
-  String get data => jsonEncode(container.toJson());
+  String get data => jsonEncode(container?.toJson());
 }
 
 class AttachmentContainer {
   late final String filePath;
+  final StorageType type;
   final String id;
   final String name;
   final String url;
@@ -227,12 +280,12 @@ class AttachmentContainer {
   final error = false.obs;
   final percentage = 0.0.obs;
 
-  AttachmentContainer(this.id, this.name, this.url, this.key) {
-    filePath = path.join(AttachmentController.getFilePath(), id);
+  AttachmentContainer(this.type, this.id, this.name, this.url, this.key) {
+    filePath = path.join(AttachmentController.getFilePathForType(type), id);
   }
 
-  factory AttachmentContainer.fromJson(Map<String, dynamic> json) {
-    return AttachmentContainer(json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
+  factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json) {
+    return AttachmentContainer(type, json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
   }
 
   Map<String, dynamic> toJson() {
