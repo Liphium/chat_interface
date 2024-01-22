@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -9,10 +8,12 @@ import 'package:get/get.dart';
 class ErrorContainer extends StatelessWidget {
   /// Translation required
   final String message;
+  final bool expand;
 
   const ErrorContainer({
     super.key,
     required this.message,
+    this.expand = false,
   });
 
   @override
@@ -29,7 +30,7 @@ class ErrorContainer extends StatelessWidget {
         children: [
           Icon(Icons.error, color: Theme.of(context).colorScheme.error),
           horizontalSpacing(defaultSpacing),
-          Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium)),
+          if (expand) Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium)) else Text(message, style: Theme.of(context).textTheme.labelMedium),
         ],
       ),
     );

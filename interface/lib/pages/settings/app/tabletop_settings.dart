@@ -125,7 +125,12 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
       }
 
       if (_error.value) {
-        return Center(child: ErrorContainer(message: "settings.tabletop.decks.error".tr));
+        return Center(
+          child: ErrorContainer(
+            message: "settings.tabletop.decks.error".tr,
+            expand: true,
+          ),
+        );
       }
 
       return Column(

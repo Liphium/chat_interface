@@ -58,13 +58,8 @@ class AttachmentController extends GetxController {
       return FileUploadResponse(json["error"], null);
     }
 
-    // Copy file to cloud_files directory
-    final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files");
-    final dir = Directory(instanceFolder);
-    await dir.create();
-
-    final file2 = File(path.join(dir.path, json["id"].toString()));
-    await file2.writeAsBytes(bytes);
+    final file = File(path.join(AttachmentController.getFilePathForType(type), json["id"].toString()));
+    await file.writeAsBytes(bytes);
     final container = AttachmentContainer(StorageType.temporary, json["id"], data.file.name, json["url"], key);
     sendLog("SENT ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
@@ -125,7 +120,7 @@ class AttachmentController extends GetxController {
     // Download and show progress
     final res = await dio.download(
       container.url,
-      path.join(container.filePath, container.id),
+      container.filePath,
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
       },
@@ -197,7 +192,7 @@ class AttachmentController extends GetxController {
     await Directory(cacheFolder).create();
 
     // Init folder for temporary files
-    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files");
+    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files");
     _pathTemporary = fileFolder;
     await Directory(fileFolder).create();
 
