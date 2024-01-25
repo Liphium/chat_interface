@@ -6,12 +6,12 @@ import 'package:chat_interface/pages/settings/account/invites_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
+import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 enum SettingLabel {
-
   // Account settings (everything to do with the account and stored on the server)
   account("settings.tab.account", [
     SettingCategory("data", Icons.account_circle, DataSettingsPage()),
@@ -23,7 +23,7 @@ enum SettingLabel {
 
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
-    //SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage()),
+    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage()),
     SettingCategory("files", Icons.folder, FileSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage()),
     //SettingCategory("notifications", Icons.notifications, null),
@@ -34,9 +34,8 @@ enum SettingLabel {
   appearance("settings.tab.appearance", [
     SettingCategory("colors", Icons.color_lens, ThemeSettingsPage()),
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
-  
   ])
-  
+
   /* Commented out for now
   privacy("settings.tab.privacy", [
     //SettingCategory("requests", Icons.group, null),
@@ -65,7 +64,6 @@ class SettingCategory {
 }
 
 class Setting<T> {
-
   final String label;
   final Rx<T?> value = Rx<T?>(null);
   T defaultValue;
@@ -97,5 +95,4 @@ class Setting<T> {
 
   T getOr(T other) => value.value ?? other;
   T getWhenValue(T other, T def) => value.value == other ? def : value.value ?? defaultValue;
-
 }

@@ -16,6 +16,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -105,24 +106,27 @@ class Friend {
   KeyStorage keyStorage;
   bool unknown = false;
   Timer? _timer;
+  int updatedAt;
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage);
+  Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage, this.updatedAt);
 
   Friend.system()
       : id = "system",
         name = "System",
         tag = "fjc",
         vaultId = "",
-        keyStorage = KeyStorage.empty();
+        keyStorage = KeyStorage.empty(),
+        updatedAt = 0;
   Friend.me([StatusController? controller])
       : id = '',
         name = '',
         tag = '',
         vaultId = '',
-        keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, "") {
+        keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+        updatedAt = 0 {
     final StatusController statusController = controller ?? Get.find();
     id = statusController.id.value;
     name = statusController.name.value;
@@ -132,7 +136,8 @@ class Friend {
       : name = 'fj-$id',
         tag = 'tag',
         vaultId = '',
-        keyStorage = KeyStorage.empty() {
+        keyStorage = KeyStorage.empty(),
+        updatedAt = 0 {
     unknown = true;
   }
 
@@ -141,9 +146,10 @@ class Friend {
         name = data.name,
         tag = data.tag,
         vaultId = data.vaultId,
-        keyStorage = KeyStorage.fromJson(jsonDecode(data.keys));
+        keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
+        updatedAt = data.updatedAt.toInt();
 
-  Friend.fromStoredPayload(Map<String, dynamic> json)
+  Friend.fromStoredPayload(Map<String, dynamic> json, this.updatedAt)
       : id = json["id"],
         name = json["name"],
         tag = json["tag"],
@@ -206,25 +212,19 @@ class Friend {
 
   //* Profile picture
   var profilePictureUsages = 0;
+  AttachmentContainer? profilePicture;
   final profilePictureImage = Rx<ui.Image?>(null);
   var profilePictureData = ProfilePictureData(1, 0, 0);
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Update the profile picture of this friend
-  void updateProfilePicture(String picture, ProfilePictureData data) async {
+  void updateProfilePicture(AttachmentContainer picture, ProfilePictureData data) async {
     // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureId: picture, pictureData: jsonEncode(data.toJson()), data: ""));
+    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: jsonEncode(picture.toJson()), pictureData: jsonEncode(data.toJson()), data: ""));
 
+    profilePicture = picture;
     profilePictureData = data;
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
-    if (profilePictureImage.value == null) {
-      // Redownload the profile picture
-      final result = await ProfilePictureHelper.downloadProfilePicture(this);
-      if (result == null) {
-        return;
-      }
-      profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(picture));
-    }
+    profilePictureImage.value = await ProfilePictureHelper.loadImage(picture.filePath);
   }
 
   /// Load the profile picture of this friend
@@ -232,6 +232,7 @@ class Friend {
     profilePictureUsages++;
 
     if (DateTime.now().difference(lastProfilePictureUpdate).inMinutes > 2) {
+      sendLog("REDOWNLOADING");
       lastProfilePictureUpdate = DateTime.now();
 
       final result = await ProfilePictureHelper.downloadProfilePicture(this);
@@ -244,31 +245,28 @@ class Friend {
     if (profilePictureImage.value != null) return;
 
     // Load the image
-    final data = await ProfilePictureHelper.getProfilePictureLocal(id);
+    final data = await ProfilePictureHelper.getProfileDataLocal(id);
     if (data == null) {
       sendLog("NOTHING FOUND");
       return;
     }
-    profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
-    if (profilePictureImage.value == null) {
-      sendLog("NO PFP");
 
-      // Redownload the profile picture
-      final result = await ProfilePictureHelper.downloadProfilePicture(this);
-      if (result == null) {
-        return;
-      }
-      profilePictureImage.value = await ProfilePictureHelper.loadImage(AttachmentController.getFilePathForId(data.pictureId));
-    }
+    final json = jsonDecode(data.pictureContainer);
+    final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
+    profilePicture = AttachmentContainer.fromJson(type, json);
+    profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
+    profilePictureImage.value = await ProfilePictureHelper.loadImage(profilePicture!.filePath);
     sendLog("LOADED!!");
   }
 
   void disposeProfilePicture() {
     profilePictureUsages--;
-    if (profilePictureUsages == 0) {
-      profilePictureImage.value = null;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (profilePictureUsages <= 0) {
+        profilePictureImage.value = null;
+        profilePicture = null;
+      }
+    });
   }
 
   //* Remove friend
@@ -292,5 +290,6 @@ class Friend {
         tag: tag,
         vaultId: vaultId,
         keys: jsonEncode(keyStorage.toJson()),
+        updatedAt: BigInt.from(updatedAt),
       );
 }

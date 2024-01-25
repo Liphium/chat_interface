@@ -1,4 +1,3 @@
-
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/app/microphone_tab.dart';
@@ -18,7 +17,6 @@ class SpeechSettings {
 }
 
 void addSpeechSettings(SettingController controller) async {
-
   SpeechSettings.defaultDeviceName = await api.getDefaultId();
 
   //* Microphone
@@ -28,7 +26,6 @@ void addSpeechSettings(SettingController controller) async {
 
   //* Output
   controller.settings[SpeechSettings.output] = Setting<String>(SpeechSettings.output, "def");
-
 }
 
 class AudioSettingsPage extends StatefulWidget {
@@ -39,7 +36,6 @@ class AudioSettingsPage extends StatefulWidget {
 }
 
 class _AudioSettingsPageState extends State<AudioSettingsPage> {
-
   final _selected = "audio.microphone".obs;
 
   // Tabs
@@ -50,7 +46,6 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,15 +71,13 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
               label: "audio.output",
               selected: _selected,
             )
-          ]
+          ],
         ),
 
         verticalSpacing(sectionSpacing),
 
         //* Current tab
-        Obx(() =>
-          _tabs[_selected.value]!
-        )
+        Obx(() => _tabs[_selected.value]!)
       ],
     );
   }

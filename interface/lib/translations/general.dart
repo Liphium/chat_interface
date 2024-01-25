@@ -18,26 +18,40 @@ class GeneralTranslations extends Translations {
           'change': 'Change',
           'save': 'Save',
           'delete': 'Delete',
+          'remove': 'Remove',
           'select': 'Select',
+          'search': 'Search',
           'zoom': 'Zoom',
           'x': 'X',
           'y': 'Y',
           'close': 'Close',
+          'open': 'Open',
           'username': 'Username',
           'password': 'Password',
+          'password.current': 'Current password',
           'invite': 'Invite',
           'email': 'Email',
+          'code': 'Code',
           'under.dev': 'This featue is still under development. Sorry for the inconvenience. Please contact support if this is something important.',
+          'no.friends': 'You have no friends yet. If you want to add some, you can do that in the friends page.',
+          'open.friends': 'Open friends page',
 
           // Time TODO: Differentiate between PM and AM
           'message.time': '@hour:@minute',
           'time.yesterday': 'Yesterday',
           'time.today': 'Today',
           'time': '@month/@day/@year',
+
+          // Log out thing
+          'log_out': 'Log out',
+          'log_out.dialog':
+              'This will delete all the data on this device. If you don\'t have your keys as a file or on another logged in device, you will not be able to recover your account. Are you sure you want to log out?',
+          'log_out.delete_files': 'Delete files',
         },
 
         //* German
         'de_DE': {
+          /*
           // Actions
           'success': 'Erfolg',
           'create': 'Erstellen',
@@ -60,6 +74,7 @@ class GeneralTranslations extends Translations {
           'password': 'Passwort',
           'email': 'Email',
           'invite': 'Einladung',
+          'code': 'Code',
           'under.dev': 'Dieses Feature ist noch in Entwicklung. Sorry für die Unannehmlichkeiten. Bitte kontaktiere den Support, wenn es um etwas Wichtiges geht.',
 
           // Time
@@ -67,6 +82,7 @@ class GeneralTranslations extends Translations {
           'time.yesterday': 'Gestern',
           'time.today': 'Heute',
           'time': '@day.@month.@year',
+          */
         }
       };
 }

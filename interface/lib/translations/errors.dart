@@ -7,13 +7,18 @@ class ErrorTranslations extends Translations {
         'en_US': {
           'error': 'Error',
           'server.error': 'Something went wrong on the server, please try again later.',
+          'friends.error': 'There was an error while loading your friends. Please try again later or contact support.',
           'node.error': 'The chat server didn\'t respond, please try again later.',
+          'mail.error': 'There was an error with our mail servers. Please try again later or contact support.',
           'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
           'new.version': 'A new version is available, please update the app.',
           'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
           'already.deleted': 'This object was already deleted.',
           'no.permission': 'You don\'t have permission to do that.',
           'spaces.connection_error': 'Something went wrong with the spaces connection. Please try again later.',
+          'invalid.method': 'This is incorrect. Please try again.',
+          'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
+          'password.incorrect': 'Your password is incorrect. Please try again.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',
@@ -44,6 +49,7 @@ class ErrorTranslations extends Translations {
 
         //* German
         'de_DE': {
+          /*
           'error': 'Fehler',
           'server.error': 'Auf dem Server ist ein Fehler aufgetreten, bitte versuche es später erneut.',
           'node.error': 'Der Chat-Server hat nicht geantwortet, bitte versuche es später erneut.',
@@ -79,6 +85,7 @@ class ErrorTranslations extends Translations {
 
           // Game
           'no.start': 'Das Spiel konnte nicht gestartet werden. Wir entschuldigen uns für die Unannehmlichkeiten, bitte melde dich bei Support, wenn du auf dieses Problem stößt.',
+          */
         },
       };
 }

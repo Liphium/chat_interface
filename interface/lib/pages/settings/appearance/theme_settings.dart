@@ -8,6 +8,7 @@ import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/default_theme.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -113,16 +114,13 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                       verticalSpacing(defaultSpacing),
 
                       //* Sliders
-                      const DoubleSelectionSetting(
-                          settingName: ThemeSettings.primaryHue, description: "custom.primary_hue", min: 0.0, max: 1.0),
+                      const DoubleSelectionSetting(settingName: ThemeSettings.primaryHue, description: "custom.primary_hue", min: 0.0, max: 1.0),
                       verticalSpacing(defaultSpacing),
 
-                      const DoubleSelectionSetting(
-                          settingName: ThemeSettings.secondaryHue, description: "custom.secondary_hue", min: 0.0, max: 1.0),
+                      const DoubleSelectionSetting(settingName: ThemeSettings.secondaryHue, description: "custom.secondary_hue", min: 0.0, max: 1.0),
                       verticalSpacing(defaultSpacing),
 
-                      const DoubleSelectionSetting(
-                          settingName: ThemeSettings.baseSaturation, description: "custom.base_saturation", min: 0.0, max: 1.0),
+                      const DoubleSelectionSetting(settingName: ThemeSettings.baseSaturation, description: "custom.base_saturation", min: 0.0, max: 1.0),
                       verticalSpacing(defaultSpacing),
 
                       //* Selections
@@ -130,9 +128,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                         "custom.theme_mode".tr,
                       ),
                       verticalSpacing(elementSpacing),
-                      ListSelectionSetting(
-                          settingName: ThemeSettings.themeMode,
-                          items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
+                      ListSelectionSetting(settingName: ThemeSettings.themeMode, items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
                       verticalSpacing(defaultSpacing),
 
                       Text(

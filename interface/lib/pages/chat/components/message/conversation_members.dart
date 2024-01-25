@@ -11,14 +11,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ConversationMembers extends StatelessWidget {
-
   final Conversation conversation;
 
   const ConversationMembers({super.key, required this.conversation});
 
   @override
   Widget build(BuildContext context) {
-
     final ownRole = conversation.members[conversation.token.id]!.role;
     final controller = Get.find<MessageController>();
 
@@ -32,11 +30,11 @@ class ConversationMembers extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
-                child: Obx(() => Text('chat.members'.trParams({"count":controller.selectedConversation.value.members.length.toString()}), style: Theme.of(context).textTheme.titleMedium)),
+                child: Obx(() => Text('chat.members'.trParams({"count": controller.selectedConversation.value.members.length.toString()}), style: Theme.of(context).textTheme.titleMedium)),
               ),
               LoadingIconButton(
                 loading: conversation.membersLoading,
-                onTap: () => conversation.fetchMembers(DateTime.now()), 
+                onTap: () => conversation.fetchMembers(DateTime.now()),
                 icon: Icons.refresh,
               ),
             ],
@@ -44,8 +42,8 @@ class ConversationMembers extends StatelessWidget {
           verticalSpacing(defaultSpacing),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
-            child: Obx(() => 
-              ListView.builder(
+            child: Obx(
+              () => ListView.builder(
                 shrinkWrap: true,
                 itemCount: controller.selectedConversation.value.members.length,
                 itemBuilder: (context, index) {
@@ -60,60 +58,41 @@ class ConversationMembers extends StatelessWidget {
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         onTap: () {
                           final friend = Get.find<FriendController>().friends[member.account];
-                          if(StatusController.ownAccountId != member.account) {
+                          if (StatusController.ownAccountId != member.account) {
                             final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
-                            Get.dialog(Profile(
-                              position: box.localToGlobal(box.size.bottomLeft(Offset.zero)), 
-                              friend: friend ?? Friend.unknown(member.account), 
-                              size: box.size.width.toInt(),
-                              actions: (friend) {
-                                return [
+                            Get.dialog(
+                              Profile(
+                                position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
+                                friend: friend ?? Friend.unknown(member.account),
+                                size: box.size.width.toInt(),
+                                actions: (friend) {
+                                  return [
+                                        //* Promotion actions
+                                        if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
+                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_moderator".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id))
+                                        else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
+                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_admin".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id)),
 
-                                  //* Promotion actions
-                                  if(ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
-                                    ProfileAction(
-                                      icon: Icons.add_moderator, 
-                                      label: "chat.make_moderator".tr, 
-                                      loading: false.obs, 
-                                      onTap: (f, l) => member.promote(conversation.id)
-                                    )
-                                  else if(ownRole == MemberRole.admin && member.role == MemberRole.moderator)
-                                    ProfileAction(
-                                      icon: Icons.add_moderator, 
-                                      label: "chat.make_admin".tr, 
-                                      loading: false.obs, 
-                                      onTap: (f, l) => member.promote(conversation.id)
-                                    ),
+                                        //* Demotion actions
+                                        if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
+                                          ProfileAction(icon: Icons.remove_moderator, label: "chat.remove_moderator".tr, loading: false.obs, onTap: (f, l) => member.demote(conversation.id))
+                                        else if (ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
+                                          ProfileAction(icon: Icons.remove_moderator, label: "chat.remove_admin".tr, loading: false.obs, onTap: (f, l) => member.demote(conversation.id)),
 
-                                  //* Demotion actions
-                                  if(ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
-                                    ProfileAction(
-                                      icon: Icons.remove_moderator, 
-                                      label: "chat.remove_moderator".tr, 
-                                      loading: false.obs, 
-                                      onTap: (f, l) => member.demote(conversation.id)
-                                    )
-                                  else if(ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
-                                    ProfileAction(
-                                      icon: Icons.remove_moderator, 
-                                      label: "chat.remove_admin".tr, 
-                                      loading: false.obs, 
-                                      onTap: (f, l) => member.demote(conversation.id)
-                                    ),
-
-                                  //* Removal actions
-                                  if(ownRole.higherOrEqual(MemberRole.moderator) && member.role.lowerThan(ownRole))
-                                    ProfileAction(
-                                      icon: Icons.person_remove, 
-                                      label: "chat.remove_member".tr, 
-                                      loading: false.obs,
-                                      color: Get.theme.colorScheme.errorContainer,
-                                      iconColor: Get.theme.colorScheme.error,
-                                      onTap: (f, l) => {}
-                                    ),
-                                ] + ProfileDefaults.buildDefaultActions(friend);
-                              },
-                            ));
+                                        //* Removal actions
+                                        if (ownRole.higherOrEqual(MemberRole.moderator) && member.role.lowerThan(ownRole))
+                                          ProfileAction(
+                                              icon: Icons.person_remove,
+                                              label: "chat.remove_member".tr,
+                                              loading: false.obs,
+                                              color: Get.theme.colorScheme.errorContainer,
+                                              iconColor: Get.theme.colorScheme.error,
+                                              onTap: (f, l) => {}),
+                                      ] +
+                                      ProfileDefaults.buildDefaultActions(friend);
+                                },
+                              ),
+                            );
                           }
                           return;
                         },
@@ -123,21 +102,25 @@ class ConversationMembers extends StatelessWidget {
                             children: [
                               Expanded(child: UserRenderer(id: member.account)),
                               horizontalSpacing(elementSpacing),
-                              if(member.role != MemberRole.user) Padding(
-                                padding: const EdgeInsets.only(left: defaultSpacing),
-                                child: Tooltip(
-                                  message: member.role == MemberRole.admin ? "chat.admin".tr : "chat.moderator".tr,
-                                  child: Icon(Icons.shield, color: member.role == MemberRole.admin ? Get.theme.colorScheme.error : Get.theme.colorScheme.onPrimary)
+                              if (member.role != MemberRole.user)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: defaultSpacing),
+                                  child: Tooltip(
+                                    message: member.role == MemberRole.admin ? "chat.admin".tr : "chat.moderator".tr,
+                                    child: Icon(
+                                      Icons.shield,
+                                      color: member.role == MemberRole.admin ? Get.theme.colorScheme.error : Get.theme.colorScheme.onPrimary,
+                                    ),
+                                  ),
                                 ),
-                              ),
                             ],
-                          )
-                        )
-                      )
+                          ),
+                        ),
+                      ),
                     ),
                   );
                 },
-              )
+              ),
             ),
           ),
         ],

@@ -10,13 +10,12 @@ import 'package:flutter/material.dart';
 
 class ProfileSetup extends Setup {
   ProfileSetup() : super('loading.profile', false);
-  
+
   @override
   Future<Widget?> load() async {
-
     // Get profile from database
     var profiles = await (db.select(db.setting)..where((tbl) => tbl.key.equals("profile"))).get();
-    if(profiles.isEmpty) return const LoginPage();
+    if (profiles.isEmpty) return const LoginPage();
 
     // Load tokens from profile
     var profile = profiles.first;
@@ -33,16 +32,19 @@ class ProfileSetup extends Setup {
     sendLog(body);
 
     // Set new token (if refreshed)
-    if(body["success"]) {
+    if (body["success"]) {
       loadTokensFromPayload(body);
       await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
     } else {
-
-      if(body["error"] == "session.duration") {
+      if (body["error"] == "session.duration") {
         return null;
       }
 
-      if(body["error"] == "server.error") {
+      if (body["code"] != null && body["code"] != 200) {
+        return const LoginPage();
+      }
+
+      if (body["error"] == "server.error") {
         return const ErrorPage(title: "server.error");
       }
 

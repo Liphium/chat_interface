@@ -23,6 +23,7 @@ class SettingsTranslations extends Translations {
           'settings.requests': 'Friend requests',
           'settings.encryption': 'Encryption',
           'settings.spaces': 'Spaces',
+          'settings.tabletop': 'Tabletop',
           'settings.files': 'Files',
           'settings.invites': 'Invites',
           'settings.invites.title': 'You have @count invites left.',
@@ -66,7 +67,9 @@ class SettingsTranslations extends Translations {
           'settings.file.max_size.description': 'Files larger than this will not be downloaded automatically.',
           'settings.file.cache': 'File cache',
           'settings.file.cache.description':
-              'The file cache stores all files that have been automatically downloaded. This includes profile pictures and all other data you\'ve selected above. When it is full old files will automatically be deleted. In the future you might even be able to turn this off. You can select the size of it with the slider below.',
+              'The file cache stores all files that have been automatically downloaded. This includes profile pictures and all other data you\'ve selected above. When it is full old files will automatically be deleted. You can select the size with the slider below or make it unlimited.',
+          'settings.file.cache_type.unlimited': 'Unlimited',
+          'settings.file.cache_type.size': 'Size',
           'settings.file.mb': 'MB',
 
           // Data settings
@@ -80,11 +83,14 @@ class SettingsTranslations extends Translations {
               'If you don\'t know what this is, it\'s fine. This is just data from the server that we can ask you for in case of problems. Here\'s which permissions you have:',
           'settings.data.account': 'Account data',
           'settings.data.password.description': 'We\'ll not show your password here. That would be stupid.',
+          'settings.data.change_password.dialog': 'Let\'s make sure your account is secure again. All your devices (also this one) will be logged out after you click "Save".',
+          'settings.data.email.description': 'Showing your email would be work. And I don\'t like that, you know.',
           'settings.data.log_out': 'Log out of your account',
-          'settings.data.log_out.description': 'This feature is still in development. Just wanted to let you know so you don\'t keep searching for it.',
+          'settings.data.log_out.description':
+              'If you log out of your account, we\'ll delete all your data from this device. This includes the keys we use to encrypt stuff on our servers. If you don\'t have these on another device, you will NEVER be able to recover your friends.',
           'settings.data.danger_zone': 'Danger zone',
           'settings.data.danger_zone.description':
-              'Hello, and welcome down here! Hope you haven\'t come here to delete your account. If you have, you can do that here. But please don\'t. We\'ll miss you. :( ... Anyways thanks for freeing some storage in our database!',
+              'Hello, and welcome down here! Hope you haven\'t come here to delete your account. If you have, you can do that here. But please don\'t. We\'ll miss you. :(',
           'settings.data.danger_zone.delete_account': 'Delete account',
           'settings.data.danger_zone.delete_account.confirm':
               'This is just a request and your actual data will be deleted in 30 days. We do this to make sure you didn\'t just accidentally click this button and that you are the actual owner of this account. Are you sure you want to delete your account?',
@@ -101,10 +107,28 @@ class SettingsTranslations extends Translations {
 
           // Spaces settings
           'game.music': 'Play music in Game Mode',
+
+          // Tabletop settings
+          'settings.tabletop.decks': 'Decks',
+          'settings.tabletop.decks.error':
+              'An error occurred while loading your decks. This is probably something you\'ll need to report to us or it\'s just your connection. You can also try to see if there\'s a new version of the app available or try again later.',
+          'settings.tabletop.decks.limit': 'Decks (@count/@limit)',
+          'decks.description': 'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
+          'decks.create': 'Create a new deck',
+          'decks.dialog.delete.title': 'Delete deck',
+          'decks.dialog.delete': 'Are you sure you want to delete this deck? Think about all the cards you\'ll lose!',
+          'decks.dialog.new_name': 'Type a new name for your deck here. This won\'t delete the cards in it, it\'ll just change the name.',
+          'decks.dialog.name': 'First of all, please give your deck a nice name. You know, something actually good.',
+          'decks.dialog.name.placeholder': 'Deck name',
+          'decks.dialog.name.error': 'Please make the name for your deck longer than 3 characters.',
+          'decks.limit_reached': 'You have reached the maximum amount of decks you can create. Please delete one of your existing decks to create a new one.',
+          'decks.cards': '@count cards',
+          'decks.add_cards': 'Add cards',
         },
 
         //* German
         'de_DE': {
+          /*
           // Categories
           'settings.tab.account': 'Konto',
           'settings.tab.appearance': 'Aussehen',
@@ -201,6 +225,7 @@ class SettingsTranslations extends Translations {
 
           // Spaces settings
           'game.music': 'Musik im Spielmodus abspielen',
+          */
         }
       };
 }

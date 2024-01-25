@@ -11,6 +11,7 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
@@ -143,8 +144,7 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces",
-        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
@@ -248,6 +248,7 @@ class SpacesController extends GetxController {
     Get.find<SpaceMemberController>().onDisconnect();
     Get.find<AudioController>().disconnect();
     Get.find<GameHubController>().leaveCall();
+    Get.find<TabletopController>().disconnect(leave: false);
 
     if (!error) {
       Get.offAll(const ChatPage(), transition: Transition.fadeIn);
@@ -303,8 +304,7 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
-      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {
@@ -335,18 +335,16 @@ class SpaceConnectionContainer extends ShareContainer {
       return SpaceInfo.notLoaded();
     }
     final body = jsonDecode(req.body);
-    if (!body["success"]) {
-      return SpaceInfo.notLoaded();
-    }
     if (timer && _timer == null) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
         final info = await getInfo();
         if (info.exists) {
           this.info.value = info;
-        } else {
-          timer.cancel();
         }
       });
+    }
+    if (!body["success"]) {
+      return SpaceInfo.notLoaded();
     }
     info.value = SpaceInfo.fromJson(this, body);
     return info.value!;

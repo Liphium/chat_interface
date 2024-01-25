@@ -39,6 +39,8 @@ class ChatPageTranslations extends Translations {
           'request.confirm.title': 'Confirm request',
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
+          'request.already.exists': 'Already exists',
+          'request.already.exists.text': 'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
 
           // Conversations
           'conversations.placeholder': 'Search',
@@ -51,6 +53,9 @@ class ChatPageTranslations extends Translations {
           'conversations.leave': 'Leave conversation',
           'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
           'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
+          'conversations.add': 'Add a member',
+          'conversations.add.create': 'Create new conversation',
+          'choose.members': 'Choose more than one member to create a group chat.',
 
           // Conversation members
           'chat.make_moderator': 'Make moderator',
@@ -79,9 +84,23 @@ class ChatPageTranslations extends Translations {
           'message.profile': 'Open profile',
           'message.delete': 'Delete message',
           'message.info.text': 'This message was sent by @account (@token) at @hour:@minute on @month/@day/@year.',
+          'message.info.copy_id': 'Copy ID',
           'message.info.copy_signature': 'Copy signature',
           'message.info.copy_sender': 'Copy sender ID',
           'message.info.copy_cert': 'Copy certificate',
+
+          // Conversation info
+          'conversation.info.id': 'Conversation ID: @id',
+          'conversation.info.read': 'Read at @clock on @date',
+          'conversation.info.update': 'Updated at @clock on @date',
+          'conversation.info.members': 'Members: @count',
+          'conversation.info.copy_id': 'Copy ID',
+          'conversation.info.copy_token': 'Copy token',
+
+          // Files
+          'file.dialog': '@name is @size MB large. Choose an option to download it:',
+          'download.folder': 'Download into folder',
+          'download.app': 'Download into app',
 
           // Spaces
           'join.space': 'Join Space',
@@ -90,6 +109,7 @@ class ChatPageTranslations extends Translations {
 
         //* German
         'de_DE': {
+          /*
           // App
           'app.title': 'The chat app',
           'app.welcome': 'Danke, dass du mich auf dieser Reise begleitest!',
@@ -171,6 +191,7 @@ class ChatPageTranslations extends Translations {
           // Spaces
           'join.space': 'Space beitreten',
           'join.space.popup': 'Manche klicken darauf ausversehen, also willst du wirklich diesem Space beitreten?',
+          */
         }
       };
 }

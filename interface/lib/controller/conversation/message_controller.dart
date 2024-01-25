@@ -16,18 +16,16 @@ import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
-
 class MessageController extends GetxController {
-
   // Constants
-  static String systemSender = "6969"; 
+  static String systemSender = "6969";
 
   final loaded = false.obs;
   final selectedConversation = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
   final messages = <Message>[].obs;
 
   void unselectConversation({String? id}) {
-    if(id != null && selectedConversation.value.id != id) {
+    if (id != null && selectedConversation.value.id != id) {
       return;
     }
     selectedConversation.value = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
@@ -37,15 +35,18 @@ class MessageController extends GetxController {
   void selectConversation(Conversation conversation) async {
     //Get.find<WritingController>().init(conversation.id); // TODO: Reimplement typing indicator
     selectedConversation.value = conversation;
-    if(conversation.notificationCount.value != 0) {
-      
+    if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
       overwriteRead(conversation);
     }
 
     // Load messages
     messages.clear();
-    var loaded = await (db.select(db.message)..limit(30)..orderBy([(u) => OrderingTerm.desc(u.createdAt)])..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
+    var loaded = await (db.select(db.message)
+          ..limit(30)
+          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+          ..where((tbl) => tbl.conversationId.equals(conversation.id)))
+        .get();
 
     for (var message in loaded) {
       messages.add(Message.fromMessageData(message));
@@ -54,13 +55,12 @@ class MessageController extends GetxController {
 
   // Push read state to the server
   void overwriteRead(Conversation conversation) async {
-
     // Send new read state to the server
     final json = await postNodeJSON("/conversations/read", {
       "id": conversation.token.id,
       "token": conversation.token.token,
     });
-    if(json["success"]) {
+    if (json["success"]) {
       conversation.notificationCount.value = 0;
       conversation.readAt.value = DateTime.now().millisecondsSinceEpoch;
     }
@@ -68,15 +68,14 @@ class MessageController extends GetxController {
 
   // Delete a message from the client with an id
   void deleteMessageFromClient(String id) async {
-
     // Get the message from the database on the client
     final data = await (db.message.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
-    if(data == null) {
+    if (data == null) {
       return;
     }
 
     // Check if message is in the selected conversation
-    if(selectedConversation.value.id == data.conversationId!) {
+    if (selectedConversation.value.id == data.conversationId!) {
       messages.removeWhere((element) => element.id == id);
     }
 
@@ -85,26 +84,27 @@ class MessageController extends GetxController {
   }
 
   void storeMessage(Message message) async {
-
     // Handle attachments
-    if(message.attachments.isNotEmpty && message.type != MessageType.system) {
-      for(var attachment in message.attachments) {
-        final container = AttachmentContainer.fromJson(jsonDecode(attachment));
+    if (message.attachments.isNotEmpty && message.type != MessageType.system) {
+      for (var attachment in message.attachments) {
+        final json = jsonDecode(attachment);
+        final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
+        final container = AttachmentContainer.fromJson(type, json);
         final extension = container.url.split(".").last;
 
-        if(FileSettings.imageTypes.contains(extension)) {
+        if (FileSettings.imageTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
-          if(download) {
+          if (download) {
             await Get.find<AttachmentController>().downloadAttachment(container);
           }
-        } else if(FileSettings.videoTypes.contains(extension)) {
+        } else if (FileSettings.videoTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
-          if(download) {
+          if (download) {
             await Get.find<AttachmentController>().downloadAttachment(container);
           }
-        } else if(FileSettings.audioTypes.contains(extension)) {
+        } else if (FileSettings.audioTypes.contains(extension)) {
           final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
-          if(download) {
+          if (download) {
             await Get.find<AttachmentController>().downloadAttachment(container);
           }
         }
@@ -112,30 +112,26 @@ class MessageController extends GetxController {
     }
 
     // Update message reading
-    Get.find<ConversationController>().updateMessageRead(
-      message.conversation, 
-      increment: selectedConversation.value.id != message.conversation, 
-      messageSendTime: message.createdAt.millisecondsSinceEpoch
-    );
+    Get.find<ConversationController>()
+        .updateMessageRead(message.conversation, increment: selectedConversation.value.id != message.conversation, messageSendTime: message.createdAt.millisecondsSinceEpoch);
 
     // Add message to message history if it's the selected one
-    if(selectedConversation.value.id == message.conversation) {
-      if(message.sender != selectedConversation.value.token.id) {
+    if (selectedConversation.value.id == message.conversation) {
+      if (message.sender != selectedConversation.value.token.id) {
         overwriteRead(selectedConversation.value);
       }
       sendLog("MESSAGE RECEIVED ${message.id}");
 
       // Check if it is a system message and if it should be rendered or not
-      if(message.type == MessageType.system) {
-        if(SystemMessages.messages[message.content]?.render == true) {
+      if (message.type == MessageType.system) {
+        if (SystemMessages.messages[message.content]?.render == true) {
           addMessageToSelected(message);
         }
       } else {
-
         // Store normal type of message
-        if(messages.isNotEmpty && messages[0].id != message.id) {
+        if (messages.isNotEmpty && messages[0].id != message.id) {
           addMessageToSelected(message);
-        } else if(messages.isEmpty) {
+        } else if (messages.isEmpty) {
           addMessageToSelected(message);
         }
       }
@@ -143,8 +139,8 @@ class MessageController extends GetxController {
 
     // Store message in database
     sendLog(message.type);
-    if(message.type == MessageType.system) {
-      if(SystemMessages.messages[message.content]?.store == true) {
+    if (message.type == MessageType.system) {
+      if (SystemMessages.messages[message.content]?.store == true) {
         sendLog("STORING " + message.content);
         db.into(db.message).insertOnConflictUpdate(message.entity);
       }
@@ -154,16 +150,16 @@ class MessageController extends GetxController {
     }
 
     // Handle system messages
-    if(message.type == MessageType.system) {
+    if (message.type == MessageType.system) {
       SystemMessages.messages[message.content]?.handle(message);
     }
   }
 
   void addMessageToSelected(Message message) {
     int index = 0;
-    for(var msg in messages) {
+    for (var msg in messages) {
       index++;
-      if(msg.createdAt.isAfter(message.createdAt)) {
+      if (msg.createdAt.isAfter(message.createdAt)) {
         continue;
       }
       index -= 1;
@@ -171,11 +167,9 @@ class MessageController extends GetxController {
     }
     messages.insert(index, message);
   }
-
 }
 
 class Message {
-    
   final String id;
   MessageType type;
   String content;
@@ -192,15 +186,17 @@ class Message {
 
   /// Extracts and decrypts the attachments
   void initAttachments() async {
-    if(attachmentsRenderer.isNotEmpty) {
+    if (attachmentsRenderer.isNotEmpty) {
       return;
     }
-    if(attachments.isNotEmpty) {
+    if (attachments.isNotEmpty) {
       for (var attachment in attachments) {
-        final decoded = AttachmentContainer.fromJson(jsonDecode(attachment));
+        final json = jsonDecode(attachment);
+        final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
+        final decoded = AttachmentContainer.fromJson(type, json);
         final container = await Get.find<AttachmentController>().findLocalFile(decoded);
         sendLog("FOUND: ${container?.filePath}");
-        if(container == null) {
+        if (container == null) {
           attachmentsRenderer.add(decoded);
         } else {
           attachmentsRenderer.add(container);
@@ -214,25 +210,13 @@ class Message {
   }
 
   factory Message.fromJson(Map<String, dynamic> json) {
-
     // Convert to message
     var message = Message(
-      json["id"],
-      MessageType.text,
-      json["data"],
-      [""],
-      "",
-      json["certificate"],
-      json["sender"],
-      DateTime.fromMillisecondsSinceEpoch(json["creation"]),
-      json["conversation"],
-      json["edited"],
-      false
-    );
+        json["id"], MessageType.text, json["data"], [""], "", json["certificate"], json["sender"], DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"], json["edited"], false);
 
     // Decrypt content
     final conversation = Get.find<ConversationController>().conversations[json["conversation"]]!;
-    if(message.sender == MessageController.systemSender) {
+    if (message.sender == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();
@@ -251,9 +235,9 @@ class Message {
   /// Loads the content from the message (signature, type, content)
   void loadContent({Map<String, dynamic>? json}) {
     final contentJson = json ?? jsonDecode(content);
-    if(type != MessageType.system) {
+    if (type != MessageType.system) {
       type = MessageType.values[contentJson["t"] ?? 0];
-      if(type == MessageType.text) {
+      if (type == MessageType.text) {
         content = utf8.decode(base64Decode(contentJson["c"]));
       } else {
         content = contentJson["c"];
@@ -270,13 +254,13 @@ class Message {
     final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
     sendLog("${conversation.members} | ${this.sender}");
     final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
-    if(sender == null) {
+    if (sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;
       return;
     }
     String hash;
-    if(type != MessageType.text) {
+    if (type != MessageType.text) {
       hash = hashSha(content + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
     } else {
       hash = hashSha(base64Encode(utf8.encode(content)) + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
@@ -284,7 +268,7 @@ class Message {
     sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
     verified.value = checkSignature(signature, sender.signatureKey, hash);
     db.message.insertOnConflictUpdate(entity);
-    if(!verified.value) {
+    if (!verified.value) {
       sendLog("invalid signature");
     } else {
       sendLog("valid signature");
@@ -320,7 +304,6 @@ class Message {
       );
 
   Map<String, dynamic> toJson() {
-  
     return <String, dynamic>{};
   }
 
@@ -328,11 +311,11 @@ class Message {
   void decryptSystemMessageAttachments() {
     final conv = Get.find<ConversationController>().conversations[conversation]!;
     for (var i = 0; i < attachments.length; i++) {
-      if(attachments[i].startsWith("a:")) {
+      if (attachments[i].startsWith("a:")) {
         attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), conv.key))["id"];
       }
     }
-    if(SystemMessages.messages[content]?.store == true) {
+    if (SystemMessages.messages[content]?.store == true) {
       db.message.insertOnConflictUpdate(entity);
     }
   }
@@ -341,10 +324,9 @@ class Message {
   ///
   /// Returns null if successful, otherwise an error message
   Future<String?> delete() async {
-
     // Check if the message is sent by the user
     final token = Get.find<ConversationController>().conversations[conversation]!.token;
-    if(sender != token.id) {
+    if (sender != token.id) {
       return "no.permission";
     }
 
@@ -352,20 +334,19 @@ class Message {
     final json = await postNodeJSON("/conversations/message/delete", {
       "certificate": certificate,
       "id": token.id,
-    	"token": token.token,
+      "token": token.token,
     });
     sendLog(json);
 
-    if(!json["success"]) {
-
-      if(json["error"] == "server.error") {
+    if (!json["success"]) {
+      if (json["error"] == "server.error") {
         return "message.delete_error";
       }
       return json["error"];
     }
 
     return null;
-  } 
+  }
 }
 
 enum MessageType {

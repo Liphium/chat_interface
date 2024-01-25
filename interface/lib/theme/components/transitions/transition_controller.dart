@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class TransitionController extends GetxController {
-  final transitionDuration = 500.ms; // constant
+  final transitionDuration = 250.ms; // constant
   final transition = false.obs;
 
   Timer? currentTimer;

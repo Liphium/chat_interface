@@ -1,5 +1,4 @@
 import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -16,7 +15,6 @@ class InvitesPage extends StatefulWidget {
 }
 
 class _InvitesPageState extends State<InvitesPage> {
-
   @override
   void initState() {
     super.initState();
@@ -28,13 +26,13 @@ class _InvitesPageState extends State<InvitesPage> {
 
     final json = await postAuthorizedJSON("/account/invite/get_all", <String, dynamic>{});
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       showErrorPopup("error", json["error"]);
       return;
     }
 
     count.value = json["count"];
-    if(json["invites"] != null) {
+    if (json["invites"] != null) {
       invites.value = List<String>.from(json["invites"]);
     }
 
@@ -53,7 +51,7 @@ class _InvitesPageState extends State<InvitesPage> {
     generateLoading.value = true;
 
     final json = await postAuthorizedJSON("/account/invite/generate", <String, dynamic>{});
-    if(!json["success"]) {
+    if (!json["success"]) {
       showErrorPopup("error", json["error"]);
       generateLoading.value = false;
       return;
@@ -70,40 +68,30 @@ class _InvitesPageState extends State<InvitesPage> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-
-      if(loading.value) {
-        return Padding(
-          padding: const EdgeInsets.all(defaultSpacing),
-          child: Center(
-            child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)
-          )
-        );
+      if (loading.value) {
+        return Padding(padding: const EdgeInsets.all(defaultSpacing), child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
       }
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
           //* Profile picture
           verticalSpacing(defaultSpacing),
-          Obx(() => Text("settings.invites.title".trParams({
-            "count": count.value.toString()
-          }), style: Get.theme.textTheme.headlineMedium)),
+          Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
           verticalSpacing(defaultSpacing),
           Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButtonCustom(
-            loading: generateLoading,
-            onTap: () => generateNewInvite(), 
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.mail_lock, color: Get.theme.colorScheme.onPrimary),
-                horizontalSpacing(defaultSpacing),
-                Text("settings.invites.generate".tr, style: Get.theme.textTheme.labelLarge),
-              ],
-            )
-          ),
+              loading: generateLoading,
+              onTap: () => generateNewInvite(),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.mail_lock, color: Get.theme.colorScheme.onPrimary),
+                  horizontalSpacing(defaultSpacing),
+                  Text("settings.invites.generate".tr, style: Get.theme.textTheme.labelLarge),
+                ],
+              )),
           verticalSpacing(sectionSpacing),
 
           //* Profile picture
@@ -112,13 +100,13 @@ class _InvitesPageState extends State<InvitesPage> {
           Text("settings.invites.history.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           Obx(() {
-            if(invites.isEmpty) {
+            if (invites.isEmpty) {
               return Text("settings.invites.history.empty".tr, style: Get.theme.textTheme.labelMedium);
             }
 
             return Column(
               children: [
-                for(final invite in invites)
+                for (final invite in invites)
                   Animate(
                     effects: [
                       ExpandEffect(
@@ -139,31 +127,28 @@ class _InvitesPageState extends State<InvitesPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Obx(() =>
-                              MouseRegion(
-                                onEnter: (_) => hovering.value = invite,
-                                onExit: (_) => hovering.value = "",
-                                child: Animate(
-                                  effects: [
-                                    BlurEffect(
-                                      end: const Offset(5, 5),
-                                      duration: 100.ms,
-                                    )
-                                  ],
-                                  onInit: (controller) {
-                                    controller.value = 1.0;
-                                  },
-                                  target: invite == hovering.value ? 0.0 : 1.0,
-                                  child: Text(invite, style: Get.theme.textTheme.labelMedium),
-                                ),
-                              )
-                            ),
+                            Obx(() => MouseRegion(
+                                  onEnter: (_) => hovering.value = invite,
+                                  onExit: (_) => hovering.value = "",
+                                  child: Animate(
+                                    effects: [
+                                      BlurEffect(
+                                        end: const Offset(5, 5),
+                                        duration: 100.ms,
+                                      )
+                                    ],
+                                    onInit: (controller) {
+                                      controller.value = 1.0;
+                                    },
+                                    target: invite == hovering.value ? 0.0 : 1.0,
+                                    child: Text(invite, style: Get.theme.textTheme.labelMedium),
+                                  ),
+                                )),
                             IconButton(
-                              onPressed: () {
-                                Clipboard.setData(ClipboardData(text: invite));
-                              }, 
-                              icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary)
-                            )
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(text: invite));
+                                },
+                                icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary))
                           ],
                         ),
                       ),

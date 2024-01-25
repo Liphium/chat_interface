@@ -8,17 +8,16 @@ class UploadData {
 }
 
 void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<UploadData> files, Function() callback) async {
-  if(loading.value) {
+  if (loading.value) {
     return;
   }
   loading.value = true;
 
   // Upload files
   final attachments = <String>[];
-  for(var file in files) {
-    final res = await Get.find<AttachmentController>().uploadFile(file);
-    sendLog("attached");
-    if(!res.success) {
+  for (var file in files) {
+    final res = await Get.find<AttachmentController>().uploadFile(file, StorageType.temporary);
+    if (res.container == null) {
       showErrorPopup("error", res.message);
       callback.call();
       return;
@@ -33,7 +32,7 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
 }
 
 void sendTextMessage(RxBool loading, String conversationId, String message, List<String> attachments, Function() callback) async {
-  if(loading.value) {
+  if (loading.value) {
     return;
   }
   loading.value = true;
@@ -41,8 +40,7 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
 }
 
 void sendActualMessage(RxBool loading, String conversationId, MessageType type, List<String> attachments, String message, Function() callback) async {
-  
-  if(message.isEmpty && attachments.isEmpty) {
+  if (message.isEmpty && attachments.isEmpty) {
     callback.call();
     return;
   }
@@ -56,27 +54,17 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   var hash = hashSha(message + stamp.toStringAsFixed(0) + conversationId); // Adding a time stamp to the message to prevent replay attacks
   sendLog("MESSAGE HASH SENT: $hash ${message + conversationId}");
 
-  var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{
-    "c": message,
-    "t": type.index,
-    "a": attachments,
-    "s": signMessage(signatureKeyPair.secretKey, hash)
-  }), key);
+  var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{"c": message, "t": type.index, "a": attachments, "s": signMessage(signatureKeyPair.secretKey, hash)}), key);
 
   // Send message
-  final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
-    "conversation": conversation.id,
-    "token_id": conversation.token.id,
-    "token": conversation.token.token,
-    "timestamp": stamp,
-    "data": encrypted
-  });
+  final json = await postNodeJSON(
+      "/conversations/message/send", <String, dynamic>{"conversation": conversation.id, "token_id": conversation.token.id, "token": conversation.token.token, "timestamp": stamp, "data": encrypted});
 
   callback.call();
-  if(!json["success"]) {
+  if (!json["success"]) {
     loading.value = false;
     String message = "conv_msg_create.${json["error"]}";
-    if(json["message"] == "server.error") {
+    if (json["message"] == "server.error") {
       message = "server.error";
     }
 

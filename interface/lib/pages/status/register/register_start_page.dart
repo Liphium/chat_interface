@@ -1,37 +1,34 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
+import 'package:chat_interface/pages/status/register/register_code_page.dart';
 import 'package:chat_interface/pages/status/register/register_handler.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class RegisterStartPage extends StatefulWidget {
+  const RegisterStartPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegisterStartPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends State<RegisterStartPage> {
   final _inviteController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _tagController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
 
   final _loading = false.obs;
   final _errorText = "".obs;
 
   @override
   void dispose() {
+    _inviteController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
-    _usernameController.dispose();
     super.dispose();
   }
 
@@ -53,7 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("register.title".tr, textAlign: TextAlign.center, style: theme.textTheme.headlineMedium),
+                Text("register.title".tr, textAlign: TextAlign.left, style: theme.textTheme.headlineMedium),
                 verticalSpacing(sectionSpacing),
 
                 // Invite
@@ -68,34 +65,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 verticalSpacing(defaultSpacing),
 
-                Text("username".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
-                verticalSpacing(elementSpacing),
-                LayoutBuilder(builder: (context, size) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: size.maxWidth * 0.6,
-                        child: FJTextField(
-                          hintText: 'placeholder.username'.tr,
-                          controller: _usernameController,
-                          maxLength: 16,
-                        ),
-                      ),
-                      Text('#', style: theme.textTheme.headlineMedium),
-                      SizedBox(
-                        width: size.maxWidth * 0.3,
-                        child: FJTextField(
-                          hintText: 'placeholder.tag'.tr,
-                          controller: _tagController,
-                          maxLength: 5,
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-                verticalSpacing(defaultSpacing),
-
                 // Email
                 Text("email".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
                 verticalSpacing(elementSpacing),
@@ -105,32 +74,18 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 verticalSpacing(defaultSpacing),
 
-                // Password
-                Text("password".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
-                verticalSpacing(elementSpacing),
-                FJTextField(
-                  hintText: 'placeholder.password'.tr,
-                  obscureText: true,
-                  controller: _passwordController,
-                ),
-                verticalSpacing(defaultSpacing),
-                FJTextField(
-                  hintText: 'placeholder.password'.tr,
-                  obscureText: true,
-                  controller: _confirmPasswordController,
-                ),
-                verticalSpacing(defaultSpacing),
                 AnimatedErrorContainer(
                   padding: const EdgeInsets.only(bottom: defaultSpacing),
                   message: _errorText,
                   expand: true,
                 ),
                 FJElevatedLoadingButtonCustom(
-                  onTap: () {
+                  onTap: () async {
                     if (_loading.value) return;
                     _loading.value = true;
                     _errorText.value = "";
 
+                    // Check all the stuff
                     if (_inviteController.text == '') {
                       _errorText.value = 'invite.invalid'.tr;
                       _loading.value = false;
@@ -143,41 +98,19 @@ class _RegisterPageState extends State<RegisterPage> {
                       return;
                     }
 
-                    if (_usernameController.text == '') {
-                      _errorText.value = 'username.invalid'.tr;
-                      _loading.value = false;
+                    // Send registration start request
+                    final error = await RegisterHandler.startRegister(_loading, _emailController.text, _inviteController.text);
+                    if (error != null) {
+                      _errorText.value = error;
                       return;
                     }
 
-                    if (_tagController.text == '') {
-                      _errorText.value = 'tag.invalid'.tr;
-                      _loading.value = false;
-                      return;
-                    }
-
-                    if (_passwordController.text.length < 8) {
-                      _errorText.value = 'password.invalid'.tr;
-                      _loading.value = false;
-                      return;
-                    }
-
-                    if (_passwordController.text != _confirmPasswordController.text) {
-                      _errorText.value = 'password.mismatch'.tr;
-                      _loading.value = false;
-                      return;
-                    }
-
-                    register(_inviteController.text, _emailController.text, _usernameController.text, _tagController.text, _passwordController.text, success: () {
-                      Get.find<TransitionController>().modelTransition(const LoginPage());
-                      _loading.value = false;
-                    }, failure: (msg) {
-                      _loading.value = false;
-                      _errorText.value = msg.tr;
-                    });
+                    // Transition to the next page
+                    Get.find<TransitionController>().modelTransition(const RegisterCodePage());
                   },
                   loading: _loading,
                   child: Center(
-                    child: Text('register.register'.tr, style: theme.textTheme.labelLarge),
+                    child: Text('login.next'.tr, style: theme.textTheme.labelLarge),
                   ),
                 ),
                 verticalSpacing(defaultSpacing),

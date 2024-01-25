@@ -1,9 +1,8 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
-import 'package:chat_interface/pages/status/register/register_page.dart';
+import 'package:chat_interface/pages/status/register/register_handler.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
-import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -91,10 +90,11 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   child: Center(
                     child: Obx(() => _loading.value
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
+                              color: Get.theme.colorScheme.onPrimary,
                               strokeWidth: 2.0,
                             ))
                         : Text('login.next'.tr, style: theme.textTheme.labelLarge)),
@@ -112,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                         backgroundColor: MaterialStateProperty.resolveWith(
                             (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
                       ),
-                      onPressed: () => Get.find<TransitionController>().modelTransition(const RegisterPage()),
+                      onPressed: () => RegisterHandler.goToRegistration(),
                       child: Text('login.no_account'.tr),
                     ),
                   ],

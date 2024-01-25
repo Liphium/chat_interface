@@ -1,4 +1,5 @@
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/ffi.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
@@ -78,6 +79,7 @@ class SetupManager {
 
   void restart() {
     current = -1;
+    api.stop();
     Get.find<TransitionController>().modelTransition(const StartingPage());
     db.close();
   }

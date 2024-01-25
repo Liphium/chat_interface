@@ -9,19 +9,16 @@ class ChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-    return GetX<ThemeManager>(
-      builder: (manager) {
-        return GetMaterialApp(
-          title: 'fj.chat',
-          theme: manager.currentTheme.value,
-          translations: MainTranslations(),
-          locale: Get.deviceLocale,
-          fallbackLocale: const Locale("en", "US"),
-          home: const StartingPage(),
-          debugShowCheckedModeBanner: false,
-        );
-      }
-    );
+    return GetX<ThemeManager>(builder: (manager) {
+      return GetMaterialApp(
+        title: 'fj.chat',
+        theme: manager.currentTheme.value,
+        translations: MainTranslations(),
+        locale: Get.deviceLocale,
+        fallbackLocale: const Locale("en", "US"),
+        home: const StartingPage(),
+        debugShowCheckedModeBanner: false,
+      );
+    });
   }
 }

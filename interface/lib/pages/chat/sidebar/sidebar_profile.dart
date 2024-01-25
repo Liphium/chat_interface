@@ -125,7 +125,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                               ),
                                               horizontalSpacing(defaultSpacing),
                                               Obx(
-                                                () => StatusRenderer(status: controller.type.value),
+                                                () => StatusRenderer(status: controller.type.value, text: false),
                                               )
                                             ],
                                           ),

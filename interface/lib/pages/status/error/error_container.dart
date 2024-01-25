@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -6,10 +8,12 @@ import 'package:get/get.dart';
 class ErrorContainer extends StatelessWidget {
   /// Translation required
   final String message;
+  final bool expand;
 
   const ErrorContainer({
     super.key,
     required this.message,
+    this.expand = false,
   });
 
   @override
@@ -26,7 +30,7 @@ class ErrorContainer extends StatelessWidget {
         children: [
           Icon(Icons.error, color: Theme.of(context).colorScheme.error),
           horizontalSpacing(defaultSpacing),
-          Text(message, style: Theme.of(context).textTheme.labelMedium),
+          if (expand) Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium)) else Text(message, style: Theme.of(context).textTheme.labelMedium),
         ],
       ),
     );
@@ -50,34 +54,74 @@ class AnimatedErrorContainer extends StatefulWidget {
 }
 
 class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
+  final message = "".obs;
+  final showing = false.obs;
+  AnimationController? controller;
+  StreamSubscription<String>? _sub;
+  String? prev;
+
+  @override
+  void initState() {
+    _sub = widget.message.listen((p0) {
+      if (prev != null && prev != "" && p0 != "") {
+        controller?.loop(count: 1, reverse: true);
+      }
+      if (p0 != "") {
+        message.value = p0;
+        showing.value = true;
+        prev = p0;
+      } else {
+        showing.value = false;
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(
       () => Animate(
         effects: [
-          ExpandEffect(
-            axis: Axis.vertical,
-            curve: Curves.ease,
+          ScaleEffect(
             duration: 250.ms,
+            curve: Curves.ease,
+            begin: const Offset(1.1, 1.1),
+            end: const Offset(1.0, 1.0),
           ),
         ],
-        target: widget.message.value.isNotEmpty ? 1 : 0,
-        child: Padding(
-          padding: widget.padding,
-          child: Container(
-            padding: const EdgeInsets.all(defaultSpacing),
-            decoration: BoxDecoration(color: Get.theme.colorScheme.errorContainer, borderRadius: BorderRadius.circular(defaultSpacing)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
-              children: [
-                Icon(Icons.error, color: Theme.of(context).colorScheme.error),
-                horizontalSpacing(defaultSpacing),
-                Flexible(
-                  child: Text(widget.message.value, style: Theme.of(context).textTheme.labelMedium),
-                ),
-              ],
+        onInit: (controller) => this.controller = controller,
+        child: Animate(
+          effects: [
+            ExpandEffect(
+              axis: Axis.vertical,
+              curve: Curves.ease,
+              duration: 250.ms,
+            ),
+          ],
+          target: showing.value ? 1 : 0,
+          child: Padding(
+            padding: widget.padding,
+            child: Container(
+              padding: const EdgeInsets.all(defaultSpacing),
+              decoration: BoxDecoration(color: Get.theme.colorScheme.errorContainer, borderRadius: BorderRadius.circular(defaultSpacing)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
+                children: [
+                  Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+                  horizontalSpacing(defaultSpacing),
+                  Flexible(
+                    child: Text(message.value, style: Theme.of(context).textTheme.labelMedium),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

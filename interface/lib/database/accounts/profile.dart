@@ -4,7 +4,7 @@ class Profile extends Table {
   TextColumn get id => text()();
 
   // Profile picture data
-  TextColumn get pictureId => text()();
+  TextColumn get pictureContainer => text()();
   TextColumn get pictureData => text()();
 
   TextColumn get data => text()();

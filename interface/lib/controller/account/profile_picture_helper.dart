@@ -39,29 +39,29 @@ class ProfilePictureHelper {
       await friend.update();
     }
 
+    String? oldPictureId;
+    String? oldPath;
     if (oldProfile != null) {
-      final exists = await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).exists();
-      if (json["profile"]["picture"] == oldProfile.pictureId && exists) {
+      oldPictureId = jsonDecode(oldProfile.pictureContainer)["id"];
+      oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
+      if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
         return null; // Nothing changed
       }
     }
 
     // Decrypt the profile picture data
     final profileData = ProfilePictureData.fromJson(jsonDecode(decryptSymmetric(json["profile"]["picture_data"], friend.keyStorage.profileKey)));
-    final container = AttachmentContainer.fromJson(jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
+    final container = AttachmentContainer.fromJson(StorageType.permanent, jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
 
     if (container.id != json["profile"]["picture"]) {
       return null;
     }
 
-    if (oldProfile != null) {
+    if (oldProfile != null && oldPath != null) {
       // Check if there is an attachment in any message using the file from the old profile picture
-      final messages = await (db.message.select()..where((tbl) => tbl.attachments.contains(oldProfile.pictureId))).get();
+      final messages = await (db.message.select()..where((tbl) => tbl.attachments.contains(oldPictureId!))).get();
       if (messages.isEmpty) {
-        final exists = await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).exists();
-        if (exists) {
-          await File(AttachmentController.getFilePathForId(oldProfile.pictureId)).delete();
-        }
+        await File(oldPath).delete();
       }
     }
 
@@ -77,7 +77,7 @@ class ProfilePictureHelper {
     }
 
     // Save the profile picture data
-    friend.updateProfilePicture(json["profile"]["picture"], profileData);
+    friend.updateProfilePicture(container, profileData);
 
     return json["profile"]["id"];
   }
@@ -85,29 +85,31 @@ class ProfilePictureHelper {
   /// Upload a profile picture to the server and set it as the current profile picture
   static Future<bool> uploadProfilePicture(XFile file, ProfilePictureData data) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file));
-    if (!response.success) {
+    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent);
+    if (response.container == null) {
       showErrorPopup("error", "profile_picture.not_uploaded");
       return false;
     }
 
     // Update the profile picture
-    final json = await postAuthorizedJSON("/account/profile/set_picture",
-        {"file": response.container.id, "data": encryptSymmetric(jsonEncode(data.toJson()), profileKey), "container": encryptSymmetric(jsonEncode(response.container.toJson()), profileKey)});
+    final json = await postAuthorizedJSON("/account/profile/set_picture", {
+      "file": response.container!.id,
+      "data": encryptSymmetric(jsonEncode(data.toJson()), profileKey),
+      "container": encryptSymmetric(jsonEncode(response.container!.toJson()), profileKey),
+    });
 
     if (!json["success"]) {
       showErrorPopup("error", "profile_picture.not_set");
       return false;
     }
-    Get.find<StatusController>().newProfilePicture(response.container.id, data);
-    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container.id, data);
+    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!, data);
 
     // TODO: Update for other devices
     return true;
   }
 
   /// Get the file id of the profile picture of a friend
-  static Future<ProfileData?> getProfilePictureLocal(String id) async {
+  static Future<ProfileData?> getProfileDataLocal(String id) async {
     final profile = await (db.profile.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
     return profile;
   }

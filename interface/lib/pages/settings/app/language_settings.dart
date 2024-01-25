@@ -9,7 +9,7 @@ class LanguageSettings {
   static final languages = [
     LanguageSelection("Device", Icons.computer, Get.deviceLocale ?? const Locale("en", "US")),
     const LanguageSelection("English", Icons.language, Locale("en", "US")),
-    const LanguageSelection("Deutsch", Icons.language, Locale("de", "DE")),
+    //const LanguageSelection("Deutsch", Icons.language, Locale("de", "DE")), FUTURE STUFF
   ];
 }
 
@@ -30,7 +30,7 @@ class LanguageSettingsPage extends StatelessWidget {
     return Column(
       children: [
         ListSelectionSetting(
-          settingName: "language", 
+          settingName: "language",
           items: LanguageSettings.languages,
           callback: (language) {
             Get.updateLocale((language as LanguageSelection).locale);

@@ -76,26 +76,26 @@ class FJElevatedLoadingButton extends StatelessWidget {
 
 class FJElevatedLoadingButtonCustom extends StatelessWidget {
   final Function() onTap;
+  final Widget Function()? builder;
   final Widget child;
   final RxBool loading;
 
-  const FJElevatedLoadingButtonCustom({super.key, required this.onTap, required this.child, required this.loading});
+  const FJElevatedLoadingButtonCustom({super.key, required this.onTap, required this.child, required this.loading, this.builder});
 
   @override
   Widget build(BuildContext context) {
     return FJElevatedButton(
       onTap: () => loading.value ? null : onTap(),
       child: Obx(() => loading.value
-          ? Center(
-              child: SizedBox(
+          ? builder?.call() ??
+              SizedBox(
                 height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                 width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing * 0.25),
                   child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
                 ),
-              ),
-            )
+              )
           : child),
     );
   }

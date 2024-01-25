@@ -15,25 +15,22 @@ import 'package:get/get.dart';
 part 'vault_actions.dart';
 
 class VaultSetup extends Setup {
-
   VaultSetup() : super("loading.vault", false);
 
   @override
   Future<Widget?> load() async {
-    
     // Refresh the vault
     await refreshVault();
 
     // Load conversations from the database
     final conversationController = Get.find<ConversationController>();
     final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
-    for(var conversation in conversations) {
+    for (var conversation in conversations) {
       await conversationController.add(Conversation.fromData(conversation));
     }
 
     return null;
   }
-
 }
 
 class VaultEntry {
@@ -44,12 +41,12 @@ class VaultEntry {
   final int updatedAt;
 
   VaultEntry(this.id, this.tag, this.account, this.payload, this.updatedAt);
-  VaultEntry.fromJson(Map<String, dynamic> json) 
-      : id = json["id"], 
-      tag = json["tag"], 
-      account = json["account"], 
-      payload = json["payload"], 
-      updatedAt = json["updated_at"];
+  VaultEntry.fromJson(Map<String, dynamic> json)
+      : id = json["id"],
+        tag = json["tag"],
+        account = json["account"],
+        payload = json["payload"],
+        updatedAt = json["updated_at"];
 }
 
 // Returns an error string (null if successful)
@@ -59,13 +56,13 @@ Future<String?> refreshVault() async {
   // Load conversations
   final json = await postAuthorizedJSON("/account/vault/list", <String, dynamic>{
     "after": lastFetchTime.millisecondsSinceEpoch, // Unix
-    "tag": Constants.conversationTag
+    "tag": Constants.conversationTag,
   });
-  if(!json["success"]) {
+  if (!json["success"]) {
     return json["error"];
   }
 
-  for(var unparsedEntry in json["entries"]) {
+  for (var unparsedEntry in json["entries"]) {
     final entry = VaultEntry.fromJson(unparsedEntry);
     sendLog(entry);
     // TODO: Parse conversations from vault
@@ -74,4 +71,3 @@ Future<String?> refreshVault() async {
   await finishFetch();
   return null;
 }
-

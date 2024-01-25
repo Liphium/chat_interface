@@ -1,5 +1,6 @@
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
+import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -7,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FileSettings {
-
   // Auto download
   static const String autoDownloadImages = "auto_download.images";
   static const String autoDownloadVideos = "auto_download.videos";
@@ -15,7 +15,13 @@ class FileSettings {
   static const String maxFileSize = "auto_download.max_size"; // MB
 
   // Maximum size of files stored in the cache
+  static const String fileCacheType = "files.cache_type";
   static const String maxCacheSize = "files.max_cache_size"; // MB
+
+  static var fileCacheTypes = [
+    SelectableItem("settings.file.cache_type.unlimited".tr, Icons.all_inclusive),
+    SelectableItem("settings.file.cache_type.size".tr, Icons.filter_alt),
+  ];
 
   // File types for auto download
   static const List<String> imageTypes = ["png", "jpg", "jpeg", "gif"];
@@ -28,6 +34,7 @@ class FileSettings {
     controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, false);
     controller.settings[maxFileSize] = Setting<double>(maxFileSize, 5.0);
     controller.settings[maxCacheSize] = Setting<double>(maxCacheSize, 500.0);
+    controller.settings[fileCacheType] = Setting<int>(fileCacheType, 0);
   }
 }
 
@@ -39,7 +46,6 @@ class FileSettingsPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         //* Auto download types
         Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
@@ -54,24 +60,36 @@ class FileSettingsPage extends StatelessWidget {
         verticalSpacing(defaultSpacing),
 
         const DoubleSelectionSetting(
-          settingName: FileSettings.maxFileSize, 
+          settingName: FileSettings.maxFileSize,
           description: "settings.file.max_size.description",
-          min: 1.0, 
+          min: 1.0,
           max: 10.0,
           unit: "settings.file.mb",
         ),
         verticalSpacing(sectionSpacing),
 
-        //* Max file size
+        //* File cache size
         Text("settings.file.cache".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
+        Text("settings.file.cache.description".tr, style: Get.theme.textTheme.bodyMedium),
+        verticalSpacing(defaultSpacing),
 
-        const DoubleSelectionSetting(
-          settingName: FileSettings.maxCacheSize, 
-          description: "settings.file.cache.description",
-          min: 100.0, 
-          max: 3000.0,
-          unit: "settings.file.mb",
+        ListSelectionSetting(
+          settingName: FileSettings.fileCacheType,
+          items: FileSettings.fileCacheTypes,
+        ),
+
+        Obx(
+          () => Visibility(
+            visible: Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue() == 1,
+            child: const DoubleSelectionSetting(
+              settingName: FileSettings.maxCacheSize,
+              description: "",
+              min: 100.0,
+              max: 3000.0,
+              unit: "settings.file.mb",
+            ),
+          ),
         ),
       ],
     );
