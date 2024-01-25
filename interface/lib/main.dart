@@ -1,4 +1,3 @@
-
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
@@ -46,7 +45,6 @@ Future<bool> initSodium() async {
 }
 
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
   sendLog(packageRSAPublicKey(generateRSAKey(2048).publicKey));
@@ -62,11 +60,11 @@ void main() async {
   // Wait for it to be finished
   await Future.delayed(100.ms);
 
-  if(isDebug) {
+  if (isDebug) {
     await encryptionTest();
     testEncryptionRSA();
   }
-  
+
   // Initialize controllers
   initializeControllers();
 
@@ -74,7 +72,6 @@ void main() async {
 }
 
 Future<bool> encryptionTest() async {
-
   final bob = generateAsymmetricKeyPair();
   final alice = generateAsymmetricKeyPair();
 
@@ -83,9 +80,8 @@ Future<bool> encryptionTest() async {
 
   // This should throw an exception
   final result = decryptAsymmetricAuth(bob.publicKey, bob.secretKey, encrypted);
-  if(!result.success) {
+  if (!result.success) {
     sendLog("Authenticated encryption works!");
   }
   return true;
 }
-
