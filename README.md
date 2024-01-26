@@ -4,4 +4,4 @@ I'm making a chat app or something, this is a really big project. Even with voic
 
 ### Contributing
 
-If anyone reads this and wants to contribute (idk why you would want to), I don't really have any contribution guidelines or anything. So if you wanna contribute reach out to me on discord: @unbreathable and we'll talk about how we should handle this project or something if we get along well. I live in the EU so it would be good if your in a timezone that's not too far away from that.
+I don't currently look for contributors on this project that just make little changes. If you find a bug, please report it using an issue, but please don't make a pull request as I just don't have the time to look through all of this at this time. If you want to join the project as a developer and not just a contributor, please reach out to me on Discord or using an issue.
