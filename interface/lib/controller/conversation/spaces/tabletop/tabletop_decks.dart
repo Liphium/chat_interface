@@ -3,7 +3,6 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -33,6 +32,7 @@ class TabletopDeck {
   String name;
   List<dynamic> encodedCards = [];
   final cards = <AttachmentContainer>[].obs;
+  final amounts = <String, int>{}.obs; // Map of card id to amount
 
   TabletopDeck(this.name, {this.vaultId});
 
@@ -55,7 +55,9 @@ class TabletopDeck {
   Future<bool> save() async {
     final encodedCards = <Map<String, dynamic>>[];
     for (var card in cards) {
-      encodedCards.add(card.toJson());
+      final json = card.toJson();
+      json["amount"] = amounts[card.id] ?? 1;
+      encodedCards.add(json);
     }
     final payload = jsonEncode({
       "name": name,
@@ -74,9 +76,12 @@ class TabletopDeck {
 
   /// usecase is the type of storage to use for the cards (for downloaded ones it should be "cache" for example)
   void loadCards(StorageType usecase) async {
+    final controller = Get.find<AttachmentController>();
     for (var card in encodedCards) {
       final type = await AttachmentController.checkLocations(card['id'], usecase, types: [StorageType.permanent, StorageType.cache]);
       final container = AttachmentContainer.fromJson(type, card);
+      amounts[container.id] = card['amount'] ?? 1;
+      await controller.downloadAttachment(container);
       cards.add(container);
     }
     encodedCards.clear();

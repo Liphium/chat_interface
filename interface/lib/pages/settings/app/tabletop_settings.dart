@@ -12,7 +12,6 @@ import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
@@ -369,6 +368,16 @@ class DeckCardsWindow extends StatefulWidget {
 }
 
 class _DeckCardsWindowState extends State<DeckCardsWindow> {
+  bool changed = false;
+
+  @override
+  void dispose() {
+    if (changed) {
+      widget.deck.save();
+    }
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DialogBase(
@@ -487,6 +496,48 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                               child: IconButton(
                                 onPressed: () => Get.dialog(ImagePreviewWindow(file: file)),
                                 icon: const Icon(Icons.launch),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: defaultSpacing),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Get.theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(defaultSpacing),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () async {
+                                        changed = true;
+                                        if ((widget.deck.amounts[card.id] ?? 1) == 1) {
+                                          return;
+                                        }
+                                        widget.deck.amounts[card.id] = (widget.deck.amounts[card.id] ?? 1) - 1;
+                                      },
+                                      icon: const Icon(Icons.remove),
+                                    ),
+                                    horizontalSpacing(elementSpacing),
+                                    Obx(
+                                      () => Text(
+                                        widget.deck.amounts[card.id].toString(),
+                                        style: Get.theme.textTheme.labelLarge,
+                                      ),
+                                    ),
+                                    horizontalSpacing(elementSpacing),
+                                    IconButton(
+                                      onPressed: () async {
+                                        changed = true;
+                                        widget.deck.amounts[card.id] = (widget.deck.amounts[card.id] ?? 1) + 1;
+                                      },
+                                      icon: const Icon(Icons.add),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),

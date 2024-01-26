@@ -90,6 +90,7 @@ class TabletopController extends GetxController {
         object = SquareObject(id, location, size, type);
         break;
     }
+    object.importData(data);
     return object;
   }
 
