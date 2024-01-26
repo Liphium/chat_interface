@@ -24,6 +24,8 @@ class FileSettings {
   ];
 
   // File types for auto download
+  /// Doesn't include gifs
+  static const List<String> staticImageTypes = ["png", "jpg", "jpeg"];
   static const List<String> imageTypes = ["png", "jpg", "jpeg", "gif"];
   static const List<String> videoTypes = ["mp4", "mov", "avi", "mkv"];
   static const List<String> audioTypes = ["mp3", "wav", "ogg"];

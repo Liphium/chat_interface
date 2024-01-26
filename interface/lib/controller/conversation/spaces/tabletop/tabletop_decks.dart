@@ -3,6 +3,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -21,7 +22,7 @@ class TabletopDecks {
 
     final decks = <TabletopDeck>[];
     for (var deck in json["entries"]) {
-      decks.add(TabletopDeck.decrypt(deck));
+      decks.add(TabletopDeck.decrypt(StorageType.permanent, deck));
     }
     return decks;
   }
@@ -30,22 +31,23 @@ class TabletopDecks {
 class TabletopDeck {
   String? vaultId;
   String name;
-  final List<Map<String, dynamic>> encodedCards = [];
-  final List<AttachmentContainer> cards = [];
+  List<dynamic> encodedCards = [];
+  final cards = <AttachmentContainer>[].obs;
 
   TabletopDeck(this.name, {this.vaultId});
 
-  factory TabletopDeck.decrypt(Map<String, dynamic> json) {
+  factory TabletopDeck.decrypt(StorageType usecase, Map<String, dynamic> json) {
     final entry = VaultEntry.fromJson(json);
     final decrypted = jsonDecode(decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, entry.payload));
     final deck = TabletopDeck(
       decrypted['name'],
       vaultId: entry.id,
     );
-    if (json['cards'] == null) {
+    if (decrypted['cards'] == null) {
       return deck;
     }
-    deck.encodedCards.addAll(json['cards']);
+    deck.encodedCards = decrypted['cards'];
+    deck.loadCards(usecase);
     return deck;
   }
 
@@ -57,7 +59,7 @@ class TabletopDeck {
     }
     final payload = jsonEncode({
       "name": name,
-      "cards": cards,
+      "cards": encodedCards,
     });
     if (vaultId != null) {
       return updateVault(vaultId!, payload);
@@ -81,6 +83,12 @@ class TabletopDeck {
   }
 
   Future<bool> delete() async {
+    // Delete all cards
+    final controller = Get.find<AttachmentController>();
+    for (var card in cards) {
+      await controller.deleteFile(card);
+    }
+
     if (vaultId == null) {
       return false;
     }

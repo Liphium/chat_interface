@@ -1,13 +1,21 @@
+import 'dart:io';
+
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
+import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -139,12 +147,14 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "settings.tabletop.decks.limit".trParams({
-                  "count": _decks.length.toString(),
-                  "limit": Constants.maxDecks.toString(),
-                }),
-                style: Get.theme.textTheme.labelLarge,
+              Obx(
+                () => Text(
+                  "settings.tabletop.decks.limit".trParams({
+                    "count": _decks.length.toString(),
+                    "limit": Constants.maxDecks.toString(),
+                  }),
+                  style: Get.theme.textTheme.labelLarge,
+                ),
               ),
               FJElevatedButton(
                 onTap: () async {
@@ -194,9 +204,11 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                       children: [
                         Text(deck.name, style: Get.theme.textTheme.labelLarge),
                         verticalSpacing(elementSpacing),
-                        Text(
-                          "decks.cards".trParams({"count": deck.cards.length.toString()}),
-                          style: Get.theme.textTheme.bodyMedium,
+                        Obx(
+                          () => Text(
+                            "decks.cards".trParams({"count": deck.cards.length.toString()}),
+                            style: Get.theme.textTheme.bodyMedium,
+                          ),
                         ),
                       ],
                     ),
@@ -230,14 +242,14 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                         ),
                         horizontalSpacing(defaultSpacing),
                         FJElevatedButton(
-                          onTap: () async {},
+                          onTap: () => Get.dialog(DeckCardsWindow(deck: deck)),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.add_to_photos, color: Get.theme.colorScheme.onPrimary),
+                              Icon(Icons.filter, color: Get.theme.colorScheme.onPrimary),
                               horizontalSpacing(elementSpacing),
                               Text(
-                                "decks.add_cards".tr,
+                                "decks.view_cards".tr,
                                 style: Get.theme.textTheme.labelLarge,
                               ),
                             ],
@@ -256,6 +268,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
   }
 }
 
+/// Deck creation/edit window (only for name)
 class DeckCreationWindow extends StatefulWidget {
   final TabletopDeck? deck;
 
@@ -334,6 +347,221 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
             ),
             child: Center(
               child: Text(widget.deck == null ? "create".tr : "save".tr, style: Get.theme.textTheme.labelLarge),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Deck cards window (for editing the cards of a deck)
+class DeckCardsWindow extends StatefulWidget {
+  final TabletopDeck deck;
+
+  const DeckCardsWindow({
+    super.key,
+    required this.deck,
+  });
+
+  @override
+  State<DeckCardsWindow> createState() => _DeckCardsWindowState();
+}
+
+class _DeckCardsWindowState extends State<DeckCardsWindow> {
+  @override
+  Widget build(BuildContext context) {
+    return DialogBase(
+      maxWidth: 800,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(widget.deck.name, style: Get.theme.textTheme.titleLarge),
+              FJElevatedButton(
+                onTap: () async {
+                  final result = await openFiles(acceptedTypeGroups: [
+                    const XTypeGroup(label: "Image", extensions: FileSettings.staticImageTypes),
+                  ]);
+                  if (result.isEmpty) {
+                    return;
+                  }
+
+                  // Check files
+                  for (var file in result) {
+                    if (await file.length() > 10 * 1000 * 1000) {
+                      showErrorPopup("error".tr, "file.too_large".tr);
+                      return;
+                    }
+                  }
+
+                  final response = await Get.dialog(CardsUploadWindow(files: result), barrierDismissible: false);
+                  if (response.isEmpty) {
+                    showErrorPopup("error", "app.error");
+                    return;
+                  }
+
+                  // Save to the vault
+                  widget.deck.cards.addAll(response);
+                  final res = await widget.deck.save();
+                  if (!res) {
+                    showErrorPopup("error", "server.error");
+                    return;
+                  }
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, color: Get.theme.colorScheme.onPrimary),
+                    horizontalSpacing(elementSpacing),
+                    Text(
+                      "add".tr,
+                      style: Get.theme.textTheme.labelLarge,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          verticalSpacing(sectionSpacing),
+          Flexible(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 700),
+              child: Obx(() {
+                if (widget.deck.cards.isEmpty) {
+                  return Text(
+                    "decks.cards.empty".tr,
+                    style: Get.theme.textTheme.bodyMedium,
+                  );
+                }
+
+                return SingleChildScrollView(
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200),
+                    itemCount: widget.deck.cards.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      final card = widget.deck.cards[index];
+                      final file = File(widget.deck.cards[index].filePath);
+                      return Stack(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(elementSpacing),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              child: Image.file(file, width: 200, height: 200, fit: BoxFit.cover),
+                            ),
+                          ),
+                          Positioned(
+                            top: defaultSpacing,
+                            right: defaultSpacing,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Get.theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(defaultSpacing),
+                              ),
+                              child: IconButton(
+                                onPressed: () async {
+                                  widget.deck.cards.remove(card);
+                                  Get.find<AttachmentController>().deleteFile(card);
+                                  final result = await widget.deck.save();
+                                  if (!result) {
+                                    showErrorPopup("error", "server.error");
+                                  }
+                                },
+                                icon: const Icon(Icons.delete),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: defaultSpacing,
+                            left: defaultSpacing,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Get.theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(defaultSpacing),
+                              ),
+                              child: IconButton(
+                                onPressed: () => Get.dialog(ImagePreviewWindow(file: file)),
+                                icon: const Icon(Icons.launch),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Cards upload window
+class CardsUploadWindow extends StatefulWidget {
+  final List<XFile> files;
+
+  const CardsUploadWindow({super.key, required this.files});
+
+  @override
+  State<CardsUploadWindow> createState() => _CardsUploadWindowState();
+}
+
+class _CardsUploadWindowState extends State<CardsUploadWindow> {
+  final _current = 0.obs;
+  final finished = <AttachmentContainer>[];
+
+  @override
+  void initState() {
+    startFileUploading();
+    super.initState();
+  }
+
+  void startFileUploading() async {
+    final controller = Get.find<AttachmentController>();
+    _current.value = 0;
+    for (var file in widget.files) {
+      final response = await controller.uploadFile(UploadData(file), StorageType.permanent, favorite: true);
+      if (response.container == null) {
+        Get.back(result: finished);
+        showErrorPopup("error", response.message);
+        return;
+      }
+      finished.add(response.container!);
+      _current.value++;
+    }
+
+    Get.back(result: finished);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DialogBase(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Obx(
+            () => Text(
+                "file.uploading".trParams({
+                  "index": (_current.value).toString(),
+                  "total": widget.files.length.toString(),
+                }),
+                style: Get.theme.textTheme.titleLarge),
+          ),
+          verticalSpacing(sectionSpacing),
+          Obx(
+            () => LinearProgressIndicator(
+              value: _current.value / widget.files.length,
+              minHeight: 10,
+              color: Get.theme.colorScheme.onPrimary,
+              backgroundColor: Get.theme.colorScheme.primary,
             ),
           ),
         ],
