@@ -20,7 +20,7 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type) async {
+  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false}) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
@@ -30,6 +30,7 @@ class AttachmentController extends GetxController {
     final formData = dio_rs.FormData.fromMap({
       "file": dio_rs.MultipartFile.fromBytes(encrypted, filename: name),
       "name": name,
+      "favorite": favorite ? "true" : "false",
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
       "extension": data.file.name.split(".").last
     });
@@ -56,7 +57,7 @@ class AttachmentController extends GetxController {
 
     final file = File(path.join(AttachmentController.getFilePathForType(type), json["id"].toString()));
     await file.writeAsBytes(bytes);
-    final container = AttachmentContainer(StorageType.temporary, json["id"], data.file.name, json["url"], key);
+    final container = AttachmentContainer(type, json["id"], data.file.name, json["url"], key);
     sendLog("SENT ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
     attachments[container.id] = container;
@@ -138,6 +139,23 @@ class AttachmentController extends GetxController {
     container.error.value = false;
     container.downloaded.value = true;
     cleanUpCache();
+    return true;
+  }
+
+  /// Delete a file
+  Future<bool> deleteFile(AttachmentContainer container) async {
+    final file = File(container.filePath);
+    await file.delete();
+    attachments.remove(container.id);
+
+    // Delete from server
+    final json = await postAuthorizedJSON("/account/files/delete", {
+      "id": container.id,
+    });
+    if (!json["success"]) {
+      sendLog("Failed to delete file from server ${container.id} ${json["error"]}");
+    }
+
     return true;
   }
 

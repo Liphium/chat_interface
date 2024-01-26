@@ -123,7 +123,8 @@ class SettingsTranslations extends Translations {
           'decks.dialog.name.error': 'Please make the name for your deck longer than 3 characters.',
           'decks.limit_reached': 'You have reached the maximum amount of decks you can create. Please delete one of your existing decks to create a new one.',
           'decks.cards': '@count cards',
-          'decks.add_cards': 'Add cards',
+          'decks.view_cards': 'View cards',
+          'decks.cards.empty': 'This deck is empty. You can add cards to it by clicking the button above.',
         },
 
         //* German

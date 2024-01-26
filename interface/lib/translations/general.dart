@@ -18,7 +18,9 @@ class GeneralTranslations extends Translations {
           'change': 'Change',
           'save': 'Save',
           'delete': 'Delete',
+          'cancel': 'Cancel',
           'remove': 'Remove',
+          'add': 'Add',
           'select': 'Select',
           'search': 'Search',
           'zoom': 'Zoom',
@@ -47,6 +49,9 @@ class GeneralTranslations extends Translations {
           'log_out.dialog':
               'This will delete all the data on this device. If you don\'t have your keys as a file or on another logged in device, you will not be able to recover your account. Are you sure you want to log out?',
           'log_out.delete_files': 'Delete files',
+
+          // Uploading
+          'file.uploading': 'Uploading @index of @total..',
         },
 
         //* German

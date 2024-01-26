@@ -73,15 +73,19 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       final type = widget.container.id.split(".").last;
       if (FileSettings.imageTypes.contains(type)) {
         return InkWell(
-          onTap: () => Get.dialog(AttachmentWindow(container: widget.container)),
+          onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.container.filePath))),
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(defaultSpacing),
             child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 350,
-                ),
-                child: Image.file(File(widget.container.filePath), fit: BoxFit.cover)),
+              constraints: const BoxConstraints(
+                maxHeight: 350,
+              ),
+              child: Image.file(
+                File(widget.container.filePath),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         );
       }
