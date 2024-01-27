@@ -47,7 +47,7 @@ class SpacesController extends GetxController {
 
   //* Space information
   final id = "".obs;
-  SecureKey? key;
+  static SecureKey? key;
 
   //* Call layout
   final expanded = false.obs;

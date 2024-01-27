@@ -13,7 +13,7 @@ void setupTabletopListeners() {
         TableObjectType.values[obj["t"]],
         obj["id"],
         Offset((obj["x"] as num).toDouble(), (obj["y"] as num).toDouble()),
-        const Size(100, 100),
+        Size((obj["w"] as num).toDouble(), (obj["h"] as num).toDouble()),
         obj["d"],
       ));
     }
@@ -25,7 +25,7 @@ void setupTabletopListeners() {
       TableObjectType.values[event.data["type"]],
       event.data["id"],
       Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
-      const Size(100, 100),
+      Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble()),
       event.data["data"],
     ));
   });

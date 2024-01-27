@@ -34,7 +34,7 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
                 color: addition.color,
                 label: addition.label,
                 loading: false.obs,
-                onTap: () => {},
+                onTap: () => addition.onTap.call(Get.find<TabletopController>()),
               );
             },
           ),

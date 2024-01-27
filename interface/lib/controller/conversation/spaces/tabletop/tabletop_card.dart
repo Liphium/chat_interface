@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
@@ -11,7 +13,26 @@ import 'package:get/get.dart';
 class CardObject extends TableObject {
   bool error = false;
 
-  CardObject(super.id, super.location, super.size, super.type);
+  CardObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.card);
+
+  static Future<CardObject?> downloadCard(AttachmentContainer container, Offset location, {String id = ""}) async {
+    // Download the file
+    final download = await Get.find<AttachmentController>().downloadAttachment(container);
+    if (!download) {
+      return null;
+    }
+
+    // Grab resolution from it
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container.filePath).readAsBytes());
+    final descriptor = await ui.ImageDescriptor.encoded(buffer);
+    final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
+
+    return CardObject(
+      id,
+      location,
+      size,
+    );
+  }
 
   @override
   void render(Canvas canvas, Offset location, TabletopController controller) {
@@ -27,7 +48,7 @@ class CardObject extends TableObject {
   }
 
   @override
-  void importData(String data) async {
+  void handleData(String data) async {
     // Download attached container
     final json = jsonDecode(data);
     final type = await AttachmentController.checkLocations(json["id"], StorageType.cache);

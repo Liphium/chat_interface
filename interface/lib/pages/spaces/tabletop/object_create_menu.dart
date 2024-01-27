@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ObjectCreateMenu extends StatefulWidget {
-  const ObjectCreateMenu({super.key});
+  final Offset location;
+
+  const ObjectCreateMenu({super.key, required this.location});
 
   @override
   State<ObjectCreateMenu> createState() => _ObjectCreateMenuState();
@@ -37,15 +39,17 @@ class _ObjectCreateMenuState extends State<ObjectCreateMenu> {
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    onTap: () {
+                    onTap: () async {
+                      TableObject? object;
                       switch (type) {
                         case TableObjectType.deck:
                           Get.back();
-                          Get.dialog(const DeckObjectCreationWindow());
+                          object = await Get.dialog(DeckObjectCreationWindow(location: widget.location));
                           break;
                         default:
                           break;
                       }
+                      object?.sendAdd();
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(defaultSpacing),

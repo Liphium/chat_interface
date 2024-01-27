@@ -3,6 +3,7 @@ import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -78,7 +79,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   return;
                 }
 
-                Get.dialog(const ObjectCreateMenu());
+                Get.dialog(ObjectCreateMenu(location: calculateMousePos(event.localPosition, scale, offset)));
                 //final obj = tableController.newObject(TableObjectType.square, "", calculateMousePos(event.localPosition, scale, offset), Size(100, 100), "");
                 //obj.sendAdd();
               } else if (event.buttons == 1) {
@@ -103,7 +104,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
             },
             onPointerUp: (event) {
               individualScale = 1;
-              if (tableController.hoveringObjects.isNotEmpty && !moved) {
+              if (tableController.hoveringObjects.isNotEmpty && !moved && event.buttons == 0) {
                 tableController.hoveringObjects.first.runAction(tableController);
               }
               tableController.heldObject = null;

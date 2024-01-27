@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -87,13 +89,13 @@ class TabletopController extends GetxController {
     TableObject object;
     switch (type) {
       case TableObjectType.deck:
-        object = DeckObject(id, location, size, type);
+        object = DeckObject(id, location, size);
         break;
       case TableObjectType.card:
-        object = DeckObject(id, location, size, type);
+        object = DeckObject(id, location, size);
         break;
     }
-    object.importData(data);
+    object.decryptData(data);
     return object;
   }
 
@@ -163,12 +165,21 @@ abstract class TableObject {
     this.location = location;
   }
 
-  /// Required when getData is implemented
-  void importData(String data) {}
+  /// DONT OVERWRITE THIS METHOD
+  void decryptData(String data) {
+    handleData(decryptSymmetric(data, SpacesController.key!));
+  }
+
+  /// NEVER CALL THIS METHOD WITH ENCRYPTED DATA
+  void handleData(String data) {}
 
   /// Implemented optionally when needed
   String getData() {
     return "";
+  }
+
+  String encryptedData() {
+    return encryptSymmetric(getData(), SpacesController.key!);
   }
 
   /// Render with rotation and scale applied (used for movable objects)
@@ -188,8 +199,10 @@ abstract class TableObject {
     spaceConnector.sendAction(Message("tobj_create", <String, dynamic>{
       "x": location.dx,
       "y": location.dy,
+      "w": size.width,
+      "h": size.height,
       "type": type.index,
-      "data": getData(),
+      "data": encryptedData(),
     }));
   }
 
