@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_square.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
@@ -86,8 +86,11 @@ class TabletopController extends GetxController {
   TableObject newObject(TableObjectType type, String id, Offset location, Size size, String data) {
     TableObject object;
     switch (type) {
-      case TableObjectType.square:
-        object = SquareObject(id, location, size, type);
+      case TableObjectType.deck:
+        object = DeckObject(id, location, size, type);
+        break;
+      case TableObjectType.card:
+        object = DeckObject(id, location, size, type);
         break;
     }
     object.importData(data);
@@ -120,7 +123,16 @@ class TabletopController extends GetxController {
   }
 }
 
-enum TableObjectType { square }
+enum TableObjectType {
+  deck(Icons.filter_none, "Deck"),
+  card(Icons.image, "Card", creatable: false);
+
+  final IconData icon;
+  final String label;
+  final bool creatable;
+
+  const TableObjectType(this.icon, this.label, {this.creatable = true});
+}
 
 abstract class TableObject {
   TableObject(this.id, this.location, this.size, this.type);

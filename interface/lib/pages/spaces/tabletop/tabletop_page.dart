@@ -1,8 +1,8 @@
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
+import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -77,8 +77,10 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   ));
                   return;
                 }
-                final obj = tableController.newObject(TableObjectType.square, "", calculateMousePos(event.localPosition, scale, offset), Size(100, 100), "");
-                obj.sendAdd();
+
+                Get.dialog(const ObjectCreateMenu());
+                //final obj = tableController.newObject(TableObjectType.square, "", calculateMousePos(event.localPosition, scale, offset), Size(100, 100), "");
+                //obj.sendAdd();
               } else if (event.buttons == 1) {
                 moved = false;
               }
