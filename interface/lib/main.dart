@@ -62,7 +62,7 @@ void main() async {
 
   if (isDebug) {
     await encryptionTest();
-    testEncryptionRSA();
+    // testEncryptionRSA(); This crashes the app for anyone not on my windows system xd
   }
 
   // Initialize controllers
