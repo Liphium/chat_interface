@@ -126,43 +126,36 @@ class _SettingsPageState extends State<SettingsPage> {
             Flexible(
               child: Padding(
                 padding: const EdgeInsets.only(left: defaultSpacing),
-                child: DynMouseScroll(
-                  scrollSpeed: 0.3,
-                  builder: (context, controller, physics) {
-                    return SingleChildScrollView(
-                      controller: controller,
-                      physics: physics,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: pageWidth),
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Obx(
-                                    () => currentCategory.value.displayTitle
-                                        ? Padding(
-                                            padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
-                                            child:
-                                                Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
-                                          )
-                                        : const SizedBox(),
-                                  ),
-                                  Obx(() => currentCategory.value.widget ?? const Placeholder()),
-                                ],
+                child: SingleChildScrollView(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: pageWidth),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Obx(
+                                () => currentCategory.value.displayTitle
+                                    ? Padding(
+                                        padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
+                                        child:
+                                            Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
+                                      )
+                                    : const SizedBox(),
                               ),
-                            ),
+                              Obx(() => currentCategory.value.widget ?? const Placeholder()),
+                            ],
                           ),
-                          SizedBox(
-                            width: max(containerWidth, 8) - 8,
-                          ),
-                        ],
+                        ),
                       ),
-                    );
-                  },
+                      SizedBox(
+                        width: max(containerWidth, 8) - 8,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
