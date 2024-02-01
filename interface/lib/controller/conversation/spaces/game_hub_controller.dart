@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GameHubController extends GetxController {
-
   // All games (mainly for UI)
   final games = {
-    "wordgrid": Game("wordgrid", "Word grid", "Play chess with your friends", "It's very complicated yk", "assets/img/chess.jpg"),
+    "wordgrid": Game("wordgrid", "Word grid", "Play chess with your friends",
+        "It's very complicated yk", "assets/img/chess.jpg"),
   };
 
   // Current sessions on the server
@@ -24,26 +24,25 @@ class GameHubController extends GetxController {
   void newSession(String game) {
     sessionLoading.value = true;
 
-    spaceConnector.sendAction(Message("game_init", {
-      "game": game
-    }), handler: (event) {
-      sessionLoading.value = false;
-      
-      if(event.data["success"]) {
-        sendLog("Game session created");
-        final session = GameSession(event.data["session"], game, event.data["min"], event.data["max"]);
-        engine.value = WordgridEngine(session.id);
-      }
+    spaceConnector.sendAction(
+      Message("game_init", {"game": game}),
+      handler: (event) {
+        sessionLoading.value = false;
 
-    },);
-
+        if (event.data["success"]) {
+          sendLog("Game session created");
+          final session = GameSession(event.data["session"], game,
+              event.data["min"], event.data["max"]);
+          engine.value = WordgridEngine(session.id);
+        }
+      },
+    );
   }
 
   void leaveCall() {
     engine.value = null;
     sessions.clear();
   }
-
 }
 
 // Class for game data (mainly for UI)
@@ -53,12 +52,12 @@ class Game {
   final String name;
   final String shortDescription, description;
 
-  Game(this.serverId, this.name, this.shortDescription, this.description, this.coverImageAsset);
+  Game(this.serverId, this.name, this.shortDescription, this.description,
+      this.coverImageAsset);
 }
 
 // Abstract class for game engines (to be implemented by each game)
 abstract class Engine {
-
   final String sessionId;
 
   Engine(this.sessionId);
@@ -68,7 +67,7 @@ abstract class Engine {
   Widget render(BuildContext context) {
     return Obx(() {
       final session = Get.find<GameHubController>().sessions[sessionId]!;
-      if(session.gameState.value == gameStateLobby) {
+      if (session.gameState.value == gameStateLobby) {
         return LobbyView(session: session);
       } else {
         return build(context);
@@ -79,11 +78,8 @@ abstract class Engine {
   void receiveEvent(String event, dynamic data);
 
   void sendEvent(String event, dynamic data) {
-    spaceConnector.sendAction(Message("game_event", <String, dynamic>{
-      "session": sessionId,
-      "name": event,
-      "data": data
-    }));
+    spaceConnector.sendAction(Message("game_event",
+        <String, dynamic>{"session": sessionId, "name": event, "data": data}));
   }
 }
 
@@ -104,14 +100,14 @@ class GameSession {
 
   void start() {
     loading = true;
-    spaceConnector.sendAction(Message("game_start", {
-      "session": id,
-    }), handler: (event) {
+    spaceConnector.sendAction(
+        Message("game_start", {
+          "session": id,
+        }), handler: (event) {
       loading = false;
-      if(!event.data["success"]) {
+      if (!event.data["success"]) {
         showErrorPopup("error".tr, event.data["message"].toString().tr);
       }
     });
   }
-
 }

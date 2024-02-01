@@ -12,28 +12,31 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SpaceMessageRenderer extends StatefulWidget {
-
   final Message message;
   final bool self;
   final bool last;
   final Friend? sender;
 
-  const SpaceMessageRenderer({super.key, required this.message, this.self = false, this.last = false, this.sender});
+  const SpaceMessageRenderer(
+      {super.key,
+      required this.message,
+      this.self = false,
+      this.last = false,
+      this.sender});
 
   @override
   State<SpaceMessageRenderer> createState() => _CallMessageRendererState();
 }
 
 class _CallMessageRendererState extends State<SpaceMessageRenderer> {
-
   final loading = false.obs;
 
   @override
   Widget build(BuildContext context) {
-
     Friend sender = widget.sender ?? Friend.system();
     sendLog(widget.message.content);
-    final container = SpaceConnectionContainer.fromJson(jsonDecode(widget.message.content));
+    final container =
+        SpaceConnectionContainer.fromJson(jsonDecode(widget.message.content));
 
     return RepaintBoundary(
       child: Stack(
@@ -45,34 +48,33 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
               horizontal: sectionSpacing,
             ),
             child: Row(
-              textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
+              textDirection:
+                  widget.self ? TextDirection.rtl : TextDirection.ltr,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-              
                 //* Avatar
                 Visibility(
                   visible: !widget.last,
-                  replacement: const SizedBox(width: 34), //* Show timestamp instead
+                  replacement:
+                      const SizedBox(width: 34), //* Show timestamp instead
                   child: Tooltip(
-                    message: sender.name,
-                    child: UserAvatar(id: sender.id, size: 34)
-                  ),
+                      message: sender.name,
+                      child: UserAvatar(id: sender.id, size: 34)),
                 ),
                 horizontalSpacing(defaultSpacing),
-              
+
                 //* Message
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                                      
                     //* Content
                     SpaceRenderer(container: container),
                   ],
                 ),
-              
+
                 horizontalSpacing(defaultSpacing),
-              
+
                 Obx(() {
                   final verified = widget.message.verified.value;
                   return Padding(
@@ -99,36 +101,41 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
 }
 
 Widget renderMiniAvatars(int amount) {
-
   final realAmount = min(amount, 5);
   return SizedBox(
     width: sectionSpacing * (realAmount + 2),
     height: sectionSpacing * 1.5,
     child: Stack(
       children: List.generate(realAmount, (index) {
-        
-        final positionedWidget = index == realAmount-1 && amount > 5 ?
-          Container(
-            height: sectionSpacing * 1.5,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(sectionSpacing * 1.5),
-              color: Get.theme.colorScheme.background,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
-              child: Center(
-                child: Text("+${amount-realAmount+1}", style: Get.theme.textTheme.labelSmall!.copyWith(color: Get.theme.colorScheme.onPrimary)),
-              ),
-            ),
-          ) :
-          SizedBox(
-            width: sectionSpacing * 1.5,
-            height: sectionSpacing * 1.5,
-            child: CircleAvatar(
-              backgroundColor: index % 2 == 0 ? Get.theme.colorScheme.errorContainer : Get.theme.colorScheme.tertiaryContainer,
-              child: Icon(Icons.person, size: sectionSpacing, color: Get.theme.colorScheme.onSurface),
-            ),
-          );
+        final positionedWidget = index == realAmount - 1 && amount > 5
+            ? Container(
+                height: sectionSpacing * 1.5,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(sectionSpacing * 1.5),
+                  color: Get.theme.colorScheme.background,
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: elementSpacing),
+                  child: Center(
+                    child: Text("+${amount - realAmount + 1}",
+                        style: Get.theme.textTheme.labelSmall!
+                            .copyWith(color: Get.theme.colorScheme.onPrimary)),
+                  ),
+                ),
+              )
+            : SizedBox(
+                width: sectionSpacing * 1.5,
+                height: sectionSpacing * 1.5,
+                child: CircleAvatar(
+                  backgroundColor: index % 2 == 0
+                      ? Get.theme.colorScheme.errorContainer
+                      : Get.theme.colorScheme.tertiaryContainer,
+                  child: Icon(Icons.person,
+                      size: sectionSpacing,
+                      color: Get.theme.colorScheme.onSurface),
+                ),
+              );
 
         return Positioned(
           left: index * sectionSpacing,

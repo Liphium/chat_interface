@@ -48,19 +48,27 @@ class _FJTextFieldState extends State<FJTextField> {
     return Obx(
       () => Animate(
         effects: [
-          ScaleEffect(end: const Offset(1.08, 1.08), duration: 250.ms, curve: Curves.ease),
+          ScaleEffect(
+              end: const Offset(1.08, 1.08),
+              duration: 250.ms,
+              curve: Curves.ease),
           CustomEffect(
             begin: 0,
             end: 1,
             duration: 250.ms,
             builder: (context, value, child) {
-              return Padding(padding: EdgeInsets.symmetric(horizontal: defaultSpacing * value), child: child);
+              return Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: defaultSpacing * value),
+                  child: child);
             },
           )
         ],
         target: _focus.value && widget.animation ? 1 : 0,
         child: Material(
-          color: widget.secondaryColor ? Get.theme.colorScheme.onBackground : Get.theme.colorScheme.background,
+          color: widget.secondaryColor
+              ? Get.theme.colorScheme.onBackground
+              : Get.theme.colorScheme.background,
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: Padding(
             padding: const EdgeInsets.all(defaultSpacing),
@@ -68,18 +76,23 @@ class _FJTextFieldState extends State<FJTextField> {
               decoration: InputDecoration(
                 isDense: true,
                 hintText: widget.hintText,
-                labelStyle: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
+                labelStyle: widget.small
+                    ? theme.textTheme.labelMedium
+                    : theme.textTheme.labelLarge,
                 errorText: widget.errorText,
                 border: InputBorder.none,
                 counterText: "",
               ),
-              style: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
+              style: widget.small
+                  ? theme.textTheme.labelMedium
+                  : theme.textTheme.labelLarge,
               obscureText: widget.obscureText,
               autocorrect: false,
               enableSuggestions: false,
               controller: widget.controller,
               maxLength: widget.maxLength,
-              maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
+              maxLengthEnforcement:
+                  MaxLengthEnforcement.truncateAfterCompositionEnds,
               onTap: () => _focus.value = true,
               focusNode: _node,
             ),

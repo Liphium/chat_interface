@@ -63,7 +63,9 @@ class _CallControlsState extends State<CallControls> {
                 padding: defaultSpacing + elementSpacing,
                 loading: controller.deafenLoading,
                 onTap: () => controller.setDeafened(!controller.deafened.value),
-                icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+                icon: controller.deafened.value
+                    ? Icons.volume_off
+                    : Icons.volume_up,
                 iconSize: 35,
                 color: theme.colorScheme.onSurface,
               );
@@ -88,7 +90,9 @@ class _CallControlsState extends State<CallControls> {
                 }
               },
               color: theme.colorScheme.onPrimary,
-              icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
+              icon: tableController.enabled.value
+                  ? Icons.speaker_group
+                  : Icons.table_restaurant,
               iconSize: 35,
             ),
           ),
@@ -115,14 +119,17 @@ class CallButtonBorder extends StatelessWidget {
   final bool gradient;
   final Widget child;
 
-  const CallButtonBorder({super.key, required this.child, this.gradient = false});
+  const CallButtonBorder(
+      {super.key, required this.child, this.gradient = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: gradient ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+        color: gradient
+            ? Get.theme.colorScheme.primary
+            : Get.theme.colorScheme.primaryContainer,
       ),
       child: child,
     );

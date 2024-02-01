@@ -12,7 +12,6 @@ class FetchFinishSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-
     // Update last fetch time
     await finishFetch();
     setupFinished = true;
@@ -23,8 +22,10 @@ class FetchFinishSetup extends Setup {
 }
 
 Future<bool> finishFetch() async {
-  if(!fetchHappening) return false;
-  await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "lastFetch", value: DateTime.now().millisecondsSinceEpoch.toString()));
+  if (!fetchHappening) return false;
+  await db.into(db.setting).insertOnConflictUpdate(SettingData(
+      key: "lastFetch",
+      value: DateTime.now().millisecondsSinceEpoch.toString()));
   fetchHappening = false;
   return true;
 }

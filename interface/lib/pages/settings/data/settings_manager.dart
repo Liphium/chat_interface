@@ -9,17 +9,13 @@ import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:get/get.dart';
 
 class AppSettings {
-
   static String showGroupMembers = "chat.group_members";
-
 }
 
 class SettingController extends GetxController {
-
   final settings = <String, Setting>{}; // label: Setting
 
   SettingController() {
-    
     addSpeechSettings(this);
     addVideoSettings(this);
     addCallAppearanceSettings(this);
@@ -30,11 +26,9 @@ class SettingController extends GetxController {
 
     // Add app settings (not in settings page)
     addSetting(Setting<bool>(AppSettings.showGroupMembers, true));
-    
   }
 
   void addSetting(Setting setting) {
     settings[setting.label] = setting;
   }
-
 }

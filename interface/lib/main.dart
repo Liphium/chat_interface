@@ -1,13 +1,14 @@
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
-import 'package:chat_interface/ffi.dart';
+import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:logger/logger.dart' as log;
 import 'package:sodium_libs/sodium_libs.dart';
+import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 
 import 'app.dart';
 
@@ -52,9 +53,11 @@ void main() async {
   // Initialize sodium
   await initSodium();
 
+  await RustLib.init();
+
   // Initialize logging from the native side
   api.createLogStream().listen((event) {
-    sendLog("${event.tag} | ${event.msg}");
+    sendLog("FROM RUST: ${event.tag} | ${event.msg}");
   });
 
   // Wait for it to be finished

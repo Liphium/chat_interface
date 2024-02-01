@@ -13,99 +13,94 @@ class CallPreview extends StatefulWidget {
 class _CallPreviewState extends State<CallPreview> {
   @override
   Widget build(BuildContext context) {
-
     ThemeData theme = Theme.of(context);
     SettingController controller = Get.find();
 
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing * 0.5),
       child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Column(
-          children: [
+          aspectRatio: 16 / 9,
+          child: Column(
+            children: [
+              //* Top preview
+              Obx(() => Visibility(
+                  visible: controller.settings["call_app.expansionPosition"]!
+                          .getValue() ==
+                      0,
+                  child: Expanded(
+                      flex: 1,
+                      child: Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: defaultSpacing),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children:
+                                  _buildEntities(theme, 0, defaultSpacing)))))),
 
-            //* Top preview
-            Obx(() =>
-              Visibility(
-                visible: controller.settings["call_app.expansionPosition"]!.getValue() == 0,
-                child: Expanded(
-                  flex: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: defaultSpacing),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: _buildEntities(theme, 0, defaultSpacing))
-                  )
-                )
-              )
-            ),
-            
-            Expanded(
-              flex: 3,
-              child: Row(
-                children: [
+              Expanded(
+                flex: 3,
+                child: Row(
+                  children: [
+                    //* Left preview
+                    Obx(() => Visibility(
+                        visible: controller
+                                .settings["call_app.expansionPosition"]!
+                                .getValue() ==
+                            3,
+                        child: Expanded(
+                            flex: 1,
+                            child: Padding(
+                                padding: const EdgeInsets.only(
+                                    right: defaultSpacing),
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: _buildEntities(
+                                        theme, defaultSpacing, 0)))))),
 
-                  //* Left preview
-                  Obx(() =>
-                    Visibility(
-                      visible: controller.settings["call_app.expansionPosition"]!.getValue() == 3,
-                      child: Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: defaultSpacing),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: _buildEntities(theme, defaultSpacing, 0)
-                          )
-                        )
-                      )
-                    )
-                  ),
-
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: theme.colorScheme.primaryContainer,
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          color: theme.colorScheme.primaryContainer,
+                        ),
                       ),
                     ),
-                  ),
 
-                  //* Right preview
-                  Obx(() =>
-                    Visibility(
-                      visible: controller.settings["call_app.expansionPosition"]!.getValue() == 1,
-                      child: Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: defaultSpacing),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: _buildEntities(theme, defaultSpacing, 0)
-                          )
-                        )
-                      )
-                    )
-                  ),
-                ],
+                    //* Right preview
+                    Obx(() => Visibility(
+                        visible: controller
+                                .settings["call_app.expansionPosition"]!
+                                .getValue() ==
+                            1,
+                        child: Expanded(
+                            flex: 1,
+                            child: Padding(
+                                padding:
+                                    const EdgeInsets.only(left: defaultSpacing),
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: _buildEntities(
+                                        theme, defaultSpacing, 0)))))),
+                  ],
+                ),
               ),
-            ),
 
-            //* Bottom preview
-            Obx(() =>
-              Visibility(
-                visible: controller.settings["call_app.expansionPosition"]!.getValue() == 2,
-                child: Expanded(
-                  flex: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: defaultSpacing),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: _buildEntities(theme, 0, defaultSpacing))
-                  )
-                )
-              )
-            ),
-          ],
-        )
-      ),
+              //* Bottom preview
+              Obx(() => Visibility(
+                  visible: controller.settings["call_app.expansionPosition"]!
+                          .getValue() ==
+                      2,
+                  child: Expanded(
+                      flex: 1,
+                      child: Padding(
+                          padding: const EdgeInsets.only(top: defaultSpacing),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children:
+                                  _buildEntities(theme, 0, defaultSpacing)))))),
+            ],
+          )),
     );
   }
 
@@ -117,26 +112,23 @@ class _CallPreviewState extends State<CallPreview> {
         child: AspectRatio(
           aspectRatio: 16 / 9,
           child: Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.tertiary,
-              borderRadius: BorderRadius.circular(defaultSpacing),
-              border: Border.all(color: Colors.green, width: 2),
-            ),
-            alignment: Alignment.bottomLeft,
-            child: SizedBox(
-              height: 25,
-              child: Padding(
-                padding: const EdgeInsets.all(defaultSpacing * 0.5),
-                child: Container(
-                  width: 60,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.tertiaryContainer,
-                    borderRadius: BorderRadius.circular(defaultSpacing),
-                  )
-                )
+              decoration: BoxDecoration(
+                color: theme.colorScheme.tertiary,
+                borderRadius: BorderRadius.circular(defaultSpacing),
+                border: Border.all(color: Colors.green, width: 2),
               ),
-            )
-          ),
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                height: 25,
+                child: Padding(
+                    padding: const EdgeInsets.all(defaultSpacing * 0.5),
+                    child: Container(
+                        width: 60,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.tertiaryContainer,
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                        ))),
+              )),
         ),
       ),
       Padding(
@@ -144,25 +136,22 @@ class _CallPreviewState extends State<CallPreview> {
         child: AspectRatio(
           aspectRatio: 16 / 9,
           child: Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              borderRadius: BorderRadius.circular(defaultSpacing),
-            ),
-            alignment: Alignment.bottomLeft,
-            child: SizedBox(
-              height: 25,
-              child: Padding(
-                padding: const EdgeInsets.all(defaultSpacing * 0.5),
-                child: Container(
-                  width: 50,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(defaultSpacing),
-                  )
-                )
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(defaultSpacing),
               ),
-            )
-          ),
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                height: 25,
+                child: Padding(
+                    padding: const EdgeInsets.all(defaultSpacing * 0.5),
+                    child: Container(
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                        ))),
+              )),
         ),
       ),
       Padding(
@@ -170,25 +159,22 @@ class _CallPreviewState extends State<CallPreview> {
         child: AspectRatio(
           aspectRatio: 16 / 9,
           child: Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.error,
-              borderRadius: BorderRadius.circular(defaultSpacing),
-            ),
-            alignment: Alignment.bottomLeft,
-            child: SizedBox(
-              height: 25,
-              child: Padding(
-                padding: const EdgeInsets.all(defaultSpacing * 0.5),
-                child: Container(
-                  width: 75,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(defaultSpacing),
-                  )
-                )
+              decoration: BoxDecoration(
+                color: theme.colorScheme.error,
+                borderRadius: BorderRadius.circular(defaultSpacing),
               ),
-            )
-          ),
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                height: 25,
+                child: Padding(
+                    padding: const EdgeInsets.all(defaultSpacing * 0.5),
+                    child: Container(
+                        width: 75,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                        ))),
+              )),
         ),
       )
     ];

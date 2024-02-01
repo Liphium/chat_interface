@@ -1,4 +1,4 @@
-import 'package:chat_interface/ffi.dart';
+import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/app/microphone_tab.dart';
 import 'package:chat_interface/pages/settings/app/output_tab.dart';

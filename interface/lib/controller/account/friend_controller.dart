@@ -53,7 +53,8 @@ class FriendController extends GetxController {
     sendLog(request.vaultId);
     final friendsVault = await removeFromFriendsVault(request.vaultId);
     if (!friendsVault) {
-      add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
+      add(request
+          .friend); // Add regardless cause restart of the app fixes not being able to remove the guy
       sendLog("ADDING REGARDLESS");
       return false;
     }
@@ -111,7 +112,8 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage, this.updatedAt);
+  Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage,
+      this.updatedAt);
 
   Friend.system()
       : id = "system",
@@ -125,7 +127,8 @@ class Friend {
         name = '',
         tag = '',
         vaultId = '',
-        keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+        keyStorage = KeyStorage(asymmetricKeyPair.publicKey,
+            signatureKeyPair.publicKey, profileKey, ""),
         updatedAt = 0 {
     final StatusController statusController = controller ?? Get.find();
     id = statusController.id.value;
@@ -218,13 +221,19 @@ class Friend {
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Update the profile picture of this friend
-  void updateProfilePicture(AttachmentContainer picture, ProfilePictureData data) async {
+  void updateProfilePicture(
+      AttachmentContainer picture, ProfilePictureData data) async {
     // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: jsonEncode(picture.toJson()), pictureData: jsonEncode(data.toJson()), data: ""));
+    db.profile.insertOnConflictUpdate(ProfileData(
+        id: id,
+        pictureContainer: jsonEncode(picture.toJson()),
+        pictureData: jsonEncode(data.toJson()),
+        data: ""));
 
     profilePicture = picture;
     profilePictureData = data;
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(picture.filePath);
+    profilePictureImage.value =
+        await ProfilePictureHelper.loadImage(picture.filePath);
   }
 
   /// Load the profile picture of this friend
@@ -252,10 +261,13 @@ class Friend {
     }
 
     final json = jsonDecode(data.pictureContainer);
-    final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
+    final type = await AttachmentController.checkLocations(
+        json["id"], StorageType.permanent);
     profilePicture = AttachmentContainer.fromJson(type, json);
-    profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(profilePicture!.filePath);
+    profilePictureData =
+        ProfilePictureData.fromJson(jsonDecode(data.pictureData));
+    profilePictureImage.value =
+        await ProfilePictureHelper.loadImage(profilePicture!.filePath);
     sendLog("LOADED!!");
   }
 

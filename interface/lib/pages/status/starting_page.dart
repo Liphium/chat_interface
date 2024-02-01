@@ -13,10 +13,9 @@ class StartingPage extends StatefulWidget {
 }
 
 class _StartingPageState extends State<StartingPage> {
-
   @override
   void initState() {
-    if(setupManager.current == -1) {
+    if (setupManager.current == -1) {
       setupManager.next(open: false);
     }
 
@@ -25,7 +24,6 @@ class _StartingPageState extends State<StartingPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Get.theme.colorScheme.background,
       body: Center(

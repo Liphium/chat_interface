@@ -3,7 +3,6 @@ import 'package:chat_interface/controller/conversation/spaces/games/wordgrid_wid
 import 'package:flutter/material.dart';
 
 class WordgridEngine extends Engine {
-
   WordgridEngine(super.session);
 
   @override
@@ -13,10 +12,9 @@ class WordgridEngine extends Engine {
 
   @override
   Widget build(BuildContext context) {
-
     const gridSize = 6;
     const fontSize = 50.0;
-   
+
     return const WordgridGrid(fontSize: fontSize, gridSize: gridSize);
   }
 }

@@ -29,7 +29,8 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("log_out.delete_files".tr, style: Get.theme.textTheme.bodyMedium),
+              Text("log_out.delete_files".tr,
+                  style: Get.theme.textTheme.bodyMedium),
               Obx(
                 () => FJSwitch(
                   value: _deleteFiles.value,
@@ -44,16 +45,22 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
               Expanded(
                 child: FJElevatedButton(
                   onTap: () async {
-                    Get.find<StatusController>().logOut(deleteEverything: true, deleteFiles: _deleteFiles.value);
+                    Get.find<StatusController>().logOut(
+                        deleteEverything: true,
+                        deleteFiles: _deleteFiles.value);
                   },
-                  child: Center(child: Text("yes".tr, style: Get.theme.textTheme.labelLarge)),
+                  child: Center(
+                      child: Text("yes".tr,
+                          style: Get.theme.textTheme.labelLarge)),
                 ),
               ),
               horizontalSpacing(defaultSpacing),
               Expanded(
                 child: FJElevatedButton(
                   onTap: () => Get.back(),
-                  child: Center(child: Text("no".tr, style: Get.theme.textTheme.labelLarge)),
+                  child: Center(
+                      child:
+                          Text("no".tr, style: Get.theme.textTheme.labelLarge)),
                 ),
               ),
             ],

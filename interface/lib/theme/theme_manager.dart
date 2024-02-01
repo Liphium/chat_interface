@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ThemeManager extends GetxController {
-
   final currentTheme = darkMetalTheme.obs;
 
   final brightness = Brightness.dark.obs;
@@ -17,11 +16,9 @@ class ThemeManager extends GetxController {
   void changeBrightness(Brightness value) {
     brightness.value = value;
   }
-
 }
 
 class CustomTheme {
-  
   // Theme properties
   final String name;
   final ThemeData light;
@@ -29,6 +26,6 @@ class CustomTheme {
 
   const CustomTheme(this.name, this.light, this.dark);
 
-  ThemeData getData(Brightness brightness) => brightness == Brightness.light ? light : dark;
-
+  ThemeData getData(Brightness brightness) =>
+      brightness == Brightness.light ? light : dark;
 }

@@ -1,13 +1,12 @@
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/ffi.dart';
+import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:get/get.dart';
 
 class AudioController extends GetxController {
-  
   //* Output
   final deafenLoading = false.obs;
   final deafened = false.obs;
@@ -16,7 +15,7 @@ class AudioController extends GetxController {
   void setDeafened(bool newOutput) async {
     await api.setDeafen(deafened: newOutput);
     deafened.value = newOutput;
-    if(_connected) {
+    if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[controller.getClientId()]!.isDeafened.value = newOutput;
       controller.members[controller.getClientId()]!.isSpeaking.value = newOutput ? false : controller.members[controller.getClientId()]!.isSpeaking.value;
@@ -31,7 +30,7 @@ class AudioController extends GetxController {
   void setMuted(bool newMuted) async {
     await api.setMuted(muted: newMuted);
     muted.value = newMuted;
-    if(_connected) {
+    if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[controller.getClientId()]!.isMuted.value = newMuted;
       controller.members[controller.getClientId()]!.isSpeaking.value = newMuted ? false : controller.members[controller.getClientId()]!.isSpeaking.value;
@@ -47,7 +46,6 @@ class AudioController extends GetxController {
   }
 
   void onConnect() async {
-
     // Enforce defaults
     final settingController = Get.find<SettingController>();
     await api.setDeafen(deafened: false);

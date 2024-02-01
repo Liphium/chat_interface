@@ -9,7 +9,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class ErrorPage extends StatefulWidget {
-
   final String title;
 
   const ErrorPage({super.key, required this.title});
@@ -19,7 +18,6 @@ class ErrorPage extends StatefulWidget {
 }
 
 class _ErrorPageState extends State<ErrorPage> {
-
   Timer? _timer;
   var _start = 30.0;
   final _progress = 0.0.obs;
@@ -67,35 +65,39 @@ class _ErrorPageState extends State<ErrorPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(widget.title.tr, style: Get.textTheme.headlineMedium,),
+                Text(
+                  widget.title.tr,
+                  style: Get.textTheme.headlineMedium,
+                ),
                 verticalSpacing(sectionSpacing),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Obx(() => Row(
-                      children: [
-                        SizedBox(
-                          width: 20.0,
-                          height: 20.0,
-                          child: CircularProgressIndicator(
-                            backgroundColor: Get.theme.colorScheme.primary,
-                            color: Get.theme.colorScheme.onPrimary,
-                            value: _progress.value,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                        horizontalSpacing(defaultSpacing * 2),
-                        Text("${'retry.text.1'.tr} "),
-                        Text('${_start.toInt()}'),
-                        Text(" ${'retry.text.2'.tr}"),
-                      ],
-                    )),
+                          children: [
+                            SizedBox(
+                              width: 20.0,
+                              height: 20.0,
+                              child: CircularProgressIndicator(
+                                backgroundColor: Get.theme.colorScheme.primary,
+                                color: Get.theme.colorScheme.onPrimary,
+                                value: _progress.value,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            horizontalSpacing(defaultSpacing * 2),
+                            Text("${'retry.text.1'.tr} "),
+                            Text('${_start.toInt()}'),
+                            Text(" ${'retry.text.2'.tr}"),
+                          ],
+                        )),
                   ],
                 ),
                 verticalSpacing(defaultSpacing),
                 FJElevatedButton(
                   onTap: () => setupManager.restart(),
-                  child: Center(child: Text('retry'.tr, style: Get.textTheme.labelLarge)),
+                  child: Center(
+                      child: Text('retry'.tr, style: Get.textTheme.labelLarge)),
                 ),
               ],
             ),

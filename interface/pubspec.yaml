@@ -30,7 +30,7 @@ dependencies:
   record: any
   sodium_libs: any
   ffi: any
-  flutter_rust_bridge: any
+  flutter_rust_bridge: 2.0.0-dev.22
   freezed_annotation: any
   file_selector: any
   drift_db_viewer: any
@@ -38,7 +38,9 @@ dependencies:
   audioplayers: any
   dio: any
   encrypt: any
-  open_app_file: ^4.0.2
+  open_app_file: any
+  rust_builder:
+    path: rust_builder
 
 dev_dependencies:
   flutter_test:
@@ -49,7 +51,9 @@ dev_dependencies:
   test: any
   ffigen: any
   freezed: any
-  msix: ^3.16.7
+  msix: any
+  integration_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true

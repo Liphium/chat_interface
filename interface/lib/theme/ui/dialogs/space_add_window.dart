@@ -50,7 +50,8 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
                 Get.dialog(const FriendsPage());
               },
               child: Center(
-                child: Text("open.friends".tr, style: theme.textTheme.labelLarge),
+                child:
+                    Text("open.friends".tr, style: theme.textTheme.labelLarge),
               ),
             ),
           ],
@@ -95,7 +96,8 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
                 return;
               }
 
-              Get.find<SpacesController>().createSpace(_controller.text, public.value);
+              Get.find<SpacesController>()
+                  .createSpace(_controller.text, public.value);
               Get.back();
             },
             label: "create".tr,

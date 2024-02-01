@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class JoinSpaceDialog extends StatefulWidget {
-
   final SpaceConnectionContainer container;
 
   const JoinSpaceDialog({super.key, required this.container});
@@ -30,18 +29,22 @@ class _JoinSpaceDialogState extends State<JoinSpaceDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               FJElevatedButton(
-                onTap: () {
-                  Get.find<SpacesController>().join(widget.container);
-                  Get.back();
-                },
-                smallCorners: true,
-                child: Center(child: Text("yeah".tr, style: Get.theme.textTheme.labelMedium),)
-              ),
+                  onTap: () {
+                    Get.find<SpacesController>().join(widget.container);
+                    Get.back();
+                  },
+                  smallCorners: true,
+                  child: Center(
+                    child:
+                        Text("yeah".tr, style: Get.theme.textTheme.labelMedium),
+                  )),
               FJElevatedButton(
-                onTap: () => Get.back(), 
-                smallCorners: true,
-                child: Center(child: Text("no.got".tr, style: Get.theme.textTheme.labelMedium),)
-              )
+                  onTap: () => Get.back(),
+                  smallCorners: true,
+                  child: Center(
+                    child: Text("no.got".tr,
+                        style: Get.theme.textTheme.labelMedium),
+                  ))
             ],
           )
         ],

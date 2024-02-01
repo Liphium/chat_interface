@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CallGridView extends StatefulWidget {
-
   final BoxConstraints constraints;
   final RxList<String>? filter;
 
@@ -19,7 +18,6 @@ class CallGridView extends StatefulWidget {
 }
 
 class _CallGridViewState extends State<CallGridView> {
-
   final double _minHeight = 120;
 
   @override
@@ -28,25 +26,27 @@ class _CallGridViewState extends State<CallGridView> {
     SpaceMemberController spaceMemberController = Get.find();
 
     return Obx(() {
-
-      if(spaceMemberController.membersLoading.value || spaceMemberController.members.isEmpty) {
+      if (spaceMemberController.membersLoading.value ||
+          spaceMemberController.members.isEmpty) {
         return Center(
-          child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
+          child:
+              CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
         );
       }
 
       int people = spaceMemberController.members.length;
-      if(people == 0) {
+      if (people == 0) {
         return const Center(
           child: Text("No one is here"),
         );
       }
 
       // Calculate the available height for every participant
-      double computedHeight = _calculateSmallRectangleHeight(widget.constraints.maxWidth, widget.constraints.maxHeight, people);
+      double computedHeight = _calculateSmallRectangleHeight(
+          widget.constraints.maxWidth, widget.constraints.maxHeight, people);
       computedHeight -= defaultSpacing * people;
 
-      if (computedHeight > _minHeight*0.4 || !controller.hasVideo.value) {
+      if (computedHeight > _minHeight * 0.4 || !controller.hasVideo.value) {
         return Center(
           child: Wrap(
             alignment: WrapAlignment.center,
@@ -55,10 +55,12 @@ class _CallGridViewState extends State<CallGridView> {
             direction: Axis.horizontal,
             spacing: defaultSpacing * 1.5,
             runSpacing: defaultSpacing * 1.5,
-          
-            children: renderEntites(0, 0, BoxConstraints(
-              maxHeight: max(_minHeight, computedHeight),
-            )),
+            children: renderEntites(
+                0,
+                0,
+                BoxConstraints(
+                  maxHeight: max(_minHeight, computedHeight),
+                )),
           ),
         );
       } else {
@@ -74,10 +76,12 @@ class _CallGridViewState extends State<CallGridView> {
                   direction: Axis.horizontal,
                   spacing: defaultSpacing * 1.5,
                   runSpacing: defaultSpacing * 1.5,
-                
-                  children: renderEntites(0, 0, BoxConstraints(
-                    maxHeight: max(_minHeight, computedHeight),
-                  )),
+                  children: renderEntites(
+                      0,
+                      0,
+                      BoxConstraints(
+                        maxHeight: max(_minHeight, computedHeight),
+                      )),
                 ),
               ),
             ],
@@ -88,7 +92,8 @@ class _CallGridViewState extends State<CallGridView> {
   }
 
   // Thanks Bing Chat (you solved a problem I worked on for 2 hours)
-  double _calculateSmallRectangleHeight(double bigRectangleWidth, double bigRectangleHeight, int n) {
+  double _calculateSmallRectangleHeight(
+      double bigRectangleWidth, double bigRectangleHeight, int n) {
     double aspectRatio = 16 / 9;
     int columns = sqrt(n).ceil();
     int rows = (n / columns).ceil();

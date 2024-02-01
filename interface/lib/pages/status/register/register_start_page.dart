@@ -50,13 +50,17 @@ class _RegisterPageState extends State<RegisterStartPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("register.title".tr, textAlign: TextAlign.left, style: theme.textTheme.headlineMedium),
+                Text("register.title".tr,
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.headlineMedium),
                 verticalSpacing(sectionSpacing),
 
                 // Invite
                 Tooltip(
                   message: "invite.info".tr,
-                  child: Text("invite".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
+                  child: Text("invite".tr,
+                      textAlign: TextAlign.left,
+                      style: theme.textTheme.labelLarge),
                 ),
                 verticalSpacing(elementSpacing),
                 FJTextField(
@@ -66,7 +70,9 @@ class _RegisterPageState extends State<RegisterStartPage> {
                 verticalSpacing(defaultSpacing),
 
                 // Email
-                Text("email".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
+                Text("email".tr,
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.labelLarge),
                 verticalSpacing(elementSpacing),
                 FJTextField(
                   hintText: 'placeholder.email'.tr,
@@ -99,18 +105,21 @@ class _RegisterPageState extends State<RegisterStartPage> {
                     }
 
                     // Send registration start request
-                    final error = await RegisterHandler.startRegister(_loading, _emailController.text, _inviteController.text);
+                    final error = await RegisterHandler.startRegister(_loading,
+                        _emailController.text, _inviteController.text);
                     if (error != null) {
                       _errorText.value = error;
                       return;
                     }
 
                     // Transition to the next page
-                    Get.find<TransitionController>().modelTransition(const RegisterCodePage());
+                    Get.find<TransitionController>()
+                        .modelTransition(const RegisterCodePage());
                   },
                   loading: _loading,
                   child: Center(
-                    child: Text('login.next'.tr, style: theme.textTheme.labelLarge),
+                    child: Text('login.next'.tr,
+                        style: theme.textTheme.labelLarge),
                   ),
                 ),
                 verticalSpacing(defaultSpacing),
@@ -121,11 +130,15 @@ class _RegisterPageState extends State<RegisterStartPage> {
                     horizontalSpacing(defaultSpacing),
                     TextButton(
                       style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all(theme.colorScheme.onPrimary),
+                        foregroundColor: MaterialStateProperty.all(
+                            theme.colorScheme.onPrimary),
                         backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
+                            (states) => states.contains(MaterialState.hovered)
+                                ? theme.colorScheme.primary.withOpacity(0.3)
+                                : theme.colorScheme.primary.withOpacity(0)),
                       ),
-                      onPressed: () => Get.find<TransitionController>().modelTransition(const LoginPage()),
+                      onPressed: () => Get.find<TransitionController>()
+                          .modelTransition(const LoginPage()),
                       child: Text('register.login'.tr),
                     ),
                   ],

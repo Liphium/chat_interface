@@ -24,7 +24,8 @@ class _InvitesPageState extends State<InvitesPage> {
   void loadData() async {
     loading.value = true;
 
-    final json = await postAuthorizedJSON("/account/invite/get_all", <String, dynamic>{});
+    final json = await postAuthorizedJSON(
+        "/account/invite/get_all", <String, dynamic>{});
 
     if (!json["success"]) {
       showErrorPopup("error", json["error"]);
@@ -50,7 +51,8 @@ class _InvitesPageState extends State<InvitesPage> {
   void generateNewInvite() async {
     generateLoading.value = true;
 
-    final json = await postAuthorizedJSON("/account/invite/generate", <String, dynamic>{});
+    final json = await postAuthorizedJSON(
+        "/account/invite/generate", <String, dynamic>{});
     if (!json["success"]) {
       showErrorPopup("error", json["error"]);
       generateLoading.value = false;
@@ -69,7 +71,11 @@ class _InvitesPageState extends State<InvitesPage> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (loading.value) {
-        return Padding(padding: const EdgeInsets.all(defaultSpacing), child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
+        return Padding(
+            padding: const EdgeInsets.all(defaultSpacing),
+            child: Center(
+                child: CircularProgressIndicator(
+                    color: Get.theme.colorScheme.onPrimary)));
       }
 
       return Column(
@@ -77,9 +83,13 @@ class _InvitesPageState extends State<InvitesPage> {
         children: [
           //* Profile picture
           verticalSpacing(defaultSpacing),
-          Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
+          Obx(() => Text(
+              "settings.invites.title"
+                  .trParams({"count": count.value.toString()}),
+              style: Get.theme.textTheme.headlineMedium)),
           verticalSpacing(defaultSpacing),
-          Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),
+          Text("settings.invites.description".tr,
+              style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButtonCustom(
               loading: generateLoading,
@@ -89,19 +99,23 @@ class _InvitesPageState extends State<InvitesPage> {
                 children: [
                   Icon(Icons.mail_lock, color: Get.theme.colorScheme.onPrimary),
                   horizontalSpacing(defaultSpacing),
-                  Text("settings.invites.generate".tr, style: Get.theme.textTheme.labelLarge),
+                  Text("settings.invites.generate".tr,
+                      style: Get.theme.textTheme.labelLarge),
                 ],
               )),
           verticalSpacing(sectionSpacing),
 
           //* Profile picture
-          Text("settings.invites.history".tr, style: Get.theme.textTheme.labelLarge),
+          Text("settings.invites.history".tr,
+              style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
-          Text("settings.invites.history.description".tr, style: Get.theme.textTheme.bodyMedium),
+          Text("settings.invites.history.description".tr,
+              style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           Obx(() {
             if (invites.isEmpty) {
-              return Text("settings.invites.history.empty".tr, style: Get.theme.textTheme.labelMedium);
+              return Text("settings.invites.history.empty".tr,
+                  style: Get.theme.textTheme.labelMedium);
             }
 
             return Column(
@@ -119,7 +133,9 @@ class _InvitesPageState extends State<InvitesPage> {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: elementSpacing),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: elementSpacing,
+                            horizontal: defaultSpacing),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           color: Get.theme.colorScheme.primaryContainer,
@@ -140,15 +156,19 @@ class _InvitesPageState extends State<InvitesPage> {
                                     onInit: (controller) {
                                       controller.value = 1.0;
                                     },
-                                    target: invite == hovering.value ? 0.0 : 1.0,
-                                    child: Text(invite, style: Get.theme.textTheme.labelMedium),
+                                    target:
+                                        invite == hovering.value ? 0.0 : 1.0,
+                                    child: Text(invite,
+                                        style: Get.theme.textTheme.labelMedium),
                                   ),
                                 )),
                             IconButton(
                                 onPressed: () {
-                                  Clipboard.setData(ClipboardData(text: invite));
+                                  Clipboard.setData(
+                                      ClipboardData(text: invite));
                                 },
-                                icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary))
+                                icon: Icon(Icons.copy,
+                                    color: Get.theme.colorScheme.onPrimary))
                           ],
                         ),
                       ),

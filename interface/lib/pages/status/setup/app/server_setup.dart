@@ -14,7 +14,9 @@ class ServerSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    final server = await (db.select(db.setting)..where((tbl) => tbl.key.equals("server"))).getSingleOrNull();
+    final server = await (db.select(db.setting)
+          ..where((tbl) => tbl.key.equals("server")))
+        .getSingleOrNull();
 
     if (server == null) {
       return const ServerSelectorPage();
@@ -53,15 +55,20 @@ class ServerSelectorPage extends StatelessWidget {
                   width: double.infinity,
                   child: FJElevatedButton(
                     onTap: () => chooseServer("http://localhost:3000"),
-                    child: Center(child: Text("Localhost", style: Get.theme.textTheme.labelLarge)),
+                    child: Center(
+                        child: Text("Localhost",
+                            style: Get.theme.textTheme.labelLarge)),
                   ),
                 ),
                 verticalSpacing(defaultSpacing),
                 SizedBox(
                   width: double.infinity,
                   child: FJElevatedButton(
-                    onTap: () => chooseServer("http://liphium.fajurion.com:4000"),
-                    child: Center(child: Text('Fajurion network', style: Get.theme.textTheme.labelLarge)),
+                    onTap: () =>
+                        chooseServer("http://liphium.fajurion.com:4000"),
+                    child: Center(
+                        child: Text('Fajurion network',
+                            style: Get.theme.textTheme.labelLarge)),
                   ),
                 ),
               ],
@@ -74,7 +81,9 @@ class ServerSelectorPage extends StatelessWidget {
 
   void chooseServer(String path) {
     basePath = "$path/$apiVersion";
-    db.into(db.setting).insert(SettingCompanion.insert(key: "server", value: path));
+    db
+        .into(db.setting)
+        .insert(SettingCompanion.insert(key: "server", value: path));
     setupManager.next();
   }
 }

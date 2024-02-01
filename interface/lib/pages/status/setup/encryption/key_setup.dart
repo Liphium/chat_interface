@@ -18,76 +18,85 @@ class KeySetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-
     // Get keys from the server
-    final pubBody = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});
-    var privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
+    final pubBody = await postAuthorizedJSON(
+        "/account/keys/public/get", <String, dynamic>{});
+    var privateKey = await (db.select(db.setting)
+          ..where((tbl) => tbl.key.equals("private_key")))
+        .getSingleOrNull();
 
-    if(!pubBody["success"]) {
-
+    if (!pubBody["success"]) {
       final signatureKeyPair = generateSignatureKeyPair();
       final pair = generateAsymmetricKeyPair();
 
-      final packagedSignaturePriv = packagePrivateKey(signatureKeyPair.secretKey);
+      final packagedSignaturePriv =
+          packagePrivateKey(signatureKeyPair.secretKey);
       final packagedSignaturePub = packagePublicKey(signatureKeyPair.publicKey);
       final packagedPriv = packagePrivateKey(pair.secretKey);
       final packagedPub = packagePublicKey(pair.publicKey);
       final genProfileKey = randomSymmetricKey();
 
       // Set public key on the server
-      var res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{
-        "key": packagedPub
-      });
-      if(!res["success"]) {
+      var res = await postAuthorizedJSON(
+          "/account/keys/public/set", <String, dynamic>{"key": packagedPub});
+      if (!res["success"]) {
         return const ErrorPage(title: "key.error");
       }
-      res = await postAuthorizedJSON("/account/keys/profile/set", <String, dynamic>{
-        "key": encryptAsymmetricAnonymous(pair.publicKey, packageSymmetricKey(genProfileKey))
+      res = await postAuthorizedJSON(
+          "/account/keys/profile/set", <String, dynamic>{
+        "key": encryptAsymmetricAnonymous(
+            pair.publicKey, packageSymmetricKey(genProfileKey))
       });
-      if(!res["success"]) {
+      if (!res["success"]) {
         return const ErrorPage(title: "key.error");
       }
-      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{
-        "key": packagedSignaturePub
-      });
-      if(!res["success"]) {
+      res = await postAuthorizedJSON("/account/keys/signature/set",
+          <String, dynamic>{"key": packagedSignaturePub});
+      if (!res["success"]) {
         return const ErrorPage(title: "key.error");
       }
 
       // Insert private key into the database
       privateKey = SettingData(key: "private_key", value: packagedPriv);
       await db.into(db.setting).insertOnConflictUpdate(privateKey);
-      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "public_key", value: packagedPub));
+      await db.into(db.setting).insertOnConflictUpdate(
+          SettingData(key: "public_key", value: packagedPub));
       pubBody["key"] = packagedPub;
-      final signaturePrivateKey = SettingData(key: "signature_private_key", value: packagedSignaturePriv);
+      final signaturePrivateKey = SettingData(
+          key: "signature_private_key", value: packagedSignaturePriv);
       await db.into(db.setting).insertOnConflictUpdate(signaturePrivateKey);
-      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "signature_public_key", value: packagedSignaturePub));
-
+      await db.into(db.setting).insertOnConflictUpdate(SettingData(
+          key: "signature_public_key", value: packagedSignaturePub));
     } else {
-
-      if(privateKey == null) {
+      if (privateKey == null) {
         return const ErrorPage(title: "priv.error");
       }
-
     }
 
     // Grab profile key from server
-    final json = await postAuthorizedJSON("/account/keys/profile/get", <String, dynamic>{});
-    if(!json["success"]) {
+    final json = await postAuthorizedJSON(
+        "/account/keys/profile/get", <String, dynamic>{});
+    if (!json["success"]) {
       return const ErrorPage(title: "key.error");
     }
 
     asymmetricKeyPair = toKeyPair(pubBody["key"], privateKey.value);
-    profileKey = unpackageSymmetricKey(decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, json["key"]));
+    profileKey = unpackageSymmetricKey(decryptAsymmetricAnonymous(
+        asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, json["key"]));
 
     // Grab signature key from client database
-    final signaturePrivateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("signature_private_key"))).getSingleOrNull();
-    final signaturePublicKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("signature_public_key"))).getSingleOrNull();
-    if(signaturePrivateKey == null || signaturePublicKey == null) {
+    final signaturePrivateKey = await (db.select(db.setting)
+          ..where((tbl) => tbl.key.equals("signature_private_key")))
+        .getSingleOrNull();
+    final signaturePublicKey = await (db.select(db.setting)
+          ..where((tbl) => tbl.key.equals("signature_public_key")))
+        .getSingleOrNull();
+    if (signaturePrivateKey == null || signaturePublicKey == null) {
       return const ErrorPage(title: "key.error");
     }
 
-    signatureKeyPair = toKeyPair(signaturePublicKey.value, signaturePrivateKey.value);
+    signatureKeyPair =
+        toKeyPair(signaturePublicKey.value, signaturePrivateKey.value);
 
     return null;
   }

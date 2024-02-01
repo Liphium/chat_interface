@@ -15,12 +15,15 @@ class ClusterSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    var cluster = await (db.select(db.setting)..where((tbl) => tbl.key.equals("cluster"))).getSingleOrNull();
+    var cluster = await (db.select(db.setting)
+          ..where((tbl) => tbl.key.equals("cluster")))
+        .getSingleOrNull();
 
     // Check if cluster exists
     if (cluster == null) {
       // Get cluster from the server
-      final body = await postAuthorizedJSON("/cluster/list", <String, dynamic>{});
+      final body =
+          await postAuthorizedJSON("/cluster/list", <String, dynamic>{});
       if (!body["success"]) {
         return ErrorPage(title: body["error"]);
       }
@@ -31,7 +34,8 @@ class ClusterSetup extends Setup {
       }
 
       // Set cluster from server
-      cluster = SettingData(key: "cluster", value: Cluster.fromJson(clusters[0]).toJson());
+      cluster = SettingData(
+          key: "cluster", value: Cluster.fromJson(clusters[0]).toJson());
       await db.into(db.setting).insertOnConflictUpdate(cluster);
       connectedCluster = Cluster.fromJson(clusters[0]);
     } else {
@@ -49,7 +53,8 @@ class Cluster {
   final String country;
 
   Cluster(this.id, this.name, this.country);
-  Cluster.fromJson(dynamic cluster) : this(cluster["id"], cluster["name"], cluster["country"]);
+  Cluster.fromJson(dynamic cluster)
+      : this(cluster["id"], cluster["name"], cluster["country"]);
 
   String toJson() => jsonEncode(
         {

@@ -41,11 +41,13 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("settings.data.change_password.dialog".tr, style: Get.theme.textTheme.bodyMedium),
+          Text("settings.data.change_password.dialog".tr,
+              style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(sectionSpacing),
 
           // Current password
-          Text("password.current".tr, textAlign: TextAlign.left, style: Get.theme.textTheme.labelLarge),
+          Text("password.current".tr,
+              textAlign: TextAlign.left, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(elementSpacing),
           FJTextField(
             hintText: 'placeholder.password'.tr,
@@ -55,7 +57,8 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> {
           verticalSpacing(defaultSpacing),
 
           // Password
-          Text("password".tr, textAlign: TextAlign.left, style: Get.theme.textTheme.labelLarge),
+          Text("password".tr,
+              textAlign: TextAlign.left, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(elementSpacing),
           FJTextField(
             hintText: 'placeholder.password'.tr,
@@ -94,7 +97,8 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> {
                 return;
               }
 
-              final json = await postAuthorizedJSON("/account/settings/change_password", {
+              final json = await postAuthorizedJSON(
+                  "/account/settings/change_password", {
                 "current": _currentPasswordController.text,
                 "new": _passwordController.text,
               });
@@ -108,7 +112,8 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> {
               // Log out of this device
               Get.find<StatusController>().logOut();
             },
-            child: Center(child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
+            child: Center(
+                child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
           )
         ],
       ),

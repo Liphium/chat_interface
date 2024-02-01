@@ -17,7 +17,8 @@ class TabletopView extends StatefulWidget {
   State<TabletopView> createState() => _TabletopViewState();
 }
 
-class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin {
+class _TabletopViewState extends State<TabletopView>
+    with SingleTickerProviderStateMixin {
   var mousePos = const Offset(0, 0);
   var offset = const Offset(0, 0);
   var scale = 1.0;
@@ -68,8 +69,10 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                   // Convert local to global position
                   final globalPos = Offset(
-                    event.localPosition.dx + (screenWidth - context.size!.width),
-                    event.localPosition.dy + (screenHeight - context.size!.height),
+                    event.localPosition.dx +
+                        (screenWidth - context.size!.width),
+                    event.localPosition.dy +
+                        (screenHeight - context.size!.height),
                   );
 
                   Get.dialog(ObjectContextMenu(
@@ -79,7 +82,9 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   return;
                 }
 
-                Get.dialog(ObjectCreateMenu(location: calculateMousePos(event.localPosition, scale, offset)));
+                Get.dialog(ObjectCreateMenu(
+                    location:
+                        calculateMousePos(event.localPosition, scale, offset)));
                 //final obj = tableController.newObject(TableObjectType.square, "", calculateMousePos(event.localPosition, scale, offset), Size(100, 100), "");
                 //obj.sendAdd();
               } else if (event.buttons == 1) {
@@ -88,15 +93,20 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
             },
             onPointerMove: (event) {
               if (event.buttons == 4) {
-                final old = calculateMousePos(event.localPosition, scale, offset);
-                final newPos = calculateMousePos(event.localPosition + event.delta, scale, offset);
+                final old =
+                    calculateMousePos(event.localPosition, scale, offset);
+                final newPos = calculateMousePos(
+                    event.localPosition + event.delta, scale, offset);
                 offset += newPos - old;
               } else if (event.buttons == 1) {
                 if (tableController.hoveringObjects.isNotEmpty) {
                   moved = true;
-                  tableController.heldObject ??= tableController.hoveringObjects.first;
-                  final old = calculateMousePos(event.localPosition, scale, offset);
-                  final newPos = calculateMousePos(event.localPosition + event.delta, scale, offset);
+                  tableController.heldObject ??=
+                      tableController.hoveringObjects.first;
+                  final old =
+                      calculateMousePos(event.localPosition, scale, offset);
+                  final newPos = calculateMousePos(
+                      event.localPosition + event.delta, scale, offset);
                   tableController.heldObject!.location += newPos - old;
                 }
               }
@@ -104,8 +114,11 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
             },
             onPointerUp: (event) {
               individualScale = 1;
-              if (tableController.hoveringObjects.isNotEmpty && !moved && event.buttons == 0) {
-                tableController.hoveringObjects.first.runAction(tableController);
+              if (tableController.hoveringObjects.isNotEmpty &&
+                  !moved &&
+                  event.buttons == 0) {
+                tableController.hoveringObjects.first
+                    .runAction(tableController);
               }
               tableController.heldObject = null;
             },
@@ -126,12 +139,15 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 if (scale + scrollDelta > 2) return;
 
                 final zoomFactor = (scale + scrollDelta) / scale;
-                final focalPoint = calculateMousePos(event.localPosition, scale, offset);
-                final newFocalPoint = calculateMousePos(event.localPosition, scale + scrollDelta, offset);
+                final focalPoint =
+                    calculateMousePos(event.localPosition, scale, offset);
+                final newFocalPoint = calculateMousePos(
+                    event.localPosition, scale + scrollDelta, offset);
 
                 offset -= focalPoint - newFocalPoint;
                 scale *= zoomFactor;
-                mousePos = calculateMousePos(event.localPosition, scale, offset);
+                mousePos =
+                    calculateMousePos(event.localPosition, scale, offset);
               }
             },
             child: SizedBox.expand(
@@ -170,10 +186,13 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   () => Slider(
                     value: rotation.value,
                     onChanged: (value) {
-                      final center = Offset(context.size!.width / 2, context.size!.height / 2);
-                      final focalPoint = calculateMousePos(center, scale, offset);
+                      final center = Offset(
+                          context.size!.width / 2, context.size!.height / 2);
+                      final focalPoint =
+                          calculateMousePos(center, scale, offset);
                       rotation.value = value;
-                      final newFocalPoint = calculateMousePos(center, scale, offset);
+                      final newFocalPoint =
+                          calculateMousePos(center, scale, offset);
 
                       offset -= focalPoint - newFocalPoint;
                     },

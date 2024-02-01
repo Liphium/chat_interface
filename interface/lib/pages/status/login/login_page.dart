@@ -47,7 +47,9 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("${"input.email".tr}.", textAlign: TextAlign.start, style: theme.textTheme.headlineMedium),
+                Text("${"input.email".tr}.",
+                    textAlign: TextAlign.start,
+                    style: theme.textTheme.headlineMedium),
                 verticalSpacing(defaultSpacing * 2),
                 AnimatedInfoContainer(
                   padding: const EdgeInsets.only(bottom: defaultSpacing),
@@ -97,7 +99,8 @@ class _LoginPageState extends State<LoginPage> {
                               color: Get.theme.colorScheme.onPrimary,
                               strokeWidth: 2.0,
                             ))
-                        : Text('login.next'.tr, style: theme.textTheme.labelLarge)),
+                        : Text('login.next'.tr,
+                            style: theme.textTheme.labelLarge)),
                   ),
                 ),
                 verticalSpacing(defaultSpacing),
@@ -108,9 +111,12 @@ class _LoginPageState extends State<LoginPage> {
                     horizontalSpacing(defaultSpacing),
                     TextButton(
                       style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all(theme.colorScheme.onPrimary),
+                        foregroundColor: MaterialStateProperty.all(
+                            theme.colorScheme.onPrimary),
                         backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
+                            (states) => states.contains(MaterialState.hovered)
+                                ? theme.colorScheme.primary.withOpacity(0.3)
+                                : theme.colorScheme.primary.withOpacity(0)),
                       ),
                       onPressed: () => RegisterHandler.goToRegistration(),
                       child: Text('login.no_account'.tr),

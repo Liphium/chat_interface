@@ -10,22 +10,23 @@ import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 class UnknownController extends GetxController {
-
   final cache = <String, UnknownAccount>{};
 
   Future<UnknownAccount?> loadUnknownProfile(String id) async {
-
-    if(id == StatusController.ownAccountId) {
-      return UnknownAccount(id, "", "", signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
+    if (id == StatusController.ownAccountId) {
+      return UnknownAccount(
+          id, "", "", signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
     }
 
     final controller = Get.find<FriendController>();
-    if(controller.friends[id] != null) {
+    if (controller.friends[id] != null) {
       return UnknownAccount.fromFriend(controller.friends[id]!);
     }
-  
-    if(cache[id] != null) {
-      if(cache[id]!.lastFetch != null && DateTime.now().difference(cache[id]!.lastFetch!) < const Duration(minutes: 5)) {
+
+    if (cache[id] != null) {
+      if (cache[id]!.lastFetch != null &&
+          DateTime.now().difference(cache[id]!.lastFetch!) <
+              const Duration(minutes: 5)) {
         return cache[id];
       }
     }
@@ -34,7 +35,7 @@ class UnknownController extends GetxController {
       "id": id,
     });
 
-    if(!json["success"]) {
+    if (!json["success"]) {
       return null;
     }
 
@@ -50,20 +51,19 @@ class UnknownController extends GetxController {
     cache[id] = profile;
     return profile;
   }
-
 }
 
 class UnknownAccount {
-  
   final String id;
   final String? name;
   final String? tag;
-  
+
   final Uint8List signatureKey;
   final Uint8List publicKey;
   DateTime? lastFetch;
 
-  UnknownAccount(this.id, this.name, this.tag, this.signatureKey, this.publicKey);
+  UnknownAccount(
+      this.id, this.name, this.tag, this.signatureKey, this.publicKey);
 
   factory UnknownAccount.fromData(UnknownProfileData data) {
     final keys = jsonDecode(data.keys);
@@ -75,7 +75,7 @@ class UnknownAccount {
       unpackagePublicKey(keys["pub"]),
     );
   }
-  
+
   factory UnknownAccount.fromFriend(Friend friend) {
     return UnknownAccount(
       friend.id,
@@ -87,13 +87,12 @@ class UnknownAccount {
   }
 
   UnknownProfileData toData() => UnknownProfileData(
-    id: id,
-    name: name ?? "",
-    tag: tag ?? "",
-    keys: jsonEncode({
-      "sg": packagePublicKey(signatureKey),
-      "pub": packagePublicKey(publicKey),
-    }),
-  );
-  
+        id: id,
+        name: name ?? "",
+        tag: tag ?? "",
+        keys: jsonEncode({
+          "sg": packagePublicKey(signatureKey),
+          "pub": packagePublicKey(publicKey),
+        }),
+      );
 }

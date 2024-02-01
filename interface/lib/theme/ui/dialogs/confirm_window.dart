@@ -13,7 +13,12 @@ class ConfirmWindow extends StatelessWidget {
   final Function()? onConfirm;
   final Function()? onDecline;
 
-  const ConfirmWindow({super.key, required this.title, required this.text, this.onConfirm, this.onDecline});
+  const ConfirmWindow(
+      {super.key,
+      required this.title,
+      required this.text,
+      this.onConfirm,
+      this.onDecline});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +40,8 @@ class ConfirmWindow extends StatelessWidget {
                       onConfirm?.call();
                     },
                     child: Center(
-                      child: Text("yes".tr, style: Get.theme.textTheme.titleMedium),
+                      child: Text("yes".tr,
+                          style: Get.theme.textTheme.titleMedium),
                     )),
               ),
               horizontalSpacing(defaultSpacing),
@@ -46,7 +52,8 @@ class ConfirmWindow extends StatelessWidget {
                       onDecline?.call();
                     },
                     child: Center(
-                      child: Text("no".tr, style: Get.theme.textTheme.titleMedium),
+                      child:
+                          Text("no".tr, style: Get.theme.textTheme.titleMedium),
                     )),
               ),
             ],

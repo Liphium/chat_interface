@@ -19,7 +19,8 @@ class FileSettings {
   static const String maxCacheSize = "files.max_cache_size"; // MB
 
   static var fileCacheTypes = [
-    SelectableItem("settings.file.cache_type.unlimited".tr, Icons.all_inclusive),
+    SelectableItem(
+        "settings.file.cache_type.unlimited".tr, Icons.all_inclusive),
     SelectableItem("settings.file.cache_type.size".tr, Icons.filter_alt),
   ];
 
@@ -31,9 +32,12 @@ class FileSettings {
   static const List<String> audioTypes = ["mp3", "wav", "ogg"];
 
   static void addSettings(SettingController controller) {
-    controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, true);
-    controller.settings[autoDownloadVideos] = Setting<bool>(autoDownloadVideos, false);
-    controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, false);
+    controller.settings[autoDownloadImages] =
+        Setting<bool>(autoDownloadImages, true);
+    controller.settings[autoDownloadVideos] =
+        Setting<bool>(autoDownloadVideos, false);
+    controller.settings[autoDownloadAudio] =
+        Setting<bool>(autoDownloadAudio, false);
     controller.settings[maxFileSize] = Setting<double>(maxFileSize, 5.0);
     controller.settings[maxCacheSize] = Setting<double>(maxCacheSize, 500.0);
     controller.settings[fileCacheType] = Setting<int>(fileCacheType, 0);
@@ -49,7 +53,8 @@ class FileSettingsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         //* Auto download types
-        Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelLarge),
+        Text("settings.file.auto_download.types".tr,
+            style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
         const BoolSettingSmall(settingName: FileSettings.autoDownloadImages),
@@ -58,7 +63,8 @@ class FileSettingsPage extends StatelessWidget {
         verticalSpacing(sectionSpacing),
 
         //* Max file size
-        Text("settings.file.max_size".tr, style: Get.theme.textTheme.labelLarge),
+        Text("settings.file.max_size".tr,
+            style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
         const DoubleSelectionSetting(
@@ -73,7 +79,8 @@ class FileSettingsPage extends StatelessWidget {
         //* File cache size
         Text("settings.file.cache".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
-        Text("settings.file.cache.description".tr, style: Get.theme.textTheme.bodyMedium),
+        Text("settings.file.cache.description".tr,
+            style: Get.theme.textTheme.bodyMedium),
         verticalSpacing(defaultSpacing),
 
         ListSelectionSetting(
@@ -83,7 +90,10 @@ class FileSettingsPage extends StatelessWidget {
 
         Obx(
           () => Visibility(
-            visible: Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue() == 1,
+            visible: Get.find<SettingController>()
+                    .settings[FileSettings.fileCacheType]!
+                    .getValue() ==
+                1,
             child: const DoubleSelectionSetting(
               settingName: FileSettings.maxCacheSize,
               description: "",

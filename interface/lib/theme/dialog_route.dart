@@ -8,7 +8,7 @@ void navigateToHeroDialog(Widget widget) {
 class HeroDialogRoute<T> extends PageRoute<T> {
   final WidgetBuilder builder;
 
-  HeroDialogRoute({ required this.builder }) : super();
+  HeroDialogRoute({required this.builder}) : super();
 
   @override
   bool get opaque => false;
@@ -29,20 +29,16 @@ class HeroDialogRoute<T> extends PageRoute<T> {
   String? get barrierLabel => "hi";
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
     return FadeTransition(
-      opacity: CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOut
-      ),
-      child: child
-    );
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+        child: child);
   }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
-    Animation<double> secondaryAnimation) {
+      Animation<double> secondaryAnimation) {
     return builder(context);
   }
-
 }

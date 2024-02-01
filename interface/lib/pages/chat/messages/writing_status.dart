@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class WritingStatusNotifier extends StatefulWidget {
-
   final List<String> writers;
 
   const WritingStatusNotifier({super.key, required this.writers});
@@ -15,7 +14,6 @@ class WritingStatusNotifier extends StatefulWidget {
 }
 
 class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
-
   String lastWriter = "-1";
 
   @override
@@ -25,26 +23,23 @@ class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
     ThemeData theme = Theme.of(context);
 
     String members = "";
-    for(var member in widget.writers) {
+    for (var member in widget.writers) {
       lastWriter = member;
       members += '${friendController.friends[member]!.name}, ';
     }
 
-    if(widget.writers.isEmpty && lastWriter != "-1") {
+    if (widget.writers.isEmpty && lastWriter != "-1") {
       members = friendController.friends[lastWriter]!.name;
-    } else if(lastWriter != "-1") {
+    } else if (lastWriter != "-1") {
       members = members.substring(0, members.length - 2);
     }
 
-    if(widget.writers.length >= 2) {
-
+    if (widget.writers.length >= 2) {
       int index = members.lastIndexOf(",");
-      members = members.replaceRange(index, index+1, " ${"and".tr}");
+      members = members.replaceRange(index, index + 1, " ${"and".tr}");
     }
-  
-    return
-    Animate(
 
+    return Animate(
       //* Animation
       effects: [
         MoveEffect(
@@ -59,30 +54,34 @@ class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
       child: Padding(
         padding: const EdgeInsets.only(right: defaultSpacing * 0.5),
         child: Material(
-          elevation: 2.0,
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(30),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.person, size: 20, color: theme.colorScheme.primary),
-                horizontalSpacing(defaultSpacing * 0.5),
-                Text("$members ${widget.writers.length > 1 ? "are".tr : "is".tr} typing", style: Theme.of(context).textTheme.bodyMedium),
-                horizontalSpacing(defaultSpacing * 0.5),
-                const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: Padding(
-                    padding: EdgeInsets.all(defaultSpacing * 0.4),
-                    child: CircularProgressIndicator(strokeWidth: 2.0,),
-                  )
-                )
-              ],
-            ),
-          )
-        ),
+            elevation: 2.0,
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(30),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.person,
+                      size: 20, color: theme.colorScheme.primary),
+                  horizontalSpacing(defaultSpacing * 0.5),
+                  Text(
+                      "$members ${widget.writers.length > 1 ? "are".tr : "is".tr} typing",
+                      style: Theme.of(context).textTheme.bodyMedium),
+                  horizontalSpacing(defaultSpacing * 0.5),
+                  const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: Padding(
+                        padding: EdgeInsets.all(defaultSpacing * 0.4),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                        ),
+                      ))
+                ],
+              ),
+            )),
       ),
     );
   }

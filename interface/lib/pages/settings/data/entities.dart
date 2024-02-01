@@ -60,7 +60,8 @@ class SettingCategory {
   final Widget? widget;
   final bool displayTitle;
 
-  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true});
+  const SettingCategory(this.label, this.icon, this.widget,
+      {this.displayTitle = true});
 }
 
 class Setting<T> {
@@ -77,7 +78,9 @@ class Setting<T> {
   }
 
   Future<bool> grabFromDb() async {
-    final val = await (db.select(db.setting)..where((tbl) => tbl.key.equals(label))).getSingleOrNull();
+    final val = await (db.select(db.setting)
+          ..where((tbl) => tbl.key.equals(label)))
+        .getSingleOrNull();
     grabFrom((val ?? SettingData(key: label, value: stringify())).value);
     return true;
   }
@@ -88,11 +91,14 @@ class Setting<T> {
 
   void setValue(T value) async {
     this.value.value = value;
-    await db.into(db.setting).insertOnConflictUpdate(SettingData(key: label, value: stringify()));
+    await db
+        .into(db.setting)
+        .insertOnConflictUpdate(SettingData(key: label, value: stringify()));
   }
 
   T getValue() => value.value == null ? defaultValue : value.value!;
 
   T getOr(T other) => value.value ?? other;
-  T getWhenValue(T other, T def) => value.value == other ? def : value.value ?? defaultValue;
+  T getWhenValue(T other, T def) =>
+      value.value == other ? def : value.value ?? defaultValue;
 }

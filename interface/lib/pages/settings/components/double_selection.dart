@@ -6,29 +6,33 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DoubleSelectionSetting extends StatefulWidget {
-  
   final String settingName;
+
   /// Translated automatically
   final String description;
   final double min;
   final double max;
   final String unit;
- 
-  const DoubleSelectionSetting({super.key, required this.settingName, required this.description, required this.min, required this.max, this.unit = ""});
+
+  const DoubleSelectionSetting(
+      {super.key,
+      required this.settingName,
+      required this.description,
+      required this.min,
+      required this.max,
+      this.unit = ""});
 
   @override
   State<DoubleSelectionSetting> createState() => _ListSelectionSettingState();
 }
 
 class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
-
   // Current value
   final current = 0.0.obs;
   DateTime? lastSet;
 
   @override
   Widget build(BuildContext context) {
-
     SettingController controller = Get.find();
     final setting = controller.settings[widget.settingName]!;
     current.value = setting.getValue() as double;
@@ -37,12 +41,12 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Visibility(
-          visible: widget.description.isNotEmpty,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: elementSpacing),
-            child: Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
-          )
-        ),
+            visible: widget.description.isNotEmpty,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: elementSpacing),
+              child: Text(widget.description.tr,
+                  style: Get.theme.textTheme.bodyMedium),
+            )),
         Obx(() {
           final value = current.value;
           final roundedCurrent = value.toStringAsFixed(1);
@@ -56,7 +60,10 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
                   max: widget.max,
                   onChanged: (value) {
                     current.value = value;
-                    if(DateTime.now().difference(lastSet ?? DateTime.now()).inMilliseconds > 100) {
+                    if (DateTime.now()
+                            .difference(lastSet ?? DateTime.now())
+                            .inMilliseconds >
+                        100) {
                       lastSet = DateTime.now();
                       setting.setValue(value);
                     }
@@ -67,7 +74,8 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
                 ),
               ),
               horizontalSpacing(defaultSpacing),
-              Text("$roundedCurrent ${widget.unit.tr}", style: Get.theme.textTheme.bodyMedium),
+              Text("$roundedCurrent ${widget.unit.tr}",
+                  style: Get.theme.textTheme.bodyMedium),
             ],
           );
         }),

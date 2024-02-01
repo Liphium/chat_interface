@@ -9,7 +9,8 @@ class ObjectContextMenu extends StatefulWidget {
   final TableObject object;
   final ContextMenuData data;
 
-  const ObjectContextMenu({super.key, required this.data, required this.object});
+  const ObjectContextMenu(
+      {super.key, required this.data, required this.object});
 
   @override
   State<ObjectContextMenu> createState() => _ObjectContextMenuState();
@@ -34,7 +35,8 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
                 color: addition.color,
                 label: addition.label,
                 loading: false.obs,
-                onTap: () => addition.onTap.call(Get.find<TabletopController>()),
+                onTap: () =>
+                    addition.onTap.call(Get.find<TabletopController>()),
               );
             },
           ),

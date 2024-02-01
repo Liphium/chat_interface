@@ -15,7 +15,6 @@ import '../../../theme/components/icon_button.dart';
 import '../../../util/vertical_spacing.dart';
 
 class MessageInput extends StatefulWidget {
-
   const MessageInput({super.key});
 
   @override
@@ -23,7 +22,6 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
-
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
   StreamSubscription<Conversation>? _sub;
@@ -48,20 +46,28 @@ class _MessageInputState extends State<MessageInput> {
     ThemeData theme = Theme.of(context);
 
     // Clear message input when conversation changes
-    _sub = Get.find<MessageController>().selectedConversation.listen((conversation) {
+    _sub = Get.find<MessageController>()
+        .selectedConversation
+        .listen((conversation) {
       _message.clear();
     });
-  
+
     // Setup actions
     final actionsMap = {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) {
           final controller = Get.find<MessageController>();
-          if(files.isEmpty) {
-            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], handleMessageFinish); 
+          if (files.isEmpty) {
+            sendTextMessage(loading, controller.selectedConversation.value.id,
+                _message.text, [], handleMessageFinish);
           }
 
-          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, files, handleMessageFinish);
+          sendTextMessageWithFiles(
+              loading,
+              controller.selectedConversation.value.id,
+              _message.text,
+              files,
+              handleMessageFinish);
           return null;
         },
       ),
@@ -70,15 +76,10 @@ class _MessageInputState extends State<MessageInput> {
     // Build actual widget
     return Padding(
       padding: const EdgeInsets.only(
-        right: defaultSpacing,
-        left: defaultSpacing,
-        bottom: defaultSpacing
-      ),
+          right: defaultSpacing, left: defaultSpacing, bottom: defaultSpacing),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
-        
         children: [
-      
           //* Writing status
           /*
           Align(
@@ -104,43 +105,44 @@ class _MessageInputState extends State<MessageInput> {
                 ),
                 child: Column(
                   children: [
-
                     //* File preview
                     Obx(() {
-
                       return Animate(
                         effects: [
                           ExpandEffect(
-                            duration: 250.ms,
-                            curve: Curves.easeInOut,
-                            axis: Axis.vertical
-                          )
+                              duration: 250.ms,
+                              curve: Curves.easeInOut,
+                              axis: Axis.vertical)
                         ],
                         target: files.isEmpty ? 0 : 1,
                         child: Padding(
-                          padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                          padding: const EdgeInsets.only(
+                              bottom: defaultSpacing * 0.5),
                           child: Row(
                             children: [
                               const SizedBox(height: 200 + defaultSpacing),
-                              for(final file in files)
-                                SquareFileRenderer(file: file, onRemove: () => files.remove(file),),
+                              for (final file in files)
+                                SquareFileRenderer(
+                                  file: file,
+                                  onRemove: () => files.remove(file),
+                                ),
                             ],
                           ),
                         ),
                       );
                     }),
 
-                    //* Input 
+                    //* Input
                     Row(
                       children: [
                         IconButton(
                           onPressed: () async {
                             final result = await openFile();
-                            if(result == null) {
+                            if (result == null) {
                               return;
                             }
                             final size = await result.length();
-                            if(size > 10 * 1000 * 1000) {
+                            if (size > 10 * 1000 * 1000) {
                               showErrorPopup("error".tr, "file.too_large".tr);
                               return;
                             }
@@ -154,22 +156,22 @@ class _MessageInputState extends State<MessageInput> {
                         Expanded(
                           child: Shortcuts(
                             shortcuts: {
-                              LogicalKeySet(LogicalKeyboardKey.enter): const SendIntent(),
+                              LogicalKeySet(LogicalKeyboardKey.enter):
+                                  const SendIntent(),
                             },
                             child: TextField(
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'chat.message'.tr,
-                              ),
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(1000),
-                              ],
-                              cursorColor: theme.colorScheme.tertiary,
-                              style: theme.textTheme.labelLarge,
-                              controller: _message,
-                              maxLines: null,
-                              keyboardType: TextInputType.multiline
-                            ),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'chat.message'.tr,
+                                ),
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(1000),
+                                ],
+                                cursorColor: theme.colorScheme.tertiary,
+                                style: theme.textTheme.labelLarge,
+                                controller: _message,
+                                maxLines: null,
+                                keyboardType: TextInputType.multiline),
                           ),
                         ),
                         horizontalSpacing(defaultSpacing),

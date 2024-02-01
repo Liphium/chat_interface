@@ -9,13 +9,16 @@ import 'package:get/get.dart';
 class MainTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys {
-
     final translations = [
-      GeneralTranslations(), SetupTranslations(), ErrorTranslations(), ChatPageTranslations(), SettingsTranslations(),
+      GeneralTranslations(),
+      SetupTranslations(),
+      ErrorTranslations(),
+      ChatPageTranslations(),
+      SettingsTranslations(),
       SpacesTranslations()
     ];
     final newTranslations = <String, Map<String, String>>{};
-    
+
     // Merge the maps
     for (var translation in translations) {
       final translationsToAdd = translation.keys;

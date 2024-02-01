@@ -29,17 +29,15 @@ const extensionToType = {
 };
 
 class FilePreview extends StatelessWidget {
-
   final XFile file;
   const FilePreview({super.key, required this.file});
 
   @override
   Widget build(BuildContext context) {
-
     final extension = file.name.split(".").last;
     final type = extensionToType[extension] ?? FileTypes.unidentified;
 
-    switch(type) {
+    switch (type) {
       case FileTypes.image:
         return Image.file(
           File(file.path),
@@ -75,17 +73,16 @@ class FilePreview extends StatelessWidget {
 }
 
 class SquareFileRenderer extends StatefulWidget {
-
   final UploadData file;
   final VoidCallback? onRemove;
 
-  const SquareFileRenderer({super.key, required this.file, required this.onRemove});
+  const SquareFileRenderer(
+      {super.key, required this.file, required this.onRemove});
   @override
   State<SquareFileRenderer> createState() => _SquareFileRendererState();
 }
 
 class _SquareFileRendererState extends State<SquareFileRenderer> {
-
   final duration = 250.ms;
 
   @override
@@ -103,11 +100,10 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
           child: Stack(
             children: [
               Container(
-                color: Get.theme.colorScheme.primaryContainer,
-                width: 200,
-                height: 200,
-                child: FilePreview(file: widget.file.file)
-              ),
+                  color: Get.theme.colorScheme.primaryContainer,
+                  width: 200,
+                  height: 200,
+                  child: FilePreview(file: widget.file.file)),
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
@@ -121,31 +117,33 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         horizontalSpacing(defaultSpacing),
-                        Expanded(child: Text(widget.file.file.name, overflow: TextOverflow.ellipsis,)),
+                        Expanded(
+                            child: Text(
+                          widget.file.file.name,
+                          overflow: TextOverflow.ellipsis,
+                        )),
                         horizontalSpacing(defaultSpacing),
-                        Obx(() => 
-                          Visibility(
-                            visible: widget.file.progress.value == 0,
-                            replacement: Padding(
-                              padding: const EdgeInsets.all(defaultSpacing),
-                              child: SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  value: widget.file.progress.value,
-                                  strokeWidth: 3,
-                                  color: Get.theme.colorScheme.onPrimary,
+                        Obx(() => Visibility(
+                              visible: widget.file.progress.value == 0,
+                              replacement: Padding(
+                                padding: const EdgeInsets.all(defaultSpacing),
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    value: widget.file.progress.value,
+                                    strokeWidth: 3,
+                                    color: Get.theme.colorScheme.onPrimary,
+                                  ),
                                 ),
                               ),
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                widget.onRemove?.call();
-                              },
-                              icon: const Icon(Icons.close),
-                            ),
-                          )
-                        ),
+                              child: IconButton(
+                                onPressed: () {
+                                  widget.onRemove?.call();
+                                },
+                                icon: const Icon(Icons.close),
+                              ),
+                            )),
                       ],
                     ),
                   ),

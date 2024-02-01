@@ -33,7 +33,9 @@ class _ObjectCreateMenuState extends State<ObjectCreateMenu> {
                 return const SizedBox();
               }
               return Padding(
-                padding: index == 0 ? const EdgeInsets.all(0) : const EdgeInsets.only(top: defaultSpacing),
+                padding: index == 0
+                    ? const EdgeInsets.all(0)
+                    : const EdgeInsets.only(top: defaultSpacing),
                 child: Material(
                   color: Get.theme.colorScheme.background,
                   borderRadius: BorderRadius.circular(defaultSpacing),
@@ -44,7 +46,8 @@ class _ObjectCreateMenuState extends State<ObjectCreateMenu> {
                       switch (type) {
                         case TableObjectType.deck:
                           Get.back();
-                          object = await Get.dialog(DeckObjectCreationWindow(location: widget.location));
+                          object = await Get.dialog(DeckObjectCreationWindow(
+                              location: widget.location));
                           break;
                         default:
                           break;
@@ -55,9 +58,11 @@ class _ObjectCreateMenuState extends State<ObjectCreateMenu> {
                       padding: const EdgeInsets.all(defaultSpacing),
                       child: Row(
                         children: [
-                          Icon(type.icon, color: Get.theme.colorScheme.onPrimary),
+                          Icon(type.icon,
+                              color: Get.theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
-                          Text("tabletop.object.${type.name}".tr, style: Get.textTheme.labelMedium),
+                          Text("tabletop.object.${type.name}".tr,
+                              style: Get.textTheme.labelMedium),
                         ],
                       ),
                     ),

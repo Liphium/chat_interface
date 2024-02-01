@@ -7,7 +7,8 @@ import 'package:get/get.dart';
 class LanguageSettings {
   static const String language = "language";
   static final languages = [
-    LanguageSelection("Device", Icons.computer, Get.deviceLocale ?? const Locale("en", "US")),
+    LanguageSelection(
+        "Device", Icons.computer, Get.deviceLocale ?? const Locale("en", "US")),
     const LanguageSelection("English", Icons.language, Locale("en", "US")),
     //const LanguageSelection("Deutsch", Icons.language, Locale("de", "DE")), FUTURE STUFF
   ];
@@ -19,7 +20,8 @@ class LanguageSelection extends SelectableItem {
 }
 
 void addLanguageSettings(SettingController controller) {
-  controller.settings[LanguageSettings.language] = Setting<int>(LanguageSettings.language, 0);
+  controller.settings[LanguageSettings.language] =
+      Setting<int>(LanguageSettings.language, 0);
 }
 
 class LanguageSettingsPage extends StatelessWidget {

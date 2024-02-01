@@ -12,7 +12,14 @@ class TransitionContainer extends StatefulWidget {
   final String tag;
   final bool fade;
 
-  const TransitionContainer({super.key, required this.child, required this.tag, this.borderRadius, this.color, this.width, this.fade = false});
+  const TransitionContainer(
+      {super.key,
+      required this.child,
+      required this.tag,
+      this.borderRadius,
+      this.color,
+      this.width,
+      this.fade = false});
 
   @override
   State<TransitionContainer> createState() => _AnimatedContainerState();
@@ -47,7 +54,8 @@ class _AnimatedContainerState extends State<TransitionContainer> {
               width: widget.width,
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,
-                color: widget.color ?? Theme.of(context).colorScheme.onBackground,
+                color:
+                    widget.color ?? Theme.of(context).colorScheme.onBackground,
               ),
               child: Animate(
                 effects: [

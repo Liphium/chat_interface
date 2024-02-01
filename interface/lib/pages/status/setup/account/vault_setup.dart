@@ -24,7 +24,9 @@ class VaultSetup extends Setup {
 
     // Load conversations from the database
     final conversationController = Get.find<ConversationController>();
-    final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
+    final conversations = await (db.select(db.conversation)
+          ..orderBy([(u) => OrderingTerm.asc(u.updatedAt)]))
+        .get();
     for (var conversation in conversations) {
       await conversationController.add(Conversation.fromData(conversation));
     }
@@ -54,7 +56,8 @@ Future<String?> refreshVault() async {
   await startFetch();
 
   // Load conversations
-  final json = await postAuthorizedJSON("/account/vault/list", <String, dynamic>{
+  final json =
+      await postAuthorizedJSON("/account/vault/list", <String, dynamic>{
     "after": lastFetchTime.millisecondsSinceEpoch, // Unix
     "tag": Constants.conversationTag,
   });

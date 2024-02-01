@@ -12,7 +12,13 @@ class SystemMessageRenderer extends StatefulWidget {
   final bool last;
   final Friend? sender;
 
-  const SystemMessageRenderer({super.key, required this.message, required this.accountId, this.self = false, this.last = false, this.sender});
+  const SystemMessageRenderer(
+      {super.key,
+      required this.message,
+      required this.accountId,
+      this.self = false,
+      this.last = false,
+      this.sender});
 
   @override
   State<SystemMessageRenderer> createState() => _MessageRendererState();
@@ -37,7 +43,9 @@ class _MessageRendererState extends State<SystemMessageRenderer> {
             //* Icon
             SizedBox(
               width: 50,
-              child: Center(child: Icon(message.icon, size: 30, color: Get.theme.colorScheme.onPrimary)),
+              child: Center(
+                  child: Icon(message.icon,
+                      size: 30, color: Get.theme.colorScheme.onPrimary)),
             ),
             horizontalSpacing(defaultSpacing),
 

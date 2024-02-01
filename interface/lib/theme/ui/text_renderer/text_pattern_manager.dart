@@ -1,4 +1,3 @@
-
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +6,6 @@ import 'impl/formatting_patterns.dart';
 final TextPatternManager textPatternManager = TextPatternManager();
 
 class TextPatternManager {
-
   late final List<TextPattern> patterns;
 
   TextPatternManager() {
@@ -21,7 +19,8 @@ class TextPatternManager {
     patterns.add(TrollPattern());
   }
 
-  List<ProcessedText> process(String text, TextStyle style, {bool renderPatterns = false}) {
+  List<ProcessedText> process(String text, TextStyle style,
+      {bool renderPatterns = false}) {
     List<ProcessedText> spans = [];
 
     // Scan text for patterns
@@ -37,7 +36,8 @@ class TextPatternManager {
     }
 
     // Sort patterns
-    patternMap = Map.fromEntries(patternMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+    patternMap = Map.fromEntries(
+        patternMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
 
     // Process text
     int lastIndex = 0;
@@ -45,17 +45,19 @@ class TextPatternManager {
     int mapIndex = 0;
     Map<TextPattern, bool> patternState = {};
 
-    while(lastIndex != text.length) {
-
+    while (lastIndex != text.length) {
       // Grab current index
       int index;
       int lengthAfter = 0;
-      if(mapIndex >= patternMap.length) {
+      if (mapIndex >= patternMap.length) {
         index = text.length;
       } else {
         index = patternMap.keys.elementAt(mapIndex);
-        if(mapIndex != patternMap.length - 1) {
-          lengthAfter = patternMap[patternMap.keys.elementAt(mapIndex + 1)]!.first.pattern.length;
+        if (mapIndex != patternMap.length - 1) {
+          lengthAfter = patternMap[patternMap.keys.elementAt(mapIndex + 1)]!
+              .first
+              .pattern
+              .length;
         }
       }
 
@@ -65,30 +67,26 @@ class TextPatternManager {
       for (TextPattern pattern in patternState.keys) {
         if (patternState[pattern]!) {
           currentStyle = pattern.process(currentStyle);
-          if(pattern.pattern.length > length) {
+          if (pattern.pattern.length > length) {
             length = pattern.pattern.length;
           }
         }
       }
 
       // Check if span is nessecary
-      if(lastIndex != index) {
-        if(currentStyle == style && !renderPatterns) {
+      if (lastIndex != index) {
+        if (currentStyle == style && !renderPatterns) {
           spans.add(ProcessedText(
-            text.substring(lastIndex+lastLength, index-lengthAfter), 
-            currentStyle
-          ));
+              text.substring(lastIndex + lastLength, index - lengthAfter),
+              currentStyle));
         } else {
-          spans.add(ProcessedText(
-            text.substring(lastIndex, index), 
-            currentStyle
-          ));
+          spans.add(
+              ProcessedText(text.substring(lastIndex, index), currentStyle));
         }
-
       }
 
       // Check for patterns
-      if(patternMap.containsKey(index)) {
+      if (patternMap.containsKey(index)) {
         for (TextPattern pattern in patternMap[index]!) {
           if (patternState.containsKey(pattern)) {
             patternState[pattern] = !patternState[pattern]!;
@@ -105,11 +103,9 @@ class TextPatternManager {
 
     return spans;
   }
-
 }
 
 class ProcessedText {
-  
   final String text;
   final TextStyle style;
 
@@ -117,9 +113,8 @@ class ProcessedText {
 }
 
 abstract class TextPattern {
-
   final String pattern;
-  
+
   TextPattern(this.pattern);
 
   // scan returns a list of indices where the pattern is found in the text
@@ -130,15 +125,14 @@ abstract class TextPattern {
     int length = 0;
     bool enable = false;
     while (length < text.length) {
-
       int index = text.indexOf(pattern, length);
       if (index == -1) {
         break;
       }
 
       // Prevent patterns right next to each other
-      if(index != length) {
-        indices.add(index+(!enable ? pattern.length : 0));
+      if (index != length) {
+        indices.add(index + (!enable ? pattern.length : 0));
         enable = !enable;
       } else {
         sendLog("Removed double pattern $index $length");
@@ -152,5 +146,4 @@ abstract class TextPattern {
   }
 
   TextStyle process(TextStyle style);
-
 }

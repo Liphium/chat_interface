@@ -136,7 +136,9 @@ class _CallRectangleState extends State<CallRectangle> {
                   Get.offAll(const ChatPage(), transition: Transition.fadeIn);
                 }
               },
-              icon: controller.fullScreen.value ? Icons.arrow_forward : Icons.arrow_back_rounded,
+              icon: controller.fullScreen.value
+                  ? Icons.arrow_forward
+                  : Icons.arrow_back_rounded,
               iconSize: 30,
             ),
           ),

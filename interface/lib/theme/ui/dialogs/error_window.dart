@@ -42,7 +42,8 @@ class ErrorWindow extends StatelessWidget {
                       FJElevatedButton(
                         onTap: () => Get.back(),
                         child: Center(
-                          child: Text("ok".tr, style: Get.theme.textTheme.titleMedium),
+                          child: Text("ok".tr,
+                              style: Get.theme.textTheme.titleMedium),
                         ),
                       )
                     ],

@@ -13,11 +13,11 @@ class GridCoordinate {
 }
 
 class WordgridGrid extends StatefulWidget {
-
   final int gridSize;
   final double fontSize;
 
-  const WordgridGrid({super.key, required this.fontSize, required this.gridSize});
+  const WordgridGrid(
+      {super.key, required this.fontSize, required this.gridSize});
 
   @override
   State<WordgridGrid> createState() => _KanagridGridState();
@@ -25,7 +25,6 @@ class WordgridGrid extends StatefulWidget {
 
 class _KanagridGridState extends State<WordgridGrid>
     with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   final selected = Rx<GridCoordinate?>(null);
   GridCoordinate? swapping;
@@ -39,7 +38,12 @@ class _KanagridGridState extends State<WordgridGrid>
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: 500.ms);
-    grid.value = List.generate(widget.gridSize, (x) => List.generate(widget.gridSize, (y) => alphabet[Random.secure().nextInt(alphabet.length)].toUpperCase()));
+    grid.value = List.generate(
+        widget.gridSize,
+        (x) => List.generate(
+            widget.gridSize,
+            (y) => alphabet[Random.secure().nextInt(alphabet.length)]
+                .toUpperCase()));
   }
 
   @override
@@ -50,95 +54,103 @@ class _KanagridGridState extends State<WordgridGrid>
 
   @override
   Widget build(BuildContext context) {
-
     return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(defaultSpacing),
-          color: Get.theme.colorScheme.primaryContainer,
-        ),
-        padding: const EdgeInsets.all(defaultSpacing),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(widget.gridSize, (x) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(widget.gridSize, (y) {    
-                return RepaintBoundary(
-                  child: Obx(() {
-                    final letter = grid[x][y];
-                    final isSelected = selected.value?.x == x && selected.value?.y == y;
-                    final isNeighbor = selected.value != null && (selected.value!.x - x).abs() <= 1 && (selected.value!.y - y).abs() <= 1;
-                    
-                    if(swap.value && isSelected) {
-                      return RepaintBoundary(
-                        child: Obx(() {
+        child: Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(defaultSpacing),
+        color: Get.theme.colorScheme.primaryContainer,
+      ),
+      padding: const EdgeInsets.all(defaultSpacing),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(widget.gridSize, (x) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(widget.gridSize, (y) {
+              return RepaintBoundary(
+                child: Obx(() {
+                  final letter = grid[x][y];
+                  final isSelected =
+                      selected.value?.x == x && selected.value?.y == y;
+                  final isNeighbor = selected.value != null &&
+                      (selected.value!.x - x).abs() <= 1 &&
+                      (selected.value!.y - y).abs() <= 1;
 
-                          final diffX = swapping!.x - x;
-                          final diffY = swapping!.y - y;
-                          final offX = diffX * value.value * widget.fontSize * 1.5 + elementSpacing * 2 * diffX;
-                          final offY = diffY * value.value * widget.fontSize * 1.5 + elementSpacing * 2 * diffY;
+                  if (swap.value && isSelected) {
+                    return RepaintBoundary(
+                      child: Obx(() {
+                        final diffX = swapping!.x - x;
+                        final diffY = swapping!.y - y;
+                        final offX =
+                            diffX * value.value * widget.fontSize * 1.5 +
+                                elementSpacing * 2 * diffX;
+                        final offY =
+                            diffY * value.value * widget.fontSize * 1.5 +
+                                elementSpacing * 2 * diffY;
 
-                          return Transform.translate(
+                        return Transform.translate(
                             offset: Offset(offY, offX),
-                            child: renderLetter(isSelected, isNeighbor, letter, () => {})
-                          );
-                        }),
-                      );
-                    }
+                            child: renderLetter(
+                                isSelected, isNeighbor, letter, () => {}));
+                      }),
+                    );
+                  }
 
-                    if(swap.value && swapping?.x == x && swapping?.y == y) {
-                      return RepaintBoundary(
-                        child: Obx(() {
+                  if (swap.value && swapping?.x == x && swapping?.y == y) {
+                    return RepaintBoundary(
+                      child: Obx(() {
+                        final diffX = selected.value!.x - x;
+                        final diffY = selected.value!.y - y;
+                        final offX =
+                            diffX * value.value * widget.fontSize * 1.5 +
+                                elementSpacing * 2 * diffX;
+                        final offY =
+                            diffY * value.value * widget.fontSize * 1.5 +
+                                elementSpacing * 2 * diffY;
 
-                          final diffX = selected.value!.x - x;
-                          final diffY = selected.value!.y - y;
-                          final offX = diffX * value.value * widget.fontSize * 1.5 + elementSpacing * 2 * diffX;
-                          final offY = diffY * value.value * widget.fontSize * 1.5 + elementSpacing * 2 * diffY;
-
-                          return Transform.translate(
+                        return Transform.translate(
                             offset: Offset(offY, offX),
-                            child: renderLetter(isSelected, isNeighbor, letter, () => {})
-                          );
-                        }),
-                      );
-                    }
+                            child: renderLetter(
+                                isSelected, isNeighbor, letter, () => {}));
+                      }),
+                    );
+                  }
 
-                    return renderLetter(isSelected, isNeighbor, letter, () {
-                      if(swap.value) {
+                  return renderLetter(isSelected, isNeighbor, letter, () {
+                    if (swap.value) {
+                      return;
+                    }
+                    if (selected.value != null) {
+                      if (isSelected) {
+                        selected.value = null;
                         return;
                       }
-                      if(selected.value != null) {
-                        if(isSelected) {
-                          selected.value = null;
-                          return;
-                        }
-                        if(!isNeighbor) {
-                          selected.value = GridCoordinate(x, y);
-                          return;
-                        }
-                        _controller.value = 0;
-                        swapping = GridCoordinate(x, y);
-                        swap.value = true;
-                        _controller.animateTo(1.0, curve: Curves.ease, duration: 500.ms);
-                        _controller.addListener(updateAnimation);
+                      if (!isNeighbor) {
+                        selected.value = GridCoordinate(x, y);
                         return;
                       }
-                      selected.value = GridCoordinate(x, y);
-                    });
-                  }),
-                );
-              }),
-            );
-          }),
-        ),
-      )
-    );
+                      _controller.value = 0;
+                      swapping = GridCoordinate(x, y);
+                      swap.value = true;
+                      _controller.animateTo(1.0,
+                          curve: Curves.ease, duration: 500.ms);
+                      _controller.addListener(updateAnimation);
+                      return;
+                    }
+                    selected.value = GridCoordinate(x, y);
+                  });
+                }),
+              );
+            }),
+          );
+        }),
+      ),
+    ));
   }
 
   void updateAnimation() {
     value.value = _controller.value;
-    if(_controller.isCompleted) {
+    if (_controller.isCompleted) {
       _controller.removeListener(updateAnimation);
       swapInGrid(selected.value!, swapping!);
       swap.value = false;
@@ -154,7 +166,8 @@ class _KanagridGridState extends State<WordgridGrid>
     grid.refresh();
   }
 
-  Widget renderLetter(bool isSelected, bool isNeighbor, String letter, Function() onTap) {
+  Widget renderLetter(
+      bool isSelected, bool isNeighbor, String letter, Function() onTap) {
     return Padding(
       padding: const EdgeInsets.all(elementSpacing),
       child: SizedBox(
@@ -162,19 +175,22 @@ class _KanagridGridState extends State<WordgridGrid>
         height: widget.fontSize * 1.5,
         child: Material(
           borderRadius: BorderRadius.circular(defaultSpacing),
-          color: isSelected ? Get.theme.colorScheme.primary : isNeighbor ? Get.theme.colorScheme.onTertiary : Get.theme.colorScheme.onBackground,
+          color: isSelected
+              ? Get.theme.colorScheme.primary
+              : isNeighbor
+                  ? Get.theme.colorScheme.onTertiary
+                  : Get.theme.colorScheme.onBackground,
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(defaultSpacing),
             child: Center(
-              child: Text(
-                letter,
-                style: Get.theme.textTheme.labelMedium!.copyWith(
-                  fontSize: widget.fontSize,
-                ),
-                textHeightBehavior: noTextHeight,
-              )
-            ),
+                child: Text(
+              letter,
+              style: Get.theme.textTheme.labelMedium!.copyWith(
+                fontSize: widget.fontSize,
+              ),
+              textHeightBehavior: noTextHeight,
+            )),
           ),
         ),
       ),

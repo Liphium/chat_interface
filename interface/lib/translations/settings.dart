@@ -30,13 +30,16 @@ class SettingsTranslations extends Translations {
 
           // Audio settings
           'audio.device': 'Select a device',
-          'audio.device.default': "If you don't know what to select here, the default is probably fine:",
+          'audio.device.default':
+              "If you don't know what to select here, the default is probably fine:",
           'audio.device.default.button': 'Use system default',
           'audio.microphone': 'Microphone',
-          'audio.microphone.device': 'Or you just select one of these devices (the green verified indicator tries detecting the best microphone):',
+          'audio.microphone.device':
+              'Or you just select one of these devices (the green verified indicator tries detecting the best microphone):',
           'audio.microphone.muted': 'Start muted in Spaces',
           'audio.microphone.sensitivity': 'Microphone sensitivity',
-          'audio.microphone.sensitivity.text': 'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
+          'audio.microphone.sensitivity.text':
+              'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
           'audio.output': 'Output',
           'audio.output.device': 'Or you just select one of these devices:',
 
@@ -62,9 +65,11 @@ class SettingsTranslations extends Translations {
           'auto_download.images': 'Automatically download images',
           'auto_download.videos': 'Automatically download videos',
           'auto_download.audio': 'Automatically download audio',
-          'settings.file.auto_download.types': 'Types of files to automatically download',
+          'settings.file.auto_download.types':
+              'Types of files to automatically download',
           'settings.file.max_size': 'Maximum file size for automatic downloads',
-          'settings.file.max_size.description': 'Files larger than this will not be downloaded automatically.',
+          'settings.file.max_size.description':
+              'Files larger than this will not be downloaded automatically.',
           'settings.file.cache': 'File cache',
           'settings.file.cache.description':
               'The file cache stores all files that have been automatically downloaded. This includes profile pictures and all other data you\'ve selected above. When it is full old files will automatically be deleted. You can select the size with the slider below or make it unlimited.',
@@ -74,17 +79,23 @@ class SettingsTranslations extends Translations {
 
           // Data settings
           'settings.data.profile_picture': 'Profile picture',
-          'settings.data.profile_picture.select': 'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
-          'settings.data.profile_picture.requirements': 'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',
+          'settings.data.profile_picture.select':
+              'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
+          'settings.data.profile_picture.requirements':
+              'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',
           'settings.data.profile_picture.remove': 'Remove profile picture',
-          'settings.data.profile_picture.remove.confirm': 'Are you sure you want to remove your profile picture?',
+          'settings.data.profile_picture.remove.confirm':
+              'Are you sure you want to remove your profile picture?',
           'settings.data.permissions': 'Permissions',
           'settings.data.permissions.description':
               'If you don\'t know what this is, it\'s fine. This is just data from the server that we can ask you for in case of problems. Here\'s which permissions you have:',
           'settings.data.account': 'Account data',
-          'settings.data.password.description': 'We\'ll not show your password here. That would be stupid.',
-          'settings.data.change_password.dialog': 'Let\'s make sure your account is secure again. All your devices (also this one) will be logged out after you click "Save".',
-          'settings.data.email.description': 'Showing your email would be work. And I don\'t like that, you know.',
+          'settings.data.password.description':
+              'We\'ll not show your password here. That would be stupid.',
+          'settings.data.change_password.dialog':
+              'Let\'s make sure your account is secure again. All your devices (also this one) will be logged out after you click "Save".',
+          'settings.data.email.description':
+              'Showing your email would be work. And I don\'t like that, you know.',
           'settings.data.log_out': 'Log out of your account',
           'settings.data.log_out.description':
               'If you log out of your account, we\'ll delete all your data from this device. This includes the keys we use to encrypt stuff on our servers. If you don\'t have these on another device, you will NEVER be able to recover your friends.',
@@ -94,16 +105,20 @@ class SettingsTranslations extends Translations {
           'settings.data.danger_zone.delete_account': 'Delete account',
           'settings.data.danger_zone.delete_account.confirm':
               'This is just a request and your actual data will be deleted in 30 days. We do this to make sure you didn\'t just accidentally click this button and that you are the actual owner of this account. Are you sure you want to delete your account?',
-          'settings.data.change_name.dialog': 'Let\'s get you a fresh username and tag. But please don\'t change it to something stupid. Your friends will thank you.',
+          'settings.data.change_name.dialog':
+              'Let\'s get you a fresh username and tag. But please don\'t change it to something stupid. Your friends will thank you.',
 
           // Invite settings (this is mostly alpha only)
           'settings.invites.description':
               "Invites are a token required for creating an account on the chat app. If you want one of your friends to be on here, send them an invite! They are distributed randomly in waves to prevent an influx of too many new users at once and also guarantee that the new users getting in are actually your friends.",
           'settings.invites.generate': 'Generate invite',
-          'settings.invites.generated': 'Invite generated! It was copied to your clipboard.',
+          'settings.invites.generated':
+              'Invite generated! It was copied to your clipboard.',
           'settings.invites.history': 'History',
-          'settings.invites.history.description': 'Here are all the invites you already generated. Hover over them to see the token.',
-          'settings.invites.history.empty': 'You haven\'t generated any invites yet or they have all been redeemed.',
+          'settings.invites.history.description':
+              'Here are all the invites you already generated. Hover over them to see the token.',
+          'settings.invites.history.empty':
+              'You haven\'t generated any invites yet or they have all been redeemed.',
 
           // Spaces settings
           'game.music': 'Play music in Game Mode',
@@ -113,18 +128,25 @@ class SettingsTranslations extends Translations {
           'settings.tabletop.decks.error':
               'An error occurred while loading your decks. This is probably something you\'ll need to report to us or it\'s just your connection. You can also try to see if there\'s a new version of the app available or try again later.',
           'settings.tabletop.decks.limit': 'Decks (@count/@limit)',
-          'decks.description': 'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
+          'decks.description':
+              'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
           'decks.create': 'Create a new deck',
           'decks.dialog.delete.title': 'Delete deck',
-          'decks.dialog.delete': 'Are you sure you want to delete this deck? Think about all the cards you\'ll lose!',
-          'decks.dialog.new_name': 'Type a new name for your deck here. This won\'t delete the cards in it, it\'ll just change the name.',
-          'decks.dialog.name': 'First of all, please give your deck a nice name. You know, something actually good.',
+          'decks.dialog.delete':
+              'Are you sure you want to delete this deck? Think about all the cards you\'ll lose!',
+          'decks.dialog.new_name':
+              'Type a new name for your deck here. This won\'t delete the cards in it, it\'ll just change the name.',
+          'decks.dialog.name':
+              'First of all, please give your deck a nice name. You know, something actually good.',
           'decks.dialog.name.placeholder': 'Deck name',
-          'decks.dialog.name.error': 'Please make the name for your deck longer than 3 characters.',
-          'decks.limit_reached': 'You have reached the maximum amount of decks you can create. Please delete one of your existing decks to create a new one.',
+          'decks.dialog.name.error':
+              'Please make the name for your deck longer than 3 characters.',
+          'decks.limit_reached':
+              'You have reached the maximum amount of decks you can create. Please delete one of your existing decks to create a new one.',
           'decks.cards': '@count cards',
           'decks.view_cards': 'View cards',
-          'decks.cards.empty': 'This deck is empty. You can add cards to it by clicking the button above.',
+          'decks.cards.empty':
+              'This deck is empty. You can add cards to it by clicking the button above.',
         },
 
         //* German

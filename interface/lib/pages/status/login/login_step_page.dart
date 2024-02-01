@@ -54,7 +54,8 @@ class _LoginPageState extends State<LoginStepPage> {
                   padding: const EdgeInsets.only(bottom: defaultSpacing * 2),
                   child: FJElevatedButton(
                     onTap: () {
-                      Get.find<TransitionController>().modelTransition(LoginChoosePage(widget.options!, widget.token));
+                      Get.find<TransitionController>().modelTransition(
+                          LoginChoosePage(widget.options!, widget.token));
                     },
                     child: Center(
                       child: Row(
@@ -78,13 +79,17 @@ class _LoginPageState extends State<LoginStepPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("${"input.${widget.type.name}".tr}.", textAlign: TextAlign.start, style: theme.textTheme.headlineMedium),
+                      Text("${"input.${widget.type.name}".tr}.",
+                          textAlign: TextAlign.start,
+                          style: theme.textTheme.headlineMedium),
                       verticalSpacing(defaultSpacing * 2),
                       Obx(
                         () => FJTextField(
                           obscureText: true,
                           hintText: 'placeholder.${widget.type.name}'.tr,
-                          errorText: _secretError.value == '' ? null : _secretError.value,
+                          errorText: _secretError.value == ''
+                              ? null
+                              : _secretError.value,
                           controller: _secretController,
                         ),
                       ),
@@ -99,7 +104,9 @@ class _LoginPageState extends State<LoginStepPage> {
                           _loading.value = true;
                           _secretError.value = '';
 
-                          loginStep(widget.token, _secretController.text, widget.type, success: () {
+                          loginStep(
+                              widget.token, _secretController.text, widget.type,
+                              success: () {
                             _loading.value = false;
                           }, failure: (err) {
                             _loading.value = false;
@@ -115,7 +122,8 @@ class _LoginPageState extends State<LoginStepPage> {
                                     strokeWidth: 2.0,
                                     color: Get.theme.colorScheme.onPrimary,
                                   ))
-                              : Text('login.next'.tr, style: theme.textTheme.labelLarge)),
+                              : Text('login.next'.tr,
+                                  style: theme.textTheme.labelLarge)),
                         ),
                       ),
                       verticalSpacing(defaultSpacing * 1.5),
@@ -125,7 +133,9 @@ class _LoginPageState extends State<LoginStepPage> {
                           Text("login.forgot.text".tr),
                           horizontalSpacing(defaultSpacing),
                           TextButton(
-                            onPressed: () => Get.offAll(const RegisterStartPage(), transition: Transition.noTransition),
+                            onPressed: () => Get.offAll(
+                                const RegisterStartPage(),
+                                transition: Transition.noTransition),
                             child: Text('login.forgot'.tr),
                           ),
                         ],

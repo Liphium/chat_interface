@@ -13,19 +13,25 @@ import 'package:get/get.dart';
 class CardObject extends TableObject {
   bool error = false;
 
-  CardObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.card);
+  CardObject(String id, Offset location, Size size)
+      : super(id, location, size, TableObjectType.card);
 
-  static Future<CardObject?> downloadCard(AttachmentContainer container, Offset location, {String id = ""}) async {
+  static Future<CardObject?> downloadCard(
+      AttachmentContainer container, Offset location,
+      {String id = ""}) async {
     // Download the file
-    final download = await Get.find<AttachmentController>().downloadAttachment(container);
+    final download =
+        await Get.find<AttachmentController>().downloadAttachment(container);
     if (!download) {
       return null;
     }
 
     // Grab resolution from it
-    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container.filePath).readAsBytes());
+    final buffer = await ui.ImmutableBuffer.fromUint8List(
+        await File(container.filePath).readAsBytes());
     final descriptor = await ui.ImageDescriptor.encoded(buffer);
-    final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
+    final size =
+        Size(descriptor.width.toDouble(), descriptor.height.toDouble());
 
     return CardObject(
       id,
@@ -44,16 +50,20 @@ class CardObject extends TableObject {
 
     // Draw a stack
     final paint = Paint()..color = Colors.blue;
-    canvas.drawRect(Rect.fromLTWH(location.dx, location.dy, size.width, size.height), paint);
+    canvas.drawRect(
+        Rect.fromLTWH(location.dx, location.dy, size.width, size.height),
+        paint);
   }
 
   @override
   void handleData(String data) async {
     // Download attached container
     final json = jsonDecode(data);
-    final type = await AttachmentController.checkLocations(json["id"], StorageType.cache);
+    final type = await AttachmentController.checkLocations(
+        json["id"], StorageType.cache);
     final container = AttachmentContainer.fromJson(type, jsonDecode(data));
-    final download = await Get.find<AttachmentController>().downloadAttachment(container);
+    final download =
+        await Get.find<AttachmentController>().downloadAttachment(container);
     if (!download) {
       error = true;
       sendLog("failed to download card");

@@ -83,7 +83,8 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
     return Column(
       children: [
         //* Auto download types
-        Text("Some tabletop settings go here".tr, style: Get.theme.textTheme.labelLarge),
+        Text("Some tabletop settings go here".tr,
+            style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
       ],
     );
@@ -205,7 +206,8 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                         verticalSpacing(elementSpacing),
                         Obx(
                           () => Text(
-                            "decks.cards".trParams({"count": deck.cards.length.toString()}),
+                            "decks.cards".trParams(
+                                {"count": deck.cards.length.toString()}),
                             style: Get.theme.textTheme.bodyMedium,
                           ),
                         ),
@@ -215,7 +217,8 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            Get.dialog(DeckCreationWindow(deck: deck)).then((value) {
+                            Get.dialog(DeckCreationWindow(deck: deck))
+                                .then((value) {
                               if (value is TabletopDeck) {
                                 deck.name = value.name;
                                 _loading.value = true;
@@ -245,7 +248,8 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.filter, color: Get.theme.colorScheme.onPrimary),
+                              Icon(Icons.filter,
+                                  color: Get.theme.colorScheme.onPrimary),
                               horizontalSpacing(elementSpacing),
                               Text(
                                 "decks.view_cards".tr,
@@ -295,7 +299,11 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(widget.deck == null ? "decks.dialog.name".tr : "decks.dialog.new_name".tr, style: Get.theme.textTheme.bodyMedium),
+          Text(
+              widget.deck == null
+                  ? "decks.dialog.name".tr
+                  : "decks.dialog.new_name".tr,
+              style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(sectionSpacing),
           FJTextField(
             hintText: "decks.dialog.name.placeholder".tr,
@@ -336,16 +344,20 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
             },
             builder: () => Center(
               child: SizedBox(
-                height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                height:
+                    Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                width:
+                    Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                  child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
                 ),
               ),
             ),
             child: Center(
-              child: Text(widget.deck == null ? "create".tr : "save".tr, style: Get.theme.textTheme.labelLarge),
+              child: Text(widget.deck == null ? "create".tr : "save".tr,
+                  style: Get.theme.textTheme.labelLarge),
             ),
           ),
         ],
@@ -393,7 +405,9 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
               FJElevatedButton(
                 onTap: () async {
                   final result = await openFiles(acceptedTypeGroups: [
-                    const XTypeGroup(label: "Image", extensions: FileSettings.staticImageTypes),
+                    const XTypeGroup(
+                        label: "Image",
+                        extensions: FileSettings.staticImageTypes),
                   ]);
                   if (result.isEmpty) {
                     return;
@@ -407,7 +421,9 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                     }
                   }
 
-                  final response = await Get.dialog(CardsUploadWindow(files: result), barrierDismissible: false);
+                  final response = await Get.dialog(
+                      CardsUploadWindow(files: result),
+                      barrierDismissible: false);
                   if (response.isEmpty) {
                     showErrorPopup("error", "app.error");
                     return;
@@ -449,7 +465,9 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                 return SingleChildScrollView(
                   child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 200),
                     itemCount: widget.deck.cards.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
@@ -460,8 +478,10 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                           Padding(
                             padding: const EdgeInsets.all(elementSpacing),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(defaultSpacing),
-                              child: Image.file(file, width: 200, height: 200, fit: BoxFit.cover),
+                              borderRadius:
+                                  BorderRadius.circular(defaultSpacing),
+                              child: Image.file(file,
+                                  width: 200, height: 200, fit: BoxFit.cover),
                             ),
                           ),
                           Positioned(
@@ -470,12 +490,14 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Get.theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(defaultSpacing),
+                                borderRadius:
+                                    BorderRadius.circular(defaultSpacing),
                               ),
                               child: IconButton(
                                 onPressed: () async {
                                   widget.deck.cards.remove(card);
-                                  Get.find<AttachmentController>().deleteFile(card);
+                                  Get.find<AttachmentController>()
+                                      .deleteFile(card);
                                   final result = await widget.deck.save();
                                   if (!result) {
                                     showErrorPopup("error", "server.error");
@@ -491,10 +513,12 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Get.theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(defaultSpacing),
+                                borderRadius:
+                                    BorderRadius.circular(defaultSpacing),
                               ),
                               child: IconButton(
-                                onPressed: () => Get.dialog(ImagePreviewWindow(file: file)),
+                                onPressed: () =>
+                                    Get.dialog(ImagePreviewWindow(file: file)),
                                 icon: const Icon(Icons.launch),
                               ),
                             ),
@@ -502,11 +526,13 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                           Align(
                             alignment: Alignment.bottomCenter,
                             child: Padding(
-                              padding: const EdgeInsets.only(bottom: defaultSpacing),
+                              padding:
+                                  const EdgeInsets.only(bottom: defaultSpacing),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Get.theme.colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(defaultSpacing),
+                                  borderRadius:
+                                      BorderRadius.circular(defaultSpacing),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -514,10 +540,15 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                                     IconButton(
                                       onPressed: () async {
                                         changed = true;
-                                        if ((widget.deck.amounts[card.id] ?? 1) == 1) {
+                                        if ((widget.deck.amounts[card.id] ??
+                                                1) ==
+                                            1) {
                                           return;
                                         }
-                                        widget.deck.amounts[card.id] = (widget.deck.amounts[card.id] ?? 1) - 1;
+                                        widget.deck.amounts[card.id] =
+                                            (widget.deck.amounts[card.id] ??
+                                                    1) -
+                                                1;
                                       },
                                       icon: const Icon(Icons.remove),
                                     ),
@@ -532,7 +563,10 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                                     IconButton(
                                       onPressed: () async {
                                         changed = true;
-                                        widget.deck.amounts[card.id] = (widget.deck.amounts[card.id] ?? 1) + 1;
+                                        widget.deck.amounts[card.id] =
+                                            (widget.deck.amounts[card.id] ??
+                                                    1) +
+                                                1;
                                       },
                                       icon: const Icon(Icons.add),
                                     ),
@@ -579,7 +613,8 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     final controller = Get.find<AttachmentController>();
     _current.value = 0;
     for (var file in widget.files) {
-      final response = await controller.uploadFile(UploadData(file), StorageType.permanent, favorite: true);
+      final response = await controller
+          .uploadFile(UploadData(file), StorageType.permanent, favorite: true);
       if (response.container == null) {
         Get.back(result: finished);
         showErrorPopup("error", response.message);

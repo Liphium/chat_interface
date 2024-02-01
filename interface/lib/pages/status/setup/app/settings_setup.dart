@@ -12,7 +12,6 @@ class SettingsSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-
     SettingController controller = Get.find();
 
     // Load all settings
@@ -21,8 +20,11 @@ class SettingsSetup extends Setup {
     }
 
     // Set current language
-    sendLog("settings: ${controller.settings[LanguageSettings.language]!.getValue()}");
-    Get.updateLocale(LanguageSettings.languages[controller.settings[LanguageSettings.language]!.getValue()].locale);
+    sendLog(
+        "settings: ${controller.settings[LanguageSettings.language]!.getValue()}");
+    Get.updateLocale(LanguageSettings
+        .languages[controller.settings[LanguageSettings.language]!.getValue()]
+        .locale);
 
     // Changes the color theme
     Get.find<ThemeManager>().changeTheme(getThemeData());

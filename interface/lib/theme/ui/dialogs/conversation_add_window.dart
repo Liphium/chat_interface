@@ -37,7 +37,8 @@ class ConversationAddWindow extends StatefulWidget {
   @override
   State<ConversationAddWindow> createState() => _ConversationAddWindowState();
 
-  static Future<String?> createConversationAction(List<Friend> friends, String? name) async {
+  static Future<String?> createConversationAction(
+      List<Friend> friends, String? name) async {
     if (friends.isEmpty) {
       return "choose.members".tr;
     }
@@ -54,8 +55,11 @@ class ConversationAddWindow extends StatefulWidget {
       return "enter.name".tr;
     }
 
-    if (name.length > specialConstants["max_conversation_name_length"] && friends.length > 1) {
-      return "too.long".trParams({"limit": specialConstants["max_conversation_name_length"].toString()});
+    if (name.length > specialConstants["max_conversation_name_length"] &&
+        friends.length > 1) {
+      return "too.long".trParams({
+        "limit": specialConstants["max_conversation_name_length"].toString()
+      });
     }
 
     var result = false;
@@ -116,7 +120,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 Get.dialog(const FriendsPage());
               },
               child: Center(
-                child: Text("open.friends".tr, style: theme.textTheme.labelLarge),
+                child:
+                    Text("open.friends".tr, style: theme.textTheme.labelLarge),
               ),
             ),
           ],
@@ -132,7 +137,11 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: [Text(widget.title.tr, style: theme.textTheme.titleMedium), Obx(() => Text("${_members.length}/100", style: theme.textTheme.bodyMedium))],
+            children: [
+              Text(widget.title.tr, style: theme.textTheme.titleMedium),
+              Obx(() => Text("${_members.length}/100",
+                  style: theme.textTheme.bodyMedium))
+            ],
           ),
           verticalSpacing(defaultSpacing),
 
@@ -145,7 +154,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             child: Row(
               children: [
-                Icon(Icons.search, size: 25, color: theme.colorScheme.onPrimary),
+                Icon(Icons.search,
+                    size: 25, color: theme.colorScheme.onPrimary),
                 horizontalSpacing(defaultSpacing),
                 Expanded(
                   child: TextField(
@@ -161,14 +171,20 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     onSubmitted: (value) {
                       // Make the first friend that matches the search the selected one
                       if (friendController.friends.isNotEmpty) {
-                        final member = friendController.friends.values.firstWhere(
-                          (element) => element.name.toLowerCase().contains(value.toLowerCase()) && element.id != StatusController.ownAccountId,
+                        final member =
+                            friendController.friends.values.firstWhere(
+                          (element) =>
+                              element.name
+                                  .toLowerCase()
+                                  .contains(value.toLowerCase()) &&
+                              element.id != StatusController.ownAccountId,
                           orElse: () => Friend.unknown("-"),
                         );
                         if (member.id != "-") {
                           if (_members.contains(member)) {
                             _members.remove(member);
-                          } else if (member.id != StatusController.ownAccountId) {
+                          } else if (member.id !=
+                              StatusController.ownAccountId) {
                             _members.add(member);
                           }
                         }
@@ -194,7 +210,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 shrinkWrap: true,
                 padding: const EdgeInsets.only(top: defaultSpacing),
                 itemBuilder: (context, index) {
-                  Friend friend = friendController.friends.values.elementAt(index);
+                  Friend friend =
+                      friendController.friends.values.elementAt(index);
 
                   if (friend.id == StatusController.ownAccountId) {
                     return const SizedBox();
@@ -202,7 +219,10 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
                   return Obx(() {
                     final search = _search.value;
-                    if (search.isNotEmpty && !friend.name.toLowerCase().contains(_search.value.toLowerCase())) {
+                    if (search.isNotEmpty &&
+                        !friend.name
+                            .toLowerCase()
+                            .contains(_search.value.toLowerCase())) {
                       return const SizedBox();
                     }
 
@@ -210,7 +230,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       padding: const EdgeInsets.only(bottom: defaultSpacing),
                       child: Obx(
                         () => Material(
-                          color: _members.contains(friend) ? theme.colorScheme.primary : Colors.transparent,
+                          color: _members.contains(friend)
+                              ? theme.colorScheme.primary
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(defaultSpacing),
@@ -223,7 +245,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                               _length.value = _members.length;
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: elementSpacing,
+                                  vertical: elementSpacing),
                               child: Row(
                                 children: [
                                   UserAvatar(
@@ -231,7 +255,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                                     size: 35,
                                   ),
                                   horizontalSpacing(defaultSpacing),
-                                  Text("${friend.name}#${friend.tag}", style: theme.textTheme.labelLarge),
+                                  Text("${friend.name}#${friend.tag}",
+                                      style: theme.textTheme.labelLarge),
                                 ],
                               ),
                             ),
@@ -252,7 +277,11 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
               RepaintBoundary(
                 child: Obx(() => Animate(
                       effects: [
-                        ExpandEffect(axis: Axis.vertical, duration: 250.ms, curve: Curves.ease, alignment: Alignment.center),
+                        ExpandEffect(
+                            axis: Axis.vertical,
+                            duration: 250.ms,
+                            curve: Curves.ease,
+                            alignment: Alignment.center),
                       ],
                       target: _length.value > 1 ? 1 : 0,
                       child: Padding(
@@ -272,7 +301,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
               FJElevatedLoadingButton(
                 onTap: () async {
                   if (widget.onDone != null) {
-                    final error = await widget.onDone!(_members, _controller.text);
+                    final error =
+                        await widget.onDone!(_members, _controller.text);
                     if (error != null) {
                       _errorText.value = error;
                     } else {
@@ -280,7 +310,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     }
                     return;
                   }
-                  final error = await ConversationAddWindow.createConversationAction(_members, _controller.text);
+                  final error =
+                      await ConversationAddWindow.createConversationAction(
+                          _members, _controller.text);
                   if (error != null) {
                     _errorText.value = error;
                   } else {

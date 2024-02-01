@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class NotificationController extends GetxController {
-
   final open = false.obs;
   final type = SnackbarType.info.obs;
   final message = ''.obs;

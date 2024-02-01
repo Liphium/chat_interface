@@ -33,7 +33,8 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               width: 35,
               height: 35,
               child: IconButton(
-                onPressed: () => Get.find<AttachmentController>().downloadAttachment(widget.container, retry: true),
+                onPressed: () => Get.find<AttachmentController>()
+                    .downloadAttachment(widget.container, retry: true),
                 iconSize: 20,
                 icon: const Icon(Icons.refresh),
               ),
@@ -73,7 +74,8 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       final type = widget.container.id.split(".").last;
       if (FileSettings.imageTypes.contains(type)) {
         return InkWell(
-          onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.container.filePath))),
+          onTap: () => Get.dialog(
+              ImagePreviewWindow(file: File(widget.container.filePath))),
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(defaultSpacing),
@@ -109,7 +111,8 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               height: 35,
               child: IconButton(
                 onPressed: () async {
-                  final result = await OpenAppFile.open(widget.container.filePath);
+                  final result =
+                      await OpenAppFile.open(widget.container.filePath);
                   if (result.type == ResultType.error) {
                     showErrorPopup("error", result.message);
                   }

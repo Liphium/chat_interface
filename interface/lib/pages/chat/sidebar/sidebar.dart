@@ -67,7 +67,8 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         color: theme.colorScheme.primary,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: defaultSpacing * 0.5),
                           child: TextField(
                             style: theme.textTheme.labelMedium,
                             decoration: InputDecoration(
@@ -76,7 +77,8 @@ class _SidebarState extends State<Sidebar> {
                               iconColor: theme.colorScheme.onPrimary,
                               fillColor: theme.colorScheme.onPrimary,
                               hoverColor: theme.colorScheme.onPrimary,
-                              prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
+                              prefixIcon: Icon(Icons.search,
+                                  color: theme.colorScheme.onPrimary),
                               hintText: "conversations.placeholder".tr,
                             ),
                             onChanged: (value) {
@@ -96,14 +98,18 @@ class _SidebarState extends State<Sidebar> {
                         color: theme.colorScheme.primary,
                         child: InkWell(
                           onTap: () {
-                            final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
+                            final RenderBox box = _addSpaceKey.currentContext
+                                ?.findRenderObject() as RenderBox;
 
                             //* Open conversation add window
-                            Get.dialog(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                            Get.dialog(SpaceAddWindow(
+                                position: box.localToGlobal(
+                                    box.size.bottomLeft(const Offset(0, 5)))));
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(defaultSpacing),
-                            child: Icon(Icons.rocket_launch, color: theme.colorScheme.onPrimary),
+                            child: Icon(Icons.rocket_launch,
+                                color: theme.colorScheme.onPrimary),
                           ),
                         ),
                       ),
@@ -123,14 +129,21 @@ class _SidebarState extends State<Sidebar> {
                             topRight: Radius.circular(defaultSpacing),
                           ),
                           onTap: () {
-                            final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
+                            final RenderBox box = _addConvKey.currentContext
+                                ?.findRenderObject() as RenderBox;
 
                             //* Open conversation add window
-                            Get.dialog(ConversationAddWindow(position: ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true)));
+                            Get.dialog(ConversationAddWindow(
+                                position: ContextMenuData(
+                                    box.localToGlobal(box.size.bottomLeft(
+                                        const Offset(0, elementSpacing))),
+                                    true,
+                                    true)));
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(defaultSpacing),
-                            child: Icon(Icons.chat_bubble, color: theme.colorScheme.onPrimary),
+                            child: Icon(Icons.chat_bubble,
+                                color: theme.colorScheme.onPrimary),
                           ),
                         ),
                       ),
@@ -157,14 +170,18 @@ class _SidebarState extends State<Sidebar> {
                 ],
                 target: query.value.isEmpty ? 0.0 : 1.0,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: defaultSpacing, left: defaultSpacing, right: defaultSpacing),
+                  padding: const EdgeInsets.only(
+                      top: defaultSpacing,
+                      left: defaultSpacing,
+                      right: defaultSpacing),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Get.theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                     ),
                     padding: const EdgeInsets.all(defaultSpacing),
-                    child: Text("conversations.hidden".tr, style: theme.textTheme.bodyMedium),
+                    child: Text("conversations.hidden".tr,
+                        style: theme.textTheme.bodyMedium),
                   ),
                 ),
               );
@@ -177,7 +194,8 @@ class _SidebarState extends State<Sidebar> {
                 child: Obx(
                   () {
                     final statusController = Get.find<StatusController>();
-                    final length = controller.order.length + statusController.sharedContent.length;
+                    final length = controller.order.length +
+                        statusController.sharedContent.length;
                     int additional = 0;
                     bool renderedShared = false;
                     return ListView.builder(
@@ -186,21 +204,32 @@ class _SidebarState extends State<Sidebar> {
                       padding: const EdgeInsets.only(top: defaultSpacing),
                       itemBuilder: (context, index) {
                         index -= additional;
-                        final prevId = index > 0 ? controller.order.elementAt(index - 1) : null;
-                        final prev = prevId != null ? controller.conversations[prevId] : null;
+                        final prevId = index > 0
+                            ? controller.order.elementAt(index - 1)
+                            : null;
+                        final prev = prevId != null
+                            ? controller.conversations[prevId]
+                            : null;
                         if (prev != null && !prev.isGroup) {
-                          final otherGuy = prev.members.values.firstWhere((element) => element.account != statusController.id.value);
+                          final otherGuy = prev.members.values.firstWhere(
+                              (element) =>
+                                  element.account != statusController.id.value);
 
                           //* Shared content renderer
-                          if (statusController.sharedContent.containsKey(otherGuy.account) && !renderedShared) {
+                          if (statusController.sharedContent
+                                  .containsKey(otherGuy.account) &&
+                              !renderedShared) {
                             additional += 1;
                             renderedShared = true;
-                            final content = statusController.sharedContent[otherGuy.account]!;
+                            final content = statusController
+                                .sharedContent[otherGuy.account]!;
                             switch (content.type) {
                               case ShareType.space:
-                                final container = content as SpaceConnectionContainer;
+                                final container =
+                                    content as SpaceConnectionContainer;
                                 return Padding(
-                                  padding: const EdgeInsets.only(bottom: elementSpacing),
+                                  padding: const EdgeInsets.only(
+                                      bottom: elementSpacing),
                                   child: Obx(
                                     () => Animate(
                                       effects: [
@@ -211,7 +240,10 @@ class _SidebarState extends State<Sidebar> {
                                           alignment: Alignment.topLeft,
                                         ),
                                       ],
-                                      target: spacesController.id.value == container.roomId ? 0.0 : 1.0,
+                                      target: spacesController.id.value ==
+                                              container.roomId
+                                          ? 0.0
+                                          : 1.0,
                                       child: SpaceRenderer(
                                         container: container,
                                         pollNewData: true,
@@ -227,11 +259,19 @@ class _SidebarState extends State<Sidebar> {
                         renderedShared = false;
 
                         //* Normal conversation renderer
-                        Conversation conversation = controller.conversations[controller.order.elementAt(index)]!;
+                        Conversation conversation = controller
+                            .conversations[controller.order.elementAt(index)]!;
 
                         Friend? friend;
                         if (!conversation.isGroup) {
-                          String id = conversation.members.values.firstWhere((element) => element.account != statusController.id.value, orElse: () => Member("-", "-", MemberRole.user)).account;
+                          String id = conversation.members.values
+                              .firstWhere(
+                                  (element) =>
+                                      element.account !=
+                                      statusController.id.value,
+                                  orElse: () =>
+                                      Member("-", "-", MemberRole.user))
+                              .account;
                           if (id == "-") {
                             friend = Friend.me();
                           } else {
@@ -245,28 +285,41 @@ class _SidebarState extends State<Sidebar> {
                         //* Conversation item
                         return Obx(
                           () {
-                            var title = conversation.isGroup || friend == null ? conversation.containerSub.value.name : conversation.dmName;
+                            var title = conversation.isGroup || friend == null
+                                ? conversation.containerSub.value.name
+                                : conversation.dmName;
                             if (friend == null && !conversation.isGroup) {
                               title = ".$title";
                             }
 
                             if (query.value != "") {
-                              if (!title.toLowerCase().startsWith(query.value.toLowerCase())) {
+                              if (!title
+                                  .toLowerCase()
+                                  .startsWith(query.value.toLowerCase())) {
                                 return const SizedBox.shrink();
                               }
-                            } else if (friend == null && !conversation.isGroup) {
+                            } else if (friend == null &&
+                                !conversation.isGroup) {
                               return const SizedBox.shrink();
                             }
 
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                              padding: const EdgeInsets.only(
+                                  bottom: defaultSpacing * 0.5),
                               child: Obx(
                                 () => Material(
-                                  borderRadius: BorderRadius.circular(defaultSpacing),
-                                  color: messageController.selectedConversation.value == conversation ? theme.colorScheme.primary : Colors.transparent,
+                                  borderRadius:
+                                      BorderRadius.circular(defaultSpacing),
+                                  color: messageController
+                                              .selectedConversation.value ==
+                                          conversation
+                                      ? theme.colorScheme.primary
+                                      : Colors.transparent,
                                   child: InkWell(
-                                    borderRadius: BorderRadius.circular(defaultSpacing),
-                                    hoverColor: theme.colorScheme.primary.withAlpha(150),
+                                    borderRadius:
+                                        BorderRadius.circular(defaultSpacing),
+                                    hoverColor: theme.colorScheme.primary
+                                        .withAlpha(150),
                                     splashColor: theme.hoverColor,
                                     onHover: (value) {
                                       hover.value = value;
@@ -274,21 +327,27 @@ class _SidebarState extends State<Sidebar> {
 
                                     //* When conversation is tapped (open conversation)
                                     onTap: () {
-                                      if (messageController.selectedConversation.value == conversation) return;
-                                      messageController.selectConversation(conversation);
+                                      if (messageController
+                                              .selectedConversation.value ==
+                                          conversation) return;
+                                      messageController
+                                          .selectConversation(conversation);
                                     },
 
                                     //* Conversation item content
                                     child: Padding(
-                                      padding: const EdgeInsets.all(elementSpacing2),
+                                      padding:
+                                          const EdgeInsets.all(elementSpacing2),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           //* Conversation info
                                           Expanded(
                                             child: Row(
                                               children: [
-                                                if (conversation.isGroup || friend == null)
+                                                if (conversation.isGroup ||
+                                                    friend == null)
                                                   Icon(
                                                       conversation.isGroup
                                                           ? Icons.group
@@ -296,21 +355,40 @@ class _SidebarState extends State<Sidebar> {
                                                               ? Icons.person_off
                                                               : Icons.person,
                                                       size: 35,
-                                                      color: theme.colorScheme.onPrimary)
+                                                      color: theme.colorScheme
+                                                          .onPrimary)
                                                 else
-                                                  UserAvatar(id: friend.id, size: 40),
-                                                horizontalSpacing(defaultSpacing * 0.75),
+                                                  UserAvatar(
+                                                      id: friend.id, size: 40),
+                                                horizontalSpacing(
+                                                    defaultSpacing * 0.75),
                                                 Expanded(
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       //* Conversation title
                                                       Obx(() {
-                                                        if (conversation.isGroup) {
+                                                        if (conversation
+                                                            .isGroup) {
                                                           return Text(
-                                                            conversation.containerSub.value.name,
-                                                            style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
-                                                            textHeightBehavior: noTextHeight,
+                                                            conversation
+                                                                .containerSub
+                                                                .value
+                                                                .name,
+                                                            style: messageController
+                                                                        .selectedConversation
+                                                                        .value ==
+                                                                    conversation
+                                                                ? theme
+                                                                    .textTheme
+                                                                    .labelMedium
+                                                                : theme
+                                                                    .textTheme
+                                                                    .bodyMedium,
+                                                            textHeightBehavior:
+                                                                noTextHeight,
                                                           );
                                                         }
 
@@ -318,55 +396,119 @@ class _SidebarState extends State<Sidebar> {
                                                           children: [
                                                             Flexible(
                                                               child: Text(
-                                                                friend != null ? conversation.dmName : conversation.containerSub.value.name,
-                                                                style: messageController.selectedConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
+                                                                friend != null
+                                                                    ? conversation
+                                                                        .dmName
+                                                                    : conversation
+                                                                        .containerSub
+                                                                        .value
+                                                                        .name,
+                                                                style: messageController
+                                                                            .selectedConversation.value ==
+                                                                        conversation
+                                                                    ? theme
+                                                                        .textTheme
+                                                                        .labelMedium
+                                                                    : theme
+                                                                        .textTheme
+                                                                        .bodyMedium,
                                                                 maxLines: 1,
-                                                                overflow: TextOverflow.ellipsis,
-                                                                textHeightBehavior: noTextHeight,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                textHeightBehavior:
+                                                                    noTextHeight,
                                                               ),
                                                             ),
-                                                            horizontalSpacing(defaultSpacing),
-                                                            if (friend != null) StatusRenderer(status: friend.statusType.value),
+                                                            horizontalSpacing(
+                                                                defaultSpacing),
+                                                            if (friend != null)
+                                                              StatusRenderer(
+                                                                  status: friend
+                                                                      .statusType
+                                                                      .value),
                                                           ],
                                                         );
                                                       }),
 
                                                       friend == null
-                                                          ? verticalSpacing(elementSpacing * 0.5)
+                                                          ? verticalSpacing(
+                                                              elementSpacing *
+                                                                  0.5)
                                                           : Visibility(
-                                                              visible: conversation.isGroup || friend.status.value != "-",
-                                                              child: verticalSpacing(defaultSpacing * 0.25),
+                                                              visible: conversation
+                                                                      .isGroup ||
+                                                                  friend.status
+                                                                          .value !=
+                                                                      "-",
+                                                              child: verticalSpacing(
+                                                                  defaultSpacing *
+                                                                      0.25),
                                                             ),
 
                                                       // Conversation description
                                                       conversation.isGroup
                                                           ? Text(
                                                               //* Conversation status message
-                                                              "chat.members".trParams(<String, String>{'count': conversation.members.length.toString()}),
+                                                              "chat.members"
+                                                                  .trParams(<String,
+                                                                      String>{
+                                                                'count':
+                                                                    conversation
+                                                                        .members
+                                                                        .length
+                                                                        .toString()
+                                                              }),
 
-                                                              style: theme.textTheme.bodySmall,
+                                                              style: theme
+                                                                  .textTheme
+                                                                  .bodySmall,
                                                               maxLines: 1,
-                                                              overflow: TextOverflow.ellipsis,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
                                                             )
                                                           :
 
                                                           //* Friend status message
                                                           friend == null
                                                               ? Text(
-                                                                  friend != null ? friend.status.value : "friend.removed".tr,
-                                                                  style: theme.textTheme.bodySmall,
+                                                                  friend != null
+                                                                      ? friend
+                                                                          .status
+                                                                          .value
+                                                                      : "friend.removed"
+                                                                          .tr,
+                                                                  style: theme
+                                                                      .textTheme
+                                                                      .bodySmall,
                                                                   maxLines: 1,
-                                                                  overflow: TextOverflow.ellipsis,
-                                                                  textHeightBehavior: noTextHeight,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  textHeightBehavior:
+                                                                      noTextHeight,
                                                                 )
-                                                              : Obx(() => Visibility(
-                                                                    visible: friend!.status.value != "-" && friend.statusType.value != statusOffline,
+                                                              : Obx(() =>
+                                                                  Visibility(
+                                                                    visible: friend!.status.value !=
+                                                                            "-" &&
+                                                                        friend.statusType.value !=
+                                                                            statusOffline,
                                                                     child: Text(
-                                                                      friend.status.value,
-                                                                      style: theme.textTheme.bodySmall,
-                                                                      maxLines: 1,
-                                                                      overflow: TextOverflow.ellipsis,
-                                                                      textHeightBehavior: noTextHeight,
+                                                                      friend
+                                                                          .status
+                                                                          .value,
+                                                                      style: theme
+                                                                          .textTheme
+                                                                          .bodySmall,
+                                                                      maxLines:
+                                                                          1,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      textHeightBehavior:
+                                                                          noTextHeight,
                                                                     ),
                                                                   )),
                                                     ],
@@ -377,13 +519,20 @@ class _SidebarState extends State<Sidebar> {
                                           ),
                                           Obx(
                                             () {
-                                              final notifications = conversation.notificationCount.value;
+                                              final notifications = conversation
+                                                  .notificationCount.value;
                                               if (hover.value) {
                                                 return IconButton(
-                                                  onPressed: () => showConfirmPopup(ConfirmWindow(
-                                                    title: "conversations.leave".tr,
-                                                    text: "conversations.leave.text".tr,
-                                                    onConfirm: () => conversation.delete(),
+                                                  onPressed: () =>
+                                                      showConfirmPopup(
+                                                          ConfirmWindow(
+                                                    title: "conversations.leave"
+                                                        .tr,
+                                                    text:
+                                                        "conversations.leave.text"
+                                                            .tr,
+                                                    onConfirm: () =>
+                                                        conversation.delete(),
                                                     onDecline: () => {},
                                                   )),
                                                   icon: const Icon(Icons.close),
@@ -395,11 +544,24 @@ class _SidebarState extends State<Sidebar> {
                                                 child: Container(
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
-                                                    color: Get.theme.colorScheme.error,
+                                                    color: Get.theme.colorScheme
+                                                        .error,
                                                   ),
                                                   child: Padding(
-                                                    padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
-                                                    child: Center(child: Text(min(notifications, 99).toString(), style: theme.textTheme.labelSmall)),
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 5,
+                                                            right: 5,
+                                                            top: 2,
+                                                            bottom: 3),
+                                                    child: Center(
+                                                        child: Text(
+                                                            min(notifications,
+                                                                    99)
+                                                                .toString(),
+                                                            style: theme
+                                                                .textTheme
+                                                                .labelSmall)),
                                                   ),
                                                 ),
                                               );

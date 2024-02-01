@@ -36,9 +36,11 @@ class _MessageBarState extends State<MessageBar> {
           padding: const EdgeInsets.all(defaultSpacing),
           child: Row(
             children: [
-              Icon(Icons.person_off, size: 30, color: Theme.of(context).colorScheme.error),
+              Icon(Icons.person_off,
+                  size: 30, color: Theme.of(context).colorScheme.error),
               horizontalSpacing(defaultSpacing),
-              Text("friend.removed".tr, style: Theme.of(context).textTheme.labelMedium),
+              Text("friend.removed".tr,
+                  style: Theme.of(context).textTheme.labelMedium),
             ],
           ),
         ),
@@ -48,16 +50,22 @@ class _MessageBarState extends State<MessageBar> {
     return Material(
       color: Get.theme.colorScheme.onBackground,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
+        padding: const EdgeInsets.symmetric(
+            horizontal: defaultSpacing, vertical: elementSpacing),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             //* Conversation label
             Row(
               children: [
-                Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                Icon(widget.conversation.isGroup ? Icons.group : Icons.person,
+                    size: 30, color: Theme.of(context).colorScheme.onPrimary),
                 horizontalSpacing(defaultSpacing),
-                Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName, style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                    widget.conversation.isGroup
+                        ? widget.conversation.containerSub.value.name
+                        : widget.conversation.dmName,
+                    style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
 
@@ -72,7 +80,10 @@ class _MessageBarState extends State<MessageBar> {
                   tooltip: "chat.start_space".tr,
                   onTap: () {
                     final controller = Get.find<SpacesController>();
-                    controller.createAndConnect(Get.find<MessageController>().selectedConversation.value.id);
+                    controller.createAndConnect(Get.find<MessageController>()
+                        .selectedConversation
+                        .value
+                        .id);
                   },
                 ),
                 horizontalSpacing(elementSpacing),
@@ -85,10 +96,13 @@ class _MessageBarState extends State<MessageBar> {
                   loading: callLoading,
                   onTap: () {
                     // Calculate position of the window
-                    final RenderBox box = _groupAddKey.currentContext?.findRenderObject() as RenderBox;
-                    final Offset globalPos = box.localToGlobal(box.size.bottomRight(const Offset(0, elementSpacing)));
+                    final RenderBox box = _groupAddKey.currentContext
+                        ?.findRenderObject() as RenderBox;
+                    final Offset globalPos = box.localToGlobal(
+                        box.size.bottomRight(const Offset(0, elementSpacing)));
                     final windowWidth = Get.mediaQuery.size.width;
-                    final position = Offset(windowWidth - globalPos.dx, globalPos.dy);
+                    final position =
+                        Offset(windowWidth - globalPos.dx, globalPos.dy);
 
                     // Open conversation add window based on the type of conversation
                     if (widget.conversation.isGroup) {
@@ -113,7 +127,10 @@ class _MessageBarState extends State<MessageBar> {
                       ));
                     } else {
                       // Get the friend and open the window
-                      final friend = widget.conversation.members.values.firstWhere((element) => element.account != StatusController.ownAccountId).getFriend();
+                      final friend = widget.conversation.members.values
+                          .firstWhere((element) =>
+                              element.account != StatusController.ownAccountId)
+                          .getFriend();
                       if (friend.unknown) {
                         return;
                       }
@@ -132,7 +149,8 @@ class _MessageBarState extends State<MessageBar> {
                   icon: Icons.info,
                   iconSize: 27,
                   onTap: () {
-                    Get.dialog(ConversationInfoWindow(conversation: widget.conversation));
+                    Get.dialog(ConversationInfoWindow(
+                        conversation: widget.conversation));
                   },
                 ),
 
@@ -142,10 +160,19 @@ class _MessageBarState extends State<MessageBar> {
                   child: Obx(
                     () => IconButton(
                       iconSize: 27,
-                      icon:
-                          Icon(Icons.group, color: controller.settings[AppSettings.showGroupMembers]!.value.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
+                      icon: Icon(Icons.group,
+                          color: controller
+                                  .settings[AppSettings.showGroupMembers]!
+                                  .value
+                                  .value
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
-                        controller.settings[AppSettings.showGroupMembers]!.setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
+                        controller.settings[AppSettings.showGroupMembers]!
+                            .setValue(!controller
+                                .settings[AppSettings.showGroupMembers]!
+                                .value
+                                .value);
                       },
                     ),
                   ),

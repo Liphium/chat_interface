@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FriendButton extends StatefulWidget {
-
   final Rx<Offset> position;
   final Friend friend;
-  
+
   const FriendButton({super.key, required this.friend, required this.position});
 
   @override
@@ -16,7 +15,6 @@ class FriendButton extends StatefulWidget {
 }
 
 class _FriendButtonState extends State<FriendButton> {
-  
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -26,44 +24,38 @@ class _FriendButtonState extends State<FriendButton> {
         onHover: (event) => widget.position.value = event.position,
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
-          hoverColor: Theme.of(context)
-              .colorScheme
-              .primary.withAlpha(100),
+          hoverColor: Theme.of(context).colorScheme.primary.withAlpha(100),
           splashColor: Theme.of(context).hoverColor,
 
           //* Show profile
-          onTap: () => Get.dialog(Profile(position: widget.position.value, friend: widget.friend)),
+          onTap: () => Get.dialog(
+              Profile(position: widget.position.value, friend: widget.friend)),
 
           //* Friend info
           child: Padding(
             padding: const EdgeInsets.symmetric(
-                horizontal: defaultSpacing,
-                vertical: defaultSpacing * 0.5),
+                horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
                       Icon(Icons.person,
-                        size: 30,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary),
+                          size: 30,
+                          color: Theme.of(context).colorScheme.onPrimary),
                       const SizedBox(width: 10),
-                      Text(widget.friend.name, style: Get.theme.textTheme.labelMedium),
+                      Text(widget.friend.name,
+                          style: Get.theme.textTheme.labelMedium),
                     ],
                   ),
 
                   //* Friend actions
                   Row(
                     children: [
-
                       //* Add to call
                       IconButton(
                         icon: Icon(Icons.add_call,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimary),
+                            color: Theme.of(context).colorScheme.onPrimary),
                         onPressed: () {},
                       ),
                     ],

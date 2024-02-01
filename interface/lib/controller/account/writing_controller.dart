@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 
 class WritingController extends GetxController {
-
   // Conversation: [Users]
   final writing = <String, List<String>>{}.obs;
 
@@ -9,12 +8,12 @@ class WritingController extends GetxController {
   final writingUser = <String, String>{};
 
   void init(String id) {
-    if(writing[id] != null) return;
+    if (writing[id] != null) return;
     writing[id] = <String>[];
   }
 
   void add(String id, String userId) {
-    if(writingUser[userId] != null) {
+    if (writingUser[userId] != null) {
       remove(writingUser[userId]!, userId);
     }
 

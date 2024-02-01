@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 
 class Message extends Table {
-  
   TextColumn get id => text()();
   BoolColumn get verified => boolean()();
   IntColumn get type => integer()();

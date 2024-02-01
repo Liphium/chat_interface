@@ -14,7 +14,9 @@ class ProfileSetup extends Setup {
   @override
   Future<Widget?> load() async {
     // Get profile from database
-    var profiles = await (db.select(db.setting)..where((tbl) => tbl.key.equals("profile"))).get();
+    var profiles = await (db.select(db.setting)
+          ..where((tbl) => tbl.key.equals("profile")))
+        .get();
     if (profiles.isEmpty) return const LoginPage();
 
     // Load tokens from profile
@@ -34,7 +36,8 @@ class ProfileSetup extends Setup {
     // Set new token (if refreshed)
     if (body["success"]) {
       loadTokensFromPayload(body);
-      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
+      await db.into(db.setting).insertOnConflictUpdate(
+          SettingData(key: "profile", value: tokensToPayload()));
     } else {
       if (body["error"] == "session.duration") {
         return null;

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginChoosePage extends StatefulWidget {
-
   final List<AuthType> options;
   final String token;
 
@@ -19,7 +18,6 @@ class LoginChoosePage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginChoosePage> {
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -42,19 +40,22 @@ class _LoginPageState extends State<LoginChoosePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("login.choose".tr, textAlign: TextAlign.start,
+                Text("login.choose".tr,
+                    textAlign: TextAlign.start,
                     style: theme.textTheme.headlineMedium),
                 verticalSpacing(defaultSpacing * 0.5),
                 Column(
                   children: List.generate(widget.options.length, (index) {
                     final type = widget.options[index];
-          
+
                     return Padding(
                       padding: const EdgeInsets.only(top: defaultSpacing),
                       child: FJOptionButton(
                         text: "choose.${type.name}".tr,
                         onTap: () {
-                          Get.find<TransitionController>().modelTransition(LoginStepPage(type, widget.token, options: widget.options));
+                          Get.find<TransitionController>().modelTransition(
+                              LoginStepPage(type, widget.token,
+                                  options: widget.options));
                         },
                       ),
                     );

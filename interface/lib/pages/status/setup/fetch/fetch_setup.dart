@@ -12,7 +12,6 @@ class FetchSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    
     setupFinished = false;
 
     // Setup last fetch time
@@ -23,15 +22,20 @@ class FetchSetup extends Setup {
 }
 
 Future<bool> startFetch() async {
-  if(fetchHappening) return false;
+  if (fetchHappening) return false;
   fetchHappening = true;
-  var lastFetch = await (db.select(db.setting)..where((tbl) => tbl.key.equals("lastFetch"))).getSingleOrNull();
-  if(lastFetch == null) {
+  var lastFetch = await (db.select(db.setting)
+        ..where((tbl) => tbl.key.equals("lastFetch")))
+      .getSingleOrNull();
+  if (lastFetch == null) {
     var first = DateTime.fromMillisecondsSinceEpoch(0);
-    await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "lastFetch", value: first.millisecondsSinceEpoch.toString()));
-    lastFetch = SettingData(key: "lastFetch", value: first.millisecondsSinceEpoch.toString());
+    await db.into(db.setting).insertOnConflictUpdate(SettingData(
+        key: "lastFetch", value: first.millisecondsSinceEpoch.toString()));
+    lastFetch = SettingData(
+        key: "lastFetch", value: first.millisecondsSinceEpoch.toString());
   }
 
-  lastFetchTime = DateTime.fromMillisecondsSinceEpoch(int.parse(lastFetch.value));
+  lastFetchTime =
+      DateTime.fromMillisecondsSinceEpoch(int.parse(lastFetch.value));
   return true;
 }

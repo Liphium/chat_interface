@@ -27,7 +27,9 @@ class StatusRenderer extends StatelessWidget {
           color: color.withAlpha(100),
           borderRadius: BorderRadius.circular(50),
         ),
-        padding: EdgeInsets.symmetric(horizontal: elementSpacing, vertical: text ? elementSpacing * 0.5 : elementSpacing),
+        padding: EdgeInsets.symmetric(
+            horizontal: elementSpacing,
+            vertical: text ? elementSpacing * 0.5 : elementSpacing),
         child: Row(
           children: [
             Icon(
@@ -37,7 +39,8 @@ class StatusRenderer extends StatelessWidget {
             ),
             if (text)
               Padding(
-                padding: const EdgeInsets.only(left: elementSpacing, right: elementSpacing * 0.5),
+                padding: const EdgeInsets.only(
+                    left: elementSpacing, right: elementSpacing * 0.5),
                 child: Text(
                   "status.${status.toString().toLowerCase()}".tr,
                   style: theme.textTheme.bodySmall!.copyWith(

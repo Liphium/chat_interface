@@ -36,13 +36,15 @@ class Connector {
   Uint8List? aesKey;
   String? aesBase64;
 
-  Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
+  Future<bool> connect(String url, String token,
+      {bool restart = true, Function(bool)? onDone}) async {
     // Generate an AES key for the connection
     aesKey = randomAESKey();
     aesBase64 = base64Encode(aesKey!);
 
     // Grab public key from the node
-    final normalizedUrl = url.replaceAll("ws://", "").replaceAll("wss://", "").split("/")[0];
+    final normalizedUrl =
+        url.replaceAll("ws://", "").replaceAll("wss://", "").split("/")[0];
     final res = await post(Uri.parse("$nodeProtocol$normalizedUrl/pub"));
     if (res.statusCode != 200) {
       sendLog("COULDN'T GET NODE PUBLIC KEY");
@@ -58,7 +60,8 @@ class Connector {
 
     initialized = true;
     try {
-      connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token, base64Encode(encryptedKey)]);
+      connection = WebSocketChannel.connect(Uri.parse(url),
+          protocols: [token, base64Encode(encryptedKey)]);
     } catch (e) {
       sendLog("FAILED TO CONNECT TO $url");
       e.printError();
@@ -149,7 +152,8 @@ class Connector {
   ///
   /// Optionally, you can specify a [handler] to handle the response (this will be called multiple times if there are multiple responses).
   /// Optionally, you can specify a [waiter] to wait for the response.
-  void sendAction(Message message, {Function(Event)? handler, Function()? waiter}) {
+  void sendAction(Message message,
+      {Function(Event)? handler, Function()? waiter}) {
     if (!_connected) {
       sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${message.action}");
       return;
@@ -165,7 +169,8 @@ class Connector {
     }
 
     // Send and encrypt the message (using AES key)
-    connection.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
+    connection.sink.add(
+        encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
   }
 
   void wait(String action, Function() waiter) {

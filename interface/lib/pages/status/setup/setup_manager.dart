@@ -1,5 +1,5 @@
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/ffi.dart';
+import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';

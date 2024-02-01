@@ -11,13 +11,18 @@ KeyPair generateAsymmetricKeyPair([Sodium? sd]) {
 }
 
 /// Encrypts a message (secret key is the key of the sender and public key is the key of the receiver)
-String encryptAsymmetricAuth(Uint8List publicKey, SecureKey secureKey, String message, [Sodium? sd]) {
-
+String encryptAsymmetricAuth(
+    Uint8List publicKey, SecureKey secureKey, String message,
+    [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   final plainTextBytes = message.toCharArray().unsignedView();
   final nonce = sodium.randombytes.buf(sodium.crypto.secretBox.nonceBytes);
 
-  final encrypted = sodium.crypto.box.easy(message: plainTextBytes, nonce: nonce, publicKey: publicKey, secretKey: secureKey);
+  final encrypted = sodium.crypto.box.easy(
+      message: plainTextBytes,
+      nonce: nonce,
+      publicKey: publicKey,
+      secretKey: secureKey);
   return base64Encode(nonce + encrypted);
 }
 
@@ -29,8 +34,9 @@ class DecryptionResult {
 }
 
 /// Decrypts a message (secret key is the key of the receiver and public key is the key of the sender)
-DecryptionResult decryptAsymmetricAuth(Uint8List publicKey, SecureKey secretKey, String message, [Sodium? sd]) {
-
+DecryptionResult decryptAsymmetricAuth(
+    Uint8List publicKey, SecureKey secretKey, String message,
+    [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   final cipherText = base64Decode(message);
   final nonce = cipherText.sublist(0, sodium.crypto.secretBox.nonceBytes);
@@ -44,7 +50,7 @@ DecryptionResult decryptAsymmetricAuth(Uint8List publicKey, SecureKey secretKey,
       publicKey: publicKey,
       secretKey: secretKey,
     );
-  } catch(e) {
+  } catch (e) {
     return DecryptionResult("", false);
   }
   return DecryptionResult(String.fromCharCodes(decrypted), true);
@@ -68,15 +74,19 @@ SecureKey unpackagePrivateKey(String privateKey, [Sodium? sd]) {
 }
 
 /// For friend requests and other stored actions (that shouldn't be identifiable).
-String encryptAsymmetricAnonymous(Uint8List publicKey, String message, [Sodium? sd]) {
+String encryptAsymmetricAnonymous(Uint8List publicKey, String message,
+    [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   final plainTextBytes = message.toCharArray().unsignedView();
-  return base64Encode(sodium.crypto.box.seal(message: plainTextBytes, publicKey: publicKey));
+  return base64Encode(
+      sodium.crypto.box.seal(message: plainTextBytes, publicKey: publicKey));
 }
 
 /// For friend requests and other stored actions (that shouldn't be identifiable).
 /// Secret key is your secret key and public key would also be your public key.
-String decryptAsymmetricAnonymous(Uint8List publicKey, SecureKey secretKey, String message, [Sodium? sd]) {
+String decryptAsymmetricAnonymous(
+    Uint8List publicKey, SecureKey secretKey, String message,
+    [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   final cipherText = base64Decode(message);
   var decrypted = "";
@@ -86,7 +96,7 @@ String decryptAsymmetricAnonymous(Uint8List publicKey, SecureKey secretKey, Stri
       publicKey: publicKey,
       secretKey: secretKey,
     ));
-  } catch(e) {
+  } catch (e) {
     sendLog("WARNING: couldn't decrypt message");
   }
   return decrypted;

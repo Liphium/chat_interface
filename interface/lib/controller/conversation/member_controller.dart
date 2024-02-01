@@ -11,7 +11,9 @@ class MemberController extends GetxController {
   void loadConversation(RxBool loading, String id) async {
     loading.value = true;
 
-    final membersDb = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(id))).get();
+    final membersDb = await (db.select(db.member)
+          ..where((tbl) => tbl.conversationId.equals(id)))
+        .get();
 
     members.clear();
     members.addAll(membersDb.map((e) => Member.fromData(e)));
@@ -29,9 +31,14 @@ class Member {
         account = json['account'],
         role = MemberRole.fromValue(json['role']);
 
-  Member.fromData(MemberData data) : this(data.id, data.accountId, MemberRole.fromValue(data.roleId));
+  Member.fromData(MemberData data)
+      : this(data.id, data.accountId, MemberRole.fromValue(data.roleId));
 
-  MemberData toData(String conversation) => MemberData(id: tokenId, accountId: account, roleId: role.value, conversationId: conversation);
+  MemberData toData(String conversation) => MemberData(
+      id: tokenId,
+      accountId: account,
+      roleId: role.value,
+      conversationId: conversation);
 
   Friend getFriend([FriendController? controller]) {
     if (StatusController.ownAccountId == account) return Friend.me();
@@ -40,7 +47,8 @@ class Member {
   }
 
   Future<bool> promote(String conversationId) async {
-    final conversation = Get.find<ConversationController>().conversations[conversationId]!;
+    final conversation =
+        Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/promote_token", {
       "id": conversation.token.id,
       "token": conversation.token.token,
@@ -55,7 +63,8 @@ class Member {
   }
 
   Future<bool> demote(String conversationId) async {
-    final conversation = Get.find<ConversationController>().conversations[conversationId]!;
+    final conversation =
+        Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/demote_token", {
       "id": conversation.token.id,
       "token": conversation.token.token,

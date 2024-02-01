@@ -19,18 +19,18 @@ class AnimatedContainerTestPage extends StatelessWidget {
           tag: "test",
           color: theme.colorScheme.onBackground,
           child: InkWell(
-            onTap: () => Get.find<TransitionController>().modelTransition(const AnimatedContainerTestPage2()),
-            child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text("Hello world.", style: TextStyle(color: Colors.white)),
-                Text("Hello world.", style: TextStyle(color: Colors.white)),
-                Text("Hello world.", style: TextStyle(color: Colors.white)),
-                Text("Hello world.", style: TextStyle(color: Colors.white)),
-                Text("Hello world.", style: TextStyle(color: Colors.white)),
-              ],
-            )
-          ),
+              onTap: () => Get.find<TransitionController>()
+                  .modelTransition(const AnimatedContainerTestPage2()),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Hello world.", style: TextStyle(color: Colors.white)),
+                  Text("Hello world.", style: TextStyle(color: Colors.white)),
+                  Text("Hello world.", style: TextStyle(color: Colors.white)),
+                  Text("Hello world.", style: TextStyle(color: Colors.white)),
+                  Text("Hello world.", style: TextStyle(color: Colors.white)),
+                ],
+              )),
         ),
       ),
     );

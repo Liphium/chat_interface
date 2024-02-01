@@ -42,7 +42,8 @@ class TabletopController extends GetxController {
         sendLog("success");
         enabled.value = true;
 
-        _ticker = Timer.periodic(const Duration(milliseconds: 1000 ~/ tickRate), (timer) {
+        _ticker = Timer.periodic(const Duration(milliseconds: 1000 ~/ tickRate),
+            (timer) {
           _handleTableTick();
         });
       },
@@ -85,7 +86,8 @@ class TabletopController extends GetxController {
   }
 
   /// Create a new object
-  TableObject newObject(TableObjectType type, String id, Offset location, Size size, String data) {
+  TableObject newObject(TableObjectType type, String id, Offset location,
+      Size size, String data) {
     TableObject object;
     switch (type) {
       case TableObjectType.deck:
@@ -116,7 +118,8 @@ class TabletopController extends GetxController {
   List<TableObject> raycast(Offset location) {
     final objects = <TableObject>[];
     for (var object in this.objects.values) {
-      final rect = Rect.fromLTWH(object.location.dx, object.location.dy, object.size.width, object.size.height);
+      final rect = Rect.fromLTWH(object.location.dx, object.location.dy,
+          object.size.width, object.size.height);
       if (rect.contains(location)) {
         objects.add(object);
       }

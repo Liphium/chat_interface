@@ -3,19 +3,18 @@ import 'dart:async';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/ffi.dart';
+import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class SpaceMemberController extends GetxController {
-
   SecureKey? key;
   final membersLoading = false.obs;
   final members = <String, SpaceMember>{}.obs;
-  StreamSubscription<Action>? sub;
+  StreamSubscription<api.Action>? sub;
   String _ownId = "";
-  
+
   // Action names
   static const String startedTalkingAction = "started_talking";
   static const String stoppedTalkingAction = "stopped_talking";
@@ -34,12 +33,13 @@ class SpaceMemberController extends GetxController {
       final decrypted = decryptSymmetric(args[0], key!);
       final clientId = args[1];
       sendLog("$decrypted:$clientId");
-      if(decrypted == myId) {
+      if (decrypted == myId) {
         _ownId = clientId;
       }
       membersFound.add(clientId);
-      if(this.members[clientId] == null) {
-        this.members[clientId] = SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)), member["muted"], member["deafened"]);
+      if (this.members[clientId] == null) {
+        this.members[clientId] =
+            SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)), member["muted"], member["deafened"]);
       }
     }
 
@@ -52,12 +52,12 @@ class SpaceMemberController extends GetxController {
     this.key = key;
 
     sub = api.createActionStream().listen((event) {
-      switch(event.action) {
+      switch (event.action) {
         // Talking stuff
         case startedTalkingAction:
           final target = event.data == "" ? _ownId : event.data;
           sendLog("talking EVENT $target");
-          if(members[target] != null && (members[target]!.isMuted.value || members[target]!.isDeafened.value)) {
+          if (members[target] != null && (members[target]!.isMuted.value || members[target]!.isDeafened.value)) {
             return;
           }
           members[target]?.isSpeaking.value = true;
@@ -76,13 +76,11 @@ class SpaceMemberController extends GetxController {
     members.clear();
     sub!.cancel();
   }
-
 }
 
 class SpaceMember {
-
   final Friend friend;
-  
+
   final isSpeaking = false.obs;
   final isMuted = false.obs;
   final isDeafened = false.obs;
@@ -91,5 +89,4 @@ class SpaceMember {
     isMuted.value = muted;
     isDeafened.value = deafened;
   }
-
 }

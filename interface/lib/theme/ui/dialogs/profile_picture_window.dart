@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProfilePictureWindow extends StatefulWidget {
-
   final XFile file;
 
   const ProfilePictureWindow({super.key, required this.file});
@@ -20,7 +19,6 @@ class ProfilePictureWindow extends StatefulWidget {
 }
 
 class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
-
   double maxScale = 0;
   final scaleFactor = (1 / 0.15625).obs;
   final moveX = 0.0.obs;
@@ -37,10 +35,10 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
 
   void initImage() async {
     final image = await ProfilePictureHelper.loadImage(widget.file.path);
-    if(image == null) return;
+    if (image == null) return;
 
     // Calculate the scale factor to fit the image into the window
-    if(image.width < image.height) {
+    if (image.width < image.height) {
       scaleFactor.value = 1 / (300 / image.width);
       maxScale = scaleFactor.value;
     } else {
@@ -54,102 +52,113 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      maxWidth: 450,
-      child: Obx(() {
-          
-        if(_image.value == null) {
-          return SizedBox(height: 100, width: 100, child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
-        }
-          
-        final scale = scaleFactor.value;
-        final offset = Offset(moveX.value, moveY.value);
-          
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text("settings.data.profile_picture.select".tr, style: Get.theme.textTheme.bodyMedium),
-            verticalSpacing(sectionSpacing),
-            Center(
-              child: ClipOval(
-                child: SizedBox(
-                  height: 300,
-                  width: 300,
-                  child: RawImage(
-                    fit: BoxFit.none,
-                    scale: scale,
-                    image: _image.value,
-                    alignment: Alignment(offset.dx, offset.dy),
+        maxWidth: 450,
+        child: Obx(() {
+          if (_image.value == null) {
+            return SizedBox(
+                height: 100,
+                width: 100,
+                child: Center(
+                    child: CircularProgressIndicator(
+                        color: Get.theme.colorScheme.onPrimary)));
+          }
+
+          final scale = scaleFactor.value;
+          final offset = Offset(moveX.value, moveY.value);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("settings.data.profile_picture.select".tr,
+                  style: Get.theme.textTheme.bodyMedium),
+              verticalSpacing(sectionSpacing),
+              Center(
+                child: ClipOval(
+                  child: SizedBox(
+                    height: 300,
+                    width: 300,
+                    child: RawImage(
+                      fit: BoxFit.none,
+                      scale: scale,
+                      image: _image.value,
+                      alignment: Alignment(offset.dx, offset.dy),
+                    ),
                   ),
                 ),
               ),
-            ),
-            verticalSpacing(defaultSpacing),
-            Row(
-              children: [
-                Text("zoom".tr, style: Get.theme.textTheme.labelMedium),
-                horizontalSpacing(defaultSpacing),
-                Expanded(
-                  child: FJSlider(
-                    value: (maxScale - scaleFactor.value) + 0.5, 
-                    min: 0.5,
-                    max: maxScale,
-                    onChanged: (val) {
-                      scaleFactor.value = (maxScale - val) + 0.5;
-                    },
+              verticalSpacing(defaultSpacing),
+              Row(
+                children: [
+                  Text("zoom".tr, style: Get.theme.textTheme.labelMedium),
+                  horizontalSpacing(defaultSpacing),
+                  Expanded(
+                    child: FJSlider(
+                      value: (maxScale - scaleFactor.value) + 0.5,
+                      min: 0.5,
+                      max: maxScale,
+                      onChanged: (val) {
+                        scaleFactor.value = (maxScale - val) + 0.5;
+                      },
+                    ),
                   ),
-                ),
-                horizontalSpacing(defaultSpacing),
-                Text(((maxScale - scaleFactor.value) + 0.5).toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
-              ],
-            ),
-            Row(
-              children: [
-                Text("x".tr, style: Get.theme.textTheme.labelMedium),
-                horizontalSpacing(defaultSpacing),
-                Expanded(
-                  child: FJSlider(
-                    value: moveX.value,
-                    min: -1,
-                    max: 1,
-                    onChanged: (val) => moveX.value = val,
+                  horizontalSpacing(defaultSpacing),
+                  Text(
+                      ((maxScale - scaleFactor.value) + 0.5).toStringAsFixed(1),
+                      style: Get.theme.textTheme.bodyMedium),
+                ],
+              ),
+              Row(
+                children: [
+                  Text("x".tr, style: Get.theme.textTheme.labelMedium),
+                  horizontalSpacing(defaultSpacing),
+                  Expanded(
+                    child: FJSlider(
+                      value: moveX.value,
+                      min: -1,
+                      max: 1,
+                      onChanged: (val) => moveX.value = val,
+                    ),
                   ),
-                ),
-                horizontalSpacing(defaultSpacing),
-                Text(moveX.value.toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
-              ],
-            ),
-            Row(
-              children: [
-                Text("y".tr, style: Get.theme.textTheme.labelMedium),
-                horizontalSpacing(defaultSpacing),
-                Expanded(
-                  child: FJSlider(
-                    value: moveY.value,
-                    min: -1,
-                    max: 1,
-                    onChanged: (val) => moveY.value = val,
+                  horizontalSpacing(defaultSpacing),
+                  Text(moveX.value.toStringAsFixed(1),
+                      style: Get.theme.textTheme.bodyMedium),
+                ],
+              ),
+              Row(
+                children: [
+                  Text("y".tr, style: Get.theme.textTheme.labelMedium),
+                  horizontalSpacing(defaultSpacing),
+                  Expanded(
+                    child: FJSlider(
+                      value: moveY.value,
+                      min: -1,
+                      max: 1,
+                      onChanged: (val) => moveY.value = val,
+                    ),
                   ),
-                ),
-                horizontalSpacing(defaultSpacing),
-                Text(moveY.value.toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
-              ],
-            ),
-            verticalSpacing(sectionSpacing),
-            FJElevatedLoadingButton(
-              loading: uploading,
-              onTap: () async {
-                if(uploading.value) return;
-                uploading.value = true;
-                await ProfilePictureHelper.uploadProfilePicture(widget.file, ProfilePictureData(scaleFactor.value, moveX.value, moveY.value));
-                uploading.value = false;
-                Get.back();
-              }, 
-              label: "select".tr,
-            ),
-          ],
-        );
-      })
-    );
+                  horizontalSpacing(defaultSpacing),
+                  Text(moveY.value.toStringAsFixed(1),
+                      style: Get.theme.textTheme.bodyMedium),
+                ],
+              ),
+              verticalSpacing(sectionSpacing),
+              FJElevatedLoadingButton(
+                loading: uploading,
+                onTap: () async {
+                  if (uploading.value) return;
+                  uploading.value = true;
+                  await ProfilePictureHelper.uploadProfilePicture(
+                      widget.file,
+                      ProfilePictureData(
+                          scaleFactor.value, moveX.value, moveY.value));
+                  uploading.value = false;
+                  Get.back();
+                },
+                label: "select".tr,
+              ),
+            ],
+          );
+        }));
   }
 }

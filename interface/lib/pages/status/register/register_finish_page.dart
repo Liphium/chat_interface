@@ -53,10 +53,14 @@ class _RegisterPageState extends State<RegisterFinishPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("register.final".tr, textAlign: TextAlign.left, style: theme.textTheme.headlineMedium),
+                Text("register.final".tr,
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.headlineMedium),
                 verticalSpacing(sectionSpacing),
 
-                Text("username".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
+                Text("username".tr,
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.labelLarge),
                 verticalSpacing(elementSpacing),
                 LayoutBuilder(builder: (context, size) {
                   return Row(
@@ -85,7 +89,9 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                 verticalSpacing(defaultSpacing),
 
                 // Password
-                Text("password".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
+                Text("password".tr,
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.labelLarge),
                 verticalSpacing(elementSpacing),
                 FJTextField(
                   hintText: 'placeholder.password'.tr,
@@ -129,26 +135,33 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                       return;
                     }
 
-                    if (_passwordController.text != _confirmPasswordController.text) {
+                    if (_passwordController.text !=
+                        _confirmPasswordController.text) {
                       _errorText.value = 'password.mismatch'.tr;
                       _loading.value = false;
                       return;
                     }
 
                     // Send registration finish request
-                    final error = await RegisterHandler.finishRegistration(_loading, _usernameController.text, _tagController.text, _passwordController.text);
+                    final error = await RegisterHandler.finishRegistration(
+                        _loading,
+                        _usernameController.text,
+                        _tagController.text,
+                        _passwordController.text);
                     if (error != null) {
                       _errorText.value = error;
                       return;
                     }
 
                     // Transition to the next page
-                    Get.find<TransitionController>().modelTransition(const LoginPage());
+                    Get.find<TransitionController>()
+                        .modelTransition(const LoginPage());
                     sendLog("registration finished");
                   },
                   loading: _loading,
                   child: Center(
-                    child: Text('register.register'.tr, style: theme.textTheme.labelLarge),
+                    child: Text('register.register'.tr,
+                        style: theme.textTheme.labelLarge),
                   ),
                 ),
                 verticalSpacing(defaultSpacing),
@@ -159,11 +172,15 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                     horizontalSpacing(defaultSpacing),
                     TextButton(
                       style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all(theme.colorScheme.onPrimary),
+                        foregroundColor: MaterialStateProperty.all(
+                            theme.colorScheme.onPrimary),
                         backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
+                            (states) => states.contains(MaterialState.hovered)
+                                ? theme.colorScheme.primary.withOpacity(0.3)
+                                : theme.colorScheme.primary.withOpacity(0)),
                       ),
-                      onPressed: () => Get.find<TransitionController>().modelTransition(const LoginPage()),
+                      onPressed: () => Get.find<TransitionController>()
+                          .modelTransition(const LoginPage()),
                       child: Text('register.login'.tr),
                     ),
                   ],

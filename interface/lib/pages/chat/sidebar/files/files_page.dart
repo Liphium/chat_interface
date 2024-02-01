@@ -14,7 +14,6 @@ class FilesPage extends StatefulWidget {
 }
 
 class _ConversationsPageState extends State<FilesPage> {
-
   final files = [
     "deine_mutter.png",
     "some_note.txt",
@@ -38,7 +37,6 @@ class _ConversationsPageState extends State<FilesPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(
@@ -50,23 +48,19 @@ class _ConversationsPageState extends State<FilesPage> {
             borderRadius: BorderRadius.circular(dialogBorderRadius),
             color: Get.theme.colorScheme.background,
           ),
-          padding: const EdgeInsets.only(top: dialogPadding, right: dialogPadding, left: dialogPadding),
+          padding: const EdgeInsets.only(
+              top: dialogPadding, right: dialogPadding, left: dialogPadding),
           child: Obx(() {
-        
-            if(files.isEmpty) {
+            if (files.isEmpty) {
               return Center(
-                child: Text(
-                  "No files found",
-                  style: Get.theme.textTheme.labelLarge
-                )
-              );
+                  child: Text("No files found",
+                      style: Get.theme.textTheme.labelLarge));
             }
-          
+
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-          
                 SizedBox(
                   height: 48,
                   child: Material(
@@ -76,7 +70,8 @@ class _ConversationsPageState extends State<FilesPage> {
                     ),
                     color: Get.theme.colorScheme.primary,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: defaultSpacing * 0.5),
                       child: TextField(
                         autofocus: true,
                         style: Get.theme.textTheme.labelMedium,
@@ -86,7 +81,8 @@ class _ConversationsPageState extends State<FilesPage> {
                           iconColor: Get.theme.colorScheme.onPrimary,
                           fillColor: Get.theme.colorScheme.onPrimary,
                           hoverColor: Get.theme.colorScheme.onPrimary,
-                          prefixIcon: Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
+                          prefixIcon: Icon(Icons.search,
+                              color: Get.theme.colorScheme.onPrimary),
                           hintText: "files.placeholder".tr,
                         ),
                         onChanged: (value) {
@@ -104,22 +100,23 @@ class _ConversationsPageState extends State<FilesPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         verticalSpacing(sectionSpacing),
-                  
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                          child: Text("files.favorite".tr, style: Get.theme.textTheme.labelMedium),
-                        ),         
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: defaultSpacing),
+                          child: Text("files.favorite".tr,
+                              style: Get.theme.textTheme.labelMedium),
+                        ),
                         verticalSpacing(defaultSpacing),
-                                
                         ListView.builder(
                           itemCount: files.length,
                           shrinkWrap: true,
                           itemBuilder: (context, index) {
                             final file = files[index];
                             final extension = file.split(".").last;
-                                
+
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                              padding: const EdgeInsets.only(
+                                  bottom: defaultSpacing * 0.5),
                               child: Material(
                                 color: Get.theme.colorScheme.onBackground,
                                 borderRadius: BorderRadius.circular(10),
@@ -128,35 +125,40 @@ class _ConversationsPageState extends State<FilesPage> {
                                     borderRadius: BorderRadius.circular(10),
                                     hoverColor: Theme.of(context)
                                         .colorScheme
-                                        .primary.withAlpha(100),
+                                        .primary
+                                        .withAlpha(100),
                                     splashColor: Theme.of(context).hoverColor,
-                                
+
                                     //* Show file overview
                                     onTap: () => {},
-                                
+
                                     //* Friend info
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: defaultSpacing,
                                           vertical: defaultSpacing * 0.5),
                                       child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Row(
                                               children: [
-                                                Icon(extensionMap[extension] ?? Icons.insert_drive_file,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onPrimary),
+                                                Icon(
+                                                    extensionMap[extension] ??
+                                                        Icons.insert_drive_file,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary),
                                                 const SizedBox(width: 10),
-                                                Text(file, style: Get.theme.textTheme.bodyMedium),
+                                                Text(file,
+                                                    style: Get.theme.textTheme
+                                                        .bodyMedium),
                                               ],
                                             ),
-                                
+
                                             //* Friend actions
                                             Row(
                                               children: [
-                                
                                                 //* Add to call
                                                 IconButton(
                                                   icon: Icon(Icons.launch,
@@ -175,26 +177,28 @@ class _ConversationsPageState extends State<FilesPage> {
                             );
                           },
                         ),
-                                
                         verticalSpacing(sectionSpacing),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                          child: Text("files.uploaded".tr, style: Get.theme.textTheme.labelMedium),
-                        ),         
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: defaultSpacing),
+                          child: Text("files.uploaded".tr,
+                              style: Get.theme.textTheme.labelMedium),
+                        ),
                         verticalSpacing(defaultSpacing),
-                                
                         ListView.builder(
                           itemCount: files.length,
                           shrinkWrap: true,
                           itemBuilder: (context, index) {
                             final file = files[index];
                             final extension = file.split(".").last;
-                            final expiry = DateTime.now().add(Duration(days: -Random().nextInt(30)));
+                            final expiry = DateTime.now()
+                                .add(Duration(days: -Random().nextInt(30)));
                             final duration = DateTime.now().difference(expiry);
                             final difference = duration.inHours / (30 * 24);
-                                
+
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                              padding: const EdgeInsets.only(
+                                  bottom: defaultSpacing * 0.5),
                               child: Material(
                                 color: Get.theme.colorScheme.onBackground,
                                 borderRadius: BorderRadius.circular(10),
@@ -203,50 +207,60 @@ class _ConversationsPageState extends State<FilesPage> {
                                     borderRadius: BorderRadius.circular(10),
                                     hoverColor: Theme.of(context)
                                         .colorScheme
-                                        .primary.withAlpha(100),
+                                        .primary
+                                        .withAlpha(100),
                                     splashColor: Theme.of(context).hoverColor,
-                                
+
                                     //* Show file overview
                                     onTap: () => {},
-                                
+
                                     //* Friend info
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: defaultSpacing,
                                           vertical: defaultSpacing * 0.5),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Icon(extensionMap[extension] ?? Icons.insert_drive_file,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimary),
-                                              const SizedBox(width: 10),
-                                              Text(file, style: Get.theme.textTheme.bodyMedium),
-                                            ],
-                                          ),
-                                
-                                          //* Friend actions
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: SizedBox(
-                                              width: defaultSpacing * 3,
-                                              height: defaultSpacing * 3,
-                                              child: Tooltip(
-                                                message: "This file will be deleted in ${duration.inDays} days",
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 3,
-                                                  value: difference,
-                                                  color: Get.theme.colorScheme.onPrimary,
-                                                  backgroundColor: Get.theme.colorScheme.primary,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                    extensionMap[extension] ??
+                                                        Icons.insert_drive_file,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary),
+                                                const SizedBox(width: 10),
+                                                Text(file,
+                                                    style: Get.theme.textTheme
+                                                        .bodyMedium),
+                                              ],
+                                            ),
+
+                                            //* Friend actions
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: SizedBox(
+                                                width: defaultSpacing * 3,
+                                                height: defaultSpacing * 3,
+                                                child: Tooltip(
+                                                  message:
+                                                      "This file will be deleted in ${duration.inDays} days",
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    strokeWidth: 3,
+                                                    value: difference,
+                                                    color: Get.theme.colorScheme
+                                                        .onPrimary,
+                                                    backgroundColor: Get.theme
+                                                        .colorScheme.primary,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ]
-                                      ), 
+                                          ]),
                                     ),
                                   ),
                                 ),

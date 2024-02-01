@@ -1,10 +1,8 @@
-
 import 'package:chat_interface/theme/ui/text_renderer/text_pattern_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 
 class BoldPattern extends TextPattern {
-  
   BoldPattern() : super('**');
 
   @override
@@ -14,7 +12,6 @@ class BoldPattern extends TextPattern {
 }
 
 class ItalicPattern extends TextPattern {
-  
   ItalicPattern() : super('*');
 
   @override
@@ -24,7 +21,6 @@ class ItalicPattern extends TextPattern {
 }
 
 class UnderlinePattern extends TextPattern {
-  
   UnderlinePattern() : super('_');
 
   @override
@@ -38,7 +34,6 @@ class UnderlinePattern extends TextPattern {
 }
 
 class StrokePattern extends TextPattern {
-  
   StrokePattern() : super('~');
 
   @override
@@ -52,7 +47,6 @@ class StrokePattern extends TextPattern {
 }
 
 class TrollPattern extends TextPattern {
-  
   TrollPattern() : super('---');
 
   @override

@@ -9,12 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProfileDefaults {
-  static Function(Friend, RxBool) deleteAction = (Friend friend, RxBool loading) async {
+  static Function(Friend, RxBool) deleteAction =
+      (Friend friend, RxBool loading) async {
     await friend.remove(loading);
     Get.back();
   };
 
-  static Function(Friend, RxBool) openAction = (Friend friend, RxBool loading) async {
+  static Function(Friend, RxBool) openAction =
+      (Friend friend, RxBool loading) async {
     openConversation(loading, friend.name, [friend.id]);
   };
 
@@ -23,13 +25,27 @@ class ProfileDefaults {
 
     if (friend.unknown) {
       return [
-        ProfileAction(icon: Icons.person_add, category: true, label: 'friends.add'.tr, loading: false.obs, onTap: (f, l) => {}),
+        ProfileAction(
+            icon: Icons.person_add,
+            category: true,
+            label: 'friends.add'.tr,
+            loading: false.obs,
+            onTap: (f, l) => {}),
       ];
     }
 
     return [
-      ProfileAction(category: true, icon: Icons.message, label: 'friends.message'.tr, onTap: openAction, loading: friend.openConversationLoading),
-      ProfileAction(icon: Icons.add_call, label: 'friends.invite_to_space'.tr, loading: false.obs, onTap: (f, l) => {}),
+      ProfileAction(
+          category: true,
+          icon: Icons.message,
+          label: 'friends.message'.tr,
+          onTap: openAction,
+          loading: friend.openConversationLoading),
+      ProfileAction(
+          icon: Icons.add_call,
+          label: 'friends.invite_to_space'.tr,
+          loading: false.obs,
+          onTap: (f, l) => {}),
       ProfileAction(
         icon: Icons.person_remove,
         category: true,
@@ -52,7 +68,14 @@ class ProfileAction {
   final Color? iconColor;
   final Function(Friend, RxBool) onTap;
 
-  const ProfileAction({required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
+  const ProfileAction(
+      {required this.icon,
+      required this.label,
+      required this.loading,
+      required this.onTap,
+      this.category = false,
+      this.color,
+      this.iconColor});
 }
 
 class Profile extends StatefulWidget {
@@ -62,7 +85,13 @@ class Profile extends StatefulWidget {
   final int size;
   final List<ProfileAction> Function(Friend)? actions;
 
-  const Profile({super.key, this.position, required this.friend, this.size = 300, this.leftAligned = true, this.actions});
+  const Profile(
+      {super.key,
+      this.position,
+      required this.friend,
+      this.size = 300,
+      this.leftAligned = true,
+      this.actions});
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -115,7 +144,8 @@ class _ProfileState extends State<Profile> {
               children: [
                 UserAvatar(id: widget.friend.id, size: 40),
                 horizontalSpacing(defaultSpacing),
-                Text(widget.friend.name, style: Get.theme.textTheme.titleMedium),
+                Text(widget.friend.name,
+                    style: Get.theme.textTheme.titleMedium),
                 Text(
                   "#${widget.friend.tag}",
                   style: Get.theme.textTheme.titleMedium!.copyWith(

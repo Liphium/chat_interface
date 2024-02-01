@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChatPage extends StatefulWidget {
-
   const ChatPage({super.key});
 
   @override
@@ -14,33 +13,31 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-
   @override
   Widget build(BuildContext context) {
-
     MessageController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      body: Stack(
-        children: [
-          Row(
-            children: [
-              const SizedBox(
-                width: 350,
-                child: Sidebar(),
-              ),
-              Expanded(
-                child: Obx(() => MessageFeed(id: controller.selectedConversation.value.id)),
-              ),
-            ],
-          ),
+        backgroundColor: theme.colorScheme.background,
+        body: Stack(
+          children: [
+            Row(
+              children: [
+                const SizedBox(
+                  width: 350,
+                  child: Sidebar(),
+                ),
+                Expanded(
+                  child: Obx(() => MessageFeed(
+                      id: controller.selectedConversation.value.id)),
+                ),
+              ],
+            ),
 
-          //* Notifications
-          const NotificationRenderer(),
-        ],
-      )
-    );
+            //* Notifications
+            const NotificationRenderer(),
+          ],
+        ));
   }
 }

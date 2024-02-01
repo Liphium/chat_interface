@@ -37,11 +37,14 @@ class ImagePreviewWindow extends StatelessWidget {
                       delay: 100.ms,
                       duration: 400.ms,
                       hz: randomHz,
-                      offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+                      offset: Offset(
+                          random.nextBool() ? randomOffset : -randomOffset,
+                          random.nextBool() ? randomOffset : -randomOffset),
                       rotation: 0,
                       curve: Curves.decelerate,
                     ),
-                    FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
+                    FadeEffect(
+                        delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
                   ],
                   child: SizedBox(
                     height: constraints.maxHeight * 0.6,

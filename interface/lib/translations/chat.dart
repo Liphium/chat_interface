@@ -33,29 +33,37 @@ class ChatPageTranslations extends Translations {
           'friends.requests_sent': 'Requests sent',
           'friends.requests': 'Requests',
           'request.sent': 'Request successfully sent!',
-          'friends.empty': 'Seems like you don\'t have any friends with that name.',
-          'friends.send_request': 'Now just press \'Enter\' whenever you\'re done typing. And we\'ll find your friend for you.',
-          'friends.example': 'If you want to add someone, please provide their username#tag. Example: Julian#1234',
+          'friends.empty':
+              'Seems like you don\'t have any friends with that name.',
+          'friends.send_request':
+              'Now just press \'Enter\' whenever you\'re done typing. And we\'ll find your friend for you.',
+          'friends.example':
+              'If you want to add someone, please provide their username#tag. Example: Julian#1234',
           'request.confirm.title': 'Confirm request',
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
           'request.already.exists': 'Already exists',
-          'request.already.exists.text': 'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
+          'request.already.exists.text':
+              'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
 
           // Conversations
           'conversations.placeholder': 'Search',
-          'conversations.hidden': "Searching for something else? You can use '.' at the beginning of your query to search for hidden conversations.",
+          'conversations.hidden':
+              "Searching for something else? You can use '.' at the beginning of your query to search for hidden conversations.",
           'conversations.create': 'Create conversation',
           'conversations.name': 'Conversation name',
           'chat.message': 'Say something',
           'chat.members': '@count members',
           'chat.start_space': 'Start a private Space',
           'conversations.leave': 'Leave conversation',
-          'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
-          'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
+          'conversations.leave.text':
+              'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
+          'chat.not.signed':
+              'This message could have been sent by someone else or modified by the server.',
           'conversations.add': 'Add a member',
           'conversations.add.create': 'Create new conversation',
-          'choose.members': 'Choose more than one member to create a group chat.',
+          'choose.members':
+              'Choose more than one member to create a group chat.',
 
           // Conversation members
           'chat.make_moderator': 'Make moderator',
@@ -69,21 +77,26 @@ class ChatPageTranslations extends Translations {
           'chat.user': 'User',
 
           // System messages
-          'chat.rank_change.0->1': '@name was promoted to Moderator by @sender.',
+          'chat.rank_change.0->1':
+              '@name was promoted to Moderator by @sender.',
           'chat.rank_change.1->2': '@name was promoted to Admin by @sender.',
-          'chat.rank_change.1->0': '@name has been demoted to a normal member by @sender.',
-          'chat.rank_change.2->1': '@name has been demoted to Moderator by @sender.',
+          'chat.rank_change.1->0':
+              '@name has been demoted to a normal member by @sender.',
+          'chat.rank_change.2->1':
+              '@name has been demoted to Moderator by @sender.',
           'chat.token_change': '@name has generated a new conversation invite.',
           'chat.member_join': '@name has joined the conversation.',
           'chat.member_leave': '@name has left the conversation.',
-          'chat.new_admin': '@name is now an Admin because the original Admin left the conversation.',
+          'chat.new_admin':
+              '@name is now an Admin because the original Admin left the conversation.',
 
           // Message menu
           'message.info': 'Info',
           'message.copy': 'Copy content',
           'message.profile': 'Open profile',
           'message.delete': 'Delete message',
-          'message.info.text': 'This message was sent by @account (@token) at @hour:@minute on @month/@day/@year.',
+          'message.info.text':
+              'This message was sent by @account (@token) at @hour:@minute on @month/@day/@year.',
           'message.info.copy_id': 'Copy ID',
           'message.info.copy_signature': 'Copy signature',
           'message.info.copy_sender': 'Copy sender ID',
@@ -98,13 +111,15 @@ class ChatPageTranslations extends Translations {
           'conversation.info.copy_token': 'Copy token',
 
           // Files
-          'file.dialog': '@name is @size MB large. Choose an option to download it:',
+          'file.dialog':
+              '@name is @size MB large. Choose an option to download it:',
           'download.folder': 'Download into folder',
           'download.app': 'Download into app',
 
           // Spaces
           'join.space': 'Join Space',
-          'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
+          'join.space.popup':
+              'Some people click this on accident, so do you really want to join this space?',
         },
 
         //* German

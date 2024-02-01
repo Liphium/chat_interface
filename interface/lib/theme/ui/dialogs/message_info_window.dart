@@ -21,7 +21,9 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final conversationToken = Get.find<ConversationController>().conversations[widget.message.conversation]!.members[widget.message.sender]!;
+    final conversationToken = Get.find<ConversationController>()
+        .conversations[widget.message.conversation]!
+        .members[widget.message.sender]!;
 
     return DialogBase(
       child: Column(
@@ -77,7 +79,8 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
             icon: Icons.copy,
             label: "message.info.copy_cert".tr,
             onTap: () {
-              Clipboard.setData(ClipboardData(text: widget.message.certificate));
+              Clipboard.setData(
+                  ClipboardData(text: widget.message.certificate));
               Get.back();
             },
             loading: false.obs,

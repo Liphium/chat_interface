@@ -9,7 +9,14 @@ class GeneratedColors {
   final Color background2;
   final Color background3;
 
-  const GeneratedColors(this.primary, this.primaryContainer, this.secondary, this.secondaryContainer, this.background1, this.background2, this.background3);
+  const GeneratedColors(
+      this.primary,
+      this.primaryContainer,
+      this.secondary,
+      this.secondaryContainer,
+      this.background1,
+      this.background2,
+      this.background3);
 }
 
 class ColorFactory {
@@ -20,37 +27,70 @@ class ColorFactory {
 
   final double primHue, secHue, sat, lum, lumJumps;
   final int themeMode, backgroundMode;
-  const ColorFactory(this.primHue, this.secHue, this.sat, this.lum, this.themeMode, this.lumJumps, this.backgroundMode);
+  const ColorFactory(this.primHue, this.secHue, this.sat, this.lum,
+      this.themeMode, this.lumJumps, this.backgroundMode);
 
-  Color getPrimary() => HSLColor.fromAHSL(1.0, primHue, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
-  Color getPrimaryContainer() => HSLColor.fromAHSL(1.0, primHue, sat, themeMode == -1 ? _containerBlack : _containerWhite).toColor();
+  Color getPrimary() => HSLColor.fromAHSL(
+          1.0, primHue, sat, themeMode == -1 ? _iconBlack : _iconWhite)
+      .toColor();
+  Color getPrimaryContainer() => HSLColor.fromAHSL(1.0, primHue, sat,
+          themeMode == -1 ? _containerBlack : _containerWhite)
+      .toColor();
 
-  Color getSecondary() => HSLColor.fromAHSL(1.0, secHue, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
-  Color getSecondaryContainer() => HSLColor.fromAHSL(1.0, secHue, sat, themeMode == -1 ? _containerBlack : _containerWhite).toColor();
+  Color getSecondary() => HSLColor.fromAHSL(
+          1.0, secHue, sat, themeMode == -1 ? _iconBlack : _iconWhite)
+      .toColor();
+  Color getSecondaryContainer() => HSLColor.fromAHSL(
+          1.0, secHue, sat, themeMode == -1 ? _containerBlack : _containerWhite)
+      .toColor();
 
-  Color getBackground1() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, lum).toColor();
-  Color getBackground2() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, clampDouble(lum + (lumJumps * themeMode), 0.0, 1.0)).toColor();
-  Color getBackground3() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, clampDouble(lum + (lumJumps * 2 * themeMode), 0.0, 1.0)).toColor();
+  Color getBackground1() =>
+      HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, lum)
+          .toColor();
+  Color getBackground2() => HSLColor.fromAHSL(
+          1.0,
+          primHue,
+          backgroundMode == 1 ? sat : 0,
+          clampDouble(lum + (lumJumps * themeMode), 0.0, 1.0))
+      .toColor();
+  Color getBackground3() => HSLColor.fromAHSL(
+          1.0,
+          primHue,
+          backgroundMode == 1 ? sat : 0,
+          clampDouble(lum + (lumJumps * 2 * themeMode), 0.0, 1.0))
+      .toColor();
 
-  Color completeBackground() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, 0.0).toColor();
+  Color completeBackground() =>
+      HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, 0.0)
+          .toColor();
 
-  Color customHue(double hue) => HSLColor.fromAHSL(1.0, hue * 360.0, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
-  Color customHueContainer(double hue) => HSLColor.fromAHSL(1.0, hue * 360.0, sat, themeMode == -1 ? _containerBlack : _containerWhite).toColor();
+  Color customHue(double hue) => HSLColor.fromAHSL(
+          1.0, hue * 360.0, sat, themeMode == -1 ? _iconBlack : _iconWhite)
+      .toColor();
+  Color customHueContainer(double hue) => HSLColor.fromAHSL(1.0, hue * 360.0,
+          sat, themeMode == -1 ? _containerBlack : _containerWhite)
+      .toColor();
 
   Color getFontColor() {
     final hsl = HSLColor.fromColor(getBackground1());
-    return hsl.lightness > 0.5 ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+    return hsl.lightness > 0.5
+        ? const Color(0xFF000000)
+        : const Color(0xFFFFFFFF);
   }
 
   Color getFontColorInverse() {
     final hsl = HSLColor.fromColor(getBackground1());
     sendLog("${hsl.lightness} IMPORTANT");
-    return hsl.lightness > 0.5 ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+    return hsl.lightness > 0.5
+        ? const Color(0xFFFFFFFF)
+        : const Color(0xFF000000);
   }
 
   Color getUnimportantFontColor() {
     final hsl = HSLColor.fromColor(getBackground1());
-    return hsl.lightness > 0.5 ? const Color(0xFF454545) : const Color(0xFFbababa);
+    return hsl.lightness > 0.5
+        ? const Color(0xFF454545)
+        : const Color(0xFFbababa);
   }
 }
 
@@ -73,15 +113,28 @@ ColorFactory buildColorFactoryFromSettings() {
 
   if (index == ThemeSettings.customThemeIndex) {
     primHue = controller.settings[ThemeSettings.primaryHue]!.getValue() * 360.0;
-    secHue = controller.settings[ThemeSettings.secondaryHue]!.getValue() * 360.0;
-    sat = controller.settings[ThemeSettings.baseSaturation]!.getValue() as double;
+    secHue =
+        controller.settings[ThemeSettings.secondaryHue]!.getValue() * 360.0;
+    sat =
+        controller.settings[ThemeSettings.baseSaturation]!.getValue() as double;
 
     // Advanced color
-    themeMode = ThemeSettings.themeModes[controller.settings[ThemeSettings.themeMode]!.getValue() as int];
-    backgroundMode = controller.settings[ThemeSettings.backgroundMode]!.getValue() as int;
+    themeMode = ThemeSettings.themeModes[
+        controller.settings[ThemeSettings.themeMode]!.getValue() as int];
+    backgroundMode =
+        controller.settings[ThemeSettings.backgroundMode]!.getValue() as int;
   }
 
-  return ColorFactory(primHue, secHue, sat, themeMode == -1 ? ThemeSettings.baseLuminosityDark : ThemeSettings.baseLuminosityLight, themeMode, ThemeSettings.luminosityJumps, backgroundMode);
+  return ColorFactory(
+      primHue,
+      secHue,
+      sat,
+      themeMode == -1
+          ? ThemeSettings.baseLuminosityDark
+          : ThemeSettings.baseLuminosityLight,
+      themeMode,
+      ThemeSettings.luminosityJumps,
+      backgroundMode);
 }
 
 ThemeData getThemeData() {

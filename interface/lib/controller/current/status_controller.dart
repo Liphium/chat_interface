@@ -99,12 +99,14 @@ class StatusController extends GetxController {
     setStatus();
   }
 
-  Future<bool> setStatus({String? message, int? type, Function()? success}) async {
+  Future<bool> setStatus(
+      {String? message, int? type, Function()? success}) async {
     if (statusLoading.value) return false;
     statusLoading.value = true;
 
     final tokens = <Map<String, dynamic>>[];
-    for (var conversation in Get.find<ConversationController>().conversations.values) {
+    for (var conversation
+        in Get.find<ConversationController>().conversations.values) {
       if (conversation.members.length == 2) {
         tokens.add(conversation.token.toMap());
       }
@@ -112,7 +114,8 @@ class StatusController extends GetxController {
 
     connector.sendAction(
         Message("st_send", <String, dynamic>{
-          "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
+          "status": statusPacket(
+              newStatusJson(message ?? status.value, type ?? this.type.value)),
           "tokens": tokens,
           "data": sharedContentPacket(),
         }), handler: (event) {
@@ -150,7 +153,8 @@ class StatusController extends GetxController {
 }
 
 String friendId(Friend friend) {
-  return hashSha(friend.id + friend.name + friend.tag + friend.keyStorage.storedActionKey);
+  return hashSha(
+      friend.id + friend.name + friend.tag + friend.keyStorage.storedActionKey);
 }
 
 enum ShareType { space }

@@ -41,12 +41,19 @@ class DialogBase extends StatelessWidget {
     return Center(
       child: Animate(
           effects: [
-            ScaleEffect(delay: 100.ms, duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), alignment: Alignment.center, curve: const ElasticOutCurve(0.8)),
+            ScaleEffect(
+                delay: 100.ms,
+                duration: 500.ms,
+                begin: const Offset(0, 0),
+                end: const Offset(1, 1),
+                alignment: Alignment.center,
+                curve: const ElasticOutCurve(0.8)),
             ShakeEffect(
                 delay: 100.ms,
                 duration: 400.ms,
                 hz: randomHz,
-                offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+                offset: Offset(random.nextBool() ? randomOffset : -randomOffset,
+                    random.nextBool() ? randomOffset : -randomOffset),
                 rotation: 0,
                 curve: Curves.decelerate),
             FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
@@ -56,7 +63,10 @@ class DialogBase extends StatelessWidget {
             elevation: 2.0,
             color: Get.theme.colorScheme.onBackground,
             borderRadius: BorderRadius.circular(dialogBorderRadius),
-            child: Container(width: maxWidth, padding: const EdgeInsets.all(dialogPadding), child: child),
+            child: Container(
+                width: maxWidth,
+                padding: const EdgeInsets.all(dialogPadding),
+                child: child),
           )),
     );
   }
@@ -91,11 +101,15 @@ class SlidingWindowBase extends StatelessWidget {
           bottom: position.fromTop ? null : position.start.dy,
           child: Animate(
             effects: [
-              MoveEffect(duration: 400.ms, begin: Offset(0, -100 * (position.fromTop ? 1 : -1)), curve: scaleAnimationCurve),
+              MoveEffect(
+                  duration: 400.ms,
+                  begin: Offset(0, -100 * (position.fromTop ? 1 : -1)),
+                  curve: scaleAnimationCurve),
               ShakeEffect(
                 duration: 350.ms,
                 hz: randomHz,
-                offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+                offset: Offset(random.nextBool() ? randomOffset : -randomOffset,
+                    random.nextBool() ? randomOffset : -randomOffset),
                 rotation: 0,
                 curve: Curves.decelerate,
               ),
@@ -108,7 +122,8 @@ class SlidingWindowBase extends StatelessWidget {
                 color: Get.theme.colorScheme.onBackground,
                 borderRadius: BorderRadius.circular(dialogBorderRadius),
                 child: Padding(
-                  padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
+                  padding: EdgeInsets.all(
+                      lessPadding ? defaultSpacing : dialogPadding),
                   child: child,
                 ),
               ),
@@ -129,7 +144,8 @@ class ContextMenuData {
 
   // Compute the position of the context menu based on a widget it should be next to
   factory ContextMenuData.fromKey(GlobalKey key) {
-    final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        key.currentContext!.findRenderObject() as RenderBox;
     var position = renderBox.localToGlobal(Offset.zero);
     final widgetDimensions = renderBox.size;
     final screenDimensions = Get.mediaQuery.size;
@@ -138,7 +154,8 @@ class ContextMenuData {
     final bool fromTop;
     if (position.dy > screenDimensions.height / 2) {
       fromTop = false;
-      position = Offset(position.dx, screenDimensions.height - position.dy - widgetDimensions.height);
+      position = Offset(position.dx,
+          screenDimensions.height - position.dy - widgetDimensions.height);
     } else {
       fromTop = true;
     }
@@ -147,10 +164,12 @@ class ContextMenuData {
     final bool fromLeft;
     if (position.dx > screenDimensions.width - 350) {
       fromLeft = false;
-      position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
+      position = Offset(
+          screenDimensions.width - position.dx + defaultSpacing, position.dy);
     } else {
       fromLeft = true;
-      position = Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
+      position = Offset(
+          position.dx + widgetDimensions.width + defaultSpacing, position.dy);
     }
     sendLog(fromLeft);
 
@@ -174,7 +193,8 @@ class ContextMenuData {
     final bool fromLeft;
     if (position.dx > screenDimensions.width - 350) {
       fromLeft = false;
-      position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
+      position = Offset(
+          screenDimensions.width - position.dx + defaultSpacing, position.dy);
     } else {
       fromLeft = true;
       position = Offset(position.dx + defaultSpacing, position.dy);

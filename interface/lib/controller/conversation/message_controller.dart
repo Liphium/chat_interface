@@ -7,7 +7,8 @@ import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
-import 'package:chat_interface/database/conversation/conversation.dart' as model;
+import 'package:chat_interface/database/conversation/conversation.dart'
+    as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -21,14 +22,29 @@ class MessageController extends GetxController {
   static String systemSender = "6969";
 
   final loaded = false.obs;
-  final selectedConversation = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
+  final selectedConversation = Conversation(
+          "0",
+          "",
+          model.ConversationType.directMessage,
+          ConversationToken("", ""),
+          ConversationContainer("hi"),
+          randomSymmetricKey(),
+          0)
+      .obs;
   final messages = <Message>[].obs;
 
   void unselectConversation({String? id}) {
     if (id != null && selectedConversation.value.id != id) {
       return;
     }
-    selectedConversation.value = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
+    selectedConversation.value = Conversation(
+        "0",
+        "",
+        model.ConversationType.directMessage,
+        ConversationToken("", ""),
+        ConversationContainer("hi"),
+        randomSymmetricKey(),
+        0);
     messages.clear();
   }
 
@@ -69,7 +85,8 @@ class MessageController extends GetxController {
   // Delete a message from the client with an id
   void deleteMessageFromClient(String id) async {
     // Get the message from the database on the client
-    final data = await (db.message.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    final data = await (db.message.select()..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
     if (data == null) {
       return;
     }
@@ -88,32 +105,43 @@ class MessageController extends GetxController {
     if (message.attachments.isNotEmpty && message.type != MessageType.system) {
       for (var attachment in message.attachments) {
         final json = jsonDecode(attachment);
-        final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
+        final type = await AttachmentController.checkLocations(
+            json["id"], StorageType.temporary);
         final container = AttachmentContainer.fromJson(type, json);
         final extension = container.url.split(".").last;
 
         if (FileSettings.imageTypes.contains(extension)) {
-          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
+          final download = Get.find<SettingController>()
+              .settings[FileSettings.autoDownloadImages]!
+              .getValue();
           if (download) {
-            await Get.find<AttachmentController>().downloadAttachment(container);
+            await Get.find<AttachmentController>()
+                .downloadAttachment(container);
           }
         } else if (FileSettings.videoTypes.contains(extension)) {
-          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
+          final download = Get.find<SettingController>()
+              .settings[FileSettings.autoDownloadVideos]!
+              .getValue();
           if (download) {
-            await Get.find<AttachmentController>().downloadAttachment(container);
+            await Get.find<AttachmentController>()
+                .downloadAttachment(container);
           }
         } else if (FileSettings.audioTypes.contains(extension)) {
-          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
+          final download = Get.find<SettingController>()
+              .settings[FileSettings.autoDownloadAudio]!
+              .getValue();
           if (download) {
-            await Get.find<AttachmentController>().downloadAttachment(container);
+            await Get.find<AttachmentController>()
+                .downloadAttachment(container);
           }
         }
       }
     }
 
     // Update message reading
-    Get.find<ConversationController>()
-        .updateMessageRead(message.conversation, increment: selectedConversation.value.id != message.conversation, messageSendTime: message.createdAt.millisecondsSinceEpoch);
+    Get.find<ConversationController>().updateMessageRead(message.conversation,
+        increment: selectedConversation.value.id != message.conversation,
+        messageSendTime: message.createdAt.millisecondsSinceEpoch);
 
     // Add message to message history if it's the selected one
     if (selectedConversation.value.id == message.conversation) {
@@ -192,9 +220,11 @@ class Message {
     if (attachments.isNotEmpty) {
       for (var attachment in attachments) {
         final json = jsonDecode(attachment);
-        final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
+        final type = await AttachmentController.checkLocations(
+            json["id"], StorageType.temporary);
         final decoded = AttachmentContainer.fromJson(type, json);
-        final container = await Get.find<AttachmentController>().findLocalFile(decoded);
+        final container =
+            await Get.find<AttachmentController>().findLocalFile(decoded);
         sendLog("FOUND: ${container?.filePath}");
         if (container == null) {
           attachmentsRenderer.add(decoded);
@@ -205,17 +235,39 @@ class Message {
     }
   }
 
-  Message(this.id, this.type, this.content, this.attachments, this.signature, this.certificate, this.sender, this.createdAt, this.conversation, this.edited, bool verified) {
+  Message(
+      this.id,
+      this.type,
+      this.content,
+      this.attachments,
+      this.signature,
+      this.certificate,
+      this.sender,
+      this.createdAt,
+      this.conversation,
+      this.edited,
+      bool verified) {
     this.verified.value = verified;
   }
 
   factory Message.fromJson(Map<String, dynamic> json) {
     // Convert to message
     var message = Message(
-        json["id"], MessageType.text, json["data"], [""], "", json["certificate"], json["sender"], DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"], json["edited"], false);
+        json["id"],
+        MessageType.text,
+        json["data"],
+        [""],
+        "",
+        json["certificate"],
+        json["sender"],
+        DateTime.fromMillisecondsSinceEpoch(json["creation"]),
+        json["conversation"],
+        json["edited"],
+        false);
 
     // Decrypt content
-    final conversation = Get.find<ConversationController>().conversations[json["conversation"]]!;
+    final conversation =
+        Get.find<ConversationController>().conversations[json["conversation"]]!;
     if (message.sender == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;
@@ -251,9 +303,11 @@ class Message {
 
   /// Verifies the signature of the message
   void verifySignature() async {
-    final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
+    final conversation =
+        Get.find<ConversationController>().conversations[this.conversation]!;
     sendLog("${conversation.members} | ${this.sender}");
-    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
+    final sender = await Get.find<UnknownController>()
+        .loadUnknownProfile(conversation.members[this.sender]!.account);
     if (sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;
@@ -261,9 +315,13 @@ class Message {
     }
     String hash;
     if (type != MessageType.text) {
-      hash = hashSha(content + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+      hash = hashSha(content +
+          createdAt.millisecondsSinceEpoch.toStringAsFixed(0) +
+          conversation.id);
     } else {
-      hash = hashSha(base64Encode(utf8.encode(content)) + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+      hash = hashSha(base64Encode(utf8.encode(content)) +
+          createdAt.millisecondsSinceEpoch.toStringAsFixed(0) +
+          conversation.id);
     }
     sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
     verified.value = checkSignature(signature, sender.signatureKey, hash);
@@ -282,7 +340,8 @@ class Message {
         attachments = List<String>.from(jsonDecode(messageData.attachments)),
         certificate = messageData.certificate,
         sender = messageData.sender!,
-        createdAt = DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
+        createdAt =
+            DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
         conversation = messageData.conversationId!,
         signature = messageData.signature,
         edited = messageData.edited {
@@ -309,10 +368,12 @@ class Message {
 
   /// Decrypts the account ids of a system message
   void decryptSystemMessageAttachments() {
-    final conv = Get.find<ConversationController>().conversations[conversation]!;
+    final conv =
+        Get.find<ConversationController>().conversations[conversation]!;
     for (var i = 0; i < attachments.length; i++) {
       if (attachments[i].startsWith("a:")) {
-        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), conv.key))["id"];
+        attachments[i] = jsonDecode(
+            decryptSymmetric(attachments[i].substring(2), conv.key))["id"];
       }
     }
     if (SystemMessages.messages[content]?.store == true) {
@@ -325,7 +386,8 @@ class Message {
   /// Returns null if successful, otherwise an error message
   Future<String?> delete() async {
     // Check if the message is sent by the user
-    final token = Get.find<ConversationController>().conversations[conversation]!.token;
+    final token =
+        Get.find<ConversationController>().conversations[conversation]!.token;
     if (sender != token.id) {
       return "no.permission";
     }

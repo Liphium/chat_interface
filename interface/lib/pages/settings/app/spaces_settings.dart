@@ -7,7 +7,8 @@ class SpacesSettings {
   static const String gameMusic = "game.music";
 
   static void addSpacesSettings(SettingController controller) {
-    controller.settings[SpacesSettings.gameMusic] = Setting<bool>(SpacesSettings.gameMusic, true);
+    controller.settings[SpacesSettings.gameMusic] =
+        Setting<bool>(SpacesSettings.gameMusic, true);
   }
 }
 

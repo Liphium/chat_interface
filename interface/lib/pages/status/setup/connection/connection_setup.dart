@@ -13,13 +13,12 @@ class ConnectionSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-
     var body = await postAuthorizedJSON("/node/connect", <String, dynamic>{
       "cluster": connectedCluster.id,
       "app": appId,
       "token": refreshToken,
     });
-    if(!body["success"]) {
+    if (!body["success"]) {
       return ErrorPage(title: body["error"]);
     }
 
@@ -28,7 +27,7 @@ class ConnectionSetup extends Setup {
 
     // Start connection
     final res = await startConnection(body["domain"], body["token"]);
-    if(!res) {
+    if (!res) {
       return const ErrorPage(title: "server.error");
     }
 

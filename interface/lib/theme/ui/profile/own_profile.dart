@@ -72,7 +72,8 @@ class _ProfileState extends State<OwnProfile> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
+                          Icon(Icons.person,
+                              size: 30.0, color: theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
                           Text(
                             controller.name.value,
@@ -81,8 +82,9 @@ class _ProfileState extends State<OwnProfile> {
                           ),
                           Text("#${controller.tag.value}",
                               textHeightBehavior: noTextHeight,
-                              style:
-                                  theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
+                              style: theme.textTheme.titleMedium!.copyWith(
+                                  fontWeight: FontWeight.normal,
+                                  color: theme.colorScheme.onPrimary)),
                         ],
                       ),
 
@@ -109,17 +111,24 @@ class _ProfileState extends State<OwnProfile> {
                           // Get details
                           Color color = getStatusColor(theme, index);
                           IconData icon = getStatusIcon(index);
-                          final bool selected = statusController.type.value == index;
+                          final bool selected =
+                              statusController.type.value == index;
 
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: elementSpacing),
+                            padding:
+                                const EdgeInsets.only(bottom: elementSpacing),
                             child: Material(
-                              color: selected ? theme.colorScheme.primary : theme.colorScheme.background,
-                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              color: selected
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.background,
+                              borderRadius:
+                                  BorderRadius.circular(defaultSpacing),
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(defaultSpacing),
+                                borderRadius:
+                                    BorderRadius.circular(defaultSpacing),
                                 onTap: () {
-                                  controller.setStatus(type: index, success: () => Get.back());
+                                  controller.setStatus(
+                                      type: index, success: () => Get.back());
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(defaultSpacing),
@@ -130,7 +139,12 @@ class _ProfileState extends State<OwnProfile> {
                                       horizontalSpacing(defaultSpacing),
                                       Text("status.${index.toString()}".tr,
                                           style: theme.textTheme.bodyMedium!
-                                              .copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface),
+                                              .copyWith(
+                                                  color: selected
+                                                      ? theme
+                                                          .colorScheme.onSurface
+                                                      : theme
+                                                          .colorScheme.surface),
                                           textHeightBehavior: noTextHeight),
                                     ],
                                   ),
@@ -159,7 +173,9 @@ class _ProfileState extends State<OwnProfile> {
                             () => Visibility(
                               visible: edit.value,
                               replacement: Text(
-                                controller.status.value == "-" ? 'status.message.add'.tr : controller.status.value,
+                                controller.status.value == "-"
+                                    ? 'status.message.add'.tr
+                                    : controller.status.value,
                                 style: theme.textTheme.bodyMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -167,13 +183,15 @@ class _ProfileState extends State<OwnProfile> {
                               ),
                               child: TextField(
                                 focusNode: _statusFocus,
-                                onChanged: (value) => statusMessage.value = value,
+                                onChanged: (value) =>
+                                    statusMessage.value = value,
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintStyle: theme.textTheme.bodyMedium!,
                                   hintText: 'status.message'.tr,
                                 ),
-                                style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
+                                style: theme.textTheme.bodyMedium!.copyWith(
+                                    color: theme.colorScheme.onSurface),
 
                                 //* Save status
                                 onEditingComplete: () {
@@ -230,13 +248,19 @@ class _ProfileState extends State<OwnProfile> {
                   ProfileButton(
                       icon: Icons.settings,
                       label: 'profile.settings'.tr,
-                      onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
+                      onTap: () => Get.off(const SettingsPage(),
+                          duration: 300.ms,
+                          transition: Transition.fade,
+                          curve: Curves.easeInOut),
                       loading: false.obs),
                   verticalSpacing(elementSpacing),
 
                   //* Friends page
                   ProfileButton(
-                      icon: Icons.group, label: 'profile.friends'.tr, onTap: () => Get.dialog(const FriendsPage()), loading: false.obs),
+                      icon: Icons.group,
+                      label: 'profile.friends'.tr,
+                      onTap: () => Get.dialog(const FriendsPage()),
+                      loading: false.obs),
                   verticalSpacing(elementSpacing),
 
                   //* Files page
@@ -256,7 +280,8 @@ class _ProfileState extends State<OwnProfile> {
                       onTap: () async {
                         testLoading.value = true;
 
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => DriftDbViewer(db)));
 
                         testLoading.value = false;
                       },

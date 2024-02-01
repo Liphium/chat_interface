@@ -9,19 +9,21 @@ late String storedActionKey;
 
 class StoredActionsSetup extends Setup {
   StoredActionsSetup() : super('loading.stored_actions', false);
-  
+
   @override
   Future<Widget?> load() async {
-
     // Get account from database
-    final body = await postAuthorizedJSON("/account/stored_actions/list", <String, dynamic>{});
-    if(!body["success"]) {
-      return ErrorPage(title: "server.error".tr,);
+    final body = await postAuthorizedJSON(
+        "/account/stored_actions/list", <String, dynamic>{});
+    if (!body["success"]) {
+      return ErrorPage(
+        title: "server.error".tr,
+      );
     }
 
     storedActionKey = body["key"];
     final actions = body["actions"] as List<dynamic>;
-    if(actions.isEmpty) {
+    if (actions.isEmpty) {
       return null;
     }
 

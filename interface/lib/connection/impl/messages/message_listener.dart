@@ -4,9 +4,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
 void setupMessageListener() {
-
   connector.listen("conv_msg", (event) {
-
     // Decrypt message
     final controller = Get.find<MessageController>();
     final message = Message.fromJson(event.data["msg"]);
@@ -14,5 +12,4 @@ void setupMessageListener() {
 
     controller.storeMessage(message);
   });
-
 }

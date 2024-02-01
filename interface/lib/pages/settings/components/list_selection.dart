@@ -15,7 +15,11 @@ class ListSelectionSetting extends StatefulWidget {
   final List<SelectableItem> items;
   final Function(SelectableItem)? callback;
 
-  const ListSelectionSetting({super.key, required this.settingName, required this.items, this.callback});
+  const ListSelectionSetting(
+      {super.key,
+      required this.settingName,
+      required this.items,
+      this.callback});
 
   @override
   State<ListSelectionSetting> createState() => _ListSelectionSettingState();
@@ -41,7 +45,11 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
         return Padding(
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
           child: Obx(() => Material(
-                color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+                color: controller.settings[widget.settingName]!
+                            .getWhenValue(0, 0) ==
+                        index
+                    ? Get.theme.colorScheme.primary
+                    : Get.theme.colorScheme.onBackground,
                 borderRadius: radius,
                 child: InkWell(
                   borderRadius: radius,
@@ -55,9 +63,12 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
                     padding: const EdgeInsets.all(defaultSpacing),
                     child: Row(
                       children: [
-                        Icon(widget.items[index].icon, color: Get.theme.colorScheme.onPrimary),
+                        Icon(widget.items[index].icon,
+                            color: Get.theme.colorScheme.onPrimary),
                         horizontalSpacing(defaultSpacing),
-                        Text(widget.items[index].label.tr, style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.onSurface)),
+                        Text(widget.items[index].label.tr,
+                            style: Get.theme.textTheme.bodyMedium!.copyWith(
+                                color: Get.theme.colorScheme.onSurface)),
                       ],
                     ),
                   ),

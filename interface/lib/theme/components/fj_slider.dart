@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FJSlider extends StatelessWidget {
-
   final double value;
   final double min, max;
 
   final Function(double)? onChanged;
   final Function(double)? onChangeEnd;
 
-  const FJSlider({super.key, required this.value, required this.onChanged, this.min = 0.0, this.max = 1.0, this.onChangeEnd});
+  const FJSlider(
+      {super.key,
+      required this.value,
+      required this.onChanged,
+      this.min = 0.0,
+      this.max = 1.0,
+      this.onChangeEnd});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +32,7 @@ class FJSlider extends StatelessWidget {
         min: min,
         max: max,
         onChanged: onChanged,
-        onChangeEnd: onChangeEnd, 
+        onChangeEnd: onChangeEnd,
       ),
     );
   }

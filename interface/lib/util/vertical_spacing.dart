@@ -1,4 +1,3 @@
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -11,11 +10,11 @@ const noTextHeight = TextHeightBehavior(
 );
 
 Widget verticalSpacing(double height) {
-    return SizedBox(height: height);
+  return SizedBox(height: height);
 }
 
 Widget horizontalSpacing(double width) {
-    return SizedBox(width: width);
+  return SizedBox(width: width);
 }
 
 const defaultSpacing = 8.0;
@@ -31,45 +30,64 @@ const scaleAnimationCurve = ElasticOutCurve(1.1);
 String formatDay(DateTime time) {
   final now = DateTime.now();
 
-  if(time.day == now.day) {
+  if (time.day == now.day) {
     return "time.today".tr;
-  } else if(time.day == now.day - 1) {
+  } else if (time.day == now.day - 1) {
     return "time.yesterday".tr;
   } else {
-    return "time".trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+    return "time".trParams({
+      "day": time.day.toString().padLeft(2, "0"),
+      "month": time.month.toString().padLeft(2, "0"),
+      "year": time.year.toString()
+    });
   }
 }
 
 String formatMessageTime(DateTime time) {
-    return "message.time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0")});
+  return "message.time".trParams({
+    "hour": time.hour.toString().padLeft(2, "0"),
+    "minute": time.minute.toString().padLeft(2, "0")
+  });
 }
 
 class ExpandEffect extends CustomEffect {
-
-  ExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, super.delay}) : super(builder: (context, value, child) {
-    return ClipRect(
-      child: Align(
-        alignment: alignment ?? Alignment.topCenter,
-        heightFactor: axis == Axis.vertical ? max(value, 0.0) : null,
-        widthFactor: axis == Axis.horizontal ? max(value, 0.0) : null,
-        child: child,
-      ),
-    );
-  });
-
+  ExpandEffect(
+      {super.curve,
+      super.duration,
+      Axis? axis,
+      Alignment? alignment,
+      super.delay})
+      : super(builder: (context, value, child) {
+          return ClipRect(
+            child: Align(
+              alignment: alignment ?? Alignment.topCenter,
+              heightFactor: axis == Axis.vertical ? max(value, 0.0) : null,
+              widthFactor: axis == Axis.horizontal ? max(value, 0.0) : null,
+              child: child,
+            ),
+          );
+        });
 }
 
 class ReverseExpandEffect extends CustomEffect {
-
-  ReverseExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, super.delay}) : super(builder: (context, value, child) {
-    return ClipRect(
-      child: Align(
-        alignment: alignment ?? Alignment.topCenter,
-        heightFactor: axis == Axis.vertical ? max(1-value, 0.0) : null,
-        widthFactor: axis == Axis.horizontal ? max(1-value, 0.0) : null,
-        child: child,
-      ),
-    );
-  });
-
+  ReverseExpandEffect(
+      {super.curve,
+      super.duration,
+      Axis? axis,
+      Alignment? alignment,
+      super.delay})
+      : super(
+          builder: (context, value, child) {
+            return ClipRect(
+              child: Align(
+                alignment: alignment ?? Alignment.topCenter,
+                heightFactor:
+                    axis == Axis.vertical ? max(1 - value, 0.0) : null,
+                widthFactor:
+                    axis == Axis.horizontal ? max(1 - value, 0.0) : null,
+                child: child,
+              ),
+            );
+          },
+        );
 }

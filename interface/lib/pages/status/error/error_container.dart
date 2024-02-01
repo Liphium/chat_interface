@@ -22,7 +22,9 @@ class ErrorContainer extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(defaultSpacing),
-      decoration: BoxDecoration(color: theme.colorScheme.errorContainer, borderRadius: BorderRadius.circular(defaultSpacing)),
+      decoration: BoxDecoration(
+          color: theme.colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(defaultSpacing)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -30,7 +32,12 @@ class ErrorContainer extends StatelessWidget {
         children: [
           Icon(Icons.error, color: Theme.of(context).colorScheme.error),
           horizontalSpacing(defaultSpacing),
-          if (expand) Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium)) else Text(message, style: Theme.of(context).textTheme.labelMedium),
+          if (expand)
+            Expanded(
+                child: Text(message,
+                    style: Theme.of(context).textTheme.labelMedium))
+          else
+            Text(message, style: Theme.of(context).textTheme.labelMedium),
         ],
       ),
     );
@@ -109,16 +116,20 @@ class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
             padding: widget.padding,
             child: Container(
               padding: const EdgeInsets.all(defaultSpacing),
-              decoration: BoxDecoration(color: Get.theme.colorScheme.errorContainer, borderRadius: BorderRadius.circular(defaultSpacing)),
+              decoration: BoxDecoration(
+                  color: Get.theme.colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(defaultSpacing)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
+                mainAxisSize:
+                    widget.expand ? MainAxisSize.max : MainAxisSize.min,
                 children: [
                   Icon(Icons.error, color: Theme.of(context).colorScheme.error),
                   horizontalSpacing(defaultSpacing),
                   Flexible(
-                    child: Text(message.value, style: Theme.of(context).textTheme.labelMedium),
+                    child: Text(message.value,
+                        style: Theme.of(context).textTheme.labelMedium),
                   ),
                 ],
               ),
@@ -163,16 +174,20 @@ class _AnimatedInfoContainerState extends State<AnimatedInfoContainer> {
           padding: widget.padding,
           child: Container(
             padding: const EdgeInsets.all(defaultSpacing),
-            decoration: BoxDecoration(color: Get.theme.colorScheme.primary, borderRadius: BorderRadius.circular(defaultSpacing)),
+            decoration: BoxDecoration(
+                color: Get.theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(defaultSpacing)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
               children: [
-                Icon(Icons.info, color: Theme.of(context).colorScheme.onPrimary),
+                Icon(Icons.info,
+                    color: Theme.of(context).colorScheme.onPrimary),
                 horizontalSpacing(defaultSpacing),
                 Flexible(
-                  child: Text(widget.message.value, style: Theme.of(context).textTheme.labelMedium),
+                  child: Text(widget.message.value,
+                      style: Theme.of(context).textTheme.labelMedium),
                 ),
               ],
             ),
