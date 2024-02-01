@@ -1,1 +1,0 @@
-nix-shell -p alsa-lib.dev libopus pkg-config automake autoconf libtool cmake
