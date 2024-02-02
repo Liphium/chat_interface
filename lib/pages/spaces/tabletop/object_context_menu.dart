@@ -9,8 +9,7 @@ class ObjectContextMenu extends StatefulWidget {
   final TableObject object;
   final ContextMenuData data;
 
-  const ObjectContextMenu(
-      {super.key, required this.data, required this.object});
+  const ObjectContextMenu({super.key, required this.data, required this.object});
 
   @override
   State<ObjectContextMenu> createState() => _ObjectContextMenuState();
@@ -29,14 +28,16 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
             itemCount: additions.length,
             itemBuilder: (context, index) {
               final addition = additions[index];
-              return ProfileButton(
-                icon: addition.icon,
-                iconColor: addition.iconColor,
-                color: addition.color,
-                label: addition.label,
-                loading: false.obs,
-                onTap: () =>
-                    addition.onTap.call(Get.find<TabletopController>()),
+              return Padding(
+                padding: EdgeInsets.only(top: index == 0 ? 0 : elementSpacing),
+                child: ProfileButton(
+                  icon: addition.icon,
+                  iconColor: addition.iconColor,
+                  color: addition.color,
+                  label: addition.label,
+                  loading: false.obs,
+                  onTap: () => addition.onTap.call(Get.find<TabletopController>()),
+                ),
               );
             },
           ),

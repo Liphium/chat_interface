@@ -3,6 +3,7 @@ import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -76,6 +77,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     data: ContextMenuData.fromPosition(globalPos),
                     object: tableController.hoveringObjects.first,
                   ));
+                  moved = true;
                   return;
                 }
 
@@ -101,6 +103,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 }
               }
               mousePos = calculateMousePos(event.localPosition, scale, offset);
+              tableController.sendCursorPosition(mousePos);
             },
             onPointerUp: (event) {
               individualScale = 1;

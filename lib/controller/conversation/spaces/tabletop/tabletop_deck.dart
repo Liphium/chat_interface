@@ -89,6 +89,13 @@ class DeckObject extends TableObject {
   List<ContextMenuAction> getContextMenuAdditions() {
     return [
       ContextMenuAction(
+        icon: Icons.card_giftcard,
+        label: 'Draw card',
+        onTap: (controller) {
+          sendLog("Let's shuffle this thing");
+        },
+      ),
+      ContextMenuAction(
         icon: Icons.shuffle,
         label: 'Shuffle',
         onTap: (controller) {
@@ -148,11 +155,18 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
           );
         }
 
+        if (_decks.isEmpty) {
+          return ErrorContainer(
+            message: "tabletop.object.deck.choose_empty".tr,
+            expand: true,
+          );
+        }
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Choose a deck".tr, style: Get.theme.textTheme.titleMedium),
+            Text("tabletop.object.deck.choose".tr, style: Get.theme.textTheme.titleMedium),
             verticalSpacing(sectionSpacing),
             ListView.builder(
               itemCount: _decks.length,
