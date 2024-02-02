@@ -24,12 +24,18 @@ void setupTabletopListeners() {
     controller.addObject(controller.newObject(
       TableObjectType.values[event.data["type"]],
       event.data["id"],
-      Offset((event.data["x"] as num).toDouble(),
-          (event.data["y"] as num).toDouble()),
-      Size((event.data["w"] as num).toDouble(),
-          (event.data["h"] as num).toDouble()),
+      Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
+      Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble()),
       event.data["data"],
     ));
+  });
+
+  // Listen for cursor movements
+  spaceConnector.listen("tc_moved", (event) {
+    controller.updateCursor(
+      event.data["c"],
+      Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
+    );
   });
 
   // Listen for deletions
@@ -43,7 +49,6 @@ void setupTabletopListeners() {
     if (object == null || object == controller.heldObject) {
       return;
     }
-    object.move(Offset((event.data["x"] as num).toDouble(),
-        (event.data["y"] as num).toDouble()));
+    object.move(Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()));
   });
 }

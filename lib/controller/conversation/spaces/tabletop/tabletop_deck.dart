@@ -18,8 +18,7 @@ class DeckObject extends TableObject {
   /// to send all the card data to the server twice if a card is in there twice)
   final order = <String>[].obs;
 
-  DeckObject(String id, Offset location, Size size)
-      : super(id, location, size, TableObjectType.deck);
+  DeckObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.deck);
 
   factory DeckObject.createFromDeck(Offset location, TabletopDeck deck) {
     final obj = DeckObject("", location, const Size(200, 200));
@@ -62,8 +61,7 @@ class DeckObject extends TableObject {
     final json = jsonDecode(data);
     final cardMap = json["cards"] as Map<String, dynamic>;
     for (var card in cardMap.values) {
-      final type = await AttachmentController.checkLocations(
-          card["id"], StorageType.cache);
+      final type = await AttachmentController.checkLocations(card["id"], StorageType.cache);
       cards[card["id"]] = AttachmentContainer.fromJson(type, card);
     }
     order.addAll((json["order"] as List<dynamic>).cast<String>());
@@ -162,16 +160,13 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
               itemBuilder: (context, index) {
                 final deck = _decks[index];
                 return Padding(
-                  padding: index == 0
-                      ? const EdgeInsets.all(0)
-                      : const EdgeInsets.only(top: defaultSpacing),
+                  padding: index == 0 ? const EdgeInsets.all(0) : const EdgeInsets.only(top: defaultSpacing),
                   child: Material(
                     color: Get.theme.colorScheme.background,
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     child: InkWell(
                       onTap: () {
-                        final object =
-                            DeckObject.createFromDeck(widget.location, deck);
+                        final object = DeckObject.createFromDeck(widget.location, deck);
                         Get.back(result: object);
                       },
                       borderRadius: BorderRadius.circular(defaultSpacing),
@@ -183,14 +178,11 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(deck.name,
-                                    style: Get.theme.textTheme.labelLarge),
+                                Text(deck.name, style: Get.theme.textTheme.labelLarge),
                                 verticalSpacing(elementSpacing),
                                 Obx(
                                   () => Text(
-                                    "decks.cards".trParams({
-                                      "count": deck.cards.length.toString()
-                                    }),
+                                    "decks.cards".trParams({"count": deck.cards.length.toString()}),
                                     style: Get.theme.textTheme.bodyMedium,
                                   ),
                                 ),

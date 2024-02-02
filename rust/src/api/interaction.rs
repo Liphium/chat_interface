@@ -167,6 +167,8 @@ pub fn list_input_devices() -> Vec<InputDevice> {
     // Turn the pcm ids into actual microphones on linux
     #[cfg(target_os = "linux")]
     {
+        // TODO: Fix this for linux
+
         // First, grab all the actually usable devices (and their name)
         let command = Command::new("arecord")
             .arg("-l")

@@ -39,23 +39,24 @@ class TabletopPainter extends CustomPainter {
     controller.hoveringObjects = controller.raycast(mousePosition);
 
     for (var object in controller.objects.values) {
-      final location = controller.heldObject == object
-          ? object.location
-          : object.interpolatedLocation(now);
+      final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
       if (controller.hoveringObjects.contains(object)) {
         canvas.save();
         canvas.scale(individualScale);
         canvas.translate(
-          -(location.dx + object.size.width / 2) *
-              ((individualScale - 1) / individualScale),
-          -(location.dy + object.size.height / 2) *
-              ((individualScale - 1) / individualScale),
+          -(location.dx + object.size.width / 2) * ((individualScale - 1) / individualScale),
+          -(location.dy + object.size.height / 2) * ((individualScale - 1) / individualScale),
         );
       }
       object.render(canvas, location, controller);
       if (controller.hoveringObjects.contains(object)) {
         canvas.restore();
       }
+    }
+
+    // Render cursors
+    for (var cursor in controller.cursors.values) {
+      cursor.render(canvas);
     }
   }
 

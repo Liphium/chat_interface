@@ -14,13 +14,7 @@ class MessageRenderer extends StatefulWidget {
   final bool last;
   final Friend? sender;
 
-  const MessageRenderer(
-      {super.key,
-      required this.message,
-      required this.accountId,
-      this.self = false,
-      this.last = false,
-      this.sender});
+  const MessageRenderer({super.key, required this.message, required this.accountId, this.self = false, this.last = false, this.sender});
 
   @override
   State<MessageRenderer> createState() => _MessageRendererState();
@@ -45,77 +39,57 @@ class _MessageRendererState extends State<MessageRenderer> {
               horizontal: sectionSpacing,
             ),
             child: Row(
-              textDirection:
-                  widget.self ? TextDirection.rtl : TextDirection.ltr,
+              textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 //* Avatar
                 Visibility(
                   visible: !widget.last,
-                  replacement:
-                      const SizedBox(width: 34), //* Show timestamp instead
+                  replacement: const SizedBox(width: 34), //* Show timestamp instead
                   child: Tooltip(
-                      message: sender.name,
-                      child: InkWell(
-                          borderRadius: BorderRadius.circular(100),
-                          onTap: () => Get.dialog(Profile(friend: sender)),
-                          child: UserAvatar(id: sender.id, size: 34))),
+                      message: sender.name, child: InkWell(borderRadius: BorderRadius.circular(100), onTap: () => Get.dialog(Profile(friend: sender)), child: UserAvatar(id: sender.id, size: 34))),
                 ),
                 horizontalSpacing(defaultSpacing),
 
                 //* Message content
                 Row(
-                  textDirection:
-                      widget.self ? TextDirection.rtl : TextDirection.ltr,
+                  textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Column(
-                      crossAxisAlignment: widget.self
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
+                      crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                       children: [
                         //* Message content (text)
                         Visibility(
                           visible: widget.message.content.isNotEmpty,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: defaultSpacing * 0.5,
-                                horizontal: defaultSpacing),
+                            padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
                             decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(defaultSpacing),
-                              color: widget.self
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              color: widget.self ? theme.colorScheme.primary : theme.colorScheme.primaryContainer,
                             ),
-                            child: Text(widget.message.content,
-                                style: theme.textTheme.labelLarge),
+                            child: Text(widget.message.content, style: theme.textTheme.labelLarge),
                           ),
                         ),
 
                         //* Attachments
                         SelectionContainer.disabled(
-                          child: Obx(() {
-                            final renderer = widget.message.attachmentsRenderer;
-                            return Visibility(
-                              visible:
-                                  widget.message.attachmentsRenderer.isNotEmpty,
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    top: widget.message.content.isEmpty
-                                        ? 0
-                                        : elementSpacing),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: renderer
-                                      .map((e) =>
-                                          AttachmentRenderer(container: e))
-                                      .toList(),
+                          child: Obx(
+                            () {
+                              final renderer = widget.message.attachmentsRenderer;
+                              return Visibility(
+                                visible: widget.message.attachmentsRenderer.isNotEmpty,
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: renderer.map((e) => AttachmentRenderer(container: e)).toList(),
+                                  ),
                                 ),
-                              ),
-                            );
-                          }),
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -123,8 +97,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                     horizontalSpacing(defaultSpacing),
 
                     //* Timestamp
-                    Text(formatMessageTime(widget.message.createdAt),
-                        style: Get.theme.textTheme.bodySmall),
+                    Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
 
                     horizontalSpacing(defaultSpacing),
 

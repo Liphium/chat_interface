@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -17,6 +18,7 @@ class TabletopController extends GetxController {
   List<TableObject> hoveringObjects = [];
   TableObject? heldObject;
   final objects = <String, TableObject>{}.obs;
+  final cursors = <String, TabletopCursor>{}.obs; // Other users cursors
 
   /// The rate at which the table is updated (to the server)
   static const tickRate = 20;
@@ -42,8 +44,7 @@ class TabletopController extends GetxController {
         sendLog("success");
         enabled.value = true;
 
-        _ticker = Timer.periodic(const Duration(milliseconds: 1000 ~/ tickRate),
-            (timer) {
+        _ticker = Timer.periodic(const Duration(milliseconds: 1000 ~/ tickRate), (timer) {
           _handleTableTick();
         });
       },
@@ -66,6 +67,7 @@ class TabletopController extends GetxController {
   void disconnect({bool leave = true}) {
     objects.clear();
     _ticker?.cancel();
+    cursors.clear();
     if (leave) {
       loading.value = true;
       spaceConnector.sendAction(
@@ -85,9 +87,33 @@ class TabletopController extends GetxController {
     }
   }
 
+  DateTime lastSent = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// Send the mouse position to the server
+  void sendCursorPosition(Offset mousePos) {
+    // Make sure to be in line with the tickrate
+    if (DateTime.now().difference(lastSent).inMilliseconds < 1000 ~/ tickRate) {
+      return;
+    }
+
+    lastSent = DateTime.now();
+    spaceConnector.sendAction(Message("tc_move", <String, dynamic>{
+      "x": mousePos.dx,
+      "y": mousePos.dy,
+    }));
+  }
+
+  /// Update the cursor position of other people
+  void updateCursor(String id, Offset position) {
+    if (cursors[id] == null) {
+      cursors[id] = TabletopCursor(id, position);
+    } else {
+      cursors[id]!.move(position);
+    }
+  }
+
   /// Create a new object
-  TableObject newObject(TableObjectType type, String id, Offset location,
-      Size size, String data) {
+  TableObject newObject(TableObjectType type, String id, Offset location, Size size, String data) {
     TableObject object;
     switch (type) {
       case TableObjectType.deck:
@@ -118,8 +144,7 @@ class TabletopController extends GetxController {
   List<TableObject> raycast(Offset location) {
     final objects = <TableObject>[];
     for (var object in this.objects.values) {
-      final rect = Rect.fromLTWH(object.location.dx, object.location.dy,
-          object.size.width, object.size.height);
+      final rect = Rect.fromLTWH(object.location.dx, object.location.dy, object.size.width, object.size.height);
       if (rect.contains(location)) {
         objects.add(object);
       }

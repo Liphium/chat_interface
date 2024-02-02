@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
@@ -88,33 +90,50 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
 
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildMicrophoneButton(controller, api.InputDevice(id: SpeechSettings.defaultDeviceName, displayName: SpeechSettings.defaultDeviceName, sampleRate: 48000, bestQuality: false),
-            BorderRadius.circular(defaultSpacing),
-            icon: Icons.done_all, label: "audio.device.default.button".tr),
+        buildMicrophoneButton(
+          controller,
+          api.InputDevice(id: SpeechSettings.defaultDeviceName, displayName: SpeechSettings.defaultDeviceName, sampleRate: 48000, bestQuality: false),
+          BorderRadius.circular(defaultSpacing),
+          icon: Icons.done_all,
+          label: "audio.device.default.button".tr,
+        ),
         verticalSpacing(defaultSpacing),
 
-        Text("audio.microphone.device".tr, style: theme.textTheme.bodyMedium),
-        verticalSpacing(elementSpacing),
+        if (Platform.isLinux)
+          const ErrorContainer(
+            expand: true,
+            message: "The microphone selection is not available on Linux because the device list is currently broken. We're working on a better solution.",
+          )
+        else
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("audio.device.custom".tr, style: theme.textTheme.bodyMedium),
+              verticalSpacing(elementSpacing),
+              RepaintBoundary(
+                child: Obx(
+                  () => ListView.builder(
+                    itemCount: _microphones.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      final current = _microphones[index];
 
-        RepaintBoundary(
-          child: Obx(() => ListView.builder(
-                itemCount: _microphones.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  final current = _microphones[index];
+                      final first = index == 0;
+                      final last = index == _microphones.length - 1;
 
-                  final first = index == 0;
-                  final last = index == _microphones.length - 1;
+                      final radius = BorderRadius.vertical(
+                        top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                        bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+                      );
 
-                  final radius = BorderRadius.vertical(
-                    top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
-                    bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
-                  );
-
-                  return buildMicrophoneButton(controller, current, radius);
-                },
-              )),
-        ),
+                      return buildMicrophoneButton(controller, current, radius);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
 
         //* Start off muted
         const BoolSettingSmall(settingName: SpeechSettings.startMuted),
@@ -132,13 +151,15 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
               children: [
                 Text("audio.microphone.sensitivity.text".tr, style: theme.textTheme.bodyMedium),
                 SizedBox(
-                    height: 0,
-                    child: Opacity(
-                        opacity: 0,
-                        child: Text(
-                          _sensitivity.value.toString(),
-                          overflow: TextOverflow.clip,
-                        ))),
+                  height: 0,
+                  child: Opacity(
+                    opacity: 0,
+                    child: Text(
+                      _sensitivity.value.toString(),
+                      overflow: TextOverflow.clip,
+                    ),
+                  ),
+                ),
                 Slider(
                   value: clampDouble(sens.value.value, 0.0, 1.0),
                   min: 0.0,
@@ -174,28 +195,29 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
               _changeMicrophone(current.id);
             },
             child: Padding(
-                padding: const EdgeInsets.all(defaultSpacing),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          //* Icon
-                          Icon(icon ?? Icons.mic, color: Get.theme.colorScheme.onPrimary),
+              padding: const EdgeInsets.all(defaultSpacing),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        //* Icon
+                        Icon(icon ?? Icons.mic, color: Get.theme.colorScheme.onPrimary),
 
-                          horizontalSpacing(defaultSpacing * 0.5),
+                        horizontalSpacing(defaultSpacing * 0.5),
 
-                          //* Label
-                          Text(label ?? current.id, style: Get.theme.textTheme.labelMedium),
-                        ],
-                      ),
+                        //* Label
+                        Text(label ?? current.displayName, style: Get.theme.textTheme.labelMedium),
+                      ],
                     ),
-                    Visibility(
-                      visible: current.bestQuality,
-                      child: Icon(Icons.verified, color: Get.theme.colorScheme.secondary),
-                    )
-                  ],
-                )),
+                  ),
+                  Visibility(
+                    visible: current.bestQuality,
+                    child: Icon(Icons.verified, color: Get.theme.colorScheme.secondary),
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),

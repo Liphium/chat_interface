@@ -17,12 +17,7 @@ class SpaceMessageRenderer extends StatefulWidget {
   final bool last;
   final Friend? sender;
 
-  const SpaceMessageRenderer(
-      {super.key,
-      required this.message,
-      this.self = false,
-      this.last = false,
-      this.sender});
+  const SpaceMessageRenderer({super.key, required this.message, this.self = false, this.last = false, this.sender});
 
   @override
   State<SpaceMessageRenderer> createState() => _CallMessageRendererState();
@@ -35,8 +30,7 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
   Widget build(BuildContext context) {
     Friend sender = widget.sender ?? Friend.system();
     sendLog(widget.message.content);
-    final container =
-        SpaceConnectionContainer.fromJson(jsonDecode(widget.message.content));
+    final container = SpaceConnectionContainer.fromJson(jsonDecode(widget.message.content));
 
     return RepaintBoundary(
       child: Stack(
@@ -48,28 +42,49 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
               horizontal: sectionSpacing,
             ),
             child: Row(
-              textDirection:
-                  widget.self ? TextDirection.rtl : TextDirection.ltr,
+              textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 //* Avatar
                 Visibility(
                   visible: !widget.last,
-                  replacement:
-                      const SizedBox(width: 34), //* Show timestamp instead
-                  child: Tooltip(
-                      message: sender.name,
-                      child: UserAvatar(id: sender.id, size: 34)),
+                  replacement: const SizedBox(width: 34), //* Show timestamp instead
+                  child: Tooltip(message: sender.name, child: UserAvatar(id: sender.id, size: 34)),
                 ),
                 horizontalSpacing(defaultSpacing),
 
                 //* Message
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+                          horizontalSpacing(elementSpacing),
+                          Text("chat.space_invite".tr, style: Get.theme.textTheme.labelLarge),
+                        ],
+                      ),
+                    ),
+                    verticalSpacing(defaultSpacing),
+
                     //* Content
-                    SpaceRenderer(container: container),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 250,
+                      ),
+                      child: SpaceRenderer(
+                        container: container,
+                        clickable: true,
+                      ),
+                    ),
                   ],
                 ),
 
@@ -115,12 +130,9 @@ Widget renderMiniAvatars(int amount) {
                   color: Get.theme.colorScheme.background,
                 ),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: elementSpacing),
+                  padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
                   child: Center(
-                    child: Text("+${amount - realAmount + 1}",
-                        style: Get.theme.textTheme.labelSmall!
-                            .copyWith(color: Get.theme.colorScheme.onPrimary)),
+                    child: Text("+${amount - realAmount + 1}", style: Get.theme.textTheme.labelSmall!.copyWith(color: Get.theme.colorScheme.onPrimary)),
                   ),
                 ),
               )
@@ -128,12 +140,8 @@ Widget renderMiniAvatars(int amount) {
                 width: sectionSpacing * 1.5,
                 height: sectionSpacing * 1.5,
                 child: CircleAvatar(
-                  backgroundColor: index % 2 == 0
-                      ? Get.theme.colorScheme.errorContainer
-                      : Get.theme.colorScheme.tertiaryContainer,
-                  child: Icon(Icons.person,
-                      size: sectionSpacing,
-                      color: Get.theme.colorScheme.onSurface),
+                  backgroundColor: index % 2 == 0 ? Get.theme.colorScheme.errorContainer : Get.theme.colorScheme.tertiaryContainer,
+                  child: Icon(Icons.person, size: sectionSpacing, color: Get.theme.colorScheme.onSurface),
                 ),
               );
 
