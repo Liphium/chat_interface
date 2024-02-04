@@ -59,19 +59,47 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
-                          horizontalSpacing(elementSpacing),
-                          Text("chat.space_invite".tr, style: Get.theme.textTheme.labelLarge),
-                        ],
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+                              horizontalSpacing(elementSpacing),
+                              Text("chat.space_invite".tr, style: Get.theme.textTheme.labelLarge),
+                            ],
+                          ),
+                        ),
+
+                        horizontalSpacing(defaultSpacing),
+
+                        //* Timestamp
+                        Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+
+                        horizontalSpacing(defaultSpacing),
+
+                        //* Verified indicator
+                        Obx(() {
+                          final verified = widget.message.verified.value;
+                          return Visibility(
+                            visible: !verified,
+                            child: Tooltip(
+                              message: "chat.not.signed".tr,
+                              child: const Icon(
+                                Icons.warning_rounded,
+                                color: Colors.amber,
+                              ),
+                            ),
+                          );
+                        })
+                      ],
                     ),
                     verticalSpacing(defaultSpacing),
 
@@ -87,25 +115,6 @@ class _CallMessageRendererState extends State<SpaceMessageRenderer> {
                     ),
                   ],
                 ),
-
-                horizontalSpacing(defaultSpacing),
-
-                Obx(() {
-                  final verified = widget.message.verified.value;
-                  return Padding(
-                    padding: const EdgeInsets.only(top: elementSpacing),
-                    child: Visibility(
-                      visible: !verified,
-                      child: Tooltip(
-                        message: "chat.not.signed".tr,
-                        child: const Icon(
-                          Icons.warning_rounded,
-                          color: Colors.amber,
-                        ),
-                      ),
-                    ),
-                  );
-                })
               ],
             ),
           ),

@@ -7,6 +7,7 @@ import 'package:chat_interface/pages/spaces/call_grid.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/call_controls.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_info_window.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -136,17 +137,15 @@ class _CallRectangleState extends State<CallRectangle> {
                   Get.offAll(const ChatPage(), transition: Transition.fadeIn);
                 }
               },
-              icon: controller.fullScreen.value
-                  ? Icons.arrow_forward
-                  : Icons.arrow_back_rounded,
+              icon: controller.fullScreen.value ? Icons.arrow_forward : Icons.arrow_back_rounded,
               iconSize: 30,
             ),
           ),
           const CallControls(),
           LoadingIconButton(
             loading: false.obs,
-            onTap: () {},
-            icon: Icons.settings,
+            onTap: () => Get.dialog(const SpaceInfoWindow()),
+            icon: Icons.info,
             iconSize: 30,
           ),
         ],

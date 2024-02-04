@@ -26,6 +26,11 @@ class TabletopCursor {
   }
 
   void render(Canvas canvas) {
+    final now = DateTime.now();
+    if (_lastMove != null && now.difference(_lastMove!).inSeconds > 1) {
+      return;
+    }
+
     final paint = Paint()
       ..color = Colors.blue
       ..style = PaintingStyle.fill;

@@ -106,7 +106,7 @@ class ChatPageTranslations extends Translations {
           'join.space': 'Join Space',
           'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
           'chat.space_invite': 'Space invitation',
-          'chat.space.not_found': 'This space does not exist.',
+          'chat.space.not_found': 'This space does not exist anymore.',
         },
 
         //* German

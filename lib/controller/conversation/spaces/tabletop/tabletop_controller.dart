@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -15,14 +16,19 @@ class TabletopController extends GetxController {
   final loading = false.obs;
   final enabled = false.obs;
 
-  List<TableObject> hoveringObjects = [];
+  /// If true, the next click will drop the held object and add it to the table
+  bool dropMode = false;
+
   TableObject? heldObject;
+  List<TableObject> hoveringObjects = [];
   final objects = <String, TableObject>{}.obs;
   final cursors = <String, TabletopCursor>{}.obs; // Other users cursors
 
   /// The rate at which the table is updated (to the server)
   static const tickRate = 20;
   Timer? _ticker;
+  Offset? _lastMousePos;
+  Offset? mousePos;
 
   /// Join the tabletop session
   void connect() {
@@ -61,6 +67,16 @@ class TabletopController extends GetxController {
         "y": heldObject!.location.dy,
       }));
     }
+
+    // Send mouse position if available
+    if (mousePos != null && _lastMousePos != mousePos) {
+      spaceConnector.sendAction(Message("tc_move", <String, dynamic>{
+        "x": mousePos!.dx,
+        "y": mousePos!.dy,
+      }));
+    }
+
+    _lastMousePos = mousePos;
   }
 
   /// Leave the tabletop session
@@ -87,24 +103,12 @@ class TabletopController extends GetxController {
     }
   }
 
-  DateTime lastSent = DateTime.fromMillisecondsSinceEpoch(0);
-
-  /// Send the mouse position to the server
-  void sendCursorPosition(Offset mousePos) {
-    // Make sure to be in line with the tickrate
-    if (DateTime.now().difference(lastSent).inMilliseconds < 1000 ~/ tickRate) {
+  /// Update the cursor position of other people
+  void updateCursor(String id, Offset position) {
+    if (id == SpaceMemberController.ownId) {
       return;
     }
 
-    lastSent = DateTime.now();
-    spaceConnector.sendAction(Message("tc_move", <String, dynamic>{
-      "x": mousePos.dx,
-      "y": mousePos.dy,
-    }));
-  }
-
-  /// Update the cursor position of other people
-  void updateCursor(String id, Offset position) {
     if (cursors[id] == null) {
       cursors[id] = TabletopCursor(id, position);
     } else {

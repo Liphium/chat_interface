@@ -17,8 +17,8 @@ class AudioController extends GetxController {
     deafened.value = newOutput;
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
-      controller.members[controller.getClientId()]!.isDeafened.value = newOutput;
-      controller.members[controller.getClientId()]!.isSpeaking.value = newOutput ? false : controller.members[controller.getClientId()]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isDeafened.value = newOutput;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       _refreshState();
     }
   }
@@ -32,8 +32,8 @@ class AudioController extends GetxController {
     muted.value = newMuted;
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
-      controller.members[controller.getClientId()]!.isMuted.value = newMuted;
-      controller.members[controller.getClientId()]!.isSpeaking.value = newMuted ? false : controller.members[controller.getClientId()]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isMuted.value = newMuted;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       _refreshState();
     }
   }

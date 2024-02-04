@@ -13,7 +13,7 @@ class SpaceMemberController extends GetxController {
   final membersLoading = false.obs;
   final members = <String, SpaceMember>{}.obs;
   StreamSubscription<api.Action>? sub;
-  String _ownId = "";
+  static String ownId = "";
 
   // Action names
   static const String startedTalkingAction = "started_talking";
@@ -34,12 +34,12 @@ class SpaceMemberController extends GetxController {
       final clientId = args[1];
       sendLog("$decrypted:$clientId");
       if (decrypted == myId) {
-        _ownId = clientId;
+        SpaceMemberController.ownId = clientId;
       }
       membersFound.add(clientId);
       if (this.members[clientId] == null) {
-        this.members[clientId] =
-            SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)), member["muted"], member["deafened"]);
+        this.members[clientId] = SpaceMember(
+            Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)), clientId, member["muted"], member["deafened"]);
       }
     }
 
@@ -55,7 +55,7 @@ class SpaceMemberController extends GetxController {
       switch (event.action) {
         // Talking stuff
         case startedTalkingAction:
-          final target = event.data == "" ? _ownId : event.data;
+          final target = event.data == "" ? ownId : event.data;
           sendLog("talking EVENT $target");
           if (members[target] != null && (members[target]!.isMuted.value || members[target]!.isDeafened.value)) {
             return;
@@ -63,13 +63,11 @@ class SpaceMemberController extends GetxController {
           members[target]?.isSpeaking.value = true;
         case stoppedTalkingAction:
           sendLog("stopped talking ${event.data}");
-          final target = event.data == "" ? _ownId : event.data;
+          final target = event.data == "" ? ownId : event.data;
           members[target]?.isSpeaking.value = false;
       }
     });
   }
-
-  String getClientId() => _ownId;
 
   void onDisconnect() {
     membersLoading.value = true;
@@ -79,13 +77,14 @@ class SpaceMemberController extends GetxController {
 }
 
 class SpaceMember {
+  final String id;
   final Friend friend;
 
   final isSpeaking = false.obs;
   final isMuted = false.obs;
   final isDeafened = false.obs;
 
-  SpaceMember(this.friend, bool muted, bool deafened) {
+  SpaceMember(this.friend, this.id, bool muted, bool deafened) {
     isMuted.value = muted;
     isDeafened.value = deafened;
   }

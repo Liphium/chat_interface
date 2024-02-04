@@ -59,7 +59,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               if (tableController.hoveringObjects.isEmpty) {
                 individualScale = 1;
               }
-              tableController.sendCursorPosition(mousePos);
+              tableController.mousePos = mousePos;
             },
             onPointerDown: (event) {
               if (event.buttons == 2) {
@@ -100,15 +100,20 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   final old = calculateMousePos(event.localPosition, scale, offset);
                   final newPos = calculateMousePos(event.localPosition + event.delta, scale, offset);
                   tableController.heldObject!.location += newPos - old;
+                  tableController.dropMode = false;
                 }
               }
               mousePos = calculateMousePos(event.localPosition, scale, offset);
-              tableController.sendCursorPosition(mousePos);
+              tableController.mousePos = mousePos;
             },
             onPointerUp: (event) {
               individualScale = 1;
               if (tableController.hoveringObjects.isNotEmpty && !moved && event.buttons == 0) {
                 tableController.hoveringObjects.first.runAction(tableController);
+              }
+              if (tableController.heldObject != null && tableController.dropMode) {
+                sendLog("object dropped");
+                //tableController.heldObject!.sendAdd();
               }
               tableController.heldObject = null;
             },
