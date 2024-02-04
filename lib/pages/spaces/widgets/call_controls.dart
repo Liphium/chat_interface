@@ -76,7 +76,6 @@ class _CallControlsState extends State<CallControls> {
         //* Play mode (reintroduced in the future maybe :)
         Obx(
           () => CallButtonBorder(
-            gradient: true,
             child: LoadingIconButton(
               padding: defaultSpacing + elementSpacing,
               loading: false.obs,
@@ -87,7 +86,6 @@ class _CallControlsState extends State<CallControls> {
                   tableController.connect();
                 }
               },
-              color: theme.colorScheme.onPrimary,
               icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
               iconSize: 35,
             ),

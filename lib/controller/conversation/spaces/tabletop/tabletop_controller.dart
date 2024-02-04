@@ -7,6 +7,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
+import 'package:chat_interface/pages/spaces/tabletop/tabletop_inventory.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class TabletopController extends GetxController {
 
   TableObject? heldObject;
   List<TableObject> hoveringObjects = [];
+  final inventory = <InventoryObject>[].obs;
   final objects = <String, TableObject>{}.obs;
   final cursors = <String, TabletopCursor>{}.obs; // Other users cursors
 
@@ -28,7 +30,12 @@ class TabletopController extends GetxController {
   static const tickRate = 20;
   Timer? _ticker;
   Offset? _lastMousePos;
-  Offset? mousePos;
+  Offset mousePos = const Offset(0, 0);
+
+  // Movement of the canvas
+  Offset canvasOffset = const Offset(0, 0);
+  double canvasZoom = 0.5;
+  final canvasRotation = 0.0.obs;
 
   /// Join the tabletop session
   void connect() {
@@ -60,7 +67,7 @@ class TabletopController extends GetxController {
   /// Called every tick
   void _handleTableTick() {
     // Send the location of the held object
-    if (heldObject != null) {
+    if (heldObject != null && !dropMode) {
       spaceConnector.sendAction(Message("tobj_move", <String, dynamic>{
         "id": heldObject!.id,
         "x": heldObject!.location.dx,
@@ -69,10 +76,10 @@ class TabletopController extends GetxController {
     }
 
     // Send mouse position if available
-    if (mousePos != null && _lastMousePos != mousePos) {
+    if (_lastMousePos != mousePos) {
       spaceConnector.sendAction(Message("tc_move", <String, dynamic>{
-        "x": mousePos!.dx,
-        "y": mousePos!.dy,
+        "x": mousePos.dx,
+        "y": mousePos.dy,
       }));
     }
 
@@ -84,6 +91,7 @@ class TabletopController extends GetxController {
     objects.clear();
     _ticker?.cancel();
     cursors.clear();
+    inventory.clear();
     if (leave) {
       loading.value = true;
       spaceConnector.sendAction(

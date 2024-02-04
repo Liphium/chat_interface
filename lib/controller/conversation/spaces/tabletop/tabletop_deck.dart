@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
+import 'package:chat_interface/pages/spaces/tabletop/tabletop_inventory.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -21,7 +23,7 @@ class DeckObject extends TableObject {
   DeckObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.deck);
 
   factory DeckObject.createFromDeck(Offset location, TabletopDeck deck) {
-    final obj = DeckObject("", location, const Size(200, 200));
+    final obj = DeckObject("", location, const Size(500, 500));
     for (var card in deck.cards) {
       obj.cards[card.id] = card;
       for (int i = 0; i < (deck.amounts[card.id] ?? 1); i++) {
@@ -37,20 +39,20 @@ class DeckObject extends TableObject {
     canvas.drawRRect(
       RRect.fromLTRBR(
         location.dx,
-        location.dy + 20,
-        location.dx + size.width - 20,
-        location.dy + 20 + size.height - 20,
-        const Radius.circular(defaultSpacing),
+        location.dy + 50,
+        location.dx + size.width - 50,
+        location.dy + 50 + size.height - 50,
+        const Radius.circular(25),
       ),
       Paint()..color = Get.theme.colorScheme.tertiary,
     );
     canvas.drawRRect(
       RRect.fromLTRBR(
-        location.dx + 20,
+        location.dx + 50,
         location.dy,
-        location.dx + 20 + size.width - 20,
-        location.dy + size.height - 20,
-        const Radius.circular(defaultSpacing),
+        location.dx + 50 + size.width - 50,
+        location.dy + size.height - 50,
+        const Radius.circular(25),
       ),
       Paint()..color = Get.theme.colorScheme.onPrimary,
     );
@@ -82,17 +84,39 @@ class DeckObject extends TableObject {
 
   @override
   void runAction(TabletopController controller) {
-    sendLog("this is an action");
+    drawCard(controller);
+  }
+
+  /// Draw a card from the deck
+  void drawCard(TabletopController controller) async {
+    if (order.isEmpty) {
+      return;
+    }
+    final cardId = order[0];
+    final container = cards[cardId]!;
+
+    // Remove the card details if it isn't in the deck anymore
+    // if (!order.contains(cardId)) {
+    //   cards.remove(cardId);
+    // }
+
+    // Prepare the card and add it to the drop mode
+    final card = await CardObject.downloadCard(container, controller.mousePos);
+    if (card == null) return;
+    controller.dropMode = true;
+    controller.heldObject = card;
   }
 
   @override
   List<ContextMenuAction> getContextMenuAdditions() {
     return [
       ContextMenuAction(
-        icon: Icons.card_giftcard,
-        label: 'Draw card',
-        onTap: (controller) {
-          sendLog("Let's shuffle this thing");
+        icon: Icons.login,
+        label: 'Draw into inventory',
+        onTap: (controller) async {
+          final cardId = order[0];
+          final container = cards[cardId]!;
+          controller.inventory.add(InventoryObject((await CardObject.downloadCard(container, controller.mousePos))!));
         },
       ),
       ContextMenuAction(

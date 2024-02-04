@@ -11,6 +11,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class CardObject extends TableObject {
+  late AttachmentContainer container;
   bool error = false;
 
   CardObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.card);
@@ -27,11 +28,29 @@ class CardObject extends TableObject {
     final descriptor = await ui.ImageDescriptor.encoded(buffer);
     final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
 
-    return CardObject(
+    // Make size fit with canvas standards (700x700 in this case)
+    final normalized = normalizeSize(size, 900);
+    final obj = CardObject(
       id,
       location,
-      size,
+      normalized,
     );
+    obj.container = container;
+
+    return obj;
+  }
+
+  /// Function to make sure images don't get too big
+  static Size normalizeSize(Size size, double targetSize) {
+    if (size.width > size.height) {
+      final decreasingFactor = targetSize / size.width;
+      size = Size((size.width * decreasingFactor).roundToDouble(), (size.height * decreasingFactor).roundToDouble());
+    } else {
+      final decreasingFactor = targetSize / size.height;
+      size = Size((size.width * decreasingFactor).roundToDouble(), (size.height * decreasingFactor).roundToDouble());
+    }
+
+    return size;
   }
 
   @override
@@ -65,6 +84,11 @@ class CardObject extends TableObject {
       size = const Size(1000, 900);
       timer.cancel();
     });
+  }
+
+  @override
+  String getData() {
+    return jsonEncode(container.toJson());
   }
 
   @override

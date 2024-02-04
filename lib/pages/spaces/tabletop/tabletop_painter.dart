@@ -55,8 +55,16 @@ class TabletopPainter extends CustomPainter {
     }
 
     // Render held object in drop mode
-    if (controller.dropMode) {
-      controller.heldObject?.render(canvas, mousePosition, controller);
+    if (controller.dropMode && controller.heldObject != null) {
+      final obj = controller.heldObject!;
+      controller.heldObject?.render(
+        canvas,
+        Offset(
+          mousePosition.dx - obj.size.width / 2,
+          mousePosition.dy - obj.size.height / 2,
+        ),
+        controller,
+      );
     }
 
     // Render cursors
