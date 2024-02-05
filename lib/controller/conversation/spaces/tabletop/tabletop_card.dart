@@ -7,12 +7,14 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class CardObject extends TableObject {
   late AttachmentContainer container;
   bool error = false;
+  bool downloaded = false;
+  ui.Image? image;
+  Size? imageSize;
 
   CardObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.card);
 
@@ -36,6 +38,12 @@ class CardObject extends TableObject {
       normalized,
     );
     obj.container = container;
+
+    // Set image
+    final codec = await descriptor.instantiateCodec();
+    obj.downloaded = true;
+    obj.image = (await codec.getNextFrame()).image;
+    obj.imageSize = size;
 
     return obj;
   }
@@ -62,12 +70,24 @@ class CardObject extends TableObject {
     }
 
     // Draw a stack
+    if (downloaded) {
+      final paint = Paint()..color = Colors.white;
+      canvas.drawImageRect(
+        image!,
+        Rect.fromLTWH(0, 0, size.width * (imageSize!.width / size.width), size.height * (imageSize!.height / size.height)),
+        Rect.fromLTWH(location.dx, location.dy, size.width, size.height),
+        paint,
+      );
+      return;
+    }
+
     final paint = Paint()..color = Colors.blue;
     canvas.drawRect(Rect.fromLTWH(location.dx, location.dy, size.width, size.height), paint);
   }
 
   @override
   void handleData(String data) async {
+    sendLog("handling data");
     // Download attached container
     final json = jsonDecode(data);
     final type = await AttachmentController.checkLocations(json["id"], StorageType.cache);
@@ -79,11 +99,13 @@ class CardObject extends TableObject {
       return;
     }
 
-    Timer.periodic(500.ms, (timer) {
-      error = false;
-      size = const Size(1000, 900);
-      timer.cancel();
-    });
+    // Get image from file
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container.filePath).readAsBytes());
+    final descriptor = await ui.ImageDescriptor.encoded(buffer);
+    final codec = await descriptor.instantiateCodec();
+    image = (await codec.getNextFrame()).image;
+    imageSize = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
+    downloaded = true;
   }
 
   @override

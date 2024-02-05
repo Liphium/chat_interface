@@ -4,7 +4,6 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
-import 'package:chat_interface/pages/spaces/tabletop/tabletop_inventory.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -92,13 +91,13 @@ class DeckObject extends TableObject {
     if (order.isEmpty) {
       return;
     }
-    final cardId = order[0];
+    final cardId = order.removeAt(0);
     final container = cards[cardId]!;
 
     // Remove the card details if it isn't in the deck anymore
-    // if (!order.contains(cardId)) {
-    //   cards.remove(cardId);
-    // }
+    if (!order.contains(cardId)) {
+      cards.remove(cardId);
+    }
 
     // Prepare the card and add it to the drop mode
     final card = await CardObject.downloadCard(container, controller.mousePos);
@@ -114,9 +113,12 @@ class DeckObject extends TableObject {
         icon: Icons.login,
         label: 'Draw into inventory',
         onTap: (controller) async {
-          final cardId = order[0];
+          if (order.isEmpty) {
+            return;
+          }
+          final cardId = order.removeAt(0);
           final container = cards[cardId]!;
-          controller.inventory.add(InventoryObject((await CardObject.downloadCard(container, controller.mousePos))!));
+          //controller.inventory.add(InventoryObject((await CardObject.downloadCard(container, controller.mousePos))!));
         },
       ),
       ContextMenuAction(

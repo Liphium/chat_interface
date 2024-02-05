@@ -7,6 +7,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 import 'package:logger/logger.dart' as log;
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
@@ -45,6 +46,8 @@ Future<bool> initSodium() async {
   sodiumLib = await SodiumInit.init();
   return true;
 }
+
+final list = <String>[].obs;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

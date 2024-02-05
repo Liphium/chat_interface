@@ -37,19 +37,59 @@ class ImagePreviewWindow extends StatelessWidget {
                       delay: 100.ms,
                       duration: 400.ms,
                       hz: randomHz,
-                      offset: Offset(
-                          random.nextBool() ? randomOffset : -randomOffset,
-                          random.nextBool() ? randomOffset : -randomOffset),
+                      offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
                       rotation: 0,
                       curve: Curves.decelerate,
                     ),
-                    FadeEffect(
-                        delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
+                    FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
                   ],
                   child: SizedBox(
                     height: constraints.maxHeight * 0.6,
                     child: GestureDetector(
                       onTap: () => {},
+                      child: Image.file(file),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        Positioned(
+          top: 0,
+          right: 0,
+          child: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class ImageHeroPreview extends StatelessWidget {
+  final File file;
+  final String tag;
+
+  const ImageHeroPreview({super.key, required this.file, required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        LayoutBuilder(builder: (context, constraints) {
+          return GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: InteractiveViewer(
+              maxScale: 5,
+              child: Center(
+                child: SizedBox(
+                  height: constraints.maxHeight * 0.6,
+                  child: GestureDetector(
+                    onTap: () => {},
+                    child: Hero(
+                      tag: tag,
                       child: Image.file(file),
                     ),
                   ),

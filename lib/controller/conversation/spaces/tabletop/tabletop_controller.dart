@@ -5,9 +5,9 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
-import 'package:chat_interface/pages/spaces/tabletop/tabletop_inventory.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +22,7 @@ class TabletopController extends GetxController {
 
   TableObject? heldObject;
   List<TableObject> hoveringObjects = [];
-  final inventory = <InventoryObject>[].obs;
+  final inventory = <CardObject>[].obs;
   final objects = <String, TableObject>{}.obs;
   final cursors = <String, TabletopCursor>{}.obs; // Other users cursors
 
@@ -31,6 +31,7 @@ class TabletopController extends GetxController {
   Timer? _ticker;
   Offset? _lastMousePos;
   Offset mousePos = const Offset(0, 0);
+  Offset globalCanvasPosition = const Offset(0, 0);
 
   // Movement of the canvas
   Offset canvasOffset = const Offset(0, 0);
