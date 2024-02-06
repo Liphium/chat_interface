@@ -10,6 +10,8 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,6 +33,7 @@ class TabletopController extends GetxController {
   Timer? _ticker;
   Offset? _lastMousePos;
   Offset mousePos = const Offset(0, 0);
+  Offset mousePosUnmodified = const Offset(0, 0);
   Offset globalCanvasPosition = const Offset(0, 0);
 
   // Movement of the canvas
@@ -164,6 +167,16 @@ class TabletopController extends GetxController {
     }
     return objects;
   }
+
+  void holdObject(TableObject object) {
+    dropMode = false;
+    heldObject = object;
+  }
+
+  void dropObject(TableObject object) {
+    dropMode = true;
+    heldObject = object;
+  }
 }
 
 enum TableObjectType {
@@ -191,7 +204,16 @@ abstract class TableObject {
   Offset? _lastLocation;
   Offset location;
 
+  // Modifiers
+  bool positionOverwrite = false;
+  final positionX = AnimatedDouble(0.0);
+  final positionY = AnimatedDouble(0.0);
+  final scale = AnimatedDouble(1.0, from: 0.0);
+
   Offset interpolatedLocation(DateTime now) {
+    if (positionOverwrite) {
+      return Offset(positionX.value(now), positionY.value(now));
+    }
     if (_lastMove == null || _lastLocation == null) {
       return location;
     }
@@ -271,4 +293,39 @@ class ContextMenuAction {
     this.color,
     this.iconColor,
   });
+}
+
+class AnimatedDouble {
+  static const animationDuration = 250;
+  static const curve = Curves.ease;
+
+  DateTime _start = DateTime.now();
+
+  double lastValue = 0;
+  late double _value;
+
+  AnimatedDouble(double value, {double from = 0.0}) {
+    _value = from;
+    setValue(value, from: from);
+  }
+
+  void setValue(double newValue, {double? from}) {
+    if (_value == newValue) return;
+    final now = DateTime.now();
+    lastValue = from ?? value(now);
+    _start = now;
+    _value = newValue;
+  }
+
+  void setRealValue(double realValue) {
+    setValue(realValue, from: realValue);
+  }
+
+  // Get an interpolated value
+  double value(DateTime now) {
+    final timeDifference = now.millisecondsSinceEpoch - _start.millisecondsSinceEpoch;
+    return lastValue + (_value - lastValue) * curve.transform(clampDouble(timeDifference / animationDuration, 0, 1));
+  }
+
+  get realValue => _value;
 }

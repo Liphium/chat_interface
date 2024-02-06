@@ -13,6 +13,7 @@ class CardObject extends TableObject {
   late AttachmentContainer container;
   bool error = false;
   bool downloaded = false;
+  bool inventory = false;
   ui.Image? image;
   Size? imageSize;
 

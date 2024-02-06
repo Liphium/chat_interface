@@ -1,9 +1,10 @@
+import 'dart:ui';
+
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -29,8 +30,6 @@ class TabletopView extends StatefulWidget {
 }
 
 class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin {
-  var mousePos = const Offset(0, 0);
-  var individualScale = 1.0;
   bool moved = false;
   final GlobalKey key = GlobalKey();
 
@@ -74,11 +73,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               if (!tableController.dropMode) {
                 tableController.heldObject = null;
               }
-              mousePos = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-              if (tableController.hoveringObjects.isEmpty) {
-                individualScale = 1;
-              }
-              tableController.mousePos = mousePos;
+              tableController.mousePosUnmodified = event.localPosition;
+              tableController.mousePos = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
             },
             onPointerDown: (event) {
               if (event.buttons == 2) {
@@ -122,16 +118,14 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   tableController.dropMode = false;
                 }
               }
-              mousePos = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-              tableController.mousePos = mousePos;
+              tableController.mousePosUnmodified = event.localPosition;
+              tableController.mousePos = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
             },
             onPointerUp: (event) {
-              individualScale = 1;
               if (tableController.hoveringObjects.isNotEmpty && !moved && event.buttons == 0) {
                 tableController.hoveringObjects.first.runAction(tableController);
               }
               if (tableController.heldObject != null && tableController.dropMode) {
-                sendLog("object dropped");
                 tableController.dropMode = false;
 
                 //tableController.heldObject!.sendAdd();
@@ -144,8 +138,13 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                 // Check if hover scale should be applied
                 if (tableController.hoveringObjects.isNotEmpty) {
-                  individualScale += scrollDelta * 2;
-                  individualScale = individualScale.clamp(1, 5);
+                  for (var object in tableController.hoveringObjects) {
+                    var current = object.scale.realValue;
+                    current += scrollDelta * 2;
+                    current = clampDouble(current, 1, 5);
+                    object.scale.setValue(current);
+                    object.scale.lastValue = object.scale.value(DateTime.now());
+                  }
                   return;
                 }
 
@@ -160,7 +159,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                 tableController.canvasOffset -= focalPoint - newFocalPoint;
                 tableController.canvasZoom *= zoomFactor;
-                mousePos = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                tableController.mousePosUnmodified = event.localPosition;
               }
             },
             child: SizedBox.expand(
@@ -176,7 +175,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                         painter: TabletopPainter(
                           controller: tableController,
                           mousePosition: tableController.mousePos,
-                          individualScale: individualScale,
+                          mousePositionUnmodified: tableController.mousePosUnmodified,
                           offset: tableController.canvasOffset,
                           scale: tableController.canvasZoom,
                           rotation: tableController.canvasRotation.value,

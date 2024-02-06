@@ -102,8 +102,7 @@ class DeckObject extends TableObject {
     // Prepare the card and add it to the drop mode
     final card = await CardObject.downloadCard(container, controller.mousePos);
     if (card == null) return;
-    controller.dropMode = true;
-    controller.heldObject = card;
+    controller.dropObject(card);
   }
 
   @override
@@ -118,7 +117,11 @@ class DeckObject extends TableObject {
           }
           final cardId = order.removeAt(0);
           final container = cards[cardId]!;
-          //controller.inventory.add(InventoryObject((await CardObject.downloadCard(container, controller.mousePos))!));
+          final obj = await CardObject.downloadCard(container, controller.mousePos);
+          if (obj == null) return;
+          obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
+          obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
+          controller.inventory.add(obj);
         },
       ),
       ContextMenuAction(
