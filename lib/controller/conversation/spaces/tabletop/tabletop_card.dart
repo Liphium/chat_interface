@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -116,6 +117,8 @@ class CardObject extends TableObject {
 
   @override
   void runAction(TabletopController controller) {
-    sendLog("action executed on a card");
+    if (inventory) {
+      Get.dialog(ImagePreviewWindow(file: File(container.filePath)));
+    }
   }
 }

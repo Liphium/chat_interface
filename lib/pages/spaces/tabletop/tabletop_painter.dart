@@ -110,7 +110,7 @@ class TabletopPainter extends CustomPainter {
         // Tell the controller about the hover state
         final hovered = rect.contains(mousePositionUnmodified);
         if (hovered && !controller.hoveringObjects.contains(object)) {
-          controller.hoveringObjects.add(object);
+          controller.hoveringObjects.insert(0, object);
         } else if (!hovered && controller.hoveringObjects.contains(object)) {
           controller.hoveringObjects.remove(object);
         }

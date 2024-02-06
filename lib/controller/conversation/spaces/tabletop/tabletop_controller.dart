@@ -10,7 +10,6 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
-import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

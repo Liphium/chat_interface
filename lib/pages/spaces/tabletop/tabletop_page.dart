@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
@@ -97,8 +98,6 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 }
 
                 Get.dialog(ObjectCreateMenu(location: TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController)));
-                //final obj = tableController.newObject(TableObjectType.square, "", calculateMousePos(event.localPosition, scale, offset), Size(100, 100), "");
-                //obj.sendAdd();
               } else if (event.buttons == 1) {
                 moved = false;
               }
@@ -110,12 +109,22 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 tableController.canvasOffset += newPos - old;
               } else if (event.buttons == 1) {
                 if (tableController.hoveringObjects.isNotEmpty) {
-                  moved = true;
-                  tableController.heldObject ??= tableController.hoveringObjects.first;
-                  final old = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                  final newPos = TabletopView.calculateMousePos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                  tableController.heldObject!.location += newPos - old;
-                  tableController.dropMode = false;
+                  if (tableController.heldObject != null) {
+                    final old = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                    final newPos = TabletopView.calculateMousePos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                    tableController.heldObject!.location += newPos - old;
+                  } else {
+                    moved = true;
+                    tableController.heldObject ??= tableController.hoveringObjects.first;
+                    final obj = tableController.heldObject!;
+                    if (obj is CardObject && obj.inventory) {
+                      tableController.inventory.remove(obj);
+                      tableController.dropMode = true;
+                      obj.inventory = false;
+                    } else {
+                      tableController.dropMode = false;
+                    }
+                  }
                 }
               }
               tableController.mousePosUnmodified = event.localPosition;
@@ -128,7 +137,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               if (tableController.heldObject != null && tableController.dropMode) {
                 tableController.dropMode = false;
 
-                //tableController.heldObject!.sendAdd();
+                tableController.heldObject!.sendAdd();
               }
               tableController.heldObject = null;
             },
