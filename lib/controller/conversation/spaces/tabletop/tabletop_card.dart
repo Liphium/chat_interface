@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +120,31 @@ class CardObject extends TableObject {
   void runAction(TabletopController controller) {
     if (inventory) {
       Get.dialog(ImagePreviewWindow(file: File(container.filePath)));
+    }
+  }
+
+  @override
+  List<ContextMenuAction> getContextMenuAdditions() {
+    return [
+      ContextMenuAction(
+        icon: Icons.login,
+        label: 'Put into inventory',
+        onTap: (controller) {
+          intoInventory(controller);
+        },
+      ),
+    ];
+  }
+
+  void intoInventory(TabletopController controller, {int? index}) {
+    final localPos = TabletopView.worldToLocalPos(location, controller.canvasZoom, controller.canvasOffset, controller);
+    positionX.setRealValue(localPos.dx);
+    positionY.setRealValue(localPos.dy);
+    sendRemove();
+    if (index != null) {
+      controller.inventory.insert(index, this);
+    } else {
+      controller.inventory.add(this);
     }
   }
 }

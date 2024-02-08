@@ -31,6 +31,7 @@ class TabletopController extends GetxController {
   static const tickRate = 20;
   Timer? _ticker;
   Offset? _lastMousePos;
+  int inventoryHoverIndex = -1;
   Offset mousePos = const Offset(0, 0);
   Offset mousePosUnmodified = const Offset(0, 0);
   Offset globalCanvasPosition = const Offset(0, 0);
@@ -135,7 +136,7 @@ class TabletopController extends GetxController {
         object = DeckObject(id, location, size);
         break;
       case TableObjectType.card:
-        object = DeckObject(id, location, size);
+        object = CardObject(id, location, size);
         break;
     }
     object.decryptData(data);
@@ -192,7 +193,7 @@ enum TableObjectType {
 abstract class TableObject {
   TableObject(this.id, this.location, this.size, this.type);
 
-  final String id;
+  String id;
   TableObjectType type;
 
   /// The size of the object
@@ -258,14 +259,25 @@ abstract class TableObject {
   /// Add a new object
   void sendAdd() {
     // Send to the server
-    spaceConnector.sendAction(Message("tobj_create", <String, dynamic>{
-      "x": location.dx,
-      "y": location.dy,
-      "w": size.width,
-      "h": size.height,
-      "type": type.index,
-      "data": encryptedData(),
-    }));
+    spaceConnector.sendAction(
+      Message("tobj_create", <String, dynamic>{
+        "x": location.dx,
+        "y": location.dy,
+        "w": size.width,
+        "h": size.height,
+        "type": type.index,
+        "data": encryptedData(),
+      }),
+      handler: (event) {
+        if (!event.data["success"]) {
+          sendLog("SOMETHING WENT WRONG");
+          return;
+        }
+        id = event.data["id"];
+        sendLog("ADDING $id to table");
+        Get.find<TabletopController>().addObject(this);
+      },
+    );
   }
 
   /// Remove an object

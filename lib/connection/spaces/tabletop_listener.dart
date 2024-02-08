@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:get/get.dart';
 
@@ -21,6 +22,10 @@ void setupTabletopListeners() {
 
   // Listen for creations
   spaceConnector.listen("tobj_created", (event) {
+    if (event.data["c"] == SpaceMemberController.ownId) {
+      return;
+    }
+
     controller.addObject(controller.newObject(
       TableObjectType.values[event.data["type"]],
       event.data["id"],

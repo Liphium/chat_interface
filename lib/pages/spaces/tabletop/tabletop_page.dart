@@ -6,6 +6,7 @@ import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -18,7 +19,7 @@ class TabletopView extends StatefulWidget {
   @override
   State<TabletopView> createState() => _TabletopViewState();
 
-  static Offset calculateMousePos(Offset local, double scale, Offset movement, TabletopController controller) {
+  static Offset localToWorldPos(Offset local, double scale, Offset movement, TabletopController controller) {
     final angle = math.atan(local.dy / local.dx);
     final mouseAngle = angle - controller.canvasRotation.value;
 
@@ -27,6 +28,26 @@ class TabletopView extends StatefulWidget {
     final x = radius * math.cos(mouseAngle);
     final y = radius * math.sin(mouseAngle);
     return Offset(x, y) / scale - movement;
+  }
+
+  static Offset worldToLocalPos(Offset world, double scale, Offset movement, TabletopController controller) {
+    // Undo the movement
+    Offset withoutMovement = world + movement;
+
+    // Reverse the scaling
+    Offset unscaled = withoutMovement * scale;
+
+    // Adjust for canvas rotation
+    final dx = unscaled.dx;
+    final dy = unscaled.dy;
+    final radius = math.sqrt(dx * dx + dy * dy);
+    final angle = math.atan2(dy, dx) - controller.canvasRotation.value;
+
+    // Convert back to local coordinates
+    final x = radius * math.cos(angle);
+    final y = radius * math.sin(angle);
+
+    return Offset(x, y);
   }
 }
 
@@ -75,7 +96,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 tableController.heldObject = null;
               }
               tableController.mousePosUnmodified = event.localPosition;
-              tableController.mousePos = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+              tableController.mousePos = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
             },
             onPointerDown: (event) {
               if (event.buttons == 2) {
@@ -97,25 +118,25 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   return;
                 }
 
-                Get.dialog(ObjectCreateMenu(location: TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController)));
+                Get.dialog(ObjectCreateMenu(location: TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController)));
               } else if (event.buttons == 1) {
                 moved = false;
               }
             },
             onPointerMove: (event) {
               if (event.buttons == 4) {
-                final old = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                final newPos = TabletopView.calculateMousePos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                final old = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                final newPos = TabletopView.localToWorldPos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
                 tableController.canvasOffset += newPos - old;
               } else if (event.buttons == 1) {
                 if (tableController.hoveringObjects.isNotEmpty) {
                   if (tableController.heldObject != null) {
-                    final old = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                    final newPos = TabletopView.calculateMousePos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                    final old = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                    final newPos = TabletopView.localToWorldPos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
                     tableController.heldObject!.location += newPos - old;
                   } else {
                     moved = true;
-                    tableController.heldObject ??= tableController.hoveringObjects.first;
+                    tableController.heldObject ??= tableController.hoveringObjects.last;
                     final obj = tableController.heldObject!;
                     if (obj is CardObject && obj.inventory) {
                       tableController.inventory.remove(obj);
@@ -128,18 +149,40 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 }
               }
               tableController.mousePosUnmodified = event.localPosition;
-              tableController.mousePos = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+              tableController.mousePos = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
             },
             onPointerUp: (event) {
               if (tableController.hoveringObjects.isNotEmpty && !moved && event.buttons == 0) {
                 tableController.hoveringObjects.first.runAction(tableController);
               }
-              if (tableController.heldObject != null && tableController.dropMode) {
-                tableController.dropMode = false;
+              sendLog(tableController.inventoryHoverIndex);
 
-                tableController.heldObject!.sendAdd();
+              final obj = tableController.heldObject;
+              if (obj != null && tableController.dropMode) {
+                tableController.dropMode = false;
+                final x = tableController.mousePos.dx - obj.size.width / 2;
+                final y = tableController.mousePos.dy - obj.size.height / 2;
+                obj.location = Offset(x, y);
+                bool add = true;
+                if (obj is CardObject) {
+                  if (tableController.inventoryHoverIndex != -1) {
+                    obj.intoInventory(tableController, index: tableController.inventoryHoverIndex);
+                    add = false;
+                  } else {
+                    obj.inventory = false;
+                    obj.positionOverwrite = false;
+                  }
+                }
+                if (add) {
+                  obj.sendAdd();
+                }
+              } else if (!tableController.dropMode && obj != null && obj is CardObject) {
+                if (tableController.inventoryHoverIndex != -1) {
+                  obj.intoInventory(tableController, index: tableController.inventoryHoverIndex);
+                }
               }
               tableController.heldObject = null;
+              tableController.dropMode = false;
             },
             onPointerSignal: (event) {
               if (event is PointerScrollEvent) {
@@ -163,8 +206,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 if (tableController.canvasZoom + scrollDelta > 5) return;
 
                 final zoomFactor = (tableController.canvasZoom + scrollDelta) / tableController.canvasZoom;
-                final focalPoint = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                final newFocalPoint = TabletopView.calculateMousePos(event.localPosition, tableController.canvasZoom + scrollDelta, tableController.canvasOffset, tableController);
+                final focalPoint = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                final newFocalPoint = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom + scrollDelta, tableController.canvasOffset, tableController);
 
                 tableController.canvasOffset -= focalPoint - newFocalPoint;
                 tableController.canvasZoom *= zoomFactor;
@@ -209,9 +252,9 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     value: tableController.canvasRotation.value,
                     onChanged: (value) {
                       final center = Offset(context.size!.width / 2, context.size!.height / 2);
-                      final focalPoint = TabletopView.calculateMousePos(center, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                      final focalPoint = TabletopView.localToWorldPos(center, tableController.canvasZoom, tableController.canvasOffset, tableController);
                       tableController.canvasRotation.value = value;
-                      final newFocalPoint = TabletopView.calculateMousePos(center, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                      final newFocalPoint = TabletopView.localToWorldPos(center, tableController.canvasZoom, tableController.canvasOffset, tableController);
 
                       tableController.canvasOffset -= focalPoint - newFocalPoint;
                     },
