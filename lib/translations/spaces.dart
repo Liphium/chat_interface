@@ -14,6 +14,7 @@ class SpacesTranslations extends Translations {
           'tabletop.object.deck': 'Deck',
           'tabletop.object.deck.choose': 'Choose a deck',
           'tabletop.object.deck.choose_empty': 'No decks available. You can create one in the settings.',
+          'tabletop.match_viewport': 'Rotate to viewport',
         },
 
         //* German

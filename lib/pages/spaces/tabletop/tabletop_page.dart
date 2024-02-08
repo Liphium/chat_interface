@@ -41,7 +41,7 @@ class TabletopView extends StatefulWidget {
     final dx = unscaled.dx;
     final dy = unscaled.dy;
     final radius = math.sqrt(dx * dx + dy * dy);
-    final angle = math.atan2(dy, dx) - controller.canvasRotation.value;
+    final angle = math.atan2(dy, dx) + controller.canvasRotation.value;
 
     // Convert back to local coordinates
     final x = radius * math.cos(angle);

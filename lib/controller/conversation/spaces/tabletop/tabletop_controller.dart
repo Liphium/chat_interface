@@ -129,7 +129,7 @@ class TabletopController extends GetxController {
   }
 
   /// Create a new object
-  TableObject newObject(TableObjectType type, String id, Offset location, Size size, String data) {
+  TableObject newObject(TableObjectType type, String id, Offset location, Size size, double rotation, String data) {
     TableObject object;
     switch (type) {
       case TableObjectType.deck:
@@ -139,6 +139,7 @@ class TabletopController extends GetxController {
         object = CardObject(id, location, size);
         break;
     }
+    object.rotate(rotation);
     object.decryptData(data);
     return object;
   }
@@ -208,6 +209,7 @@ abstract class TableObject {
   bool positionOverwrite = false;
   final positionX = AnimatedDouble(0.0);
   final positionY = AnimatedDouble(0.0);
+  final rotation = AnimatedDouble(0.0);
   final scale = AnimatedDouble(1.0, from: 0.0);
 
   Offset interpolatedLocation(DateTime now) {
@@ -226,6 +228,20 @@ abstract class TableObject {
     _lastMove = DateTime.now();
     _lastLocation = this.location;
     this.location = location;
+  }
+
+  double lastRotation = 0;
+  void rotate(double rot) {
+    lastRotation = rot;
+  }
+
+  void hoverRotation(double rot) {
+    lastRotation = rotation.realValue;
+    rotation.setValue(rot);
+  }
+
+  void unhoverRotation() {
+    rotation.setValue(lastRotation);
   }
 
   /// DONT OVERWRITE THIS METHOD
@@ -265,6 +281,7 @@ abstract class TableObject {
         "y": location.dy,
         "w": size.width,
         "h": size.height,
+        "r": lastRotation,
         "type": type.index,
         "data": encryptedData(),
       }),

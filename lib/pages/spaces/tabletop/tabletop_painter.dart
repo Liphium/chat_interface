@@ -3,7 +3,8 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
+
+import 'dart:math' as math;
 
 class TabletopPainter extends CustomPainter {
   final TabletopController controller;
@@ -45,35 +46,22 @@ class TabletopPainter extends CustomPainter {
       }
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
       object.scale.setValue(1.0);
+      object.rotation.setValue(0);
       drawObject(canvas, location, object, now);
     }
 
     for (var object in controller.hoveringObjects) {
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
+      object.rotation.setValue(-rotation);
       drawObject(canvas, location, object, now);
     }
 
     // Render held object in drop mode
     if (controller.dropMode && controller.heldObject != null) {
       final obj = controller.heldObject!;
-      canvas.save();
-      final scale = obj.scale.value(now);
-      canvas.scale(scale);
       final x = mousePosition.dx - obj.size.width / 2;
       final y = mousePosition.dy - obj.size.height / 2;
-      canvas.translate(
-        -(x + obj.size.width / 2) * ((scale - 1) / scale),
-        -(y + obj.size.height / 2) * ((scale - 1) / scale),
-      );
-      controller.heldObject?.render(
-        canvas,
-        Offset(
-          x,
-          y,
-        ),
-        controller,
-      );
-      canvas.restore();
+      drawObject(canvas, Offset(x, y), obj, now);
     } else if (!controller.dropMode && controller.heldObject != null) {
       final location = controller.heldObject!.location;
       drawObject(canvas, location, controller.heldObject!, now);
@@ -179,11 +167,12 @@ class TabletopPainter extends CustomPainter {
   void drawObject(Canvas canvas, Offset location, TableObject object, DateTime now) {
     final scale = object.scale.value(now);
     canvas.save();
+    final focalX = location.dx + object.size.width / 2;
+    final focalY = location.dy + object.size.height / 2;
+    canvas.translate(focalX, focalY);
+    canvas.rotate(object.rotation.value(now));
     canvas.scale(scale);
-    canvas.translate(
-      -(location.dx + object.size.width / 2) * ((scale - 1) / scale),
-      -(location.dy + object.size.height / 2) * ((scale - 1) / scale),
-    );
+    canvas.translate(-focalX, -focalY);
     object.render(canvas, location, controller);
     canvas.restore();
   }
