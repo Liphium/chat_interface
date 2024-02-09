@@ -2,6 +2,7 @@ import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
+import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/call_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
@@ -21,6 +22,7 @@ class SettingController extends GetxController {
     addCallAppearanceSettings(this);
     addLanguageSettings(this);
     SpacesSettings.addSpacesSettings(this);
+    TabletopSettings.addSettings(this);
     ThemeSettings.addThemeSettings(this);
     FileSettings.addSettings(this);
 

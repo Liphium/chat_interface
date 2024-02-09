@@ -5,6 +5,9 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
+import 'package:chat_interface/pages/settings/components/double_selection.dart';
+import 'package:chat_interface/pages/settings/data/entities.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
@@ -17,6 +20,14 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+class TabletopSettings {
+  static const String framerate = "tabletop.framerate";
+
+  static void addSettings(SettingController controller) {
+    controller.settings[framerate] = Setting<double>(framerate, 60.0);
+  }
+}
 
 class TabletopSettingsPage extends StatefulWidget {
   const TabletopSettingsPage({super.key});
@@ -81,10 +92,19 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         //* Auto download types
-        Text("Some tabletop settings go here".tr, style: Get.theme.textTheme.labelLarge),
+        Text("tabletop.general.framerate".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
+        DoubleSelectionSetting(
+          settingName: TabletopSettings.framerate,
+          description: "tabletop.general.framerate.description",
+          unit: "tabletop.general.framerate.unit".tr,
+          min: 30.0,
+          max: 256.0,
+          rounded: true,
+        ),
       ],
     );
   }

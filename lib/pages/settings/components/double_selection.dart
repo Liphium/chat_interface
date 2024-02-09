@@ -12,15 +12,18 @@ class DoubleSelectionSetting extends StatefulWidget {
   final String description;
   final double min;
   final double max;
+  final bool rounded;
   final String unit;
 
-  const DoubleSelectionSetting(
-      {super.key,
-      required this.settingName,
-      required this.description,
-      required this.min,
-      required this.max,
-      this.unit = ""});
+  const DoubleSelectionSetting({
+    super.key,
+    required this.settingName,
+    required this.description,
+    required this.min,
+    required this.max,
+    this.unit = "",
+    this.rounded = false,
+  });
 
   @override
   State<DoubleSelectionSetting> createState() => _ListSelectionSettingState();
@@ -44,12 +47,11 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
             visible: widget.description.isNotEmpty,
             child: Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
-              child: Text(widget.description.tr,
-                  style: Get.theme.textTheme.bodyMedium),
+              child: Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
             )),
         Obx(() {
           final value = current.value;
-          final roundedCurrent = value.toStringAsFixed(1);
+          final roundedCurrent = widget.rounded ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -59,23 +61,23 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
                   min: widget.min,
                   max: widget.max,
                   onChanged: (value) {
-                    current.value = value;
-                    if (DateTime.now()
-                            .difference(lastSet ?? DateTime.now())
-                            .inMilliseconds >
-                        100) {
-                      lastSet = DateTime.now();
-                      setting.setValue(value);
+                    if (widget.rounded) {
+                      current.value = value.roundToDouble();
+                    } else {
+                      current.value = value;
                     }
                   },
                   onChangeEnd: (value) {
-                    setting.setValue(value);
+                    if (widget.rounded) {
+                      setting.setValue(value.roundToDouble());
+                    } else {
+                      setting.setValue(value);
+                    }
                   },
                 ),
               ),
               horizontalSpacing(defaultSpacing),
-              Text("$roundedCurrent ${widget.unit.tr}",
-                  style: Get.theme.textTheme.bodyMedium),
+              Text("$roundedCurrent ${widget.unit.tr}", style: Get.theme.textTheme.bodyMedium),
             ],
           );
         }),

@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
+import 'package:chat_interface/pages/settings/data/entities.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
@@ -53,27 +57,25 @@ class TabletopView extends StatefulWidget {
 
 class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin {
   bool moved = false;
-  final GlobalKey key = GlobalKey();
+  final GlobalKey _key = GlobalKey();
 
   final updater = false.obs;
-  late AnimationController _controller;
+  Timer? timer;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: 50.ms);
-    _controller.loop();
-
-    // Update every frame
-    _controller.addListener(() {
-      updater.value = !updater.value;
-    });
+    final setting = Get.find<SettingController>().settings[TabletopSettings.framerate]! as Setting<double>;
+    setting.value.listenAndPump((value) => startFrameTimer(value!));
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void startFrameTimer(double value) {
+    if (timer != null) {
+      timer!.cancel();
+    }
+    timer = Timer.periodic((1000 / value).ms, (timer) {
+      updater.value = !updater.value;
+    });
   }
 
   @override
@@ -82,7 +84,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
     // Add post frame callback to tell the controller the size of the painter
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final renderObj = key.currentContext!.findRenderObject() as RenderBox;
+      final renderObj = _key.currentContext!.findRenderObject() as RenderBox;
       final widgetPosition = renderObj.localToGlobal(Offset.zero);
       tableController.globalCanvasPosition = widgetPosition;
     });
@@ -221,7 +223,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     () {
                       updater.value;
                       return CustomPaint(
-                        key: key,
+                        key: _key,
                         willChange: true,
                         isComplex: true,
                         painter: TabletopPainter(
