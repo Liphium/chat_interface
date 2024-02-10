@@ -28,7 +28,6 @@ import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smooth_scroll_multiplatform/smooth_scroll_multiplatform.dart';
 
 part 'message_actions.dart';
 
@@ -65,19 +64,16 @@ class _MessageFeedState extends State<MessageFeed> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('app.title'.tr,
-              style: Theme.of(context).textTheme.headlineMedium),
+          Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
           verticalSpacing(sectionSpacing),
           Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
           verticalSpacing(elementSpacing),
-          Text('app.build'.trParams({"build": "Alpha"}),
-              style: Theme.of(context).textTheme.bodyLarge),
+          Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
         ],
       );
     }
 
-    final conversation =
-        Get.find<ConversationController>().conversations[widget.id]!;
+    final conversation = Get.find<ConversationController>().conversations[widget.id]!;
     MessageController controller = Get.find();
     FriendController friendController = Get.find();
     StatusController statusController = Get.find();
@@ -86,8 +82,7 @@ class _MessageFeedState extends State<MessageFeed> {
     return Column(
       children: [
         //* Header
-        Obx(() =>
-            MessageBar(conversation: controller.selectedConversation.value)),
+        Obx(() => MessageBar(conversation: controller.selectedConversation.value)),
 
         Expanded(
           child: Row(
@@ -106,59 +101,37 @@ class _MessageFeedState extends State<MessageFeed> {
                             selectionControls: desktopTextSelectionControls,
                             child: Center(
                               child: ConstrainedBox(
-                                constraints:
-                                    const BoxConstraints(maxWidth: 1200),
+                                constraints: const BoxConstraints(maxWidth: 1200),
                                 child: Obx(
                                   () {
                                     return ListView.builder(
                                       itemCount: controller.messages.length + 1,
                                       reverse: true,
                                       shrinkWrap: true,
-                                      physics: const BouncingScrollPhysics(
-                                          parent:
-                                              AlwaysScrollableScrollPhysics()),
+                                      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                                       itemBuilder: (context, index) {
                                         if (index == 0) {
-                                          return verticalSpacing(
-                                              defaultSpacing);
+                                          return verticalSpacing(defaultSpacing);
                                         }
 
-                                        final message =
-                                            controller.messages[index - 1];
-                                        if (message.type ==
-                                            MessageType.system) {
-                                          return SystemMessageRenderer(
-                                              message: message,
-                                              accountId: MessageController
-                                                  .systemSender);
+                                        final message = controller.messages[index - 1];
+                                        if (message.type == MessageType.system) {
+                                          return SystemMessageRenderer(message: message, accountId: MessageController.systemSender);
                                         }
-                                        final conversationToken = controller
-                                            .selectedConversation
-                                            .value
-                                            .members[message.sender]!;
-                                        final sender = friendController
-                                            .friends[conversationToken.account];
-                                        final self =
-                                            conversationToken.account ==
-                                                statusController.id.value;
+                                        final sender = friendController.friends[message.senderAccount];
+                                        final self = message.senderAccount == statusController.id.value;
 
                                         bool last = false;
                                         bool newHeading = false;
-                                        if (index !=
-                                            controller.messages.length) {
-                                          final lastMessage =
-                                              controller.messages[index];
+                                        if (index != controller.messages.length) {
+                                          final lastMessage = controller.messages[index];
 
                                           // Check if the last message was a day before the current one
-                                          if (lastMessage.createdAt.day !=
-                                              message.createdAt.day) {
+                                          if (lastMessage.createdAt.day != message.createdAt.day) {
                                             newHeading = true;
                                           }
 
-                                          if (lastMessage.sender ==
-                                                  message.sender &&
-                                              lastCount < 5 &&
-                                              !newHeading) {
+                                          if (lastMessage.sender == message.sender && lastCount < 5 && !newHeading) {
                                             last = true;
                                             lastCount++;
                                           } else {
@@ -170,58 +143,29 @@ class _MessageFeedState extends State<MessageFeed> {
                                         switch (message.type) {
                                           case MessageType.text:
                                             renderer = MessageRenderer(
-                                                message: message,
-                                                accountId:
-                                                    conversationToken.account,
-                                                self: self,
-                                                last: last,
-                                                sender: self
-                                                    ? Friend.me()
-                                                    : sender);
+                                                message: message, accountId: message.senderAccount, self: self, last: last, sender: self ? Friend.me() : sender);
 
                                           case MessageType.call:
-                                            renderer = SpaceMessageRenderer(
-                                                message: message,
-                                                self: self,
-                                                last: last,
-                                                sender: self
-                                                    ? Friend.me()
-                                                    : sender);
+                                            renderer = SpaceMessageRenderer(message: message, self: self, last: last, sender: self ? Friend.me() : sender);
 
                                           case MessageType.system:
-                                            renderer = SystemMessageRenderer(
-                                                message: message,
-                                                accountId:
-                                                    conversationToken.account);
+                                            renderer = SystemMessageRenderer(message: message, accountId: message.senderAccount);
                                         }
 
-                                        final GlobalKey contextMenuKey =
-                                            GlobalKey();
+                                        final GlobalKey contextMenuKey = GlobalKey();
                                         final hovering = false.obs;
                                         return Column(
                                           children: [
-                                            if (newHeading ||
-                                                index ==
-                                                    controller.messages.length)
+                                            if (newHeading || index == controller.messages.length)
                                               Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: sectionSpacing,
-                                                    bottom: defaultSpacing),
-                                                child: Text(
-                                                    formatDay(
-                                                        message.createdAt),
-                                                    style: Get.theme.textTheme
-                                                        .bodyMedium),
+                                                padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
+                                                child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
                                               ),
                                             MouseRegion(
-                                              onEnter: (event) =>
-                                                  hovering.value = true,
-                                              onExit: (event) =>
-                                                  hovering.value = false,
+                                              onEnter: (event) => hovering.value = true,
+                                              onExit: (event) => hovering.value = false,
                                               child: Row(
-                                                textDirection: self
-                                                    ? TextDirection.rtl
-                                                    : TextDirection.ltr,
+                                                textDirection: self ? TextDirection.rtl : TextDirection.ltr,
                                                 children: [
                                                   Flexible(
                                                     child: renderer,
@@ -234,25 +178,20 @@ class _MessageFeedState extends State<MessageFeed> {
                                                         child: Row(
                                                           children: [
                                                             LoadingIconButton(
-                                                              key:
-                                                                  contextMenuKey,
+                                                              key: contextMenuKey,
                                                               iconSize: 22,
                                                               extra: 4,
                                                               padding: 4,
                                                               onTap: () {
                                                                 Get.dialog(
                                                                   MessageOptionsWindow(
-                                                                    data: ContextMenuData
-                                                                        .fromKey(
-                                                                            contextMenuKey),
+                                                                    data: ContextMenuData.fromKey(contextMenuKey),
                                                                     self: self,
-                                                                    message:
-                                                                        message,
+                                                                    message: message,
                                                                   ),
                                                                 );
                                                               },
-                                                              icon: Icons
-                                                                  .more_horiz,
+                                                              icon: Icons.more_horiz,
                                                             )
                                                           ],
                                                         ),
@@ -275,18 +214,14 @@ class _MessageFeedState extends State<MessageFeed> {
                       ),
 
                       //* Message input
-                      conversation.borked
-                          ? const SizedBox.shrink()
-                          : const MessageInput()
+                      conversation.borked ? const SizedBox.shrink() : const MessageInput()
                     ],
                   ),
                 ),
               ),
               Obx(
                 () => Visibility(
-                  visible: controller.selectedConversation.value.isGroup &&
-                      settingController
-                          .settings[AppSettings.showGroupMembers]!.value.value,
+                  visible: controller.selectedConversation.value.isGroup && settingController.settings[AppSettings.showGroupMembers]!.value.value,
                   child: Container(
                     color: Get.theme.colorScheme.onBackground,
                     width: 300,

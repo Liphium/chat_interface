@@ -21,8 +21,7 @@ void setupSetupListeners() {
     if (data == "-" || data == "") {
       controller.status.value = "-";
       controller.type.value = statusOnline;
-      subscribeToConversations(
-          controller.statusJson(), controller.generateFriendId());
+      subscribeToConversations(controller.statusJson(), controller.generateFriendId());
       return;
     }
 
@@ -32,8 +31,7 @@ void setupSetupListeners() {
     final decrypted = decryptSymmetric(args[1], profileKey);
     controller.fromStatusJson(decrypted);
 
-    subscribeToConversations(
-        controller.statusJson(), controller.generateFriendId());
+    subscribeToConversations(controller.statusJson(), controller.generateFriendId());
   }, afterSetup: true);
 
   //* Setup finished
@@ -49,19 +47,16 @@ Future<bool> subscribeToConversations(String status, String friendId) async {
 
   // Subscribe to all conversations
   final tokens = <Map<String, dynamic>>[];
-  for (var conversation
-      in Get.find<ConversationController>().conversations.values) {
+  for (var conversation in Get.find<ConversationController>().conversations.values) {
     tokens.add(conversation.token.toMap());
   }
 
   // Subscribe
-  _sub(status, tokens);
+  _sub(status, tokens, deletions: true);
   return true;
 }
 
-void subscribeToConversation(
-    String status, String friendId, ConversationToken token,
-    {deletions = true}) {
+void subscribeToConversation(String status, String friendId, ConversationToken token, {deletions = true}) {
   // Encrypt status with profile key
   status = generateStatusData(status, friendId);
 
@@ -79,8 +74,7 @@ String generateStatusData(String status, String friendId) {
   return status;
 }
 
-void _sub(String status, List<Map<String, dynamic>> tokens,
-    {bool startup = true, deletions = false}) async {
+void _sub(String status, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
   // Get last message received
   final lastMessage = await (db.message.select()
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
@@ -99,8 +93,6 @@ void _sub(String status, List<Map<String, dynamic>> tokens,
       return;
     }
     Get.find<StatusController>().statusLoading.value = false;
-    Get.find<ConversationController>().finishedLoading(
-        event.data["read"], deletions ? (event.data["missing"] ?? []) : [],
-        overwriteReads: startup);
+    Get.find<ConversationController>().finishedLoading(event.data["read"], deletions ? (event.data["missing"] ?? []) : [], overwriteReads: startup);
   });
 }

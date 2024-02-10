@@ -8,9 +8,10 @@ class Message extends Table {
   TextColumn get signature => text()();
   TextColumn get attachments => text()();
   TextColumn get certificate => text()();
-  TextColumn get sender => text().nullable()();
+  TextColumn get sender => text()();
+  TextColumn get senderAccount => text()();
   Int64Column get createdAt => int64()();
-  TextColumn get conversationId => text().nullable()();
+  TextColumn get conversationId => text()();
   BoolColumn get edited => boolean()();
 
   @override

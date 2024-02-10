@@ -7,8 +7,7 @@ class UploadData {
   UploadData(this.file);
 }
 
-void sendTextMessageWithFiles(RxBool loading, String conversationId,
-    String message, List<UploadData> files, Function() callback) async {
+void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<UploadData> files, Function() callback) async {
   if (loading.value) {
     return;
   }
@@ -17,8 +16,7 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId,
   // Upload files
   final attachments = <String>[];
   for (var file in files) {
-    final res = await Get.find<AttachmentController>()
-        .uploadFile(file, StorageType.temporary);
+    final res = await Get.find<AttachmentController>().uploadFile(file, StorageType.temporary);
     if (res.container == null) {
       showErrorPopup("error", res.message);
       callback.call();
@@ -30,22 +28,18 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId,
   sendLog("sending...");
 
   loading.value = false;
-  sendActualMessage(loading, conversationId, MessageType.text, attachments,
-      base64Encode(utf8.encode(message)), callback);
+  sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
 
-void sendTextMessage(RxBool loading, String conversationId, String message,
-    List<String> attachments, Function() callback) async {
+void sendTextMessage(RxBool loading, String conversationId, String message, List<String> attachments, Function() callback) async {
   if (loading.value) {
     return;
   }
   loading.value = true;
-  sendActualMessage(loading, conversationId, MessageType.text, attachments,
-      base64Encode(utf8.encode(message)), callback);
+  sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
 
-void sendActualMessage(RxBool loading, String conversationId, MessageType type,
-    List<String> attachments, String message, Function() callback) async {
+void sendActualMessage(RxBool loading, String conversationId, MessageType type, List<String> attachments, String message, Function() callback) async {
   if (message.isEmpty && attachments.isEmpty) {
     callback.call();
     return;
@@ -57,29 +51,14 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type,
   final conversation = controller.conversations[conversationId]!;
   var key = conversation.key;
   final stamp = DateTime.now().millisecondsSinceEpoch;
-  var hash = hashSha(message +
-      stamp.toStringAsFixed(0) +
-      conversationId); // Adding a time stamp to the message to prevent replay attacks
+  var hash = hashSha(message + stamp.toStringAsFixed(0) + conversationId); // Adding a time stamp to the message to prevent replay attacks
   sendLog("MESSAGE HASH SENT: $hash ${message + conversationId}");
 
-  var encrypted = encryptSymmetric(
-      jsonEncode(<String, dynamic>{
-        "c": message,
-        "t": type.index,
-        "a": attachments,
-        "s": signMessage(signatureKeyPair.secretKey, hash)
-      }),
-      key);
+  var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{"c": message, "t": type.index, "a": attachments, "s": signMessage(signatureKeyPair.secretKey, hash)}), key);
 
   // Send message
-  final json =
-      await postNodeJSON("/conversations/message/send", <String, dynamic>{
-    "conversation": conversation.id,
-    "token_id": conversation.token.id,
-    "token": conversation.token.token,
-    "timestamp": stamp,
-    "data": encrypted
-  });
+  final json = await postNodeJSON("/conversations/message/send",
+      <String, dynamic>{"conversation": conversation.id, "token_id": conversation.token.id, "token": conversation.token.token, "timestamp": stamp, "data": encrypted});
 
   callback.call();
   if (!json["success"]) {

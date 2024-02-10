@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -74,6 +75,25 @@ class SystemMessages {
       translation: (msg) {
         return "chat.member_leave".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+        });
+      },
+    ),
+
+    // Called when a member is kicked from the conversation
+    // Format: [issuerId, memberId]
+    "group.member_kick": SystemMessage(
+      Icons.arrow_back,
+      handler: (msg) {
+        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
+        if (msg.attachments[1] == StatusController.ownAccountId) {
+          conversation.delete(popup: false, request: false);
+        }
+        conversation.fetchMembers(msg.createdAt);
+      },
+      translation: (msg) {
+        return "chat.kick".trParams({
+          "issuer": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[1]).name,
         });
       },
     ),

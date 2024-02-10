@@ -30,7 +30,8 @@ class ConversationMembers extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
-                child: Obx(() => Text('chat.members'.trParams({"count": controller.selectedConversation.value.members.length.toString()}), style: Theme.of(context).textTheme.titleMedium)),
+                child: Obx(() =>
+                    Text('chat.members'.trParams({"count": controller.selectedConversation.value.members.length.toString()}), style: Theme.of(context).textTheme.titleMedium)),
               ),
               LoadingIconButton(
                 loading: conversation.membersLoading,
@@ -69,25 +70,38 @@ class ConversationMembers extends StatelessWidget {
                                   return [
                                         //* Promotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
-                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_moderator".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id))
+                                          ProfileAction(
+                                              icon: Icons.add_moderator, label: "chat.make_moderator".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id))
                                         else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
-                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_admin".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id)),
+                                          ProfileAction(
+                                              icon: Icons.add_moderator, label: "chat.make_admin".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id)),
 
                                         //* Demotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
-                                          ProfileAction(icon: Icons.remove_moderator, label: "chat.remove_moderator".tr, loading: false.obs, onTap: (f, l) => member.demote(conversation.id))
+                                          ProfileAction(
+                                            icon: Icons.remove_moderator,
+                                            label: "chat.remove_moderator".tr,
+                                            loading: false.obs,
+                                            onTap: (f, l) => member.demote(conversation.id),
+                                          )
                                         else if (ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
-                                          ProfileAction(icon: Icons.remove_moderator, label: "chat.remove_admin".tr, loading: false.obs, onTap: (f, l) => member.demote(conversation.id)),
+                                          ProfileAction(
+                                            icon: Icons.remove_moderator,
+                                            label: "chat.remove_admin".tr,
+                                            loading: false.obs,
+                                            onTap: (f, l) => member.demote(conversation.id),
+                                          ),
 
                                         //* Removal actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role.lowerThan(ownRole))
                                           ProfileAction(
-                                              icon: Icons.person_remove,
-                                              label: "chat.remove_member".tr,
-                                              loading: false.obs,
-                                              color: Get.theme.colorScheme.errorContainer,
-                                              iconColor: Get.theme.colorScheme.error,
-                                              onTap: (f, l) => {}),
+                                            icon: Icons.person_remove,
+                                            label: "chat.remove_member".tr,
+                                            loading: false.obs,
+                                            color: Get.theme.colorScheme.errorContainer,
+                                            iconColor: Get.theme.colorScheme.error,
+                                            onTap: (f, l) => member.remove(conversation.id),
+                                          ),
                                       ] +
                                       ProfileDefaults.buildDefaultActions(friend);
                                 },

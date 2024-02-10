@@ -728,8 +728,14 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   static const VerificationMeta _senderMeta = const VerificationMeta('sender');
   @override
   late final GeneratedColumn<String> sender = GeneratedColumn<String>(
-      'sender', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'sender', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _senderAccountMeta =
+      const VerificationMeta('senderAccount');
+  @override
+  late final GeneratedColumn<String> senderAccount = GeneratedColumn<String>(
+      'sender_account', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -740,8 +746,8 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       const VerificationMeta('conversationId');
   @override
   late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-      'conversation_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _editedMeta = const VerificationMeta('edited');
   @override
   late final GeneratedColumn<bool> edited = GeneratedColumn<bool>(
@@ -760,6 +766,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
         attachments,
         certificate,
         sender,
+        senderAccount,
         createdAt,
         conversationId,
         edited
@@ -822,6 +829,16 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
     if (data.containsKey('sender')) {
       context.handle(_senderMeta,
           sender.isAcceptableOrUnknown(data['sender']!, _senderMeta));
+    } else if (isInserting) {
+      context.missing(_senderMeta);
+    }
+    if (data.containsKey('sender_account')) {
+      context.handle(
+          _senderAccountMeta,
+          senderAccount.isAcceptableOrUnknown(
+              data['sender_account']!, _senderAccountMeta));
+    } else if (isInserting) {
+      context.missing(_senderAccountMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -834,6 +851,8 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           _conversationIdMeta,
           conversationId.isAcceptableOrUnknown(
               data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
     }
     if (data.containsKey('edited')) {
       context.handle(_editedMeta,
@@ -865,11 +884,13 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       certificate: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}certificate'])!,
       sender: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sender']),
+          .read(DriftSqlType.string, data['${effectivePrefix}sender'])!,
+      senderAccount: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_account'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
-      conversationId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}conversation_id']),
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
       edited: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
     );
@@ -889,9 +910,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final String signature;
   final String attachments;
   final String certificate;
-  final String? sender;
+  final String sender;
+  final String senderAccount;
   final BigInt createdAt;
-  final String? conversationId;
+  final String conversationId;
   final bool edited;
   const MessageData(
       {required this.id,
@@ -901,9 +923,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       required this.signature,
       required this.attachments,
       required this.certificate,
-      this.sender,
+      required this.sender,
+      required this.senderAccount,
       required this.createdAt,
-      this.conversationId,
+      required this.conversationId,
       required this.edited});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -915,13 +938,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     map['signature'] = Variable<String>(signature);
     map['attachments'] = Variable<String>(attachments);
     map['certificate'] = Variable<String>(certificate);
-    if (!nullToAbsent || sender != null) {
-      map['sender'] = Variable<String>(sender);
-    }
+    map['sender'] = Variable<String>(sender);
+    map['sender_account'] = Variable<String>(senderAccount);
     map['created_at'] = Variable<BigInt>(createdAt);
-    if (!nullToAbsent || conversationId != null) {
-      map['conversation_id'] = Variable<String>(conversationId);
-    }
+    map['conversation_id'] = Variable<String>(conversationId);
     map['edited'] = Variable<bool>(edited);
     return map;
   }
@@ -935,12 +955,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       signature: Value(signature),
       attachments: Value(attachments),
       certificate: Value(certificate),
-      sender:
-          sender == null && nullToAbsent ? const Value.absent() : Value(sender),
+      sender: Value(sender),
+      senderAccount: Value(senderAccount),
       createdAt: Value(createdAt),
-      conversationId: conversationId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(conversationId),
+      conversationId: Value(conversationId),
       edited: Value(edited),
     );
   }
@@ -956,9 +974,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       signature: serializer.fromJson<String>(json['signature']),
       attachments: serializer.fromJson<String>(json['attachments']),
       certificate: serializer.fromJson<String>(json['certificate']),
-      sender: serializer.fromJson<String?>(json['sender']),
+      sender: serializer.fromJson<String>(json['sender']),
+      senderAccount: serializer.fromJson<String>(json['senderAccount']),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
-      conversationId: serializer.fromJson<String?>(json['conversationId']),
+      conversationId: serializer.fromJson<String>(json['conversationId']),
       edited: serializer.fromJson<bool>(json['edited']),
     );
   }
@@ -973,9 +992,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       'signature': serializer.toJson<String>(signature),
       'attachments': serializer.toJson<String>(attachments),
       'certificate': serializer.toJson<String>(certificate),
-      'sender': serializer.toJson<String?>(sender),
+      'sender': serializer.toJson<String>(sender),
+      'senderAccount': serializer.toJson<String>(senderAccount),
       'createdAt': serializer.toJson<BigInt>(createdAt),
-      'conversationId': serializer.toJson<String?>(conversationId),
+      'conversationId': serializer.toJson<String>(conversationId),
       'edited': serializer.toJson<bool>(edited),
     };
   }
@@ -988,9 +1008,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           String? signature,
           String? attachments,
           String? certificate,
-          Value<String?> sender = const Value.absent(),
+          String? sender,
+          String? senderAccount,
           BigInt? createdAt,
-          Value<String?> conversationId = const Value.absent(),
+          String? conversationId,
           bool? edited}) =>
       MessageData(
         id: id ?? this.id,
@@ -1000,10 +1021,10 @@ class MessageData extends DataClass implements Insertable<MessageData> {
         signature: signature ?? this.signature,
         attachments: attachments ?? this.attachments,
         certificate: certificate ?? this.certificate,
-        sender: sender.present ? sender.value : this.sender,
+        sender: sender ?? this.sender,
+        senderAccount: senderAccount ?? this.senderAccount,
         createdAt: createdAt ?? this.createdAt,
-        conversationId:
-            conversationId.present ? conversationId.value : this.conversationId,
+        conversationId: conversationId ?? this.conversationId,
         edited: edited ?? this.edited,
       );
   @override
@@ -1017,6 +1038,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           ..write('attachments: $attachments, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
+          ..write('senderAccount: $senderAccount, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')
           ..write('edited: $edited')
@@ -1025,8 +1047,19 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, verified, type, content, signature,
-      attachments, certificate, sender, createdAt, conversationId, edited);
+  int get hashCode => Object.hash(
+      id,
+      verified,
+      type,
+      content,
+      signature,
+      attachments,
+      certificate,
+      sender,
+      senderAccount,
+      createdAt,
+      conversationId,
+      edited);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1039,6 +1072,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           other.attachments == this.attachments &&
           other.certificate == this.certificate &&
           other.sender == this.sender &&
+          other.senderAccount == this.senderAccount &&
           other.createdAt == this.createdAt &&
           other.conversationId == this.conversationId &&
           other.edited == this.edited);
@@ -1052,9 +1086,10 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> signature;
   final Value<String> attachments;
   final Value<String> certificate;
-  final Value<String?> sender;
+  final Value<String> sender;
+  final Value<String> senderAccount;
   final Value<BigInt> createdAt;
-  final Value<String?> conversationId;
+  final Value<String> conversationId;
   final Value<bool> edited;
   final Value<int> rowid;
   const MessageCompanion({
@@ -1066,6 +1101,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.attachments = const Value.absent(),
     this.certificate = const Value.absent(),
     this.sender = const Value.absent(),
+    this.senderAccount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.edited = const Value.absent(),
@@ -1079,9 +1115,10 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required String signature,
     required String attachments,
     required String certificate,
-    this.sender = const Value.absent(),
+    required String sender,
+    required String senderAccount,
     required BigInt createdAt,
-    this.conversationId = const Value.absent(),
+    required String conversationId,
     required bool edited,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -1091,7 +1128,10 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
         signature = Value(signature),
         attachments = Value(attachments),
         certificate = Value(certificate),
+        sender = Value(sender),
+        senderAccount = Value(senderAccount),
         createdAt = Value(createdAt),
+        conversationId = Value(conversationId),
         edited = Value(edited);
   static Insertable<MessageData> custom({
     Expression<String>? id,
@@ -1102,6 +1142,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     Expression<String>? attachments,
     Expression<String>? certificate,
     Expression<String>? sender,
+    Expression<String>? senderAccount,
     Expression<BigInt>? createdAt,
     Expression<String>? conversationId,
     Expression<bool>? edited,
@@ -1116,6 +1157,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       if (attachments != null) 'attachments': attachments,
       if (certificate != null) 'certificate': certificate,
       if (sender != null) 'sender': sender,
+      if (senderAccount != null) 'sender_account': senderAccount,
       if (createdAt != null) 'created_at': createdAt,
       if (conversationId != null) 'conversation_id': conversationId,
       if (edited != null) 'edited': edited,
@@ -1131,9 +1173,10 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<String>? signature,
       Value<String>? attachments,
       Value<String>? certificate,
-      Value<String?>? sender,
+      Value<String>? sender,
+      Value<String>? senderAccount,
       Value<BigInt>? createdAt,
-      Value<String?>? conversationId,
+      Value<String>? conversationId,
       Value<bool>? edited,
       Value<int>? rowid}) {
     return MessageCompanion(
@@ -1145,6 +1188,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       attachments: attachments ?? this.attachments,
       certificate: certificate ?? this.certificate,
       sender: sender ?? this.sender,
+      senderAccount: senderAccount ?? this.senderAccount,
       createdAt: createdAt ?? this.createdAt,
       conversationId: conversationId ?? this.conversationId,
       edited: edited ?? this.edited,
@@ -1179,6 +1223,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     if (sender.present) {
       map['sender'] = Variable<String>(sender.value);
     }
+    if (senderAccount.present) {
+      map['sender_account'] = Variable<String>(senderAccount.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<BigInt>(createdAt.value);
     }
@@ -1205,6 +1252,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
           ..write('attachments: $attachments, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
+          ..write('senderAccount: $senderAccount, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')
           ..write('edited: $edited, ')
