@@ -8,8 +8,7 @@ import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/database/conversation/conversation.dart'
-    as model;
+import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
@@ -27,8 +26,7 @@ part 'conversation_actions.dart';
 
 class ConversationController extends GetxController {
   final loaded = false.obs;
-  final order =
-      <String>[].obs; // List of conversation IDs in order of last updated
+  final order = <String>[].obs; // List of conversation IDs in order of last updated
   final conversations = <String, Conversation>{};
   int newConvs = 0;
 
@@ -37,9 +35,7 @@ class ConversationController extends GetxController {
     conversations[conversation.id] = conversation;
 
     if (conversation.members.isEmpty) {
-      final members = await (db.select(db.member)
-            ..where((tbl) => tbl.conversationId.equals(conversation.id)))
-          .get();
+      final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
 
       for (var member in members) {
         conversation.addMember(Member.fromData(member));
@@ -49,8 +45,7 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  Future<bool> addCreated(Conversation conversation, List<Member> members,
-      {Member? admin}) async {
+  Future<bool> addCreated(Conversation conversation, List<Member> members, {Member? admin}) async {
     conversations[conversation.id] = conversation;
     _insertToOrder(conversation.id);
 
@@ -62,8 +57,7 @@ class ConversationController extends GetxController {
     }
 
     // Add to vault
-    final vaultId =
-        await addToVault(Constants.conversationTag, conversation.toJson());
+    final vaultId = await addToVault(Constants.conversationTag, conversation.toJson());
     if (vaultId == null) {
       // TODO: refresh the vault or something
       sendLog("COULDNT STORE IN VAULT; SOMETHING WENT WRONG");
@@ -81,30 +75,21 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  void updateMessageRead(String conversation,
-      {bool increment = true, required int messageSendTime}) {
+  void updateMessageRead(String conversation, {bool increment = true, required int messageSendTime}) {
     (db.conversation.update()..where((tbl) => tbl.id.equals(conversation)))
-        .write(ConversationCompanion(
-            updatedAt: drift.Value(
-                BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
 
     // Swap in the map
     _insertToOrder(conversation);
-    conversations[conversation]!.updatedAt.value =
-        DateTime.now().millisecondsSinceEpoch;
-    if (increment &&
-        conversations[conversation]!.readAt.value < messageSendTime) {
+    conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
+    if (increment && conversations[conversation]!.readAt.value < messageSendTime) {
       conversations[conversation]!.notificationCount.value += 1;
     }
   }
 
-  void finishedLoading(Map<String, dynamic> readStates, List<dynamic> deleted,
-      {bool overwriteReads = true}) async {
+  void finishedLoading(Map<String, dynamic> readStates, List<dynamic> deleted, {bool overwriteReads = true}) async {
     // Sort the conversations
-    order.sort((a, b) => conversations[b]!
-        .updatedAt
-        .value
-        .compareTo(conversations[a]!.updatedAt.value));
+    order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
     for (var conversation in conversations.values) {
       // Check if it was deleted
       if (deleted.contains(conversation.token.id)) {
@@ -151,8 +136,7 @@ class Conversation {
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.vaultId, this.type, this.token, this.container,
-      this.key, int updatedAt) {
+  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.key, int updatedAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
@@ -182,15 +166,8 @@ class Conversation {
   }
 
   Future<bool> fetchNotificationCount() async {
-    final count = await db.customSelect(
-        "SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?",
-        variables: [
-          drift.Variable.withString(id),
-          drift.Variable.withBigInt(BigInt.from(readAt.value))
-        ],
-        readsFrom: {
-          db.message
-        }).getSingle();
+    final count = await db.customSelect("SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?",
+        variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))], readsFrom: {db.message}).getSingle();
     notificationCount.value += (count.data["c"] ?? 0) as int;
     return true;
   }
@@ -198,10 +175,8 @@ class Conversation {
   bool get isGroup => type == model.ConversationType.group;
   String get dmName => (Get.find<FriendController>().friends[members.values
               .firstWhere(
-                (element) =>
-                    element.account != Get.find<StatusController>().id.value,
-                orElse: () => Member(StatusController.ownAccountId,
-                    StatusController.ownAccountId, MemberRole.user),
+                (element) => element.account != Get.find<StatusController>().id.value,
+                orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user),
               )
               .account] ??
           Friend.unknown(container.name))
@@ -209,11 +184,8 @@ class Conversation {
   bool get borked =>
       !isGroup &&
       Get.find<FriendController>().friends[members.values
-              .firstWhere(
-                  (element) =>
-                      element.account != Get.find<StatusController>().id.value,
-                  orElse: () => Member(StatusController.ownAccountId,
-                      StatusController.ownAccountId, MemberRole.user))
+              .firstWhere((element) => element.account != Get.find<StatusController>().id.value,
+                  orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
               .account] ==
           null;
 
@@ -253,8 +225,7 @@ class Conversation {
 
       if (!json["success"]) {
         sendLog("Error deleting conversation from vault: ${json["error"]}");
-        if (popup)
-          showErrorPopup("error".tr, "error.not_delete_conversation".tr);
+        if (popup) showErrorPopup("error".tr, "error.not_delete_conversation".tr);
         return;
       }
     }
@@ -273,8 +244,7 @@ class Conversation {
     }
   }
 
-  DateTime?
-      lastMemberFetch; // Makes sure we only do it once when multiple methods call it
+  DateTime? lastMemberFetch; // Makes sure we only do it once when multiple methods call it
 
   // Re-fetch members of conversation (and save to database)
   void fetchMembers(DateTime message) async {
@@ -307,8 +277,7 @@ class Conversation {
     for (var memberData in json["members"]) {
       sendLog(memberData);
       final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-      members[memberData["id"]] = Member(memberData["id"], memberContainer.id,
-          MemberRole.fromValue(memberData["rank"]));
+      members[memberData["id"]] = Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"]));
     }
 
     for (var currentMember in this.members.values) {

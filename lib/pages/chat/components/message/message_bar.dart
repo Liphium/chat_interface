@@ -9,6 +9,7 @@ import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -121,8 +122,15 @@ class _MessageBarState extends State<MessageBar> {
                           sendLog(finalList);
 
                           // Add the people to the conversation
+                          for (var friend in finalList) {
+                            final res = await addToConversation(widget.conversation, friend);
+                            if (!res) {
+                              showErrorPopup("error", "server.error");
+                              return null;
+                            }
+                          }
 
-                          return "hello world";
+                          return null;
                         },
                       ));
                     } else {
@@ -156,8 +164,10 @@ class _MessageBarState extends State<MessageBar> {
                   child: Obx(
                     () => IconButton(
                       iconSize: 27,
-                      icon:
-                          Icon(Icons.group, color: controller.settings[AppSettings.showGroupMembers]!.value.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
+                      icon: Icon(Icons.group,
+                          color: controller.settings[AppSettings.showGroupMembers]!.value.value
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
                         controller.settings[AppSettings.showGroupMembers]!.setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
                       },

@@ -11,18 +11,14 @@ class SystemMessages {
     "group.rank_change": SystemMessage(
       Icons.shield,
       handler: (msg) {
-        final conversation =
-            Get.find<ConversationController>().conversations[msg.conversation]!;
+        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
         conversation.fetchMembers(msg.createdAt);
       },
       translation: (msg) {
         final friendController = Get.find<FriendController>();
-        return "chat.rank_change.${msg.attachments[0]}->${msg.attachments[1]}"
-            .trParams({
+        return "chat.rank_change.${msg.attachments[0]}->${msg.attachments[1]}".trParams({
           "name": friendController.getFriend(msg.attachments[2]).name,
-          "sender": friendController
-              .getFriend(msg.attachments[3])
-              .name, // NZJNP232RS5g
+          "sender": friendController.getFriend(msg.attachments[3]).name, // NZJNP232RS5g
         });
       },
     ),
@@ -34,8 +30,7 @@ class SystemMessages {
       handler: (msg) => {},
       translation: (msg) {
         return "chat.token_change".trParams({
-          "name":
-              Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
       },
     ),
@@ -45,14 +40,25 @@ class SystemMessages {
     "group.member_join": SystemMessage(
       Icons.arrow_forward,
       handler: (msg) {
-        final conversation =
-            Get.find<ConversationController>().conversations[msg.conversation]!;
+        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
         conversation.fetchMembers(msg.createdAt);
       },
       translation: (msg) {
         return "chat.member_join".trParams({
-          "name":
-              Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+        });
+      },
+    ),
+
+    // Called when a member invites a new member to the group
+    // Format: [invitorId, memberId]
+    "group.member_invite": SystemMessage(
+      Icons.waving_hand,
+      handler: (msg) {},
+      translation: (msg) {
+        return "chat.member_invite".trParams({
+          "invitor": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[1]).name,
         });
       },
     ),
@@ -62,14 +68,12 @@ class SystemMessages {
     "group.member_leave": SystemMessage(
       Icons.arrow_back,
       handler: (msg) {
-        final conversation =
-            Get.find<ConversationController>().conversations[msg.conversation]!;
+        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
         conversation.fetchMembers(msg.createdAt);
       },
       translation: (msg) {
         return "chat.member_leave".trParams({
-          "name":
-              Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
       },
     ),
@@ -79,14 +83,12 @@ class SystemMessages {
     "group.new_admin": SystemMessage(
       Icons.shield,
       handler: (msg) {
-        final conversation =
-            Get.find<ConversationController>().conversations[msg.conversation]!;
+        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
         conversation.fetchMembers(msg.createdAt);
       },
       translation: (msg) {
         return "chat.new_admin".trParams({
-          "name":
-              Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
       },
     ),
@@ -98,8 +100,7 @@ class SystemMessages {
       store: false,
       render: false,
       handler: (msg) {
-        Get.find<MessageController>()
-            .deleteMessageFromClient(msg.attachments[0]);
+        Get.find<MessageController>().deleteMessageFromClient(msg.attachments[0]);
       },
       translation: (msg) {
         return "msg.deleted".tr;
@@ -115,11 +116,7 @@ class SystemMessage {
   final String Function(Message) translation;
   final Function(Message) handler;
 
-  SystemMessage(this.icon,
-      {required this.handler,
-      required this.translation,
-      this.render = true,
-      this.store = true});
+  SystemMessage(this.icon, {required this.handler, required this.translation, this.render = true, this.store = true});
 
   void handle(Message message) {
     message.decryptSystemMessageAttachments();

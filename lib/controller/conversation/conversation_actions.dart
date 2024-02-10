@@ -75,7 +75,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   final memberContainers = <String, String>{};
   for (final friend in friends) {
     final container = MemberContainer(friend.id);
-    memberContainers[friend.id] = (container.encrypted(conversationKey));
+    memberContainers[friend.id] = container.encrypted(conversationKey);
   }
   final conversationContainer = ConversationContainer(name);
   final encryptedData = conversationContainer.encrypted(conversationKey);
@@ -93,7 +93,8 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   }
 
   // Create the conversation
-  final body = await postNodeJSON("/conversations/open", <String, dynamic>{"accountData": ownMemberContainer, "members": memberContainers.values.toList(), "data": encryptedData});
+  final body =
+      await postNodeJSON("/conversations/open", <String, dynamic>{"accountData": ownMemberContainer, "members": memberContainers.values.toList(), "data": encryptedData});
   if (!body["success"]) {
     showErrorPopup("error".tr, "error.unknown".tr);
     return false;
@@ -102,22 +103,13 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   //* Send the stuff to all other members
   final conversationController = Get.find<ConversationController>();
 
-  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]), conversationContainer, conversationKey,
-      DateTime.now().millisecondsSinceEpoch);
+  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
+      conversationContainer, conversationKey, DateTime.now().millisecondsSinceEpoch);
   final members = <Member>[];
   final packagedKey = packageSymmetricKey(conversationKey);
   for (var friend in friends) {
     final token = ConversationToken.fromJson(body["tokens"][hashSha(memberContainers[friend.id]!)]);
-    final signature = signMessage(signatureKeyPair.secretKey, "${body["conversation"]}${friend.id}");
-    await sendAuthenticatedStoredAction(
-        friend,
-        storedAction("conv", <String, dynamic>{
-          "s": StatusController.ownAccountId,
-          "id": body["conversation"],
-          "sg": signature,
-          "token": token.toJson(),
-          "key": packagedKey,
-        }));
+    await sendAuthenticatedStoredAction(friend, _conversationPayload(body["conversation"], token, packagedKey, friend));
     members.add(Member(token.id, friend.id, MemberRole.user));
   }
 
@@ -126,4 +118,33 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), conversation.token, deletions: false);
 
   return true;
+}
+
+/// Add a friend to a conversation by generating a new token for them and then
+/// sending it to them by using a authenticated stored action.
+Future<bool> addToConversation(Conversation conv, Friend friend) async {
+  // Generate a new conversation token for the friend
+  final json = await postNodeJSON("/conversations/generate_token", {
+    "id": conv.token.id,
+    "token": conv.token.token,
+    "data": MemberContainer(friend.id).encrypted(conv.key),
+  });
+
+  if (!json["success"]) {
+    return false;
+  }
+
+  final result = await sendAuthenticatedStoredAction(friend, _conversationPayload(conv.id, ConversationToken.fromJson(json), packageSymmetricKey(conv.key), friend));
+  return result;
+}
+
+String _conversationPayload(String id, ConversationToken token, String packagedKey, Friend friend) {
+  final signature = signMessage(signatureKeyPair.secretKey, "$id${friend.id}");
+  return storedAction("conv", {
+    "s": StatusController.ownAccountId,
+    "id": id,
+    "sg": signature,
+    "token": token.toJson(),
+    "key": packagedKey,
+  });
 }

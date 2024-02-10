@@ -9,8 +9,7 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
-import 'package:chat_interface/database/conversation/conversation.dart'
-    as model;
+import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/web.dart';
@@ -27,8 +26,7 @@ void setupStoredActionListener() {
     try {
       await processStoredAction(event.data);
     } catch (e) {
-      sendLog(
-          "something weird happened: error while processing stored action payload");
+      sendLog("something weird happened: error while processing stored action payload");
       sendLog(e);
     }
   });
@@ -36,8 +34,7 @@ void setupStoredActionListener() {
 
 Future<bool> processStoredAction(Map<String, dynamic> action) async {
   // Decrypt stored action payload
-  final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey,
-      asymmetricKeyPair.secretKey, action["payload"]);
+  final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, action["payload"]);
   if (payload == "") {
     // Delete the action (invalid)
     sendLog("invalid stored action: couldn't decrypt payload (DELETED)");
@@ -67,8 +64,7 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
 }
 
 //* Friend requests
-Future<bool> _handleFriendRequestAction(
-    String actionId, Map<String, dynamic> json) async {
+Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> json) async {
   // Delete the action (it doesn't need to be handled twice)
   final response = await deleteStoredAction(actionId);
   if (!response) {
@@ -76,8 +72,7 @@ Future<bool> _handleFriendRequestAction(
   }
 
   // Get friend by name and tag
-  final resJson = await postAuthorizedJSON("/account/stored_actions/details",
-      {"username": json["name"], "tag": json["tag"]});
+  final resJson = await postAuthorizedJSON("/account/stored_actions/details", {"username": json["name"], "tag": json["tag"]});
 
   if (!resJson["success"]) {
     sendLog("invalid friend request: ${json["error"]}");
@@ -88,10 +83,8 @@ Future<bool> _handleFriendRequestAction(
   final publicKey = unpackagePublicKey(resJson["key"]);
   final signatureKey = unpackagePublicKey(resJson["sg"]);
   final statusController = Get.find<StatusController>();
-  final signedMessage =
-      "${statusController.name.value}#${statusController.tag.value}";
-  final result =
-      decryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, json["s"]);
+  final signedMessage = "${statusController.name.value}#${statusController.tag.value}";
+  final result = decryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, json["s"]);
   if (!result.success || result.message != signedMessage) {
     sendLog("invalid friend request: invalid signature");
     return true;
@@ -99,9 +92,7 @@ Future<bool> _handleFriendRequestAction(
 
   // Check if the current account already sent this account a friend request (-> add friend)
   final id = resJson["account"];
-  var request = Get.find<RequestController>().requestsSent.firstWhere(
-      (element) => element.id == id,
-      orElse: () => Request.mock("hi"));
+  var request = Get.find<RequestController>().requestsSent.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
   sendLog("${request.id} | $id");
 
   if (request.id != "hi") {
@@ -118,32 +109,20 @@ Future<bool> _handleFriendRequestAction(
   }
 
   // Check if the request is already in the list
-  if (Get.find<RequestController>()
-      .requests
-      .any((element) => element.id == id)) {
+  if (Get.find<RequestController>().requests.any((element) => element.id == id)) {
     sendLog("invalid friend request: already in list");
     return true;
   }
 
   // Check if the guy is already a friend
-  if (Get.find<FriendController>()
-      .friends
-      .values
-      .any((element) => element.id == id)) {
+  if (Get.find<FriendController>().friends.values.any((element) => element.id == id)) {
     sendLog("invalid friend request: already a friend");
     return true;
   }
 
   // Add friend request to vault
   final profileKey = unpackageSymmetricKey(json["pf"]);
-  request = Request(
-      id,
-      json["name"],
-      json["tag"],
-      "",
-      actionId,
-      KeyStorage(publicKey, signatureKey, profileKey, json["sa"]),
-      DateTime.now().millisecondsSinceEpoch);
+  request = Request(id, json["name"], json["tag"], "", actionId, KeyStorage(publicKey, signatureKey, profileKey, json["sa"]), DateTime.now().millisecondsSinceEpoch);
 
   final vaultId = await storeInFriendsVault(request.toStoredPayload(false));
   if (vaultId == null) {
@@ -159,8 +138,7 @@ Future<bool> _handleFriendRequestAction(
 }
 
 //* Conversation opening
-Future<bool> _handleConversationOpening(
-    String actionId, Map<String, dynamic> actionJson) async {
+Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> actionJson) async {
   // Delete the action (it doesn't need to be handled twice)
   final response = await deleteStoredAction(actionId);
   if (!response) {
@@ -175,8 +153,7 @@ Future<bool> _handleConversationOpening(
   }
 
   final token = jsonDecode(actionJson["token"]);
-  final json = await postNodeJSON("/conversations/activate",
-      <String, dynamic>{"id": token["id"], "token": token["token"]});
+  final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"id": token["id"], "token": token["token"]});
   if (!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
     // TODO: Could also mean it has been activated on another device
@@ -192,8 +169,7 @@ Future<bool> _handleConversationOpening(
   for (var memberData in json["members"]) {
     sendLog(memberData);
     final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-    members.add(Member(memberData["id"], memberContainer.id,
-        MemberRole.fromValue(memberData["rank"])));
+    members.add(Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"])));
   }
 
   final container = ConversationContainer.decrypt(json["data"], key);
@@ -211,9 +187,7 @@ Future<bool> _handleConversationOpening(
     members,
   );
   final statusController = Get.find<StatusController>();
-  subscribeToConversation(statusController.statusJson(),
-      statusController.generateFriendId(), convToken,
-      deletions: false);
+  subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), convToken, deletions: false);
 
   return true;
 }

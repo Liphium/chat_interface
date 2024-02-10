@@ -77,6 +77,7 @@ class ChatPageTranslations extends Translations {
           'chat.member_join': '@name has joined the conversation.',
           'chat.member_leave': '@name has left the conversation.',
           'chat.new_admin': '@name is now an Admin because the original Admin left the conversation.',
+          'chat.member_invite': '@invitor invited @name to join the group.',
 
           // Message menu
           'message.info': 'Info',
