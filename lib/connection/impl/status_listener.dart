@@ -21,17 +21,13 @@ void setupStatusListener() {
 
     // Send back status
     final controller = Get.find<StatusController>();
-    String status = generateStatusData(
-        controller.statusJson(), controller.generateFriendId());
+    String status = generateStatusData(controller.statusJson(), controller.generateFriendId());
 
     // Get dm with friend
     final dm = Get.find<ConversationController>()
         .conversations
         .values
-        .firstWhere((element) =>
-            element.members.length == 2 &&
-            element.members.values
-                .any((element) => element.account == friend.id));
+        .firstWhere((element) => element.members.length == 2 && element.members.values.any((element) => element.account == friend.id));
 
     connector.sendAction(Message("st_res", <String, dynamic>{
       "id": dm.token.id,
@@ -68,8 +64,8 @@ Friend? handleStatus(Event event) {
   final sharedData = event.data["d"] as String;
   if (sharedData != "") {
     sendLog("RECEIVED SHARED CONTENT");
-    final sharedJson =
-        decryptSymmetric(sharedData, friend.keyStorage.profileKey);
+    final sharedJson = decryptSymmetric(sharedData, friend.keyStorage.profileKey);
+    sendLog(sharedJson);
     final shared = jsonDecode(sharedJson) as Map<String, dynamic>;
     switch (ShareType.values[shared["type"] as int]) {
       // Shared space
@@ -84,8 +80,7 @@ Friend? handleStatus(Event event) {
         break;
     }
   } else {
-    final container =
-        Get.find<StatusController>().sharedContent.remove(friend.id);
+    final container = Get.find<StatusController>().sharedContent.remove(friend.id);
     container?.onDrop();
   }
 

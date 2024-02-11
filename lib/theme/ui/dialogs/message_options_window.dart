@@ -16,11 +16,12 @@ class MessageOptionsWindow extends StatefulWidget {
   final bool self;
   final Message message;
 
-  const MessageOptionsWindow(
-      {super.key,
-      required this.data,
-      required this.self,
-      required this.message});
+  const MessageOptionsWindow({
+    super.key,
+    required this.data,
+    required this.self,
+    required this.message,
+  });
 
   @override
   State<MessageOptionsWindow> createState() => _ConversationAddWindowState();
@@ -31,10 +32,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final member = Get.find<ConversationController>()
-        .conversations[widget.message.conversation]!
-        .members[widget.message.sender]!;
-    final friend = Get.find<FriendController>().friends[member.account];
+    final friend = Get.find<FriendController>().friends[widget.message.senderAccount];
 
     return SlidingWindowBase(
       lessPadding: true,
@@ -51,16 +49,14 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             },
             loading: false.obs,
           ),
-          if (widget.message.type == MessageType.text &&
-              widget.message.content != "")
+          if (widget.message.type == MessageType.text && widget.message.content != "")
             Padding(
               padding: const EdgeInsets.only(top: elementSpacing),
               child: ProfileButton(
                 icon: Icons.copy,
                 label: "message.copy".tr,
                 onTap: () {
-                  Clipboard.setData(
-                      ClipboardData(text: widget.message.content));
+                  Clipboard.setData(ClipboardData(text: widget.message.content));
                   Get.back();
                 },
                 loading: false.obs,
@@ -72,8 +68,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             label: "message.profile".tr,
             onTap: () {
               Get.back();
-              Get.dialog(
-                  Profile(friend: friend ?? Friend.unknown(member.account)));
+              Get.dialog(Profile(friend: friend ?? Friend.unknown(widget.message.senderAccount)));
             },
             loading: false.obs,
           ),

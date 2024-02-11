@@ -17,6 +17,8 @@ class ChatPageTranslations extends Translations {
           'status.3': 'Busy',
           'status.message': 'Status message',
           'status.message.add': 'Add a status message',
+          'profile.stop_sharing': "Stop sharing space",
+          'profile.start_sharing': 'Start sharing space',
           'profile.settings': 'Settings',
           'profile.friends': 'Friends',
           'profile.files': 'Files',

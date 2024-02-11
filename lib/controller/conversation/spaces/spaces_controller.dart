@@ -46,6 +46,7 @@ class SpacesController extends GetxController {
   final loopSource = AssetSource("music/arcade_loop.wav");
 
   //* Space information
+  static String? currentDomain;
   final id = "".obs;
   static SecureKey? key;
 
@@ -64,6 +65,10 @@ class SpacesController extends GetxController {
 
   void createAndConnect(String conversationId) {
     _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, [], container.toInviteJson(), () => {}));
+  }
+
+  SpaceConnectionContainer getContainer() {
+    return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
   }
 
   StreamSubscription<void>? _sub;
@@ -193,6 +198,7 @@ class SpacesController extends GetxController {
       sendLog("key is null: can't connect to space");
       return;
     }
+    currentDomain = appToken["domain"];
 
     // Setup all controllers
     Get.find<AudioController>().onConnect();

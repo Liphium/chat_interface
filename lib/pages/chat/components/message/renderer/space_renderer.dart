@@ -69,17 +69,16 @@ class _SpaceRendererState extends State<SpaceRenderer> {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: Obx(() {
-        // TODO: Make this better and compatible with messages too
-
         if (_loading.value || _info.value == null) {
           return Center(
-              child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: CircularProgressIndicator(
-              color: Get.theme.colorScheme.onPrimary,
-              backgroundColor: Get.theme.colorScheme.primary,
+            child: Padding(
+              padding: const EdgeInsets.all(defaultSpacing),
+              child: CircularProgressIndicator(
+                color: Get.theme.colorScheme.onPrimary,
+                backgroundColor: Get.theme.colorScheme.primary,
+              ),
             ),
-          ));
+          );
         }
 
         if (!_info.value!.exists) {
@@ -128,13 +127,14 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                 children: [
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      /* Info is buggy, so removed for now
                       Visibility(
                         visible: info.title.isNotEmpty,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: defaultSpacing),
                           child: Text(info.title, style: Get.theme.textTheme.labelLarge),
                         ),
-                      ),
+                      ),*/
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

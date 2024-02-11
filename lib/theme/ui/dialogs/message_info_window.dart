@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
@@ -21,9 +22,8 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final conversationToken = Get.find<ConversationController>()
-        .conversations[widget.message.conversation]!
-        .members[widget.message.sender]!;
+    final conversationToken = Get.find<ConversationController>().conversations[widget.message.conversation]!.members[widget.message.sender] ??
+        Member("removed".tr, widget.message.senderAccount, MemberRole.user);
 
     return DialogBase(
       child: Column(
@@ -79,8 +79,7 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
             icon: Icons.copy,
             label: "message.info.copy_cert".tr,
             onTap: () {
-              Clipboard.setData(
-                  ClipboardData(text: widget.message.certificate));
+              Clipboard.setData(ClipboardData(text: widget.message.certificate));
               Get.back();
             },
             loading: false.obs,

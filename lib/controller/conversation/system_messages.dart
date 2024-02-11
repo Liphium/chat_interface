@@ -85,9 +85,6 @@ class SystemMessages {
       Icons.arrow_back,
       handler: (msg) {
         final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        if (msg.attachments[1] == StatusController.ownAccountId) {
-          conversation.delete(popup: false, request: false);
-        }
         conversation.fetchMembers(msg.createdAt);
       },
       translation: (msg) {
@@ -121,6 +118,23 @@ class SystemMessages {
       render: false,
       handler: (msg) {
         Get.find<MessageController>().deleteMessageFromClient(msg.attachments[0]);
+      },
+      translation: (msg) {
+        return "msg.deleted".tr;
+      },
+    ),
+
+    // Called when the member is unsubscribed from the conversation (due to deletion or sth)
+    // Format: [accountId]
+    "conv.kicked": SystemMessage(
+      Icons.delete,
+      store: false,
+      render: false,
+      handler: (msg) {
+        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
+        if (msg.attachments[0] == StatusController.ownAccountId) {
+          conversation.delete(popup: false, request: false);
+        }
       },
       translation: (msg) {
         return "msg.deleted".tr;

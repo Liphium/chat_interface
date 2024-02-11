@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -55,8 +58,47 @@ class _OutputTabState extends State<OutputTab> {
 
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildOutputButton(controller, api.OutputDevice(id: SpeechSettings.defaultDeviceName), BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
+        buildOutputButton(controller, api.OutputDevice(id: SpeechSettings.defaultDeviceName), BorderRadius.circular(defaultSpacing),
+            icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing),
+
+        if (Platform.isLinux)
+          const ErrorContainer(
+            expand: true,
+            message: "The output device selection is not available on Linux because the device list is currently broken. We're working on a better solution.",
+          )
+        else
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("audio.device.custom".tr, style: theme.textTheme.bodyMedium),
+              verticalSpacing(elementSpacing),
+              RepaintBoundary(
+                child: Obx(
+                  () => ListView.builder(
+                    itemCount: _microphones.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      final current = _microphones[index];
+
+                      final first = index == 0;
+                      final last = index == _microphones.length - 1;
+
+                      final radius = BorderRadius.vertical(
+                        top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                        bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+                      );
+
+                      return buildOutputButton(controller, current, radius);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+        /*
 
         Text("audio.output.device".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
@@ -81,7 +123,7 @@ class _OutputTabState extends State<OutputTab> {
               )),
         ),
         verticalSpacing(sectionSpacing),
-
+        */
         // TODO: Some sort of audio test
       ],
     );
@@ -91,7 +133,9 @@ class _OutputTabState extends State<OutputTab> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: elementSpacing * 0.5, horizontal: elementSpacing),
       child: Obx(() => Material(
-            color: controller.settings["audio.output"]!.getOr(SpeechSettings.defaultDeviceName) == current.id ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+            color: controller.settings["audio.output"]!.getOr(SpeechSettings.defaultDeviceName) == current.id
+                ? Get.theme.colorScheme.primary
+                : Get.theme.colorScheme.onBackground,
             borderRadius: radius,
             child: InkWell(
               borderRadius: radius,

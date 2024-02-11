@@ -20,6 +20,7 @@ class GeneralTranslations extends Translations {
           'delete': 'Delete',
           'cancel': 'Cancel',
           'remove': 'Remove',
+          'removed': 'Removed',
           'add': 'Add',
           'select': 'Select',
           'search': 'Search',
@@ -34,10 +35,8 @@ class GeneralTranslations extends Translations {
           'invite': 'Invite',
           'email': 'Email',
           'code': 'Code',
-          'under.dev':
-              'This featue is still under development. Sorry for the inconvenience. Please contact support if this is something important.',
-          'no.friends':
-              'You have no friends yet. If you want to add some, you can do that in the friends page.',
+          'under.dev': 'This featue is still under development. Sorry for the inconvenience. Please contact support if this is something important.',
+          'no.friends': 'You have no friends yet. If you want to add some, you can do that in the friends page.',
           'open.friends': 'Open friends page',
 
           // Time TODO: Differentiate between PM and AM

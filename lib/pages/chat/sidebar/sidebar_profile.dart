@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
@@ -40,26 +41,17 @@ class _SidebarProfileState extends State<SidebarProfile> {
                   if (!controller.inSpace.value) {
                     return const SizedBox.shrink();
                   }
-                  final shown = Get.find<MessageController>()
-                          .selectedConversation
-                          .value
-                          .id ==
-                      "0";
+                  final shown = Get.find<MessageController>().selectedConversation.value.id == "0";
 
                   return Column(
                     children: [
                       Material(
                         borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: shown
-                            ? theme.colorScheme.background
-                            : theme.colorScheme.primaryContainer,
+                        color: shown ? theme.colorScheme.background : theme.colorScheme.primaryContainer,
                         child: InkWell(
-                          onTap: () => Get.find<MessageController>()
-                              .unselectConversation(),
+                          onTap: () => Get.find<MessageController>().unselectConversation(),
                           splashColor: theme.hoverColor,
-                          hoverColor: shown
-                              ? theme.colorScheme.background
-                              : theme.colorScheme.background,
+                          hoverColor: shown ? theme.colorScheme.background : theme.colorScheme.background,
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           child: Padding(
                             padding: const EdgeInsets.all(defaultSpacing),
@@ -69,15 +61,13 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(controller.title.value,
-                                        style: Get.theme.textTheme.labelMedium),
-                                    verticalSpacing(elementSpacing),
-                                    renderMiniAvatars(1)
+                                    //Text(controller.title.value, style: Get.theme.textTheme.labelMedium),
+                                    //verticalSpacing(elementSpacing),
+                                    Obx(() => renderMiniAvatars(Get.find<SpaceMemberController>().members.length)),
                                   ],
                                 ),
                                 horizontalSpacing(defaultSpacing),
-                                DurationRenderer(controller.start.value,
-                                    style: theme.textTheme.bodyLarge)
+                                DurationRenderer(controller.start.value, style: theme.textTheme.bodyLarge)
                               ],
                             ),
                           ),
@@ -93,25 +83,20 @@ class _SidebarProfileState extends State<SidebarProfile> {
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   color: theme.colorScheme.primaryContainer,
                   child: InkWell(
-                    onTap: () => Get.dialog(
-                        const OwnProfile(position: Offset(defaultSpacing, 60))),
+                    onTap: () => Get.dialog(const OwnProfile(position: Offset(defaultSpacing, 60))),
                     splashColor: theme.hoverColor.withAlpha(10),
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: theme.colorScheme.background,
                     splashFactory: NoSplash.splashFactory,
                     child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: elementSpacing,
-                            vertical: elementSpacing),
+                        padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                                 child: Row(
                               children: [
-                                UserAvatar(
-                                    id: StatusController.ownAccountId,
-                                    size: 40),
+                                UserAvatar(id: StatusController.ownAccountId, size: 40),
                                 horizontalSpacing(defaultSpacing * 0.75),
                                 Expanded(
                                   child: Obx(
@@ -119,18 +104,15 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                       visible: !controller.statusLoading.value,
                                       replacement: const Center(
                                           child: Padding(
-                                              padding: EdgeInsets.all(
-                                                  defaultSpacing),
+                                              padding: EdgeInsets.all(defaultSpacing),
                                               child: SizedBox(
                                                   height: 20,
                                                   width: 20,
-                                                  child:
-                                                      CircularProgressIndicator(
+                                                  child: CircularProgressIndicator(
                                                     strokeWidth: 4.0,
                                                   )))),
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           //* Profile name and status type
                                           Row(
@@ -140,43 +122,31 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                                   () => Text(
                                                     controller.name.value,
                                                     maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: theme
-                                                        .textTheme.titleMedium,
-                                                    textHeightBehavior:
-                                                        noTextHeight,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: theme.textTheme.titleMedium,
+                                                    textHeightBehavior: noTextHeight,
                                                   ),
                                                 ),
                                               ),
                                               horizontalSpacing(defaultSpacing),
                                               Obx(
-                                                () => StatusRenderer(
-                                                    status:
-                                                        controller.type.value,
-                                                    text: false),
+                                                () => StatusRenderer(status: controller.type.value, text: false),
                                               )
                                             ],
                                           ),
 
                                           //* Status message
                                           Obx(() => Visibility(
-                                              visible:
-                                                  controller.status.value !=
-                                                      "-",
+                                              visible: controller.status.value != "-",
                                               child: Column(children: [
-                                                verticalSpacing(
-                                                    defaultSpacing * 0.25),
+                                                verticalSpacing(defaultSpacing * 0.25),
 
                                                 //* Status message
                                                 Text(
                                                   controller.status.value,
-                                                  style:
-                                                      theme.textTheme.bodySmall,
-                                                  textHeightBehavior:
-                                                      noTextHeight,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
+                                                  style: theme.textTheme.bodySmall,
+                                                  textHeightBehavior: noTextHeight,
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
                                               ])))
                                         ],
@@ -190,19 +160,13 @@ class _SidebarProfileState extends State<SidebarProfile> {
                             Row(
                               children: [
                                 IconButton(
-                                  onPressed: () =>
-                                      Get.dialog(const FriendsPage()),
-                                  icon: const Icon(Icons.group,
-                                      color: Colors.white),
+                                  onPressed: () => Get.dialog(const FriendsPage()),
+                                  icon: const Icon(Icons.group, color: Colors.white),
                                 ),
                                 horizontalSpacing(defaultSpacing * 0.5),
                                 IconButton(
-                                  onPressed: () => Get.to(const SettingsPage(),
-                                      duration: 300.ms,
-                                      transition: Transition.fade,
-                                      curve: Curves.easeInOut),
-                                  icon: const Icon(Icons.settings,
-                                      color: Colors.white),
+                                  onPressed: () => Get.to(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
+                                  icon: const Icon(Icons.settings, color: Colors.white),
                                 ),
                               ],
                             )

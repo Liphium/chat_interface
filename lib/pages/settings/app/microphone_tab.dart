@@ -187,7 +187,9 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
       padding: const EdgeInsets.symmetric(vertical: elementSpacing * 0.5, horizontal: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.microphone"]!.getOr(SpeechSettings.defaultDeviceName) == current.id ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+          color: controller.settings["audio.microphone"]!.getOr(SpeechSettings.defaultDeviceName) == current.id
+              ? Get.theme.colorScheme.primary
+              : Get.theme.colorScheme.onBackground,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,

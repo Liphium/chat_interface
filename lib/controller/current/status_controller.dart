@@ -44,7 +44,7 @@ class StatusController extends GetxController {
   final sharedContent = RxMap<String, ShareContainer>();
 
   // Current shared content (by this account)
-  ShareContainer? _container;
+  final ownContainer = Rx<ShareContainer?>(null);
 
   void setName(String value) => name.value = value;
   void setTag(String value) => tag.value = value;
@@ -78,35 +78,33 @@ class StatusController extends GetxController {
   }
 
   String sharedContentPacket() {
-    if (_container == null) {
+    if (ownContainer.value == null) {
       return "";
     }
-    return encryptSymmetric(_container!.toJson(), profileKey);
+    return encryptSymmetric(ownContainer.value!.toJson(), profileKey);
   }
 
   Future<bool> share(ShareContainer container) async {
-    if (_container != null) return false;
-    _container = container;
+    if (ownContainer.value != null) return false;
+    ownContainer.value = container;
     await setStatus();
     return true;
   }
 
   void stopSharing() {
-    if (_container == null) {
+    if (ownContainer.value == null) {
       return;
     }
-    _container = null;
+    ownContainer.value = null;
     setStatus();
   }
 
-  Future<bool> setStatus(
-      {String? message, int? type, Function()? success}) async {
+  Future<bool> setStatus({String? message, int? type, Function()? success}) async {
     if (statusLoading.value) return false;
     statusLoading.value = true;
 
     final tokens = <Map<String, dynamic>>[];
-    for (var conversation
-        in Get.find<ConversationController>().conversations.values) {
+    for (var conversation in Get.find<ConversationController>().conversations.values) {
       if (conversation.members.length == 2) {
         tokens.add(conversation.token.toMap());
       }
@@ -114,8 +112,7 @@ class StatusController extends GetxController {
 
     connector.sendAction(
         Message("st_send", <String, dynamic>{
-          "status": statusPacket(
-              newStatusJson(message ?? status.value, type ?? this.type.value)),
+          "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
           "tokens": tokens,
           "data": sharedContentPacket(),
         }), handler: (event) {
@@ -153,8 +150,7 @@ class StatusController extends GetxController {
 }
 
 String friendId(Friend friend) {
-  return hashSha(
-      friend.id + friend.name + friend.tag + friend.keyStorage.storedActionKey);
+  return hashSha(friend.id + friend.name + friend.tag + friend.keyStorage.storedActionKey);
 }
 
 enum ShareType { space }
