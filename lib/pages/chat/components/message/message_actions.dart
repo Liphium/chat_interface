@@ -40,9 +40,16 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
       bool found = false;
       for (var word in line.split(" ")) {
         if (word.isURL) {
-          attachments.add(word);
-          found = true;
-          break;
+          for (var fileType in FileSettings.imageTypes) {
+            if (word.endsWith(".$fileType")) {
+              attachments.add(word);
+              found = true;
+              break;
+            }
+          }
+          if (found) {
+            break;
+          }
         }
       }
       if (found) {

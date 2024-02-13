@@ -2705,6 +2705,155 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
   }
 }
 
+class $TrustedLinkTable extends TrustedLink
+    with TableInfo<$TrustedLinkTable, TrustedLinkData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TrustedLinkTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _domainMeta = const VerificationMeta('domain');
+  @override
+  late final GeneratedColumn<String> domain = GeneratedColumn<String>(
+      'domain', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [domain];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'trusted_link';
+  @override
+  VerificationContext validateIntegrity(Insertable<TrustedLinkData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('domain')) {
+      context.handle(_domainMeta,
+          domain.isAcceptableOrUnknown(data['domain']!, _domainMeta));
+    } else if (isInserting) {
+      context.missing(_domainMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {domain};
+  @override
+  TrustedLinkData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TrustedLinkData(
+      domain: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}domain'])!,
+    );
+  }
+
+  @override
+  $TrustedLinkTable createAlias(String alias) {
+    return $TrustedLinkTable(attachedDatabase, alias);
+  }
+}
+
+class TrustedLinkData extends DataClass implements Insertable<TrustedLinkData> {
+  final String domain;
+  const TrustedLinkData({required this.domain});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['domain'] = Variable<String>(domain);
+    return map;
+  }
+
+  TrustedLinkCompanion toCompanion(bool nullToAbsent) {
+    return TrustedLinkCompanion(
+      domain: Value(domain),
+    );
+  }
+
+  factory TrustedLinkData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TrustedLinkData(
+      domain: serializer.fromJson<String>(json['domain']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'domain': serializer.toJson<String>(domain),
+    };
+  }
+
+  TrustedLinkData copyWith({String? domain}) => TrustedLinkData(
+        domain: domain ?? this.domain,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('TrustedLinkData(')
+          ..write('domain: $domain')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => domain.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TrustedLinkData && other.domain == this.domain);
+}
+
+class TrustedLinkCompanion extends UpdateCompanion<TrustedLinkData> {
+  final Value<String> domain;
+  final Value<int> rowid;
+  const TrustedLinkCompanion({
+    this.domain = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TrustedLinkCompanion.insert({
+    required String domain,
+    this.rowid = const Value.absent(),
+  }) : domain = Value(domain);
+  static Insertable<TrustedLinkData> custom({
+    Expression<String>? domain,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (domain != null) 'domain': domain,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TrustedLinkCompanion copyWith({Value<String>? domain, Value<int>? rowid}) {
+    return TrustedLinkCompanion(
+      domain: domain ?? this.domain,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (domain.present) {
+      map['domain'] = Variable<String>(domain.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrustedLinkCompanion(')
+          ..write('domain: $domain, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   late final $ConversationTable conversation = $ConversationTable(this);
@@ -2715,6 +2864,7 @@ abstract class _$Database extends GeneratedDatabase {
   late final $RequestTable request = $RequestTable(this);
   late final $UnknownProfileTable unknownProfile = $UnknownProfileTable(this);
   late final $ProfileTable profile = $ProfileTable(this);
+  late final $TrustedLinkTable trustedLink = $TrustedLinkTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2727,6 +2877,7 @@ abstract class _$Database extends GeneratedDatabase {
         friend,
         request,
         unknownProfile,
-        profile
+        profile,
+        trustedLink
       ];
 }

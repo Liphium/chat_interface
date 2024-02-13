@@ -1,6 +1,7 @@
 import 'package:chat_interface/database/accounts/profile.dart';
 import 'package:chat_interface/database/accounts/request.dart';
 import 'package:chat_interface/database/accounts/setting.dart';
+import 'package:chat_interface/database/accounts/trusted_links.dart';
 import 'package:chat_interface/database/accounts/unknown_profile.dart';
 import 'package:drift/drift.dart';
 
@@ -13,19 +14,24 @@ part 'database.g.dart';
 bool databaseInitialized = false;
 late Database db;
 
-@DriftDatabase(tables: [
-  Conversation,
-  Member,
-  Message,
-  Setting,
-  Friend,
-  Request,
-  UnknownProfile,
-  Profile
-])
+@DriftDatabase(tables: [Conversation, Member, Message, Setting, Friend, Request, UnknownProfile, Profile, TrustedLink])
 class Database extends _$Database {
   Database(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          await m.createTable(trustedLink);
+        }
+      },
+    );
+  }
 }

@@ -9,7 +9,7 @@ class SettingsTranslations extends Translations {
           'settings.tab.account': 'Account',
           'settings.tab.appearance': 'Appearance',
           'settings.tab.app': 'App',
-          'settings.tab.privacy': 'Privacy',
+          'settings.tab.security': 'Security',
           'settings.data': 'Data',
           'settings.profile': 'Profile',
           'settings.security': 'Security',
@@ -26,6 +26,7 @@ class SettingsTranslations extends Translations {
           'settings.tabletop': 'Tabletop',
           'settings.files': 'Files',
           'settings.invites': 'Invites',
+          'settings.trusted_links': 'Trusted Links',
           'settings.invites.title': 'You have @count invites left.',
 
           // Audio settings
@@ -113,7 +114,8 @@ class SettingsTranslations extends Translations {
           'settings.tabletop.decks.error':
               'An error occurred while loading your decks. This is probably something you\'ll need to report to us or it\'s just your connection. You can also try to see if there\'s a new version of the app available or try again later.',
           'settings.tabletop.decks.limit': 'Decks (@count/@limit)',
-          'decks.description': 'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
+          'decks.description':
+              'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
           'decks.create': 'Create a new deck',
           'decks.dialog.delete.title': 'Delete deck',
           'decks.dialog.delete': 'Are you sure you want to delete this deck? Think about all the cards you\'ll lose!',
@@ -129,6 +131,22 @@ class SettingsTranslations extends Translations {
           'tabletop.general.framerate': 'Framerate',
           'tabletop.general.framerate.description': 'The framerate at which the table is rendered. This should be roughly equivalent to the refresh rate of your monitor.',
           'tabletop.general.framerate.unit': 'Hz',
+
+          // Trusted links
+          'links.warning':
+              'This an advanced section. Changing the default behavior of the app might result in leaks of your data or other various things. Only change things here if you know what you\'re doing.',
+          'links.locations': 'Settings for locations',
+          'links.unsafe_sources': 'Allow accessing resources from unsafe locations (e.g. websites with HTTP)',
+          'links.trusted_domains': 'Trusted domains',
+          'links.trust_mode': 'Select which domains you want to trust.',
+          'links.trust_mode.all': 'All domains',
+          'links.trust_mode.list_verified': 'A verified list of providers',
+          'links.trust_mode.list': 'A custom list of domains (defined below)',
+          'links.trust_mode.none': 'No domains',
+          'links.trusted_list': 'Here\'s the list of domains you trust.',
+          'links.trusted_list.add': 'Add a trusted domain',
+          'links.trusted_list.placeholder': 'liphium.app',
+          'links.trusted_list.empty': 'You currently don\'t trust any domains.'
         },
 
         //* German

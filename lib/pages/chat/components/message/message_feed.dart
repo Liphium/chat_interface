@@ -11,6 +11,7 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/system_message_renderer.dart';
+import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/spaces/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
@@ -18,6 +19,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/message_sp
 import 'package:chat_interface/pages/chat/components/message/renderer/message_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';

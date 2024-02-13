@@ -8,6 +8,7 @@ import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
+import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,16 +35,11 @@ enum SettingLabel {
   appearance("settings.tab.appearance", [
     SettingCategory("colors", Icons.color_lens, ThemeSettingsPage()),
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
-  ])
+  ]),
 
-  /* Commented out for now
-  privacy("settings.tab.privacy", [
-    //SettingCategory("requests", Icons.group, null),
-    //SettingCategory("encryption", Icons.key, null),
-  ])
-  */
-
-  ;
+  privacy("settings.tab.security", [
+    SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage()),
+  ]);
 
   final String _label;
   final List<SettingCategory> categories;
@@ -60,8 +56,7 @@ class SettingCategory {
   final Widget? widget;
   final bool displayTitle;
 
-  const SettingCategory(this.label, this.icon, this.widget,
-      {this.displayTitle = true});
+  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true});
 }
 
 class Setting<T> {
@@ -78,9 +73,7 @@ class Setting<T> {
   }
 
   Future<bool> grabFromDb() async {
-    final val = await (db.select(db.setting)
-          ..where((tbl) => tbl.key.equals(label)))
-        .getSingleOrNull();
+    final val = await (db.select(db.setting)..where((tbl) => tbl.key.equals(label))).getSingleOrNull();
     grabFrom((val ?? SettingData(key: label, value: stringify())).value);
     return true;
   }
@@ -91,14 +84,11 @@ class Setting<T> {
 
   void setValue(T value) async {
     this.value.value = value;
-    await db
-        .into(db.setting)
-        .insertOnConflictUpdate(SettingData(key: label, value: stringify()));
+    await db.into(db.setting).insertOnConflictUpdate(SettingData(key: label, value: stringify()));
   }
 
   T getValue() => value.value == null ? defaultValue : value.value!;
 
   T getOr(T other) => value.value ?? other;
-  T getWhenValue(T other, T def) =>
-      value.value == other ? def : value.value ?? defaultValue;
+  T getWhenValue(T other, T def) => value.value == other ? def : value.value ?? defaultValue;
 }

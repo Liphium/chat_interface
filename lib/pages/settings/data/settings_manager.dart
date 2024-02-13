@@ -7,6 +7,7 @@ import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/call_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
+import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
 import 'package:get/get.dart';
 
 class AppSettings {
@@ -25,6 +26,7 @@ class SettingController extends GetxController {
     TabletopSettings.addSettings(this);
     ThemeSettings.addThemeSettings(this);
     FileSettings.addSettings(this);
+    TrustedLinkSettings.registerSettings(this);
 
     // Add app settings (not in settings page)
     addSetting(Setting<bool>(AppSettings.showGroupMembers, true));

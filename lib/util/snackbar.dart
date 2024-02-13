@@ -46,8 +46,11 @@ void showErrorPopup(String title, String message) {
 }
 
 Future<bool> showConfirmPopup(ConfirmWindow window) async {
-  await Get.dialog(window);
-  return true;
+  final result = await Get.dialog<bool>(window);
+  if (result == null) {
+    return true;
+  }
+  return result;
 }
 
 class NotificationRenderer extends StatefulWidget {
@@ -68,15 +71,8 @@ class _NotificationRendererState extends State<NotificationRenderer> {
     return Obx(() => Animate(
           target: notificationController.open.value ? 1 : 0,
           effects: [
-            ScaleEffect(
-                curve: Curves.elasticOut,
-                duration: 400.ms,
-                begin: const Offset(0, 0)),
-            FadeEffect(
-                curve: Curves.linear,
-                duration: 250.ms,
-                delay: 100.ms,
-                begin: 0),
+            ScaleEffect(curve: Curves.elasticOut, duration: 400.ms, begin: const Offset(0, 0)),
+            FadeEffect(curve: Curves.linear, duration: 250.ms, delay: 100.ms, begin: 0),
           ],
           child: Positioned(
               top: widget.position.dx,
