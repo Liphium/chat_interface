@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/file_info_window.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';

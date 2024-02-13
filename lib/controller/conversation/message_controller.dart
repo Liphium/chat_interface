@@ -142,7 +142,7 @@ class MessageController extends GetxController {
     sendLog(message.type);
     if (message.type == MessageType.system) {
       if (SystemMessages.messages[message.content]?.store == true) {
-        sendLog("STORING " + message.content);
+        sendLog("STORING ${message.content}");
         db.into(db.message).insertOnConflictUpdate(message.entity);
       }
     } else {

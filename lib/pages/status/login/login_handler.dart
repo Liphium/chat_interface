@@ -1,4 +1,3 @@
-import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/login/login_choose_page.dart';

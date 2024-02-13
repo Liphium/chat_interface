@@ -1,4 +1,3 @@
-import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';

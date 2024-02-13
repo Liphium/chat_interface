@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/pages/status/register/register_code_page.dart';
 import 'package:chat_interface/pages/status/register/register_finish_page.dart';
 import 'package:chat_interface/pages/status/register/register_start_page.dart';

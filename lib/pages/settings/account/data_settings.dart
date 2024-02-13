@@ -13,7 +13,6 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 class DataSettingsPage extends StatelessWidget {
   const DataSettingsPage({super.key});

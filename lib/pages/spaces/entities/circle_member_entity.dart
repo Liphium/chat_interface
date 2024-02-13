@@ -1,9 +1,7 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
-import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 class CircleMemberEntity extends StatefulWidget {
   final SpaceMember member;

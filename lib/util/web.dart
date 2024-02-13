@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';

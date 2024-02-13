@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
@@ -8,7 +7,6 @@ import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class ChangeNameWindow extends StatefulWidget {
