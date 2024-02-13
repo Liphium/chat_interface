@@ -3,7 +3,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/conversation_info_window.dart';
+import 'package:chat_interface/pages/chat/components/conversations/conversation_info_window.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';

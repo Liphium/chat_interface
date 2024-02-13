@@ -39,19 +39,12 @@ class _FriendsPageState extends State<FriendsPage> {
 
     return Animate(
       effects: [
-        ScaleEffect(
-            delay: 100.ms,
-            duration: 500.ms,
-            begin: const Offset(0, 0),
-            end: const Offset(1, 1),
-            alignment: Alignment.center,
-            curve: const ElasticOutCurve(0.8)),
+        ScaleEffect(delay: 100.ms, duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), alignment: Alignment.center, curve: const ElasticOutCurve(0.8)),
         ShakeEffect(
             delay: 100.ms,
             duration: 400.ms,
             hz: randomHz,
-            offset: Offset(random.nextBool() ? randomOffset : -randomOffset,
-                random.nextBool() ? randomOffset : -randomOffset),
+            offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
             rotation: 0,
             curve: Curves.decelerate),
         FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
@@ -60,15 +53,14 @@ class _FriendsPageState extends State<FriendsPage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             maxWidth: 500,
-            maxHeight: 400,
+            maxHeight: 800,
           ),
           child: Container(
             decoration: BoxDecoration(
               color: Get.theme.colorScheme.background,
               borderRadius: BorderRadius.circular(dialogBorderRadius),
             ),
-            padding: const EdgeInsets.only(
-                left: dialogPadding, top: dialogPadding, right: dialogPadding),
+            padding: const EdgeInsets.only(left: dialogPadding, top: dialogPadding, right: dialogPadding),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -81,8 +73,7 @@ class _FriendsPageState extends State<FriendsPage> {
                     ),
                     color: Get.theme.colorScheme.primary,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: defaultSpacing * 0.5),
+                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
                       child: Row(
                         children: [
                           Expanded(
@@ -95,8 +86,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                 iconColor: Get.theme.colorScheme.onPrimary,
                                 fillColor: Get.theme.colorScheme.onPrimary,
                                 hoverColor: Get.theme.colorScheme.onPrimary,
-                                prefixIcon: Icon(Icons.search,
-                                    color: Get.theme.colorScheme.onPrimary),
+                                prefixIcon: Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
                                 hintText: "friends.placeholder".tr,
                               ),
                               onChanged: (value) {
@@ -106,10 +96,7 @@ class _FriendsPageState extends State<FriendsPage> {
                               cursorColor: Get.theme.colorScheme.onPrimary,
                             ),
                           ),
-                          LoadingIconButton(
-                              loading: requestsLoading,
-                              onTap: () => doAction(),
-                              icon: Icons.check)
+                          LoadingIconButton(loading: requestsLoading, onTap: () => doAction(), icon: Icons.check)
                         ],
                       ),
                     ),
@@ -139,18 +126,13 @@ class _FriendsPageState extends State<FriendsPage> {
                                   )
                                 ],
                                 target: revealSuccess.value ? 1.0 : 0.0,
-                                child:
-                                    SuccessContainer(text: "request.sent".tr),
+                                child: SuccessContainer(text: "request.sent".tr),
                               ),
                             ),
 
                             Obx(() {
-                              final found = friendController.friends.values.any(
-                                  (friend) =>
-                                      friend.name.toLowerCase().startsWith(
-                                          query.value.toLowerCase()) &&
-                                      friend.id !=
-                                          StatusController.ownAccountId);
+                              final found = friendController.friends.values
+                                  .any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()) && friend.id != StatusController.ownAccountId);
                               final hashtag = query.value.contains("#");
                               return Animate(
                                   effects: [
@@ -162,47 +144,29 @@ class _FriendsPageState extends State<FriendsPage> {
                                   ],
                                   target: found ? 0.0 : 1.0,
                                   child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: defaultSpacing),
+                                    padding: const EdgeInsets.only(top: defaultSpacing),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(
-                                            defaultSpacing),
+                                        borderRadius: BorderRadius.circular(defaultSpacing),
                                         color: theme.colorScheme.onBackground,
                                       ),
-                                      padding:
-                                          const EdgeInsets.all(defaultSpacing),
+                                      padding: const EdgeInsets.all(defaultSpacing),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
                                           Animate(
-                                            effects: [
-                                              ReverseExpandEffect(
-                                                  curve: Curves.easeInOut,
-                                                  duration: 250.ms,
-                                                  axis: Axis.vertical,
-                                                  alignment: Alignment.topLeft)
-                                            ],
+                                            effects: [ReverseExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical, alignment: Alignment.topLeft)],
                                             target: hashtag ? 1.0 : 0.0,
                                             child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: defaultSpacing),
-                                              child: Text("friends.empty".tr,
-                                                  style: theme
-                                                      .textTheme.bodyMedium),
+                                              padding: const EdgeInsets.only(bottom: defaultSpacing),
+                                              child: Text("friends.empty".tr, style: theme.textTheme.bodyMedium),
                                             ),
                                           ),
                                           hashtag
-                                              ? Text("friends.send_request".tr,
-                                                  style: theme
-                                                      .textTheme.labelMedium)
-                                              : Text("friends.example".tr,
-                                                  style: theme
-                                                      .textTheme.labelMedium),
+                                              ? Text("friends.send_request".tr, style: theme.textTheme.labelMedium)
+                                              : Text("friends.example".tr, style: theme.textTheme.labelMedium),
                                         ],
                                       ),
                                     ),
@@ -220,47 +184,31 @@ class _FriendsPageState extends State<FriendsPage> {
                                   ],
                                   target: query.value.isEmpty ? 0.0 : 1.0,
                                   child: Visibility(
-                                      visible:
-                                          requestController.requests.isNotEmpty,
+                                      visible: requestController.requests.isNotEmpty,
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           verticalSpacing(sectionSpacing),
-                                          Text("friends.requests".tr,
-                                              style:
-                                                  theme.textTheme.labelLarge),
+                                          Text("friends.requests".tr, style: theme.textTheme.labelLarge),
                                           verticalSpacing(elementSpacing),
                                           Builder(
                                             builder: (context) {
-                                              if (requestController
-                                                  .requests.isEmpty) {
+                                              if (requestController.requests.isEmpty) {
                                                 return const SizedBox.shrink();
                                               }
                                               return Column(
                                                 mainAxisSize: MainAxisSize.min,
-                                                children: requestController
-                                                    .requests
-                                                    .map((request) {
-                                                  return RequestButton(
-                                                      request: request,
-                                                      self: false);
+                                                children: requestController.requests.map((request) {
+                                                  return RequestButton(request: request, self: false);
                                                 }).toList(),
                                               );
                                             },
                                           ),
                                           Visibility(
-                                            visible: friendController
-                                                        .friends.length >
-                                                    1 ||
-                                                requestController
-                                                    .requestsSent.isNotEmpty,
-                                            child: verticalSpacing(
-                                                sectionSpacing -
-                                                    elementSpacing),
+                                            visible: friendController.friends.length > 1 || requestController.requestsSent.isNotEmpty,
+                                            child: verticalSpacing(sectionSpacing - elementSpacing),
                                           )
                                         ],
                                       )),
@@ -278,55 +226,37 @@ class _FriendsPageState extends State<FriendsPage> {
                                 ],
                                 target: query.value.isEmpty ? 0.0 : 1.0,
                                 child: Visibility(
-                                  visible:
-                                      requestController.requestsSent.isNotEmpty,
+                                  visible: requestController.requestsSent.isNotEmpty,
                                   child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: sectionSpacing),
+                                    padding: const EdgeInsets.only(top: sectionSpacing),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text("friends.requests_sent".tr,
-                                            style: theme.textTheme.labelLarge),
+                                        Text("friends.requests_sent".tr, style: theme.textTheme.labelLarge),
                                         verticalSpacing(elementSpacing),
                                         Builder(
                                           builder: (context) {
-                                            if (requestController
-                                                .requestsSent.isEmpty) {
+                                            if (requestController.requestsSent.isEmpty) {
                                               return const SizedBox.shrink();
                                             }
                                             return ListView.builder(
                                               shrinkWrap: true,
-                                              itemCount: requestController
-                                                  .requestsSent.length,
+                                              itemCount: requestController.requestsSent.length,
                                               itemBuilder: (context, index) {
-                                                final request =
-                                                    requestController
-                                                        .requestsSent
-                                                        .elementAt(index);
+                                                final request = requestController.requestsSent.elementAt(index);
                                                 return Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          bottom:
-                                                              elementSpacing),
-                                                  child: RequestButton(
-                                                      request: request,
-                                                      self: true),
+                                                  padding: const EdgeInsets.only(bottom: elementSpacing),
+                                                  child: RequestButton(request: request, self: true),
                                                 );
                                               },
                                             );
                                           },
                                         ),
                                         Visibility(
-                                          visible:
-                                              friendController.friends.length >
-                                                  1,
-                                          child: verticalSpacing(
-                                              sectionSpacing - elementSpacing),
+                                          visible: friendController.friends.length > 1,
+                                          child: verticalSpacing(sectionSpacing - elementSpacing),
                                         )
                                       ],
                                     ),
@@ -345,30 +275,19 @@ class _FriendsPageState extends State<FriendsPage> {
                                 children: [
                                   Builder(
                                     builder: (context) {
-                                      if (friendController.friends.length <=
-                                          1) {
+                                      if (friendController.friends.length <= 1) {
                                         return const SizedBox.shrink();
                                       }
                                       return ListView.builder(
                                         shrinkWrap: true,
-                                        itemCount:
-                                            friendController.friends.length,
+                                        itemCount: friendController.friends.length,
                                         itemBuilder: (context, index) {
                                           return Obx(
                                             () {
-                                              final friend = friendController
-                                                  .friends.values
-                                                  .elementAt(index);
-                                              final visible = query
-                                                      .value.isEmpty ||
-                                                  friend.name
-                                                      .toLowerCase()
-                                                      .startsWith(query.value
-                                                          .toLowerCase());
+                                              final friend = friendController.friends.values.elementAt(index);
+                                              final visible = query.value.isEmpty || friend.name.toLowerCase().startsWith(query.value.toLowerCase());
                                               return Visibility(
-                                                visible: friend.id !=
-                                                    StatusController
-                                                        .ownAccountId,
+                                                visible: friend.id != StatusController.ownAccountId,
                                                 child: Animate(
                                                   effects: [
                                                     ReverseExpandEffect(
@@ -379,13 +298,8 @@ class _FriendsPageState extends State<FriendsPage> {
                                                   ],
                                                   target: visible ? 0.0 : 1.0,
                                                   child: Padding(
-                                                    padding: EdgeInsets.only(
-                                                        top: index == 0
-                                                            ? defaultSpacing
-                                                            : elementSpacing),
-                                                    child: FriendButton(
-                                                        friend: friend,
-                                                        position: position),
+                                                    padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
+                                                    child: FriendButton(friend: friend, position: position),
                                                   ),
                                                 ),
                                               );
@@ -417,8 +331,7 @@ class _FriendsPageState extends State<FriendsPage> {
     var args = query.value.split("#");
     if (args.length != 2) {
       // TODO: Open friend settings
-      sendLog(
-          "TODO: This is where we open friend settings or detect if the friend the user is trying to add doesn't exist");
+      sendLog("TODO: This is where we open friend settings or detect if the friend the user is trying to add doesn't exist");
       return;
     }
 
@@ -443,8 +356,7 @@ class _FriendsPageState extends State<FriendsPage> {
             style: Get.theme.textTheme.labelMedium,
             decoration: InputDecoration(
               border: InputBorder.none,
-              prefixIcon:
-                  Icon(Icons.search, color: theme.colorScheme.onPrimary),
+              prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
               hintText: 'friends.placeholder'.tr,
             ),
           ),

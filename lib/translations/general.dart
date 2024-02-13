@@ -35,7 +35,7 @@ class GeneralTranslations extends Translations {
           'invite': 'Invite',
           'email': 'Email',
           'code': 'Code',
-          'under.dev': 'This featue is still under development. Sorry for the inconvenience. Please contact support if this is something important.',
+          'under.dev': 'This feature is still under development. Sorry for the inconvenience.',
           'no.friends': 'You have no friends yet. If you want to add some, you can do that in the friends page.',
           'open.friends': 'Open friends page',
 

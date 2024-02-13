@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class ImagePreviewWindow extends StatelessWidget {
-  final File file;
+  final String? url;
+  final File? file;
 
-  const ImagePreviewWindow({super.key, required this.file});
+  const ImagePreviewWindow({super.key, this.file, this.url});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class ImagePreviewWindow extends StatelessWidget {
                     height: constraints.maxHeight * 0.6,
                     child: GestureDetector(
                       onTap: () => {},
-                      child: Image.file(file),
+                      child: url == null ? Image.file(file!) : Image.network(url!),
                     ),
                   ),
                 ),

@@ -48,7 +48,13 @@ class _MessageRendererState extends State<MessageRenderer> {
                   visible: !widget.last,
                   replacement: const SizedBox(width: 34), //* Show timestamp instead
                   child: Tooltip(
-                      message: sender.name, child: InkWell(borderRadius: BorderRadius.circular(100), onTap: () => Get.dialog(Profile(friend: sender)), child: UserAvatar(id: sender.id, size: 34))),
+                    message: sender.name,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(100),
+                      onTap: () => Get.dialog(Profile(friend: sender)),
+                      child: UserAvatar(id: sender.id, size: 34),
+                    ),
+                  ),
                 ),
                 horizontalSpacing(defaultSpacing),
 
@@ -97,7 +103,9 @@ class _MessageRendererState extends State<MessageRenderer> {
                     horizontalSpacing(defaultSpacing),
 
                     //* Timestamp
-                    Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                    SelectionContainer.disabled(
+                      child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                    ),
 
                     horizontalSpacing(defaultSpacing),
 

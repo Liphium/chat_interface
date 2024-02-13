@@ -74,7 +74,6 @@ class _CallControlsState extends State<CallControls> {
         horizontalSpacing(defaultSpacing),
 
         //* Play mode (reintroduced in the future maybe :)
-        /*
         Obx(
           () => CallButtonBorder(
             child: LoadingIconButton(
@@ -93,7 +92,6 @@ class _CallControlsState extends State<CallControls> {
           ),
         ),
         horizontalSpacing(defaultSpacing),
-        */
 
         //* End call button
         CallButtonBorder(

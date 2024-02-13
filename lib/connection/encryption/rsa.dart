@@ -14,9 +14,7 @@ const standardKeySize = 2048;
 AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAKey(int keySize) {
   final keyGen = KeyGenerator("RSA");
 
-  keyGen.init(ParametersWithRandom(
-      RSAKeyGeneratorParameters(BigInt.parse("65537"), keySize, 64),
-      _secureRandom()));
+  keyGen.init(ParametersWithRandom(RSAKeyGeneratorParameters(BigInt.parse("65537"), keySize, 64), _secureRandom()));
 
   final keyPair = keyGen.generateKeyPair();
 
@@ -27,8 +25,7 @@ AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAKey(int keySize) {
 }
 
 SecureRandom _secureRandom() {
-  final secureRandom = SecureRandom('Fortuna')
-    ..seed(KeyParameter(enc.SecureRandom(32).bytes));
+  final secureRandom = SecureRandom('Fortuna')..seed(KeyParameter(enc.SecureRandom(32).bytes));
   return secureRandom;
 }
 
@@ -41,8 +38,7 @@ String packageRSAPublicKey(RSAPublicKey key) {
 /// Unpackage a public key from a string.
 RSAPublicKey unpackageRSAPublicKey(String key) {
   final parts = key.split(":");
-  return RSAPublicKey(
-      BigInt.parse(parts[0], radix: 36), BigInt.parse(parts[1], radix: 36));
+  return RSAPublicKey(BigInt.parse(parts[0], radix: 36), BigInt.parse(parts[1], radix: 36));
 }
 
 /// Package a private key into a string.
@@ -54,31 +50,23 @@ String packageRSAPrivateKey(RSAPrivateKey key) {
 /// Unpackage a private key from a string.
 RSAPrivateKey unpackageRSAPrivateKey(String key) {
   final parts = key.split(":");
-  return RSAPrivateKey(
-      BigInt.parse(parts[0], radix: 36),
-      BigInt.parse(parts[2], radix: 36),
-      BigInt.parse(parts[3], radix: 36),
-      BigInt.parse(parts[4], radix: 36));
+  return RSAPrivateKey(BigInt.parse(parts[0], radix: 36), BigInt.parse(parts[2], radix: 36), BigInt.parse(parts[3], radix: 36), BigInt.parse(parts[4], radix: 36));
 }
 
 /// Turn a public and private key into an [AsymmetricKeyPair].
-AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> toRSAKeyPair(
-    String pub, String priv) {
-  return AsymmetricKeyPair(
-      unpackageRSAPublicKey(pub), unpackageRSAPrivateKey(priv));
+AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> toRSAKeyPair(String pub, String priv) {
+  return AsymmetricKeyPair(unpackageRSAPublicKey(pub), unpackageRSAPrivateKey(priv));
 }
 
 /// Sign a message with a private key.
 String signRSA(RSAPrivateKey key, String digest) {
-  final signer =
-      enc.Signer(enc.RSASigner(enc.RSASignDigest.SHA256, privateKey: key));
+  final signer = enc.Signer(enc.RSASigner(enc.RSASignDigest.SHA256, privateKey: key));
   return signer.sign(digest).base64;
 }
 
 /// Verify a signature with a public key.
 bool verifyRSASignature(String signature, RSAPublicKey key, String digest) {
-  final verifier =
-      enc.Signer(enc.RSASigner(enc.RSASignDigest.SHA256, publicKey: key));
+  final verifier = enc.Signer(enc.RSASigner(enc.RSASignDigest.SHA256, publicKey: key));
   return verifier.verify64(digest, signature);
 }
 
@@ -124,14 +112,13 @@ void testEncryptionRSA() {
 
   final decrypted = decryptRSA(data, priv);
   final decryptedString = String.fromCharCodes(decrypted);
-  print(decryptedString);
+  sendLog(decryptedString);
 
   final key = randomAESKey();
   sendLog(key);
 
   const msg = "hello world";
-  final encrypted =
-      encryptAES(msg.toCharArray().unsignedView(), base64Encode(key));
+  final encrypted = encryptAES(msg.toCharArray().unsignedView(), base64Encode(key));
   sendLog(base64Encode(encrypted));
   final decrypted2 = decryptAES(encrypted, base64Encode(key));
 

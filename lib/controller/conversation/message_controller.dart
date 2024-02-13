@@ -88,6 +88,11 @@ class MessageController extends GetxController {
     // Handle attachments
     if (message.attachments.isNotEmpty && message.type != MessageType.system) {
       for (var attachment in message.attachments) {
+        if (attachment.isURL) {
+          sendLog("attachment url found");
+          continue;
+        }
+
         final json = jsonDecode(attachment);
         final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
         final container = AttachmentContainer.fromJson(type, json);
@@ -193,6 +198,10 @@ class Message {
     }
     if (attachments.isNotEmpty) {
       for (var attachment in attachments) {
+        if (attachment.isURL) {
+          attachmentsRenderer.add(AttachmentContainer.remoteImage(attachment));
+          continue;
+        }
         final json = jsonDecode(attachment);
         final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
         final decoded = AttachmentContainer.fromJson(type, json);

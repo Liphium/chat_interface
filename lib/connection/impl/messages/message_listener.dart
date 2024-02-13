@@ -10,6 +10,11 @@ void setupMessageListener() {
     final message = Message.fromJson(event.data["msg"]);
     sendLog("MESSAGE SENT");
 
+    if (message.attachments.length > 5) {
+      sendLog("invalid message, more than 5 attachments");
+      return;
+    }
+
     controller.storeMessage(message);
   });
 }

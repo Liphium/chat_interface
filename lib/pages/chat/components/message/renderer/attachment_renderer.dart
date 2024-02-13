@@ -32,13 +32,39 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               width: 35,
               height: 35,
               child: IconButton(
-                onPressed: () => Get.find<AttachmentController>()
-                    .downloadAttachment(widget.container, retry: true),
+                onPressed: () => Get.find<AttachmentController>().downloadAttachment(widget.container, retry: true),
                 iconSize: 20,
                 icon: const Icon(Icons.refresh),
               ),
             ),
           ],
+        );
+      }
+
+      if (widget.container.attachmentType == AttachmentContainerType.link) {
+        return Row(
+          children: [
+            ErrorContainer(message: "under_dev".tr),
+          ],
+        );
+      }
+
+      if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
+        return InkWell(
+          onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
+          borderRadius: BorderRadius.circular(defaultSpacing),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(defaultSpacing),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: 350,
+              ),
+              child: Image.network(
+                widget.container.url,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
         );
       }
 
@@ -73,8 +99,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       final type = widget.container.id.split(".").last;
       if (FileSettings.imageTypes.contains(type)) {
         return InkWell(
-          onTap: () => Get.dialog(
-              ImagePreviewWindow(file: File(widget.container.filePath))),
+          onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.container.filePath))),
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(defaultSpacing),
@@ -110,8 +135,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               height: 35,
               child: IconButton(
                 onPressed: () async {
-                  final result =
-                      await OpenAppFile.open(widget.container.filePath);
+                  final result = await OpenAppFile.open(widget.container.filePath);
                   if (result.type == ResultType.error) {
                     showErrorPopup("error", result.message);
                   }

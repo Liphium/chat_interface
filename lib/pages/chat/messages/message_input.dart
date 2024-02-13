@@ -46,9 +46,7 @@ class _MessageInputState extends State<MessageInput> {
     ThemeData theme = Theme.of(context);
 
     // Clear message input when conversation changes
-    _sub = Get.find<MessageController>()
-        .selectedConversation
-        .listen((conversation) {
+    _sub = Get.find<MessageController>().selectedConversation.listen((conversation) {
       _message.clear();
     });
 
@@ -58,16 +56,15 @@ class _MessageInputState extends State<MessageInput> {
         onInvoke: (SendIntent intent) {
           final controller = Get.find<MessageController>();
           if (files.isEmpty) {
-            sendTextMessage(loading, controller.selectedConversation.value.id,
-                _message.text, [], handleMessageFinish);
+            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], handleMessageFinish);
+            return;
           }
 
-          sendTextMessageWithFiles(
-              loading,
-              controller.selectedConversation.value.id,
-              _message.text,
-              files,
-              handleMessageFinish);
+          if (files.length > 5) {
+            return;
+          }
+
+          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, files, handleMessageFinish);
           return null;
         },
       ),
@@ -75,8 +72,7 @@ class _MessageInputState extends State<MessageInput> {
 
     // Build actual widget
     return Padding(
-      padding: const EdgeInsets.only(
-          right: defaultSpacing, left: defaultSpacing, bottom: defaultSpacing),
+      padding: const EdgeInsets.only(right: defaultSpacing, left: defaultSpacing, bottom: defaultSpacing),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -108,16 +104,10 @@ class _MessageInputState extends State<MessageInput> {
                     //* File preview
                     Obx(() {
                       return Animate(
-                        effects: [
-                          ExpandEffect(
-                              duration: 250.ms,
-                              curve: Curves.easeInOut,
-                              axis: Axis.vertical)
-                        ],
+                        effects: [ExpandEffect(duration: 250.ms, curve: Curves.easeInOut, axis: Axis.vertical)],
                         target: files.isEmpty ? 0 : 1,
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                              bottom: defaultSpacing * 0.5),
+                          padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                           child: Row(
                             children: [
                               const SizedBox(height: 200 + defaultSpacing),
@@ -137,6 +127,9 @@ class _MessageInputState extends State<MessageInput> {
                       children: [
                         IconButton(
                           onPressed: () async {
+                            if (files.length == 5) {
+                              return;
+                            }
                             final result = await openFile();
                             if (result == null) {
                               return;
@@ -156,22 +149,22 @@ class _MessageInputState extends State<MessageInput> {
                         Expanded(
                           child: Shortcuts(
                             shortcuts: {
-                              LogicalKeySet(LogicalKeyboardKey.enter):
-                                  const SendIntent(),
+                              LogicalKeySet(LogicalKeyboardKey.enter): const SendIntent(),
                             },
                             child: TextField(
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'chat.message'.tr,
-                                ),
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(1000),
-                                ],
-                                cursorColor: theme.colorScheme.tertiary,
-                                style: theme.textTheme.labelLarge,
-                                controller: _message,
-                                maxLines: null,
-                                keyboardType: TextInputType.multiline),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'chat.message'.tr,
+                              ),
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(1000),
+                              ],
+                              cursorColor: theme.colorScheme.tertiary,
+                              style: theme.textTheme.labelLarge,
+                              controller: _message,
+                              maxLines: null,
+                              keyboardType: TextInputType.multiline,
+                            ),
                           ),
                         ),
                         horizontalSpacing(defaultSpacing),

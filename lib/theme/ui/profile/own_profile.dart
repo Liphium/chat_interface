@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
@@ -267,27 +268,20 @@ class _ProfileState extends State<OwnProfile> {
                   verticalSpacing(elementSpacing),
 
                   //* Files page
-                  /*
-                  ProfileButton(
-                    icon: Icons.folder,
-                    label: 'profile.files'.tr,
-                    onTap: () => Get.dialog(const FilesPage()),
-                    loading: false.obs
-                  ),
-                  verticalSpacing(elementSpacing), */
+                  ProfileButton(icon: Icons.folder, label: 'profile.files'.tr, onTap: () => Get.dialog(const LibraryWindow()), loading: false.obs),
+                  verticalSpacing(elementSpacing),
 
                   //* Hide profile
                   ProfileButton(
-                      icon: Icons.hardware,
-                      label: 'profile.test'.tr,
-                      onTap: () async {
-                        testLoading.value = true;
-
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
-
-                        testLoading.value = false;
-                      },
-                      loading: testLoading),
+                    icon: Icons.hardware,
+                    label: 'profile.test'.tr,
+                    onTap: () async {
+                      testLoading.value = true;
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
+                      testLoading.value = false;
+                    },
+                    loading: testLoading,
+                  ),
                 ],
               ),
             ),

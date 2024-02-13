@@ -25,8 +25,6 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
     attachments.add(res.data);
   }
 
-  sendLog("sending...");
-
   loading.value = false;
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
@@ -35,6 +33,24 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
   if (loading.value) {
     return;
   }
+
+  // Scan for links with remote images
+  if (attachments.isEmpty) {
+    for (var line in message.split("\n")) {
+      bool found = false;
+      for (var word in line.split(" ")) {
+        if (word.isURL) {
+          attachments.add(word);
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        break;
+      }
+    }
+  }
+
   loading.value = true;
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), callback);
 }
@@ -57,8 +73,13 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   var encrypted = encryptSymmetric(jsonEncode(<String, dynamic>{"c": message, "t": type.index, "a": attachments, "s": signMessage(signatureKeyPair.secretKey, hash)}), key);
 
   // Send message
-  final json = await postNodeJSON("/conversations/message/send",
-      <String, dynamic>{"conversation": conversation.id, "token_id": conversation.token.id, "token": conversation.token.token, "timestamp": stamp, "data": encrypted});
+  final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
+    "conversation": conversation.id,
+    "token_id": conversation.token.id,
+    "token": conversation.token.token,
+    "timestamp": stamp,
+    "data": encrypted,
+  });
 
   callback.call();
   if (!json["success"]) {

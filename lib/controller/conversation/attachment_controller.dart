@@ -20,8 +20,7 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type,
-      {favorite = false}) async {
+  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false}) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
@@ -32,8 +31,7 @@ class AttachmentController extends GetxController {
       "file": dio_rs.MultipartFile.fromBytes(encrypted, filename: name),
       "name": name,
       "favorite": favorite ? "true" : "false",
-      "key": encryptAsymmetricAnonymous(
-          asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
+      "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
       "extension": data.file.name.split(".").last
     });
 
@@ -41,10 +39,7 @@ class AttachmentController extends GetxController {
     final res = await dio.post(
       server("/account/files/upload").toString(),
       data: formData,
-      options: dio_rs.Options(headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": "Bearer $sessionToken"
-      }),
+      options: dio_rs.Options(headers: {"Content-Type": "multipart/form-data", "Authorization": "Bearer $sessionToken"}),
       onSendProgress: (count, total) {
         data.progress.value = count / total;
         sendLog(data.progress.value);
@@ -60,11 +55,9 @@ class AttachmentController extends GetxController {
       return FileUploadResponse(json["error"], null);
     }
 
-    final file = File(path.join(
-        AttachmentController.getFilePathForType(type), json["id"].toString()));
+    final file = File(path.join(AttachmentController.getFilePathForType(type), json["id"].toString()));
     await file.writeAsBytes(bytes);
-    final container =
-        AttachmentContainer(type, json["id"], data.file.name, json["url"], key);
+    final container = AttachmentContainer(type, json["id"], data.file.name, json["url"], key);
     sendLog("SENT ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
     attachments[container.id] = container;
@@ -73,8 +66,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Find a local file
-  Future<AttachmentContainer?> findLocalFile(AttachmentContainer container,
-      {save = true}) async {
+  Future<AttachmentContainer?> findLocalFile(AttachmentContainer container, {save = true}) async {
     if (attachments.containsKey(container.id)) {
       return attachments[container.id];
     }
@@ -95,8 +87,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Download an attachment
-  Future<bool> downloadAttachment(AttachmentContainer container,
-      {bool retry = false}) async {
+  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false}) async {
     if (container.downloading) return true;
     final localFile = await findLocalFile(container);
     if (localFile != null && !retry) {
@@ -106,9 +97,7 @@ class AttachmentController extends GetxController {
     attachments[container.id] = container;
     container.downloading = true;
     sendLog("Downloading ${container.name}...");
-    final maxSize = Get.find<SettingController>()
-        .settings[FileSettings.maxFileSize]!
-        .getValue();
+    final maxSize = Get.find<SettingController>().settings[FileSettings.maxFileSize]!.getValue();
 
     final json = await postAuthorizedJSON("/account/files/info", {
       "id": container.id,
@@ -117,6 +106,12 @@ class AttachmentController extends GetxController {
     if (!json["success"]) {
       container.error.value = true;
       container.downloaded.value = false;
+      return false;
+    }
+
+    // TODO: Test this check thingy
+    if (json["file"]["path"] != container.url) {
+      sendLog("Download errored, invalid attachment url");
       return false;
     }
 
@@ -146,7 +141,7 @@ class AttachmentController extends GetxController {
     // Decrypt file
     final file = File(container.filePath);
     final encrypted = await file.readAsBytes();
-    final decrypted = decryptSymmetricBytes(encrypted, container.key);
+    final decrypted = decryptSymmetricBytes(encrypted, container.key!);
     await file.writeAsBytes(decrypted);
 
     container.downloading = false;
@@ -167,8 +162,7 @@ class AttachmentController extends GetxController {
       "id": container.id,
     });
     if (!json["success"]) {
-      sendLog(
-          "Failed to delete file from server ${container.id} ${json["error"]}");
+      sendLog("Failed to delete file from server ${container.id} ${json["error"]}");
     }
 
     return true;
@@ -179,24 +173,16 @@ class AttachmentController extends GetxController {
     // TODO: Test this stuff properly
 
     // Move into isolate in the future?
-    final cacheType = Get.find<SettingController>()
-        .settings[FileSettings.fileCacheType]!
-        .getValue();
+    final cacheType = Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue();
     if (cacheType == 0) return;
-    final maxSize = Get.find<SettingController>()
-            .settings[FileSettings.maxCacheSize]!
-            .getValue() *
-        1000 *
-        1000; // Convert to bytes
+    final maxSize = Get.find<SettingController>().settings[FileSettings.maxCacheSize]!.getValue() * 1000 * 1000; // Convert to bytes
     final dir = Directory(getFilePathForType(StorageType.temporary));
     final files = await dir.list().toList();
-    var cacheSize = files.fold(
-        0, (previousValue, element) => previousValue + element.statSync().size);
+    var cacheSize = files.fold(0, (previousValue, element) => previousValue + element.statSync().size);
     if (cacheSize < maxSize) return;
 
     // Delete oldest files
-    files
-        .sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
+    files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
     for (final file in files) {
       final size = file.statSync().size;
       await file.delete();
@@ -224,20 +210,17 @@ class AttachmentController extends GetxController {
 
   static void initFilePath(String accountId) async {
     // Init folder for cached files
-    final cacheFolder = path.join(
-        (await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
+    final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
     _pathCache = cacheFolder;
     await Directory(cacheFolder).create();
 
     // Init folder for temporary files
-    final fileFolder = path.join((await getApplicationSupportDirectory()).path,
-        "cloud_files_$accountId");
+    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_$accountId");
     _pathTemporary = fileFolder;
     await Directory(fileFolder).create();
 
     // Init folder for permanent files
-    final saveFolder = path.join((await getApplicationSupportDirectory()).path,
-        "saved_files_$accountId");
+    final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_$accountId");
     _pathPermanent = saveFolder;
     await Directory(saveFolder).create();
   }
@@ -254,8 +237,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Get the storage type for a file (or the default type)
-  static Future<StorageType> checkLocations(String id, StorageType defaultType,
-      {types = StorageType.values}) async {
+  static Future<StorageType> checkLocations(String id, StorageType defaultType, {types = StorageType.values}) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
       final file = File(path.join(getFilePathForType(type), id));
@@ -268,8 +250,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Check if a file exists (and get the file path if it does)
-  static Future<String?> getFilePathFor(String id,
-      {types = StorageType.values}) async {
+  static Future<String?> getFilePathFor(String id, {types = StorageType.values}) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
       final file = File(path.join(getFilePathForType(type), id));
@@ -303,13 +284,16 @@ class FileUploadResponse {
   String get data => jsonEncode(container?.toJson());
 }
 
+enum AttachmentContainerType { link, remoteImage, file }
+
 class AttachmentContainer {
   late final String filePath;
+  late final AttachmentContainerType attachmentType;
   final StorageType type;
   final String id;
   final String name;
   final String url;
-  final SecureKey key;
+  final SecureKey? key;
 
   // Download status
   bool downloading = false;
@@ -318,21 +302,28 @@ class AttachmentContainer {
   final percentage = 0.0.obs;
 
   AttachmentContainer(this.type, this.id, this.name, this.url, this.key) {
+    if (id == "" && name == "") {
+      for (var fileType in FileSettings.imageTypes) {
+        if (url.endsWith(".$fileType")) {
+          attachmentType = AttachmentContainerType.remoteImage;
+          return;
+        }
+      }
+      attachmentType = AttachmentContainerType.link;
+    } else {
+      attachmentType = AttachmentContainerType.file;
+      return;
+    }
     filePath = path.join(AttachmentController.getFilePathForType(type), id);
   }
 
-  factory AttachmentContainer.fromJson(
-      StorageType type, Map<String, dynamic> json) {
-    return AttachmentContainer(type, json["id"], json["name"], json["url"],
-        unpackageSymmetricKey(json["key"]));
+  AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
+
+  factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json) {
+    return AttachmentContainer(type, json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
   }
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      "id": id,
-      "name": name,
-      "url": url,
-      "key": packageSymmetricKey(key)
-    };
+    return <String, dynamic>{"id": id, "name": name, "url": url, "key": packageSymmetricKey(key!)};
   }
 }

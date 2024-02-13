@@ -8,20 +8,22 @@ class SidebarButton extends StatefulWidget {
   final String label;
   final RxString selected;
   final BorderRadius radius;
+  final Color? background;
 
-  const SidebarButton(
-      {super.key,
-      required this.onTap,
-      required this.label,
-      this.radius = const BorderRadius.all(Radius.circular(defaultSpacing)),
-      required this.selected});
+  const SidebarButton({
+    super.key,
+    required this.onTap,
+    required this.label,
+    this.radius = const BorderRadius.all(Radius.circular(defaultSpacing)),
+    this.background,
+    required this.selected,
+  });
 
   @override
   State<SidebarButton> createState() => _SidebarButtonState();
 }
 
-class _SidebarButtonState extends State<SidebarButton>
-    with TickerProviderStateMixin {
+class _SidebarButtonState extends State<SidebarButton> with TickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -61,18 +63,14 @@ class _SidebarButtonState extends State<SidebarButton>
       child: Obx(
         () => Material(
           borderRadius: widget.radius,
-          color: widget.selected.value == widget.label
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.onBackground,
+          color: widget.selected.value == widget.label ? Get.theme.colorScheme.primary : widget.background ?? Get.theme.colorScheme.primaryContainer,
           child: InkWell(
             borderRadius: widget.radius,
             onTap: () {
               widget.onTap();
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: defaultSpacing * 1.5,
-                  vertical: defaultSpacing * 0.5),
+              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 1.5, vertical: defaultSpacing * 0.5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
               ),
