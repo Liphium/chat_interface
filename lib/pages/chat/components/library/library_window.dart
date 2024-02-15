@@ -1,3 +1,5 @@
+import 'package:chat_interface/database/accounts/library_entry.dart';
+import 'package:chat_interface/pages/chat/components/library/library_tab.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -16,10 +18,15 @@ class _LibraryWindowState extends State<LibraryWindow> {
 
   // Tabs
   final _tabs = <String, Widget>{
-    "library.all": const Placeholder(),
-    "library.images": const Placeholder(),
-    "library.gifs": const Placeholder(),
+    "library.all": const LibraryTab(),
+    "library.images": const LibraryTab(filter: LibraryEntryType.image),
+    "library.gifs": const LibraryTab(filter: LibraryEntryType.gif),
   };
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +65,19 @@ class _LibraryWindowState extends State<LibraryWindow> {
                 label: "library.gifs",
                 background: Get.theme.colorScheme.background,
                 selected: _selected,
-              )
+              ),
             ],
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: 700,
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(top: defaultSpacing),
+                child: Obx(() => _tabs[_selected.value]!),
+              ),
+            ),
           ),
         ],
       ),

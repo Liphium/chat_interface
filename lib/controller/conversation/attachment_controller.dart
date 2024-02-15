@@ -310,9 +310,9 @@ class AttachmentContainer {
         }
       }
       attachmentType = AttachmentContainerType.link;
+      return;
     } else {
       attachmentType = AttachmentContainerType.file;
-      return;
     }
     filePath = path.join(AttachmentController.getFilePathForType(type), id);
   }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/accounts/trusted_links.dart';
+import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
@@ -147,18 +148,21 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
 
       final type = widget.container.id.split(".").last;
       if (FileSettings.imageTypes.contains(type)) {
-        return InkWell(
-          onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.container.filePath))),
-          borderRadius: BorderRadius.circular(defaultSpacing),
-          child: ClipRRect(
+        return LibraryFavoriteButton(
+          container: widget.container,
+          child: InkWell(
+            onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.container.filePath))),
             borderRadius: BorderRadius.circular(defaultSpacing),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: 350,
-              ),
-              child: Image.file(
-                File(widget.container.filePath),
-                fit: BoxFit.cover,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(defaultSpacing),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 350,
+                ),
+                child: Image.file(
+                  File(widget.container.filePath),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),

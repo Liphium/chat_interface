@@ -90,7 +90,12 @@ class _MessageRendererState extends State<MessageRenderer> {
                                   padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: renderer.map((e) => AttachmentRenderer(container: e)).toList(),
+                                    children: renderer.map((e) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(top: elementSpacing),
+                                        child: AttachmentRenderer(container: e),
+                                      );
+                                    }).toList(),
                                   ),
                                 ),
                               );

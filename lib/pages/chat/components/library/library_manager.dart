@@ -17,7 +17,7 @@ class LibraryManager {
         }
         final size = await _calculateImageDimension(Image.file(File(container.filePath)));
         return LibraryEntryData(
-          type: LibraryEntryType.attachment,
+          type: LibraryEntryType.fromFileName(container.filePath),
           createdAt: BigInt.from(DateTime.now().millisecondsSinceEpoch),
           data: jsonEncode(container.toJson()),
           width: size.width.toInt(),
@@ -28,7 +28,7 @@ class LibraryManager {
       case AttachmentContainerType.remoteImage:
         final size = await _calculateImageDimension(Image.network(container.url));
         return LibraryEntryData(
-          type: LibraryEntryType.attachment,
+          type: LibraryEntryType.fromFileName(container.url),
           createdAt: BigInt.from(DateTime.now().millisecondsSinceEpoch),
           data: container.url,
           width: size.width.toInt(),

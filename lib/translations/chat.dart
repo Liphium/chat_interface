@@ -107,6 +107,12 @@ class ChatPageTranslations extends Translations {
           'download.app': 'Download into app',
           'image.loading': 'Image is loading..',
 
+          // Library
+          'library.all': 'Everything',
+          'library.images': 'Images',
+          'library.gifs': 'GIFs',
+          'library.empty': 'The library is currently empty. You can add stuff to it by favoriting images or GIFs in conversations.',
+
           // Spaces
           'join.space': 'Join Space',
           'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
