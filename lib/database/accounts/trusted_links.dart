@@ -1,6 +1,10 @@
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/settings/data/entities.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart';
+import 'package:get/get.dart';
 
 class TrustedLink extends Table {
   TextColumn get domain => text()();
@@ -10,8 +14,36 @@ class TrustedLink extends Table {
 }
 
 class TrustedLinkHelper {
+  static late Setting _trustModeSetting;
+  static late Setting _unsafeSetting;
+
+  static const trustedProviders = [
+    "google.com",
+    "tenor.com",
+    "youtube.com",
+    "youtu.be",
+    "github.com",
+    "google.de",
+  ];
+
+  static void init() {
+    final controller = Get.find<SettingController>();
+    _unsafeSetting = controller.settings[TrustedLinkSettings.unsafeSources]!;
+    _trustModeSetting = controller.settings[TrustedLinkSettings.trustMode]!;
+  }
+
   static Future<bool> isLinkTrusted(String url) async {
-    if (url.startsWith("http://")) {
+    if (url.startsWith("http://") && _unsafeSetting.getOr(true)) {
+      return false;
+    }
+
+    final type = _trustModeSetting.getValue();
+    if (type == 0) {
+      return true;
+    } else if (type == 3) {
+      return false;
+    } else if (type == 1) {
+      // TODO: Trusted list of providers
       return false;
     }
 

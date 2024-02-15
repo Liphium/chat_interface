@@ -105,6 +105,7 @@ class ChatPageTranslations extends Translations {
           'file.dialog': '@name is @size MB large. Choose an option to download it:',
           'download.folder': 'Download into folder',
           'download.app': 'Download into app',
+          'image.loading': 'Image is loading..',
 
           // Spaces
           'join.space': 'Join Space',

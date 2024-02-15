@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/database/accounts/trusted_links.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
@@ -20,6 +21,23 @@ class AttachmentRenderer extends StatefulWidget {
 }
 
 class _AttachmentRendererState extends State<AttachmentRenderer> {
+  final loading = false.obs;
+  final linkTrusted = false.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
+      tryLink();
+    }
+  }
+
+  void tryLink() async {
+    loading.value = true;
+    linkTrusted.value = await TrustedLinkHelper.isLinkTrusted(widget.container.url);
+    loading.value = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -49,7 +67,38 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         );
       }
 
+      //* Remote images
       if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
+        if (loading.value) {
+          return Container(
+            padding: const EdgeInsets.all(defaultSpacing),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(defaultSpacing),
+              color: Get.theme.colorScheme.primaryContainer,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Get.theme.colorScheme.onPrimary,
+                    strokeWidth: 3,
+                  ),
+                ),
+                horizontalSpacing(defaultSpacing),
+                Text("image.loading".tr)
+              ],
+            ),
+          );
+        }
+
+        if (!linkTrusted.value) {
+          return const SizedBox();
+        }
+
         return InkWell(
           onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
           borderRadius: BorderRadius.circular(defaultSpacing),
