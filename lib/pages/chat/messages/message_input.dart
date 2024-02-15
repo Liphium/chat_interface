@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -125,6 +126,7 @@ class _MessageInputState extends State<MessageInput> {
                     //* Input
                     Row(
                       children: [
+                        //* Attach a file
                         IconButton(
                           onPressed: () async {
                             if (files.length == 5) {
@@ -144,6 +146,12 @@ class _MessageInputState extends State<MessageInput> {
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,
                           tooltip: "chat.add_file".tr,
+                        ),
+                        //* Attach from the library
+                        IconButton(
+                          onPressed: () => Get.dialog(const LibraryWindow()),
+                          icon: const Icon(Icons.folder),
+                          color: theme.colorScheme.tertiary,
                         ),
                         horizontalSpacing(defaultSpacing),
                         Expanded(

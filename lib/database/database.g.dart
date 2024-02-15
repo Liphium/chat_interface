@@ -2854,6 +2854,309 @@ class TrustedLinkCompanion extends UpdateCompanion<TrustedLinkData> {
   }
 }
 
+class $LibraryEntryTable extends LibraryEntry
+    with TableInfo<$LibraryEntryTable, LibraryEntryData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LibraryEntryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumnWithTypeConverter<LibraryEntryType, int> type =
+      GeneratedColumn<int>('type', aliasedName, false,
+              type: DriftSqlType.int, requiredDuringInsert: true)
+          .withConverter<LibraryEntryType>($LibraryEntryTable.$convertertype);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _widthMeta = const VerificationMeta('width');
+  @override
+  late final GeneratedColumn<int> width = GeneratedColumn<int>(
+      'width', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _heightMeta = const VerificationMeta('height');
+  @override
+  late final GeneratedColumn<int> height = GeneratedColumn<int>(
+      'height', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [type, createdAt, data, width, height];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'library_entry';
+  @override
+  VerificationContext validateIntegrity(Insertable<LibraryEntryData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    context.handle(_typeMeta, const VerificationResult.success());
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    if (data.containsKey('width')) {
+      context.handle(
+          _widthMeta, width.isAcceptableOrUnknown(data['width']!, _widthMeta));
+    } else if (isInserting) {
+      context.missing(_widthMeta);
+    }
+    if (data.containsKey('height')) {
+      context.handle(_heightMeta,
+          height.isAcceptableOrUnknown(data['height']!, _heightMeta));
+    } else if (isInserting) {
+      context.missing(_heightMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  LibraryEntryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LibraryEntryData(
+      type: $LibraryEntryTable.$convertertype.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      width: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}width'])!,
+      height: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}height'])!,
+    );
+  }
+
+  @override
+  $LibraryEntryTable createAlias(String alias) {
+    return $LibraryEntryTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<LibraryEntryType, int, int> $convertertype =
+      const EnumIndexConverter<LibraryEntryType>(LibraryEntryType.values);
+}
+
+class LibraryEntryData extends DataClass
+    implements Insertable<LibraryEntryData> {
+  final LibraryEntryType type;
+  final BigInt createdAt;
+  final String data;
+  final int width;
+  final int height;
+  const LibraryEntryData(
+      {required this.type,
+      required this.createdAt,
+      required this.data,
+      required this.width,
+      required this.height});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['type'] =
+          Variable<int>($LibraryEntryTable.$convertertype.toSql(type));
+    }
+    map['created_at'] = Variable<BigInt>(createdAt);
+    map['data'] = Variable<String>(data);
+    map['width'] = Variable<int>(width);
+    map['height'] = Variable<int>(height);
+    return map;
+  }
+
+  LibraryEntryCompanion toCompanion(bool nullToAbsent) {
+    return LibraryEntryCompanion(
+      type: Value(type),
+      createdAt: Value(createdAt),
+      data: Value(data),
+      width: Value(width),
+      height: Value(height),
+    );
+  }
+
+  factory LibraryEntryData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LibraryEntryData(
+      type: $LibraryEntryTable.$convertertype
+          .fromJson(serializer.fromJson<int>(json['type'])),
+      createdAt: serializer.fromJson<BigInt>(json['createdAt']),
+      data: serializer.fromJson<String>(json['data']),
+      width: serializer.fromJson<int>(json['width']),
+      height: serializer.fromJson<int>(json['height']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'type': serializer
+          .toJson<int>($LibraryEntryTable.$convertertype.toJson(type)),
+      'createdAt': serializer.toJson<BigInt>(createdAt),
+      'data': serializer.toJson<String>(data),
+      'width': serializer.toJson<int>(width),
+      'height': serializer.toJson<int>(height),
+    };
+  }
+
+  LibraryEntryData copyWith(
+          {LibraryEntryType? type,
+          BigInt? createdAt,
+          String? data,
+          int? width,
+          int? height}) =>
+      LibraryEntryData(
+        type: type ?? this.type,
+        createdAt: createdAt ?? this.createdAt,
+        data: data ?? this.data,
+        width: width ?? this.width,
+        height: height ?? this.height,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('LibraryEntryData(')
+          ..write('type: $type, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('data: $data, ')
+          ..write('width: $width, ')
+          ..write('height: $height')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(type, createdAt, data, width, height);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LibraryEntryData &&
+          other.type == this.type &&
+          other.createdAt == this.createdAt &&
+          other.data == this.data &&
+          other.width == this.width &&
+          other.height == this.height);
+}
+
+class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
+  final Value<LibraryEntryType> type;
+  final Value<BigInt> createdAt;
+  final Value<String> data;
+  final Value<int> width;
+  final Value<int> height;
+  final Value<int> rowid;
+  const LibraryEntryCompanion({
+    this.type = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.data = const Value.absent(),
+    this.width = const Value.absent(),
+    this.height = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LibraryEntryCompanion.insert({
+    required LibraryEntryType type,
+    required BigInt createdAt,
+    required String data,
+    required int width,
+    required int height,
+    this.rowid = const Value.absent(),
+  })  : type = Value(type),
+        createdAt = Value(createdAt),
+        data = Value(data),
+        width = Value(width),
+        height = Value(height);
+  static Insertable<LibraryEntryData> custom({
+    Expression<int>? type,
+    Expression<BigInt>? createdAt,
+    Expression<String>? data,
+    Expression<int>? width,
+    Expression<int>? height,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (type != null) 'type': type,
+      if (createdAt != null) 'created_at': createdAt,
+      if (data != null) 'data': data,
+      if (width != null) 'width': width,
+      if (height != null) 'height': height,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LibraryEntryCompanion copyWith(
+      {Value<LibraryEntryType>? type,
+      Value<BigInt>? createdAt,
+      Value<String>? data,
+      Value<int>? width,
+      Value<int>? height,
+      Value<int>? rowid}) {
+    return LibraryEntryCompanion(
+      type: type ?? this.type,
+      createdAt: createdAt ?? this.createdAt,
+      data: data ?? this.data,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (type.present) {
+      map['type'] =
+          Variable<int>($LibraryEntryTable.$convertertype.toSql(type.value));
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<BigInt>(createdAt.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (width.present) {
+      map['width'] = Variable<int>(width.value);
+    }
+    if (height.present) {
+      map['height'] = Variable<int>(height.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryEntryCompanion(')
+          ..write('type: $type, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('data: $data, ')
+          ..write('width: $width, ')
+          ..write('height: $height, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   late final $ConversationTable conversation = $ConversationTable(this);
@@ -2865,6 +3168,7 @@ abstract class _$Database extends GeneratedDatabase {
   late final $UnknownProfileTable unknownProfile = $UnknownProfileTable(this);
   late final $ProfileTable profile = $ProfileTable(this);
   late final $TrustedLinkTable trustedLink = $TrustedLinkTable(this);
+  late final $LibraryEntryTable libraryEntry = $LibraryEntryTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2878,6 +3182,7 @@ abstract class _$Database extends GeneratedDatabase {
         request,
         unknownProfile,
         profile,
-        trustedLink
+        trustedLink,
+        libraryEntry
       ];
 }

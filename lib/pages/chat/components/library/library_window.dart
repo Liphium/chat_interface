@@ -28,63 +28,6 @@ class _LibraryWindowState extends State<LibraryWindow> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          //* Search box
-          SizedBox(
-            height: 48,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: Material(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(defaultSpacing * 1.5),
-                    ),
-                    color: Get.theme.colorScheme.primary,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
-                      child: TextField(
-                        style: Get.theme.textTheme.labelMedium,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          focusColor: Get.theme.colorScheme.onPrimary,
-                          iconColor: Get.theme.colorScheme.onPrimary,
-                          fillColor: Get.theme.colorScheme.onPrimary,
-                          hoverColor: Get.theme.colorScheme.onPrimary,
-                          prefixIcon: Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
-                          hintText: "conversations.placeholder".tr,
-                        ),
-                        onChanged: (value) {},
-                        cursorColor: Get.theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-                horizontalSpacing(elementSpacing),
-                SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Material(
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(defaultSpacing * 1.5),
-                    ),
-                    color: Get.theme.colorScheme.primary,
-                    child: InkWell(
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(defaultSpacing),
-                      ),
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(defaultSpacing),
-                        child: Icon(Icons.file_upload, color: Get.theme.colorScheme.onPrimary),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          verticalSpacing(defaultSpacing),
-
           //* Tabs
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
