@@ -37,17 +37,22 @@ class TrustedLinkHelper {
       return false;
     }
 
+    final domain = extractDomain(url);
     final type = _trustModeSetting.getValue();
     if (type == 0) {
       return true;
     } else if (type == 3) {
       return false;
     } else if (type == 1) {
-      // TODO: Trusted list of providers
+      for (var trusted in trustedProviders) {
+        if (domain.endsWith(trusted)) {
+          return true;
+        }
+      }
+
       return false;
     }
 
-    final domain = extractDomain(url);
     final result = await (db.trustedLink.select()..where((tbl) => tbl.domain.contains(domain))).getSingleOrNull();
     if (result == null) {
       return false;
