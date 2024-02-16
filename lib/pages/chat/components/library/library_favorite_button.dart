@@ -1,7 +1,9 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,6 +33,27 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
       bookmarked.value = await (db.libraryEntry.select()..where((tbl) => tbl.data.equals(widget.container.url))).getSingleOrNull() != null;
     } else {
       bookmarked.value = await (db.libraryEntry.select()..where((tbl) => tbl.data.contains(widget.container.id))).getSingleOrNull() != null;
+    }
+  }
+
+  void toggleFavoriteOnServer() async {
+    if (widget.container.attachmentType != AttachmentContainerType.file) {
+      return;
+    }
+    if (bookmarked.value) {
+      final json = await postAuthorizedJSON("/account/files/favorite", {
+        "id": widget.container.id,
+      });
+      if (!json["success"]) {
+        sendLog("FAILED TO FAVORITE ON SERVER: ${json["error"]}");
+      }
+    } else {
+      final json = await postAuthorizedJSON("/account/files/unfavorite", {
+        "id": widget.container.id,
+      });
+      if (!json["success"]) {
+        sendLog("FAILED TO FAVORITE ON SERVER: ${json["error"]}");
+      }
     }
   }
 
@@ -70,10 +93,12 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                       if (bookmarked.value) {
                         await db.libraryEntry.deleteWhere((tbl) => tbl.data.equals(entry.data));
                         bookmarked.value = false;
+                        toggleFavoriteOnServer();
                         return;
                       }
                       await db.libraryEntry.insertOne(entry);
                       bookmarked.value = true;
+                      toggleFavoriteOnServer();
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(elementSpacing),

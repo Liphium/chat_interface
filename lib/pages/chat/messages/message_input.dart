@@ -5,6 +5,7 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _MessageInputState extends State<MessageInput> {
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
   StreamSubscription<Conversation>? _sub;
+  final GlobalKey _libraryKey = GlobalKey();
 
   final files = <UploadData>[].obs;
 
@@ -149,7 +151,8 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         //* Attach from the library
                         IconButton(
-                          onPressed: () => Get.dialog(const LibraryWindow()),
+                          key: _libraryKey,
+                          onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true))),
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),

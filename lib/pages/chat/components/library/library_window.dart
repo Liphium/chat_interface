@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:chat_interface/database/accounts/library_entry.dart';
 import 'package:chat_interface/pages/chat/components/library/library_tab.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
@@ -7,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LibraryWindow extends StatefulWidget {
-  const LibraryWindow({super.key});
+  final ContextMenuData data;
+
+  const LibraryWindow({super.key, required this.data});
 
   @override
   State<LibraryWindow> createState() => _LibraryWindowState();
@@ -16,13 +20,6 @@ class LibraryWindow extends StatefulWidget {
 class _LibraryWindowState extends State<LibraryWindow> {
   final _selected = "library.all".obs;
 
-  // Tabs
-  final _tabs = <String, Widget>{
-    "library.all": const LibraryTab(),
-    "library.images": const LibraryTab(filter: LibraryEntryType.image),
-    "library.gifs": const LibraryTab(filter: LibraryEntryType.gif),
-  };
-
   @override
   void initState() {
     super.initState();
@@ -30,8 +27,9 @@ class _LibraryWindowState extends State<LibraryWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return DialogBase(
-      maxWidth: 500,
+    return SlidingWindowBase(
+      maxSize: 500,
+      position: widget.data,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -68,14 +66,22 @@ class _LibraryWindowState extends State<LibraryWindow> {
               ),
             ],
           ),
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: 700,
-            ),
+          SizedBox(
+            height: 400,
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.only(top: defaultSpacing),
-                child: Obx(() => _tabs[_selected.value]!),
+                child: Obx(() {
+                  switch (_selected.value) {
+                    case "library.all":
+                      return const LibraryTab();
+                    case "library.images":
+                      return const LibraryTab(filter: LibraryEntryType.image);
+                    case "library.gifs":
+                      return const LibraryTab(filter: LibraryEntryType.gif);
+                  }
+                  return const SizedBox();
+                }),
               ),
             ),
           ),

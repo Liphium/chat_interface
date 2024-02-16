@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/accounts/library_entry.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
@@ -19,38 +23,65 @@ class LibraryTab extends StatefulWidget {
 }
 
 class _LibraryTabState extends State<LibraryTab> {
-  final entryList = <LibraryEntryData>[].obs;
-
-  @override
-  void initState() {
-    super.initState();
-    loadMoreItems();
-  }
+  LibraryEntryType? _lastFilter;
+  final _containerList = <AttachmentContainer>[].obs;
+  BigInt lastDate = BigInt.from(0);
+  final _show = false.obs;
 
   void loadMoreItems() async {
-    final lastTime = entryList.isEmpty ? BigInt.from(0) : entryList.last.createdAt;
+    if (widget.filter != _lastFilter) {
+      lastDate = BigInt.from(0);
+    }
     List<LibraryEntryData> entries;
     if (widget.filter != null) {
       entries = await (db.libraryEntry.select()
-            ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
-            ..where((tbl) => tbl.createdAt.isSmallerThan(Variable(lastTime)))
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
+            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(lastDate)))
             ..where((tbl) => tbl.type.equals(widget.filter!.index))
             ..limit(30))
           .get();
     } else {
       entries = await (db.libraryEntry.select()
-            ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
-            ..where((tbl) => tbl.createdAt.isSmallerThan(Variable(lastTime)))
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
+            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(lastDate)))
             ..limit(30))
           .get();
     }
-    entryList.addAll(entries);
+    if (entries.isNotEmpty) {
+      lastDate = entries.last.createdAt;
+    }
+    final newContainerList = <AttachmentContainer>[];
+    for (var entry in entries) {
+      if (entry.data.isURL) {
+        newContainerList.add(AttachmentContainer.remoteImage(entry.data));
+      } else {
+        final json = jsonDecode(entry.data);
+        final type = await AttachmentController.getStorageTypeFor(json["id"]);
+        if (type == null) {
+          continue;
+        }
+        newContainerList.add(AttachmentContainer.fromJson(type, json));
+      }
+    }
+    if (_lastFilter != widget.filter) {
+      _containerList.value = newContainerList;
+    } else {
+      _containerList.addAll(newContainerList);
+    }
+    _lastFilter = widget.filter;
+    _show.value = true;
   }
 
   @override
   Widget build(BuildContext context) {
+    loadMoreItems();
+
     return Obx(() {
-      if (entryList.isEmpty) {
+      if (!_show.value) {
+        return const SizedBox();
+      }
+
+      if (_containerList.isEmpty) {
         return InfoContainer(
           message: "library.empty".tr,
           expand: true,
@@ -59,15 +90,31 @@ class _LibraryTabState extends State<LibraryTab> {
 
       return GridView.builder(
         shrinkWrap: true,
-        itemCount: entryList.length,
+        itemCount: _containerList.length,
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 200,
           mainAxisSpacing: defaultSpacing,
           crossAxisSpacing: defaultSpacing,
         ),
         itemBuilder: (context, index) {
-          return Container(
-            color: Colors.red,
+          final container = _containerList[index];
+
+          // Render attachment container
+          Image image;
+          if (container.attachmentType == AttachmentContainerType.remoteImage) {
+            image = Image.network(
+              container.url,
+              fit: BoxFit.cover,
+            );
+          } else {
+            image = Image.file(
+              File(container.filePath),
+              fit: BoxFit.cover,
+            );
+          }
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(defaultSpacing),
+            child: image,
           );
         },
       );

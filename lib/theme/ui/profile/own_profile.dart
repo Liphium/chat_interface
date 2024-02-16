@@ -267,10 +267,6 @@ class _ProfileState extends State<OwnProfile> {
                   ProfileButton(icon: Icons.group, label: 'profile.friends'.tr, onTap: () => Get.dialog(const FriendsPage()), loading: false.obs),
                   verticalSpacing(elementSpacing),
 
-                  //* Files page
-                  ProfileButton(icon: Icons.folder, label: 'profile.files'.tr, onTap: () => Get.dialog(const LibraryWindow()), loading: false.obs),
-                  verticalSpacing(elementSpacing),
-
                   //* Hide profile
                   ProfileButton(
                     icon: Icons.hardware,

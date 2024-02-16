@@ -261,6 +261,19 @@ class AttachmentController extends GetxController {
 
     return null;
   }
+
+  /// Check if a file exists (and get the storage type if it does)
+  static Future<StorageType?> getStorageTypeFor(String id, {types = StorageType.values}) async {
+    // Check if the file is in any of the existing folders
+    for (final type in types) {
+      final file = File(path.join(getFilePathForType(type), id));
+      if (await file.exists()) {
+        return type;
+      }
+    }
+
+    return null;
+  }
 }
 
 /// The type of storage the file is in on device

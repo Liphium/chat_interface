@@ -100,18 +100,21 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           return const SizedBox();
         }
 
-        return InkWell(
-          onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
-          borderRadius: BorderRadius.circular(defaultSpacing),
-          child: ClipRRect(
+        return LibraryFavoriteButton(
+          container: widget.container,
+          child: InkWell(
+            onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
             borderRadius: BorderRadius.circular(defaultSpacing),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: 350,
-              ),
-              child: Image.network(
-                widget.container.url,
-                fit: BoxFit.cover,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(defaultSpacing),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 350,
+                ),
+                child: Image.network(
+                  widget.container.url,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
