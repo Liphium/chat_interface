@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/accounts/library_entry.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
@@ -98,6 +99,7 @@ class _LibraryTabState extends State<LibraryTab> {
         ),
         itemBuilder: (context, index) {
           final container = _containerList[index];
+          container.downloaded.value = true;
 
           // Render attachment container
           Image image;
@@ -112,9 +114,28 @@ class _LibraryTabState extends State<LibraryTab> {
               fit: BoxFit.cover,
             );
           }
-          return ClipRRect(
+          return Material(
             borderRadius: BorderRadius.circular(defaultSpacing),
-            child: image,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(defaultSpacing),
+              onTap: () => {},
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(defaultSpacing),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return LibraryFavoriteButton(
+                      callback: () => _containerList.removeAt(index),
+                      container: container,
+                      child: SizedBox(
+                        width: constraints.biggest.width,
+                        height: constraints.biggest.height,
+                        child: image,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           );
         },
       );

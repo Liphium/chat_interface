@@ -85,38 +85,6 @@ class MessageController extends GetxController {
   }
 
   void storeMessage(Message message) async {
-    // Handle attachments
-    if (message.attachments.isNotEmpty && message.type != MessageType.system) {
-      for (var attachment in message.attachments) {
-        if (attachment.isURL) {
-          sendLog("attachment url found");
-          continue;
-        }
-
-        final json = jsonDecode(attachment);
-        final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
-        final container = AttachmentContainer.fromJson(type, json);
-        final extension = container.url.split(".").last;
-
-        if (FileSettings.imageTypes.contains(extension)) {
-          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
-          if (download) {
-            await Get.find<AttachmentController>().downloadAttachment(container);
-          }
-        } else if (FileSettings.videoTypes.contains(extension)) {
-          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
-          if (download) {
-            await Get.find<AttachmentController>().downloadAttachment(container);
-          }
-        } else if (FileSettings.audioTypes.contains(extension)) {
-          final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
-          if (download) {
-            await Get.find<AttachmentController>().downloadAttachment(container);
-          }
-        }
-      }
-    }
-
     // Update message reading
     Get.find<ConversationController>()
         .updateMessageRead(message.conversation, increment: selectedConversation.value.id != message.conversation, messageSendTime: message.createdAt.millisecondsSinceEpoch);
@@ -205,13 +173,29 @@ class Message {
         final json = jsonDecode(attachment);
         final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
         final decoded = AttachmentContainer.fromJson(type, json);
-        final container = await Get.find<AttachmentController>().findLocalFile(decoded);
+        var container = await Get.find<AttachmentController>().findLocalFile(decoded);
         sendLog("FOUND: ${container?.filePath}");
         if (container == null) {
-          attachmentsRenderer.add(decoded);
-        } else {
-          attachmentsRenderer.add(container);
+          final extension = decoded.id.split(".").last;
+          if (FileSettings.imageTypes.contains(extension)) {
+            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
+            if (download) {
+              Get.find<AttachmentController>().downloadAttachment(decoded);
+            }
+          } else if (FileSettings.videoTypes.contains(extension)) {
+            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
+            if (download) {
+              Get.find<AttachmentController>().downloadAttachment(decoded);
+            }
+          } else if (FileSettings.audioTypes.contains(extension)) {
+            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
+            if (download) {
+              Get.find<AttachmentController>().downloadAttachment(decoded);
+            }
+          }
+          container = decoded;
         }
+        attachmentsRenderer.add(container);
       }
     }
   }

@@ -11,11 +11,13 @@ import 'package:get/get.dart';
 class LibraryFavoriteButton extends StatefulWidget {
   final AttachmentContainer container;
   final Widget child;
+  final Function()? callback;
 
   const LibraryFavoriteButton({
     super.key,
     required this.child,
     required this.container,
+    this.callback,
   });
 
   @override
@@ -25,10 +27,8 @@ class LibraryFavoriteButton extends StatefulWidget {
 class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
   final visible = false.obs;
   final bookmarked = false.obs;
-  bool fetched = false;
 
   void fetchBookmarkState() async {
-    fetched = true;
     if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
       bookmarked.value = await (db.libraryEntry.select()..where((tbl) => tbl.data.equals(widget.container.url))).getSingleOrNull() != null;
     } else {
@@ -52,7 +52,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
         "id": widget.container.id,
       });
       if (!json["success"]) {
-        sendLog("FAILED TO FAVORITE ON SERVER: ${json["error"]}");
+        sendLog("FAILED TO UNFAVORITE ON SERVER: ${json["error"]}");
       }
     }
   }
@@ -61,9 +61,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (e) {
-        if (!fetched) {
-          fetchBookmarkState();
-        }
+        fetchBookmarkState();
         visible.value = true;
       },
       onExit: (e) => visible.value = false,
@@ -90,6 +88,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                       if (entry == null) {
                         return;
                       }
+                      widget.callback?.call();
                       if (bookmarked.value) {
                         await db.libraryEntry.deleteWhere((tbl) => tbl.data.equals(entry.data));
                         bookmarked.value = false;

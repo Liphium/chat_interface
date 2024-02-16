@@ -109,7 +109,7 @@ class AttachmentController extends GetxController {
       return false;
     }
 
-    // TODO: Test this check thingy
+    sendLog(json["file"]["path"]);
     if (json["file"]["path"] != container.url) {
       sendLog("Download errored, invalid attachment url");
       return false;
