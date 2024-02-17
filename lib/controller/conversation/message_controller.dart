@@ -149,7 +149,7 @@ class Message {
   String content;
   List<String> attachments;
   final verified = true.obs;
-  final String answer;
+  String answer;
   String signature;
   final String certificate;
   final String sender;
@@ -258,6 +258,7 @@ class Message {
       content = contentJson["c"];
     }
     attachments = List<String>.from(contentJson["a"] ?? [""]);
+    answer = contentJson["r"] ?? "";
   }
 
   /// Verifies the signature of the message

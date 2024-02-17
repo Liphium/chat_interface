@@ -79,7 +79,7 @@ class _MessageInputState extends State<MessageInput> {
         onInvoke: (SendIntent intent) {
           final controller = Get.find<MessageController>();
           if (currentDraft.value!.files.isEmpty) {
-            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], resetCurrentDraft);
+            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], currentDraft.value!.answer, resetCurrentDraft);
             return;
           }
 
@@ -87,7 +87,7 @@ class _MessageInputState extends State<MessageInput> {
             return;
           }
 
-          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, currentDraft.value!.files, resetCurrentDraft);
+          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, currentDraft.value!.files, currentDraft.value!.answer, resetCurrentDraft);
           return null;
         },
       ),

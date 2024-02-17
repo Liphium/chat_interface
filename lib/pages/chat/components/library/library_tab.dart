@@ -126,7 +126,7 @@ class _LibraryTabState extends State<LibraryTab> {
                 if (controller.selectedConversation.value.id == "") {
                   return;
                 }
-                sendActualMessage(false.obs, controller.selectedConversation.value.id, MessageType.text, [container.toAttachment()], "", () => {});
+                sendActualMessage(false.obs, controller.selectedConversation.value.id, MessageType.text, [container.toAttachment()], "", "", () => {});
                 Get.back();
               },
               child: ClipRRect(
