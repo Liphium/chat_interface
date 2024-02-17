@@ -15,27 +15,27 @@ part 'database.g.dart';
 bool databaseInitialized = false;
 late Database db;
 
-@DriftDatabase(tables: [Conversation, Member, Message, Setting, Friend, Request, UnknownProfile, Profile, TrustedLink, LibraryEntry])
+@DriftDatabase(tables: [
+  Conversation,
+  Member,
+  Message,
+  Setting,
+  Friend,
+  Request,
+  UnknownProfile,
+  Profile,
+  TrustedLink,
+  LibraryEntry,
+  MessageReaction,
+])
 class Database extends _$Database {
   Database(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration {
-    return MigrationStrategy(
-      onCreate: (Migrator m) async {
-        await m.createAll();
-      },
-      onUpgrade: (Migrator m, int from, int to) async {
-        if (from < 2) {
-          await m.createTable(trustedLink);
-        }
-        if (from < 3) {
-          await m.createTable(libraryEntry);
-        }
-      },
-    );
+    return MigrationStrategy();
   }
 }

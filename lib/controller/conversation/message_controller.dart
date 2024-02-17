@@ -149,6 +149,7 @@ class Message {
   String content;
   List<String> attachments;
   final verified = true.obs;
+  final String answer;
   String signature;
   final String certificate;
   final String sender;
@@ -204,6 +205,7 @@ class Message {
     this.id,
     this.type,
     this.content,
+    this.answer,
     this.attachments,
     this.signature,
     this.certificate,
@@ -220,7 +222,7 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) {
     // Convert to message
     final account = Get.find<ConversationController>().conversations[json["conversation"]]!.members[json["sender"]]?.account ?? "removed";
-    var message = Message(json["id"], MessageType.text, json["data"], [""], "", json["certificate"], json["sender"], account,
+    var message = Message(json["id"], MessageType.text, json["data"], "", [], "", json["certificate"], json["sender"], account,
         DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"], json["edited"], false);
 
     // Decrypt content
@@ -288,6 +290,7 @@ class Message {
       : id = messageData.id,
         type = MessageType.values[messageData.type],
         content = messageData.content,
+        answer = messageData.answer,
         attachments = List<String>.from(jsonDecode(messageData.attachments)),
         certificate = messageData.certificate,
         sender = messageData.sender,
@@ -303,6 +306,7 @@ class Message {
         id: id,
         type: type.index,
         content: content,
+        answer: answer,
         signature: signature,
         attachments: jsonEncode(attachments),
         certificate: certificate,

@@ -3,45 +3,66 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
-class $ConversationTable extends Conversation with TableInfo<$ConversationTable, ConversationData> {
+class $ConversationTable extends Conversation
+    with TableInfo<$ConversationTable, ConversationData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $ConversationTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _vaultIdMeta = const VerificationMeta('vaultId');
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _vaultIdMeta =
+      const VerificationMeta('vaultId');
   @override
-  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>('vault_id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+      'vault_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<ConversationType, int> type =
-      GeneratedColumn<int>('type', aliasedName, false, type: DriftSqlType.int, requiredDuringInsert: true).withConverter<ConversationType>($ConversationTable.$convertertype);
+      GeneratedColumn<int>('type', aliasedName, false,
+              type: DriftSqlType.int, requiredDuringInsert: true)
+          .withConverter<ConversationType>($ConversationTable.$convertertype);
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
-  late final GeneratedColumn<String> data = GeneratedColumn<String>('data', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _tokenMeta = const VerificationMeta('token');
   @override
-  late final GeneratedColumn<String> token = GeneratedColumn<String>('token', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> token = GeneratedColumn<String>(
+      'token', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
-  late final GeneratedColumn<String> key = GeneratedColumn<String>('key', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+      'key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<BigInt> updatedAt = GeneratedColumn<BigInt>('updated_at', aliasedName, false, type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  late final GeneratedColumn<BigInt> updatedAt = GeneratedColumn<BigInt>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   static const VerificationMeta _readAtMeta = const VerificationMeta('readAt');
   @override
-  late final GeneratedColumn<BigInt> readAt = GeneratedColumn<BigInt>('read_at', aliasedName, false, type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  late final GeneratedColumn<BigInt> readAt = GeneratedColumn<BigInt>(
+      'read_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, vaultId, type, data, token, key, updatedAt, readAt];
+  List<GeneratedColumn> get $columns =>
+      [id, vaultId, type, data, token, key, updatedAt, readAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'conversation';
   @override
-  VerificationContext validateIntegrity(Insertable<ConversationData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<ConversationData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -50,33 +71,39 @@ class $ConversationTable extends Conversation with TableInfo<$ConversationTable,
       context.missing(_idMeta);
     }
     if (data.containsKey('vault_id')) {
-      context.handle(_vaultIdMeta, vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
+      context.handle(_vaultIdMeta,
+          vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
     } else if (isInserting) {
       context.missing(_vaultIdMeta);
     }
     context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('data')) {
-      context.handle(_dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
     if (data.containsKey('token')) {
-      context.handle(_tokenMeta, token.isAcceptableOrUnknown(data['token']!, _tokenMeta));
+      context.handle(
+          _tokenMeta, token.isAcceptableOrUnknown(data['token']!, _tokenMeta));
     } else if (isInserting) {
       context.missing(_tokenMeta);
     }
     if (data.containsKey('key')) {
-      context.handle(_keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+      context.handle(
+          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
     } else if (isInserting) {
       context.missing(_keyMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta, updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
     if (data.containsKey('read_at')) {
-      context.handle(_readAtMeta, readAt.isAcceptableOrUnknown(data['read_at']!, _readAtMeta));
+      context.handle(_readAtMeta,
+          readAt.isAcceptableOrUnknown(data['read_at']!, _readAtMeta));
     } else if (isInserting) {
       context.missing(_readAtMeta);
     }
@@ -89,14 +116,23 @@ class $ConversationTable extends Conversation with TableInfo<$ConversationTable,
   ConversationData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ConversationData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      vaultId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
-      type: $ConversationTable.$convertertype.fromSql(attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}type'])!),
-      data: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}data'])!,
-      token: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}token'])!,
-      key: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}key'])!,
-      updatedAt: attachedDatabase.typeMapping.read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
-      readAt: attachedDatabase.typeMapping.read(DriftSqlType.bigInt, data['${effectivePrefix}read_at'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      vaultId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
+      type: $ConversationTable.$convertertype.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      token: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}token'])!,
+      key: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
+      readAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}read_at'])!,
     );
   }
 
@@ -105,10 +141,12 @@ class $ConversationTable extends Conversation with TableInfo<$ConversationTable,
     return $ConversationTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<ConversationType, int, int> $convertertype = const EnumIndexConverter<ConversationType>(ConversationType.values);
+  static JsonTypeConverter2<ConversationType, int, int> $convertertype =
+      const EnumIndexConverter<ConversationType>(ConversationType.values);
 }
 
-class ConversationData extends DataClass implements Insertable<ConversationData> {
+class ConversationData extends DataClass
+    implements Insertable<ConversationData> {
   final String id;
   final String vaultId;
   final ConversationType type;
@@ -132,7 +170,8 @@ class ConversationData extends DataClass implements Insertable<ConversationData>
     map['id'] = Variable<String>(id);
     map['vault_id'] = Variable<String>(vaultId);
     {
-      map['type'] = Variable<int>($ConversationTable.$convertertype.toSql(type));
+      map['type'] =
+          Variable<int>($ConversationTable.$convertertype.toSql(type));
     }
     map['data'] = Variable<String>(data);
     map['token'] = Variable<String>(token);
@@ -155,12 +194,14 @@ class ConversationData extends DataClass implements Insertable<ConversationData>
     );
   }
 
-  factory ConversationData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory ConversationData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConversationData(
       id: serializer.fromJson<String>(json['id']),
       vaultId: serializer.fromJson<String>(json['vaultId']),
-      type: $ConversationTable.$convertertype.fromJson(serializer.fromJson<int>(json['type'])),
+      type: $ConversationTable.$convertertype
+          .fromJson(serializer.fromJson<int>(json['type'])),
       data: serializer.fromJson<String>(json['data']),
       token: serializer.fromJson<String>(json['token']),
       key: serializer.fromJson<String>(json['key']),
@@ -174,7 +215,8 @@ class ConversationData extends DataClass implements Insertable<ConversationData>
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'vaultId': serializer.toJson<String>(vaultId),
-      'type': serializer.toJson<int>($ConversationTable.$convertertype.toJson(type)),
+      'type': serializer
+          .toJson<int>($ConversationTable.$convertertype.toJson(type)),
       'data': serializer.toJson<String>(data),
       'token': serializer.toJson<String>(token),
       'key': serializer.toJson<String>(key),
@@ -183,7 +225,15 @@ class ConversationData extends DataClass implements Insertable<ConversationData>
     };
   }
 
-  ConversationData copyWith({String? id, String? vaultId, ConversationType? type, String? data, String? token, String? key, BigInt? updatedAt, BigInt? readAt}) =>
+  ConversationData copyWith(
+          {String? id,
+          String? vaultId,
+          ConversationType? type,
+          String? data,
+          String? token,
+          String? key,
+          BigInt? updatedAt,
+          BigInt? readAt}) =>
       ConversationData(
         id: id ?? this.id,
         vaultId: vaultId ?? this.vaultId,
@@ -210,7 +260,8 @@ class ConversationData extends DataClass implements Insertable<ConversationData>
   }
 
   @override
-  int get hashCode => Object.hash(id, vaultId, type, data, token, key, updatedAt, readAt);
+  int get hashCode =>
+      Object.hash(id, vaultId, type, data, token, key, updatedAt, readAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -321,7 +372,8 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       map['vault_id'] = Variable<String>(vaultId.value);
     }
     if (type.present) {
-      map['type'] = Variable<int>($ConversationTable.$convertertype.toSql(type.value));
+      map['type'] =
+          Variable<int>($ConversationTable.$convertertype.toSql(type.value));
     }
     if (data.present) {
       map['data'] = Variable<String>(data.value);
@@ -368,16 +420,26 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   $MemberTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _conversationIdMeta = const VerificationMeta('conversationId');
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
   @override
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>('conversation_id', aliasedName, true, type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _accountIdMeta = const VerificationMeta('accountId');
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
   @override
-  late final GeneratedColumn<String> accountId = GeneratedColumn<String>('account_id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'account_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _roleIdMeta = const VerificationMeta('roleId');
   @override
-  late final GeneratedColumn<int> roleId = GeneratedColumn<int>('role_id', aliasedName, false, type: DriftSqlType.int, requiredDuringInsert: true);
+  late final GeneratedColumn<int> roleId = GeneratedColumn<int>(
+      'role_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [id, conversationId, accountId, roleId];
   @override
@@ -386,7 +448,8 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   String get actualTableName => $name;
   static const String $name = 'member';
   @override
-  VerificationContext validateIntegrity(Insertable<MemberData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<MemberData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -395,15 +458,20 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
       context.missing(_idMeta);
     }
     if (data.containsKey('conversation_id')) {
-      context.handle(_conversationIdMeta, conversationId.isAcceptableOrUnknown(data['conversation_id']!, _conversationIdMeta));
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
     }
     if (data.containsKey('account_id')) {
-      context.handle(_accountIdMeta, accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta));
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta));
     } else if (isInserting) {
       context.missing(_accountIdMeta);
     }
     if (data.containsKey('role_id')) {
-      context.handle(_roleIdMeta, roleId.isAcceptableOrUnknown(data['role_id']!, _roleIdMeta));
+      context.handle(_roleIdMeta,
+          roleId.isAcceptableOrUnknown(data['role_id']!, _roleIdMeta));
     } else if (isInserting) {
       context.missing(_roleIdMeta);
     }
@@ -416,10 +484,14 @@ class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   MemberData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MemberData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      conversationId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}conversation_id']),
-      accountId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
-      roleId: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}role_id'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      conversationId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}conversation_id']),
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
+      roleId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}role_id'])!,
     );
   }
 
@@ -434,7 +506,11 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   final String? conversationId;
   final String accountId;
   final int roleId;
-  const MemberData({required this.id, this.conversationId, required this.accountId, required this.roleId});
+  const MemberData(
+      {required this.id,
+      this.conversationId,
+      required this.accountId,
+      required this.roleId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -450,13 +526,16 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   MemberCompanion toCompanion(bool nullToAbsent) {
     return MemberCompanion(
       id: Value(id),
-      conversationId: conversationId == null && nullToAbsent ? const Value.absent() : Value(conversationId),
+      conversationId: conversationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(conversationId),
       accountId: Value(accountId),
       roleId: Value(roleId),
     );
   }
 
-  factory MemberData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory MemberData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MemberData(
       id: serializer.fromJson<String>(json['id']),
@@ -476,9 +555,15 @@ class MemberData extends DataClass implements Insertable<MemberData> {
     };
   }
 
-  MemberData copyWith({String? id, Value<String?> conversationId = const Value.absent(), String? accountId, int? roleId}) => MemberData(
+  MemberData copyWith(
+          {String? id,
+          Value<String?> conversationId = const Value.absent(),
+          String? accountId,
+          int? roleId}) =>
+      MemberData(
         id: id ?? this.id,
-        conversationId: conversationId.present ? conversationId.value : this.conversationId,
+        conversationId:
+            conversationId.present ? conversationId.value : this.conversationId,
         accountId: accountId ?? this.accountId,
         roleId: roleId ?? this.roleId,
       );
@@ -498,7 +583,11 @@ class MemberData extends DataClass implements Insertable<MemberData> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is MemberData && other.id == this.id && other.conversationId == this.conversationId && other.accountId == this.accountId && other.roleId == this.roleId);
+      (other is MemberData &&
+          other.id == this.id &&
+          other.conversationId == this.conversationId &&
+          other.accountId == this.accountId &&
+          other.roleId == this.roleId);
 }
 
 class MemberCompanion extends UpdateCompanion<MemberData> {
@@ -539,7 +628,12 @@ class MemberCompanion extends UpdateCompanion<MemberData> {
     });
   }
 
-  MemberCompanion copyWith({Value<String>? id, Value<String?>? conversationId, Value<String>? accountId, Value<int>? roleId, Value<int>? rowid}) {
+  MemberCompanion copyWith(
+      {Value<String>? id,
+      Value<String?>? conversationId,
+      Value<String>? accountId,
+      Value<int>? roleId,
+      Value<int>? rowid}) {
     return MemberCompanion(
       id: id ?? this.id,
       conversationId: conversationId ?? this.conversationId,
@@ -590,51 +684,107 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   $MessageTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _verifiedMeta = const VerificationMeta('verified');
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _verifiedMeta =
+      const VerificationMeta('verified');
   @override
-  late final GeneratedColumn<bool> verified = GeneratedColumn<bool>('verified', aliasedName, false,
-      type: DriftSqlType.bool, requiredDuringInsert: true, defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
+  late final GeneratedColumn<bool> verified = GeneratedColumn<bool>(
+      'verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<int> type = GeneratedColumn<int>('type', aliasedName, false, type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _contentMeta = const VerificationMeta('content');
+  late final GeneratedColumn<int> type = GeneratedColumn<int>(
+      'type', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _contentMeta =
+      const VerificationMeta('content');
   @override
-  late final GeneratedColumn<String> content = GeneratedColumn<String>('content', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _signatureMeta = const VerificationMeta('signature');
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+      'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _signatureMeta =
+      const VerificationMeta('signature');
   @override
-  late final GeneratedColumn<String> signature = GeneratedColumn<String>('signature', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _attachmentsMeta = const VerificationMeta('attachments');
+  late final GeneratedColumn<String> signature = GeneratedColumn<String>(
+      'signature', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _attachmentsMeta =
+      const VerificationMeta('attachments');
   @override
-  late final GeneratedColumn<String> attachments = GeneratedColumn<String>('attachments', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _certificateMeta = const VerificationMeta('certificate');
+  late final GeneratedColumn<String> attachments = GeneratedColumn<String>(
+      'attachments', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _certificateMeta =
+      const VerificationMeta('certificate');
   @override
-  late final GeneratedColumn<String> certificate = GeneratedColumn<String>('certificate', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> certificate = GeneratedColumn<String>(
+      'certificate', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _senderMeta = const VerificationMeta('sender');
   @override
-  late final GeneratedColumn<String> sender = GeneratedColumn<String>('sender', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _senderAccountMeta = const VerificationMeta('senderAccount');
+  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
+      'sender', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _senderAccountMeta =
+      const VerificationMeta('senderAccount');
   @override
-  late final GeneratedColumn<String> senderAccount = GeneratedColumn<String>('sender_account', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumn<String> senderAccount = GeneratedColumn<String>(
+      'sender_account', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _answerMeta = const VerificationMeta('answer');
   @override
-  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>('created_at', aliasedName, false, type: DriftSqlType.bigInt, requiredDuringInsert: true);
-  static const VerificationMeta _conversationIdMeta = const VerificationMeta('conversationId');
+  late final GeneratedColumn<String> answer = GeneratedColumn<String>(
+      'answer', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>('conversation_id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  @override
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _editedMeta = const VerificationMeta('edited');
   @override
-  late final GeneratedColumn<bool> edited = GeneratedColumn<bool>('edited', aliasedName, false,
-      type: DriftSqlType.bool, requiredDuringInsert: true, defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("edited" IN (0, 1))'));
+  late final GeneratedColumn<bool> edited = GeneratedColumn<bool>(
+      'edited', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("edited" IN (0, 1))'));
   @override
-  List<GeneratedColumn> get $columns => [id, verified, type, content, signature, attachments, certificate, sender, senderAccount, createdAt, conversationId, edited];
+  List<GeneratedColumn> get $columns => [
+        id,
+        verified,
+        type,
+        content,
+        signature,
+        attachments,
+        certificate,
+        sender,
+        senderAccount,
+        answer,
+        createdAt,
+        conversationId,
+        edited
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'message';
   @override
-  VerificationContext validateIntegrity(Insertable<MessageData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<MessageData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -643,57 +793,82 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       context.missing(_idMeta);
     }
     if (data.containsKey('verified')) {
-      context.handle(_verifiedMeta, verified.isAcceptableOrUnknown(data['verified']!, _verifiedMeta));
+      context.handle(_verifiedMeta,
+          verified.isAcceptableOrUnknown(data['verified']!, _verifiedMeta));
     } else if (isInserting) {
       context.missing(_verifiedMeta);
     }
     if (data.containsKey('type')) {
-      context.handle(_typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
     if (data.containsKey('content')) {
-      context.handle(_contentMeta, content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
     } else if (isInserting) {
       context.missing(_contentMeta);
     }
     if (data.containsKey('signature')) {
-      context.handle(_signatureMeta, signature.isAcceptableOrUnknown(data['signature']!, _signatureMeta));
+      context.handle(_signatureMeta,
+          signature.isAcceptableOrUnknown(data['signature']!, _signatureMeta));
     } else if (isInserting) {
       context.missing(_signatureMeta);
     }
     if (data.containsKey('attachments')) {
-      context.handle(_attachmentsMeta, attachments.isAcceptableOrUnknown(data['attachments']!, _attachmentsMeta));
+      context.handle(
+          _attachmentsMeta,
+          attachments.isAcceptableOrUnknown(
+              data['attachments']!, _attachmentsMeta));
     } else if (isInserting) {
       context.missing(_attachmentsMeta);
     }
     if (data.containsKey('certificate')) {
-      context.handle(_certificateMeta, certificate.isAcceptableOrUnknown(data['certificate']!, _certificateMeta));
+      context.handle(
+          _certificateMeta,
+          certificate.isAcceptableOrUnknown(
+              data['certificate']!, _certificateMeta));
     } else if (isInserting) {
       context.missing(_certificateMeta);
     }
     if (data.containsKey('sender')) {
-      context.handle(_senderMeta, sender.isAcceptableOrUnknown(data['sender']!, _senderMeta));
+      context.handle(_senderMeta,
+          sender.isAcceptableOrUnknown(data['sender']!, _senderMeta));
     } else if (isInserting) {
       context.missing(_senderMeta);
     }
     if (data.containsKey('sender_account')) {
-      context.handle(_senderAccountMeta, senderAccount.isAcceptableOrUnknown(data['sender_account']!, _senderAccountMeta));
+      context.handle(
+          _senderAccountMeta,
+          senderAccount.isAcceptableOrUnknown(
+              data['sender_account']!, _senderAccountMeta));
     } else if (isInserting) {
       context.missing(_senderAccountMeta);
     }
+    if (data.containsKey('answer')) {
+      context.handle(_answerMeta,
+          answer.isAcceptableOrUnknown(data['answer']!, _answerMeta));
+    } else if (isInserting) {
+      context.missing(_answerMeta);
+    }
     if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta, createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
     if (data.containsKey('conversation_id')) {
-      context.handle(_conversationIdMeta, conversationId.isAcceptableOrUnknown(data['conversation_id']!, _conversationIdMeta));
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
     } else if (isInserting) {
       context.missing(_conversationIdMeta);
     }
     if (data.containsKey('edited')) {
-      context.handle(_editedMeta, edited.isAcceptableOrUnknown(data['edited']!, _editedMeta));
+      context.handle(_editedMeta,
+          edited.isAcceptableOrUnknown(data['edited']!, _editedMeta));
     } else if (isInserting) {
       context.missing(_editedMeta);
     }
@@ -706,18 +881,32 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   MessageData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MessageData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      verified: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
-      type: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}type'])!,
-      content: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}content'])!,
-      signature: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}signature'])!,
-      attachments: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}attachments'])!,
-      certificate: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}certificate'])!,
-      sender: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}sender'])!,
-      senderAccount: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}sender_account'])!,
-      createdAt: attachedDatabase.typeMapping.read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
-      conversationId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
-      edited: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      verified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      signature: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}signature'])!,
+      attachments: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!,
+      certificate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}certificate'])!,
+      sender: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender'])!,
+      senderAccount: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_account'])!,
+      answer: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}answer'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      edited: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
     );
   }
 
@@ -737,6 +926,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final String certificate;
   final String sender;
   final String senderAccount;
+  final String answer;
   final BigInt createdAt;
   final String conversationId;
   final bool edited;
@@ -750,6 +940,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       required this.certificate,
       required this.sender,
       required this.senderAccount,
+      required this.answer,
       required this.createdAt,
       required this.conversationId,
       required this.edited});
@@ -765,6 +956,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     map['certificate'] = Variable<String>(certificate);
     map['sender'] = Variable<String>(sender);
     map['sender_account'] = Variable<String>(senderAccount);
+    map['answer'] = Variable<String>(answer);
     map['created_at'] = Variable<BigInt>(createdAt);
     map['conversation_id'] = Variable<String>(conversationId);
     map['edited'] = Variable<bool>(edited);
@@ -782,13 +974,15 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       certificate: Value(certificate),
       sender: Value(sender),
       senderAccount: Value(senderAccount),
+      answer: Value(answer),
       createdAt: Value(createdAt),
       conversationId: Value(conversationId),
       edited: Value(edited),
     );
   }
 
-  factory MessageData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory MessageData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
@@ -800,6 +994,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       certificate: serializer.fromJson<String>(json['certificate']),
       sender: serializer.fromJson<String>(json['sender']),
       senderAccount: serializer.fromJson<String>(json['senderAccount']),
+      answer: serializer.fromJson<String>(json['answer']),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
       conversationId: serializer.fromJson<String>(json['conversationId']),
       edited: serializer.fromJson<bool>(json['edited']),
@@ -818,6 +1013,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       'certificate': serializer.toJson<String>(certificate),
       'sender': serializer.toJson<String>(sender),
       'senderAccount': serializer.toJson<String>(senderAccount),
+      'answer': serializer.toJson<String>(answer),
       'createdAt': serializer.toJson<BigInt>(createdAt),
       'conversationId': serializer.toJson<String>(conversationId),
       'edited': serializer.toJson<bool>(edited),
@@ -834,6 +1030,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           String? certificate,
           String? sender,
           String? senderAccount,
+          String? answer,
           BigInt? createdAt,
           String? conversationId,
           bool? edited}) =>
@@ -847,6 +1044,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
         certificate: certificate ?? this.certificate,
         sender: sender ?? this.sender,
         senderAccount: senderAccount ?? this.senderAccount,
+        answer: answer ?? this.answer,
         createdAt: createdAt ?? this.createdAt,
         conversationId: conversationId ?? this.conversationId,
         edited: edited ?? this.edited,
@@ -863,6 +1061,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
           ..write('senderAccount: $senderAccount, ')
+          ..write('answer: $answer, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')
           ..write('edited: $edited')
@@ -871,7 +1070,20 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, verified, type, content, signature, attachments, certificate, sender, senderAccount, createdAt, conversationId, edited);
+  int get hashCode => Object.hash(
+      id,
+      verified,
+      type,
+      content,
+      signature,
+      attachments,
+      certificate,
+      sender,
+      senderAccount,
+      answer,
+      createdAt,
+      conversationId,
+      edited);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -885,6 +1097,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           other.certificate == this.certificate &&
           other.sender == this.sender &&
           other.senderAccount == this.senderAccount &&
+          other.answer == this.answer &&
           other.createdAt == this.createdAt &&
           other.conversationId == this.conversationId &&
           other.edited == this.edited);
@@ -900,6 +1113,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> certificate;
   final Value<String> sender;
   final Value<String> senderAccount;
+  final Value<String> answer;
   final Value<BigInt> createdAt;
   final Value<String> conversationId;
   final Value<bool> edited;
@@ -914,6 +1128,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.certificate = const Value.absent(),
     this.sender = const Value.absent(),
     this.senderAccount = const Value.absent(),
+    this.answer = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.edited = const Value.absent(),
@@ -929,6 +1144,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required String certificate,
     required String sender,
     required String senderAccount,
+    required String answer,
     required BigInt createdAt,
     required String conversationId,
     required bool edited,
@@ -942,6 +1158,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
         certificate = Value(certificate),
         sender = Value(sender),
         senderAccount = Value(senderAccount),
+        answer = Value(answer),
         createdAt = Value(createdAt),
         conversationId = Value(conversationId),
         edited = Value(edited);
@@ -955,6 +1172,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     Expression<String>? certificate,
     Expression<String>? sender,
     Expression<String>? senderAccount,
+    Expression<String>? answer,
     Expression<BigInt>? createdAt,
     Expression<String>? conversationId,
     Expression<bool>? edited,
@@ -970,6 +1188,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       if (certificate != null) 'certificate': certificate,
       if (sender != null) 'sender': sender,
       if (senderAccount != null) 'sender_account': senderAccount,
+      if (answer != null) 'answer': answer,
       if (createdAt != null) 'created_at': createdAt,
       if (conversationId != null) 'conversation_id': conversationId,
       if (edited != null) 'edited': edited,
@@ -987,6 +1206,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<String>? certificate,
       Value<String>? sender,
       Value<String>? senderAccount,
+      Value<String>? answer,
       Value<BigInt>? createdAt,
       Value<String>? conversationId,
       Value<bool>? edited,
@@ -1001,6 +1221,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       certificate: certificate ?? this.certificate,
       sender: sender ?? this.sender,
       senderAccount: senderAccount ?? this.senderAccount,
+      answer: answer ?? this.answer,
       createdAt: createdAt ?? this.createdAt,
       conversationId: conversationId ?? this.conversationId,
       edited: edited ?? this.edited,
@@ -1038,6 +1259,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     if (senderAccount.present) {
       map['sender_account'] = Variable<String>(senderAccount.value);
     }
+    if (answer.present) {
+      map['answer'] = Variable<String>(answer.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<BigInt>(createdAt.value);
     }
@@ -1065,6 +1289,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
           ..write('senderAccount: $senderAccount, ')
+          ..write('answer: $answer, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')
           ..write('edited: $edited, ')
@@ -1081,10 +1306,14 @@ class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
   $SettingTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
-  late final GeneratedColumn<String> key = GeneratedColumn<String>('key', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+      'key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _valueMeta = const VerificationMeta('value');
   @override
-  late final GeneratedColumn<String> value = GeneratedColumn<String>('value', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+      'value', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [key, value];
   @override
@@ -1093,16 +1322,19 @@ class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
   String get actualTableName => $name;
   static const String $name = 'setting';
   @override
-  VerificationContext validateIntegrity(Insertable<SettingData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<SettingData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('key')) {
-      context.handle(_keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+      context.handle(
+          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
     } else if (isInserting) {
       context.missing(_keyMeta);
     }
     if (data.containsKey('value')) {
-      context.handle(_valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+      context.handle(
+          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
     } else if (isInserting) {
       context.missing(_valueMeta);
     }
@@ -1115,8 +1347,10 @@ class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
   SettingData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SettingData(
-      key: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}key'])!,
-      value: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}value'])!,
+      key: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      value: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}value'])!,
     );
   }
 
@@ -1145,7 +1379,8 @@ class SettingData extends DataClass implements Insertable<SettingData> {
     );
   }
 
-  factory SettingData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory SettingData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SettingData(
       key: serializer.fromJson<String>(json['key']),
@@ -1177,7 +1412,11 @@ class SettingData extends DataClass implements Insertable<SettingData> {
   @override
   int get hashCode => Object.hash(key, value);
   @override
-  bool operator ==(Object other) => identical(this, other) || (other is SettingData && other.key == this.key && other.value == this.value);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SettingData &&
+          other.key == this.key &&
+          other.value == this.value);
 }
 
 class SettingCompanion extends UpdateCompanion<SettingData> {
@@ -1207,7 +1446,8 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
     });
   }
 
-  SettingCompanion copyWith({Value<String>? key, Value<String>? value, Value<int>? rowid}) {
+  SettingCompanion copyWith(
+      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
     return SettingCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
@@ -1248,31 +1488,47 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   $FriendTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>('name', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _tagMeta = const VerificationMeta('tag');
   @override
-  late final GeneratedColumn<String> tag = GeneratedColumn<String>('tag', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _vaultIdMeta = const VerificationMeta('vaultId');
+  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
+      'tag', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _vaultIdMeta =
+      const VerificationMeta('vaultId');
   @override
-  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>('vault_id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+      'vault_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
-  late final GeneratedColumn<String> keys = GeneratedColumn<String>('keys', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  late final GeneratedColumn<String> keys = GeneratedColumn<String>(
+      'keys', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<BigInt> updatedAt = GeneratedColumn<BigInt>('updated_at', aliasedName, false, type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  late final GeneratedColumn<BigInt> updatedAt = GeneratedColumn<BigInt>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, name, tag, vaultId, keys, updatedAt];
+  List<GeneratedColumn> get $columns =>
+      [id, name, tag, vaultId, keys, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'friend';
   @override
-  VerificationContext validateIntegrity(Insertable<FriendData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<FriendData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -1281,27 +1537,32 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
       context.missing(_idMeta);
     }
     if (data.containsKey('name')) {
-      context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('tag')) {
-      context.handle(_tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
+      context.handle(
+          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
     } else if (isInserting) {
       context.missing(_tagMeta);
     }
     if (data.containsKey('vault_id')) {
-      context.handle(_vaultIdMeta, vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
+      context.handle(_vaultIdMeta,
+          vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
     } else if (isInserting) {
       context.missing(_vaultIdMeta);
     }
     if (data.containsKey('keys')) {
-      context.handle(_keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
+      context.handle(
+          _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
     } else if (isInserting) {
       context.missing(_keysMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta, updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
@@ -1314,12 +1575,18 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   FriendData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return FriendData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      tag: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
-      vaultId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
-      keys: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
-      updatedAt: attachedDatabase.typeMapping.read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      tag: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+      vaultId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
+      keys: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
     );
   }
 
@@ -1336,7 +1603,13 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   final String vaultId;
   final String keys;
   final BigInt updatedAt;
-  const FriendData({required this.id, required this.name, required this.tag, required this.vaultId, required this.keys, required this.updatedAt});
+  const FriendData(
+      {required this.id,
+      required this.name,
+      required this.tag,
+      required this.vaultId,
+      required this.keys,
+      required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1360,7 +1633,8 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     );
   }
 
-  factory FriendData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory FriendData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return FriendData(
       id: serializer.fromJson<String>(json['id']),
@@ -1384,7 +1658,14 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     };
   }
 
-  FriendData copyWith({String? id, String? name, String? tag, String? vaultId, String? keys, BigInt? updatedAt}) => FriendData(
+  FriendData copyWith(
+          {String? id,
+          String? name,
+          String? tag,
+          String? vaultId,
+          String? keys,
+          BigInt? updatedAt}) =>
+      FriendData(
         id: id ?? this.id,
         name: name ?? this.name,
         tag: tag ?? this.tag,
@@ -1471,7 +1752,13 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   }
 
   FriendCompanion copyWith(
-      {Value<String>? id, Value<String>? name, Value<String>? tag, Value<String>? vaultId, Value<String>? keys, Value<BigInt>? updatedAt, Value<int>? rowid}) {
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? tag,
+      Value<String>? vaultId,
+      Value<String>? keys,
+      Value<BigInt>? updatedAt,
+      Value<int>? rowid}) {
     return FriendCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -1532,38 +1819,61 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   $RequestTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>('name', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _tagMeta = const VerificationMeta('tag');
   @override
-  late final GeneratedColumn<String> tag = GeneratedColumn<String>('tag', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
+      'tag', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _selfMeta = const VerificationMeta('self');
   @override
-  late final GeneratedColumn<bool> self = GeneratedColumn<bool>('self', aliasedName, false,
-      type: DriftSqlType.bool, requiredDuringInsert: true, defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("self" IN (0, 1))'));
-  static const VerificationMeta _vaultIdMeta = const VerificationMeta('vaultId');
+  late final GeneratedColumn<bool> self = GeneratedColumn<bool>(
+      'self', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("self" IN (0, 1))'));
+  static const VerificationMeta _vaultIdMeta =
+      const VerificationMeta('vaultId');
   @override
-  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>('vault_id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _storedActionIdMeta = const VerificationMeta('storedActionId');
+  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+      'vault_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _storedActionIdMeta =
+      const VerificationMeta('storedActionId');
   @override
-  late final GeneratedColumn<String> storedActionId = GeneratedColumn<String>('stored_action_id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> storedActionId = GeneratedColumn<String>(
+      'stored_action_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
-  late final GeneratedColumn<String> keys = GeneratedColumn<String>('keys', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  late final GeneratedColumn<String> keys = GeneratedColumn<String>(
+      'keys', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<BigInt> updatedAt = GeneratedColumn<BigInt>('updated_at', aliasedName, false, type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  late final GeneratedColumn<BigInt> updatedAt = GeneratedColumn<BigInt>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, name, tag, self, vaultId, storedActionId, keys, updatedAt];
+  List<GeneratedColumn> get $columns =>
+      [id, name, tag, self, vaultId, storedActionId, keys, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'request';
   @override
-  VerificationContext validateIntegrity(Insertable<RequestData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<RequestData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -1572,37 +1882,46 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
       context.missing(_idMeta);
     }
     if (data.containsKey('name')) {
-      context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('tag')) {
-      context.handle(_tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
+      context.handle(
+          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
     } else if (isInserting) {
       context.missing(_tagMeta);
     }
     if (data.containsKey('self')) {
-      context.handle(_selfMeta, self.isAcceptableOrUnknown(data['self']!, _selfMeta));
+      context.handle(
+          _selfMeta, self.isAcceptableOrUnknown(data['self']!, _selfMeta));
     } else if (isInserting) {
       context.missing(_selfMeta);
     }
     if (data.containsKey('vault_id')) {
-      context.handle(_vaultIdMeta, vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
+      context.handle(_vaultIdMeta,
+          vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
     } else if (isInserting) {
       context.missing(_vaultIdMeta);
     }
     if (data.containsKey('stored_action_id')) {
-      context.handle(_storedActionIdMeta, storedActionId.isAcceptableOrUnknown(data['stored_action_id']!, _storedActionIdMeta));
+      context.handle(
+          _storedActionIdMeta,
+          storedActionId.isAcceptableOrUnknown(
+              data['stored_action_id']!, _storedActionIdMeta));
     } else if (isInserting) {
       context.missing(_storedActionIdMeta);
     }
     if (data.containsKey('keys')) {
-      context.handle(_keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
+      context.handle(
+          _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
     } else if (isInserting) {
       context.missing(_keysMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta, updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
@@ -1615,14 +1934,22 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   RequestData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RequestData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      tag: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
-      self: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}self'])!,
-      vaultId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
-      storedActionId: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}stored_action_id'])!,
-      keys: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
-      updatedAt: attachedDatabase.typeMapping.read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      tag: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+      self: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}self'])!,
+      vaultId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
+      storedActionId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}stored_action_id'])!,
+      keys: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
     );
   }
 
@@ -1677,7 +2004,8 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     );
   }
 
-  factory RequestData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory RequestData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RequestData(
       id: serializer.fromJson<String>(json['id']),
@@ -1705,7 +2033,16 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     };
   }
 
-  RequestData copyWith({String? id, String? name, String? tag, bool? self, String? vaultId, String? storedActionId, String? keys, BigInt? updatedAt}) => RequestData(
+  RequestData copyWith(
+          {String? id,
+          String? name,
+          String? tag,
+          bool? self,
+          String? vaultId,
+          String? storedActionId,
+          String? keys,
+          BigInt? updatedAt}) =>
+      RequestData(
         id: id ?? this.id,
         name: name ?? this.name,
         tag: tag ?? this.tag,
@@ -1731,7 +2068,8 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, tag, self, vaultId, storedActionId, keys, updatedAt);
+  int get hashCode => Object.hash(
+      id, name, tag, self, vaultId, storedActionId, keys, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1882,23 +2220,32 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   }
 }
 
-class $UnknownProfileTable extends UnknownProfile with TableInfo<$UnknownProfileTable, UnknownProfileData> {
+class $UnknownProfileTable extends UnknownProfile
+    with TableInfo<$UnknownProfileTable, UnknownProfileData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $UnknownProfileTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>('name', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _tagMeta = const VerificationMeta('tag');
   @override
-  late final GeneratedColumn<String> tag = GeneratedColumn<String>('tag', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
+      'tag', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
-  late final GeneratedColumn<String> keys = GeneratedColumn<String>('keys', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> keys = GeneratedColumn<String>(
+      'keys', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [id, name, tag, keys];
   @override
@@ -1907,7 +2254,8 @@ class $UnknownProfileTable extends UnknownProfile with TableInfo<$UnknownProfile
   String get actualTableName => $name;
   static const String $name = 'unknown_profile';
   @override
-  VerificationContext validateIntegrity(Insertable<UnknownProfileData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<UnknownProfileData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -1916,17 +2264,20 @@ class $UnknownProfileTable extends UnknownProfile with TableInfo<$UnknownProfile
       context.missing(_idMeta);
     }
     if (data.containsKey('name')) {
-      context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('tag')) {
-      context.handle(_tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
+      context.handle(
+          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
     } else if (isInserting) {
       context.missing(_tagMeta);
     }
     if (data.containsKey('keys')) {
-      context.handle(_keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
+      context.handle(
+          _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
     } else if (isInserting) {
       context.missing(_keysMeta);
     }
@@ -1939,10 +2290,14 @@ class $UnknownProfileTable extends UnknownProfile with TableInfo<$UnknownProfile
   UnknownProfileData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return UnknownProfileData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      tag: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
-      keys: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      tag: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
+      keys: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
     );
   }
 
@@ -1952,12 +2307,17 @@ class $UnknownProfileTable extends UnknownProfile with TableInfo<$UnknownProfile
   }
 }
 
-class UnknownProfileData extends DataClass implements Insertable<UnknownProfileData> {
+class UnknownProfileData extends DataClass
+    implements Insertable<UnknownProfileData> {
   final String id;
   final String name;
   final String tag;
   final String keys;
-  const UnknownProfileData({required this.id, required this.name, required this.tag, required this.keys});
+  const UnknownProfileData(
+      {required this.id,
+      required this.name,
+      required this.tag,
+      required this.keys});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1977,7 +2337,8 @@ class UnknownProfileData extends DataClass implements Insertable<UnknownProfileD
     );
   }
 
-  factory UnknownProfileData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory UnknownProfileData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UnknownProfileData(
       id: serializer.fromJson<String>(json['id']),
@@ -1997,7 +2358,9 @@ class UnknownProfileData extends DataClass implements Insertable<UnknownProfileD
     };
   }
 
-  UnknownProfileData copyWith({String? id, String? name, String? tag, String? keys}) => UnknownProfileData(
+  UnknownProfileData copyWith(
+          {String? id, String? name, String? tag, String? keys}) =>
+      UnknownProfileData(
         id: id ?? this.id,
         name: name ?? this.name,
         tag: tag ?? this.tag,
@@ -2018,7 +2381,12 @@ class UnknownProfileData extends DataClass implements Insertable<UnknownProfileD
   int get hashCode => Object.hash(id, name, tag, keys);
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is UnknownProfileData && other.id == this.id && other.name == this.name && other.tag == this.tag && other.keys == this.keys);
+      identical(this, other) ||
+      (other is UnknownProfileData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.tag == this.tag &&
+          other.keys == this.keys);
 }
 
 class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
@@ -2060,7 +2428,12 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
     });
   }
 
-  UnknownProfileCompanion copyWith({Value<String>? id, Value<String>? name, Value<String>? tag, Value<String>? keys, Value<int>? rowid}) {
+  UnknownProfileCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? tag,
+      Value<String>? keys,
+      Value<int>? rowid}) {
     return UnknownProfileCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -2111,26 +2484,37 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
   $ProfileTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>('id', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _pictureContainerMeta = const VerificationMeta('pictureContainer');
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pictureContainerMeta =
+      const VerificationMeta('pictureContainer');
   @override
-  late final GeneratedColumn<String> pictureContainer =
-      GeneratedColumn<String>('picture_container', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _pictureDataMeta = const VerificationMeta('pictureData');
+  late final GeneratedColumn<String> pictureContainer = GeneratedColumn<String>(
+      'picture_container', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pictureDataMeta =
+      const VerificationMeta('pictureData');
   @override
-  late final GeneratedColumn<String> pictureData = GeneratedColumn<String>('picture_data', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> pictureData = GeneratedColumn<String>(
+      'picture_data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
-  late final GeneratedColumn<String> data = GeneratedColumn<String>('data', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, pictureContainer, pictureData, data];
+  List<GeneratedColumn> get $columns =>
+      [id, pictureContainer, pictureData, data];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'profile';
   @override
-  VerificationContext validateIntegrity(Insertable<ProfileData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<ProfileData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -2139,17 +2523,24 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
       context.missing(_idMeta);
     }
     if (data.containsKey('picture_container')) {
-      context.handle(_pictureContainerMeta, pictureContainer.isAcceptableOrUnknown(data['picture_container']!, _pictureContainerMeta));
+      context.handle(
+          _pictureContainerMeta,
+          pictureContainer.isAcceptableOrUnknown(
+              data['picture_container']!, _pictureContainerMeta));
     } else if (isInserting) {
       context.missing(_pictureContainerMeta);
     }
     if (data.containsKey('picture_data')) {
-      context.handle(_pictureDataMeta, pictureData.isAcceptableOrUnknown(data['picture_data']!, _pictureDataMeta));
+      context.handle(
+          _pictureDataMeta,
+          pictureData.isAcceptableOrUnknown(
+              data['picture_data']!, _pictureDataMeta));
     } else if (isInserting) {
       context.missing(_pictureDataMeta);
     }
     if (data.containsKey('data')) {
-      context.handle(_dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
@@ -2162,10 +2553,14 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
   ProfileData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ProfileData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      pictureContainer: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}picture_container'])!,
-      pictureData: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}picture_data'])!,
-      data: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      pictureContainer: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}picture_container'])!,
+      pictureData: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}picture_data'])!,
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
     );
   }
 
@@ -2180,7 +2575,11 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
   final String pictureContainer;
   final String pictureData;
   final String data;
-  const ProfileData({required this.id, required this.pictureContainer, required this.pictureData, required this.data});
+  const ProfileData(
+      {required this.id,
+      required this.pictureContainer,
+      required this.pictureData,
+      required this.data});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2200,7 +2599,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     );
   }
 
-  factory ProfileData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory ProfileData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ProfileData(
       id: serializer.fromJson<String>(json['id']),
@@ -2220,7 +2620,12 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     };
   }
 
-  ProfileData copyWith({String? id, String? pictureContainer, String? pictureData, String? data}) => ProfileData(
+  ProfileData copyWith(
+          {String? id,
+          String? pictureContainer,
+          String? pictureData,
+          String? data}) =>
+      ProfileData(
         id: id ?? this.id,
         pictureContainer: pictureContainer ?? this.pictureContainer,
         pictureData: pictureData ?? this.pictureData,
@@ -2242,7 +2647,11 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ProfileData && other.id == this.id && other.pictureContainer == this.pictureContainer && other.pictureData == this.pictureData && other.data == this.data);
+      (other is ProfileData &&
+          other.id == this.id &&
+          other.pictureContainer == this.pictureContainer &&
+          other.pictureData == this.pictureData &&
+          other.data == this.data);
 }
 
 class ProfileCompanion extends UpdateCompanion<ProfileData> {
@@ -2284,7 +2693,12 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     });
   }
 
-  ProfileCompanion copyWith({Value<String>? id, Value<String>? pictureContainer, Value<String>? pictureData, Value<String>? data, Value<int>? rowid}) {
+  ProfileCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? pictureContainer,
+      Value<String>? pictureData,
+      Value<String>? data,
+      Value<int>? rowid}) {
     return ProfileCompanion(
       id: id ?? this.id,
       pictureContainer: pictureContainer ?? this.pictureContainer,
@@ -2328,14 +2742,17 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
   }
 }
 
-class $TrustedLinkTable extends TrustedLink with TableInfo<$TrustedLinkTable, TrustedLinkData> {
+class $TrustedLinkTable extends TrustedLink
+    with TableInfo<$TrustedLinkTable, TrustedLinkData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $TrustedLinkTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _domainMeta = const VerificationMeta('domain');
   @override
-  late final GeneratedColumn<String> domain = GeneratedColumn<String>('domain', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> domain = GeneratedColumn<String>(
+      'domain', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [domain];
   @override
@@ -2344,11 +2761,13 @@ class $TrustedLinkTable extends TrustedLink with TableInfo<$TrustedLinkTable, Tr
   String get actualTableName => $name;
   static const String $name = 'trusted_link';
   @override
-  VerificationContext validateIntegrity(Insertable<TrustedLinkData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<TrustedLinkData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('domain')) {
-      context.handle(_domainMeta, domain.isAcceptableOrUnknown(data['domain']!, _domainMeta));
+      context.handle(_domainMeta,
+          domain.isAcceptableOrUnknown(data['domain']!, _domainMeta));
     } else if (isInserting) {
       context.missing(_domainMeta);
     }
@@ -2361,7 +2780,8 @@ class $TrustedLinkTable extends TrustedLink with TableInfo<$TrustedLinkTable, Tr
   TrustedLinkData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TrustedLinkData(
-      domain: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}domain'])!,
+      domain: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}domain'])!,
     );
   }
 
@@ -2387,7 +2807,8 @@ class TrustedLinkData extends DataClass implements Insertable<TrustedLinkData> {
     );
   }
 
-  factory TrustedLinkData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory TrustedLinkData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TrustedLinkData(
       domain: serializer.fromJson<String>(json['domain']),
@@ -2415,7 +2836,9 @@ class TrustedLinkData extends DataClass implements Insertable<TrustedLinkData> {
   @override
   int get hashCode => domain.hashCode;
   @override
-  bool operator ==(Object other) => identical(this, other) || (other is TrustedLinkData && other.domain == this.domain);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TrustedLinkData && other.domain == this.domain);
 }
 
 class TrustedLinkCompanion extends UpdateCompanion<TrustedLinkData> {
@@ -2468,7 +2891,8 @@ class TrustedLinkCompanion extends UpdateCompanion<TrustedLinkData> {
   }
 }
 
-class $LibraryEntryTable extends LibraryEntry with TableInfo<$LibraryEntryTable, LibraryEntryData> {
+class $LibraryEntryTable extends LibraryEntry
+    with TableInfo<$LibraryEntryTable, LibraryEntryData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2476,19 +2900,30 @@ class $LibraryEntryTable extends LibraryEntry with TableInfo<$LibraryEntryTable,
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<LibraryEntryType, int> type =
-      GeneratedColumn<int>('type', aliasedName, false, type: DriftSqlType.int, requiredDuringInsert: true).withConverter<LibraryEntryType>($LibraryEntryTable.$convertertype);
-  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+      GeneratedColumn<int>('type', aliasedName, false,
+              type: DriftSqlType.int, requiredDuringInsert: true)
+          .withConverter<LibraryEntryType>($LibraryEntryTable.$convertertype);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>('created_at', aliasedName, false, type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
-  late final GeneratedColumn<String> data = GeneratedColumn<String>('data', aliasedName, false, type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _widthMeta = const VerificationMeta('width');
   @override
-  late final GeneratedColumn<int> width = GeneratedColumn<int>('width', aliasedName, false, type: DriftSqlType.int, requiredDuringInsert: true);
+  late final GeneratedColumn<int> width = GeneratedColumn<int>(
+      'width', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _heightMeta = const VerificationMeta('height');
   @override
-  late final GeneratedColumn<int> height = GeneratedColumn<int>('height', aliasedName, false, type: DriftSqlType.int, requiredDuringInsert: true);
+  late final GeneratedColumn<int> height = GeneratedColumn<int>(
+      'height', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [type, createdAt, data, width, height];
   @override
@@ -2497,27 +2932,32 @@ class $LibraryEntryTable extends LibraryEntry with TableInfo<$LibraryEntryTable,
   String get actualTableName => $name;
   static const String $name = 'library_entry';
   @override
-  VerificationContext validateIntegrity(Insertable<LibraryEntryData> instance, {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<LibraryEntryData> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta, createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
     if (data.containsKey('data')) {
-      context.handle(_dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
     if (data.containsKey('width')) {
-      context.handle(_widthMeta, width.isAcceptableOrUnknown(data['width']!, _widthMeta));
+      context.handle(
+          _widthMeta, width.isAcceptableOrUnknown(data['width']!, _widthMeta));
     } else if (isInserting) {
       context.missing(_widthMeta);
     }
     if (data.containsKey('height')) {
-      context.handle(_heightMeta, height.isAcceptableOrUnknown(data['height']!, _heightMeta));
+      context.handle(_heightMeta,
+          height.isAcceptableOrUnknown(data['height']!, _heightMeta));
     } else if (isInserting) {
       context.missing(_heightMeta);
     }
@@ -2530,11 +2970,17 @@ class $LibraryEntryTable extends LibraryEntry with TableInfo<$LibraryEntryTable,
   LibraryEntryData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return LibraryEntryData(
-      type: $LibraryEntryTable.$convertertype.fromSql(attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}type'])!),
-      createdAt: attachedDatabase.typeMapping.read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
-      data: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}data'])!,
-      width: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}width'])!,
-      height: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}height'])!,
+      type: $LibraryEntryTable.$convertertype.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      width: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}width'])!,
+      height: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}height'])!,
     );
   }
 
@@ -2543,21 +2989,29 @@ class $LibraryEntryTable extends LibraryEntry with TableInfo<$LibraryEntryTable,
     return $LibraryEntryTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<LibraryEntryType, int, int> $convertertype = const EnumIndexConverter<LibraryEntryType>(LibraryEntryType.values);
+  static JsonTypeConverter2<LibraryEntryType, int, int> $convertertype =
+      const EnumIndexConverter<LibraryEntryType>(LibraryEntryType.values);
 }
 
-class LibraryEntryData extends DataClass implements Insertable<LibraryEntryData> {
+class LibraryEntryData extends DataClass
+    implements Insertable<LibraryEntryData> {
   final LibraryEntryType type;
   final BigInt createdAt;
   final String data;
   final int width;
   final int height;
-  const LibraryEntryData({required this.type, required this.createdAt, required this.data, required this.width, required this.height});
+  const LibraryEntryData(
+      {required this.type,
+      required this.createdAt,
+      required this.data,
+      required this.width,
+      required this.height});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     {
-      map['type'] = Variable<int>($LibraryEntryTable.$convertertype.toSql(type));
+      map['type'] =
+          Variable<int>($LibraryEntryTable.$convertertype.toSql(type));
     }
     map['created_at'] = Variable<BigInt>(createdAt);
     map['data'] = Variable<String>(data);
@@ -2576,10 +3030,12 @@ class LibraryEntryData extends DataClass implements Insertable<LibraryEntryData>
     );
   }
 
-  factory LibraryEntryData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory LibraryEntryData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LibraryEntryData(
-      type: $LibraryEntryTable.$convertertype.fromJson(serializer.fromJson<int>(json['type'])),
+      type: $LibraryEntryTable.$convertertype
+          .fromJson(serializer.fromJson<int>(json['type'])),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
       data: serializer.fromJson<String>(json['data']),
       width: serializer.fromJson<int>(json['width']),
@@ -2590,7 +3046,8 @@ class LibraryEntryData extends DataClass implements Insertable<LibraryEntryData>
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'type': serializer.toJson<int>($LibraryEntryTable.$convertertype.toJson(type)),
+      'type': serializer
+          .toJson<int>($LibraryEntryTable.$convertertype.toJson(type)),
       'createdAt': serializer.toJson<BigInt>(createdAt),
       'data': serializer.toJson<String>(data),
       'width': serializer.toJson<int>(width),
@@ -2598,7 +3055,13 @@ class LibraryEntryData extends DataClass implements Insertable<LibraryEntryData>
     };
   }
 
-  LibraryEntryData copyWith({LibraryEntryType? type, BigInt? createdAt, String? data, int? width, int? height}) => LibraryEntryData(
+  LibraryEntryData copyWith(
+          {LibraryEntryType? type,
+          BigInt? createdAt,
+          String? data,
+          int? width,
+          int? height}) =>
+      LibraryEntryData(
         type: type ?? this.type,
         createdAt: createdAt ?? this.createdAt,
         data: data ?? this.data,
@@ -2675,7 +3138,13 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     });
   }
 
-  LibraryEntryCompanion copyWith({Value<LibraryEntryType>? type, Value<BigInt>? createdAt, Value<String>? data, Value<int>? width, Value<int>? height, Value<int>? rowid}) {
+  LibraryEntryCompanion copyWith(
+      {Value<LibraryEntryType>? type,
+      Value<BigInt>? createdAt,
+      Value<String>? data,
+      Value<int>? width,
+      Value<int>? height,
+      Value<int>? rowid}) {
     return LibraryEntryCompanion(
       type: type ?? this.type,
       createdAt: createdAt ?? this.createdAt,
@@ -2690,7 +3159,8 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (type.present) {
-      map['type'] = Variable<int>($LibraryEntryTable.$convertertype.toSql(type.value));
+      map['type'] =
+          Variable<int>($LibraryEntryTable.$convertertype.toSql(type.value));
     }
     if (createdAt.present) {
       map['created_at'] = Variable<BigInt>(createdAt.value);
@@ -2724,6 +3194,272 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   }
 }
 
+class $MessageReactionTable extends MessageReaction
+    with TableInfo<$MessageReactionTable, MessageReactionData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MessageReactionTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _messageIdMeta =
+      const VerificationMeta('messageId');
+  @override
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+      'message_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _senderMeta = const VerificationMeta('sender');
+  @override
+  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
+      'sender', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _reactionMeta =
+      const VerificationMeta('reaction');
+  @override
+  late final GeneratedColumn<String> reaction = GeneratedColumn<String>(
+      'reaction', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [messageId, sender, reaction, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'message_reaction';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<MessageReactionData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('sender')) {
+      context.handle(_senderMeta,
+          sender.isAcceptableOrUnknown(data['sender']!, _senderMeta));
+    } else if (isInserting) {
+      context.missing(_senderMeta);
+    }
+    if (data.containsKey('reaction')) {
+      context.handle(_reactionMeta,
+          reaction.isAcceptableOrUnknown(data['reaction']!, _reactionMeta));
+    } else if (isInserting) {
+      context.missing(_reactionMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  MessageReactionData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MessageReactionData(
+      messageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+      sender: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender'])!,
+      reaction: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}reaction'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $MessageReactionTable createAlias(String alias) {
+    return $MessageReactionTable(attachedDatabase, alias);
+  }
+}
+
+class MessageReactionData extends DataClass
+    implements Insertable<MessageReactionData> {
+  final String messageId;
+  final String sender;
+  final String reaction;
+  final BigInt createdAt;
+  const MessageReactionData(
+      {required this.messageId,
+      required this.sender,
+      required this.reaction,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['sender'] = Variable<String>(sender);
+    map['reaction'] = Variable<String>(reaction);
+    map['created_at'] = Variable<BigInt>(createdAt);
+    return map;
+  }
+
+  MessageReactionCompanion toCompanion(bool nullToAbsent) {
+    return MessageReactionCompanion(
+      messageId: Value(messageId),
+      sender: Value(sender),
+      reaction: Value(reaction),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory MessageReactionData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MessageReactionData(
+      messageId: serializer.fromJson<String>(json['messageId']),
+      sender: serializer.fromJson<String>(json['sender']),
+      reaction: serializer.fromJson<String>(json['reaction']),
+      createdAt: serializer.fromJson<BigInt>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'messageId': serializer.toJson<String>(messageId),
+      'sender': serializer.toJson<String>(sender),
+      'reaction': serializer.toJson<String>(reaction),
+      'createdAt': serializer.toJson<BigInt>(createdAt),
+    };
+  }
+
+  MessageReactionData copyWith(
+          {String? messageId,
+          String? sender,
+          String? reaction,
+          BigInt? createdAt}) =>
+      MessageReactionData(
+        messageId: messageId ?? this.messageId,
+        sender: sender ?? this.sender,
+        reaction: reaction ?? this.reaction,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('MessageReactionData(')
+          ..write('messageId: $messageId, ')
+          ..write('sender: $sender, ')
+          ..write('reaction: $reaction, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(messageId, sender, reaction, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MessageReactionData &&
+          other.messageId == this.messageId &&
+          other.sender == this.sender &&
+          other.reaction == this.reaction &&
+          other.createdAt == this.createdAt);
+}
+
+class MessageReactionCompanion extends UpdateCompanion<MessageReactionData> {
+  final Value<String> messageId;
+  final Value<String> sender;
+  final Value<String> reaction;
+  final Value<BigInt> createdAt;
+  final Value<int> rowid;
+  const MessageReactionCompanion({
+    this.messageId = const Value.absent(),
+    this.sender = const Value.absent(),
+    this.reaction = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MessageReactionCompanion.insert({
+    required String messageId,
+    required String sender,
+    required String reaction,
+    required BigInt createdAt,
+    this.rowid = const Value.absent(),
+  })  : messageId = Value(messageId),
+        sender = Value(sender),
+        reaction = Value(reaction),
+        createdAt = Value(createdAt);
+  static Insertable<MessageReactionData> custom({
+    Expression<String>? messageId,
+    Expression<String>? sender,
+    Expression<String>? reaction,
+    Expression<BigInt>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (sender != null) 'sender': sender,
+      if (reaction != null) 'reaction': reaction,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MessageReactionCompanion copyWith(
+      {Value<String>? messageId,
+      Value<String>? sender,
+      Value<String>? reaction,
+      Value<BigInt>? createdAt,
+      Value<int>? rowid}) {
+    return MessageReactionCompanion(
+      messageId: messageId ?? this.messageId,
+      sender: sender ?? this.sender,
+      reaction: reaction ?? this.reaction,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (sender.present) {
+      map['sender'] = Variable<String>(sender.value);
+    }
+    if (reaction.present) {
+      map['reaction'] = Variable<String>(reaction.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<BigInt>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessageReactionCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('sender: $sender, ')
+          ..write('reaction: $reaction, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   late final $ConversationTable conversation = $ConversationTable(this);
@@ -2736,8 +3472,23 @@ abstract class _$Database extends GeneratedDatabase {
   late final $ProfileTable profile = $ProfileTable(this);
   late final $TrustedLinkTable trustedLink = $TrustedLinkTable(this);
   late final $LibraryEntryTable libraryEntry = $LibraryEntryTable(this);
+  late final $MessageReactionTable messageReaction =
+      $MessageReactionTable(this);
   @override
-  Iterable<TableInfo<Table, Object?>> get allTables => allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [conversation, member, message, setting, friend, request, unknownProfile, profile, trustedLink, libraryEntry];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        conversation,
+        member,
+        message,
+        setting,
+        friend,
+        request,
+        unknownProfile,
+        profile,
+        trustedLink,
+        libraryEntry,
+        messageReaction
+      ];
 }

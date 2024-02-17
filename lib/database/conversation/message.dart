@@ -10,10 +10,18 @@ class Message extends Table {
   TextColumn get certificate => text()();
   TextColumn get sender => text()();
   TextColumn get senderAccount => text()();
+  TextColumn get answer => text()();
   Int64Column get createdAt => int64()();
   TextColumn get conversationId => text()();
   BoolColumn get edited => boolean()();
 
   @override
   Set<Column<Object>>? get primaryKey => {id};
+}
+
+class MessageReaction extends Table {
+  TextColumn get messageId => text()();
+  TextColumn get sender => text()();
+  TextColumn get reaction => text()();
+  Int64Column get createdAt => int64()();
 }
