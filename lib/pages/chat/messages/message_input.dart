@@ -63,8 +63,10 @@ class _MessageInputState extends State<MessageInput> {
   void resetCurrentDraft() {
     if (currentDraft.value != null) {
       MessageSendHelper.drafts[currentDraft.value!.conversationId] = MessageDraft(currentDraft.value!.conversationId, "");
+      currentDraft.value = MessageDraft(currentDraft.value!.conversationId, "");
       _message.clear();
     }
+    loading.value = false;
   }
 
   @override
