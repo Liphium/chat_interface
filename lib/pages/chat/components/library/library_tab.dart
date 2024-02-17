@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/database/accounts/library_entry.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
@@ -118,7 +120,15 @@ class _LibraryTabState extends State<LibraryTab> {
             borderRadius: BorderRadius.circular(defaultSpacing),
             child: InkWell(
               borderRadius: BorderRadius.circular(defaultSpacing),
-              onTap: () => {},
+              onTap: () {
+                //* Send message with the library element
+                final controller = Get.find<MessageController>();
+                if (controller.selectedConversation.value.id == "") {
+                  return;
+                }
+                sendActualMessage(false.obs, controller.selectedConversation.value.id, MessageType.text, [container.toAttachment()], "", () => {});
+                Get.back();
+              },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(defaultSpacing),
                 child: LayoutBuilder(

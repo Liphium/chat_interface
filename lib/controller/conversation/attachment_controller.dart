@@ -336,6 +336,17 @@ class AttachmentContainer {
     return AttachmentContainer(type, json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
   }
 
+  String toAttachment() {
+    switch (attachmentType) {
+      case AttachmentContainerType.link:
+        return url;
+      case AttachmentContainerType.remoteImage:
+        return url;
+      case AttachmentContainerType.file:
+        return jsonEncode(toJson());
+    }
+  }
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{"id": id, "name": name, "url": url, "key": packageSymmetricKey(key!)};
   }
