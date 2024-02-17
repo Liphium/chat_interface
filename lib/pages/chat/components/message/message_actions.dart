@@ -1,5 +1,18 @@
 part of 'message_feed.dart';
 
+class MessageSendHelper {
+  static final drafts = <String, MessageDraft>{}; // ConversationId, Message draft
+}
+
+class MessageDraft {
+  final String conversationId;
+  String message;
+  final files = <UploadData>[].obs;
+  final attachments = <String>[];
+
+  MessageDraft(this.conversationId, this.message);
+}
+
 class UploadData {
   final XFile file;
   final progress = 0.0.obs;

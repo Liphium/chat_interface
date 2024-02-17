@@ -26,48 +26,66 @@ class MessageInput extends StatefulWidget {
 class _MessageInputState extends State<MessageInput> {
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
+  final FocusNode _inputFocus = FocusNode();
   StreamSubscription<Conversation>? _sub;
   final GlobalKey _libraryKey = GlobalKey();
-
-  final files = <UploadData>[].obs;
+  final currentDraft = Rx<MessageDraft?>(null);
 
   @override
   void dispose() {
     _message.dispose();
     _sub?.cancel();
+    _inputFocus.dispose();
     super.dispose();
   }
 
-  void handleMessageFinish() {
-    _message.clear();
-    files.clear();
-    loading.value = false;
+  @override
+  void initState() {
+    super.initState();
+
+    // Clear message input when conversation changes
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _sub = Get.find<MessageController>().selectedConversation.listenAndPump((conversation) {
+        loadDraft(conversation.id);
+      });
+    });
+  }
+
+  void loadDraft(String conversation) {
+    if (currentDraft.value != null) {
+      MessageSendHelper.drafts[currentDraft.value!.conversationId] = currentDraft.value!;
+    }
+    currentDraft.value = MessageSendHelper.drafts[conversation] ?? MessageDraft(conversation, "");
+    _message.text = currentDraft.value!.message;
+    _inputFocus.requestFocus();
+  }
+
+  void resetCurrentDraft() {
+    if (currentDraft.value != null) {
+      MessageSendHelper.drafts[currentDraft.value!.conversationId] = MessageDraft(currentDraft.value!.conversationId, "");
+      _message.clear();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    // Clear message input when conversation changes
-    _sub = Get.find<MessageController>().selectedConversation.listen((conversation) {
-      _message.clear();
-    });
-
     // Setup actions
     final actionsMap = {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) {
           final controller = Get.find<MessageController>();
-          if (files.isEmpty) {
-            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], handleMessageFinish);
+          if (currentDraft.value!.files.isEmpty) {
+            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], resetCurrentDraft);
             return;
           }
 
-          if (files.length > 5) {
+          if (currentDraft.value!.files.length > 5) {
             return;
           }
 
-          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, files, handleMessageFinish);
+          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, currentDraft.value!.files, resetCurrentDraft);
           return null;
         },
       ),
@@ -79,15 +97,6 @@ class _MessageInputState extends State<MessageInput> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          //* Writing status
-          /*
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Obx(() => WritingStatusNotifier(writers: Get.find<WritingController>().writing[controller.selectedConversation.value.id] ?? []))
-          ),
-          
-          verticalSpacing(defaultSpacing * 0.5), */
-
           //* Input
           Actions(
             actions: actionsMap,
@@ -106,18 +115,21 @@ class _MessageInputState extends State<MessageInput> {
                   children: [
                     //* File preview
                     Obx(() {
+                      if (currentDraft.value == null) {
+                        return const SizedBox();
+                      }
                       return Animate(
                         effects: [ExpandEffect(duration: 250.ms, curve: Curves.easeInOut, axis: Axis.vertical)],
-                        target: files.isEmpty ? 0 : 1,
+                        target: currentDraft.value!.files.isEmpty ? 0 : 1,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                           child: Row(
                             children: [
                               const SizedBox(height: 200 + defaultSpacing),
-                              for (final file in files)
+                              for (final file in currentDraft.value!.files)
                                 SquareFileRenderer(
                                   file: file,
-                                  onRemove: () => files.remove(file),
+                                  onRemove: () => currentDraft.value!.files.remove(file),
                                 ),
                             ],
                           ),
@@ -131,7 +143,7 @@ class _MessageInputState extends State<MessageInput> {
                         //* Attach a file
                         IconButton(
                           onPressed: () async {
-                            if (files.length == 5) {
+                            if (currentDraft.value!.files.length == 5) {
                               return;
                             }
                             final result = await openFile();
@@ -143,7 +155,7 @@ class _MessageInputState extends State<MessageInput> {
                               showErrorPopup("error".tr, "file.too_large".tr);
                               return;
                             }
-                            files.add(UploadData(result));
+                            currentDraft.value!.files.add(UploadData(result));
                           },
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,
@@ -170,6 +182,8 @@ class _MessageInputState extends State<MessageInput> {
                               inputFormatters: [
                                 LengthLimitingTextInputFormatter(1000),
                               ],
+                              focusNode: _inputFocus,
+                              onChanged: (value) => currentDraft.value!.message = value,
                               cursorColor: theme.colorScheme.tertiary,
                               style: theme.textTheme.labelLarge,
                               controller: _message,
