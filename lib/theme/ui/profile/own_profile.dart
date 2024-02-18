@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/chat/components/emojis/emoji_window.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
@@ -259,6 +260,15 @@ class _ProfileState extends State<OwnProfile> {
                     icon: Icons.settings,
                     label: 'profile.settings'.tr,
                     onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
+                    loading: false.obs,
+                  ),
+                  verticalSpacing(elementSpacing),
+
+                  //* Emoji testing
+                  ProfileButton(
+                    icon: Icons.emoji_emotions,
+                    label: 'profile.test'.tr,
+                    onTap: () => Get.dialog(const EmojiWindow()),
                     loading: false.obs,
                   ),
                   verticalSpacing(elementSpacing),

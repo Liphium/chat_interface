@@ -6,6 +6,7 @@ import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:twemoji_v2/twemoji_v2.dart';
 
 class MessageRenderer extends StatefulWidget {
   final String accountId;
@@ -75,7 +76,11 @@ class _MessageRendererState extends State<MessageRenderer> {
                               borderRadius: BorderRadius.circular(defaultSpacing),
                               color: widget.self ? theme.colorScheme.primary : theme.colorScheme.primaryContainer,
                             ),
-                            child: Text(widget.message.content, style: theme.textTheme.labelLarge),
+                            child: TwemojiText(
+                              text: widget.message.content,
+                              style: theme.textTheme.labelLarge,
+                              emojiFontMultiplier: 1.15,
+                            ),
                           ),
                         ),
 

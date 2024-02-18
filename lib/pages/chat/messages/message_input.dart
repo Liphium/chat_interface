@@ -196,7 +196,13 @@ class _MessageInputState extends State<MessageInput> {
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),
-                        horizontalSpacing(defaultSpacing),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
+                          icon: const Icon(Icons.emoji_emotions),
+                          color: theme.colorScheme.tertiary,
+                        ),
+                        horizontalSpacing(elementSpacing),
                         LoadingIconButton(
                           onTap: () => {},
                           onTapContext: (context) {

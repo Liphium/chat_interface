@@ -150,6 +150,7 @@ class ContextMenuData {
     if (position.dx > screenDimensions.width - 350 || right) {
       fromLeft = false;
       if (above) {
+        position = Offset(screenDimensions.width - position.dx - widgetDimensions.width, position.dy);
       } else {
         position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
       }

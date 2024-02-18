@@ -41,6 +41,8 @@ dependencies:
   open_app_file: any
   rust_builder:
     path: rust_builder
+  twemoji_v2: ^0.5.3
+  unicode_emojis: ^0.4.0
 
 dev_dependencies:
   flutter_test:
