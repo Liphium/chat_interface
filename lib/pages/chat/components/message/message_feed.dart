@@ -19,7 +19,6 @@ import 'package:chat_interface/pages/chat/components/message/renderer/message_sp
 import 'package:chat_interface/pages/chat/components/message/renderer/message_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
-import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -30,7 +29,6 @@ import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:livekit_client/livekit_client.dart';
 
 part 'message_actions.dart';
 

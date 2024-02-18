@@ -1,4 +1,3 @@
-import 'package:chat_interface/database/accounts/trusted_links.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
