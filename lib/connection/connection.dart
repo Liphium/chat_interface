@@ -8,6 +8,7 @@ import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -178,8 +179,9 @@ Connector connector = Connector();
 
 /// Initialize the connection to the chat node.
 Future<bool> startConnection(String node, String connectionToken) async {
+  sendLog(node);
   if (connector.initialized) return false;
-  final res = await connector.connect("ws://$node/gateway", connectionToken);
+  final res = await connector.connect(isHttps ? "wss://$node/gateway" : "ws://$node/gateway", connectionToken);
   if (!res) {
     return false;
   }
