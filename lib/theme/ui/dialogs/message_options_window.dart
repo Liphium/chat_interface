@@ -5,7 +5,6 @@ import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -90,13 +89,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 icon: Icons.reply,
                 label: "message.reply".tr,
                 onTap: () {
-                  MessageSendHelper.currentDraft.value?.answer.value = AnswerData(
-                    widget.message.id,
-                    widget.message.senderAccount,
-                    widget.message.content,
-                    widget.message.attachments,
-                  );
-                  //Get.back();
+                  MessageSendHelper.addReplyToCurrentDraft(widget.message);
+                  Get.back();
                 },
                 loading: false.obs,
               ),

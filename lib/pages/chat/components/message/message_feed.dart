@@ -165,6 +165,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                                 child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
                                               ),
                                             MouseRegion(
+                                              onEnter: (event) => hovering.value = true,
                                               onHover: (event) {
                                                 if (hovering.value) {
                                                   return;
@@ -200,6 +201,15 @@ class _MessageFeedState extends State<MessageFeed> {
                                                                 );
                                                               },
                                                               icon: Icons.more_horiz,
+                                                            ),
+                                                            LoadingIconButton(
+                                                              iconSize: 22,
+                                                              extra: 4,
+                                                              padding: 4,
+                                                              onTap: () {
+                                                                MessageSendHelper.addReplyToCurrentDraft(message);
+                                                              },
+                                                              icon: Icons.reply,
                                                             )
                                                           ],
                                                         ),

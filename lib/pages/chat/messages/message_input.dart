@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
@@ -138,15 +139,26 @@ class _MessageInputState extends State<MessageInput> {
                             child: Row(
                               children: [
                                 Icon(Icons.reply, color: theme.colorScheme.tertiary),
-                                horizontalSpacing(elementSpacing),
+                                horizontalSpacing(defaultSpacing),
                                 Expanded(
                                   child: Text(
-                                    answer.toAnswerContent(),
-                                    style: theme.textTheme.labelLarge,
+                                    "message.reply.text".trParams({
+                                      "name": Get.find<FriendController>().friends[answer.senderAccount]?.name ?? Friend.unknown(answer.senderAccount).name,
+                                    }),
+                                    style: theme.textTheme.labelMedium,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
+                                LoadingIconButton(
+                                  iconSize: 22,
+                                  extra: 4,
+                                  padding: 4,
+                                  onTap: () {
+                                    MessageSendHelper.currentDraft.value!.answer.value = null;
+                                  },
+                                  icon: Icons.close,
+                                )
                               ],
                             ),
                           ),
@@ -239,12 +251,6 @@ class _MessageInputState extends State<MessageInput> {
                           key: _libraryKey,
                           onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
                           icon: const Icon(Icons.folder),
-                          color: theme.colorScheme.tertiary,
-                        ),
-                        horizontalSpacing(elementSpacing),
-                        IconButton(
-                          onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
-                          icon: const Icon(Icons.emoji_emotions),
                           color: theme.colorScheme.tertiary,
                         ),
                         horizontalSpacing(elementSpacing),

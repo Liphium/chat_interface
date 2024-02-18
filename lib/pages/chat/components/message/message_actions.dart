@@ -3,6 +3,10 @@ part of 'message_feed.dart';
 class MessageSendHelper {
   static final currentDraft = Rx<MessageDraft?>(null);
   static final drafts = <String, MessageDraft>{}; // ConversationId, Message draft
+
+  static void addReplyToCurrentDraft(Message message) {
+    currentDraft.value?.answer.value = AnswerData(message.id, message.senderAccount, message.content, message.attachments);
+  }
 }
 
 class AnswerData {
@@ -13,19 +17,13 @@ class AnswerData {
 
   AnswerData(this.id, this.senderAccount, this.content, this.attachments);
 
-  String toAnswerContent() {
-    return answerContent(senderAccount, content, attachments);
-  }
-
-  static String answerContent(String senderAccount, String content, List<String> attachments, {FriendController? controller}) {
-    final friend = (controller ?? Get.find<FriendController>()).friends[senderAccount] ?? Friend.unknown(senderAccount);
+  static String answerContent(String content, List<String> attachments, {FriendController? controller}) {
     if (content == "" && attachments.isEmpty) {
       content = "message.empty".tr;
     } else if (content == "" && attachments.isNotEmpty) {
       content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
     }
-
-    return "${friend.name}: $content";
+    return content;
   }
 }
 

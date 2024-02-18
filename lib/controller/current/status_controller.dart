@@ -65,7 +65,11 @@ class StatusController extends GetxController {
 
   void fromStatusJson(String json) {
     final data = jsonDecode(json);
-    status.value = data["s"];
+    try {
+      status.value = utf8.decode(base64Decode(data["s"]));
+    } catch (e) {
+      status.value = "-";
+    }
     type.value = data["t"];
   }
 
@@ -102,6 +106,9 @@ class StatusController extends GetxController {
   Future<bool> setStatus({String? message, int? type, Function()? success}) async {
     if (statusLoading.value) return false;
     statusLoading.value = true;
+    if (message != null) {
+      message = base64Encode(utf8.encode(message));
+    }
 
     final tokens = <Map<String, dynamic>>[];
     for (var conversation in Get.find<ConversationController>().conversations.values) {
@@ -119,7 +126,7 @@ class StatusController extends GetxController {
       statusLoading.value = false;
       success?.call();
       if (event.data["success"] == true) {
-        if (message != null) status.value = message;
+        if (message != null) status.value = utf8.decode(base64Decode(message));
         if (type != null) this.type.value = type;
       }
     });
