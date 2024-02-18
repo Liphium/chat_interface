@@ -48,6 +48,16 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             },
             loading: false.obs,
           ),
+          verticalSpacing(elementSpacing),
+          ProfileButton(
+            icon: Icons.security,
+            label: "message.reverify".tr,
+            onTap: () {
+              widget.message.verifySignature();
+              Get.back();
+            },
+            loading: false.obs,
+          ),
           if (widget.message.type == MessageType.text && widget.message.content != "")
             Padding(
               padding: const EdgeInsets.only(top: elementSpacing),

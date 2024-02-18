@@ -84,6 +84,7 @@ class ChatPageTranslations extends Translations {
 
           // Message menu
           'message.info': 'Info',
+          'message.reverify': 'Reverify message',
           'message.copy': 'Copy content',
           'message.profile': 'Open profile',
           'message.delete': 'Delete message',

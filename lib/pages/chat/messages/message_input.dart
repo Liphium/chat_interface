@@ -116,28 +116,30 @@ class _MessageInputState extends State<MessageInput> {
                 child: Column(
                   children: [
                     //* File preview
-                    Obx(() {
-                      if (currentDraft.value == null) {
-                        return const SizedBox();
-                      }
-                      return Animate(
-                        effects: [ExpandEffect(duration: 250.ms, curve: Curves.easeInOut, axis: Axis.vertical)],
-                        target: currentDraft.value!.files.isEmpty ? 0 : 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                          child: Row(
-                            children: [
-                              const SizedBox(height: 200 + defaultSpacing),
-                              for (final file in currentDraft.value!.files)
-                                SquareFileRenderer(
-                                  file: file,
-                                  onRemove: () => currentDraft.value!.files.remove(file),
-                                ),
-                            ],
+                    Obx(
+                      () {
+                        if (currentDraft.value == null) {
+                          return const SizedBox();
+                        }
+                        return Animate(
+                          effects: [ExpandEffect(duration: 250.ms, curve: Curves.easeInOut, axis: Axis.vertical)],
+                          target: currentDraft.value!.files.isEmpty ? 0 : 1,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                            child: Row(
+                              children: [
+                                const SizedBox(height: 200 + defaultSpacing),
+                                for (final file in currentDraft.value!.files)
+                                  SquareFileRenderer(
+                                    file: file,
+                                    onRemove: () => currentDraft.value!.files.remove(file),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
 
                     //* Input
                     Row(
@@ -164,12 +166,6 @@ class _MessageInputState extends State<MessageInput> {
                           tooltip: "chat.add_file".tr,
                         ),
                         //* Attach from the library
-                        IconButton(
-                          key: _libraryKey,
-                          onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true))),
-                          icon: const Icon(Icons.folder),
-                          color: theme.colorScheme.tertiary,
-                        ),
                         horizontalSpacing(defaultSpacing),
                         Expanded(
                           child: Shortcuts(
@@ -193,6 +189,12 @@ class _MessageInputState extends State<MessageInput> {
                               keyboardType: TextInputType.multiline,
                             ),
                           ),
+                        ),
+                        IconButton(
+                          key: _libraryKey,
+                          onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
+                          icon: const Icon(Icons.folder),
+                          color: theme.colorScheme.tertiary,
                         ),
                         horizontalSpacing(defaultSpacing),
                         LoadingIconButton(

@@ -164,7 +164,12 @@ class _MessageFeedState extends State<MessageFeed> {
                                                 child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
                                               ),
                                             MouseRegion(
-                                              onEnter: (event) => hovering.value = true,
+                                              onHover: (event) {
+                                                if (hovering.value) {
+                                                  return;
+                                                }
+                                                hovering.value = true;
+                                              },
                                               onExit: (event) => hovering.value = false,
                                               child: Row(
                                                 textDirection: self ? TextDirection.rtl : TextDirection.ltr,

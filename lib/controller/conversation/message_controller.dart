@@ -158,14 +158,17 @@ class Message {
   final String conversation;
   final bool edited;
 
+  bool renderingAttachments = false;
   final attachmentsRenderer = <AttachmentContainer>[].obs;
 
   /// Extracts and decrypts the attachments
   void initAttachments() async {
-    if (attachmentsRenderer.isNotEmpty) {
+    if (attachmentsRenderer.isNotEmpty || renderingAttachments) {
       return;
     }
+    renderingAttachments = true;
     if (attachments.isNotEmpty) {
+      sendLog(attachments.length);
       for (var attachment in attachments) {
         if (attachment.isURL) {
           attachmentsRenderer.add(AttachmentContainer.remoteImage(attachment));
@@ -198,6 +201,7 @@ class Message {
         }
         attachmentsRenderer.add(container);
       }
+      renderingAttachments = false;
     }
   }
 
@@ -273,9 +277,21 @@ class Message {
     }
     String hash;
     if (type != MessageType.text) {
-      hash = hashSha(content + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+      final contentJson = jsonEncode(<String, dynamic>{
+        "c": content,
+        "t": type.index,
+        "a": attachments,
+        "r": answer,
+      });
+      hash = hashSha(contentJson + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
     } else {
-      hash = hashSha(base64Encode(utf8.encode(content)) + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
+      final contentJson = jsonEncode(<String, dynamic>{
+        "c": base64Encode(utf8.encode(content)),
+        "t": type.index,
+        "a": attachments,
+        "r": answer,
+      });
+      hash = hashSha(contentJson + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
     }
     sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
     verified.value = checkSignature(signature, sender.signatureKey, hash);
