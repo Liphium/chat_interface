@@ -30,6 +30,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:livekit_client/livekit_client.dart';
 
 part 'message_actions.dart';
 

@@ -1,9 +1,11 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -81,6 +83,24 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             },
             loading: false.obs,
           ),
+          if (widget.message.type == MessageType.text)
+            Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.reply,
+                label: "message.reply".tr,
+                onTap: () {
+                  MessageSendHelper.currentDraft.value?.answer.value = AnswerData(
+                    widget.message.id,
+                    widget.message.senderAccount,
+                    widget.message.content,
+                    widget.message.attachments,
+                  );
+                  //Get.back();
+                },
+                loading: false.obs,
+              ),
+            ),
           if (widget.self)
             Padding(
               padding: const EdgeInsets.only(top: defaultSpacing),

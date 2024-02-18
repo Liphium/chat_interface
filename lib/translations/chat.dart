@@ -85,6 +85,7 @@ class ChatPageTranslations extends Translations {
           // Message menu
           'message.info': 'Info',
           'message.reverify': 'Reverify message',
+          'message.reply': 'Reply',
           'message.copy': 'Copy content',
           'message.profile': 'Open profile',
           'message.delete': 'Delete message',
@@ -93,6 +94,7 @@ class ChatPageTranslations extends Translations {
           'message.info.copy_signature': 'Copy signature',
           'message.info.copy_sender': 'Copy sender ID',
           'message.info.copy_cert': 'Copy certificate',
+          'message.empty': 'An empty message.',
 
           // Conversation info
           'conversation.info.id': 'Conversation ID: @id',

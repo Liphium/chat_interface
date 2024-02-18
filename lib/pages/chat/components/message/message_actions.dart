@@ -1,12 +1,37 @@
 part of 'message_feed.dart';
 
 class MessageSendHelper {
+  static final currentDraft = Rx<MessageDraft?>(null);
   static final drafts = <String, MessageDraft>{}; // ConversationId, Message draft
+}
+
+class AnswerData {
+  final String id;
+  final String senderAccount;
+  final String content;
+  final List<String> attachments;
+
+  AnswerData(this.id, this.senderAccount, this.content, this.attachments);
+
+  String toAnswerContent() {
+    return answerContent(senderAccount, content, attachments);
+  }
+
+  static String answerContent(String senderAccount, String content, List<String> attachments, {FriendController? controller}) {
+    final friend = (controller ?? Get.find<FriendController>()).friends[senderAccount] ?? Friend.unknown(senderAccount);
+    if (content == "" && attachments.isEmpty) {
+      content = "message.empty".tr;
+    } else if (content == "" && attachments.isNotEmpty) {
+      content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+    }
+
+    return "${friend.name}: $content";
+  }
 }
 
 class MessageDraft {
   final String conversationId;
-  String answer = "";
+  final answer = Rx<AnswerData?>(null);
   String message;
   final files = <UploadData>[].obs;
   final attachments = <String>[];

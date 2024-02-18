@@ -29,7 +29,6 @@ class _MessageInputState extends State<MessageInput> {
   final FocusNode _inputFocus = FocusNode();
   StreamSubscription<Conversation>? _sub;
   final GlobalKey _libraryKey = GlobalKey();
-  final currentDraft = Rx<MessageDraft?>(null);
 
   @override
   void dispose() {
@@ -52,18 +51,18 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void loadDraft(String conversation) {
-    if (currentDraft.value != null) {
-      MessageSendHelper.drafts[currentDraft.value!.conversationId] = currentDraft.value!;
+    if (MessageSendHelper.currentDraft.value != null) {
+      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] = MessageSendHelper.currentDraft.value!;
     }
-    currentDraft.value = MessageSendHelper.drafts[conversation] ?? MessageDraft(conversation, "");
-    _message.text = currentDraft.value!.message;
+    MessageSendHelper.currentDraft.value = MessageSendHelper.drafts[conversation] ?? MessageDraft(conversation, "");
+    _message.text = MessageSendHelper.currentDraft.value!.message;
     _inputFocus.requestFocus();
   }
 
   void resetCurrentDraft() {
-    if (currentDraft.value != null) {
-      MessageSendHelper.drafts[currentDraft.value!.conversationId] = MessageDraft(currentDraft.value!.conversationId, "");
-      currentDraft.value = MessageDraft(currentDraft.value!.conversationId, "");
+    if (MessageSendHelper.currentDraft.value != null) {
+      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] = MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
+      MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
       _message.clear();
     }
     loading.value = false;
@@ -78,16 +77,18 @@ class _MessageInputState extends State<MessageInput> {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) {
           final controller = Get.find<MessageController>();
-          if (currentDraft.value!.files.isEmpty) {
-            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [], currentDraft.value!.answer, resetCurrentDraft);
+          if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
+            sendTextMessage(
+                loading, controller.selectedConversation.value.id, _message.text, [], MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
             return;
           }
 
-          if (currentDraft.value!.files.length > 5) {
+          if (MessageSendHelper.currentDraft.value!.files.length > 5) {
             return;
           }
 
-          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, currentDraft.value!.files, currentDraft.value!.answer, resetCurrentDraft);
+          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, MessageSendHelper.currentDraft.value!.files,
+              MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
           return null;
         },
       ),
@@ -115,24 +116,68 @@ class _MessageInputState extends State<MessageInput> {
                 ),
                 child: Column(
                   children: [
-                    //* File preview
+                    //* Reply preview
                     Obx(
                       () {
-                        if (currentDraft.value == null) {
+                        final answer = MessageSendHelper.currentDraft.value?.answer.value;
+
+                        if (MessageSendHelper.currentDraft.value == null || answer == null) {
                           return const SizedBox();
                         }
                         return Animate(
-                          effects: [ExpandEffect(duration: 250.ms, curve: Curves.easeInOut, axis: Axis.vertical)],
-                          target: currentDraft.value!.files.isEmpty ? 0 : 1,
+                          effects: [
+                            ExpandEffect(
+                              duration: 250.ms,
+                              curve: Curves.easeInOut,
+                              axis: Axis.vertical,
+                            )
+                          ],
+                          target: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.all(elementSpacing),
+                            child: Row(
+                              children: [
+                                Icon(Icons.reply, color: theme.colorScheme.tertiary),
+                                horizontalSpacing(elementSpacing),
+                                Expanded(
+                                  child: Text(
+                                    answer.toAnswerContent(),
+                                    style: theme.textTheme.labelLarge,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+                    //* File preview
+                    Obx(
+                      () {
+                        if (MessageSendHelper.currentDraft.value == null) {
+                          return const SizedBox();
+                        }
+                        return Animate(
+                          effects: [
+                            ExpandEffect(
+                              duration: 250.ms,
+                              curve: Curves.easeInOut,
+                              axis: Axis.vertical,
+                            )
+                          ],
+                          target: MessageSendHelper.currentDraft.value!.files.isEmpty ? 0 : 1,
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                             child: Row(
                               children: [
                                 const SizedBox(height: 200 + defaultSpacing),
-                                for (final file in currentDraft.value!.files)
+                                for (final file in MessageSendHelper.currentDraft.value!.files)
                                   SquareFileRenderer(
                                     file: file,
-                                    onRemove: () => currentDraft.value!.files.remove(file),
+                                    onRemove: () => MessageSendHelper.currentDraft.value!.files.remove(file),
                                   ),
                               ],
                             ),
@@ -147,7 +192,7 @@ class _MessageInputState extends State<MessageInput> {
                         //* Attach a file
                         IconButton(
                           onPressed: () async {
-                            if (currentDraft.value!.files.length == 5) {
+                            if (MessageSendHelper.currentDraft.value!.files.length == 5) {
                               return;
                             }
                             final result = await openFile();
@@ -159,7 +204,7 @@ class _MessageInputState extends State<MessageInput> {
                               showErrorPopup("error".tr, "file.too_large".tr);
                               return;
                             }
-                            currentDraft.value!.files.add(UploadData(result));
+                            MessageSendHelper.currentDraft.value!.files.add(UploadData(result));
                           },
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,
@@ -181,7 +226,7 @@ class _MessageInputState extends State<MessageInput> {
                                 LengthLimitingTextInputFormatter(1000),
                               ],
                               focusNode: _inputFocus,
-                              onChanged: (value) => currentDraft.value!.message = value,
+                              onChanged: (value) => MessageSendHelper.currentDraft.value!.message = value,
                               cursorColor: theme.colorScheme.tertiary,
                               style: theme.textTheme.labelLarge,
                               controller: _message,
