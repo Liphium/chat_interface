@@ -216,7 +216,9 @@ class SpacesController extends GetxController {
     spaceConnector.sendAction(
       msg.Message(
         "setup",
-        <String, dynamic>{"data": encryptSymmetric(Get.find<StatusController>().id.value, key!)},
+        <String, dynamic>{
+          "data": encryptSymmetric(Get.find<StatusController>().id.value, key!),
+        },
       ),
       handler: (event) async {
         if (!event.data["success"]) {

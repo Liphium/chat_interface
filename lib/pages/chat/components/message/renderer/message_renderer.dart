@@ -1,4 +1,3 @@
-
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/database/database.dart';
@@ -43,6 +42,8 @@ class _MessageRendererState extends State<MessageRenderer> {
       if (message != null) {
         answerMessage.value = Message.fromMessageData(message);
       }
+    } else {
+      answerMessage.value = null;
     }
   }
 

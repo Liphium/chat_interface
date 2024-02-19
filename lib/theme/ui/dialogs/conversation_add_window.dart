@@ -283,6 +283,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
               ),
               FJElevatedLoadingButton(
                 onTap: () async {
+                  _conversationLoading.value = true;
                   if (widget.onDone != null) {
                     final error = await widget.onDone!(_members, _controller.text);
                     if (error != null) {
@@ -290,6 +291,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     } else {
                       Get.back();
                     }
+                    _conversationLoading.value = false;
                     return;
                   }
                   final error = await ConversationAddWindow.createConversationAction(_members, _controller.text);
@@ -298,6 +300,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                   } else {
                     Get.back();
                   }
+                  _conversationLoading.value = false;
                 },
                 label: widget.action.tr,
                 loading: _conversationLoading,

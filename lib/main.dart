@@ -17,7 +17,7 @@ final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;
 const appVersion = 1; // TODO: ALWAYS change to the new one saved in the node backend
-const bool isHttps = true;
+const bool isHttps = false;
 const bool isDebug = true; // TODO: Set to false before release
 const bool checkVersion = false; // TODO: Set to true in release builds
 const bool driftLogger = true;

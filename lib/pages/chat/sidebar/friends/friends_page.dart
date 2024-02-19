@@ -14,8 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-part 'friend_actions.dart';
-
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
 
