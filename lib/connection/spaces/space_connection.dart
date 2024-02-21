@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/spaces/game_listener.dart';
 import 'package:chat_interface/connection/spaces/tabletop_listener.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';
@@ -13,7 +14,7 @@ Connector spaceConnector = Connector();
 
 /// Connect to the space node.
 Future<bool> createSpaceConnection(String domain, String token) async {
-  return await spaceConnector.connect("ws://$domain/gateway", token, restart: false, onDone: ((error) {
+  return await spaceConnector.connect("${isHttps ? "wss://" : "ws://"}$domain/gateway", token, restart: false, onDone: ((error) {
     if (error) {
       showErrorPopup("error", "spaces.connection_error");
     }

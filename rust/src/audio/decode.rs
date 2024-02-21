@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, VecDeque},
     sync::{
         mpsc::{self, Receiver, Sender},
         Arc, Mutex,
@@ -21,7 +21,7 @@ use crate::{
     util::{self, crypto},
 };
 
-use super::player::{start_audio_player, start_audio_processor};
+use super::player::{self, start_audio_player, start_audio_processor};
 
 pub fn decode(
     samples: &[u8],
@@ -191,8 +191,6 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
                 seq: seq,
             };
 
-            // TODO: Replace with multiple tokio threads
-
             let prev = talking.insert(packet.id.clone(), SystemTime::now());
             if prev == None {
                 util::send_action(api::interaction::Action {
@@ -202,10 +200,12 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
             }
 
             let item = players.entry(packet.id.clone()).or_insert_with(|| {
-                let (voice_sender, voice_receiver) = tokio::sync::mpsc::channel(10usize);
                 let (packet_sender, packet_receiver) = tokio::sync::mpsc::channel(10usize);
-                start_audio_player(runtime.handle(), sink.clone(), voice_receiver);
-                start_audio_processor(runtime.handle(), packet_receiver, voice_sender);
+                let jitter_buffer = Arc::new(tokio::sync::Mutex::new(VecDeque::with_capacity(
+                    player::BUFFER_SIZE,
+                )));
+                start_audio_player(runtime.handle(), sink.clone(), jitter_buffer.clone());
+                start_audio_processor(runtime.handle(), packet_receiver, jitter_buffer.clone());
                 packet_sender
             });
             item.try_send(packet).unwrap_or_default();

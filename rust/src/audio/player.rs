@@ -1,66 +1,95 @@
-use std::{sync::{Arc, Mutex}, time::{Instant, Duration}, collections::VecDeque};
+use std::{
+    collections::VecDeque,
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use audiopus::coder;
-use rodio::{Sink, buffer::SamplesBuffer};
-use tokio::sync::mpsc::{Receiver, Sender};
+use rodio::Sink;
+use tokio::sync::{mpsc::Receiver, Mutex};
 
 use crate::{connection::Protocol, logger};
 
-use super::decode::{AudioPacket, self};
+use super::decode::{self, AudioPacket};
 
+#[derive(Clone)]
 pub struct DecodedAudioPacket {
     pub samples: Vec<f32>,
     pub protocol: Protocol,
 }
 
-pub fn start_audio_player(handle: &tokio::runtime::Handle, sink: Arc<Mutex<Sink>>, mut receiver: Receiver<DecodedAudioPacket>) {
+pub fn start_audio_player(
+    handle: &tokio::runtime::Handle,
+    sink: Arc<std::sync::Mutex<Sink>>,
+    jitter_buffer: Arc<Mutex<VecDeque<(u32, DecodedAudioPacket)>>>,
+) {
     handle.spawn(async move {
-
         let mut current_protocol = Protocol::None;
         let mut current_interval = tokio::time::interval(Duration::from_millis(20));
+        let mut last_seq: u32 = 0;
 
         loop {
             current_interval.tick().await;
 
-            let packet = match receiver.try_recv() {
-                Ok(packet) => packet,
-                Err(_) => {
-                    //logger::send_log(logger::TAG_AUDIO, "No packet received");
-                    continue;
-                },
-            };
+            // Evaluate jitter buffer
+            let mut jitter_buffer_vec = jitter_buffer.lock().await;
+            println!("{} {}", jitter_buffer_vec.len(), last_seq);
+            if jitter_buffer_vec.len() > BUFFER_SIZE {
+                jitter_buffer_vec.pop_front();
+            }
 
-            if packet.protocol != current_protocol {
-                current_protocol = packet.protocol.clone();
-                current_interval = tokio::time::interval(packet.protocol.frame_duration());
+            if jitter_buffer_vec.len() < BUFFER_SIZE / 2 {
+                last_seq = 0;
                 continue;
             }
 
-            let sink_locked = match sink.lock() {
-                Ok(sink) => sink,
-                Err(_) => {
-                    logger::send_log(logger::TAG_AUDIO, "Failed to acquire lock on sink");
-                    continue;
-                },
-            };
+            if last_seq == 0 {
+                last_seq = jitter_buffer_vec
+                    .clone()
+                    .into_iter()
+                    .min_by(|x, y| x.0.cmp(&y.0))
+                    .unwrap()
+                    .0;
+            } else {
+                last_seq += 1;
+            }
 
-            sink_locked.append(SamplesBuffer::new(1, current_protocol.opus_sample_rate() as u32, packet.samples.as_slice()));
-            drop(sink_locked);
+            // Play the thing
+            // if packet.protocol != current_protocol {
+            //     current_protocol = packet.protocol.clone();
+            //     current_interval = tokio::time::interval(packet.protocol.frame_duration());
+            //     continue;
+            // }
+
+            // let sink_locked = match sink.try_lock() {
+            //     Ok(sink) => sink,
+            //     Err(_) => {
+            //         logger::send_log(logger::TAG_AUDIO, "Failed to acquire lock on sink");
+            //         continue;
+            //     }
+            // };
+
+            // sink_locked.append(SamplesBuffer::new(
+            //     1,
+            //     current_protocol.opus_sample_rate() as u32,
+            //     packet.samples.as_slice(),
+            // ));
+            // drop(sink_locked);
         }
-
     });
 }
 
-pub const BUFFER_SIZE: usize = 10; // 80ms normally
+pub static BUFFER_SIZE: usize = 30;
 
-pub fn start_audio_processor(handle: &tokio::runtime::Handle, mut receiver: Receiver<AudioPacket>, sender: Sender<DecodedAudioPacket>) {
+pub fn start_audio_processor(
+    handle: &tokio::runtime::Handle,
+    mut receiver: Receiver<AudioPacket>,
+    jitter_buffer: Arc<Mutex<VecDeque<(u32, DecodedAudioPacket)>>>,
+) {
     handle.spawn(async move {
-
         let mut current_protocol = Protocol::None;
-        let mut decoder = coder::Decoder::new(audiopus::SampleRate::Hz48000, audiopus::Channels::Mono).unwrap();
-        let mut jitter_buffer = VecDeque::with_capacity(BUFFER_SIZE);
-        let mut last_played_seq: u32 = 0;
-        let mut last_real_played: u32 = 0;
+        let mut decoder =
+            coder::Decoder::new(audiopus::SampleRate::Hz48000, audiopus::Channels::Mono).unwrap();
         let mut last_packet = Instant::now();
 
         loop {
@@ -68,74 +97,39 @@ pub fn start_audio_processor(handle: &tokio::runtime::Handle, mut receiver: Rece
             let seq = packet.seq;
 
             if packet.protocol != current_protocol {
-                decoder = coder::Decoder::new(packet.protocol.opus_sample_rate(), audiopus::Channels::Mono).unwrap();
+                decoder = coder::Decoder::new(
+                    packet.protocol.opus_sample_rate(),
+                    audiopus::Channels::Mono,
+                )
+                .unwrap();
                 current_protocol = packet.protocol.clone();
                 logger::send_log(logger::TAG_AUDIO, "different protocol found");
                 continue;
             }
-            let decoded = decode::decode(packet.data.as_slice(), super::encode::FRAME_SIZE, &mut decoder);
+            let decoded = decode::decode(
+                packet.data.as_slice(),
+                super::encode::FRAME_SIZE,
+                &mut decoder,
+            );
+
+            // Aquire lock on the jitter buffer
+            let mut jitter_buffer_vec = jitter_buffer.lock().await;
 
             // Add the packet to the jitter buffer
             if Instant::now().duration_since(last_packet) > Duration::from_millis(100) {
                 logger::send_log(logger::TAG_AUDIO, "A long time has passed, clearing buffer");
-                jitter_buffer.clear();
+                jitter_buffer_vec.clear();
             }
             last_packet = Instant::now();
 
-            jitter_buffer.push_back((seq, decoded));
-            if jitter_buffer.len() > BUFFER_SIZE {
-                jitter_buffer.pop_front();
-            } else if jitter_buffer.len() != BUFFER_SIZE {
-                logger::send_log(logger::TAG_AUDIO, "Jitter buffer too small, dropping packet");
-                // TODO: Remove if statement below and put it here instead (at least the last_played_seq == 0 part)
-                continue;
-            }
-
-            // Make sure something is always playing
-            let (front_seq_p, _) = jitter_buffer.front().unwrap();
-            let front_seq = front_seq_p.clone();
-            if last_played_seq == 0 || (front_seq.wrapping_sub(last_real_played) > BUFFER_SIZE as u32) {
-                logger::send_log(logger::TAG_AUDIO, format!("Last played: {}, front: {}, difference: {}", last_played_seq, front_seq, front_seq.wrapping_sub(last_real_played)).as_str());
-                last_played_seq = front_seq.clone() - 1;
-                last_real_played = last_played_seq;
-            }
-
-            // Check if the next packet in the buffer is ready to be played
-            let index = match jitter_buffer.iter().position(|(seq, _)| *seq == last_played_seq + 1) {
-                Some(index) => index,
-                None => {
-                    logger::send_log(logger::TAG_AUDIO, format!("Last played: {}, nothing found, incrementing", last_played_seq).as_str());
-                    last_played_seq += 1;
-                    continue;
+            // Push packet into the jitter buffer
+            jitter_buffer_vec.push_back((
+                seq,
+                DecodedAudioPacket {
+                    protocol: packet.protocol,
+                    samples: decoded,
                 },
-            };
-            let (next_seq, next_decoded) = match jitter_buffer.get(index.clone()) {
-                Some((seq, decoded)) => (seq.clone(), decoded.clone()),
-                None => continue,
-            };
-            jitter_buffer.remove(index);
-            last_real_played = next_seq;
-
-            logger::send_log(logger::TAG_AUDIO, format!("Last played: {}, now playing: {}, front: {} ({})", last_played_seq, next_seq, front_seq, index).as_str());
-
-            sender.try_send(DecodedAudioPacket { 
-                samples: next_decoded.clone(), 
-                protocol: current_protocol.clone(), 
-            }).expect("sending channel broke");
-
-            last_played_seq = next_seq;
-
-            // let sink_locked = match sink.lock() {
-            //     Ok(sink) => sink,
-            //     Err(_) => {
-            //         logger::send_log(logger::TAG_AUDIO, "Failed to acquire lock on sink");
-            //         continue;
-            //     },
-            // };
-            
-
-            // sink_locked.append(SamplesBuffer::new(1, packet.protocol.opus_sample_rate() as u32, decoded));
-            // drop(sink_locked)
+            ));
         }
     });
 }

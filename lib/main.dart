@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -17,7 +20,7 @@ final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;
 const appVersion = 1; // TODO: ALWAYS change to the new one saved in the node backend
-const bool isHttps = false;
+const bool isHttps = true;
 const bool isDebug = true; // TODO: Set to false before release
 const bool checkVersion = false; // TODO: Set to true in release builds
 const bool driftLogger = true;
@@ -53,6 +56,7 @@ void main() async {
 
   // Initialize sodium
   await initSodium();
+  print(packageSymmetricKey(randomSymmetricKey()));
 
   await RustLib.init();
 

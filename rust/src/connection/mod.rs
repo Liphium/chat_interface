@@ -1,10 +1,10 @@
 use std::{sync::Mutex, time::Duration};
 
-use alkali::{symmetric::cipher, mem::FullAccess};
+use alkali::{mem::FullAccess, symmetric::cipher};
 use base64::{engine::general_purpose, Engine};
 use once_cell::sync::Lazy;
 
-use crate::{util, logger};
+use crate::{logger, util};
 
 pub mod udp;
 
@@ -13,7 +13,7 @@ pub struct Config {
     pub client_id: String,
     pub verification_key: Vec<u8>,
     pub encryption_key: cipher::Key<FullAccess>,
-    pub connection: bool
+    pub connection: bool,
 }
 
 #[derive(Clone, PartialEq)]
@@ -22,20 +22,19 @@ pub enum Protocol {
     Hz24000, // Not supported
     Hz16000, // Well, it works, but it's shit
     Hz12000, // Not supported
-    Hz8000, // Not supported
-    None
+    Hz8000,  // Not supported
+    None,
 }
 
 impl Protocol {
-
     pub fn frame_duration(&self) -> Duration {
         match &self {
             Self::Hz48000 => Duration::from_millis(20),
             Self::Hz24000 => Duration::from_millis(20), // Unsupported
             Self::Hz16000 => Duration::from_millis(20), // Unsupported
             Self::Hz12000 => Duration::from_millis(20), // Unsupported
-            Self::Hz8000 => Duration::from_millis(20), // Unsupported
-            Self::None => Duration::from_millis(20), // Unsupported
+            Self::Hz8000 => Duration::from_millis(20),  // Unsupported
+            Self::None => Duration::from_millis(20),    // Unsupported
         }
     }
 
@@ -45,7 +44,7 @@ impl Protocol {
             Self::Hz24000 => audiopus::SampleRate::Hz24000,
             Self::Hz16000 => audiopus::SampleRate::Hz16000,
             Self::Hz12000 => audiopus::SampleRate::Hz12000,
-            Self::Hz8000 => audiopus::SampleRate::Hz8000, 
+            Self::Hz8000 => audiopus::SampleRate::Hz8000,
             Self::None => audiopus::SampleRate::Hz48000,
         }
     }
@@ -56,7 +55,7 @@ impl Protocol {
             Self::Hz24000 => 24000,
             Self::Hz16000 => 16000,
             Self::Hz12000 => 12000,
-            Self::Hz8000 => 8000, 
+            Self::Hz8000 => 8000,
             Self::None => 48000,
         }
     }
@@ -67,8 +66,8 @@ impl Protocol {
             Self::Hz24000 => "o3",
             Self::Hz16000 => "o2",
             Self::Hz12000 => "o1",
-            Self::Hz8000 => "o0", 
-            Self::None => "n-"
+            Self::Hz8000 => "o0",
+            Self::None => "n-",
         }
     }
 }
@@ -116,9 +115,9 @@ pub fn protocol_from_prefix(prefix: &str) -> Option<Protocol> {
         "o3" => Some(Protocol::Hz24000),
         "o2" => Some(Protocol::Hz16000),
         "o1" => Some(Protocol::Hz12000),
-        "o0" => Some(Protocol::Hz8000), 
+        "o0" => Some(Protocol::Hz8000),
         "n-" => Some(Protocol::None),
-        _ => None
+        _ => None,
     }
 }
 
@@ -131,7 +130,6 @@ pub fn get_key(token: &str) -> Vec<u8> {
 }
 
 pub fn init_packet(config: &Config) -> Vec<u8> {
-
     let init_vec = vec![b'd', b'r', b'o', b'p'];
     let hash = util::hasher::sha256(init_vec.clone());
 
@@ -145,7 +143,13 @@ pub fn init_packet(config: &Config) -> Vec<u8> {
     buffer
 }
 
-pub fn construct_packet(config: &Config, protocol: &Protocol, voice_data: &[u8], sequence: u32, buffer: &mut Vec<u8>) {
+pub fn construct_packet(
+    config: &Config,
+    protocol: &Protocol,
+    voice_data: &[u8],
+    sequence: u32,
+    buffer: &mut Vec<u8>,
+) {
     buffer.clear();
     buffer.extend_from_slice(config.client_id.as_bytes());
 
@@ -155,7 +159,10 @@ pub fn construct_packet(config: &Config, protocol: &Protocol, voice_data: &[u8],
     voice_vec.extend_from_slice(voice_data);
     let encrypted_voice_res = util::crypto::encrypt_sodium(&config.encryption_key, &voice_vec);
     if encrypted_voice_res.is_err() {
-        logger::send_log(logger::TAG_CONNECTION, "packet couldn't be encrypted, maybe a key exchange issue?");
+        logger::send_log(
+            logger::TAG_CONNECTION,
+            "packet couldn't be encrypted, maybe a key exchange issue?",
+        );
         return;
     }
     let encrypted_voice = encrypted_voice_res.unwrap();

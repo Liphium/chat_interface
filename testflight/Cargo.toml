@@ -1,0 +1,7 @@
+[package]
+name = "testflight"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rust_lib = { path = "../rust" }
