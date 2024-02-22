@@ -5,6 +5,7 @@ use std::{
         Arc, Mutex,
     },
     thread,
+    time::SystemTime,
 };
 
 use crate::{audio, frb_generated::StreamSink, logger, util};
@@ -102,15 +103,12 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
             .set_bitrate(audiopus::Bitrate::BitsPerSecond(128000))
             .unwrap();
 
-        let (mut _stream, mut stream_handle) =
-            OutputStream::try_default().expect("Can't create output channel");
+        let (mut _stream, mut stream_handle) = OutputStream::try_default().unwrap();
         let sink = Arc::new(Mutex::new(
             Sink::try_new(&stream_handle).expect("Couldn't create sink"),
         ));
         let mut players: HashMap<String, tokio::sync::mpsc::Sender<AudioPacket>> = HashMap::new();
-        let runtime = Runtime::new().unwrap();
-
-        let mut sample_buffer = Vec::<f32>::new();
+        let runtime: Runtime = Runtime::new().unwrap();
 
         loop {
             if connection::should_stop() {
@@ -131,25 +129,11 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 .unwrap();
             }
 
-            let mut samples = match ENCODE_RECEIVER.lock() {
+            let samples = match ENCODE_RECEIVER.lock() {
                 Ok(lock) => lock.recv().expect("receiving broken"),
                 Err(poisoned) => poisoned.into_inner().recv().expect("receiving broken"),
             };
             let samples_len = samples.len();
-            sample_buffer.append(&mut samples);
-
-            if sample_buffer.len() > 100000 {
-                let sink_unlocked = sink.lock().unwrap();
-                sink_unlocked.append(SamplesBuffer::new(
-                    1,
-                    protocol.opus_sample_rate() as u32,
-                    sample_buffer.clone(),
-                ));
-                sample_buffer.clear();
-                continue;
-            } else {
-                continue;
-            }
 
             if samples_len < FRAME_SIZE * channels {
                 logger::send_log(logger::TAG_AUDIO, "packet dropped");
@@ -205,6 +189,26 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 let mut channel = vec![b'v', b':'];
                 channel.append(&mut encoded);
                 connection::udp::send(auth::encrypted_packet(&mut channel)); */
+            } else {
+                sequence += 1;
+                println!("{:?}", encoded.len());
+
+                let item = players.entry(config.client_id.clone()).or_insert_with(|| {
+                    let (packet_sender, packet_receiver) = tokio::sync::mpsc::channel(10usize);
+                    let jitter_buffer = Arc::new(tokio::sync::Mutex::new(VecDeque::with_capacity(
+                        player::BUFFER_SIZE,
+                    )));
+                    start_audio_player(runtime.handle(), sink.clone(), jitter_buffer.clone());
+                    start_audio_processor(runtime.handle(), packet_receiver, jitter_buffer.clone());
+                    packet_sender
+                });
+                item.try_send(AudioPacket {
+                    protocol: protocol.clone(),
+                    data: encoded,
+                    id: config.client_id.clone(),
+                    seq: sequence,
+                })
+                .unwrap_or_default();
             }
         }
     });

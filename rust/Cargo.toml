@@ -11,7 +11,7 @@ aes-gcm = "0.10.2"
 alkali = "0.3.0"
 audiopus = "0.2.0"
 base64 = "0.21.2"
-cpal = "0.15.2"
+cpal = { version = "0.15.2", features = ["jack"] }
 once_cell = "1.18.0"
 rand = "0.8.5"
 rodio = "0.17.1"

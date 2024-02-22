@@ -15,7 +15,11 @@ use crate::{audio::encode, connection, logger};
 pub fn record(conn_config: Arc<connection::Config>) {
     thread::spawn(move || {
         // Get a cpal host
-        let host = cpal::default_host(); // Current host on computer
+        let mut host = cpal::default_host(); // Current host on computer
+        #[cfg(target_os = "linux")]
+        {
+            host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
+        }
 
         // Get input device (using new API)
         let mut device = host
