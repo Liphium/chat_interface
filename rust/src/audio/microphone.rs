@@ -1,19 +1,26 @@
-use std::{sync::{Mutex, Arc}, thread, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    thread,
+    time::Duration,
+};
 
-use cpal::{traits::{HostTrait, DeviceTrait, StreamTrait}, StreamConfig};
+use cpal::{
+    traits::{DeviceTrait, HostTrait, StreamTrait},
+    StreamConfig,
+};
 use rubato::{FftFixedOut, Resampler};
 
 use crate::{audio::encode, connection, logger};
 
 pub fn record(conn_config: Arc<connection::Config>) {
-    
     thread::spawn(move || {
-
         // Get a cpal host
         let host = cpal::default_host(); // Current host on computer
 
         // Get input device (using new API)
-        let mut device = host.default_input_device().expect("no input device available"); // Current device
+        let mut device = host
+            .default_input_device()
+            .expect("no input device available"); // Current device
         for d in host.input_devices().expect("Couldn't get input devices") {
             if d.name().unwrap() == super::get_input_device() {
                 device = d;
@@ -23,13 +30,20 @@ pub fn record(conn_config: Arc<connection::Config>) {
         let last_value = super::get_input_device();
 
         // Create a stream config
-        let default_config = device.default_input_config().expect("no stream config found");
-        logger::send_log(logger::TAG_AUDIO, format!("default config: {:?}", default_config).as_str());
+        let default_config = device
+            .default_input_config()
+            .expect("no stream config found");
+        logger::send_log(
+            logger::TAG_AUDIO,
+            format!("default config: {:?}", default_config).as_str(),
+        );
         let sample_rate: u32 = default_config.sample_rate().0;
         let work_channels = 1; // Stereo doesn't work at the moment (will fix in the future or never)
         let mic_channels = default_config.channels();
-        connection::new_protocol(connection::nearest_opus_protocol(default_config.sample_rate().0));
-    
+        connection::new_protocol(connection::nearest_opus_protocol(
+            default_config.sample_rate().0,
+        ));
+
         let config: StreamConfig = StreamConfig {
             channels: mic_channels,
             sample_rate: cpal::SampleRate(sample_rate),
@@ -43,7 +57,8 @@ pub fn record(conn_config: Arc<connection::Config>) {
             encode::FRAME_SIZE,
             encode::FRAME_SIZE,
             work_channels as usize,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Create buffer for overflowing samplesd
         let overflow_buffer = Arc::new(Mutex::new(Vec::<f32>::new()));
@@ -60,13 +75,19 @@ pub fn record(conn_config: Arc<connection::Config>) {
                 resample_data(data, &mut resampler, &overflow_buffer_2, mic_channels);
             },
             move |err| {
-                logger::send_log(logger::TAG_ERROR, format!("an error occurred on stream: {}", err).as_str());
+                logger::send_log(
+                    logger::TAG_ERROR,
+                    format!("an error occurred on stream: {}", err).as_str(),
+                );
             },
             None,
         ) {
             Ok(stream) => stream,
             Err(err) => {
-                logger::send_log(logger::TAG_ERROR, format!("an error occurred on stream: {}", err).as_str());
+                logger::send_log(
+                    logger::TAG_ERROR,
+                    format!("an error occurred on stream: {}", err).as_str(),
+                );
                 return;
             }
         };
@@ -75,9 +96,15 @@ pub fn record(conn_config: Arc<connection::Config>) {
         stream.play().unwrap();
 
         loop {
-
             if last_value != super::get_input_device() {
-                logger::send_log(logger::TAG_AUDIO, format!("Input device changed to {}, restarting", super::get_input_device()).as_str());
+                logger::send_log(
+                    logger::TAG_AUDIO,
+                    format!(
+                        "Input device changed to {}, restarting",
+                        super::get_input_device()
+                    )
+                    .as_str(),
+                );
                 record(cloned_config);
                 break;
             }
@@ -102,12 +129,11 @@ fn stereo_to_mono(pcm: &[f32]) -> Vec<f32> {
 }
 
 fn resample_data(
-    data: &[f32], 
-    resampler: &mut FftFixedOut<f64>, 
-    overflow_buffer_p: &Arc<Mutex<Vec<f32>>>, 
+    data: &[f32],
+    resampler: &mut FftFixedOut<f64>,
+    overflow_buffer_p: &Arc<Mutex<Vec<f32>>>,
     channels: u16,
 ) {
-
     // Cut down to needed size and add to overflow buffer (MONO ONLY)
     let mut max_length = resampler.input_frames_next();
     let mut overflow_buffer = overflow_buffer_p.lock().unwrap();
@@ -119,7 +145,6 @@ fn resample_data(
     }
 
     while overflow_buffer.len() > max_length {
-
         // Get data to resample from overflow
         let buffer = if overflow_buffer.len() > max_length {
             let buffer = overflow_buffer.drain(0..max_length).collect::<Vec<f32>>();
@@ -127,9 +152,10 @@ fn resample_data(
         } else {
             return;
         };
-        
+
         // Extract channels
-        let mut extracted_channels: Vec<Vec<f64>> = vec![Vec::<f64>::with_capacity(buffer.len()); 1];
+        let mut extracted_channels: Vec<Vec<f64>> =
+            vec![Vec::<f64>::with_capacity(buffer.len()); 1];
         extracted_channels[0] = buffer.iter().map(|&x| x as f64).collect::<Vec<f64>>();
 
         // Resample and reverse extract
@@ -140,7 +166,7 @@ fn resample_data(
         encode::pass_to_encode(sample);
 
         // Prepare for next iteration
-        max_length = resampler.input_frames_next()*channels as usize;
+        max_length = resampler.input_frames_next() * channels as usize;
     }
 }
 
@@ -169,4 +195,3 @@ fn reverse_extract_channels(channels_data: &[Vec<f64>]) -> Vec<f32> {
     }
     interleaved_samples
 } */
-

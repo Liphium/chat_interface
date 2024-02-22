@@ -1,9 +1,10 @@
-use rust_lib::{audio, connection};
+use rust_lib::{api, communication};
 
 fn main() {
-    connection::allow_start();
-    connection::udp::init();
-    audio::set_amplitude_logging(true);
+    api::interaction::test_voice("def".to_string());
+    communication::start_listening();
+
+    /*
 
     // Listen for stdout
     let mut buffer = String::new();
@@ -16,9 +17,6 @@ fn main() {
     println!("client_id: {}", client_id);
     println!("verification_key: {}", verification_key);
 
-    let jitter_buffer_vec = [(&0, 1), (&0, 2), (&0, 3)];
-    let last_seq = jitter_buffer_vec.into_iter().min_by(|x, y| (x.0).cmp(y.0));
-
     connection::udp::connect_recursive(
         client_id.trim().to_string(),
         verification_key.trim().to_string(),
@@ -26,5 +24,5 @@ fn main() {
         "localhost:3011",
         0,
         true,
-    )
+    )*/
 }

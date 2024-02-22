@@ -1,11 +1,7 @@
-use std::{
-    collections::VecDeque,
-    sync::Arc,
-    time::{Duration, Instant},
-};
+use std::{collections::VecDeque, sync::Arc, time::Duration};
 
 use audiopus::coder;
-use rodio::Sink;
+use rodio::{buffer::SamplesBuffer, Sink};
 use tokio::sync::{mpsc::Receiver, Mutex};
 
 use crate::{connection::Protocol, logger};
@@ -26,55 +22,67 @@ pub fn start_audio_player(
     handle.spawn(async move {
         let mut current_protocol = Protocol::None;
         let mut current_interval = tokio::time::interval(Duration::from_millis(20));
-        let mut last_seq: u32 = 0;
 
         loop {
             current_interval.tick().await;
 
             // Evaluate jitter buffer
             let mut jitter_buffer_vec = jitter_buffer.lock().await;
-            println!("{} {}", jitter_buffer_vec.len(), last_seq);
             if jitter_buffer_vec.len() > BUFFER_SIZE {
                 jitter_buffer_vec.pop_front();
             }
 
-            if jitter_buffer_vec.len() < BUFFER_SIZE / 2 {
-                last_seq = 0;
+            if jitter_buffer_vec.len() < BUFFER_SIZE {
                 continue;
             }
 
-            if last_seq == 0 {
-                last_seq = jitter_buffer_vec
+            println!("playing");
+            let mut current_seq = jitter_buffer_vec
+                .clone()
+                .into_iter()
+                .min_by(|x, y| x.0.cmp(&y.0))
+                .unwrap()
+                .0;
+            let max_seq = jitter_buffer_vec
+                .clone()
+                .into_iter()
+                .max_by(|x, y| x.0.cmp(&y.0))
+                .unwrap()
+                .0;
+
+            while current_seq != max_seq {
+                let current_packet_result = jitter_buffer_vec
                     .clone()
                     .into_iter()
-                    .min_by(|x, y| x.0.cmp(&y.0))
-                    .unwrap()
-                    .0;
-            } else {
-                last_seq += 1;
+                    .find(|x| x.0 == current_seq);
+                let current_packet = current_packet_result.unwrap().1;
+
+                if current_packet.protocol != current_protocol {
+                    current_protocol = current_packet.protocol.clone();
+                    current_interval =
+                        tokio::time::interval(current_packet.protocol.frame_duration());
+                }
+
+                let sink_locked = match sink.try_lock() {
+                    Ok(sink) => sink,
+                    Err(_) => {
+                        logger::send_log(logger::TAG_AUDIO, "Failed to acquire lock on sink");
+                        continue;
+                    }
+                };
+
+                sink_locked.append(SamplesBuffer::new(
+                    1,
+                    current_protocol.opus_sample_rate() as u32,
+                    current_packet.samples.as_slice(),
+                ));
+                drop(sink_locked);
+
+                current_seq += 1;
             }
+            jitter_buffer_vec.clear();
 
-            // Play the thing
-            // if packet.protocol != current_protocol {
-            //     current_protocol = packet.protocol.clone();
-            //     current_interval = tokio::time::interval(packet.protocol.frame_duration());
-            //     continue;
-            // }
-
-            // let sink_locked = match sink.try_lock() {
-            //     Ok(sink) => sink,
-            //     Err(_) => {
-            //         logger::send_log(logger::TAG_AUDIO, "Failed to acquire lock on sink");
-            //         continue;
-            //     }
-            // };
-
-            // sink_locked.append(SamplesBuffer::new(
-            //     1,
-            //     current_protocol.opus_sample_rate() as u32,
-            //     packet.samples.as_slice(),
-            // ));
-            // drop(sink_locked);
+            println!("{} {}", current_seq, max_seq);
         }
     });
 }
@@ -84,13 +92,13 @@ pub static BUFFER_SIZE: usize = 30;
 pub fn start_audio_processor(
     handle: &tokio::runtime::Handle,
     mut receiver: Receiver<AudioPacket>,
+    sink: Arc<std::sync::Mutex<Sink>>,
     jitter_buffer: Arc<Mutex<VecDeque<(u32, DecodedAudioPacket)>>>,
 ) {
     handle.spawn(async move {
         let mut current_protocol = Protocol::None;
         let mut decoder =
             coder::Decoder::new(audiopus::SampleRate::Hz48000, audiopus::Channels::Mono).unwrap();
-        let mut last_packet = Instant::now();
 
         loop {
             let packet = receiver.recv().await.unwrap();
@@ -103,7 +111,13 @@ pub fn start_audio_processor(
                 )
                 .unwrap();
                 current_protocol = packet.protocol.clone();
-                logger::send_log(logger::TAG_AUDIO, "different protocol found");
+                logger::send_log(
+                    logger::TAG_AUDIO,
+                    &format!(
+                        "different protocol found {:?}",
+                        packet.protocol.opus_sample_rate()
+                    ),
+                );
                 continue;
             }
             let decoded = decode::decode(
@@ -115,13 +129,22 @@ pub fn start_audio_processor(
             // Aquire lock on the jitter buffer
             let mut jitter_buffer_vec = jitter_buffer.lock().await;
 
-            // Add the packet to the jitter buffer
-            if Instant::now().duration_since(last_packet) > Duration::from_millis(100) {
-                logger::send_log(logger::TAG_AUDIO, "A long time has passed, clearing buffer");
-                jitter_buffer_vec.clear();
-            }
-            last_packet = Instant::now();
+            let sink_locked = match sink.try_lock() {
+                Ok(sink) => sink,
+                Err(_) => {
+                    logger::send_log(logger::TAG_AUDIO, "Failed to acquire lock on sink");
+                    continue;
+                }
+            };
 
+            sink_locked.append(SamplesBuffer::new(
+                1,
+                current_protocol.opus_sample_rate() as u32,
+                decoded,
+            ));
+            drop(sink_locked);
+
+            /*
             // Push packet into the jitter buffer
             jitter_buffer_vec.push_back((
                 seq,
@@ -130,6 +153,7 @@ pub fn start_audio_processor(
                     samples: decoded,
                 },
             ));
+            */
         }
     });
 }

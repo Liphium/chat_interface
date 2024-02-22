@@ -205,7 +205,12 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
                     player::BUFFER_SIZE,
                 )));
                 start_audio_player(runtime.handle(), sink.clone(), jitter_buffer.clone());
-                start_audio_processor(runtime.handle(), packet_receiver, jitter_buffer.clone());
+                start_audio_processor(
+                    runtime.handle(),
+                    packet_receiver,
+                    sink.clone(),
+                    jitter_buffer.clone(),
+                );
                 packet_sender
             });
             item.try_send(packet).unwrap_or_default();
