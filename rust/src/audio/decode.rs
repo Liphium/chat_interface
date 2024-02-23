@@ -98,9 +98,6 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
         );
         let (mut _stream, mut stream_handle) =
             OutputStream::try_from_device(&device).expect("Couldn't start output stream");
-        let sink = Arc::new(Mutex::new(
-            Sink::try_new(&stream_handle).expect("Couldn't create sink"),
-        ));
         let mut players: HashMap<String, tokio::sync::mpsc::Sender<AudioPacket>> = HashMap::new();
         let mut talking: HashMap<String, SystemTime> = HashMap::new();
         let runtime = Runtime::new().unwrap();
@@ -123,8 +120,7 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
                 last_value = super::get_output_device();
                 (_stream, stream_handle) =
                     OutputStream::try_from_device(&device).expect("Couldn't start output stream");
-                *sink.lock().unwrap() =
-                    Sink::try_new(&stream_handle).expect("Couldn't create sink");
+                players.clear();
             }
 
             if connection::should_stop() {
@@ -204,7 +200,8 @@ pub fn decode_play_thread(config: Arc<connection::Config>) {
                 let jitter_buffer = Arc::new(tokio::sync::Mutex::new(VecDeque::with_capacity(
                     player::BUFFER_SIZE,
                 )));
-                start_audio_player(runtime.handle(), sink.clone(), jitter_buffer.clone());
+                let sink = Sink::try_new(&stream_handle).expect("Couldn't create sink");
+                start_audio_player(runtime.handle(), sink, jitter_buffer.clone());
                 start_audio_processor(runtime.handle(), packet_receiver, jitter_buffer.clone());
                 packet_sender
             });

@@ -1,5 +1,6 @@
 use std::{
     collections::VecDeque,
+    ops::Sub,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -20,7 +21,7 @@ pub struct DecodedAudioPacket {
 
 pub fn start_audio_player(
     handle: &tokio::runtime::Handle,
-    sink: Arc<std::sync::Mutex<Sink>>,
+    sink: Sink,
     jitter_buffer: Arc<Mutex<VecDeque<(u32, DecodedAudioPacket)>>>,
 ) {
     handle.spawn(async move {
@@ -32,10 +33,7 @@ pub fn start_audio_player(
             current_interval.tick().await;
 
             // Evaluate jitter buffer
-            let mut jitter_buffer_vec = jitter_buffer.lock().await;
-            if jitter_buffer_vec.len() > BUFFER_SIZE {
-                jitter_buffer_vec.pop_front();
-            }
+            let jitter_buffer_vec = jitter_buffer.lock().await;
 
             if jitter_buffer_vec.len() < BUFFER_SIZE / 2 {
                 current_seq = 0;
@@ -49,10 +47,17 @@ pub fn start_audio_player(
                     .min_by(|x, y| x.0.cmp(&y.0))
                     .unwrap()
                     .0;
-            } else {
-                current_seq += 1;
+                println!("new seq: {}", current_seq);
             }
 
+            let max_seq = jitter_buffer_vec
+                .clone()
+                .into_iter()
+                .max_by(|x, y| x.0.cmp(&y.0))
+                .unwrap()
+                .0;
+
+            let before_seq = current_seq.clone();
             let current_packet_result = jitter_buffer_vec
                 .clone()
                 .into_iter()
@@ -79,25 +84,29 @@ pub fn start_audio_player(
                 current_interval = tokio::time::interval(current_packet.protocol.frame_duration());
             }
 
-            let sink_locked = match sink.try_lock() {
-                Ok(sink) => sink,
-                Err(_) => {
-                    logger::send_log(logger::TAG_AUDIO, "Failed to acquire lock on sink");
-                    continue;
-                }
-            };
-
-            sink_locked.append(SamplesBuffer::new(
+            sink.append(SamplesBuffer::new(
                 1,
-                current_protocol.opus_sample_rate() as u32,
+                current_protocol.usize() as u32,
                 current_packet.samples.as_slice(),
             ));
-            drop(sink_locked);
+
+            current_seq += 1;
+
+            logger::send_log(
+                logger::TAG_AUDIO,
+                &format!(
+                    "current: {}, max seq: {}, size: {}, inserted: {}",
+                    current_seq,
+                    max_seq,
+                    jitter_buffer_vec.len(),
+                    current_seq - before_seq
+                ),
+            );
         }
     });
 }
 
-pub static BUFFER_SIZE: usize = 30;
+pub static BUFFER_SIZE: usize = 40;
 
 pub fn start_audio_processor(
     handle: &tokio::runtime::Handle,
@@ -139,7 +148,7 @@ pub fn start_audio_processor(
 
             // Aquire lock on the jitter buffer
             let mut jitter_buffer_vec = jitter_buffer.lock().await;
-            if jitter_buffer_vec.len() > BUFFER_SIZE {
+            if jitter_buffer_vec.len() >= BUFFER_SIZE {
                 jitter_buffer_vec.pop_front();
             }
 
@@ -151,6 +160,7 @@ pub fn start_audio_processor(
                         Instant::now().duration_since(last_packet).as_millis()
                     ),
                 );
+                println!("dropping buffer");
                 jitter_buffer_vec.clear();
             }
             last_packet = Instant::now();

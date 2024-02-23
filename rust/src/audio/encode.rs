@@ -5,13 +5,11 @@ use std::{
         Arc, Mutex,
     },
     thread,
-    time::SystemTime,
 };
 
 use crate::{audio, frb_generated::StreamSink, logger, util};
 use once_cell::sync::Lazy;
-use rand::seq;
-use rodio::{buffer::SamplesBuffer, OutputStream, Sink};
+use rodio::{OutputStream, Sink};
 use tokio::runtime::Runtime;
 
 use crate::connection;
@@ -103,10 +101,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
             .set_bitrate(audiopus::Bitrate::BitsPerSecond(128000))
             .unwrap();
 
-        let (mut _stream, mut stream_handle) = OutputStream::try_default().unwrap();
-        let sink = Arc::new(Mutex::new(
-            Sink::try_new(&stream_handle).expect("Couldn't create sink"),
-        ));
+        let (mut _stream, stream_handle) = OutputStream::try_default().unwrap();
         let mut players: HashMap<String, tokio::sync::mpsc::Sender<AudioPacket>> = HashMap::new();
         let runtime: Runtime = Runtime::new().unwrap();
 
@@ -191,14 +186,14 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 connection::udp::send(auth::encrypted_packet(&mut channel)); */
             } else {
                 sequence += 1;
-                println!("{:?}", encoded.len());
 
                 let item = players.entry(config.client_id.clone()).or_insert_with(|| {
                     let (packet_sender, packet_receiver) = tokio::sync::mpsc::channel(10usize);
                     let jitter_buffer = Arc::new(tokio::sync::Mutex::new(VecDeque::with_capacity(
                         player::BUFFER_SIZE,
                     )));
-                    start_audio_player(runtime.handle(), sink.clone(), jitter_buffer.clone());
+                    let sink = Sink::try_new(&stream_handle).expect("Couldn't create sink");
+                    start_audio_player(runtime.handle(), sink, jitter_buffer.clone());
                     start_audio_processor(runtime.handle(), packet_receiver, jitter_buffer.clone());
                     packet_sender
                 });
