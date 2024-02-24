@@ -166,11 +166,11 @@ pub fn construct_packet(
         return;
     }
     let encrypted_voice = encrypted_voice_res.unwrap();
-    let hash = util::hasher::sha256(encrypted_voice.to_vec());
-    let encrypted_verifier = util::crypto::encrypt(&config.verification_key, &hash);
-    let encoded_verifier = general_purpose::STANDARD_NO_PAD.encode(&encrypted_verifier);
-    buffer.extend_from_slice(&encoded_verifier.as_bytes());
-    buffer.push(b':');
+    let mut to_hash = encrypted_voice.clone();
+    to_hash.extend(&config.verification_key);
+    let hash = util::hasher::sha256(to_hash);
+    println!("hash len: {}", hash.len());
+    buffer.extend_from_slice(hash.as_slice());
 
     // Encrypt voice data
     buffer.extend_from_slice(&encrypted_voice);
