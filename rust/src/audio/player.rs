@@ -28,14 +28,41 @@ pub fn start_audio_player(
         let mut current_interval = tokio::time::interval(Duration::from_millis(20));
         let mut current_seq: u32 = 0;
 
+        let mut last_current_max = 0;
+        let mut last_packet = Instant::now();
+
         loop {
             current_interval.tick().await;
 
             // Evaluate jitter buffer
-            let jitter_buffer_vec = jitter_buffer.lock().await;
+            let mut jitter_buffer_vec = jitter_buffer.lock().await;
 
             if jitter_buffer_vec.len() < BUFFER_SIZE / 2 {
                 current_seq = 0;
+                continue;
+            }
+
+            let current_max = jitter_buffer_vec
+                .clone()
+                .into_iter()
+                .max_by(|x, y| x.0.cmp(&y.0))
+                .unwrap()
+                .0;
+
+            if current_max != last_current_max {
+                last_current_max = current_max;
+                last_packet = Instant::now();
+            }
+
+            if Instant::now().duration_since(last_packet).as_millis() > 100 {
+                logger::send_log(
+                    logger::TAG_AUDIO,
+                    &format!(
+                        "Dropping buffer cause delay: {}ms",
+                        Instant::now().duration_since(last_packet).as_millis()
+                    ),
+                );
+                jitter_buffer_vec.clear();
                 continue;
             }
 
@@ -120,7 +147,7 @@ pub fn start_audio_processor(
         let mut last_packet = Instant::now();
 
         loop {
-            let packet = receiver.recv().await.unwrap();
+            let packet = receiver.recv().await.expect("couldn't receive packet");
             let seq = packet.seq;
 
             if packet.protocol != current_protocol {

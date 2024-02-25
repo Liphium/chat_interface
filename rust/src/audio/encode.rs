@@ -147,7 +147,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
             if options.amplitude_logging {
                 let mut sink = AMPLITUDE_SINK.lock().unwrap();
                 if let Some(s) = &mut *sink {
-                    s.add(max);
+                    s.add(max).expect("couldn't log amplitude");
                 }
             }
 
@@ -179,12 +179,7 @@ pub fn encode_thread(config: Arc<connection::Config>, channels: usize) {
                 sequence += 1;
                 connection::construct_packet(&config, &protocol, &encoded, sequence, &mut buffer);
                 connection::udp::send(buffer.clone());
-
-                /*
-                let mut channel = vec![b'v', b':'];
-                channel.append(&mut encoded);
-                connection::udp::send(auth::encrypted_packet(&mut channel)); */
-            } else {
+            } else if config.test {
                 sequence += 1;
 
                 let item = players.entry(config.client_id.clone()).or_insert_with(|| {
