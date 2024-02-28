@@ -41,16 +41,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<InputDevice> dco_decode_list_input_device(dynamic raw);
 
   @protected
-  List<OutputDevice> dco_decode_list_output_device(dynamic raw);
-
-  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
   LogEntry dco_decode_log_entry(dynamic raw);
-
-  @protected
-  OutputDevice dco_decode_output_device(dynamic raw);
 
   @protected
   int dco_decode_u_32(dynamic raw);
@@ -83,17 +77,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<InputDevice> sse_decode_list_input_device(SseDeserializer deserializer);
 
   @protected
-  List<OutputDevice> sse_decode_list_output_device(
-      SseDeserializer deserializer);
-
-  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
   LogEntry sse_decode_log_entry(SseDeserializer deserializer);
-
-  @protected
-  OutputDevice sse_decode_output_device(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_32(SseDeserializer deserializer);
@@ -130,18 +117,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       List<InputDevice> self, SseSerializer serializer);
 
   @protected
-  void sse_encode_list_output_device(
-      List<OutputDevice> self, SseSerializer serializer);
-
-  @protected
   void sse_encode_list_prim_u_8_strict(
       Uint8List self, SseSerializer serializer);
 
   @protected
   void sse_encode_log_entry(LogEntry self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_output_device(OutputDevice self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_32(int self, SseSerializer serializer);

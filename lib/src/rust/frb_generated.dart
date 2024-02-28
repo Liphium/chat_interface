@@ -85,8 +85,6 @@ abstract class RustLibApi extends BaseApi {
 
   Future<List<InputDevice>> listInputDevices({dynamic hint});
 
-  Future<List<OutputDevice>> listOutputDevices({dynamic hint});
-
   Future<void> setAmplitudeLogging(
       {required bool amplitudeLogging, dynamic hint});
 
@@ -102,12 +100,7 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> setTalkingAmplitude({required double amplitude, dynamic hint});
 
-  Future<void> startVoice(
-      {required String clientId,
-      required String verificationKey,
-      required String encryptionKey,
-      required String address,
-      dynamic hint});
+  Future<void> startTalkingEngine({dynamic hint});
 
   Future<void> stop({dynamic hint});
 
@@ -367,30 +360,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<List<OutputDevice>> listOutputDevices({dynamic hint}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 19, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_list_output_device,
-        decodeErrorData: null,
-      ),
-      constMeta: kListOutputDevicesConstMeta,
-      argValues: [],
-      apiImpl: this,
-      hint: hint,
-    ));
-  }
-
-  TaskConstMeta get kListOutputDevicesConstMeta => const TaskConstMeta(
-        debugName: "list_output_devices",
-        argNames: [],
-      );
-
-  @override
   Future<void> setAmplitudeLogging(
       {required bool amplitudeLogging, dynamic hint}) {
     return handler.executeNormal(NormalTask(
@@ -448,7 +417,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(id, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 20, port: port_);
+            funcId: 19, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -498,7 +467,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(id, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 21, port: port_);
+            funcId: 20, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -567,19 +536,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<void> startVoice(
-      {required String clientId,
-      required String verificationKey,
-      required String encryptionKey,
-      required String address,
-      dynamic hint}) {
+  Future<void> startTalkingEngine({dynamic hint}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(clientId, serializer);
-        sse_encode_String(verificationKey, serializer);
-        sse_encode_String(encryptionKey, serializer);
-        sse_encode_String(address, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
             funcId: 3, port: port_);
       },
@@ -587,16 +547,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeSuccessData: sse_decode_unit,
         decodeErrorData: null,
       ),
-      constMeta: kStartVoiceConstMeta,
-      argValues: [clientId, verificationKey, encryptionKey, address],
+      constMeta: kStartTalkingEngineConstMeta,
+      argValues: [],
       apiImpl: this,
       hint: hint,
     ));
   }
 
-  TaskConstMeta get kStartVoiceConstMeta => const TaskConstMeta(
-        debugName: "start_voice",
-        argNames: ["clientId", "verificationKey", "encryptionKey", "address"],
+  TaskConstMeta get kStartTalkingEngineConstMeta => const TaskConstMeta(
+        debugName: "start_talking_engine",
+        argNames: [],
       );
 
   @override
@@ -654,7 +614,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(name, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -678,7 +638,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 23, port: port_);
+            funcId: 22, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -753,12 +713,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<OutputDevice> dco_decode_list_output_device(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return (raw as List<dynamic>).map(dco_decode_output_device).toList();
-  }
-
-  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
@@ -774,17 +728,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       timeSecs: dco_decode_i_64(arr[0]),
       tag: dco_decode_String(arr[1]),
       msg: dco_decode_String(arr[2]),
-    );
-  }
-
-  @protected
-  OutputDevice dco_decode_output_device(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 1)
-      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
-    return OutputDevice(
-      id: dco_decode_String(arr[0]),
     );
   }
 
@@ -866,19 +809,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<OutputDevice> sse_decode_list_output_device(
-      SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    var len_ = sse_decode_i_32(deserializer);
-    var ans_ = <OutputDevice>[];
-    for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_output_device(deserializer));
-    }
-    return ans_;
-  }
-
-  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
@@ -892,13 +822,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_tag = sse_decode_String(deserializer);
     var var_msg = sse_decode_String(deserializer);
     return LogEntry(timeSecs: var_timeSecs, tag: var_tag, msg: var_msg);
-  }
-
-  @protected
-  OutputDevice sse_decode_output_device(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_id = sse_decode_String(deserializer);
-    return OutputDevice(id: var_id);
   }
 
   @protected
@@ -975,16 +898,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_output_device(
-      List<OutputDevice> self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    for (final item in self) {
-      sse_encode_output_device(item, serializer);
-    }
-  }
-
-  @protected
   void sse_encode_list_prim_u_8_strict(
       Uint8List self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -998,12 +911,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_64(self.timeSecs, serializer);
     sse_encode_String(self.tag, serializer);
     sse_encode_String(self.msg, serializer);
-  }
-
-  @protected
-  void sse_encode_output_device(OutputDevice self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.id, serializer);
   }
 
   @protected

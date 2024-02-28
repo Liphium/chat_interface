@@ -12,18 +12,8 @@ Stream<LogEntry> createLogStream({dynamic hint}) =>
 Stream<Action> createActionStream({dynamic hint}) =>
     RustLib.instance.api.createActionStream(hint: hint);
 
-Future<void> startVoice(
-        {required String clientId,
-        required String verificationKey,
-        required String encryptionKey,
-        required String address,
-        dynamic hint}) =>
-    RustLib.instance.api.startVoice(
-        clientId: clientId,
-        verificationKey: verificationKey,
-        encryptionKey: encryptionKey,
-        address: address,
-        hint: hint);
+Future<void> startTalkingEngine({dynamic hint}) =>
+    RustLib.instance.api.startTalkingEngine(hint: hint);
 
 Future<void> testVoice({required String device, dynamic hint}) =>
     RustLib.instance.api.testVoice(device: device, hint: hint);
@@ -70,9 +60,6 @@ Future<List<InputDevice>> listInputDevices({dynamic hint}) =>
 
 Future<String> getDefaultId({dynamic hint}) =>
     RustLib.instance.api.getDefaultId(hint: hint);
-
-Future<List<OutputDevice>> listOutputDevices({dynamic hint}) =>
-    RustLib.instance.api.listOutputDevices(hint: hint);
 
 Future<void> setInputDevice({required String id, dynamic hint}) =>
     RustLib.instance.api.setInputDevice(id: id, hint: hint);
@@ -154,22 +141,4 @@ class LogEntry {
           timeSecs == other.timeSecs &&
           tag == other.tag &&
           msg == other.msg;
-}
-
-class OutputDevice {
-  final String id;
-
-  const OutputDevice({
-    required this.id,
-  });
-
-  @override
-  int get hashCode => id.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is OutputDevice &&
-          runtimeType == other.runtimeType &&
-          id == other.id;
 }

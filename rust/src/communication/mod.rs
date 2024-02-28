@@ -1,12 +1,9 @@
 use std::{
     collections::HashMap,
-    io::{self, BufReader},
-    sync::{Arc, Mutex},
-    thread,
-    time::Duration,
+    io::{self},
 };
 
-use rodio::{OutputStream, Sink};
+
 use serde::{Deserialize, Serialize};
 
 use crate::{audio, logger};

@@ -1,12 +1,9 @@
-use std::{process::Command, sync::Arc};
+use std::process::Command;
 
-use alkali::symmetric::cipher;
-use cpal::traits::HostTrait;
-use rodio::DeviceTrait;
+use cpal::traits::{DeviceTrait, HostTrait};
 
 use crate::{
     audio::{self, microphone},
-    connection,
     frb_generated::StreamSink,
     logger, util,
 };
@@ -32,43 +29,17 @@ pub fn create_action_stream(s: StreamSink<Action>) {
     util::set_action_sink(s);
 }
 
-pub fn start_voice(
-    client_id: String,
-    verification_key: String,
-    encryption_key: String,
-    address: String,
-) {
-    connection::allow_start();
-    connection::udp::init();
+pub fn start_talking_engine() {
     audio::set_amplitude_logging(false);
-    connection::udp::connect_recursive(
-        client_id,
-        verification_key,
-        encryption_key,
-        address.as_str(),
-        0,
-        false,
-    )
 }
 
 pub fn test_voice(device: String) {
-    connection::allow_start();
-    let config = Arc::new(connection::Config {
-        test: true,
-        client_id: "test".to_string(),
-        verification_key: vec![0; 32],
-        encryption_key: cipher::Key::generate().unwrap(),
-        connection: false,
-    });
-
     audio::set_amplitude_logging(true);
     audio::set_input_device(device);
-    microphone::record(config.clone());
+    microphone::record();
 }
 
-pub fn stop() {
-    connection::stop();
-}
+pub fn stop() {}
 
 //* Audio crab */
 pub fn set_muted(muted: bool) {
@@ -108,11 +79,11 @@ pub fn set_silent_mute(silent_mute: bool) {
 }
 
 pub fn create_amplitude_stream(s: StreamSink<f32>) {
-    audio::encode::set_amplitude_sink(s);
+    audio::microphone::set_amplitude_sink(s);
 }
 
 pub fn delete_amplitude_stream() {
-    audio::encode::delete_sink();
+    audio::microphone::delete_sink();
     audio::set_amplitude_logging(false);
 }
 
@@ -256,25 +227,6 @@ pub fn get_default_id() -> String {
 
 pub struct OutputDevice {
     pub id: String,
-}
-
-// Get all output devices
-pub fn list_output_devices() -> Vec<OutputDevice> {
-    let mut output_devices = Vec::new();
-    let host = cpal::default_host();
-    let input_devices_iter = host.output_devices().unwrap();
-
-    // Find microphones
-    let _best_sample_rate: u32 = 0;
-    for device in input_devices_iter {
-        let id = device.name().unwrap();
-
-        // Add device
-        let input_device = OutputDevice { id };
-        output_devices.push(input_device);
-    }
-
-    output_devices
 }
 
 // Set devices

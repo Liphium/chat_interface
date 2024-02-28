@@ -5,9 +5,6 @@ use rand::distributions::{Alphanumeric, DistString};
 
 use crate::{api, frb_generated::StreamSink, logger};
 
-pub mod crypto;
-pub mod hasher;
-
 static ACTION_SINK: Lazy<Mutex<Option<StreamSink<api::interaction::Action>>>> =
     Lazy::new(|| Mutex::new(None));
 
