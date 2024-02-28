@@ -19,25 +19,25 @@ class _ChatPageState extends State<ChatPage> {
     ThemeData theme = Theme.of(context);
 
     return Scaffold(
-        backgroundColor: theme.colorScheme.background,
-        body: Stack(
-          children: [
-            Row(
-              children: [
-                const SizedBox(
-                  width: 350,
-                  child: Sidebar(),
-                ),
-                Expanded(
-                  child: Obx(() => MessageFeed(
-                      id: controller.selectedConversation.value.id)),
-                ),
-              ],
-            ),
+      backgroundColor: theme.colorScheme.background,
+      body: Stack(
+        children: [
+          Row(
+            children: [
+              const SizedBox(
+                width: 350,
+                child: Sidebar(),
+              ),
+              Expanded(
+                child: Obx(() => MessageFeed(id: controller.selectedConversation.value.id)),
+              ),
+            ],
+          ),
 
-            //* Notifications
-            const NotificationRenderer(),
-          ],
-        ));
+          //* Notifications
+          const NotificationRenderer(),
+        ],
+      ),
+    );
   }
 }

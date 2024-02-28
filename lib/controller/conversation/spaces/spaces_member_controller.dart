@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
+import 'package:livekit_client/livekit_client.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class SpaceMemberController extends GetxController {
@@ -38,8 +40,8 @@ class SpaceMemberController extends GetxController {
       }
       membersFound.add(clientId);
       if (this.members[clientId] == null) {
-        this.members[clientId] = SpaceMember(
-            Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)), clientId, member["muted"], member["deafened"]);
+        this.members[clientId] = SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)),
+            clientId, member["muted"], member["deafened"]);
       }
     }
 
@@ -69,6 +71,23 @@ class SpaceMemberController extends GetxController {
     });
   }
 
+  void onLivekitConnected() {
+    SpacesController.livekitRoom!.createListener()
+      ..on<ParticipantConnectedEvent>((event) {
+        if (event.participant.identity == StatusController.ownAccountId) {
+          return;
+        }
+        members[event.participant.identity]?.joinVoice(event.participant);
+      })
+      ..on<ParticipantDisconnectedEvent>((event) {
+        if (event.participant.identity == StatusController.ownAccountId) {
+          return;
+        }
+        members[event.participant.identity]?.leaveVoice();
+      });
+    members[ownId]?.joinVoice(SpacesController.livekitRoom!.localParticipant!);
+  }
+
   void onDisconnect() {
     membersLoading.value = true;
     members.clear();
@@ -79,6 +98,7 @@ class SpaceMemberController extends GetxController {
 class SpaceMember {
   final String id;
   final Friend friend;
+  final participant = Rx<Participant?>(null);
 
   final isSpeaking = false.obs;
   final isMuted = false.obs;
@@ -87,5 +107,28 @@ class SpaceMember {
   SpaceMember(this.friend, this.id, bool muted, bool deafened) {
     isMuted.value = muted;
     isDeafened.value = deafened;
+  }
+
+  void joinVoice(Participant participant) {
+    this.participant.value = participant;
+
+    participant.createListener()
+      ..on<TrackPublishedEvent>((event) {
+        sendLog("start talking");
+        if (event.publication.kind == TrackType.AUDIO) {
+          isSpeaking.value = true;
+        }
+      })
+      ..on<TrackUnpublishedEvent>((event) {
+        sendLog("stop talking");
+        if (event.publication.kind == TrackType.AUDIO) {
+          isSpeaking.value = false;
+        }
+      });
+  }
+
+  void leaveVoice() {
+    participant.value?.dispose();
+    participant.value = null;
   }
 }

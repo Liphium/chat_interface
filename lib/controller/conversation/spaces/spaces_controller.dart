@@ -25,6 +25,7 @@ import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:livekit_client/livekit_client.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class SpacesController extends GetxController {
@@ -47,6 +48,7 @@ class SpacesController extends GetxController {
 
   //* Space information
   static String? currentDomain;
+  static Room? livekitRoom;
   final id = "".obs;
   static SecureKey? key;
 
@@ -227,14 +229,20 @@ class SpacesController extends GetxController {
           return;
         }
 
-        // Connect to UDP
-        final domain = (appToken["domain"] as String).split(":")[0];
-        await api.startVoice(
-          clientId: event.data["id"],
-          verificationKey: event.data["key"],
-          encryptionKey: packageSymmetricKey(key!),
-          address: '$domain:${event.data["port"]}',
-        );
+        // Connect to UDP (old voice chat)
+        // final domain = (appToken["domain"] as String).split(":")[0];
+        // await api.startVoice(
+        //   clientId: event.data["id"],
+        //   verificationKey: event.data["key"],
+        //   encryptionKey: packageSymmetricKey(key!),
+        //   address: '$domain:${event.data["port"]}',
+        // );
+
+        // Connect to new voice chat
+        livekitRoom = Room();
+        await livekitRoom!.connect(event.data["url"], event.data["token"]);
+        Get.find<SpaceMemberController>().onLivekitConnected();
+        livekitRoom!.localParticipant!.setMicrophoneEnabled(true);
 
         connected.value = true;
         inSpace.value = true;
@@ -250,6 +258,7 @@ class SpacesController extends GetxController {
     await api.stop();
     id.value = "";
     spaceConnector.disconnect();
+    livekitRoom?.disconnect();
 
     // Tell other controllers about it
     Get.find<StatusController>().stopSharing();
