@@ -54,19 +54,13 @@ class SpaceMemberController extends GetxController {
     this.key = key;
 
     sub = api.createActionStream().listen((event) {
+      sendLog(event.action);
       switch (event.action) {
         // Talking stuff
         case startedTalkingAction:
-          final target = event.data == "" ? ownId : event.data;
-          sendLog("talking EVENT $target");
-          if (members[target] != null && (members[target]!.isMuted.value || members[target]!.isDeafened.value)) {
-            return;
-          }
-          members[target]?.isSpeaking.value = true;
+          members[ownId]?.isSpeaking.value = true;
         case stoppedTalkingAction:
-          sendLog("stopped talking ${event.data}");
-          final target = event.data == "" ? ownId : event.data;
-          members[target]?.isSpeaking.value = false;
+          members[ownId]?.isSpeaking.value = false;
       }
     });
   }

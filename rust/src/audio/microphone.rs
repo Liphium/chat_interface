@@ -8,6 +8,7 @@ use once_cell::sync::Lazy;
 
 use crate::{frb_generated::StreamSink, logger, util};
 
+static STOP_CHAT: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 static AMPLITUDE_SINK: Lazy<Mutex<Option<StreamSink<f32>>>> = Lazy::new(|| Mutex::new(None));
 
 pub fn set_amplitude_sink(s: StreamSink<f32>) {
@@ -20,6 +21,18 @@ pub fn delete_sink() {
     let mut sink = AMPLITUDE_SINK.lock().unwrap();
     *sink = None;
     drop(sink);
+}
+
+pub fn allow_start() {
+    *STOP_CHAT.lock().unwrap() = false;
+}
+
+pub fn should_stop() -> bool {
+    *STOP_CHAT.lock().unwrap()
+}
+
+pub fn stop() {
+    *STOP_CHAT.lock().unwrap() = true;
 }
 
 pub fn record() {
@@ -137,6 +150,10 @@ pub fn record() {
                     .as_str(),
                 );
                 record();
+                break;
+            }
+
+            if should_stop() {
                 break;
             }
 

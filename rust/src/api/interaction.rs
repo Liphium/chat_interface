@@ -31,15 +31,20 @@ pub fn create_action_stream(s: StreamSink<Action>) {
 
 pub fn start_talking_engine() {
     audio::set_amplitude_logging(false);
+    microphone::allow_start();
+    microphone::record();
 }
 
 pub fn test_voice(device: String) {
     audio::set_amplitude_logging(true);
     audio::set_input_device(device);
+    microphone::allow_start();
     microphone::record();
 }
 
-pub fn stop() {}
+pub fn stop() {
+    microphone::stop();
+}
 
 //* Audio crab */
 pub fn set_muted(muted: bool) {

@@ -243,6 +243,7 @@ class SpacesController extends GetxController {
         await livekitRoom!.connect(event.data["url"], event.data["token"]);
         Get.find<SpaceMemberController>().onLivekitConnected();
         livekitRoom!.localParticipant!.setMicrophoneEnabled(true);
+        await api.startTalkingEngine();
 
         connected.value = true;
         inSpace.value = true;
