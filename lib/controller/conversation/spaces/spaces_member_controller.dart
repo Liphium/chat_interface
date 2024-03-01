@@ -54,13 +54,28 @@ class SpaceMemberController extends GetxController {
     this.key = key;
 
     sub = api.createActionStream().listen((event) {
-      sendLog(event.action);
+      if (members[ownId] == null) {
+        return;
+      }
       switch (event.action) {
         // Talking stuff
         case startedTalkingAction:
-          members[ownId]?.isSpeaking.value = true;
+          members[ownId]!.isSpeaking.value = true;
+          if (members[ownId]!.participant.value != null) {
+            final participant = members[ownId]!.participant.value!;
+            if (participant.audioTrackPublications.isNotEmpty) {
+              participant.audioTrackPublications.first.track?.enable();
+            }
+          }
+
         case stoppedTalkingAction:
-          members[ownId]?.isSpeaking.value = false;
+          members[ownId]!.isSpeaking.value = false;
+          if (members[ownId]!.participant.value != null) {
+            final participant = members[ownId]!.participant.value!;
+            if (participant.audioTrackPublications.isNotEmpty) {
+              participant.audioTrackPublications.first.track?.disable();
+            }
+          }
       }
     });
   }
