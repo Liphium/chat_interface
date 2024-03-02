@@ -48,6 +48,13 @@ class TabletopController extends GetxController {
     }
     loading.value = true;
 
+    // Reset positions
+    canvasOffset = const Offset(0, 0);
+    canvasZoom = 0.5;
+    canvasRotation.value = 0;
+    mousePos = const Offset(0, 0);
+    mousePosUnmodified = const Offset(0, 0);
+
     spaceConnector.sendAction(
       Message("table_join", <String, dynamic>{}),
       handler: (event) {

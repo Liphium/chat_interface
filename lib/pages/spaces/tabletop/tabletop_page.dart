@@ -120,12 +120,16 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   return;
                 }
 
-                Get.dialog(ObjectCreateMenu(location: TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController)));
+                Get.dialog(
+                    ObjectCreateMenu(location: TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController)));
               } else if (event.buttons == 1) {
                 moved = false;
               }
             },
             onPointerMove: (event) {
+              final added = event.localPosition + event.delta;
+              if (added.dx <= 0 || added.dy <= 0 || event.localPosition.dx <= 0 || event.localPosition.dy <= 0) return;
+              sendLog(added);
               if (event.buttons == 4) {
                 final old = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
                 final newPos = TabletopView.localToWorldPos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
@@ -209,7 +213,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                 final zoomFactor = (tableController.canvasZoom + scrollDelta) / tableController.canvasZoom;
                 final focalPoint = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                final newFocalPoint = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom + scrollDelta, tableController.canvasOffset, tableController);
+                final newFocalPoint =
+                    TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom + scrollDelta, tableController.canvasOffset, tableController);
 
                 tableController.canvasOffset -= focalPoint - newFocalPoint;
                 tableController.canvasZoom *= zoomFactor;

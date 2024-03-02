@@ -1,10 +1,12 @@
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:get/get.dart';
+import 'package:livekit_client/livekit_client.dart';
 
 class AudioController extends GetxController {
   //* Output
@@ -13,12 +15,30 @@ class AudioController extends GetxController {
   bool _connected = false;
 
   void setDeafened(bool newOutput) async {
-    await api.setDeafen(deafened: newOutput);
     deafened.value = newOutput;
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isDeafened.value = newOutput;
       controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      if (controller.members[SpaceMemberController.ownId]!.participant.value != null) {
+        if (newOutput) {
+          // Stop all audio and unsubscribe from tracks
+          for (var remote in SpacesController.livekitRoom!.remoteParticipants.values) {
+            for (var track in remote.audioTrackPublications) {
+              if (track.kind != TrackType.AUDIO) continue;
+              track.unsubscribe();
+            }
+          }
+        } else {
+          // Start all audio and subscribe to tracks again
+          for (var remote in SpacesController.livekitRoom!.remoteParticipants.values) {
+            for (var track in remote.audioTrackPublications) {
+              if (track.kind != TrackType.AUDIO) continue;
+              track.subscribe();
+            }
+          }
+        }
+      }
       _refreshState();
     }
   }
@@ -28,12 +48,15 @@ class AudioController extends GetxController {
   final muted = false.obs;
 
   void setMuted(bool newMuted) async {
-    await api.setMuted(muted: newMuted);
     muted.value = newMuted;
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isMuted.value = newMuted;
       controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      final participant = controller.members[SpaceMemberController.ownId]!.participant.value as LocalParticipant;
+      if (newMuted) {
+        participant.audioTrackPublications.firstOrNull?.mute();
+      }
       _refreshState();
     }
   }

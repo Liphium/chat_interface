@@ -53,29 +53,34 @@ class SpaceMemberController extends GetxController {
   void onConnect(SecureKey key) async {
     this.key = key;
 
-    sub = api.createActionStream().listen((event) {
+    sub = api.createActionStream().listen((event) async {
       if (members[ownId] == null) {
         return;
       }
       switch (event.action) {
         // Talking stuff
         case startedTalkingAction:
-          members[ownId]!.isSpeaking.value = true;
+          if (members[ownId]!.isMuted.value || members[ownId]!.isDeafened.value) {
+            return;
+          }
           if (members[ownId]!.participant.value != null) {
-            final participant = members[ownId]!.participant.value!;
-            if (participant.audioTrackPublications.isNotEmpty) {
-              participant.audioTrackPublications.first.track?.enable();
+            final participant = members[ownId]!.participant.value! as LocalParticipant;
+            if (participant.audioTrackPublications.isEmpty) {
+              await participant.setMicrophoneEnabled(true);
+            } else if (participant.audioTrackPublications.isNotEmpty) {
+              await participant.audioTrackPublications.first.unmute();
             }
           }
+          members[ownId]!.isSpeaking.value = true;
 
         case stoppedTalkingAction:
-          members[ownId]!.isSpeaking.value = false;
           if (members[ownId]!.participant.value != null) {
-            final participant = members[ownId]!.participant.value!;
+            final participant = members[ownId]!.participant.value! as LocalParticipant;
             if (participant.audioTrackPublications.isNotEmpty) {
-              participant.audioTrackPublications.first.track?.disable();
+              await participant.audioTrackPublications.first.mute();
             }
           }
+          members[ownId]!.isSpeaking.value = false;
       }
     });
   }
@@ -94,13 +99,24 @@ class SpaceMemberController extends GetxController {
         }
         members[event.participant.identity]?.leaveVoice();
       });
-    members[ownId]?.joinVoice(SpacesController.livekitRoom!.localParticipant!);
+    members[ownId]!.joinVoice(SpacesController.livekitRoom!.localParticipant!);
+
+    for (var remote in SpacesController.livekitRoom!.remoteParticipants.values) {
+      for (var track in remote.audioTrackPublications) {
+        if (track.kind != TrackType.AUDIO) continue;
+        track.subscribe();
+      }
+    }
   }
 
   void onDisconnect() {
     membersLoading.value = true;
     members.clear();
     sub!.cancel();
+  }
+
+  bool isLocalDeafened() {
+    return members[ownId]!.isDeafened.value;
   }
 }
 
@@ -121,18 +137,27 @@ class SpaceMember {
   void joinVoice(Participant participant) {
     this.participant.value = participant;
 
+    if (participant is RemoteParticipant) {
+      if (Get.find<SpaceMemberController>().isLocalDeafened()) {
+        return;
+      }
+      for (var track in participant.audioTrackPublications) {
+        if (track.kind == TrackType.AUDIO) {
+          track.subscribe();
+        }
+      }
+    }
+
     participant.createListener()
       ..on<TrackPublishedEvent>((event) {
-        sendLog("start talking");
-        if (event.publication.kind == TrackType.AUDIO) {
-          isSpeaking.value = true;
+        sendLog("track published");
+        if (event.publication.kind == TrackType.AUDIO && !Get.find<SpaceMemberController>().isLocalDeafened()) {
+          event.publication.subscribe();
         }
       })
       ..on<TrackUnpublishedEvent>((event) {
-        sendLog("stop talking");
-        if (event.publication.kind == TrackType.AUDIO) {
-          isSpeaking.value = false;
-        }
+        sendLog("track unpublished");
+        // TODO: Handle something here
       });
   }
 

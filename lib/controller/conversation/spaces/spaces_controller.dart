@@ -240,9 +240,14 @@ class SpacesController extends GetxController {
 
         // Connect to new voice chat
         livekitRoom = Room();
-        await livekitRoom!.connect(event.data["url"], event.data["token"]);
+        await livekitRoom!.connect(
+          event.data["url"],
+          event.data["token"],
+          connectOptions: const ConnectOptions(
+            autoSubscribe: false,
+          ),
+        );
         Get.find<SpaceMemberController>().onLivekitConnected();
-        livekitRoom!.localParticipant!.setMicrophoneEnabled(true);
         await api.startTalkingEngine();
 
         connected.value = true;
