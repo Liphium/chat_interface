@@ -17,7 +17,7 @@ class DeckObject extends TableObject {
 
   /// All card ids in the order they are in the deck (we separate this from the cards map so we don't have
   /// to send all the card data to the server twice if a card is in there twice)
-  final order = <String>[].obs;
+  final order = <String>[];
 
   DeckObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.deck);
 
@@ -59,6 +59,8 @@ class DeckObject extends TableObject {
 
   @override
   void handleData(String data) async {
+    order.clear();
+    cards.clear();
     final json = jsonDecode(data);
     final cardMap = json["cards"] as Map<String, dynamic>;
     for (var card in cardMap.values) {
@@ -91,18 +93,30 @@ class DeckObject extends TableObject {
     if (order.isEmpty) {
       return;
     }
-    final cardId = order.removeAt(0);
-    final container = cards[cardId]!;
+    modify(() async {
+      final cardId = order.removeAt(0);
+      final container = cards[cardId]!;
 
-    // Remove the card details if it isn't in the deck anymore
-    if (!order.contains(cardId)) {
-      cards.remove(cardId);
-    }
+      // Remove the card details if it isn't in the deck anymore
+      if (!order.contains(cardId)) {
+        cards.remove(cardId);
+      }
 
-    // Prepare the card and add it to the drop mode
-    final card = await CardObject.downloadCard(container, controller.mousePos);
-    if (card == null) return;
-    controller.dropObject(card);
+      updateData();
+
+      // Prepare the card and add it to the drop mode
+      final card = await CardObject.downloadCard(container, controller.mousePos);
+      if (card == null) return;
+      controller.dropObject(card);
+    });
+  }
+
+  /// Shuffle the deck
+  void shuffle() {
+    modify(() {
+      order.shuffle();
+      updateData();
+    });
   }
 
   @override
@@ -115,20 +129,24 @@ class DeckObject extends TableObject {
           if (order.isEmpty) {
             return;
           }
-          final cardId = order.removeAt(0);
-          final container = cards[cardId]!;
-          final obj = await CardObject.downloadCard(container, controller.mousePos);
-          if (obj == null) return;
-          obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
-          obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
-          controller.inventory.add(obj);
+          modify(() async {
+            final cardId = order.removeAt(0);
+            final container = cards[cardId]!;
+            final obj = await CardObject.downloadCard(container, controller.mousePos);
+            updateData();
+            if (obj == null) return;
+            obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
+            obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
+            controller.inventory.add(obj);
+          });
         },
       ),
       ContextMenuAction(
         icon: Icons.shuffle,
         label: 'Shuffle',
         onTap: (controller) {
-          sendLog("Let's shuffle this thing");
+          shuffle();
+          Get.back();
         },
       ),
     ];

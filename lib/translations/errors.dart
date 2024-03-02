@@ -6,66 +6,47 @@ class ErrorTranslations extends Translations {
         //* English US
         'en_US': {
           'error': 'Error',
-          'server.error':
-              'Something went wrong on the server, please try again later.',
-          'friends.error':
-              'There was an error while loading your friends. Please try again later or contact support.',
-          'node.error':
-              'The chat server didn\'t respond, please try again later.',
-          'mail.error':
-              'There was an error with our mail servers. Please try again later or contact support.',
-          'app.error':
-              'There was an error with the app. Please report this to the developers.',
-          'not.setup':
-              'The chat server is not set up yet, maybe try updating to the newest version?',
+          'server.error': 'Something went wrong on the server, please try again later.',
+          'friends.error': 'There was an error while loading your friends. Please try again later or contact support.',
+          'node.error': 'The chat server didn\'t respond, please try again later.',
+          'mail.error': 'There was an error with our mail servers. Please try again later or contact support.',
+          'app.error': 'There was an error with the app. Please report this to the developers.',
+          'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
           'new.version': 'A new version is available, please update the app.',
-          'key.error':
-              'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
+          'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
           'already.deleted': 'This object was already deleted.',
           'no.permission': 'You don\'t have permission to do that.',
-          'spaces.connection_error':
-              'Something went wrong with the spaces connection. Please try again later.',
+          'spaces.connection_error': 'Something went wrong with the spaces connection. Please try again later.',
           'invalid.method': 'This is incorrect. Please try again.',
-          'sessions.limit':
-              'You are already registered with 5 devices. Please log out of one of them to log in here.',
+          'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
           'password.incorrect': 'Your password is incorrect. Please try again.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',
-          'request.self.text':
-              "I know you're lonely, but you can't be your own friend. Sorry.",
+          'request.self.text': "I know you're lonely, but you can't be your own friend. Sorry.",
           'requests.already.exists': 'Already sent',
-          'requests.already.exists.text':
-              "I know you want to be this person's friend, but you already sent them a request. So please chill a little bit.",
+          'requests.already.exists.text': "I know you want to be this person's friend, but you already sent them a request. So please chill a little bit.",
           'request.not.found': 'User not found',
-          'request.not.found.text':
-              "You sure this is your friend? Maybe you just met them in your dreams?",
+          'request.not.found.text': "You sure this is your friend? Maybe you just met them in your dreams?",
 
           // Chat
-          'error.not_delete_conversation':
-              'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
+          'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
           'file.not_uploaded': 'File not found. Maybe it was deleted?',
           'file.too_large': 'The maximum file size is 10MB.',
           'chat.add_file': 'Attach a file',
-          'message.delete_error':
-              'Couldn\'t delete message. Please try again later.',
+          'message.delete_error': 'Couldn\'t delete message. Please try again later.',
 
           // Settings
-          'profile_picture.not_uploaded':
-              'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
-          'profile_picture.not_set':
-              'Your profile picture couldn\'t be set. Please try again later or contact support.',
-          'tag.invalid':
-              'Your tag is doesn\'t match the requirements. Please make it longer than 3 characters and don\'t use special characters.',
-          'username.invalid':
-              'Your username doesn\'t match the requirements. Please make it longer than 3 characters.',
-          'username.taken':
-              'This combination of username and tag is taken, please choose something else.',
+          'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
+          'profile_picture.not_set': 'Your profile picture couldn\'t be set. Please try again later or contact support.',
+          'tag.invalid': 'Your tag is doesn\'t match the requirements. Please make it longer than 3 characters and don\'t use special characters.',
+          'username.invalid': 'Your username doesn\'t match the requirements. Please make it longer than 3 characters.',
+          'username.taken': 'This combination of username and tag is taken, please choose something else.',
           'password.mismatch': 'The passwords don\'t match.',
 
           // Game
-          'no.start':
-              'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
+          'tabletop.invalid_action': 'You can\'t do that right now. Please try again later.',
+          'no.start': 'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
         },
 
         //* German

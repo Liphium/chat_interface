@@ -23,8 +23,7 @@ class ThemePreset extends SelectableItem {
   final int themeMode;
   final int backgroundMode;
 
-  const ThemePreset(super.label, super.icon, this.primaryHue, this.secondaryHue,
-      this.baseSaturation, this.themeMode, this.backgroundMode);
+  const ThemePreset(super.label, super.icon, this.primaryHue, this.secondaryHue, this.baseSaturation, this.themeMode, this.backgroundMode);
 }
 
 class ThemeSettings {
@@ -36,8 +35,7 @@ class ThemeSettings {
   static const String primaryHue = 'theme.primary';
   static const String secondaryHue = 'theme.secondary';
   static const String baseSaturation = 'theme.baseSaturation';
-  static const String backgroundMode =
-      'theme.backgroundMode'; // Colored or dark
+  static const String backgroundMode = 'theme.backgroundMode'; // Colored or dark
 
   static const double baseLuminosityLight = 0.87;
   static const double baseLuminosityDark = 0.13;
@@ -48,16 +46,11 @@ class ThemeSettings {
     1 // Light
   ];
 
-  static final backgroundModes = [
-    SelectableItem("custom.none".tr, Icons.close),
-    SelectableItem("custom.colored".tr, Icons.color_lens)
-  ];
+  static final backgroundModes = [SelectableItem("custom.none".tr, Icons.close), SelectableItem("custom.colored".tr, Icons.color_lens)];
 
   static final themePresets = [
-    ThemePreset(
-        "theme.default_dark".tr, Icons.dark_mode, 0.54, 0.62, 0.6, 0, 0),
-    ThemePreset(
-        "theme.default_light".tr, Icons.light_mode, 0.48, 0.57, 0.6, 1, 0),
+    ThemePreset("theme.default_dark".tr, Icons.dark_mode, 0.54, 0.62, 0.6, 0, 0),
+    ThemePreset("theme.default_light".tr, Icons.light_mode, 0.48, 0.57, 0.6, 1, 0),
     ThemePreset("theme.winter".tr, Icons.ac_unit, 0.48, 0.57, 0.82, 0, 0),
     ThemePreset("theme.custom".tr, Icons.brush, 0, 0, 0, 1, 0),
   ];
@@ -110,41 +103,24 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
             children: [
               Text("theme.presets".tr, style: Get.theme.textTheme.labelLarge),
               verticalSpacing(defaultSpacing),
-              ListSelectionSetting(
-                  settingName: ThemeSettings.themePreset,
-                  items: ThemeSettings.themePresets),
+              ListSelectionSetting(settingName: ThemeSettings.themePreset, items: ThemeSettings.themePresets),
               verticalSpacing(sectionSpacing),
               Obx(() => Visibility(
-                  visible: controller.settings[ThemeSettings.themePreset]!
-                          .getValue() ==
-                      ThemeSettings.customThemeIndex,
+                  visible: controller.settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("theme.custom.title".tr,
-                          style: Get.theme.textTheme.labelLarge),
+                      Text("theme.custom.title".tr, style: Get.theme.textTheme.labelLarge),
                       verticalSpacing(defaultSpacing),
 
                       //* Sliders
-                      const DoubleSelectionSetting(
-                          settingName: ThemeSettings.primaryHue,
-                          description: "custom.primary_hue",
-                          min: 0.0,
-                          max: 1.0),
+                      const DoubleSelectionSetting(settingName: ThemeSettings.primaryHue, description: "custom.primary_hue", min: 0.0, max: 1.0),
                       verticalSpacing(defaultSpacing),
 
-                      const DoubleSelectionSetting(
-                          settingName: ThemeSettings.secondaryHue,
-                          description: "custom.secondary_hue",
-                          min: 0.0,
-                          max: 1.0),
+                      const DoubleSelectionSetting(settingName: ThemeSettings.secondaryHue, description: "custom.secondary_hue", min: 0.0, max: 1.0),
                       verticalSpacing(defaultSpacing),
 
-                      const DoubleSelectionSetting(
-                          settingName: ThemeSettings.baseSaturation,
-                          description: "custom.base_saturation",
-                          min: 0.0,
-                          max: 1.0),
+                      const DoubleSelectionSetting(settingName: ThemeSettings.baseSaturation, description: "custom.base_saturation", min: 0.0, max: 1.0),
                       verticalSpacing(defaultSpacing),
 
                       //* Selections
@@ -154,19 +130,14 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                       verticalSpacing(elementSpacing),
                       ListSelectionSetting(
                           settingName: ThemeSettings.themeMode,
-                          items: [
-                            SelectableItem("custom.dark".tr, Icons.dark_mode),
-                            SelectableItem("custom.light".tr, Icons.light_mode)
-                          ]),
+                          items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
                       verticalSpacing(defaultSpacing),
 
                       Text(
                         "custom.background_mode".tr,
                       ),
                       verticalSpacing(elementSpacing),
-                      ListSelectionSetting(
-                          settingName: ThemeSettings.backgroundMode,
-                          items: ThemeSettings.backgroundModes),
+                      ListSelectionSetting(settingName: ThemeSettings.backgroundMode, items: ThemeSettings.backgroundModes),
 
                       verticalSpacing(sectionSpacing)
                     ],
@@ -176,8 +147,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                     final ThemeData theme = getThemeData();
                     Get.find<ThemeManager>().changeTheme(theme);
                   },
-                  child: Text("theme.apply".tr,
-                      style: Get.theme.textTheme.labelLarge))
+                  child: Text("theme.apply".tr, style: Get.theme.textTheme.labelLarge))
             ],
           ),
         ),
@@ -197,10 +167,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(
-                          top: sectionSpacing,
-                          right: sectionSpacing,
-                          left: sectionSpacing),
+                      padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(defaultSpacing),
@@ -210,12 +177,9 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                         height: 60,
                         child: Row(
                           children: [
-                            Icon(Icons.color_lens,
-                                color: colors.getPrimary(), size: 40),
+                            Icon(Icons.color_lens, color: colors.getPrimary(), size: 40),
                             horizontalSpacing(defaultSpacing),
-                            Expanded(
-                                child: Text("theme.primary".tr,
-                                    style: Get.theme.textTheme.labelLarge)),
+                            Expanded(child: Text("theme.primary".tr, style: Get.theme.textTheme.labelLarge)),
                           ],
                         ),
                       ),
@@ -231,12 +195,9 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                         height: 60,
                         child: Row(
                           children: [
-                            Icon(Icons.color_lens,
-                                color: colors.getSecondary(), size: 40),
+                            Icon(Icons.color_lens, color: colors.getSecondary(), size: 40),
                             horizontalSpacing(defaultSpacing),
-                            Expanded(
-                                child: Text("theme.secondary".tr,
-                                    style: Get.theme.textTheme.labelLarge)),
+                            Expanded(child: Text("theme.secondary".tr, style: Get.theme.textTheme.labelLarge)),
                           ],
                         ),
                       ),
@@ -251,13 +212,9 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                       height: 60,
                       child: Row(
                         children: [
-                          Icon(Icons.person,
-                              color: colors.getPrimary(), size: 40),
+                          Icon(Icons.person, color: colors.getPrimary(), size: 40),
                           horizontalSpacing(defaultSpacing),
-                          Expanded(
-                              child: Text(
-                                  Get.find<StatusController>().name.value,
-                                  style: Get.theme.textTheme.labelLarge)),
+                          Expanded(child: Text(Get.find<StatusController>().name.value, style: Get.theme.textTheme.labelLarge)),
                         ],
                       ),
                     ),

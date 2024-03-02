@@ -94,7 +94,7 @@ class CardObject extends TableObject {
     // Download attached container
     final json = jsonDecode(data);
     final type = await AttachmentController.checkLocations(json["id"], StorageType.cache);
-    final container = AttachmentContainer.fromJson(type, jsonDecode(data));
+    container = AttachmentContainer.fromJson(type, jsonDecode(data));
     final download = await Get.find<AttachmentController>().downloadAttachment(container);
     if (!download) {
       error = true;

@@ -67,4 +67,13 @@ void setupTabletopListeners() {
     }
     object.rotate((event.data["r"] as num).toDouble());
   });
+
+  // Listen for modifications
+  spaceConnector.listen("tobj_modified", (event) {
+    final object = controller.objects[event.data["id"]];
+    if (object == null) {
+      return;
+    }
+    object.decryptData(event.data["data"]);
+  });
 }

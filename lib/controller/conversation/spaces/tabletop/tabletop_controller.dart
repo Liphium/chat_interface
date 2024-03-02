@@ -310,6 +310,30 @@ abstract class TableObject {
       "id": id,
     }));
   }
+
+  /// Start a modification process (data)
+  void modify(Function() callback) {
+    spaceConnector.sendAction(
+        Message("tobj_select", <String, dynamic>{
+          "id": id,
+        }), handler: (event) {
+      if (!event.data["success"]) {
+        sendLog("can't modify rn");
+        return;
+      }
+      callback();
+    });
+  }
+
+  /// Update the data of the object
+  void updateData() {
+    spaceConnector.sendAction(
+      Message("tobj_modify", <String, dynamic>{
+        "id": id,
+        "data": encryptedData(),
+      }),
+    );
+  }
 }
 
 class ContextMenuAction {

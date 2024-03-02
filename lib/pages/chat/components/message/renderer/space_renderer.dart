@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/duration_renderer.dart';
+import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -103,7 +104,11 @@ class _SpaceRendererState extends State<SpaceRenderer> {
         final renderAmount = min(info.friends.length, 3);
 
         return Material(
-          color: widget.clickable ? Get.theme.colorScheme.primaryContainer : Colors.transparent,
+          color: widget.sidebar
+              ? Get.theme.colorScheme.primary.withAlpha(100)
+              : widget.clickable
+                  ? Get.theme.colorScheme.primaryContainer
+                  : Colors.transparent,
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: InkWell(
             borderRadius: BorderRadius.circular(defaultSpacing),
@@ -153,9 +158,8 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                                         child: SizedBox(
                                           width: 40,
                                           height: 40,
-                                          child: CircleAvatar(
-                                            backgroundColor: index % 2 == 0 ? Get.theme.colorScheme.primary : Get.theme.colorScheme.tertiaryContainer,
-                                            child: Icon(Icons.person, size: 23, color: Get.theme.colorScheme.onSurface),
+                                          child: UserAvatar(
+                                            id: info.friends[index].id,
                                           ),
                                         ),
                                       ),
