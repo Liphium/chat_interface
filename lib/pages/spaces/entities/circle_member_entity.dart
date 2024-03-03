@@ -9,11 +9,7 @@ class CircleMemberEntity extends StatefulWidget {
   final double bottomPadding;
   final double rightPadding;
 
-  const CircleMemberEntity(
-      {super.key,
-      required this.bottomPadding,
-      required this.rightPadding,
-      required this.member});
+  const CircleMemberEntity({super.key, required this.bottomPadding, required this.rightPadding, required this.member});
 
   @override
   State<CircleMemberEntity> createState() => _MemberEntityState();
@@ -23,8 +19,7 @@ class _MemberEntityState extends State<CircleMemberEntity> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-          bottom: widget.bottomPadding, right: widget.rightPadding),
+      padding: EdgeInsets.only(bottom: widget.bottomPadding, right: widget.rightPadding),
       child: Stack(
         children: [
           Obx(
@@ -32,9 +27,7 @@ class _MemberEntityState extends State<CircleMemberEntity> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: widget.member.isSpeaking.value
-                      ? Colors.green
-                      : Colors.transparent,
+                  color: widget.member.isSpeaking.value ? Colors.green : Colors.transparent,
                   width: 4,
                 ),
               ),

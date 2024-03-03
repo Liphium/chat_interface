@@ -1,10 +1,11 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,7 +40,7 @@ class _CallControlsState extends State<CallControls> {
       children: [
         //* Microphone button
         CallButtonBorder(
-          child: GetX<AudioController>(
+          child: GetX<PublicationController>(
             builder: (controller) {
               return LoadingIconButton(
                 padding: defaultSpacing + elementSpacing,
@@ -57,7 +58,7 @@ class _CallControlsState extends State<CallControls> {
 
         //* Audio output
         CallButtonBorder(
-          child: GetX<AudioController>(
+          child: GetX<PublicationController>(
             builder: (controller) {
               return LoadingIconButton(
                 padding: defaultSpacing + elementSpacing,
@@ -73,12 +74,30 @@ class _CallControlsState extends State<CallControls> {
 
         horizontalSpacing(defaultSpacing),
 
-        //* Play mode (reintroduced in the future maybe :)
+        //* Camera
+        CallButtonBorder(
+          child: GetX<PublicationController>(
+            builder: (controller) {
+              return LoadingIconButton(
+                padding: defaultSpacing + elementSpacing,
+                loading: controller.videoLoading,
+                onTap: () => controller.setVideoEnabled(!controller.videoEnabled.value),
+                icon: controller.videoEnabled.value ? Icons.videocam : Icons.videocam_off,
+                iconSize: 35,
+                color: theme.colorScheme.onSurface,
+              );
+            },
+          ),
+        ),
+
+        horizontalSpacing(defaultSpacing),
+
+        //* Table mode
         Obx(
           () => CallButtonBorder(
             child: LoadingIconButton(
               padding: defaultSpacing + elementSpacing,
-              loading: false.obs,
+              loading: tableController.loading,
               onTap: () {
                 if (tableController.enabled.value) {
                   tableController.disconnect();
@@ -91,6 +110,7 @@ class _CallControlsState extends State<CallControls> {
             ),
           ),
         ),
+
         horizontalSpacing(defaultSpacing),
 
         //* End call button

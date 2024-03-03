@@ -8,7 +8,7 @@ import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/audio_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
@@ -23,6 +23,7 @@ import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:livekit_client/livekit_client.dart';
@@ -30,9 +31,6 @@ import 'package:sodium_libs/sodium_libs.dart';
 
 class SpacesController extends GetxController {
   //* Call status
-  @Deprecated("Not used anymore")
-  final livekit = false.obs;
-
   final inSpace = false.obs;
   final spaceLoading = false.obs;
   final connected = false.obs;
@@ -56,6 +54,7 @@ class SpacesController extends GetxController {
   final expanded = false.obs;
   final fullScreen = false.obs;
   final hasVideo = false.obs;
+  final cinemaWidget = Rx<Widget?>(null);
 
   void createSpace(String title, bool publish) {
     _startSpace((container) {
@@ -203,7 +202,7 @@ class SpacesController extends GetxController {
     currentDomain = appToken["domain"];
 
     // Setup all controllers
-    Get.find<AudioController>().onConnect();
+    Get.find<PublicationController>().onConnect();
     Get.find<SpaceMemberController>().onConnect(key!);
 
     // Connect to space node
@@ -249,6 +248,7 @@ class SpacesController extends GetxController {
         );
         Get.find<SpaceMemberController>().onLivekitConnected();
         await api.startTalkingEngine();
+        livekitRoom!.addListener(_onRoomUpdate);
 
         connected.value = true;
         inSpace.value = true;
@@ -265,17 +265,24 @@ class SpacesController extends GetxController {
     id.value = "";
     spaceConnector.disconnect();
     livekitRoom?.disconnect();
+    livekitRoom?.removeListener(_onRoomUpdate);
 
     // Tell other controllers about it
     Get.find<StatusController>().stopSharing();
     Get.find<SpaceMemberController>().onDisconnect();
-    Get.find<AudioController>().disconnect();
+    Get.find<PublicationController>().disconnect();
     Get.find<GameHubController>().leaveCall();
     Get.find<TabletopController>().disconnect(leave: false);
 
     if (!error) {
       Get.offAll(const ChatPage(), transition: Transition.fadeIn);
     }
+  }
+
+  /// Called every time the room updates
+  void _onRoomUpdate() {
+    hasVideo.value = livekitRoom!.remoteParticipants.values.any((element) => element.videoTrackPublications.isNotEmpty) || livekitRoom!.localParticipant!.isCameraEnabled();
+    sendLog("UPDATE VIDEO ${hasVideo.value}");
   }
 }
 

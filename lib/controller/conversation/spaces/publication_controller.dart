@@ -5,10 +5,11 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_member_cont
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
-class AudioController extends GetxController {
+class PublicationController extends GetxController {
   //* Output
   final deafenLoading = false.obs;
   final deafened = false.obs;
@@ -66,6 +67,30 @@ class AudioController extends GetxController {
       "muted": muted.value,
       "deafened": deafened.value,
     }));
+  }
+
+  //* Video
+  final videoLoading = false.obs;
+  final videoEnabled = false.obs;
+  final videoCounter = 0.obs;
+
+  void setVideoEnabled(bool newVideoEnabled) async {
+    videoLoading.value = true;
+    if (_connected) {
+      try {
+        final controller = Get.find<SpaceMemberController>();
+        if (newVideoEnabled) {
+          await SpacesController.livekitRoom?.localParticipant!.setCameraEnabled(true);
+        } else {
+          await SpacesController.livekitRoom?.localParticipant!.setCameraEnabled(false);
+        }
+        controller.members[SpaceMemberController.ownId]!.isVideo.value = newVideoEnabled;
+        videoEnabled.value = newVideoEnabled;
+      } catch (e) {
+        sendLog("SCREEN SHARE ERROR $e");
+      }
+    }
+    videoLoading.value = false;
   }
 
   void onConnect() async {

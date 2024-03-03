@@ -102,9 +102,10 @@ class SpaceMemberController extends GetxController {
     members[ownId]!.joinVoice(SpacesController.livekitRoom!.localParticipant!);
 
     for (var remote in SpacesController.livekitRoom!.remoteParticipants.values) {
-      for (var track in remote.audioTrackPublications) {
-        if (track.kind != TrackType.AUDIO) continue;
-        track.subscribe();
+      for (var pub in remote.trackPublications.values) {
+        if (!pub.isScreenShare) {
+          pub.subscribe();
+        }
       }
     }
   }
@@ -128,6 +129,7 @@ class SpaceMember {
   final isSpeaking = false.obs;
   final isMuted = false.obs;
   final isDeafened = false.obs;
+  final isVideo = false.obs;
 
   SpaceMember(this.friend, this.id, bool muted, bool deafened) {
     isMuted.value = muted;
@@ -141,9 +143,9 @@ class SpaceMember {
       if (Get.find<SpaceMemberController>().isLocalDeafened()) {
         return;
       }
-      for (var track in participant.audioTrackPublications) {
-        if (track.kind == TrackType.AUDIO) {
-          track.subscribe();
+      for (var pub in participant.trackPublications.values) {
+        if (!pub.isScreenShare) {
+          pub.subscribe();
         }
       }
     }
@@ -151,13 +153,18 @@ class SpaceMember {
     participant.createListener()
       ..on<TrackPublishedEvent>((event) {
         sendLog("track published");
-        if (event.publication.kind == TrackType.AUDIO && !Get.find<SpaceMemberController>().isLocalDeafened()) {
+        if (!event.publication.isScreenShare && !Get.find<SpaceMemberController>().isLocalDeafened()) {
           event.publication.subscribe();
+          if (event.publication.kind == TrackType.VIDEO) {
+            isVideo.value = true;
+          }
         }
       })
       ..on<TrackUnpublishedEvent>((event) {
         sendLog("track unpublished");
-        // TODO: Handle something here
+        if (event.publication.kind == TrackType.VIDEO && !event.publication.isScreenShare) {
+          isVideo.value = false;
+        }
       });
   }
 

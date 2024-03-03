@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/status/starting_page.dart';
+import 'package:chat_interface/size_demo.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/translations/translations.dart';
 import 'package:flutter/material.dart';

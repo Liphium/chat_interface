@@ -3,9 +3,12 @@ import 'dart:math';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/pages/spaces/entities/entity_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'dart:math' as math;
 
 class CallGridView extends StatefulWidget {
   final BoxConstraints constraints;
@@ -26,11 +29,9 @@ class _CallGridViewState extends State<CallGridView> {
     SpaceMemberController spaceMemberController = Get.find();
 
     return Obx(() {
-      if (spaceMemberController.membersLoading.value ||
-          spaceMemberController.members.isEmpty) {
+      if (spaceMemberController.membersLoading.value || spaceMemberController.members.isEmpty) {
         return Center(
-          child:
-              CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
+          child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
         );
       }
 
@@ -42,8 +43,7 @@ class _CallGridViewState extends State<CallGridView> {
       }
 
       // Calculate the available height for every participant
-      double computedHeight = _calculateSmallRectangleHeight(
-          widget.constraints.maxWidth, widget.constraints.maxHeight, people);
+      double computedHeight = _calculateSmallRectangleHeight(Size(widget.constraints.maxWidth, widget.constraints.maxHeight), people);
       computedHeight -= defaultSpacing * people;
 
       if (computedHeight > _minHeight * 0.4 || !controller.hasVideo.value) {
@@ -56,11 +56,12 @@ class _CallGridViewState extends State<CallGridView> {
             spacing: defaultSpacing * 1.5,
             runSpacing: defaultSpacing * 1.5,
             children: renderEntites(
-                0,
-                0,
-                BoxConstraints(
-                  maxHeight: max(_minHeight, computedHeight),
-                )),
+              0,
+              0,
+              BoxConstraints(
+                maxHeight: max(_minHeight, computedHeight),
+              ),
+            ),
           ),
         );
       } else {
@@ -77,11 +78,12 @@ class _CallGridViewState extends State<CallGridView> {
                   spacing: defaultSpacing * 1.5,
                   runSpacing: defaultSpacing * 1.5,
                   children: renderEntites(
-                      0,
-                      0,
-                      BoxConstraints(
-                        maxHeight: max(_minHeight, computedHeight),
-                      )),
+                    0,
+                    0,
+                    BoxConstraints(
+                      maxHeight: max(_minHeight, computedHeight),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -91,20 +93,19 @@ class _CallGridViewState extends State<CallGridView> {
     });
   }
 
-  // Thanks Bing Chat (you solved a problem I worked on for 2 hours)
-  double _calculateSmallRectangleHeight(
-      double bigRectangleWidth, double bigRectangleHeight, int n) {
-    double aspectRatio = 16 / 9;
-    int columns = sqrt(n).ceil();
-    int rows = (n / columns).ceil();
-    double smallRectangleWidth = bigRectangleWidth / columns;
-    double smallRectangleHeight = smallRectangleWidth / aspectRatio;
-
-    if (smallRectangleHeight * rows > bigRectangleHeight) {
-      smallRectangleHeight = bigRectangleHeight / rows;
-      smallRectangleWidth = smallRectangleHeight * aspectRatio;
+  double _calculateSmallRectangleHeight(Size parentSize, int n) {
+    // Do it for the height
+    double idealHeight = parentSize.height;
+    double childrenWidth = parentSize.height * (16.0 / 9.0);
+    int numFit = 0;
+    while (idealHeight * (n - numFit) > parentSize.height) {
+      idealHeight -= 1;
+      childrenWidth = idealHeight * (16.0 / 9.0);
+      numFit = (parentSize.width ~/ childrenWidth).ceil() - 1;
     }
 
-    return smallRectangleHeight;
+    sendLog("Ideal height: $idealHeight");
+
+    return idealHeight;
   }
 }
