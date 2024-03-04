@@ -91,6 +91,7 @@ class SpaceMemberController extends GetxController {
         if (event.participant.identity == StatusController.ownAccountId) {
           return;
         }
+        sendLog("participant connected");
         members[event.participant.identity]?.joinVoice(event.participant);
       })
       ..on<ParticipantDisconnectedEvent>((event) {
@@ -139,6 +140,45 @@ class SpaceMember {
   void joinVoice(Participant participant) {
     this.participant.value = participant;
 
+    participant.createListener()
+      ..on<TrackPublishedEvent>((event) async {
+        sendLog("track published");
+        if (!event.publication.isScreenShare && !Get.find<SpaceMemberController>().isLocalDeafened()) {
+          await event.publication.subscribe();
+        }
+      })
+      ..on<TrackUnpublishedEvent>((event) async {
+        sendLog("track unpublished");
+        if (event.publication.kind == TrackType.VIDEO && !event.publication.isScreenShare) {
+          isVideo.value = false;
+          sendLog("VIDEO DISABLED FROM UNPUBLISHING");
+        }
+      })
+      ..on<TrackMutedEvent>((event) async {
+        if (event.publication.kind == TrackType.VIDEO && !event.publication.isScreenShare) {
+          isVideo.value = false;
+          sendLog("VIDEO DISABLED FROM MUTE");
+        }
+      })
+      ..on<TrackUnmutedEvent>((event) async {
+        if (event.publication.kind == TrackType.VIDEO) {
+          sendLog("VIDEO ENABLED FROM UNMUTE");
+          isVideo.value = true;
+        }
+      })
+      ..on<TrackUnsubscribedEvent>((event) async {
+        if (event.publication.kind == TrackType.VIDEO && !event.publication.isScreenShare) {
+          isVideo.value = false;
+          sendLog("VIDEO DISABLED FROM UNSUBSCRIBE");
+        }
+      })
+      ..on<TrackSubscribedEvent>((event) async {
+        if (event.publication.kind == TrackType.VIDEO) {
+          sendLog("VIDEO ENABLED FROM SUBSCRIBE");
+          isVideo.value = true;
+        }
+      });
+
     if (participant is RemoteParticipant) {
       if (Get.find<SpaceMemberController>().isLocalDeafened()) {
         return;
@@ -149,23 +189,6 @@ class SpaceMember {
         }
       }
     }
-
-    participant.createListener()
-      ..on<TrackPublishedEvent>((event) {
-        sendLog("track published");
-        if (!event.publication.isScreenShare && !Get.find<SpaceMemberController>().isLocalDeafened()) {
-          event.publication.subscribe();
-          if (event.publication.kind == TrackType.VIDEO) {
-            isVideo.value = true;
-          }
-        }
-      })
-      ..on<TrackUnpublishedEvent>((event) {
-        sendLog("track unpublished");
-        if (event.publication.kind == TrackType.VIDEO && !event.publication.isScreenShare) {
-          isVideo.value = false;
-        }
-      });
   }
 
   void leaveVoice() {

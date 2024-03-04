@@ -281,7 +281,9 @@ class SpacesController extends GetxController {
 
   /// Called every time the room updates
   void _onRoomUpdate() {
-    hasVideo.value = livekitRoom!.remoteParticipants.values.any((element) => element.videoTrackPublications.isNotEmpty) || livekitRoom!.localParticipant!.isCameraEnabled();
+    hasVideo.value = livekitRoom!.remoteParticipants.values.any((element) => element.isCameraEnabled() || element.isScreenShareEnabled()) ||
+        livekitRoom!.localParticipant!.isCameraEnabled() ||
+        livekitRoom!.localParticipant!.isScreenShareEnabled();
     sendLog("UPDATE VIDEO ${hasVideo.value}");
   }
 }

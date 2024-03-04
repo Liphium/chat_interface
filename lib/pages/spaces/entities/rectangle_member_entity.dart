@@ -24,7 +24,7 @@ class _RectangleMemberEntityState extends State<RectangleMemberEntity> {
         child: Obx(
           () {
             Widget mainWidget;
-            if (widget.member.isVideo.value) {
+            if (widget.member.isVideo.value && widget.member.participant.value!.videoTrackPublications.firstOrNull?.track != null) {
               mainWidget = VideoTrackRenderer(
                 widget.member.participant.value!.videoTrackPublications.first.track! as VideoTrack,
               );
