@@ -51,10 +51,19 @@ class SpacesController extends GetxController {
   static SecureKey? key;
 
   //* Call layout
-  final expanded = false.obs;
   final fullScreen = false.obs;
   final hasVideo = false.obs;
+  final hideOverlay = false.obs;
   final cinemaWidget = Rx<Widget?>(null);
+
+  void cinemaMode(Widget widget) {
+    if (cinemaWidget.value != null) {
+      cinemaWidget.value = null;
+      return;
+    }
+    hideOverlay.value = false;
+    cinemaWidget.value = widget;
+  }
 
   void createSpace(String title, bool publish) {
     _startSpace((container) {

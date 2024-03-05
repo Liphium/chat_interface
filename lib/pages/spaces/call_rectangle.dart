@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
+import 'package:chat_interface/pages/spaces/call_cinema.dart';
 import 'package:chat_interface/pages/spaces/call_grid.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
@@ -44,6 +45,10 @@ class _CallRectangleState extends State<CallRectangle> {
                     () {
                       if (Get.find<TabletopController>().enabled.value) {
                         return const TabletopView();
+                      }
+
+                      if (controller.cinemaWidget.value != null) {
+                        return const CallCinemaView();
                       }
 
                       return LayoutBuilder(
