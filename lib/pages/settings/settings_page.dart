@@ -51,15 +51,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         onTap: () => Get.back(),
                         child: Row(
                           children: [
-                            Icon(Icons.arrow_back,
-                                color: theme.colorScheme.onPrimary),
+                            Icon(Icons.arrow_back, color: theme.colorScheme.onPrimary),
                             horizontalSpacing(defaultSpacing * 0.5),
-                            Text("back".tr,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(
-                                        color: theme.colorScheme.onSurface)),
+                            Text("back".tr, style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onSurface)),
                           ],
                         ),
                       );
@@ -75,57 +69,36 @@ class _SettingsPageState extends State<SettingsPage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           verticalSpacing(sectionSpacing),
-                          Text(current.label.tr,
-                              style: Theme.of(context).textTheme.titleLarge),
+                          Text(current.label.tr, style: Theme.of(context).textTheme.titleLarge),
                           verticalSpacing(defaultSpacing * 0.5),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: current.categories
                                 .map(
                                   (element) => Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: defaultSpacing),
+                                    padding: const EdgeInsets.only(top: defaultSpacing),
                                     child: Obx(
                                       () => Material(
-                                        color: currentCategory.value == element
-                                            ? Get.theme.colorScheme.primary
-                                            : Get.theme.colorScheme
-                                                .primaryContainer,
-                                        borderRadius: BorderRadius.circular(
-                                            defaultSpacing),
+                                        color: currentCategory.value == element ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                                        borderRadius: BorderRadius.circular(defaultSpacing),
                                         child: InkWell(
-                                          onTap: () =>
-                                              currentCategory.value = element,
-                                          borderRadius: BorderRadius.circular(
-                                              defaultSpacing),
+                                          onTap: () => currentCategory.value = element,
+                                          borderRadius: BorderRadius.circular(defaultSpacing),
                                           child: Padding(
-                                            padding: const EdgeInsets.all(
-                                                defaultSpacing),
+                                            padding: const EdgeInsets.all(defaultSpacing),
                                             child: Row(
                                               children: [
                                                 Icon(
                                                   element.icon,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onPrimary,
-                                                  size: Get
-                                                          .theme
-                                                          .textTheme
-                                                          .titleLarge!
-                                                          .fontSize! *
-                                                      1.5,
+                                                  color: Theme.of(context).colorScheme.onPrimary,
+                                                  size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
                                                 ),
-                                                horizontalSpacing(
-                                                    defaultSpacing),
+                                                horizontalSpacing(defaultSpacing),
                                                 Expanded(
                                                   child: Text(
-                                                    "settings.${element.label}"
-                                                        .tr,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .labelLarge!,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
+                                                    "settings.${element.label}".tr,
+                                                    style: Theme.of(context).textTheme.labelLarge!,
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
                                                 ),
                                               ],
@@ -157,28 +130,19 @@ class _SettingsPageState extends State<SettingsPage> {
                       ConstrainedBox(
                         constraints: BoxConstraints(maxWidth: pageWidth),
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                              bottom: defaultSpacing, right: defaultSpacing),
+                          padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Obx(
                                 () => currentCategory.value.displayTitle
                                     ? Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: defaultSpacing,
-                                            bottom: sectionSpacing),
-                                        child: Text(
-                                            "settings.${currentCategory.value.label}"
-                                                .tr,
-                                            style:
-                                                theme.textTheme.headlineMedium),
+                                        padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
+                                        child: Text("settings.${currentCategory.value.label}".tr, style: theme.textTheme.headlineMedium),
                                       )
                                     : const SizedBox(),
                               ),
-                              Obx(() =>
-                                  currentCategory.value.widget ??
-                                  const Placeholder()),
+                              Obx(() => currentCategory.value.widget ?? const Placeholder()),
                             ],
                           ),
                         ),

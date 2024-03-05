@@ -100,17 +100,19 @@ pub struct InputDevice {
     pub best_quality: bool,
 }
 
-struct PCMAndName {
-    pub pcm_id: String,
-    pub display_name: String,
-}
-
 pub static DEFAULT_NAME: &str = "def";
 
 // Get all input devices
 pub fn list_input_devices() -> Vec<InputDevice> {
     let mut input_devices = Vec::new();
-    let host = cpal::default_host();
+    let mut host = cpal::default_host();
+
+    // On linux, use jack
+    #[cfg(target_os = "linux")]
+    {
+        host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
+    }
+
     let input_devices_iter = host.input_devices().unwrap();
 
     // Find microphones
@@ -138,88 +140,6 @@ pub fn list_input_devices() -> Vec<InputDevice> {
         if device.sample_rate == best_sample_rate {
             device.best_quality = true;
         }
-    }
-
-    // Turn the pcm ids into actual microphones on linux
-    #[cfg(target_os = "linux")]
-    {
-        // TODO: Fix this for linux
-
-        // First, grab all the actually usable devices (and their name)
-        let command = Command::new("arecord")
-            .arg("-l")
-            .output()
-            .expect("couldn't run");
-        let output = String::from_utf8_lossy(&command.stdout);
-        println!("{}", output);
-        let mut actual_devices = Vec::<String>::new();
-
-        // Get list of actual devices
-        for line in output.split("\n") {
-            if line.starts_with("card") {
-                let device_name = line
-                    .trim()
-                    .split(":")
-                    .nth(1)
-                    .unwrap()
-                    .trim()
-                    .split("[")
-                    .nth(1)
-                    .unwrap()
-                    .trim()
-                    .split("]")
-                    .nth(0)
-                    .unwrap()
-                    .trim()
-                    .to_string();
-                actual_devices.insert(0, device_name);
-            }
-        }
-
-        // Second, grab all the pcm ids and filter them based on the actual devices
-        let command = Command::new("arecord")
-            .arg("-L")
-            .output()
-            .expect("couldn't run");
-        let output = String::from_utf8_lossy(&command.stdout);
-        let mut working_pcms = Vec::<PCMAndName>::new();
-
-        let mut pcm_id = "";
-        for line in output.split("\n") {
-            if line.starts_with(" ") && pcm_id != "" {
-                let device_name = line.trim().to_string();
-
-                // Check if the device is actually a recording device/microphone
-                if !actual_devices.contains(&device_name) {
-                    continue;
-                }
-
-                let pcm_cutted = pcm_id.to_string().split(":").nth(1).unwrap().to_string();
-                working_pcms.insert(
-                    0,
-                    PCMAndName {
-                        pcm_id: pcm_cutted.to_string(),
-                        display_name: device_name,
-                    },
-                );
-
-                pcm_id = "";
-            } else {
-                pcm_id = line.trim();
-            }
-        }
-
-        // Third, assign the display names to the input devices and remove the ones that don't do anything
-        input_devices.retain_mut(|device| {
-            let mut found = false;
-            for pcm in &working_pcms {
-                if device.id.contains(&pcm.pcm_id) && device.id.starts_with("sysdefault:") {
-                    device.display_name = pcm.display_name.clone();
-                    found = true;
-                }
-            }
-            found
-        });
     }
 
     input_devices

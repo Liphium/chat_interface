@@ -50,78 +50,44 @@ class _OutputTabState extends State<OutputTab> {
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
         buildOutputButton(controller, SpeechSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
-        verticalSpacing(defaultSpacing),
+        verticalSpacing(defaultSpacing - elementSpacing),
 
-        if (Platform.isLinux)
-          const ErrorContainer(
-            expand: true,
-            message: "The output device selection is not available on Linux because the device list is currently broken. We're working on a better solution.",
-          )
-        else
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("audio.device.custom".tr, style: theme.textTheme.bodyMedium),
-              verticalSpacing(elementSpacing),
-              RepaintBoundary(
-                child: Obx(
-                  () => ListView.builder(
-                    itemCount: _microphones.length,
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      final current = _microphones[index];
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("audio.device.custom".tr, style: theme.textTheme.bodyMedium),
+            verticalSpacing(elementSpacing),
+            RepaintBoundary(
+              child: Obx(
+                () => ListView.builder(
+                  itemCount: _microphones.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    final current = _microphones[index];
 
-                      final first = index == 0;
-                      final last = index == _microphones.length - 1;
+                    final first = index == 0;
+                    final last = index == _microphones.length - 1;
 
-                      final radius = BorderRadius.vertical(
-                        top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
-                        bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
-                      );
+                    final radius = BorderRadius.vertical(
+                      top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                      bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+                    );
 
-                      return buildOutputButton(controller, current, radius);
-                    },
-                  ),
+                    return buildOutputButton(controller, current, radius);
+                  },
                 ),
               ),
-            ],
-          ),
-
-        /*
-
-        Text("audio.output.device".tr, style: theme.textTheme.bodyMedium),
-        verticalSpacing(elementSpacing),
-
-        RepaintBoundary(
-          child: Obx(() => ListView.builder(
-                itemCount: _microphones.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  final current = _microphones[index];
-
-                  final first = index == 0;
-                  final last = index == _microphones.length - 1;
-
-                  final radius = BorderRadius.vertical(
-                    top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
-                    bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
-                  );
-
-                  return buildOutputButton(controller, current, radius);
-                },
-              )),
+            ),
+          ],
         ),
-        verticalSpacing(sectionSpacing),
-        */
-        // TODO: Some sort of audio test
       ],
     );
   }
 
   Widget buildOutputButton(SettingController controller, String current, BorderRadius radius, {IconData? icon, String? label}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: elementSpacing * 0.5, horizontal: elementSpacing),
+      padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
           color: controller.settings["audio.output"]!.getOr(SpeechSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,

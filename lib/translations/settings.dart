@@ -14,7 +14,7 @@ class SettingsTranslations extends Translations {
           'settings.profile': 'Profile',
           'settings.security': 'Security',
           'settings.devices': 'Devices',
-          'settings.video': 'Video',
+          'settings.camera': 'Camera',
           'settings.audio': 'Audio',
           'settings.notifications': 'Notifications',
           'settings.language': 'Language',
@@ -35,6 +35,7 @@ class SettingsTranslations extends Translations {
           'audio.device.default.button': 'Use system default',
           'audio.microphone': 'Microphone',
           'audio.microphone.device': 'Or you just select one of these devices (the green verified indicator tries detecting the best microphone):',
+          'audio.device.custom': 'Or choose one of the following devices:',
           'audio.microphone.muted': 'Start muted in Spaces',
           'audio.microphone.sensitivity': 'Microphone sensitivity',
           'audio.microphone.sensitivity.text': 'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
@@ -146,7 +147,12 @@ class SettingsTranslations extends Translations {
           'links.trusted_list': 'Here\'s the list of domains you trust.',
           'links.trusted_list.add': 'Add a trusted domain',
           'links.trusted_list.placeholder': 'liphium.app',
-          'links.trusted_list.empty': 'You currently don\'t trust any domains.'
+          'links.trusted_list.empty': 'You currently don\'t trust any domains.',
+
+          // Camera settings
+          'video.camera.device': 'Select a camera',
+          'video.camera.preview': 'Camera preview',
+          'video.camera.preview.start': 'Start camera preview',
         },
 
         //* German
