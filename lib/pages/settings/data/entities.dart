@@ -7,6 +7,7 @@ import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
+import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ enum SettingLabel {
     SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage()),
     SettingCategory("files", Icons.folder, FileSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage()),
+    SettingCategory("camera", Icons.videocam, VideoSettingsPage()),
     //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("language", Icons.public, LanguageSettingsPage()),
   ]),

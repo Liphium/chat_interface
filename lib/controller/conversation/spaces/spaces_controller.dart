@@ -61,7 +61,6 @@ class SpacesController extends GetxController {
       cinemaWidget.value = null;
       return;
     }
-    hideOverlay.value = false;
     cinemaWidget.value = widget;
   }
 

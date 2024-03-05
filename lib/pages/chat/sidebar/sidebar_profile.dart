@@ -1,11 +1,14 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_info_window.dart';
 import 'package:chat_interface/theme/components/duration_renderer.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/own_profile.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
@@ -54,9 +57,8 @@ class _SidebarProfileState extends State<SidebarProfile> {
                           hoverColor: shown ? theme.colorScheme.background : theme.colorScheme.background,
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           child: Padding(
-                            padding: const EdgeInsets.all(defaultSpacing),
+                            padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +69,38 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                   ],
                                 ),
                                 horizontalSpacing(defaultSpacing),
-                                DurationRenderer(controller.start.value, style: theme.textTheme.bodyLarge)
+                                const Spacer(),
+                                GetX<PublicationController>(
+                                  builder: (controller) {
+                                    return LoadingIconButton(
+                                      loading: controller.muteLoading,
+                                      onTap: () => controller.setMuted(!controller.muted.value),
+                                      icon: controller.muted.value ? Icons.mic_off : Icons.mic,
+                                      extra: defaultSpacing,
+                                      iconSize: 25,
+                                      color: theme.colorScheme.onSurface,
+                                    );
+                                  },
+                                ),
+                                GetX<PublicationController>(
+                                  builder: (controller) {
+                                    return LoadingIconButton(
+                                      loading: controller.deafenLoading,
+                                      onTap: () => controller.setDeafened(!controller.deafened.value),
+                                      icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+                                      extra: defaultSpacing,
+                                      iconSize: 25,
+                                      color: theme.colorScheme.onSurface,
+                                    );
+                                  },
+                                ),
+                                LoadingIconButton(
+                                  padding: 0,
+                                  extra: 10,
+                                  iconSize: 25,
+                                  onTap: () => Get.dialog(const SpaceInfoWindow()),
+                                  icon: Icons.info,
+                                ),
                               ],
                             ),
                           ),

@@ -38,6 +38,7 @@ class GeneralTranslations extends Translations {
           'under.dev': 'This feature is still under development. Sorry for the inconvenience.',
           'no.friends': 'You have no friends yet. If you want to add some, you can do that in the friends page.',
           'open.friends': 'Open friends page',
+          'reset': 'Reset',
 
           // Time TODO: Differentiate between PM and AM
           'message.time': '@hour:@minute',

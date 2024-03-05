@@ -77,9 +77,7 @@ class _CallPositionOverlayState extends State<CallPositionOverlay> {
                       textDirection: widget.position == CallOverlayPosition.right ? TextDirection.ltr : TextDirection.rtl,
                       children: [
                         horizontalButton(controller, widget.position),
-                        horizontalSpacing(defaultSpacing * 0.5),
-                        hideOverlayButton(spacesController),
-                        horizontalSpacing(defaultSpacing * 0.5),
+                        horizontalSpacing(elementSpacing),
                         verticalButton(controller, widget.alignment == CallOverlayAlignment.start ? CallOverlayPosition.bottom : CallOverlayPosition.top),
                       ],
                     )
@@ -88,9 +86,7 @@ class _CallPositionOverlayState extends State<CallPositionOverlay> {
                       verticalDirection: widget.position == CallOverlayPosition.top ? VerticalDirection.up : VerticalDirection.down,
                       children: [
                         verticalButton(controller, widget.position),
-                        verticalSpacing(defaultSpacing * 0.5),
-                        hideOverlayButton(spacesController),
-                        verticalSpacing(defaultSpacing * 0.5),
+                        verticalSpacing(elementSpacing),
                         horizontalButton(controller, widget.alignment == CallOverlayAlignment.start ? CallOverlayPosition.right : CallOverlayPosition.left),
                       ],
                     ),
@@ -118,8 +114,4 @@ class _CallPositionOverlayState extends State<CallPositionOverlay> {
           size: 25,
         ));
   }
-
-  Widget hideOverlayButton(SpacesController callController) => IconButton(
-      onPressed: () => callController.hideOverlay.toggle(),
-      icon: Icon(callController.hideOverlay.value ? Icons.unfold_more : Icons.unfold_less, size: 25, color: Colors.amber));
 }

@@ -132,6 +132,8 @@ class SpaceMember {
   final isDeafened = false.obs;
   final isVideo = false.obs;
 
+  VideoTrackRenderer? videoTrackRenderer;
+
   SpaceMember(this.friend, this.id, bool muted, bool deafened) {
     isMuted.value = muted;
     isDeafened.value = deafened;

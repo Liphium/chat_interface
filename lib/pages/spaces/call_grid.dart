@@ -8,7 +8,6 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class CallGridView extends StatefulWidget {
   final BoxConstraints constraints;
   final RxList<String>? filter;

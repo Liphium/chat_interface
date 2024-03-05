@@ -23,7 +23,7 @@ dependencies:
   http: any
   animations: any
   pointycastle: any
-  livekit_client: ^2.0.1
+  livekit_client: ^2.0.2
   logging: any
   url_launcher: any
   flutter_webrtc: any
