@@ -66,7 +66,18 @@ class _MessageBarState extends State<MessageBar> {
             //* Conversation actions
             Row(
               children: [
-                //* Start call
+                if (Get.find<SpacesController>().inSpace.value)
+                  LoadingIconButton(
+                    icon: Icons.add_call,
+                    iconSize: 27,
+                    loading: callLoading,
+                    tooltip: "chat.add_space".tr,
+                    onTap: () {
+                      final controller = Get.find<SpacesController>();
+                      controller.inviteToCall(Get.find<MessageController>().selectedConversation.value.id);
+                    },
+                  ),
+
                 LoadingIconButton(
                   icon: Icons.call,
                   iconSize: 27,
@@ -77,6 +88,7 @@ class _MessageBarState extends State<MessageBar> {
                     controller.createAndConnect(Get.find<MessageController>().selectedConversation.value.id);
                   },
                 ),
+
                 horizontalSpacing(elementSpacing),
 
                 //* Invite people

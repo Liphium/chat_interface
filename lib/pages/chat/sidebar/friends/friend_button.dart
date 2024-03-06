@@ -1,5 +1,8 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,39 +31,50 @@ class _FriendButtonState extends State<FriendButton> {
           splashColor: Theme.of(context).hoverColor,
 
           //* Show profile
-          onTap: () => Get.dialog(
-              Profile(position: widget.position.value, friend: widget.friend)),
+          onTap: () => Get.dialog(Profile(position: widget.position.value, friend: widget.friend)),
 
           //* Friend info
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.person,
-                          size: 30,
-                          color: Theme.of(context).colorScheme.onPrimary),
-                      const SizedBox(width: 10),
-                      Text(widget.friend.name,
-                          style: Get.theme.textTheme.labelMedium),
-                    ],
-                  ),
+                  Icon(Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                  const SizedBox(width: 10),
+                  Text(widget.friend.name, style: Get.theme.textTheme.labelMedium),
+                ],
+              ),
 
-                  //* Friend actions
-                  Row(
-                    children: [
-                      //* Add to call
-                      IconButton(
-                        icon: Icon(Icons.add_call,
-                            color: Theme.of(context).colorScheme.onPrimary),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                ]),
+              //* Friend actions
+              Builder(builder: (context) {
+                if (Get.find<SpacesController>().inSpace.value) {
+                  return IconButton(
+                    icon: Icon(Icons.add_call, color: Theme.of(context).colorScheme.onPrimary),
+                    onPressed: () {
+                      final conversation =
+                          Get.find<ConversationController>().conversations.values.where((element) => !element.isGroup && element.members.containsKey(widget.friend.id));
+                      if (conversation.isNotEmpty) {
+                        Get.find<SpacesController>().inviteToCall(conversation.first.id);
+                        Get.back();
+                      }
+                    },
+                  );
+                }
+
+                return IconButton(
+                  icon: Icon(Icons.call, color: Theme.of(context).colorScheme.onPrimary),
+                  onPressed: () {
+                    final conversation = Get.find<ConversationController>().conversations.values.where(
+                          (element) => !element.isGroup && element.members.values.any((m) => m.account == widget.friend.id),
+                        );
+                    if (conversation.isNotEmpty) {
+                      Get.find<SpacesController>().createAndConnect(conversation.first.id);
+                      Get.back();
+                    }
+                  },
+                );
+              }),
+            ]),
           ),
         ),
       ),

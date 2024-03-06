@@ -76,6 +76,10 @@ class SpacesController extends GetxController {
     _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, [], container.toInviteJson(), "", () => {}));
   }
 
+  void inviteToCall(String conversationId) {
+    sendActualMessage(spaceLoading, conversationId, MessageType.call, [], getContainer().toInviteJson(), "", () => {});
+  }
+
   SpaceConnectionContainer getContainer() {
     return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
   }
