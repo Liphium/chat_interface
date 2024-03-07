@@ -4,7 +4,6 @@ import 'package:chat_interface/controller/conversation/spaces/publication_contro
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -92,9 +91,10 @@ class _CallControlsState extends State<CallControls> {
           ),
         ),
 
+        /*
         horizontalSpacing(defaultSpacing),
 
-        //* Screenshare
+        // Screenshare
         CallButtonBorder(
           child: GetX<PublicationController>(
             builder: (controller) {
@@ -102,12 +102,16 @@ class _CallControlsState extends State<CallControls> {
                 padding: defaultSpacing + elementSpacing,
                 loading: controller.screenshareLoading,
                 onTap: () async {
-                  final source = await showDialog<DesktopCapturerSource>(
-                    context: context,
-                    builder: (context) => ScreenSelectDialog(),
-                  );
-                  sendLog(source);
-                  //controller.setScreenshareEnabled(!controller.screenshareEnabled.value);
+                  final sources = await desktopCapturer.getSources(types: [SourceType.Screen]);
+                  if (sources.isNotEmpty) {
+                    controller.setScreenshareEnabled(
+                      !controller.screenshareEnabled.value,
+                      options: ScreenShareCaptureOptions(
+                        sourceId: sources.first.id,
+                      ),
+                    );
+                  }
+                  //sendLog(source);
                 },
                 icon: controller.videoEnabled.value ? Icons.stop_screen_share : Icons.screen_share,
                 iconSize: 35,
@@ -116,6 +120,7 @@ class _CallControlsState extends State<CallControls> {
             },
           ),
         ),
+        */
 
         horizontalSpacing(defaultSpacing),
 
