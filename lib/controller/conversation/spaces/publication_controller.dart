@@ -72,7 +72,6 @@ class PublicationController extends GetxController {
   //* Video
   final videoLoading = false.obs;
   final videoEnabled = false.obs;
-  final videoCounter = 0.obs;
 
   void setVideoEnabled(bool newVideoEnabled) async {
     videoLoading.value = true;
@@ -86,6 +85,29 @@ class PublicationController extends GetxController {
         }
         controller.members[SpaceMemberController.ownId]!.isVideo.value = newVideoEnabled;
         videoEnabled.value = newVideoEnabled;
+      } catch (e) {
+        sendLog("SCREEN SHARE ERROR $e");
+      }
+    }
+    videoLoading.value = false;
+  }
+
+  //* Video
+  final screenshareLoading = false.obs;
+  final screenshareEnabled = false.obs;
+
+  void setScreenshareEnabled(bool newScreenshareEnabled, {ScreenShareCaptureOptions? options}) async {
+    videoLoading.value = true;
+    if (_connected) {
+      try {
+        final controller = Get.find<SpaceMemberController>();
+        if (newScreenshareEnabled) {
+          await SpacesController.livekitRoom?.localParticipant!.setScreenShareEnabled(true, screenShareCaptureOptions: options);
+        } else {
+          await SpacesController.livekitRoom?.localParticipant!.setScreenShareEnabled(false);
+        }
+        controller.members[SpaceMemberController.ownId]!.isScreenshare.value = newScreenshareEnabled;
+        screenshareEnabled.value = newScreenshareEnabled;
       } catch (e) {
         sendLog("SCREEN SHARE ERROR $e");
       }

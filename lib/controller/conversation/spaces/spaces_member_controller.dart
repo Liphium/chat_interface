@@ -131,8 +131,7 @@ class SpaceMember {
   final isMuted = false.obs;
   final isDeafened = false.obs;
   final isVideo = false.obs;
-
-  VideoTrackRenderer? videoTrackRenderer;
+  final isScreenshare = false.obs;
 
   SpaceMember(this.friend, this.id, bool muted, bool deafened) {
     isMuted.value = muted;
@@ -150,35 +149,19 @@ class SpaceMember {
         }
       })
       ..on<TrackUnpublishedEvent>((event) async {
-        sendLog("track unpublished");
-        if (event.publication.kind == TrackType.VIDEO && !event.publication.isScreenShare) {
-          isVideo.value = false;
-          sendLog("VIDEO DISABLED FROM UNPUBLISHING");
-        }
+        _disableVideo(event.publication);
       })
       ..on<TrackMutedEvent>((event) async {
-        if (event.publication.kind == TrackType.VIDEO && !event.publication.isScreenShare) {
-          isVideo.value = false;
-          sendLog("VIDEO DISABLED FROM MUTE");
-        }
+        _disableVideo(event.publication);
       })
       ..on<TrackUnmutedEvent>((event) async {
-        if (event.publication.kind == TrackType.VIDEO) {
-          sendLog("VIDEO ENABLED FROM UNMUTE");
-          isVideo.value = true;
-        }
+        _enableVideo(event.publication);
       })
       ..on<TrackUnsubscribedEvent>((event) async {
-        if (event.publication.kind == TrackType.VIDEO && !event.publication.isScreenShare) {
-          isVideo.value = false;
-          sendLog("VIDEO DISABLED FROM UNSUBSCRIBE");
-        }
+        _disableVideo(event.publication);
       })
       ..on<TrackSubscribedEvent>((event) async {
-        if (event.publication.kind == TrackType.VIDEO) {
-          sendLog("VIDEO ENABLED FROM SUBSCRIBE");
-          isVideo.value = true;
-        }
+        _enableVideo(event.publication);
       });
 
     if (participant is RemoteParticipant) {
@@ -189,6 +172,26 @@ class SpaceMember {
         if (!pub.isScreenShare) {
           pub.subscribe();
         }
+      }
+    }
+  }
+
+  void _disableVideo(TrackPublication pub) {
+    if (pub.kind == TrackType.VIDEO) {
+      if (pub.isScreenShare) {
+        isScreenshare.value = false;
+      } else {
+        isVideo.value = false;
+      }
+    }
+  }
+
+  void _enableVideo(TrackPublication pub) {
+    if (pub.kind == TrackType.VIDEO) {
+      if (pub.isScreenShare) {
+        isScreenshare.value = true;
+      } else {
+        isVideo.value = true;
       }
     }
   }

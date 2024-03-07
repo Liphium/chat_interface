@@ -119,7 +119,7 @@ class _CallRectangleState extends State<CallRectangle> {
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
-                              Colors.black.withOpacity(0.5),
+                              Colors.black.withOpacity(0.2),
                               Colors.black.withOpacity(0),
                             ],
                           ),

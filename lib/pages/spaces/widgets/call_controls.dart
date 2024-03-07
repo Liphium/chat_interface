@@ -4,9 +4,12 @@ import 'package:chat_interface/controller/conversation/spaces/publication_contro
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
+import 'package:livekit_client/livekit_client.dart';
 
 class CallControls extends StatefulWidget {
   const CallControls({super.key});
@@ -82,6 +85,31 @@ class _CallControlsState extends State<CallControls> {
                 loading: controller.videoLoading,
                 onTap: () => controller.setVideoEnabled(!controller.videoEnabled.value),
                 icon: controller.videoEnabled.value ? Icons.videocam : Icons.videocam_off,
+                iconSize: 35,
+                color: theme.colorScheme.onSurface,
+              );
+            },
+          ),
+        ),
+
+        horizontalSpacing(defaultSpacing),
+
+        //* Screenshare
+        CallButtonBorder(
+          child: GetX<PublicationController>(
+            builder: (controller) {
+              return LoadingIconButton(
+                padding: defaultSpacing + elementSpacing,
+                loading: controller.screenshareLoading,
+                onTap: () async {
+                  final source = await showDialog<DesktopCapturerSource>(
+                    context: context,
+                    builder: (context) => ScreenSelectDialog(),
+                  );
+                  sendLog(source);
+                  //controller.setScreenshareEnabled(!controller.screenshareEnabled.value);
+                },
+                icon: controller.videoEnabled.value ? Icons.stop_screen_share : Icons.screen_share,
                 iconSize: 35,
                 color: theme.colorScheme.onSurface,
               );

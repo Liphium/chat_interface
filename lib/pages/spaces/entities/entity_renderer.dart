@@ -2,8 +2,10 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/pages/spaces/entities/circle_member_entity.dart';
 import 'package:chat_interface/pages/spaces/entities/rectangle_member_entity.dart';
+import 'package:chat_interface/pages/spaces/entities/screenshare_player_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:livekit_client/livekit_client.dart';
 
 List<Widget> renderEntites(double bottom, double right, BoxConstraints constraints, [int maxHero = 17, List<String>? toRender]) {
   SpacesController controller = Get.find();
@@ -29,6 +31,16 @@ List<Widget> renderEntites(double bottom, double right, BoxConstraints constrain
               rightPadding: right,
             ),
           );
+
+    if (memberController.members[toRender[i]]!.participant.value != null) {
+      if (memberController.members[toRender[i]]!.participant.value!.isScreenShareEnabled()) {
+        entities.add(
+          ScreensharePlayerEntity(
+            publication: memberController.members[toRender[i]]!.participant.value!.getTrackPublicationBySource(TrackSource.screenShareVideo)! as TrackPublication<VideoTrack>,
+          ),
+        );
+      }
+    }
 
     // Add to list
     entities.add(entities.length > maxHero ? memberRenderer : memberRenderer);
