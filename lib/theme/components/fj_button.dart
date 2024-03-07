@@ -24,20 +24,11 @@ class FJElevatedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: color ?? Get.theme.colorScheme.primary,
-      borderRadius: BorderRadius.only(
-        bottomLeft:
-            Radius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),
-        topRight: Radius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),
-      ),
+      borderRadius: BorderRadius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),
       elevation: shadow ? 5.0 : 0.0,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.only(
-          bottomLeft:
-              Radius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),
-          topRight:
-              Radius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),
-        ),
+        borderRadius: BorderRadius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),
         splashColor: Get.theme.hoverColor.withAlpha(20),
         child: Padding(
           padding: const EdgeInsets.all(defaultSpacing),
@@ -53,11 +44,7 @@ class FJElevatedLoadingButton extends StatelessWidget {
   final String label;
   final RxBool loading;
 
-  const FJElevatedLoadingButton(
-      {super.key,
-      required this.onTap,
-      required this.label,
-      required this.loading});
+  const FJElevatedLoadingButton({super.key, required this.onTap, required this.label, required this.loading});
 
   @override
   Widget build(BuildContext context) {
@@ -67,15 +54,11 @@ class FJElevatedLoadingButton extends StatelessWidget {
         child: Obx(
           () => loading.value
               ? SizedBox(
-                  height: Get.theme.textTheme.labelLarge!.fontSize! +
-                      defaultSpacing,
-                  width: Get.theme.textTheme.labelLarge!.fontSize! +
-                      defaultSpacing,
+                  height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                  width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                   child: Padding(
                     padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                    child: CircularProgressIndicator(
-                        strokeWidth: 3.0,
-                        color: Get.theme.colorScheme.onPrimary),
+                    child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
                   ),
                 )
               : Text(label, style: Get.theme.textTheme.labelLarge),
@@ -91,12 +74,7 @@ class FJElevatedLoadingButtonCustom extends StatelessWidget {
   final Widget child;
   final RxBool loading;
 
-  const FJElevatedLoadingButtonCustom(
-      {super.key,
-      required this.onTap,
-      required this.child,
-      required this.loading,
-      this.builder});
+  const FJElevatedLoadingButtonCustom({super.key, required this.onTap, required this.child, required this.loading, this.builder});
 
   @override
   Widget build(BuildContext context) {
@@ -105,14 +83,11 @@ class FJElevatedLoadingButtonCustom extends StatelessWidget {
       child: Obx(() => loading.value
           ? builder?.call() ??
               SizedBox(
-                height:
-                    Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                width:
-                    Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                  child: CircularProgressIndicator(
-                      strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                  child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
                 ),
               )
           : child),

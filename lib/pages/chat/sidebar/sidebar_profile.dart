@@ -7,7 +7,6 @@ import 'package:chat_interface/pages/chat/components/message/renderer/message_sp
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_info_window.dart';
-import 'package:chat_interface/theme/components/duration_renderer.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/own_profile.dart';
@@ -120,7 +119,6 @@ class _SidebarProfileState extends State<SidebarProfile> {
                     splashColor: theme.hoverColor.withAlpha(10),
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: theme.colorScheme.background,
-                    splashFactory: NoSplash.splashFactory,
                     child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
                         child: Row(
@@ -136,14 +134,17 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                     () => Visibility(
                                       visible: !controller.statusLoading.value,
                                       replacement: const Center(
-                                          child: Padding(
-                                              padding: EdgeInsets.all(defaultSpacing),
-                                              child: SizedBox(
-                                                  height: 20,
-                                                  width: 20,
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 4.0,
-                                                  )))),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(defaultSpacing),
+                                          child: SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 4.0,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [

@@ -62,75 +62,54 @@ class _SidebarState extends State<Sidebar> {
                   children: [
                     Expanded(
                       child: Material(
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(defaultSpacing * 1.5),
-                        ),
+                        borderRadius: BorderRadius.circular(defaultSpacing),
                         color: theme.colorScheme.primary,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
-                          child: TextField(
-                            style: theme.textTheme.labelMedium,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusColor: theme.colorScheme.onPrimary,
-                              iconColor: theme.colorScheme.onPrimary,
-                              fillColor: theme.colorScheme.onPrimary,
-                              hoverColor: theme.colorScheme.onPrimary,
-                              prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
-                              hintText: "conversations.placeholder".tr,
-                            ),
-                            onChanged: (value) {
-                              query.value = value;
-                            },
-                            cursorColor: theme.colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    horizontalSpacing(defaultSpacing * 0.5),
-                    SizedBox(
-                      key: _addSpaceKey,
-                      width: 48,
-                      height: 48,
-                      child: Material(
-                        color: theme.colorScheme.primary,
-                        child: InkWell(
-                          onTap: () {
-                            final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  style: theme.textTheme.labelMedium,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    focusColor: theme.colorScheme.onPrimary,
+                                    iconColor: theme.colorScheme.onPrimary,
+                                    fillColor: theme.colorScheme.onPrimary,
+                                    hoverColor: theme.colorScheme.onPrimary,
+                                    prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
+                                    hintText: "conversations.placeholder".tr,
+                                  ),
+                                  onChanged: (value) {
+                                    query.value = value;
+                                  },
+                                  cursorColor: theme.colorScheme.onPrimary,
+                                ),
+                              ),
+                              horizontalSpacing(defaultSpacing * 0.5),
+                              IconButton(
+                                key: _addSpaceKey,
+                                onPressed: () {
+                                  final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
 
-                            //* Open conversation add window
-                            Get.dialog(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(defaultSpacing),
-                            child: Icon(Icons.rocket_launch, color: theme.colorScheme.onPrimary),
-                          ),
-                        ),
-                      ),
-                    ),
-                    horizontalSpacing(defaultSpacing * 0.5),
-                    SizedBox(
-                      key: _addConvKey,
-                      width: 48,
-                      height: 48,
-                      child: Material(
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(defaultSpacing * 1.5),
-                        ),
-                        color: theme.colorScheme.primary,
-                        child: InkWell(
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(defaultSpacing),
-                          ),
-                          onTap: () {
-                            final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
+                                  //* Open conversation add window
+                                  Get.dialog(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                                },
+                                icon: Icon(Icons.rocket_launch, color: theme.colorScheme.onPrimary),
+                              ),
+                              horizontalSpacing(defaultSpacing * 0.5),
+                              IconButton(
+                                key: _addConvKey,
+                                onPressed: () {
+                                  final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
 
-                            //* Open conversation add window
-                            Get.dialog(ConversationAddWindow(position: ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true)));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(defaultSpacing),
-                            child: Icon(Icons.chat_bubble, color: theme.colorScheme.onPrimary),
+                                  //* Open conversation add window
+                                  Get.dialog(
+                                      ConversationAddWindow(position: ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true)));
+                                },
+                                icon: Icon(Icons.chat_bubble, color: theme.colorScheme.onPrimary),
+                              ),
+                            ],
                           ),
                         ),
                       ),

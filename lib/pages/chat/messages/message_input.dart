@@ -97,7 +97,7 @@ class _MessageInputState extends State<MessageInput> {
 
     // Build actual widget
     return Padding(
-      padding: const EdgeInsets.only(right: defaultSpacing, left: defaultSpacing, bottom: defaultSpacing),
+      padding: const EdgeInsets.only(right: sectionSpacing, left: sectionSpacing, bottom: sectionSpacing),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -106,10 +106,7 @@ class _MessageInputState extends State<MessageInput> {
             actions: actionsMap,
             child: Material(
               color: theme.colorScheme.onBackground,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(defaultSpacing * 1.5),
-                bottomLeft: Radius.circular(defaultSpacing * 1.5),
-              ),
+              borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: defaultSpacing,

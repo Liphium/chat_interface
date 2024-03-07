@@ -39,7 +39,7 @@ class ThemeSettings {
 
   static const double baseLuminosityLight = 0.87;
   static const double baseLuminosityDark = 0.13;
-  static const double luminosityJumps = 0.04;
+  static const double luminosityJumps = 0.03;
 
   static final themeModes = [
     -1, // Dark
@@ -102,7 +102,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("theme.presets".tr, style: Get.theme.textTheme.labelLarge),
-              verticalSpacing(defaultSpacing),
+              verticalSpacing(elementSpacing),
               ListSelectionSetting(settingName: ThemeSettings.themePreset, items: ThemeSettings.themePresets),
               verticalSpacing(sectionSpacing),
               Obx(() => Visibility(

@@ -1,22 +1,10 @@
 part of 'theme_settings.dart';
 
-class GeneratedColors {
-  final Color primary;
-  final Color primaryContainer;
-  final Color secondary;
-  final Color secondaryContainer;
-  final Color background1;
-  final Color background2;
-  final Color background3;
-
-  const GeneratedColors(this.primary, this.primaryContainer, this.secondary, this.secondaryContainer, this.background1, this.background2, this.background3);
-}
-
 class ColorFactory {
   static const _iconWhite = 0.5;
   static const _iconBlack = 0.7;
   static const _containerWhite = 0.85;
-  static const _containerBlack = 0.2;
+  static const _containerBlack = 0.17;
 
   final double primHue, secHue, sat, lum, lumJumps;
   final int themeMode, backgroundMode;
@@ -28,9 +16,9 @@ class ColorFactory {
   Color getSecondary() => HSLColor.fromAHSL(1.0, secHue, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
   Color getSecondaryContainer() => HSLColor.fromAHSL(1.0, secHue, sat, themeMode == -1 ? _containerBlack : _containerWhite).toColor();
 
-  Color getBackground1() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : sat * 0.05, lum).toColor();
-  Color getBackground2() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : sat * 0.05, clampDouble(lum + (lumJumps * themeMode), 0.0, 1.0)).toColor();
-  Color getBackground3() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : sat * 0.05, clampDouble(lum + (lumJumps * 2 * themeMode), 0.0, 1.0)).toColor();
+  Color getBackground1() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0.03, lum).toColor();
+  Color getBackground2() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0.03, clampDouble(lum - 0.03, 0.0, 1.0)).toColor();
+  Color getBackground3() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0.03, clampDouble(lum - 0.06, 0.0, 1.0)).toColor();
 
   Color completeBackground() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, 0.0).toColor();
 
