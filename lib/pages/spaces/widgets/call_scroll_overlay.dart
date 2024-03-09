@@ -1,4 +1,3 @@
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +33,6 @@ class CallPositionOverlay extends StatefulWidget {
 class _CallPositionOverlayState extends State<CallPositionOverlay> {
   @override
   Widget build(BuildContext context) {
-    SpacesController spacesController = Get.find();
     SettingController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
