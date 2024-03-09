@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
