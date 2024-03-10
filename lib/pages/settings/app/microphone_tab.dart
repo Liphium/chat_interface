@@ -54,11 +54,11 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
   }
 
   String _getCurrent() {
-    return Get.find<SettingController>().settings[SpeechSettings.microphone]!.getOr(SpeechSettings.defaultDeviceName);
+    return Get.find<SettingController>().settings[AudioSettings.microphone]!.getOr(AudioSettings.defaultDeviceName);
   }
 
   void _changeMicrophone(String device) async {
-    Get.find<SettingController>().settings[SpeechSettings.microphone]!.setValue(device);
+    Get.find<SettingController>().settings[AudioSettings.microphone]!.setValue(device);
     api.setInputDevice(id: device);
   }
 
@@ -90,7 +90,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         verticalSpacing(elementSpacing),
         buildMicrophoneButton(
           controller,
-          api.InputDevice(id: SpeechSettings.defaultDeviceName, displayName: SpeechSettings.defaultDeviceName, sampleRate: 48000, bestQuality: false),
+          api.InputDevice(id: AudioSettings.defaultDeviceName, displayName: AudioSettings.defaultDeviceName, sampleRate: 48000, bestQuality: false),
           BorderRadius.circular(defaultSpacing),
           icon: Icons.done_all,
           label: "audio.device.default.button".tr,
@@ -128,7 +128,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         ),
 
         //* Start off muted
-        const BoolSettingSmall(settingName: SpeechSettings.startMuted),
+        const BoolSettingSmall(settingName: AudioSettings.startMuted),
 
         verticalSpacing(sectionSpacing),
 
@@ -179,7 +179,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.microphone"]!.getOr(SpeechSettings.defaultDeviceName) == current.id
+          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id
               ? Get.theme.colorScheme.primary
               : Get.theme.colorScheme.onBackground,
           borderRadius: radius,

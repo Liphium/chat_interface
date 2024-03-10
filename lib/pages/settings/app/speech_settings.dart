@@ -1,4 +1,3 @@
-import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/app/microphone_tab.dart';
 import 'package:chat_interface/pages/settings/app/output_tab.dart';
@@ -8,24 +7,22 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SpeechSettings {
-  static String defaultDeviceName = "";
+class AudioSettings {
+  static String defaultDeviceName = "def";
   static const String microphone = "audio.microphone";
   static const String microphoneSensitivity = "audio.microphone.sensitivity";
   static const String startMuted = "audio.microphone.muted";
   static const String output = "audio.output";
-}
 
-void addSpeechSettings(SettingController controller) async {
-  SpeechSettings.defaultDeviceName = await api.getDefaultId();
+  static void addSettings(SettingController controller) async {
+    //* Microphone
+    controller.settings[AudioSettings.microphone] = Setting<String>(AudioSettings.microphone, AudioSettings.defaultDeviceName);
+    controller.settings[AudioSettings.microphoneSensitivity] = Setting<double>(AudioSettings.microphoneSensitivity, 0.15);
+    controller.settings[AudioSettings.startMuted] = Setting<bool>(AudioSettings.startMuted, false);
 
-  //* Microphone
-  controller.settings[SpeechSettings.microphone] = Setting<String>(SpeechSettings.microphone, "def");
-  controller.settings[SpeechSettings.microphoneSensitivity] = Setting<double>(SpeechSettings.microphoneSensitivity, 0.15);
-  controller.settings[SpeechSettings.startMuted] = Setting<bool>(SpeechSettings.startMuted, false);
-
-  //* Output
-  controller.settings[SpeechSettings.output] = Setting<String>(SpeechSettings.output, "def");
+    //* Output
+    controller.settings[AudioSettings.output] = Setting<String>(AudioSettings.output, AudioSettings.defaultDeviceName);
+  }
 }
 
 class AudioSettingsPage extends StatefulWidget {

@@ -18,7 +18,7 @@ class SettingController extends GetxController {
   final settings = <String, Setting>{}; // label: Setting
 
   SettingController() {
-    addSpeechSettings(this);
+    AudioSettings.addSettings(this);
     addVideoSettings(this);
     addCallAppearanceSettings(this);
     addLanguageSettings(this);
