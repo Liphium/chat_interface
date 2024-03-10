@@ -118,7 +118,7 @@ class _OutputTabState extends State<OutputTab> {
                   horizontalSpacing(defaultSpacing * 0.5),
 
                   //* Label
-                  Text(current, style: Get.theme.textTheme.labelMedium),
+                  Text(label ?? current, style: Get.theme.textTheme.labelMedium),
                 ],
               ),
             ),
