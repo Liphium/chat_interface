@@ -123,16 +123,22 @@ class PublicationController extends GetxController {
     deafened.value = false;
 
     // Set settings
-    await api.setTalkingAmplitude(amplitude: settingController.settings[SpeechSettings.microphoneSensitivity]!.getOr(0.0));
-    await api.setInputDevice(id: settingController.settings[SpeechSettings.microphone]!.getValue());
-    await api.setOutputDevice(id: settingController.settings[SpeechSettings.output]!.getValue());
+    await api.setTalkingAmplitude(amplitude: settingController.settings[AudioSettings.microphoneSensitivity]!.getOr(0.0));
+    await api.setInputDevice(id: settingController.settings[AudioSettings.microphone]!.getValue());
+    await api.setOutputDevice(id: settingController.settings[AudioSettings.output]!.getValue());
     _connected = true;
 
     // Set mute
-    final startMuted = settingController.settings[SpeechSettings.startMuted]!.getValue() as bool;
+    final startMuted = settingController.settings[AudioSettings.startMuted]!.getValue() as bool;
     await api.setMuted(muted: startMuted);
     await Future.delayed(500.milliseconds);
     setMuted(startMuted);
+
+    final devices = await Hardware.instance.enumerateDevices();
+    final outputDevice = devices.firstWhereOrNull((element) => element.label == settingController.settings[AudioSettings.output]!.getValue());
+    if (outputDevice != null) {
+      SpacesController.livekitRoom?.setAudioOutputDevice(outputDevice);
+    }
   }
 
   void disconnect() {

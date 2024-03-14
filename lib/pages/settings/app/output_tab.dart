@@ -1,9 +1,12 @@
-import 'package:chat_interface/src/rust/api/interaction.dart' as api;
+import 'dart:async';
+
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:livekit_client/livekit_client.dart';
 
 class OutputTab extends StatefulWidget {
   const OutputTab({super.key});
@@ -13,23 +16,34 @@ class OutputTab extends StatefulWidget {
 }
 
 class _OutputTabState extends State<OutputTab> {
-  final _microphones = <String>[].obs;
+  final _microphones = <MediaDevice>[].obs;
+  StreamSubscription<List<MediaDevice>>? _subscription;
 
   @override
   void initState() {
     super.initState();
-
-    // Get microphones
-    _init();
+    Hardware.instance.enumerateDevices().then(_onDeviceChange);
+    _subscription = Hardware.instance.onDeviceChange.stream.listen(_onDeviceChange);
   }
 
-  void _init() async {
-    // TODO: Rework this to use Livekit
+  void _onDeviceChange(List<MediaDevice> devices) {
+    _microphones.clear();
+    _microphones.addAll(devices.where((element) => element.kind == "audiooutput").toList());
   }
 
   void _changeDevice(String device) async {
-    Get.find<SettingController>().settings[SpeechSettings.output]!.setValue(device);
-    await api.setOutputDevice(id: device);
+    final devices = await Hardware.instance.enumerateDevices();
+    final output = devices.firstWhereOrNull((element) => element.label == device);
+    if (output != null) {
+      SpacesController.livekitRoom?.setAudioOutputDevice(output);
+    }
+    Get.find<SettingController>().settings[AudioSettings.output]!.setValue(device);
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -46,7 +60,7 @@ class _OutputTabState extends State<OutputTab> {
 
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildOutputButton(controller, SpeechSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
+        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing - elementSpacing),
 
         Column(
@@ -71,7 +85,7 @@ class _OutputTabState extends State<OutputTab> {
                       bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
                     );
 
-                    return buildOutputButton(controller, current, radius);
+                    return buildOutputButton(controller, current.label, radius);
                   },
                 ),
               ),
@@ -87,7 +101,7 @@ class _OutputTabState extends State<OutputTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.output"]!.getOr(SpeechSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,
