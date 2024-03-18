@@ -240,15 +240,6 @@ class SpacesController extends GetxController {
           return;
         }
 
-        // Connect to UDP (old voice chat)
-        // final domain = (appToken["domain"] as String).split(":")[0];
-        // await api.startVoice(
-        //   clientId: event.data["id"],
-        //   verificationKey: event.data["key"],
-        //   encryptionKey: packageSymmetricKey(key!),
-        //   address: '$domain:${event.data["port"]}',
-        // );
-
         // Connect to new voice chat
         livekitRoom = Room();
         await livekitRoom!.connect(
