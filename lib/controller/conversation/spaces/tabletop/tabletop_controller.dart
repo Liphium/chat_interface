@@ -36,6 +36,9 @@ class TabletopController extends GetxController {
   Offset mousePosUnmodified = const Offset(0, 0);
   Offset globalCanvasPosition = const Offset(0, 0);
 
+  // Position of the hint
+  final hints = <String, Offset>{};
+
   // Movement of the canvas
   Offset canvasOffset = const Offset(0, 0);
   double canvasZoom = 0.5;
