@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -157,6 +158,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
         onPointerUp: (event) {
           if (tableController.hoveringObjects.isNotEmpty && !moved && event.buttons == 0) {
             tableController.hoveringObjects.first.runAction(tableController);
+            return;
           }
           sendLog(tableController.inventoryHoverIndex);
 
@@ -182,6 +184,9 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
           } else if (!tableController.dropMode && obj != null && obj is CardObject) {
             if (tableController.inventoryHoverIndex != -1) {
               obj.intoInventory(tableController, index: tableController.inventoryHoverIndex);
+            } else if (tableController.hoveringObjects.any((element) => element is DeckObject)) {
+              final deck = tableController.hoveringObjects.firstWhere((element) => element is DeckObject) as DeckObject;
+              deck.addCard(obj);
             }
           }
           tableController.heldObject = null;

@@ -5,9 +5,11 @@ import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -72,13 +74,21 @@ class CardObject extends TableObject {
       return;
     }
 
-    // Draw a stack
+    // Draw the card
     if (downloaded) {
       final paint = Paint()..color = Colors.white;
+
+      // Show that the card is about to be dropped
+      if (controller.heldObject == this && controller.hoveringObjects.any((element) => element is DeckObject) && !controller.dropMode) {
+        paint.color = Colors.white.withOpacity(0.5);
+      }
+
+      final imageRect = Rect.fromLTWH(location.dx, location.dy, size.width, size.height);
+      canvas.clipRRect(RRect.fromRectAndRadius(imageRect, const Radius.circular(sectionSpacing * 4)));
       canvas.drawImageRect(
         image!,
         Rect.fromLTWH(0, 0, size.width * (imageSize!.width / size.width), size.height * (imageSize!.height / size.height)),
-        Rect.fromLTWH(location.dx, location.dy, size.width, size.height),
+        imageRect,
         paint,
       );
       return;
