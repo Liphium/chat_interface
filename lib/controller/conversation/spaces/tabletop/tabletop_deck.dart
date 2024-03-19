@@ -40,20 +40,36 @@ class DeckObject extends TableObject {
         location.dy + 50,
         location.dx + size.width - 50,
         location.dy + 50 + size.height - 50,
-        const Radius.circular(25),
+        const Radius.circular(sectionSpacing * 2),
       ),
       Paint()..color = Get.theme.colorScheme.tertiary,
     );
+    final rect = RRect.fromLTRBR(
+      location.dx + 50,
+      location.dy,
+      location.dx + 50 + size.width - 50,
+      location.dy + size.height - 50,
+      const Radius.circular(sectionSpacing * 2),
+    );
     canvas.drawRRect(
-      RRect.fromLTRBR(
-        location.dx + 50,
-        location.dy,
-        location.dx + 50 + size.width - 50,
-        location.dy + size.height - 50,
-        const Radius.circular(25),
-      ),
+      rect,
       Paint()..color = Get.theme.colorScheme.onPrimary,
     );
+    var textSpan = TextSpan(
+      text: order.length.toString(),
+      style: TextStyle(
+        color: Get.theme.colorScheme.primary,
+        fontSize: 100,
+        fontFamily: "Roboto Mono",
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, Offset(rect.left + rect.width / 2 - textPainter.size.width / 2, rect.top + rect.height / 2 - textPainter.size.height / 2));
   }
 
   @override
@@ -114,6 +130,15 @@ class DeckObject extends TableObject {
   void shuffle() {
     modify(() {
       order.shuffle();
+      updateData();
+    });
+  }
+
+  void addCard(CardObject obj) {
+    modify(() {
+      cards[obj.container.id] = obj.container;
+      order.add(obj.container.id);
+      obj.sendRemove();
       updateData();
     });
   }

@@ -143,6 +143,7 @@ class TabletopPainter extends CustomPainter {
           -(x + width / 2) * ((scale - 1) / scale),
           -(y + height / 2) * ((scale - 1) / scale),
         );
+        canvas.clipRRect(RRect.fromRectAndRadius(rect, const Radius.circular(sectionSpacing * 2)));
         canvas.drawImageRect(
           object.image!,
           imageRect,
@@ -154,9 +155,6 @@ class TabletopPainter extends CustomPainter {
         counterWidth -= width + defaultSpacing;
       }
     }
-
-    // Draw a hovering hint
-    drawBackgroundText(canvas, "hello world", const Offset(10, 10));
   }
 
   @override
@@ -175,25 +173,5 @@ class TabletopPainter extends CustomPainter {
     canvas.translate(-focalX, -focalY);
     object.render(canvas, location, controller);
     canvas.restore();
-  }
-
-  void drawBackgroundText(Canvas canvas, String text, Offset position) {
-    var textSpan = TextSpan(
-      text: text,
-      style: Get.theme.textTheme.labelLarge,
-    );
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-    final hintRect = Rect.fromLTWH(
-      position.dx - elementSpacing,
-      position.dy - elementSpacing,
-      textPainter.size.width + defaultSpacing,
-      textPainter.size.height + defaultSpacing,
-    );
-    canvas.drawRRect(RRect.fromRectAndRadius(hintRect, const Radius.circular(defaultSpacing)), Paint()..color = Get.theme.colorScheme.primaryContainer);
-    textPainter.paint(canvas, position);
   }
 }
