@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
     
   flutter_animate: any
-  get: any
+  get: ^4.6.6
   path_provider: any
   path: any
   drift: any
