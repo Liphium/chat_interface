@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,6 +9,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:dio/dio.dart' as d;
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -81,7 +83,7 @@ class LiveShareController extends GetxController {
     final file = File(currentFile.value!.path);
 
     // Read the original file and extract one chunk
-    final stream = file.openRead(start * chunkSize, (start + 1) * chunkSize);
+    final stream = file.openRead((start - 1) * chunkSize, start * chunkSize);
     final chunkFile = File("${chunksDir!.path}/chunk_$start");
     await chunkFile.create();
     final writeStream = chunkFile.openWrite();
@@ -146,9 +148,6 @@ class LiveShareController extends GetxController {
     );
     final body = res.data as d.ResponseBody;
 
-    String receiverId = "";
-    bool receivedInfo = false;
-
     // Create receiving directory
     var tempDir = await getTemporaryDirectory();
     tempDir = Directory("${tempDir.path}/liphium");
@@ -157,65 +156,141 @@ class LiveShareController extends GetxController {
     await receiveDir.create();
     sendLog(receiveDir.path);
 
-    var currentBuffer = <int>[];
+    // Data for downloads
+    bool completed = false, downloading = false, waiting = false;
+    int currentChunk = 0;
+    int maxChunk = 0;
+    String receiverId = "";
+    bool receivedInfo = false;
 
     // Listen for new parts
-    body.stream.listen((bytes) async {
+    body.stream.listen((event) async {
+      // Parse the server sent event (Format: data: <data>\n\n)
+      final packet = String.fromCharCodes(event);
+      final data = packet.substring(6).trim();
       if (!receivedInfo) {
         receivedInfo = true;
-        final json = jsonDecode(String.fromCharCodes(bytes));
-        receiverId = json["id"];
-        sendLog("starting to receive chunks for $receiverId");
+        receiverId = data;
         return;
       }
 
-      final text = String.fromCharCodes(bytes);
-      if (text.startsWith("\n\nc:")) {
-        final args = text.split(":");
-        final chunkId = args[1].trim();
+      sendLog("can now download until $data");
 
-        // Save to file
-        sendLog("storing chunk $chunkId..");
-        final partFile = File("${receiveDir.path}/chunk_$chunkId");
-        partFile.writeAsBytes(currentBuffer, mode: FileMode.writeOnlyAppend);
+      maxChunk = int.parse(data);
+      if (currentChunk == 0) {
+        currentChunk = maxChunk;
 
-        // Send receive confirmation
-        final res = await dio.post(
-          nodePath("/liveshare/received"), // TODO: Eventually use domain of the node here (might be different from the server domain)
-          data: jsonEncode({
+        // Start a timer for downloading the parts
+        Timer.periodic(20.ms, (timer) async {
+          if (downloading) return;
+          if (completed) {
+            timer.cancel();
+            return;
+          }
+
+          // Check if new chunk is available
+          if (waiting) {
+            if (currentChunk < maxChunk) {
+              currentChunk++;
+              waiting = false;
+            } else {
+              return;
+            }
+          }
+          downloading = true;
+
+          // Download stuff
+          final formData = d.FormData.fromMap({
             "id": id,
             "token": token,
-            "receiver": receiverId,
-          }),
-          options: d.Options(
-            validateStatus: (status) => status != 404,
-          ),
-        );
-        if (res.statusCode != 200) {
-          sendLog("Failed to send receive confirmation");
-          return;
-        }
+            "chunk": currentChunk,
+          });
+          final res = await dio.download(
+            nodePath("/liveshare/download"),
+            "${receiveDir.path}/chunk_$currentChunk",
+            data: formData,
+            options: d.Options(
+              validateStatus: (status) => status != 404,
+            ),
+          );
 
-        if (!res.data["success"]) {
-          sendLog("Failed to send receive confirmation");
-          return;
-        }
+          if (res.statusCode != 200) {
+            sendLog("ERROR DOWNLOADING CHUNK $currentChunk");
+            return;
+          }
 
-        // Clear buffer
-        currentBuffer.clear();
-        sendLog("stored chunk $chunkId");
+          sendLog("downloaded chunk $currentChunk");
+          downloading = false;
 
-        if (res.data["complete"]) {
-          sendLog("received all chunks");
-          return;
-        }
+          // Check if new chunk can be downloaded right away
+          if (currentChunk < maxChunk) {
+            currentChunk++;
+            waiting = false;
+          } else {
+            waiting = true;
+          }
 
-        sendLog("starting with next chunk");
-        return;
+          _tellReceived(
+            id,
+            token,
+            receiverId,
+            callback: (complete) {
+              completed = complete;
+              if (completed) {
+                _stitchFileTogether("test.mkv", receiveDir);
+              }
+              sendLog("is completed: $complete");
+            },
+            onError: () => sendLog("error"),
+          );
+        });
+      }
+    });
+  }
+
+  void _tellReceived(String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
+    // Send receive confirmation
+    final res = await dio.post(
+      nodePath("/liveshare/received"), // TODO: Eventually use domain of the node here (might be different from the server domain)
+      data: jsonEncode({
+        "id": id,
+        "token": token,
+        "receiver": receiverId,
+      }),
+      options: d.Options(
+        validateStatus: (status) => status != 404,
+      ),
+    );
+
+    if (res.statusCode != 200) {
+      onError?.call();
+      return;
+    }
+
+    if (!res.data["success"]) {
+      onError?.call();
+      return;
+    }
+
+    callback?.call(res.data["complete"]);
+  }
+
+  void _stitchFileTogether(String fileName, Directory dir) async {
+    final downloads = await getDownloadsDirectory();
+    final file = File("${downloads!.path}/$fileName");
+
+    int currentIndex = 1;
+    while (true) {
+      final chunk = File("${dir.path}/chunk_$currentIndex");
+      final exists = await chunk.exists();
+      if (!exists) {
+        break;
       }
 
-      // Save the part to file
-      currentBuffer += bytes;
-    });
+      await file.writeAsBytes(await chunk.readAsBytes(), mode: currentIndex == 1 ? FileMode.write : FileMode.append);
+      chunk.delete();
+
+      currentIndex++;
+    }
   }
 }
