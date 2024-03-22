@@ -7,6 +7,7 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
+import 'package:chat_interface/pages/chat/sidebar/liveshare_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -85,6 +86,11 @@ class _SidebarState extends State<Sidebar> {
                                   },
                                   cursorColor: theme.colorScheme.onPrimary,
                                 ),
+                              ),
+                              horizontalSpacing(defaultSpacing * 0.5),
+                              IconButton(
+                                onPressed: () => Get.dialog(const LiveShareWindow()),
+                                icon: Icon(Icons.electric_bolt, color: theme.colorScheme.onPrimary),
                               ),
                               horizontalSpacing(defaultSpacing * 0.5),
                               IconButton(

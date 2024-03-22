@@ -23,10 +23,35 @@ const extensionToType = {
   "mp3": FileTypes.audio,
   "ogg": FileTypes.audio,
   "wav": FileTypes.audio,
+  "mp4": FileTypes.video,
+  "mov": FileTypes.video,
+  "avi": FileTypes.video,
+  "mkv": FileTypes.video,
   "pdf": FileTypes.document,
   "doc": FileTypes.document,
   "docx": FileTypes.document,
 };
+
+IconData getIconForFileName(String name) {
+  final extension = name.split(".").last;
+  final type = extensionToType[extension] ?? FileTypes.unidentified;
+  return getIconForType(type);
+}
+
+IconData getIconForType(FileTypes type) {
+  switch (type) {
+    case FileTypes.image:
+      return Icons.image;
+    case FileTypes.video:
+      return Icons.video_collection;
+    case FileTypes.audio:
+      return Icons.library_music;
+    case FileTypes.document:
+      return Icons.text_snippet;
+    case FileTypes.unidentified:
+      return Icons.insert_drive_file;
+  }
+}
 
 class FilePreview extends StatelessWidget {
   final XFile file;
@@ -76,8 +101,7 @@ class SquareFileRenderer extends StatefulWidget {
   final UploadData file;
   final VoidCallback? onRemove;
 
-  const SquareFileRenderer(
-      {super.key, required this.file, required this.onRemove});
+  const SquareFileRenderer({super.key, required this.file, required this.onRemove});
   @override
   State<SquareFileRenderer> createState() => _SquareFileRendererState();
 }
@@ -99,11 +123,7 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: Stack(
             children: [
-              Container(
-                  color: Get.theme.colorScheme.primaryContainer,
-                  width: 200,
-                  height: 200,
-                  child: FilePreview(file: widget.file.file)),
+              Container(color: Get.theme.colorScheme.primaryContainer, width: 200, height: 200, child: FilePreview(file: widget.file.file)),
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
