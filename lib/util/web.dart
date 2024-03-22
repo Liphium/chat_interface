@@ -26,9 +26,18 @@ String tokensToPayload() {
   return jsonEncode(payload);
 }
 
+const authorizationHeader = "Authorization";
 String nodeProtocol = isHttps ? "https://" : "http://";
 String basePath = 'http://localhost:3000';
 RSAPublicKey? serverPublicKey;
+
+String nodePath(String path) {
+  return "$nodeProtocol$nodeDomain$path";
+}
+
+String authorizationValue() {
+  return "Bearer $sessionToken";
+}
 
 Uri server(String path) {
   return Uri.parse('$basePath$path');

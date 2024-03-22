@@ -89,7 +89,9 @@ class _LiveShareWindowState extends State<LiveShareWindow> {
             },
           ),
           FJElevatedButton(
-            onTap: () => {},
+            onTap: () {
+              controller.startSharing();
+            },
             child: Text("Share with self", style: Get.theme.textTheme.labelLarge),
           ),
         ],
