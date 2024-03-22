@@ -88,9 +88,27 @@ class _SidebarState extends State<Sidebar> {
                                 ),
                               ),
                               horizontalSpacing(defaultSpacing * 0.5),
-                              IconButton(
-                                onPressed: () => Get.dialog(const LiveShareWindow()),
-                                icon: Icon(Icons.electric_bolt, color: theme.colorScheme.onPrimary),
+                              Stack(
+                                children: [
+                                  IconButton(
+                                    onPressed: () => Get.dialog(const LiveShareWindow()),
+                                    icon: Icon(Icons.electric_bolt, color: theme.colorScheme.onPrimary),
+                                  ),
+                                  IgnorePointer(
+                                    child: SizedBox(
+                                      width: 48 - defaultSpacing,
+                                      height: 48 - defaultSpacing,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(2.0),
+                                        child: CircularProgressIndicator(
+                                          value: 0.5,
+                                          strokeWidth: 3,
+                                          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
                               ),
                               horizontalSpacing(defaultSpacing * 0.5),
                               IconButton(

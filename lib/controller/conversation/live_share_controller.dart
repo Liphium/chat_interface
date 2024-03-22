@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -12,6 +13,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 class LiveShareController extends GetxController {
   final currentFile = Rx<XFile?>(null);
@@ -292,5 +294,30 @@ class LiveShareController extends GetxController {
 
       currentIndex++;
     }
+  }
+}
+
+class LiveshareInviteContainer {
+  final String id;
+  final String token;
+  final SecureKey key;
+
+  LiveshareInviteContainer(this.id, this.token, this.key);
+
+  factory LiveshareInviteContainer.fromJson(String json) {
+    final data = jsonDecode(json);
+    return LiveshareInviteContainer(
+      data["id"],
+      data["token"],
+      unpackageSymmetricKey(data["key"]),
+    );
+  }
+
+  String toJson() {
+    return jsonEncode({
+      "id": id,
+      "token": token,
+      "key": packageSymmetricKey(key),
+    });
   }
 }
