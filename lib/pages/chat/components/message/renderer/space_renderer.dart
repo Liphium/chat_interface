@@ -91,10 +91,19 @@ class _SpaceRendererState extends State<SpaceRenderer> {
               borderRadius: BorderRadius.circular(defaultSpacing),
               color: Get.theme.colorScheme.primaryContainer,
             ),
-            padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
-            child: Text(
-              "chat.space.not_found".tr,
-              style: Get.theme.textTheme.bodyLarge,
+            padding: const EdgeInsets.all(defaultSpacing),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.public_off, color: Get.theme.colorScheme.error),
+                horizontalSpacing(elementSpacing),
+                Flexible(
+                  child: Text(
+                    "chat.space.not_found".tr,
+                    style: Get.theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ],
             ),
           );
         }

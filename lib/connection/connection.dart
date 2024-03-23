@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/connection/impl/live_share_listener.dart';
 import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
@@ -190,6 +191,7 @@ Future<bool> startConnection(String node, String connectionToken) async {
   setupStoredActionListener();
   setupStatusListener();
   setupMessageListener();
+  setupLiveshareListening();
 
   // Add listeners for Spaces (unrelated to chat node)
   setupSpaceListeners();

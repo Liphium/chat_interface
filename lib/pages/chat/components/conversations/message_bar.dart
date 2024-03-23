@@ -1,9 +1,12 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/live_share_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/pages/chat/components/conversations/conversation_info_window.dart';
+import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
@@ -11,6 +14,7 @@ import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,6 +33,7 @@ class _MessageBarState extends State<MessageBar> {
 
   @override
   Widget build(BuildContext context) {
+    final liveShareController = Get.find<LiveShareController>();
     final controller = Get.find<SettingController>();
 
     if (widget.conversation.borked) {
@@ -66,6 +71,44 @@ class _MessageBarState extends State<MessageBar> {
             //* Conversation actions
             Row(
               children: [
+                //* Live share
+                if (widget.conversation.type == model.ConversationType.directMessage && controller.settings[FileSettings.liveShareExperiment]!.getValue())
+                  Stack(
+                    children: [
+                      IconButton(
+                        onPressed: () async {
+                          if (liveShareController.isRunning()) {
+                            liveShareController.cancel();
+                            return;
+                          }
+                          final result = await openFile();
+                          if (result == null) {
+                            return;
+                          }
+                          liveShareController.newTransaction(widget.conversation.dmName, widget.conversation.id, result);
+                        },
+                        icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
+                        tooltip: "chat.liveshare".tr,
+                      ),
+                      IgnorePointer(
+                        child: SizedBox(
+                          width: 48 - defaultSpacing,
+                          height: 48 - defaultSpacing,
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Obx(
+                              () => CircularProgressIndicator(
+                                value: liveShareController.loading.value ? null : liveShareController.progress.value,
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+
                 if (Get.find<SpacesController>().inSpace.value)
                   LoadingIconButton(
                     icon: Icons.add_call,
@@ -88,8 +131,6 @@ class _MessageBarState extends State<MessageBar> {
                     controller.createAndConnect(Get.find<MessageController>().selectedConversation.value.id);
                   },
                 ),
-
-                horizontalSpacing(elementSpacing),
 
                 //* Invite people
                 LoadingIconButton(
