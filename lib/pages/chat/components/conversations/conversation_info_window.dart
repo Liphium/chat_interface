@@ -1,4 +1,8 @@
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/live_share_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -23,10 +27,8 @@ class _ConversationAddWindowState extends State<ConversationInfoWindow> {
   Widget build(BuildContext context) {
     sendLog(widget.conversation.readAt.value);
     sendLog(widget.conversation.updatedAt.value);
-    final readDate = DateTime.fromMillisecondsSinceEpoch(
-        widget.conversation.readAt.value.toInt());
-    final updateDate = DateTime.fromMillisecondsSinceEpoch(
-        widget.conversation.updatedAt.value.toInt());
+    final readDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.readAt.value.toInt());
+    final updateDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.updatedAt.value.toInt());
 
     return DialogBase(
       child: Column(
@@ -81,8 +83,7 @@ class _ConversationAddWindowState extends State<ConversationInfoWindow> {
             icon: Icons.copy,
             label: "conversation.info.copy_id".tr,
             onTap: () {
-              Clipboard.setData(
-                  ClipboardData(text: widget.conversation.id.toString()));
+              Clipboard.setData(ClipboardData(text: widget.conversation.id.toString()));
               Get.back();
             },
             loading: false.obs,
@@ -92,10 +93,19 @@ class _ConversationAddWindowState extends State<ConversationInfoWindow> {
             icon: Icons.copy,
             label: "conversation.info.copy_token".tr,
             onTap: () {
-              Clipboard.setData(ClipboardData(
-                  text:
-                      "${widget.conversation.token.id}:${widget.conversation.token.token}"));
+              Clipboard.setData(ClipboardData(text: "${widget.conversation.token.id}:${widget.conversation.token.token}"));
               Get.back();
+            },
+            loading: false.obs,
+          ),
+          verticalSpacing(elementSpacing),
+          ProfileButton(
+            icon: Icons.hardware,
+            label: "profile.test".tr,
+            onTap: () {
+              final container = LiveshareInviteContainer("hello", "hello-world-token", "test.png", randomSymmetricKey());
+
+              sendActualMessage(false.obs, widget.conversation.id, MessageType.liveshare, [], container.toJson(), "", () => {});
             },
             loading: false.obs,
           ),

@@ -111,6 +111,14 @@ class ChatPageTranslations extends Translations {
           'download.folder': 'Download into folder',
           'download.app': 'Download into app',
           'image.loading': 'Image is loading..',
+          'file.bytes': '@count B',
+          'file.kilobytes': '@count KB',
+          'file.megabytes': '@count MB',
+          'file.gigabytes': '@count GB',
+
+          // Live share
+          'chat.liveshare_request': 'Request to share file',
+          'chat.liveshare.not_found': 'The request has expired.',
 
           // Library
           'library.all': 'Everything',
@@ -122,7 +130,7 @@ class ChatPageTranslations extends Translations {
           'join.space': 'Join Space',
           'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
           'chat.space_invite': 'Space invitation',
-          'chat.space.not_found': 'This space does not exist anymore.',
+          'chat.space.not_found': 'This space already ended.',
         },
 
         //* German

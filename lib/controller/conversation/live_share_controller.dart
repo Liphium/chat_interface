@@ -300,15 +300,17 @@ class LiveShareController extends GetxController {
 class LiveshareInviteContainer {
   final String id;
   final String token;
+  final String fileName;
   final SecureKey key;
 
-  LiveshareInviteContainer(this.id, this.token, this.key);
+  LiveshareInviteContainer(this.id, this.token, this.fileName, this.key);
 
   factory LiveshareInviteContainer.fromJson(String json) {
     final data = jsonDecode(json);
     return LiveshareInviteContainer(
       data["id"],
       data["token"],
+      data["name"],
       unpackageSymmetricKey(data["key"]),
     );
   }
@@ -317,6 +319,7 @@ class LiveshareInviteContainer {
     return jsonEncode({
       "id": id,
       "token": token,
+      "name": fileName,
       "key": packageSymmetricKey(key),
     });
   }

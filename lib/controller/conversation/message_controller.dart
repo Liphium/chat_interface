@@ -384,5 +384,6 @@ class Message {
 enum MessageType {
   text,
   system,
-  call;
+  call,
+  liveshare;
 }

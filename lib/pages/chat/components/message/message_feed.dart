@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/message_liveshare_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/system_message_renderer.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -148,6 +149,9 @@ class _MessageFeedState extends State<MessageFeed> {
 
                                           case MessageType.call:
                                             renderer = SpaceMessageRenderer(message: message, self: self, last: last, sender: self ? Friend.me() : sender);
+
+                                          case MessageType.liveshare:
+                                            renderer = LiveshareMessageRenderer(message: message, self: self, last: last, sender: self ? Friend.me() : sender);
 
                                           case MessageType.system:
                                             renderer = SystemMessageRenderer(message: message, accountId: message.senderAccount);
