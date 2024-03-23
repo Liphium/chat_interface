@@ -7,6 +7,7 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart' as msg;
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -16,6 +17,7 @@ import 'package:dio/dio.dart' as d;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:open_app_file/open_app_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -30,6 +32,7 @@ class LiveShareController extends GetxController {
   String? transactionId;
   String? transactionToken;
   String? uploadToken;
+  String? filePath;
   Directory? chunksDir;
   StreamSubscription<Uint8List>? partSubscription;
 
@@ -55,7 +58,7 @@ class LiveShareController extends GetxController {
   //* Everything about sending starts here
 
   void newTransaction(String friendId, String conversationId, XFile shared) async {
-    if (currentReceiver.value != null || currentConversation.value != null) {
+    if (currentReceiver.value != null || currentConversation.value != null || loading.value) {
       sendLog("Already in a transaction");
       return;
     }
@@ -71,6 +74,7 @@ class LiveShareController extends GetxController {
     sendLog(chunksDir!.path);
 
     final file = File(shared.path);
+    filePath = shared.path;
     final fileSize = await file.length();
     endPart = (fileSize.toDouble() / chunkSize.toDouble()).ceil();
     connector.sendAction(
@@ -79,7 +83,6 @@ class LiveShareController extends GetxController {
         "size": fileSize,
       }),
       handler: (event) {
-        loading.value = false;
         if (!event.data["success"]) {
           sendLog("creating transaction failed");
           showErrorPopup("error".tr, "liveshare.create_failed".tr);
@@ -103,6 +106,7 @@ class LiveShareController extends GetxController {
 
   /// Called for every file part sending event (only when sending)
   void sendFilePart(Event event) async {
+    loading.value = false;
     final start = event.data["start"] as int;
     //final end = event.data["end"] as int;
     if (sending >= start) {
@@ -110,8 +114,9 @@ class LiveShareController extends GetxController {
     }
     final prevSending = sending;
     sending = start;
+    progress.value = start / endPart;
 
-    final file = File("");
+    final file = File(filePath!);
 
     // Read the original file and extract one chunk
     final stream = file.openRead((start - 1) * chunkSize, start * chunkSize);
@@ -165,6 +170,7 @@ class LiveShareController extends GetxController {
     currentConversation.value = null;
     transactionId = null;
     transactionToken = null;
+    filePath = null;
     uploadToken = null;
     await chunksDir?.delete(recursive: true);
     chunksDir = null;
@@ -174,10 +180,29 @@ class LiveShareController extends GetxController {
 
   /// Join a transaction with a given ID and token + start listening for parts
   void joinTransaction(String conversation, String friendId, LiveshareInviteContainer container) async {
-    if (transactionId == null || transactionToken == null) {
+    if (currentReceiver.value != null || currentConversation.value != null || loading.value) {
+      sendLog("Already in a transaction");
+      return;
+    }
+    if (friendId == StatusController.ownAccountId) {
+      showErrorPopup("error", "chat.liveshare.not_send_self");
       return;
     }
     uploading = false;
+
+    // Get info about the file
+    final json = await postAny(
+      "$nodeProtocol${container.url}/liveshare/info",
+      {"id": container.id, "token": container.token},
+    );
+    if (!json["success"]) {
+      sendLog("failed to get info");
+      return;
+    }
+    endPart = (json["size"].toDouble() / chunkSize.toDouble()).ceil();
+
+    currentConversation.value = conversation;
+    currentReceiver.value = friendId;
 
     // Subscribe to byte stream
     final formData = d.FormData.fromMap({
@@ -213,6 +238,7 @@ class LiveShareController extends GetxController {
     bool receivedInfo = false;
 
     // Listen for new parts
+    Timer? downloadTimer;
     partSubscription = body.stream.listen(
       (event) async {
         // Parse the server sent event (Format: data: <data>\n\n)
@@ -231,7 +257,7 @@ class LiveShareController extends GetxController {
           currentChunk = maxChunk;
 
           // Start a timer for downloading the parts
-          Timer.periodic(20.ms, (timer) async {
+          downloadTimer = Timer.periodic(20.ms, (timer) async {
             if (downloading) return;
             if (completed) {
               timer.cancel();
@@ -242,6 +268,7 @@ class LiveShareController extends GetxController {
             if (waiting) {
               if (currentChunk < maxChunk) {
                 currentChunk++;
+                progress.value = currentChunk / endPart;
                 waiting = false;
               } else {
                 return;
@@ -285,10 +312,13 @@ class LiveShareController extends GetxController {
               container.id,
               container.token,
               receiverId,
-              callback: (complete) {
+              callback: (complete) async {
                 completed = complete;
                 if (completed) {
-                  _stitchFileTogether("test.mkv", receiveDir);
+                  await _stitchFileTogether(container.fileName, receiveDir);
+                  await receiveDir.delete(recursive: true);
+                  OpenAppFile.open((await getDownloadsDirectory())!.path);
+                  partSubscription?.cancel();
                 }
                 sendLog("is completed: $complete");
               },
@@ -297,10 +327,19 @@ class LiveShareController extends GetxController {
           });
         }
       },
+      onError: (e) {
+        sendLog("download error: $e");
+      },
+      cancelOnError: true,
       onDone: () async {
+        downloadTimer?.cancel();
         onTransactionEnd();
-        await receiveDir.delete(recursive: true);
-        sendLog("done, have to delete all files here");
+        // Give time to delete files
+        Timer(const Duration(seconds: 5), () {
+          if (!completed) {
+            receiveDir.delete(recursive: true);
+          }
+        });
       },
     );
   }
@@ -332,7 +371,7 @@ class LiveShareController extends GetxController {
     callback?.call(res.data["complete"]);
   }
 
-  void _stitchFileTogether(String fileName, Directory dir) async {
+  Future<bool> _stitchFileTogether(String fileName, Directory dir) async {
     final downloads = await getDownloadsDirectory();
     final file = File("${downloads!.path}/$fileName");
 
@@ -349,6 +388,8 @@ class LiveShareController extends GetxController {
 
       currentIndex++;
     }
+
+    return true;
   }
 }
 

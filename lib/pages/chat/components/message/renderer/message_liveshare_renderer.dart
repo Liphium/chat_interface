@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/live_share_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -25,15 +27,18 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
   final available = false.obs;
   final size = 0.obs;
 
+  Timer? timer;
+
   @override
   void initState() {
     super.initState();
     final container = LiveshareInviteContainer.fromJson(widget.message.content);
     updateInfo(container);
+    timer = Timer.periodic(const Duration(seconds: 5), (_) => updateInfo(container));
   }
 
   void updateInfo(LiveshareInviteContainer container) async {
-    final json = await postAny(container.url, {
+    final json = await postAny("$nodeProtocol${container.url}/liveshare/info", {
       "id": container.id,
       "token": container.token,
     });
@@ -41,6 +46,7 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
 
     if (!json["success"]) {
       available.value = false;
+      timer?.cancel();
       return;
     }
 
@@ -49,8 +55,15 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    timer?.cancel();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Friend sender = widget.sender ?? Friend.system();
+    final controller = Get.find<LiveShareController>();
     final container = LiveshareInviteContainer.fromJson(widget.message.content);
 
     return RepaintBoundary(
@@ -152,7 +165,7 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
                                 Flexible(
                                   child: Obx(
                                     () => Text(
-                                      available.value ? formatFileSize(3 * 1024 * 1024 * 1024) : 'chat.liveshare.not_found'.tr,
+                                      available.value ? formatFileSize(size.value) : 'chat.liveshare.not_found'.tr,
                                       style: Get.theme.textTheme.bodyMedium,
                                     ),
                                   ),
@@ -163,15 +176,26 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
                           horizontalSpacing(defaultSpacing),
 
                           //* Accept button
-                          Obx(
-                            () => Visibility(
-                              visible: available.value,
+                          Obx(() {
+                            if (available.value && controller.currentConversation.value == widget.message.conversation) {
+                              return SizedBox(
+                                width: 30,
+                                height: 30,
+                                child: CircularProgressIndicator(
+                                  color: Get.theme.colorScheme.onPrimary,
+                                  value: controller.progress.value,
+                                ),
+                              );
+                            }
+
+                            return Visibility(
+                              visible: available.value && !widget.self,
                               child: IconButton(
-                                onPressed: () => {},
+                                onPressed: () => Get.find<LiveShareController>().joinTransaction(widget.message.conversation, widget.message.senderAccount, container),
                                 icon: const Icon(Icons.check),
                               ),
-                            ),
-                          ),
+                            );
+                          }),
                         ],
                       ),
                     ),

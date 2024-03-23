@@ -143,27 +143,29 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                           overflow: TextOverflow.ellipsis,
                         )),
                         horizontalSpacing(defaultSpacing),
-                        Obx(() => Visibility(
-                              visible: widget.file.progress.value == 0,
-                              replacement: Padding(
-                                padding: const EdgeInsets.all(defaultSpacing),
-                                child: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    value: widget.file.progress.value,
-                                    strokeWidth: 3,
-                                    color: Get.theme.colorScheme.onPrimary,
-                                  ),
+                        Obx(
+                          () => Visibility(
+                            visible: widget.file.progress.value == 0,
+                            replacement: Padding(
+                              padding: const EdgeInsets.all(defaultSpacing),
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  value: widget.file.progress.value,
+                                  strokeWidth: 3,
+                                  color: Get.theme.colorScheme.onPrimary,
                                 ),
                               ),
-                              child: IconButton(
-                                onPressed: () {
-                                  widget.onRemove?.call();
-                                },
-                                icon: const Icon(Icons.close),
-                              ),
-                            )),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                widget.onRemove?.call();
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
