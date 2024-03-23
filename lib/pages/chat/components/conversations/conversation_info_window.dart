@@ -100,17 +100,6 @@ class _ConversationAddWindowState extends State<ConversationInfoWindow> {
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
-            icon: Icons.hardware,
-            label: "profile.test".tr,
-            onTap: () {
-              final container = LiveshareInviteContainer("hello", "hello-world-token", "test.png", randomSymmetricKey());
-
-              sendActualMessage(false.obs, widget.conversation.id, MessageType.liveshare, [], container.toJson(), "", () => {});
-            },
-            loading: false.obs,
-          ),
-          verticalSpacing(elementSpacing),
-          ProfileButton(
             color: Get.theme.colorScheme.onError,
             iconColor: Get.theme.colorScheme.error,
             icon: Icons.close,

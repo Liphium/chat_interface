@@ -60,7 +60,7 @@ class InfoContainer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error, color: Theme.of(context).colorScheme.onPrimary),
+          Icon(Icons.info, color: Theme.of(context).colorScheme.onPrimary),
           horizontalSpacing(defaultSpacing),
           if (expand) Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium)) else Text(message, style: Theme.of(context).textTheme.labelMedium),
         ],

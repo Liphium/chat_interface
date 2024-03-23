@@ -7,8 +7,8 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
-import 'package:chat_interface/pages/chat/sidebar/liveshare_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
@@ -86,29 +86,6 @@ class _SidebarState extends State<Sidebar> {
                                   },
                                   cursorColor: theme.colorScheme.onPrimary,
                                 ),
-                              ),
-                              horizontalSpacing(defaultSpacing * 0.5),
-                              Stack(
-                                children: [
-                                  IconButton(
-                                    onPressed: () => Get.dialog(const LiveShareWindow()),
-                                    icon: Icon(Icons.electric_bolt, color: theme.colorScheme.onPrimary),
-                                  ),
-                                  IgnorePointer(
-                                    child: SizedBox(
-                                      width: 48 - defaultSpacing,
-                                      height: 48 - defaultSpacing,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(2.0),
-                                        child: CircularProgressIndicator(
-                                          value: 0.5,
-                                          strokeWidth: 3,
-                                          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onPrimary),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                ],
                               ),
                               horizontalSpacing(defaultSpacing * 0.5),
                               IconButton(

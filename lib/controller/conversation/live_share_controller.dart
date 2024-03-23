@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart' as msg;
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:dio/dio.dart' as d;
 import 'package:file_selector/file_selector.dart';
@@ -16,22 +20,47 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class LiveShareController extends GetxController {
-  final currentFile = Rx<XFile?>(null);
-
   // Current transaction
-  final enabled = false.obs;
+  final currentReceiver = Rx<String?>(null);
+  final currentConversation = Rx<String?>(null);
+  final loading = false.obs;
+  final progress = 0.0.obs;
+  bool uploading = false;
+  int endPart = 0;
   String? transactionId;
   String? transactionToken;
   String? uploadToken;
   Directory? chunksDir;
+  StreamSubscription<Uint8List>? partSubscription;
 
   static const chunkSize = 512 * 1024;
 
-  /// Start a transaction with a new file
-  void startSharing() async {
-    if (currentFile.value == null) {
+  bool isRunning() {
+    return currentReceiver.value != null && currentConversation.value != null;
+  }
+
+  void cancel() {
+    if (currentReceiver.value == null || currentConversation.value == null) {
       return;
     }
+    if (uploading) {
+      connector.sendAction(
+        Message("cancel_transaction", <String, dynamic>{}),
+      );
+    } else {
+      partSubscription?.cancel();
+    }
+  }
+
+  //* Everything about sending starts here
+
+  void newTransaction(String friendId, String conversationId, XFile shared) async {
+    if (currentReceiver.value != null || currentConversation.value != null) {
+      sendLog("Already in a transaction");
+      return;
+    }
+    loading.value = true;
+    uploading = true;
 
     // Generate chunks dir
     var tempDir = await getTemporaryDirectory();
@@ -41,37 +70,38 @@ class LiveShareController extends GetxController {
     await chunksDir!.create();
     sendLog(chunksDir!.path);
 
-    final file = File(currentFile.value!.path);
+    final file = File(shared.path);
     final fileSize = await file.length();
-    sendLog("File name: ${currentFile.value!.name}");
-    sendLog("File size: $fileSize");
+    endPart = (fileSize.toDouble() / chunkSize.toDouble()).ceil();
     connector.sendAction(
       Message("create_transaction", <String, dynamic>{
-        "name": currentFile.value!.name,
+        "name": shared.name,
         "size": fileSize,
       }),
       handler: (event) {
+        loading.value = false;
         if (!event.data["success"]) {
           sendLog("creating transaction failed");
+          showErrorPopup("error".tr, "liveshare.create_failed".tr);
           return;
         }
 
-        enabled.value = true;
+        currentReceiver.value = friendId;
+        currentConversation.value = conversationId;
         transactionId = event.data["id"];
         transactionToken = event.data["token"];
         uploadToken = event.data["upload_token"];
-        sendLog("Transaction ID: $transactionId");
-        sendLog("Transaction token: $transactionToken");
 
-        // Prepare sending
-
-        // Share with self for now
-        _joinTransaction(transactionId!, transactionToken!);
+        // Send live share message
+        final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, shared.name, randomSymmetricKey());
+        sendActualMessage(false.obs, conversationId, msg.MessageType.liveshare, [], container.toJson(), "", () => {});
       },
     );
   }
 
   int sending = 0;
+
+  /// Called for every file part sending event (only when sending)
   void sendFilePart(Event event) async {
     final start = event.data["start"] as int;
     //final end = event.data["end"] as int;
@@ -81,8 +111,7 @@ class LiveShareController extends GetxController {
     final prevSending = sending;
     sending = start;
 
-    // Send one part for now
-    final file = File(currentFile.value!.path);
+    final file = File("");
 
     // Read the original file and extract one chunk
     final stream = file.openRead((start - 1) * chunkSize, start * chunkSize);
@@ -127,18 +156,36 @@ class LiveShareController extends GetxController {
     );
   }
 
-  void _joinTransaction(String id, String token) async {
+  /// Called when a transaction is ended (only when sending)
+  void onTransactionEnd() async {
+    loading.value = false;
+    uploading = false;
+    progress.value = 0.0;
+    currentReceiver.value = null;
+    currentConversation.value = null;
+    transactionId = null;
+    transactionToken = null;
+    uploadToken = null;
+    await chunksDir?.delete(recursive: true);
+    chunksDir = null;
+  }
+
+  //* Everything about receiving starts here
+
+  /// Join a transaction with a given ID and token + start listening for parts
+  void joinTransaction(String conversation, String friendId, LiveshareInviteContainer container) async {
     if (transactionId == null || transactionToken == null) {
       return;
     }
+    uploading = false;
 
     // Subscribe to byte stream
     final formData = d.FormData.fromMap({
-      "id": id,
-      "token": token,
+      "id": container.id,
+      "token": container.token,
     });
     final res = await dio.post(
-      nodePath("/liveshare/subscribe"),
+      "$nodeProtocol${container.url}/liveshare/subscribe",
       data: formData,
       options: d.Options(
         validateStatus: (status) => status != 404,
@@ -166,94 +213,102 @@ class LiveShareController extends GetxController {
     bool receivedInfo = false;
 
     // Listen for new parts
-    body.stream.listen((event) async {
-      // Parse the server sent event (Format: data: <data>\n\n)
-      final packet = String.fromCharCodes(event);
-      final data = packet.substring(6).trim();
-      if (!receivedInfo) {
-        receivedInfo = true;
-        receiverId = data;
-        return;
-      }
+    partSubscription = body.stream.listen(
+      (event) async {
+        // Parse the server sent event (Format: data: <data>\n\n)
+        final packet = String.fromCharCodes(event);
+        final data = packet.substring(6).trim();
+        if (!receivedInfo) {
+          receivedInfo = true;
+          receiverId = data;
+          return;
+        }
 
-      sendLog("can now download until $data");
+        sendLog("can now download until $data");
 
-      maxChunk = int.parse(data);
-      if (currentChunk == 0) {
-        currentChunk = maxChunk;
+        maxChunk = int.parse(data);
+        if (currentChunk == 0) {
+          currentChunk = maxChunk;
 
-        // Start a timer for downloading the parts
-        Timer.periodic(20.ms, (timer) async {
-          if (downloading) return;
-          if (completed) {
-            timer.cancel();
-            return;
-          }
+          // Start a timer for downloading the parts
+          Timer.periodic(20.ms, (timer) async {
+            if (downloading) return;
+            if (completed) {
+              timer.cancel();
+              return;
+            }
 
-          // Check if new chunk is available
-          if (waiting) {
+            // Check if new chunk is available
+            if (waiting) {
+              if (currentChunk < maxChunk) {
+                currentChunk++;
+                waiting = false;
+              } else {
+                return;
+              }
+            }
+            downloading = true;
+
+            // Download stuff
+            final formData = d.FormData.fromMap({
+              "id": container.id,
+              "token": container.token,
+              "chunk": currentChunk,
+            });
+            final res = await dio.download(
+              "$nodeProtocol${container.url}/liveshare/download",
+              "${receiveDir.path}/chunk_$currentChunk",
+              data: formData,
+              options: d.Options(
+                validateStatus: (status) => status != 404,
+              ),
+            );
+
+            if (res.statusCode != 200) {
+              sendLog("ERROR DOWNLOADING CHUNK $currentChunk");
+              return;
+            }
+
+            sendLog("downloaded chunk $currentChunk");
+            downloading = false;
+
+            // Check if new chunk can be downloaded right away
             if (currentChunk < maxChunk) {
               currentChunk++;
               waiting = false;
             } else {
-              return;
+              waiting = true;
             }
-          }
-          downloading = true;
 
-          // Download stuff
-          final formData = d.FormData.fromMap({
-            "id": id,
-            "token": token,
-            "chunk": currentChunk,
+            _tellReceived(
+              container.url,
+              container.id,
+              container.token,
+              receiverId,
+              callback: (complete) {
+                completed = complete;
+                if (completed) {
+                  _stitchFileTogether("test.mkv", receiveDir);
+                }
+                sendLog("is completed: $complete");
+              },
+              onError: () => sendLog("error"),
+            );
           });
-          final res = await dio.download(
-            nodePath("/liveshare/download"),
-            "${receiveDir.path}/chunk_$currentChunk",
-            data: formData,
-            options: d.Options(
-              validateStatus: (status) => status != 404,
-            ),
-          );
-
-          if (res.statusCode != 200) {
-            sendLog("ERROR DOWNLOADING CHUNK $currentChunk");
-            return;
-          }
-
-          sendLog("downloaded chunk $currentChunk");
-          downloading = false;
-
-          // Check if new chunk can be downloaded right away
-          if (currentChunk < maxChunk) {
-            currentChunk++;
-            waiting = false;
-          } else {
-            waiting = true;
-          }
-
-          _tellReceived(
-            id,
-            token,
-            receiverId,
-            callback: (complete) {
-              completed = complete;
-              if (completed) {
-                _stitchFileTogether("test.mkv", receiveDir);
-              }
-              sendLog("is completed: $complete");
-            },
-            onError: () => sendLog("error"),
-          );
-        });
-      }
-    });
+        }
+      },
+      onDone: () async {
+        onTransactionEnd();
+        await receiveDir.delete(recursive: true);
+        sendLog("done, have to delete all files here");
+      },
+    );
   }
 
-  void _tellReceived(String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
+  void _tellReceived(String url, String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
     // Send receive confirmation
     final res = await dio.post(
-      nodePath("/liveshare/received"), // TODO: Eventually use domain of the node here (might be different from the server domain)
+      "$nodeProtocol$url/liveshare/received",
       data: jsonEncode({
         "id": id,
         "token": token,
@@ -298,16 +353,18 @@ class LiveShareController extends GetxController {
 }
 
 class LiveshareInviteContainer {
+  final String url;
   final String id;
   final String token;
   final String fileName;
   final SecureKey key;
 
-  LiveshareInviteContainer(this.id, this.token, this.fileName, this.key);
+  LiveshareInviteContainer(this.url, this.id, this.token, this.fileName, this.key);
 
   factory LiveshareInviteContainer.fromJson(String json) {
     final data = jsonDecode(json);
     return LiveshareInviteContainer(
+      data["url"],
       data["id"],
       data["token"],
       data["name"],
@@ -317,6 +374,7 @@ class LiveshareInviteContainer {
 
   String toJson() {
     return jsonEncode({
+      "url": url,
       "id": id,
       "token": token,
       "name": fileName,

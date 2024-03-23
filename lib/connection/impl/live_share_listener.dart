@@ -6,4 +6,8 @@ void setupLiveshareListening() {
   connector.listen("transaction_send_part", (event) {
     Get.find<LiveShareController>().sendFilePart(event);
   });
+
+  connector.listen("transaction_end", (event) {
+    Get.find<LiveShareController>().onTransactionEnd();
+  });
 }

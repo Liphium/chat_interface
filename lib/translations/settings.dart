@@ -28,6 +28,7 @@ class SettingsTranslations extends Translations {
           'settings.invites': 'Invites',
           'settings.trusted_links': 'Trusted Links',
           'settings.invites.title': 'You have @count invites left.',
+          'settings.experimental': 'Experimental',
 
           // Audio settings
           'audio.device': 'Select a device',
@@ -73,6 +74,10 @@ class SettingsTranslations extends Translations {
           'settings.file.cache_type.unlimited': 'Unlimited',
           'settings.file.cache_type.size': 'Size',
           'settings.file.mb': 'MB',
+          'settings.file.live_share': 'Live Share',
+          'settings.file.live_share.description':
+              'This is an experimental feature that allows you to share files with one of your friends in real-time, up to any file size. This gives you a glimpse into the future of file sharing on Liphium. You can access this feature by clicking on the bolt icon in any direct message.',
+          'files.live_share.experiment': 'Enable Live Share',
 
           // Data settings
           'settings.data.profile_picture': 'Profile picture',

@@ -5,6 +5,7 @@ import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:dio/dio.dart' as d;
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -118,6 +119,22 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
   }
 
   return _postTCP(connector.nodePublicKey!, "$nodeProtocol$nodeDomain$path", body, defaultError: defaultError, token: sessionToken);
+}
+
+// Post request to any domain
+Future<Map<String, dynamic>> postAny(String url, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+  final res = await dio.post(
+    url,
+    data: jsonEncode(body),
+    options: d.Options(
+      validateStatus: (status) => status != 404,
+    ),
+  );
+  if (res.statusCode != 200) {
+    return <String, dynamic>{"success": false, "error": defaultError};
+  }
+
+  return res.data;
 }
 
 String padBase64(String str) {

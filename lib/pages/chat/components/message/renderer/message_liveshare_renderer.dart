@@ -2,9 +2,9 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/live_share_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,7 +21,32 @@ class LiveshareMessageRenderer extends StatefulWidget {
 }
 
 class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
-  final loading = false.obs;
+  final loading = true.obs;
+  final available = false.obs;
+  final size = 0.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    final container = LiveshareInviteContainer.fromJson(widget.message.content);
+    updateInfo(container);
+  }
+
+  void updateInfo(LiveshareInviteContainer container) async {
+    final json = await postAny(container.url, {
+      "id": container.id,
+      "token": container.token,
+    });
+    loading.value = false;
+
+    if (!json["success"]) {
+      available.value = false;
+      return;
+    }
+
+    available.value = true;
+    size.value = json["size"];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,16 +149,12 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
                                     style: Get.theme.textTheme.labelMedium,
                                   ),
                                 ),
-                                // Flexible(
-                                //   child: Text(
-                                //     "chat.liveshare.not_found".tr,
-                                //     style: Get.theme.textTheme.bodyMedium,
-                                //   ),
-                                // ),
                                 Flexible(
-                                  child: Text(
-                                    formatFileSize(3 * 1024 * 1024 * 1024),
-                                    style: Get.theme.textTheme.bodyMedium,
+                                  child: Obx(
+                                    () => Text(
+                                      available.value ? formatFileSize(3 * 1024 * 1024 * 1024) : 'chat.liveshare.not_found'.tr,
+                                      style: Get.theme.textTheme.bodyMedium,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -142,15 +163,14 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
                           horizontalSpacing(defaultSpacing),
 
                           //* Accept button
-                          IconButton(
-                            onPressed: () => {},
-                            icon: const Icon(Icons.check),
-                          ),
-
-                          //* Decline button
-                          IconButton(
-                            onPressed: () => {},
-                            icon: const Icon(Icons.close),
+                          Obx(
+                            () => Visibility(
+                              visible: available.value,
+                              child: IconButton(
+                                onPressed: () => {},
+                                icon: const Icon(Icons.check),
+                              ),
+                            ),
                           ),
                         ],
                       ),
