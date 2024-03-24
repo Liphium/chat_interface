@@ -4,6 +4,8 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/settings/app/speech_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
@@ -66,7 +68,17 @@ class SpaceMemberController extends GetxController {
           if (members[ownId]!.participant.value != null) {
             final participant = members[ownId]!.participant.value! as LocalParticipant;
             if (participant.audioTrackPublications.isEmpty) {
-              await participant.setMicrophoneEnabled(true);
+              final controller = Get.find<SettingController>();
+              await participant.setMicrophoneEnabled(
+                true,
+                audioCaptureOptions: AudioCaptureOptions(
+                  echoCancellation: controller.settings[AudioSettings.echoCancellation]!.getValue(),
+                  autoGainControl: controller.settings[AudioSettings.autoGainControl]!.getValue(),
+                  noiseSuppression: controller.settings[AudioSettings.noiseSuppression]!.getValue(),
+                  highPassFilter: controller.settings[AudioSettings.highPassFilter]!.getValue(),
+                  typingNoiseDetection: controller.settings[AudioSettings.typingNoiseDetection]!.getValue(),
+                ),
+              );
             } else if (participant.audioTrackPublications.isNotEmpty) {
               await participant.audioTrackPublications.first.unmute();
             }

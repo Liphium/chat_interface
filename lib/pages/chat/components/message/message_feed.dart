@@ -110,6 +110,8 @@ class _MessageFeedState extends State<MessageFeed> {
                                       itemCount: controller.messages.length + 1,
                                       reverse: true,
                                       shrinkWrap: true,
+                                      addAutomaticKeepAlives: false,
+                                      addRepaintBoundaries: false,
                                       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                                       itemBuilder: (context, index) {
                                         if (index == 0) {
@@ -145,16 +147,38 @@ class _MessageFeedState extends State<MessageFeed> {
                                         switch (message.type) {
                                           case MessageType.text:
                                             renderer = MessageRenderer(
-                                                message: message, accountId: message.senderAccount, self: self, last: last, sender: self ? Friend.me() : sender);
+                                              key: ValueKey(message.id),
+                                              message: message,
+                                              accountId: message.senderAccount,
+                                              self: self,
+                                              last: last,
+                                              sender: self ? Friend.me() : sender,
+                                            );
 
                                           case MessageType.call:
-                                            renderer = SpaceMessageRenderer(message: message, self: self, last: last, sender: self ? Friend.me() : sender);
+                                            renderer = SpaceMessageRenderer(
+                                              key: ValueKey(message.id),
+                                              message: message,
+                                              self: self,
+                                              last: last,
+                                              sender: self ? Friend.me() : sender,
+                                            );
 
                                           case MessageType.liveshare:
-                                            renderer = LiveshareMessageRenderer(message: message, self: self, last: last, sender: self ? Friend.me() : sender);
+                                            renderer = LiveshareMessageRenderer(
+                                              key: ValueKey(message.id),
+                                              message: message,
+                                              self: self,
+                                              last: last,
+                                              sender: self ? Friend.me() : sender,
+                                            );
 
                                           case MessageType.system:
-                                            renderer = SystemMessageRenderer(message: message, accountId: message.senderAccount);
+                                            renderer = SystemMessageRenderer(
+                                              key: ValueKey(message.id),
+                                              message: message,
+                                              accountId: message.senderAccount,
+                                            );
                                         }
 
                                         final GlobalKey contextMenuKey = GlobalKey();

@@ -9,6 +9,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:livekit_client/livekit_client.dart';
 
 class MicrophoneTab extends StatefulWidget {
   const MicrophoneTab({super.key});
@@ -170,6 +171,20 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
             ),
           ),
         ),
+
+        verticalSpacing(sectionSpacing),
+
+        //* Other settings
+        Text("audio.microphone.processing".tr, style: theme.textTheme.labelLarge),
+        verticalSpacing(defaultSpacing),
+        Text("audio.microphone.processing.text".tr, style: theme.textTheme.bodyMedium),
+        verticalSpacing(elementSpacing),
+
+        const BoolSettingSmall(settingName: AudioSettings.echoCancellation),
+        const BoolSettingSmall(settingName: AudioSettings.noiseSuppression),
+        const BoolSettingSmall(settingName: AudioSettings.autoGainControl),
+        const BoolSettingSmall(settingName: AudioSettings.typingNoiseDetection),
+        const BoolSettingSmall(settingName: AudioSettings.highPassFilter),
       ],
     );
   }

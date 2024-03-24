@@ -40,6 +40,13 @@ class SettingsTranslations extends Translations {
           'audio.microphone.muted': 'Start muted in Spaces',
           'audio.microphone.sensitivity': 'Microphone sensitivity',
           'audio.microphone.sensitivity.text': 'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
+          'audio.microphone.processing': 'Microphone processing',
+          'audio.microphone.processing.text': 'When changing any of these settings, please rejoin the space to apply them.',
+          'audio.microphone.echo_cancellation': 'Echo cancellation',
+          'audio.microphone.noise_suppression': 'Noise suppression',
+          'audio.microphone.auto_gain_control': 'Auto gain control',
+          'audio.microphone.typing_noise_detection': 'Typing noise detection',
+          'audio.microphone.high_pass_filter': 'High-pass filter',
           'audio.output': 'Output',
           'audio.output.device': 'Or you just select one of these devices:',
 
