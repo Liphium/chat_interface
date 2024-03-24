@@ -35,6 +35,13 @@ pub fn stop() {
     *STOP_CHAT.lock().unwrap() = true;
 }
 
+fn pcm_to_db(pcm: f32) -> f32 {
+    if pcm <= 0.0 {
+        return 0.0;
+    }
+    20.0 * pcm.log10()
+}
+
 pub fn record() {
     thread::spawn(move || {
         // Get a cpal host
@@ -74,6 +81,7 @@ pub fn record() {
         };
 
         // Create a stream
+        let mut historic_fluctuations = vec![0.0; 10];
         let mut talking_streak = 0;
         let stream = match device.build_input_stream(
             &config.into(),
@@ -100,7 +108,26 @@ pub fn record() {
                     }
                 }
 
-                if max > options.talking_amplitude {
+                // Detect if the user is talking
+                let talking: bool = if options.detection_mode == 0 {
+                    if historic_fluctuations.len() >= 10 {
+                        historic_fluctuations.remove(0);
+                    }
+                    historic_fluctuations.push(max);
+
+                    // Calculate the fluctuation
+                    let mut fluctuation = 0.0;
+                    for i in 0..historic_fluctuations.len() {
+                        fluctuation += (max - historic_fluctuations[i]).abs();
+                    }
+                    fluctuation /= historic_fluctuations.len() as f32;
+
+                    fluctuation > 0.0011
+                } else {
+                    pcm_to_db(max) > options.talking_amplitude
+                };
+
+                if talking {
                     talking_streak = 25;
 
                     if !options.talking {

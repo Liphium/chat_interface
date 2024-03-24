@@ -1,6 +1,7 @@
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/app/microphone_tab.dart';
 import 'package:chat_interface/pages/settings/app/output_tab.dart';
+import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -10,7 +11,6 @@ import 'package:get/get.dart';
 class AudioSettings {
   static String defaultDeviceName = "def";
   static const String microphone = "audio.microphone";
-  static const String microphoneSensitivity = "audio.microphone.sensitivity";
   static const String startMuted = "audio.microphone.muted";
   static const String output = "audio.output";
 
@@ -20,6 +20,14 @@ class AudioSettings {
   static const String echoCancellation = "audio.microphone.echo_cancellation";
   static const String typingNoiseDetection = "audio.microphone.typing_noise_detection";
   static const String highPassFilter = "audio.microphone.high_pass_filter";
+
+  static const String microphoneMode = "audio.microphone.mode";
+  static const String microphoneSensitivity = "audio.microphone.sensitivity";
+
+  static var microphoneModes = [
+    SelectableItem("audio.microphone.sensitivity.automatic".tr, Icons.filter_alt),
+    SelectableItem("audio.microphone.sensitivity.manual".tr, Icons.adjust),
+  ];
 
   static void addSettings(SettingController controller) async {
     //* Microphone
@@ -31,6 +39,7 @@ class AudioSettings {
     controller.settings[AudioSettings.echoCancellation] = Setting<bool>(AudioSettings.echoCancellation, true);
     controller.settings[AudioSettings.typingNoiseDetection] = Setting<bool>(AudioSettings.typingNoiseDetection, true);
     controller.settings[AudioSettings.highPassFilter] = Setting<bool>(AudioSettings.highPassFilter, false);
+    controller.settings[AudioSettings.microphoneMode] = Setting<int>(AudioSettings.microphoneMode, 0);
 
     //* Output
     controller.settings[AudioSettings.output] = Setting<String>(AudioSettings.output, AudioSettings.defaultDeviceName);

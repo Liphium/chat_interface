@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:livekit_client/livekit_client.dart';
 
 class MicrophoneTab extends StatefulWidget {
   const MicrophoneTab({super.key});
@@ -22,7 +23,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
   final _microphones = <api.InputDevice>[].obs;
   final _sensitivity = 0.0.obs;
   bool _started = false;
-  StreamSubscription? _sub;
+  StreamSubscription? _sub, _actionSub;
 
   @override
   void initState() {
@@ -44,13 +45,16 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
 
     _microphones.addAll(list);
     if (!Get.find<SpacesController>().connected.value) {
-      await api.testVoice(device: _getCurrent());
+      await api.testVoice(device: _getCurrent(), detectionMode: 0);
       _started = true;
     } else {
       await api.setAmplitudeLogging(amplitudeLogging: true);
     }
     _sub = api.createAmplitudeStream().listen((amp) {
       _sensitivity.value = amp;
+    });
+    _actionSub = api.createActionStream().listen((event) {
+      sendLog(event.action);
     });
   }
 
@@ -66,6 +70,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
   @override
   void dispose() {
     _sub?.cancel();
+    _actionSub?.cancel();
     api.setAmplitudeLogging(amplitudeLogging: false);
     api.deleteAmplitudeStream();
     if (_started) {
@@ -130,45 +135,62 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
 
         //* Start off muted
         const BoolSettingSmall(settingName: AudioSettings.startMuted),
-
         verticalSpacing(sectionSpacing),
 
         //* Sensitivity
         Text("audio.microphone.sensitivity".tr, style: theme.textTheme.labelLarge),
-        verticalSpacing(elementSpacing),
+        verticalSpacing(defaultSpacing),
+
+        Text("audio.microphone.sensitivity.text".tr, style: theme.textTheme.bodyMedium),
+        SizedBox(
+          height: 0,
+          child: Opacity(
+            opacity: 0,
+            child: Text(
+              _sensitivity.value.toString(),
+              overflow: TextOverflow.clip,
+            ),
+          ),
+        ),
+        verticalSpacing(defaultSpacing),
+
+        ListSelectionSetting(
+          settingName: AudioSettings.microphoneMode,
+          items: AudioSettings.microphoneModes,
+        ),
 
         RepaintBoundary(
           child: Obx(
-            () => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("audio.microphone.sensitivity.text".tr, style: theme.textTheme.bodyMedium),
-                SizedBox(
-                  height: 0,
-                  child: Opacity(
-                    opacity: 0,
-                    child: Text(
-                      _sensitivity.value.toString(),
-                      overflow: TextOverflow.clip,
+            () {
+              if (controller.settings[AudioSettings.microphoneMode]!.value.value == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: defaultSpacing),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onBackground,
+                      borderRadius: BorderRadius.circular(elementSpacing),
                     ),
+                    height: 15,
                   ),
-                ),
-                Slider(
-                  value: clampDouble(sens.value.value, 0.0, 1.0),
-                  min: 0.0,
-                  max: 0.5,
-                  inactiveColor: theme.colorScheme.onBackground,
-                  thumbColor: theme.colorScheme.onPrimary,
-                  activeColor: theme.colorScheme.onPrimary,
-                  secondaryTrackValue: clampDouble(_sensitivity.value, 0.0, 0.5),
-                  secondaryActiveColor: theme.colorScheme.secondary,
-                  onChanged: (value) => sens.value.value = value,
-                  onChangeEnd: (value) {
-                    sens.setValue(value);
-                  },
-                ),
-              ],
-            ),
+                );
+              }
+
+              return Slider(
+                value: clampDouble(sens.value.value, 0.0, 1.0),
+                min: 0.0,
+                max: 0.5,
+                label: _sensitivity.value.toString(),
+                inactiveColor: theme.colorScheme.onBackground,
+                thumbColor: theme.colorScheme.onPrimary,
+                activeColor: theme.colorScheme.onPrimary,
+                secondaryTrackValue: clampDouble(_sensitivity.value, 0.0, 0.5),
+                secondaryActiveColor: theme.colorScheme.secondary,
+                onChanged: (value) => sens.value.value = value,
+                onChangeEnd: (value) {
+                  sens.setValue(value);
+                },
+              );
+            },
           ),
         ),
 

@@ -1,5 +1,3 @@
-use std::process::Command;
-
 use cpal::traits::{DeviceTrait, HostTrait};
 
 use crate::{
@@ -35,8 +33,9 @@ pub fn start_talking_engine() {
     microphone::record();
 }
 
-pub fn test_voice(device: String) {
+pub fn test_voice(device: String, detection_mode: i32) {
     audio::set_amplitude_logging(true);
+    audio::set_detection_mode(detection_mode);
     audio::set_input_device(device);
     microphone::allow_start();
     microphone::record();

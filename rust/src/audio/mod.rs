@@ -9,6 +9,7 @@ pub static ACTION_STARTED_TALKING: &str = "started_talking";
 pub static ACTION_STOPPED_TALKING: &str = "stopped_talking";
 
 pub struct AudioOptions {
+    pub detection_mode: i32,
     pub silent_mute: bool,
     pub muted: bool,
     pub deafened: bool,
@@ -21,6 +22,7 @@ pub struct AudioOptions {
 
 pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {
     Mutex::new(AudioOptions {
+        detection_mode: 0,
         silent_mute: false,
         muted: false,
         deafened: false,
@@ -87,6 +89,16 @@ pub fn set_silent_mute(silent_mute: bool) {
 pub fn set_input_device(microphone: String) {
     let mut options = get_options();
     (*options).input_device = microphone;
+}
+
+pub fn set_detection_mode(mode: i32) {
+    let mut options = get_options();
+    (*options).detection_mode = mode;
+}
+
+pub fn get_detection_mode() -> i32 {
+    let options = get_options();
+    options.detection_mode
 }
 
 pub fn get_input_device() -> String {

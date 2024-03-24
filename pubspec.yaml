@@ -30,7 +30,7 @@ dependencies:
   record: any
   sodium_libs: any
   ffi: any
-  flutter_rust_bridge: 2.0.0-dev.22
+  flutter_rust_bridge: 2.0.0-dev.28
   freezed_annotation: any
   file_selector: any
   drift_db_viewer: any
