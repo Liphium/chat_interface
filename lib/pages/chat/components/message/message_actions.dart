@@ -17,13 +17,22 @@ class AnswerData {
 
   AnswerData(this.id, this.senderAccount, this.content, this.attachments);
 
-  static String answerContent(String content, List<String> attachments, {FriendController? controller}) {
-    if (content == "" && attachments.isEmpty) {
-      content = "message.empty".tr;
-    } else if (content == "" && attachments.isNotEmpty) {
-      content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+  static String answerContent(MessageType type, String content, List<String> attachments, {FriendController? controller}) {
+    switch (type) {
+      case MessageType.text:
+        if (content == "" && attachments.isEmpty) {
+          content = "message.empty".tr;
+        } else if (content == "" && attachments.isNotEmpty) {
+          content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+        }
+        return content;
+      case MessageType.call:
+        return "chat.space_invite".tr;
+      case MessageType.liveshare:
+        return "chat.liveshare_request".tr;
+      case MessageType.system:
+        return "under.dev".tr;
     }
-    return content;
   }
 }
 

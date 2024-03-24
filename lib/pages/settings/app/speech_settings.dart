@@ -14,11 +14,23 @@ class AudioSettings {
   static const String startMuted = "audio.microphone.muted";
   static const String output = "audio.output";
 
+  // Microphone settings
+  static const String noiseSuppression = "audio.microphone.noise_suppression";
+  static const String autoGainControl = "audio.microphone.auto_gain_control";
+  static const String echoCancellation = "audio.microphone.echo_cancellation";
+  static const String typingNoiseDetection = "audio.microphone.typing_noise_detection";
+  static const String highPassFilter = "audio.microphone.high_pass_filter";
+
   static void addSettings(SettingController controller) async {
     //* Microphone
     controller.settings[AudioSettings.microphone] = Setting<String>(AudioSettings.microphone, AudioSettings.defaultDeviceName);
     controller.settings[AudioSettings.microphoneSensitivity] = Setting<double>(AudioSettings.microphoneSensitivity, 0.15);
     controller.settings[AudioSettings.startMuted] = Setting<bool>(AudioSettings.startMuted, false);
+    controller.settings[AudioSettings.noiseSuppression] = Setting<bool>(AudioSettings.noiseSuppression, true);
+    controller.settings[AudioSettings.autoGainControl] = Setting<bool>(AudioSettings.autoGainControl, true);
+    controller.settings[AudioSettings.echoCancellation] = Setting<bool>(AudioSettings.echoCancellation, true);
+    controller.settings[AudioSettings.typingNoiseDetection] = Setting<bool>(AudioSettings.typingNoiseDetection, true);
+    controller.settings[AudioSettings.highPassFilter] = Setting<bool>(AudioSettings.highPassFilter, false);
 
     //* Output
     controller.settings[AudioSettings.output] = Setting<String>(AudioSettings.output, AudioSettings.defaultDeviceName);

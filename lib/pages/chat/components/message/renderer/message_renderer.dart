@@ -106,7 +106,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                                 child: Column(
                                   crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                   children: [
-                                    // Reply message
+                                    //* Reply message
                                     Obx(() {
                                       if (answerMessage.value == null) {
                                         return const SizedBox();
@@ -127,9 +127,18 @@ class _MessageRendererState extends State<MessageRenderer> {
                                                 children: [
                                                   UserAvatar(id: answerMessage.value!.senderAccount, size: 30),
                                                   horizontalSpacing(elementSpacing),
+                                                  if (answerMessage.value!.type == MessageType.call)
+                                                    Icon(Icons.public, color: theme.colorScheme.onPrimary)
+                                                  else if (answerMessage.value!.type == MessageType.liveshare)
+                                                    Icon(Icons.electric_bolt, color: theme.colorScheme.onPrimary)
+                                                  else if (answerMessage.value!.type == MessageType.system)
+                                                    Icon(Icons.info, color: theme.colorScheme.onPrimary)
+                                                  else
+                                                    const SizedBox(),
+                                                  horizontalSpacing(elementSpacing),
                                                   Flexible(
                                                     child: Text(
-                                                      AnswerData.answerContent(answerMessage.value!.content, answerMessage.value!.attachments),
+                                                      AnswerData.answerContent(answerMessage.value!.type, answerMessage.value!.content, answerMessage.value!.attachments),
                                                       style: Get.theme.textTheme.labelMedium,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,

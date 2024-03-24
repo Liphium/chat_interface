@@ -5,6 +5,7 @@ import 'package:chat_interface/controller/conversation/live_share_controller.dar
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -25,28 +26,43 @@ class LiveshareMessageRenderer extends StatefulWidget {
 class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
   final loading = true.obs;
   final available = false.obs;
+  LiveshareInviteContainer? container;
+  int unavailableCount = 0;
   final size = 0.obs;
+  String transactionBegin = "";
 
   Timer? timer;
 
   @override
   void initState() {
     super.initState();
-    final container = LiveshareInviteContainer.fromJson(widget.message.content);
-    updateInfo(container);
-    timer = Timer.periodic(const Duration(seconds: 5), (_) => updateInfo(container));
+    container = LiveshareInviteContainer.fromJson(widget.message.content);
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 3), (_) => updateInfo());
+    transactionBegin = container!.id;
+    updateInfo();
   }
 
-  void updateInfo(LiveshareInviteContainer container) async {
-    final json = await postAny("$nodeProtocol${container.url}/liveshare/info", {
-      "id": container.id,
-      "token": container.token,
+  void updateInfo() async {
+    if (transactionBegin != container!.id) {
+      sendLog("WTF Flutter is actually weird $transactionBegin ${container!.id}");
+      return;
+    }
+
+    final json = await postAny("$nodeProtocol${container!.url}/liveshare/info", {
+      "id": container!.id,
+      "token": container!.token,
     });
     loading.value = false;
 
     if (!json["success"]) {
+      unavailableCount++;
+      sendLog(unavailableCount);
+      if (unavailableCount > 5) {
+        available.value = false;
+        timer?.cancel();
+      }
       available.value = false;
-      timer?.cancel();
       return;
     }
 
@@ -64,7 +80,7 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
   Widget build(BuildContext context) {
     Friend sender = widget.sender ?? Friend.system();
     final controller = Get.find<LiveShareController>();
-    final container = LiveshareInviteContainer.fromJson(widget.message.content);
+    container = LiveshareInviteContainer.fromJson(widget.message.content);
 
     return RepaintBoundary(
       child: Stack(
@@ -146,7 +162,7 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            getIconForFileName(container.fileName),
+                            getIconForFileName(container!.fileName),
                             size: sectionSpacing * 2,
                             color: Get.theme.colorScheme.onPrimary,
                           ),
@@ -158,7 +174,7 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
                               children: [
                                 Flexible(
                                   child: Text(
-                                    container.fileName,
+                                    container!.fileName,
                                     style: Get.theme.textTheme.labelMedium,
                                   ),
                                 ),
@@ -191,7 +207,7 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
                             return Visibility(
                               visible: available.value && !widget.self,
                               child: IconButton(
-                                onPressed: () => Get.find<LiveShareController>().joinTransaction(widget.message.conversation, widget.message.senderAccount, container),
+                                onPressed: () => Get.find<LiveShareController>().joinTransaction(widget.message.conversation, widget.message.senderAccount, container!),
                                 icon: const Icon(Icons.check),
                               ),
                             );

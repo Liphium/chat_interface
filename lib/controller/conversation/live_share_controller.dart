@@ -64,6 +64,7 @@ class LiveShareController extends GetxController {
     }
     loading.value = true;
     uploading = true;
+    sending = 0;
 
     // Generate chunks dir
     var tempDir = await getTemporaryDirectory();
@@ -166,6 +167,7 @@ class LiveShareController extends GetxController {
     loading.value = false;
     uploading = false;
     progress.value = 0.0;
+    sending = 0;
     currentReceiver.value = null;
     currentConversation.value = null;
     transactionId = null;
@@ -196,7 +198,7 @@ class LiveShareController extends GetxController {
       {"id": container.id, "token": container.token},
     );
     if (!json["success"]) {
-      sendLog("failed to get info");
+      showErrorPopup("error", "chat.liveshare.not_found");
       return;
     }
     endPart = (json["size"].toDouble() / chunkSize.toDouble()).ceil();
