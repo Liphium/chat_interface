@@ -46,7 +46,8 @@ class MessageController extends GetxController {
     var loaded = await (db.select(db.message)
           ..limit(30)
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-          ..where((tbl) => tbl.conversationId.equals(conversation.id)))
+          ..where((tbl) => tbl.conversationId.equals(conversation.id))
+          ..where((tbl) => tbl.system.equals(false)))
         .get();
 
     for (var message in loaded) {
@@ -116,11 +117,11 @@ class MessageController extends GetxController {
     if (message.type == MessageType.system) {
       if (SystemMessages.messages[message.content]?.store == true) {
         sendLog("STORING ${message.content}");
-        db.into(db.message).insertOnConflictUpdate(message.entity);
+        db.into(db.message).insertOnConflictUpdate(message.entity(!SystemMessages.messages[message.content]!.render));
       }
     } else {
       sendLog("WE ARE STORING");
-      db.into(db.message).insertOnConflictUpdate(message.entity);
+      db.into(db.message).insertOnConflictUpdate(message.entity(false));
     }
 
     // Handle system messages
@@ -295,7 +296,7 @@ class Message {
     }
     sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
     verified.value = checkSignature(signature, sender.signatureKey, hash);
-    db.message.insertOnConflictUpdate(entity);
+    db.message.insertOnConflictUpdate(entity(false));
     if (!verified.value) {
       sendLog("invalid signature");
     } else {
@@ -319,21 +320,24 @@ class Message {
     verified.value = messageData.verified;
   }
 
-  MessageData get entity => MessageData(
-        id: id,
-        type: type.index,
-        content: content,
-        answer: answer,
-        signature: signature,
-        attachments: jsonEncode(attachments),
-        certificate: certificate,
-        sender: sender,
-        senderAccount: senderAccount,
-        createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
-        conversationId: conversation,
-        edited: edited,
-        verified: verified.value,
-      );
+  MessageData entity(bool system) {
+    return MessageData(
+      id: id,
+      type: type.index,
+      content: content,
+      answer: answer,
+      signature: signature,
+      attachments: jsonEncode(attachments),
+      certificate: certificate,
+      sender: sender,
+      senderAccount: senderAccount,
+      createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
+      conversationId: conversation,
+      edited: edited,
+      verified: verified.value,
+      system: system,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{};
@@ -348,7 +352,7 @@ class Message {
       }
     }
     if (SystemMessages.messages[content]?.store == true) {
-      db.message.insertOnConflictUpdate(entity);
+      db.message.insertOnConflictUpdate(entity(!SystemMessages.messages[content]!.render));
     }
   }
 

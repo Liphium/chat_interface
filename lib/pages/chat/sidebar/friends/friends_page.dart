@@ -39,12 +39,13 @@ class _FriendsPageState extends State<FriendsPage> {
       effects: [
         ScaleEffect(delay: 100.ms, duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), alignment: Alignment.center, curve: const ElasticOutCurve(0.8)),
         ShakeEffect(
-            delay: 100.ms,
-            duration: 400.ms,
-            hz: randomHz,
-            offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
-            rotation: 0,
-            curve: Curves.decelerate),
+          delay: 100.ms,
+          duration: 400.ms,
+          hz: randomHz,
+          offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+          rotation: 0,
+          curve: Curves.decelerate,
+        ),
         FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
       ],
       child: Center(
@@ -65,10 +66,7 @@ class _FriendsPageState extends State<FriendsPage> {
                 SizedBox(
                   height: 48,
                   child: Material(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(defaultSpacing * 1.5),
-                      topRight: Radius.circular(defaultSpacing * 1.5),
-                    ),
+                    borderRadius: BorderRadius.circular(defaultSpacing),
                     color: Get.theme.colorScheme.primary,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),

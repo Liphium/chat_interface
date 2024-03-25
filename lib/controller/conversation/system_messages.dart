@@ -114,7 +114,6 @@ class SystemMessages {
     // Format: [messageId]
     "msg.deleted": SystemMessage(
       Icons.delete,
-      store: false,
       render: false,
       handler: (msg) {
         Get.find<MessageController>().deleteMessageFromClient(msg.attachments[0]);
@@ -128,7 +127,6 @@ class SystemMessages {
     // Format: [accountId]
     "conv.kicked": SystemMessage(
       Icons.delete,
-      store: false,
       render: false,
       handler: (msg) {
         final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;

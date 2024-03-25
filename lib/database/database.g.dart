@@ -696,6 +696,14 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
       requiredDuringInsert: true,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
+  static const VerificationMeta _systemMeta = const VerificationMeta('system');
+  @override
+  late final GeneratedColumn<bool> system = GeneratedColumn<bool>(
+      'system', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("system" IN (0, 1))'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<int> type = GeneratedColumn<int>(
@@ -765,6 +773,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   List<GeneratedColumn> get $columns => [
         id,
         verified,
+        system,
         type,
         content,
         signature,
@@ -797,6 +806,12 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           verified.isAcceptableOrUnknown(data['verified']!, _verifiedMeta));
     } else if (isInserting) {
       context.missing(_verifiedMeta);
+    }
+    if (data.containsKey('system')) {
+      context.handle(_systemMeta,
+          system.isAcceptableOrUnknown(data['system']!, _systemMeta));
+    } else if (isInserting) {
+      context.missing(_systemMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -885,6 +900,8 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       verified: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
+      system: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}system'])!,
       type: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
       content: attachedDatabase.typeMapping
@@ -919,6 +936,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
 class MessageData extends DataClass implements Insertable<MessageData> {
   final String id;
   final bool verified;
+  final bool system;
   final int type;
   final String content;
   final String signature;
@@ -933,6 +951,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   const MessageData(
       {required this.id,
       required this.verified,
+      required this.system,
       required this.type,
       required this.content,
       required this.signature,
@@ -949,6 +968,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['verified'] = Variable<bool>(verified);
+    map['system'] = Variable<bool>(system);
     map['type'] = Variable<int>(type);
     map['content'] = Variable<String>(content);
     map['signature'] = Variable<String>(signature);
@@ -967,6 +987,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageCompanion(
       id: Value(id),
       verified: Value(verified),
+      system: Value(system),
       type: Value(type),
       content: Value(content),
       signature: Value(signature),
@@ -987,6 +1008,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
       verified: serializer.fromJson<bool>(json['verified']),
+      system: serializer.fromJson<bool>(json['system']),
       type: serializer.fromJson<int>(json['type']),
       content: serializer.fromJson<String>(json['content']),
       signature: serializer.fromJson<String>(json['signature']),
@@ -1006,6 +1028,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'verified': serializer.toJson<bool>(verified),
+      'system': serializer.toJson<bool>(system),
       'type': serializer.toJson<int>(type),
       'content': serializer.toJson<String>(content),
       'signature': serializer.toJson<String>(signature),
@@ -1023,6 +1046,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   MessageData copyWith(
           {String? id,
           bool? verified,
+          bool? system,
           int? type,
           String? content,
           String? signature,
@@ -1037,6 +1061,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       MessageData(
         id: id ?? this.id,
         verified: verified ?? this.verified,
+        system: system ?? this.system,
         type: type ?? this.type,
         content: content ?? this.content,
         signature: signature ?? this.signature,
@@ -1054,6 +1079,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     return (StringBuffer('MessageData(')
           ..write('id: $id, ')
           ..write('verified: $verified, ')
+          ..write('system: $system, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
           ..write('signature: $signature, ')
@@ -1073,6 +1099,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   int get hashCode => Object.hash(
       id,
       verified,
+      system,
       type,
       content,
       signature,
@@ -1090,6 +1117,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       (other is MessageData &&
           other.id == this.id &&
           other.verified == this.verified &&
+          other.system == this.system &&
           other.type == this.type &&
           other.content == this.content &&
           other.signature == this.signature &&
@@ -1106,6 +1134,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
 class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> id;
   final Value<bool> verified;
+  final Value<bool> system;
   final Value<int> type;
   final Value<String> content;
   final Value<String> signature;
@@ -1121,6 +1150,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   const MessageCompanion({
     this.id = const Value.absent(),
     this.verified = const Value.absent(),
+    this.system = const Value.absent(),
     this.type = const Value.absent(),
     this.content = const Value.absent(),
     this.signature = const Value.absent(),
@@ -1137,6 +1167,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   MessageCompanion.insert({
     required String id,
     required bool verified,
+    required bool system,
     required int type,
     required String content,
     required String signature,
@@ -1151,6 +1182,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         verified = Value(verified),
+        system = Value(system),
         type = Value(type),
         content = Value(content),
         signature = Value(signature),
@@ -1165,6 +1197,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   static Insertable<MessageData> custom({
     Expression<String>? id,
     Expression<bool>? verified,
+    Expression<bool>? system,
     Expression<int>? type,
     Expression<String>? content,
     Expression<String>? signature,
@@ -1181,6 +1214,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (verified != null) 'verified': verified,
+      if (system != null) 'system': system,
       if (type != null) 'type': type,
       if (content != null) 'content': content,
       if (signature != null) 'signature': signature,
@@ -1199,6 +1233,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   MessageCompanion copyWith(
       {Value<String>? id,
       Value<bool>? verified,
+      Value<bool>? system,
       Value<int>? type,
       Value<String>? content,
       Value<String>? signature,
@@ -1214,6 +1249,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return MessageCompanion(
       id: id ?? this.id,
       verified: verified ?? this.verified,
+      system: system ?? this.system,
       type: type ?? this.type,
       content: content ?? this.content,
       signature: signature ?? this.signature,
@@ -1237,6 +1273,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     }
     if (verified.present) {
       map['verified'] = Variable<bool>(verified.value);
+    }
+    if (system.present) {
+      map['system'] = Variable<bool>(system.value);
     }
     if (type.present) {
       map['type'] = Variable<int>(type.value);
@@ -1282,6 +1321,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     return (StringBuffer('MessageCompanion(')
           ..write('id: $id, ')
           ..write('verified: $verified, ')
+          ..write('system: $system, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
           ..write('signature: $signature, ')
