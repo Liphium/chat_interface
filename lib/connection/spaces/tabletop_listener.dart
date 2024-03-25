@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
 void setupTabletopListeners() {
@@ -75,5 +76,7 @@ void setupTabletopListeners() {
       return;
     }
     object.decryptData(event.data["data"]);
+    sendLog(event.data["w"]);
+    object.size = Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble());
   });
 }

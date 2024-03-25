@@ -8,6 +8,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_member_cont
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_text.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/foundation.dart';
@@ -142,6 +143,9 @@ class TabletopController extends GetxController {
   TableObject newObject(TableObjectType type, String id, Offset location, Size size, double rotation, String data) {
     TableObject object;
     switch (type) {
+      case TableObjectType.text:
+        object = TextObject(id, location, size);
+        break;
       case TableObjectType.deck:
         object = DeckObject(id, location, size);
         break;
@@ -191,6 +195,7 @@ class TabletopController extends GetxController {
 }
 
 enum TableObjectType {
+  text(Icons.text_fields, "Text"),
   deck(Icons.filter_none, "Deck"),
   card(Icons.image, "Card", creatable: false);
 
@@ -330,10 +335,13 @@ abstract class TableObject {
 
   /// Update the data of the object
   void updateData() {
+    sendLog(size.width);
     spaceConnector.sendAction(
       Message("tobj_modify", <String, dynamic>{
         "id": id,
         "data": encryptedData(),
+        "width": size.width,
+        "height": size.height,
       }),
     );
   }

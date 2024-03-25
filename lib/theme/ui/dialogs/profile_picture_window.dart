@@ -55,12 +55,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
         maxWidth: 450,
         child: Obx(() {
           if (_image.value == null) {
-            return SizedBox(
-                height: 100,
-                width: 100,
-                child: Center(
-                    child: CircularProgressIndicator(
-                        color: Get.theme.colorScheme.onPrimary)));
+            return SizedBox(height: 100, width: 100, child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
           }
 
           final scale = scaleFactor.value;
@@ -70,8 +65,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("settings.data.profile_picture.select".tr,
-                  style: Get.theme.textTheme.bodyMedium),
+              Text("settings.data.profile_picture.select".tr, style: Get.theme.textTheme.bodyMedium),
               verticalSpacing(sectionSpacing),
               Center(
                 child: ClipOval(
@@ -103,9 +97,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                     ),
                   ),
                   horizontalSpacing(defaultSpacing),
-                  Text(
-                      ((maxScale - scaleFactor.value) + 0.5).toStringAsFixed(1),
-                      style: Get.theme.textTheme.bodyMedium),
+                  Text(((maxScale - scaleFactor.value) + 0.5).toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
                 ],
               ),
               Row(
@@ -121,8 +113,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                     ),
                   ),
                   horizontalSpacing(defaultSpacing),
-                  Text(moveX.value.toStringAsFixed(1),
-                      style: Get.theme.textTheme.bodyMedium),
+                  Text(moveX.value.toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
                 ],
               ),
               Row(
@@ -138,8 +129,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                     ),
                   ),
                   horizontalSpacing(defaultSpacing),
-                  Text(moveY.value.toStringAsFixed(1),
-                      style: Get.theme.textTheme.bodyMedium),
+                  Text(moveY.value.toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
                 ],
               ),
               verticalSpacing(sectionSpacing),
@@ -148,10 +138,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                 onTap: () async {
                   if (uploading.value) return;
                   uploading.value = true;
-                  await ProfilePictureHelper.uploadProfilePicture(
-                      widget.file,
-                      ProfilePictureData(
-                          scaleFactor.value, moveX.value, moveY.value));
+                  await ProfilePictureHelper.uploadProfilePicture(widget.file, ProfilePictureData(scaleFactor.value, moveX.value, moveY.value));
                   uploading.value = false;
                   Get.back();
                 },

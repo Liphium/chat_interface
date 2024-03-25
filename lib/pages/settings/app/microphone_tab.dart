@@ -176,14 +176,14 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
               }
 
               return Slider(
-                value: clampDouble(sens.value.value, 0.0, 1.0),
-                min: 0.0,
-                max: 0.5,
+                value: clampDouble(sens.value.value, -70, 0),
+                min: -70,
+                max: 0,
                 label: _sensitivity.value.toString(),
                 inactiveColor: theme.colorScheme.onBackground,
                 thumbColor: theme.colorScheme.onPrimary,
                 activeColor: theme.colorScheme.onPrimary,
-                secondaryTrackValue: clampDouble(_sensitivity.value, 0.0, 0.5),
+                secondaryTrackValue: clampDouble(_sensitivity.value, -70, 0),
                 secondaryActiveColor: theme.colorScheme.secondary,
                 onChanged: (value) => sens.value.value = value,
                 onChangeEnd: (value) {

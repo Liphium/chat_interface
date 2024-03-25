@@ -37,7 +37,7 @@ pub fn stop() {
 
 fn pcm_to_db(pcm: f32) -> f32 {
     if pcm <= 0.0 {
-        return 0.0;
+        return -100.0;
     }
     20.0 * pcm.log10()
 }
@@ -98,6 +98,7 @@ pub fn record() {
                         max = *sample;
                     }
                 }
+                max = pcm_to_db(max);
 
                 let mut options = super::get_options();
 

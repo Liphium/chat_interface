@@ -29,7 +29,7 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
         children: [
           Text("Rotation", style: Get.theme.textTheme.labelLarge),
           Obx(
-            () => FJSlider(
+            () => FJSliderWithInput(
               value: tableController.canvasRotation.value,
               onChanged: (value) {
                 rotateTable(value, tableController);

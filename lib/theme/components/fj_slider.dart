@@ -4,17 +4,12 @@ import 'package:get/get.dart';
 class FJSlider extends StatelessWidget {
   final double value;
   final double min, max;
+  final String? label;
 
   final Function(double)? onChanged;
   final Function(double)? onChangeEnd;
 
-  const FJSlider(
-      {super.key,
-      required this.value,
-      required this.onChanged,
-      this.min = 0.0,
-      this.max = 1.0,
-      this.onChangeEnd});
+  const FJSlider({super.key, required this.value, required this.onChanged, this.min = 0.0, this.max = 1.0, this.onChangeEnd, this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -24,15 +19,61 @@ class FJSlider extends StatelessWidget {
         thumbShape: CustomSliderThumbShape(),
         overlayShape: CustomSliderOverlayShape(),
       ),
-      child: Slider(
-        value: value,
-        inactiveColor: Get.theme.colorScheme.primary,
-        thumbColor: Get.theme.colorScheme.onPrimary,
-        activeColor: Get.theme.colorScheme.onPrimary,
-        min: min,
-        max: max,
-        onChanged: onChanged,
-        onChangeEnd: onChangeEnd,
+      child: Row(
+        children: [
+          Expanded(
+            child: Slider(
+              value: value,
+              inactiveColor: Get.theme.colorScheme.primary,
+              thumbColor: Get.theme.colorScheme.onPrimary,
+              activeColor: Get.theme.colorScheme.onPrimary,
+              min: min,
+              max: max,
+              onChanged: onChanged,
+              onChangeEnd: onChangeEnd,
+            ),
+          ),
+          label != null ? Text(label!) : const SizedBox(),
+        ],
+      ),
+    );
+  }
+}
+
+class FJSliderWithInput extends StatelessWidget {
+  final double value;
+  final double min, max;
+  final String? label;
+
+  final Function(double)? onChanged;
+  final Function(double)? onChangeEnd;
+
+  const FJSliderWithInput({super.key, required this.value, required this.onChanged, this.min = 0.0, this.max = 1.0, this.onChangeEnd, this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliderTheme(
+      data: const SliderThemeData(
+        trackShape: CustomSliderTrackShape(),
+        thumbShape: CustomSliderThumbShape(),
+        overlayShape: CustomSliderOverlayShape(),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Slider(
+              value: value,
+              inactiveColor: Get.theme.colorScheme.primary,
+              thumbColor: Get.theme.colorScheme.onPrimary,
+              activeColor: Get.theme.colorScheme.onPrimary,
+              min: min,
+              max: max,
+              onChanged: onChanged,
+              onChangeEnd: onChangeEnd,
+            ),
+          ),
+          label != null ? Text(label!) : const SizedBox(),
+        ],
       ),
     );
   }
@@ -74,8 +115,7 @@ class CustomSliderThumbShape extends RoundSliderThumbShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    super.paint(context,
-        center.translate(-(value - 0.5) / 0.5 * enabledThumbRadius, 0.0),
+    super.paint(context, center.translate(-(value - 0.5) / 0.5 * enabledThumbRadius, 0.0),
         activationAnimation: activationAnimation,
         enableAnimation: enableAnimation,
         isDiscrete: isDiscrete,
@@ -108,8 +148,7 @@ class CustomSliderOverlayShape extends RoundSliderOverlayShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    super.paint(
-        context, center.translate(-(value - 0.5) / 0.5 * thumbRadius, 0.0),
+    super.paint(context, center.translate(-(value - 0.5) / 0.5 * thumbRadius, 0.0),
         activationAnimation: activationAnimation,
         enableAnimation: enableAnimation,
         isDiscrete: isDiscrete,
