@@ -32,14 +32,14 @@ class AudioSettings {
   static void addSettings(SettingController controller) async {
     //* Microphone
     controller.settings[AudioSettings.microphone] = Setting<String>(AudioSettings.microphone, AudioSettings.defaultDeviceName);
-    controller.settings[AudioSettings.microphoneSensitivity] = Setting<double>(AudioSettings.microphoneSensitivity, 0.15);
+    controller.settings[AudioSettings.microphoneSensitivity] = Setting<double>(AudioSettings.microphoneSensitivity, -30);
     controller.settings[AudioSettings.startMuted] = Setting<bool>(AudioSettings.startMuted, false);
     controller.settings[AudioSettings.noiseSuppression] = Setting<bool>(AudioSettings.noiseSuppression, true);
     controller.settings[AudioSettings.autoGainControl] = Setting<bool>(AudioSettings.autoGainControl, true);
     controller.settings[AudioSettings.echoCancellation] = Setting<bool>(AudioSettings.echoCancellation, true);
     controller.settings[AudioSettings.typingNoiseDetection] = Setting<bool>(AudioSettings.typingNoiseDetection, true);
     controller.settings[AudioSettings.highPassFilter] = Setting<bool>(AudioSettings.highPassFilter, false);
-    controller.settings[AudioSettings.microphoneMode] = Setting<int>(AudioSettings.microphoneMode, 0);
+    controller.settings[AudioSettings.microphoneMode] = Setting<int>(AudioSettings.microphoneMode, 1);
 
     //* Output
     controller.settings[AudioSettings.output] = Setting<String>(AudioSettings.output, AudioSettings.defaultDeviceName);

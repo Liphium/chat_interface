@@ -15,7 +15,7 @@ class FJTextField extends StatefulWidget {
   final bool small;
   final TextEditingController? controller;
   final int? maxLength;
-  final int? maxLines;
+  final int maxLines;
 
   const FJTextField({
     super.key,
@@ -27,7 +27,7 @@ class FJTextField extends StatefulWidget {
     this.secondaryColor = false,
     this.small = false,
     this.obscureText = false,
-    this.maxLines,
+    this.maxLines = 1,
     this.maxLength,
   });
 

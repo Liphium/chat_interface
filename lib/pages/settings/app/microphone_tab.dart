@@ -111,11 +111,9 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
             verticalSpacing(elementSpacing),
             RepaintBoundary(
               child: Obx(
-                () => ListView.builder(
-                  itemCount: _microphones.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
+                () => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(_microphones.length, (index) {
                     final current = _microphones[index];
 
                     final first = index == 0;
@@ -127,7 +125,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                     );
 
                     return buildMicrophoneButton(controller, current, radius);
-                  },
+                  }),
                 ),
               ),
             ),

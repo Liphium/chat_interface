@@ -60,7 +60,8 @@ class _OutputTabState extends State<OutputTab> {
 
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
+        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing),
+            icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing - elementSpacing),
 
         Column(
@@ -71,10 +72,9 @@ class _OutputTabState extends State<OutputTab> {
             verticalSpacing(elementSpacing),
             RepaintBoundary(
               child: Obx(
-                () => ListView.builder(
-                  itemCount: _microphones.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
+                () => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(_microphones.length, (index) {
                     final current = _microphones[index];
 
                     final first = index == 0;
@@ -86,7 +86,7 @@ class _OutputTabState extends State<OutputTab> {
                     );
 
                     return buildOutputButton(controller, current.label, radius);
-                  },
+                  }),
                 ),
               ),
             ),
@@ -101,7 +101,9 @@ class _OutputTabState extends State<OutputTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current
+              ? Get.theme.colorScheme.primary
+              : Get.theme.colorScheme.onBackground,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,
