@@ -114,6 +114,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                 () => ListView.builder(
                   itemCount: _microphones.length,
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     final current = _microphones[index];
 

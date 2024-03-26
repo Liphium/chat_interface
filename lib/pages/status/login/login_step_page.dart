@@ -86,6 +86,7 @@ class _LoginPageState extends State<LoginStepPage> {
                       Obx(
                         () => FJTextField(
                           obscureText: true,
+                          maxLines: 1,
                           hintText: 'placeholder.${widget.type.name}'.tr,
                           errorText: _secretError.value == ''
                               ? null

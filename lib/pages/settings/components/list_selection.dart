@@ -26,10 +26,8 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
   Widget build(BuildContext context) {
     SettingController controller = Get.find();
 
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: widget.items.length,
-      itemBuilder: (context, index) {
+    return Column(
+      children: List.generate(widget.items.length, (index) {
         final first = index == 0;
         final last = index == widget.items.length - 1;
 
@@ -42,7 +40,9 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
           child: Obx(
             () => Material(
-              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index
+                  ? Get.theme.colorScheme.primary
+                  : Get.theme.colorScheme.onBackground,
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,
@@ -69,7 +69,7 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
             ),
           ),
         );
-      },
+      }),
     );
   }
 }
