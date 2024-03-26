@@ -27,7 +27,6 @@ dependencies:
   logging: any
   url_launcher: any
   flutter_webrtc: any
-  record: any
   sodium_libs: any
   ffi: any
   flutter_rust_bridge: 2.0.0-dev.28

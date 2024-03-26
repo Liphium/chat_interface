@@ -1,7 +1,6 @@
 use std::sync::Mutex;
 
 use once_cell::sync::Lazy;
-use rand::distributions::{Alphanumeric, DistString};
 
 use crate::{api, frb_generated::StreamSink, logger};
 
@@ -37,11 +36,4 @@ pub fn send_action(action: api::interaction::Action) {
     }
 }
 
-pub fn random_string(length: usize) -> String {
-    return Alphanumeric.sample_string(&mut rand::thread_rng(), length);
-}
 
-#[deprecated(since = "0.1.0", note = "use logger module instead")]
-pub fn print_log(message: &str) {
-    logger::send_log("rust", message);
-}
