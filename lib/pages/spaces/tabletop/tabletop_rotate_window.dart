@@ -36,6 +36,8 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
               },
               min: 0,
               max: 2 * math.pi,
+              transformer: (value) => value * (360.0 / (2.0 * math.pi)),
+              reverseTransformer: (value) => value * ((2.0 * math.pi) / 360.0),
             ),
           ),
           Row(

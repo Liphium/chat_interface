@@ -1,4 +1,10 @@
+import 'dart:math' as math;
+
+import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class FJSlider extends StatelessWidget {
@@ -18,6 +24,7 @@ class FJSlider extends StatelessWidget {
         trackShape: CustomSliderTrackShape(),
         thumbShape: CustomSliderThumbShape(),
         overlayShape: CustomSliderOverlayShape(),
+        trackHeight: 6,
       ),
       child: Row(
         children: [
@@ -40,15 +47,46 @@ class FJSlider extends StatelessWidget {
   }
 }
 
-class FJSliderWithInput extends StatelessWidget {
+class FJSliderWithInput extends StatefulWidget {
   final double value;
   final double min, max;
   final String? label;
+  final Function(double)? transformer;
+  final Function(double)? reverseTransformer;
 
   final Function(double)? onChanged;
   final Function(double)? onChangeEnd;
 
-  const FJSliderWithInput({super.key, required this.value, required this.onChanged, this.min = 0.0, this.max = 1.0, this.onChangeEnd, this.label});
+  const FJSliderWithInput({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.min = 0.0,
+    this.max = 1.0,
+    this.onChangeEnd,
+    this.label,
+    this.transformer,
+    this.reverseTransformer,
+  });
+
+  @override
+  State<FJSliderWithInput> createState() => _FJSliderWithInputState();
+}
+
+class _FJSliderWithInputState extends State<FJSliderWithInput> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.value = TextEditingValue(text: (widget.transformer?.call(widget.value) ?? widget.value).toStringAsFixed(0));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,22 +95,45 @@ class FJSliderWithInput extends StatelessWidget {
         trackShape: CustomSliderTrackShape(),
         thumbShape: CustomSliderThumbShape(),
         overlayShape: CustomSliderOverlayShape(),
+        trackHeight: 6,
       ),
       child: Row(
         children: [
           Expanded(
+            flex: 4,
             child: Slider(
-              value: value,
+              value: widget.value,
               inactiveColor: Get.theme.colorScheme.primary,
               thumbColor: Get.theme.colorScheme.onPrimary,
               activeColor: Get.theme.colorScheme.onPrimary,
-              min: min,
-              max: max,
-              onChanged: onChanged,
-              onChangeEnd: onChangeEnd,
+              min: widget.min,
+              max: widget.max,
+              onChanged: (value) {
+                widget.onChanged!(value);
+                _controller.value = TextEditingValue(text: (widget.transformer?.call(value) ?? value).toStringAsFixed(0));
+              },
+              onChangeEnd: widget.onChangeEnd,
             ),
           ),
-          label != null ? Text(label!) : const SizedBox(),
+          horizontalSpacing(defaultSpacing),
+          Expanded(
+            flex: 1,
+            child: FJTextField(
+              animation: false,
+              hintText: widget.label,
+              controller: _controller,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChange: (value) {
+                if (value.isEmpty) {
+                  return;
+                }
+                final newValue = double.parse(value);
+                var finalValue = widget.reverseTransformer?.call(newValue) ?? newValue;
+                finalValue = clampDouble(finalValue, widget.min, widget.max);
+                widget.onChanged!(finalValue);
+              },
+            ),
+          )
         ],
       ),
     );

@@ -16,6 +16,8 @@ class FJTextField extends StatefulWidget {
   final TextEditingController? controller;
   final int? maxLength;
   final int maxLines;
+  final Function(String)? onChange;
+  final List<TextInputFormatter>? inputFormatters;
 
   const FJTextField({
     super.key,
@@ -29,6 +31,8 @@ class FJTextField extends StatefulWidget {
     this.obscureText = false,
     this.maxLines = 1,
     this.maxLength,
+    this.onChange,
+    this.inputFormatters,
   });
 
   @override
@@ -85,6 +89,8 @@ class _FJTextFieldState extends State<FJTextField> {
               maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
               onTap: () => _focus.value = true,
               focusNode: _node,
+              onChanged: widget.onChange,
+              inputFormatters: widget.inputFormatters,
             ),
           ),
         ),
