@@ -45,7 +45,9 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
       RustLibWire.fromExternalLibrary;
 
   @override
-  Future<void> executeRustInitializers() async {}
+  Future<void> executeRustInitializers() async {
+    await api.initApp();
+  }
 
   @override
   ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig =>
@@ -73,6 +75,8 @@ abstract class RustLibApi extends BaseApi {
 
   Future<String> getDefaultId({dynamic hint});
 
+  Future<int> getDetectionMode({dynamic hint});
+
   Future<double> getTalkingAmplitude({dynamic hint});
 
   Future<bool> isAmplitudeLogging({dynamic hint});
@@ -87,6 +91,8 @@ abstract class RustLibApi extends BaseApi {
       {required bool amplitudeLogging, dynamic hint});
 
   Future<void> setDeafen({required bool deafened, dynamic hint});
+
+  Future<void> setDetectionMode({required int detectionMode, dynamic hint});
 
   Future<void> setInputDevice({required String id, dynamic hint});
 
@@ -105,7 +111,7 @@ abstract class RustLibApi extends BaseApi {
   Future<void> testVoice(
       {required String device, required int detectionMode, dynamic hint});
 
-  Future<String> greet({required String name, dynamic hint});
+  String greet({required String name, dynamic hint});
 
   Future<void> initApp({dynamic hint});
 }
@@ -220,7 +226,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 18, port: port_);
+            funcId: 20, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -235,6 +241,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kGetDefaultIdConstMeta => const TaskConstMeta(
         debugName: "get_default_id",
+        argNames: [],
+      );
+
+  @override
+  Future<int> getDetectionMode({dynamic hint}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 18, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_i_32,
+        decodeErrorData: null,
+      ),
+      constMeta: kGetDetectionModeConstMeta,
+      argValues: [],
+      apiImpl: this,
+      hint: hint,
+    ));
+  }
+
+  TaskConstMeta get kGetDetectionModeConstMeta => const TaskConstMeta(
+        debugName: "get_detection_mode",
         argNames: [],
       );
 
@@ -340,7 +370,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 17, port: port_);
+            funcId: 19, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_input_device,
@@ -410,13 +440,38 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> setDetectionMode({required int detectionMode, dynamic hint}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_i_32(detectionMode, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 17, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kSetDetectionModeConstMeta,
+      argValues: [detectionMode],
+      apiImpl: this,
+      hint: hint,
+    ));
+  }
+
+  TaskConstMeta get kSetDetectionModeConstMeta => const TaskConstMeta(
+        debugName: "set_detection_mode",
+        argNames: ["detectionMode"],
+      );
+
+  @override
   Future<void> setInputDevice({required String id, dynamic hint}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(id, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 19, port: port_);
+            funcId: 21, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -466,7 +521,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(id, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 20, port: port_);
+            funcId: 22, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -610,13 +665,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<String> greet({required String name, dynamic hint}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
+  String greet({required String name, dynamic hint}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(name, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 21, port: port_);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -640,7 +694,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 22, port: port_);
+            funcId: 24, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,

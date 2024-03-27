@@ -53,9 +53,6 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
     _sub = api.createAmplitudeStream().listen((amp) {
       _sensitivity.value = amp;
     });
-    _actionSub = api.createActionStream().listen((event) {
-      sendLog(event.action);
-    });
   }
 
   String _getCurrent() {

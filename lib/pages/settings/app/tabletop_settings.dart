@@ -24,8 +24,12 @@ import 'package:get/get.dart';
 class TabletopSettings {
   static const String framerate = "tabletop.framerate";
 
+  // Experimental settings
+  static const String smoothDragging = "tabletop.smooth_dragging";
+
   static void addSettings(SettingController controller) {
     controller.settings[framerate] = Setting<double>(framerate, 60.0);
+    controller.settings[smoothDragging] = Setting<bool>(smoothDragging, false);
   }
 }
 
@@ -104,6 +108,13 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
           min: 30.0,
           max: 256.0,
           rounded: true,
+        ),
+        verticalSpacing(sectionSpacing),
+        Row(
+          children: [
+            Text("tabletop.general.smooth_scrolling".tr, style: Get.theme.textTheme.labelLarge),
+            horizontalSpacing(defaultSpacing),
+          ],
         ),
       ],
     );

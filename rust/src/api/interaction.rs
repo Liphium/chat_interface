@@ -91,6 +91,14 @@ pub fn delete_amplitude_stream() {
     audio::set_amplitude_logging(false);
 }
 
+pub fn set_detection_mode(detection_mode: i32) {
+    audio::set_detection_mode(detection_mode)
+}
+
+pub fn get_detection_mode() -> i32 {
+    audio::get_detection_mode()
+}
+
 //* Device shit */
 pub struct InputDevice {
     pub id: String,

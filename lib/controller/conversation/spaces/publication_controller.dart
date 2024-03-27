@@ -134,6 +134,10 @@ class PublicationController extends GetxController {
     await Future.delayed(500.milliseconds);
     setMuted(startMuted);
 
+    // Set detection mode
+    final detectionMode = settingController.settings[AudioSettings.microphoneMode]!.getValue() as int;
+    await api.setDetectionMode(detectionMode: detectionMode);
+
     final devices = await Hardware.instance.enumerateDevices();
     final outputDevice = devices.firstWhereOrNull((element) => element.label == settingController.settings[AudioSettings.output]!.getValue());
     if (outputDevice != null) {

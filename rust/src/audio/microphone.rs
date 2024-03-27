@@ -45,11 +45,7 @@ fn pcm_to_db(pcm: f32) -> f32 {
 pub fn record() {
     thread::spawn(move || {
         // Get a cpal host
-        let mut host = cpal::default_host(); // Current host on computer
-        #[cfg(target_os = "linux")]
-        {
-            host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
-        }
+        let host = cpal::default_host(); // Current host on computer
 
         // Get input device (using new API)
         let mut device = host
@@ -125,7 +121,7 @@ pub fn record() {
 
                     fluctuation > 0.0011
                 } else {
-                    pcm_to_db(max) > options.talking_amplitude
+                    max > options.talking_amplitude
                 };
 
                 if talking {

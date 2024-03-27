@@ -35,5 +35,3 @@ pub fn send_action(action: api::interaction::Action) {
         None => {}
     }
 }
-
-

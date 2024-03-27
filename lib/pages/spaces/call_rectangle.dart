@@ -12,6 +12,7 @@ import 'package:chat_interface/pages/spaces/widgets/call_controls.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -113,6 +114,7 @@ class _CallRectangleState extends State<CallRectangle> {
                       ],
                       target: hovered.value || controlsHovered.value ? 0 : 1,
                       child: Container(
+                        width: double.infinity,
                         // Create a gradient on this container from bottom to top
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -143,73 +145,77 @@ class _CallRectangleState extends State<CallRectangle> {
   }
 
   Widget buildControls(SpacesController controller) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.only(
-          right: sectionSpacing,
-          left: sectionSpacing,
-          bottom: sectionSpacing,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Obx(
-              () => LoadingIconButton(
-                loading: false.obs,
-                onTap: () {
-                  if (controller.playMode.value) {
-                    showConfirmPopup(ConfirmWindow(
-                        title: 'spaces.play_mode.leave',
-                        text: 'spaces.play_mode.leave.text',
-                        onConfirm: () {
-                          Get.back();
-                          Timer(300.ms, () {
-                            controller.switchToPlayMode();
-                          });
-                        },
-                        onDecline: () {
-                          Get.back();
-                        }));
-                    return;
-                  }
-                  controller.fullScreen.toggle();
-                  if (controller.fullScreen.value) {
-                    Get.offAll(const CallPage(), transition: Transition.fadeIn);
-                  } else {
-                    Get.offAll(const ChatPage(), transition: Transition.fadeIn);
-                  }
-                },
-                icon: controller.fullScreen.value ? Icons.arrow_forward : Icons.arrow_back_rounded,
-                iconSize: 30,
+    return Center(
+      heightFactor: 1,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Padding(
+          padding: const EdgeInsets.only(
+            right: sectionSpacing,
+            left: sectionSpacing,
+            bottom: sectionSpacing,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Obx(
+                () => LoadingIconButton(
+                  loading: false.obs,
+                  onTap: () {
+                    if (controller.playMode.value) {
+                      showConfirmPopup(ConfirmWindow(
+                          title: 'spaces.play_mode.leave',
+                          text: 'spaces.play_mode.leave.text',
+                          onConfirm: () {
+                            Get.back();
+                            Timer(300.ms, () {
+                              controller.switchToPlayMode();
+                            });
+                          },
+                          onDecline: () {
+                            Get.back();
+                          }));
+                      return;
+                    }
+                    controller.fullScreen.toggle();
+                    if (controller.fullScreen.value) {
+                      Get.offAll(const CallPage(), transition: Transition.fadeIn);
+                    } else {
+                      Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+                    }
+                  },
+                  icon: controller.fullScreen.value ? Icons.arrow_forward : Icons.arrow_back_rounded,
+                  iconSize: 30,
+                ),
               ),
-            ),
-            horizontalSpacing(sectionSpacing),
-            const CallControls(),
-            horizontalSpacing(sectionSpacing),
-            Obx(
-              () {
-                if (Get.find<TabletopController>().enabled.value) {
+              horizontalSpacing(sectionSpacing),
+              const CallControls(),
+              horizontalSpacing(sectionSpacing),
+              Obx(
+                () {
+                  if (Get.find<TabletopController>().enabled.value) {
+                    return LoadingIconButton(
+                      key: tabletopKey,
+                      loading: false.obs,
+                      onTap: () {
+                        Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+                      },
+                      icon: Icons.crop_rotate,
+                      iconSize: 30,
+                    );
+                  }
+
                   return LoadingIconButton(
-                    key: tabletopKey,
                     loading: false.obs,
-                    onTap: () {
-                      Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
-                    },
-                    icon: Icons.crop_rotate,
+                    onTap: () => controller.hideOverlay.toggle(),
+                    icon: controller.hideOverlay.value ? Icons.visibility_off : Icons.visibility,
                     iconSize: 30,
                   );
-                }
-
-                return LoadingIconButton(
-                  loading: false.obs,
-                  onTap: () => controller.hideOverlay.toggle(),
-                  icon: controller.hideOverlay.value ? Icons.visibility_off : Icons.visibility,
-                  iconSize: 30,
-                );
-              },
-            )
-          ],
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

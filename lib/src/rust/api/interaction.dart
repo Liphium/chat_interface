@@ -59,6 +59,13 @@ Stream<double> createAmplitudeStream({dynamic hint}) =>
 Future<void> deleteAmplitudeStream({dynamic hint}) =>
     RustLib.instance.api.deleteAmplitudeStream(hint: hint);
 
+Future<void> setDetectionMode({required int detectionMode, dynamic hint}) =>
+    RustLib.instance.api
+        .setDetectionMode(detectionMode: detectionMode, hint: hint);
+
+Future<int> getDetectionMode({dynamic hint}) =>
+    RustLib.instance.api.getDetectionMode(hint: hint);
+
 Future<List<InputDevice>> listInputDevices({dynamic hint}) =>
     RustLib.instance.api.listInputDevices(hint: hint);
 
