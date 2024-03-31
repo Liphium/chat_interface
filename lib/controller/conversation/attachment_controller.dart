@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/database/accounts/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
@@ -20,7 +21,7 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false}) async {
+  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false, popups = true}) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
@@ -39,7 +40,10 @@ class AttachmentController extends GetxController {
     final res = await dio.post(
       server("/account/files/upload").toString(),
       data: formData,
-      options: dio_rs.Options(headers: {"Content-Type": "multipart/form-data", "Authorization": "Bearer $sessionToken"}),
+      options: dio_rs.Options(headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": "Bearer $sessionToken",
+      }),
       onSendProgress: (count, total) {
         data.progress.value = count / total;
         sendLog(data.progress.value);
@@ -87,15 +91,17 @@ class AttachmentController extends GetxController {
   }
 
   /// Download an attachment
-  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false}) async {
-    if (container.downloading) return true;
+  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true}) async {
+    if (container.downloading.value) return true;
+    if (container.attachmentType != AttachmentContainerType.file) return false;
+
     final localFile = await findLocalFile(container);
     if (localFile != null && !retry) {
       sendLog("already exists ${container.name} ${container.id}");
       return true;
     }
     attachments[container.id] = container;
-    container.downloading = true;
+    container.downloading.value = true;
     sendLog("Downloading ${container.name}...");
     final maxSize = Get.find<SettingController>().settings[FileSettings.maxFileSize]!.getValue();
 
@@ -104,37 +110,45 @@ class AttachmentController extends GetxController {
     });
 
     if (!json["success"]) {
-      container.error.value = true;
-      container.downloaded.value = false;
-      return false;
-    }
-
-    sendLog(json["file"]["path"]);
-    if (json["file"]["path"] != container.url) {
-      sendLog("Download errored, invalid attachment url");
+      container.errorHappened(false);
       return false;
     }
 
     final size = json["file"]["size"] / 1000.0 / 1000.0; // Convert to MB
-    sendLog(size);
     if (size > maxSize) {
-      container.error.value = true;
-      container.downloaded.value = false;
+      container.errorHappened(false);
       return false;
+    }
+
+    // Check if the domain is trusted or ask the user to add a new one to the list of trusted providers if needed
+    if (!await TrustedLinkHelper.isLinkTrusted(container.url)) {
+      if (!popups) {
+        container.errorHappened(true);
+        return false;
+      }
+
+      final result = await TrustedLinkHelper.askToAdd(container.url);
+      if (!result) {
+        container.errorHappened(true);
+        return false;
+      }
     }
 
     // Download and show progress
     final res = await dio.download(
-      container.url,
+      serverPath("/account/files/download/${container.id}", instance: container.url),
       container.filePath,
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
       },
+      options: dio_rs.Options(
+        validateStatus: (status) => true,
+        method: "POST",
+      ),
     );
 
     if (res.statusCode != 200) {
-      container.error.value = true;
-      container.downloaded.value = false;
+      container.errorHappened(false);
       return false;
     }
 
@@ -144,7 +158,7 @@ class AttachmentController extends GetxController {
     final decrypted = decryptSymmetricBytes(encrypted, container.key!);
     await file.writeAsBytes(decrypted);
 
-    container.downloading = false;
+    container.downloading.value = false;
     container.error.value = false;
     container.downloaded.value = true;
     cleanUpCache();
@@ -309,10 +323,18 @@ class AttachmentContainer {
   final SecureKey? key;
 
   // Download status
-  bool downloading = false;
+  final downloading = false.obs;
   final downloaded = false.obs;
   final error = false.obs;
+  final unsafeLocation = false.obs;
   final percentage = 0.0.obs;
+
+  void errorHappened(bool unsafe) {
+    error.value = true;
+    unsafeLocation.value = unsafe;
+    downloading.value = false;
+    downloaded.value = false;
+  }
 
   AttachmentContainer(this.type, this.id, this.name, this.url, this.key) {
     if (id == "" && name == "") {

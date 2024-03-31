@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/current/notification_controller.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/error_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -42,7 +43,7 @@ void showMessage(SnackbarType type, String message) {
 
 /// Automatically translated
 void showErrorPopup(String title, String message) {
-  Get.dialog(ErrorWindow(title: title.tr, error: message.tr));
+  Get.dialog(ErrorWindow(title: title.tr, error: translateError(message)));
 }
 
 Future<bool> showConfirmPopup(ConfirmWindow window) async {

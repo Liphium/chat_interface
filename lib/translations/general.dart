@@ -52,8 +52,11 @@ class GeneralTranslations extends Translations {
               'This will delete all the data on this device. If you don\'t have your keys as a file or on another logged in device, you will not be able to recover your account. Are you sure you want to log out?',
           'log_out.delete_files': 'Delete files',
 
-          // Uploading
+          // File things
           'file.uploading': 'Uploading @index of @total..',
+          'file.links.title': 'Unknown location found',
+          'file.links.description':
+              'You are trying to download a file from an unknown server. This could potentially lead to your IP address or personal information being exposed. Do you want to add @domain to your list of trusted providers?',
         },
 
         //* German

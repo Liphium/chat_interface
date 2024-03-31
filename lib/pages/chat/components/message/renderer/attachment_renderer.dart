@@ -42,10 +42,19 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      if (widget.container.downloading.value) {
+        return CircularProgressIndicator(
+          strokeWidth: 4,
+          value: widget.container.percentage.value,
+          color: Get.theme.colorScheme.onPrimary,
+        );
+      }
+
       if (widget.container.error.value) {
         return Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            ErrorContainer(message: "file.not_uploaded".tr),
+            ErrorContainer(message: widget.container.unsafeLocation.value ? "file.unsafe".trParams({"domain": widget.container.url}) : "file.not_uploaded".tr),
             horizontalSpacing(defaultSpacing),
             SizedBox(
               width: 35,

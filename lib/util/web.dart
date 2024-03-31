@@ -4,8 +4,10 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart' as d;
+import 'package:get/get.dart' as g;
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -38,6 +40,11 @@ String nodePath(String path) {
 
 String authorizationValue() {
   return "Bearer $sessionToken";
+}
+
+String serverPath(String path, {String? instance}) {
+  path = path.startsWith("/") ? path : "/$path";
+  return "${instance == null ? basePath : "$instance/$apiVersion"}$path";
 }
 
 Uri server(String path) {
@@ -157,4 +164,18 @@ String storedAction(String name, Map<String, dynamic> payload) {
   prefixJson.addAll(payload);
 
   return jsonEncode(prefixJson);
+}
+
+/// Translate an error with parameters (for example: file.not_uploaded:PARAMETER)
+String translateError(String error) {
+  final args = error.split(":");
+  if (args.length == 1) {
+    return error.tr;
+  }
+  final map = <String, String>{};
+  for (int i = 1; i < args.length; i++) {
+    sendLog(args[i]);
+    map[i.toString()] = args[i];
+  }
+  return args[0].trParams(map);
 }

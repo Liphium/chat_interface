@@ -2,7 +2,10 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
@@ -17,23 +20,44 @@ class TrustedLinkHelper {
   static late Setting _trustModeSetting;
   static late Setting _unsafeSetting;
 
-  static const trustedProviders = [
-    "google.com",
-    "tenor.com",
-    "youtube.com",
-    "youtu.be",
-    "github.com",
-    "google.de",
-  ];
-
   static void init() {
     final controller = Get.find<SettingController>();
     _unsafeSetting = controller.settings[TrustedLinkSettings.unsafeSources]!;
     _trustModeSetting = controller.settings[TrustedLinkSettings.trustMode]!;
   }
 
+  /// Show a confirm popup to confirm the user wants to add a new domain
+  static Future<bool> askToAdd(String url) async {
+    // Exclude own instance
+    final domain = extractDomain(url);
+    sendLog("$domain ${extractDomain(basePath)}");
+    if (domain == extractDomain(basePath)) {
+      return true;
+    }
+
+    if (url.startsWith("http://") && !_unsafeSetting.getValue()) {
+      return false;
+    }
+    if (_trustModeSetting.getValue() == 2) {
+      return false;
+    }
+
+    final result = await showConfirmPopup(ConfirmWindow(
+      title: "file.links.title".tr,
+      text: "file.links.description".trParams({
+        "domain": domain,
+      }),
+    ));
+
+    if (result) {
+      db.trustedLink.insertOnConflictUpdate(TrustedLinkData(domain: domain));
+    }
+
+    return result;
+  }
+
   static Future<bool> isLinkTrusted(String url) async {
-    if (url.startsWith("http://") && _unsafeSetting.getOr(true)) {
+    if (url.startsWith("http://") && !_unsafeSetting.getValue()) {
       return false;
     }
 
@@ -41,15 +65,11 @@ class TrustedLinkHelper {
     final type = _trustModeSetting.getValue();
     if (type == 0) {
       return true;
-    } else if (type == 3) {
+    } else if (type == 2) {
       return false;
-    } else if (type == 1) {
-      for (var trusted in trustedProviders) {
-        if (domain.endsWith(trusted)) {
-          return true;
-        }
-      }
+    }
 
+    if (domain == "") {
       return false;
     }
 
@@ -61,35 +81,19 @@ class TrustedLinkHelper {
     return true;
   }
 
+  /// Extract between the first "//" and the first "/" to get the domain
   static String extractDomain(String url) {
-    // Remove the protocol part if present
-    String domain = url.startsWith('http://') ? url.substring(7) : url;
-    domain = domain.startsWith('https://') ? domain.substring(8) : domain;
-
-    // Remove www if present
-    if (domain.startsWith('www.')) {
-      domain = domain.substring(4);
+    final args = url.split("/");
+    if (args.length < 3) {
+      return "";
     }
-
-    // Extract domain by taking characters until the first '/'
-    int index = domain.indexOf('/');
-    if (index != -1) {
-      domain = domain.substring(0, index);
-    }
-
-    // Extract domain by considering only the last three segments
-    List<String> parts = domain.split('.');
-    if (parts.length > 3) {
-      domain = parts.getRange(parts.length - 3, parts.length).join('.');
-    }
-
-    return domain;
+    return args[2];
   }
 }
 
 /// Method for testing the thing
 void main() {
-  final testCases = ["http://domain.com", "http://www.domain.com.uk", "http://something.domain.com", "http://some.some.some.domain.com/hello_world"];
+  final testCases = ["http://domain.com", "http://www.domain.co.uk", "http://something.domain.com", "http://some.some.some.domain.com/hello_world"];
   for (var testCase in testCases) {
     sendLog(TrustedLinkHelper.extractDomain(testCase));
   }
