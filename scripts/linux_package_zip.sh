@@ -1,0 +1,1 @@
+flutter build linux --release && cd ../build/linux/x64/release/bundle && zip -r ~/Downloads/linux.zip ./*

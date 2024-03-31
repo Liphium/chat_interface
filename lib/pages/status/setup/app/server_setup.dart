@@ -1,6 +1,8 @@
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -20,13 +22,21 @@ class ServerSetup extends Setup {
       return const ServerSelectorPage();
     } else {
       basePath = "${server.value}/$apiVersion";
+      isHttps = server.value.startsWith("https://");
       return null;
     }
   }
 }
 
-class ServerSelectorPage extends StatelessWidget {
+class ServerSelectorPage extends StatefulWidget {
   const ServerSelectorPage({super.key});
+
+  @override
+  State<ServerSelectorPage> createState() => _ServerSelectorPageState();
+}
+
+class _ServerSelectorPageState extends State<ServerSelectorPage> {
+  final TextEditingController _name = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -49,19 +59,15 @@ class ServerSelectorPage extends StatelessWidget {
                   style: Get.textTheme.headlineMedium,
                 ),
                 verticalSpacing(sectionSpacing),
-                SizedBox(
-                  width: double.infinity,
-                  child: FJElevatedButton(
-                    onTap: () => chooseServer("http://localhost:3000"),
-                    child: Center(child: Text("Localhost", style: Get.theme.textTheme.labelLarge)),
-                  ),
+                FJTextField(
+                  controller: _name,
+                  hintText: "https://example.com",
                 ),
                 verticalSpacing(defaultSpacing),
-                SizedBox(
-                  width: double.infinity,
-                  child: FJElevatedButton(
-                    onTap: () => chooseServer("https://api.liphium.app"),
-                    child: Center(child: Text('Liphium network', style: Get.theme.textTheme.labelLarge)),
+                FJElevatedButton(
+                  onTap: () => chooseServer(_name.text),
+                  child: Center(
+                    child: Text('Select server', style: Get.theme.textTheme.labelLarge),
                   ),
                 ),
               ],

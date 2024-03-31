@@ -30,7 +30,10 @@ String tokensToPayload() {
 }
 
 const authorizationHeader = "Authorization";
-String nodeProtocol = isHttps ? "https://" : "http://";
+String nodeProtocol() {
+  return isHttps ? "https://" : "http://";
+}
+
 String basePath = 'http://localhost:3000';
 RSAPublicKey? serverPublicKey;
 

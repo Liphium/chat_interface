@@ -12,6 +12,7 @@ class SetupTranslations extends Translations {
           // Instance setup
           'setup.choose.instance': 'Choose an instance.',
           'setup.instance.name': 'Enter a new name',
+          'setup.choose.server': 'Choose a server',
 
           // Login/register
           'register.title': 'Register an account.',
@@ -19,11 +20,9 @@ class SetupTranslations extends Translations {
           'placeholder.password': 'yourmum123 (don\'t use this)',
           'placeholder.tag': '1234',
           'placeholder.invite': 'your-invite-code',
-          'password.invalid':
-              'Please enter a password that is longer than 8 characters.',
+          'password.invalid': 'Please enter a password that is longer than 8 characters.',
           'invite.invalid': 'Please enter a valid invite code.',
-          'invite.info':
-              'Invite codes are your way to get into the app. You can get one from a friend or from official sources.',
+          'invite.info': 'Invite codes are your way to get into the app. You can get one from a friend or from official sources.',
           'placeholder.email': 'your@email.com',
           'register.verify': 'Verify your email.',
           'register.final': 'Finish your account.',
@@ -37,8 +36,7 @@ class SetupTranslations extends Translations {
           'input.email': 'Your email, please',
           'login.next': 'Next step',
           'login.no_account.text': 'Don\'t have an account?',
-          'login.register_reminder':
-              'Don\'t have an account? There is a register button below the next button.',
+          'login.register_reminder': 'Don\'t have an account? There is a register button below the next button.',
           'login.no_account': 'Register one',
           'input.password': 'Your password, please',
           'login.forgot.text': 'Forgot your password?',
