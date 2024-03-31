@@ -41,6 +41,7 @@ dependencies:
   rust_builder:
     path: rust_builder
   unicode_emojis: ^0.4.0
+  archive: ^3.4.10
 
 dev_dependencies:
   flutter_test:

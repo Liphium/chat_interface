@@ -22,8 +22,7 @@ class InstanceSetup extends Setup {
   Future<Widget?> load() async {
     // Get list of instances
     sendLog((await getApplicationSupportDirectory()).path);
-    final instanceFolder =
-        path.join((await getApplicationSupportDirectory()).path, "instances");
+    final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
     final dir = Directory(instanceFolder);
 
     await dir.create();
@@ -44,11 +43,9 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
   if (databaseInitialized) {
     await db.close();
   }
-  final dbFolder =
-      path.join((await getApplicationSupportDirectory()).path, "instances");
+  final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
   final file = File(path.join(dbFolder, '$name.db'));
-  db = Database(
-      NativeDatabase.createInBackground(file, logStatements: driftLogger));
+  db = Database(NativeDatabase.createInBackground(file, logStatements: driftLogger));
 
   sendLog("going on");
 
@@ -106,20 +103,13 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                         itemCount: widget.instances.length,
                         itemBuilder: (context, index) {
                           var instance = widget.instances[index];
-                          final base = path
-                              .basename(path.withoutExtension(instance.path));
+                          final base = path.basename(path.withoutExtension(instance.path));
 
                           return Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: elementSpacing),
+                            padding: const EdgeInsets.only(bottom: elementSpacing),
                             child: FJElevatedButton(
-                              onTap: () => setupInstance(
-                                  path.basename(
-                                      path.withoutExtension(instance.path)),
-                                  next: true),
-                              child: Center(
-                                  child: Text(base,
-                                      style: Get.textTheme.labelLarge)),
+                              onTap: () => setupInstance(path.basename(path.withoutExtension(instance.path)), next: true),
+                              child: Center(child: Text(base, style: Get.textTheme.labelLarge)),
                             ),
                           );
                         },
@@ -131,11 +121,8 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                       ),
                       verticalSpacing(defaultSpacing),
                       FJElevatedButton(
-                        onTap: () =>
-                            setupInstance(_controller.text, next: true),
-                        child: Center(
-                            child: Text("create".tr,
-                                style: Get.textTheme.labelLarge)),
+                        onTap: () => setupInstance(_controller.text, next: true),
+                        child: Center(child: Text("create".tr, style: Get.textTheme.labelLarge)),
                       ),
                     ],
                   ),
