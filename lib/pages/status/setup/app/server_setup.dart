@@ -81,6 +81,7 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
   void chooseServer(String path) {
     basePath = "$path/$apiVersion";
     db.into(db.setting).insert(SettingCompanion.insert(key: "server", value: path));
+    isHttps = path.startsWith("https://");
     setupManager.next();
   }
 }

@@ -60,7 +60,7 @@ class ReleaseData {
 }
 
 Future<ReleaseData?> fetchReleaseDataFor(String owner, String repo) async {
-  final res = await dio.get("https://api.github.com/repos/$owner/$repo/releases/latest");
+  final res = await dio.get("https://api.github.com/repos/$owner/$repo/releases/latest", options: Options(validateStatus: (s) => true));
   if (res.statusCode != 200) {
     return null;
   }
