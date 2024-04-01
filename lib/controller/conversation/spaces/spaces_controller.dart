@@ -28,6 +28,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:livekit_client/livekit_client.dart';
 import 'package:sodium_libs/sodium_libs.dart';
+import 'package:window_manager/window_manager.dart';
 
 class SpacesController extends GetxController {
   //* Call status
@@ -51,10 +52,20 @@ class SpacesController extends GetxController {
   static SecureKey? key;
 
   //* Call layout
+  final hideSidebar = false.obs;
   final fullScreen = false.obs;
   final hasVideo = false.obs;
   final hideOverlay = false.obs;
   final cinemaWidget = Rx<Widget?>(null);
+
+  void toggleFullScreen() {
+    fullScreen.toggle();
+    if (fullScreen.value) {
+      windowManager.setFullScreen(true);
+    } else {
+      windowManager.setFullScreen(false);
+    }
+  }
 
   void cinemaMode(Widget widget) {
     if (cinemaWidget.value != null) {
@@ -90,13 +101,13 @@ class SpacesController extends GetxController {
     playMode.value = !playMode.value;
     if (playMode.value) {
       Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
-      fullScreen.value = true;
+      hideSidebar.value = true;
       if (Get.find<SettingController>().settings[SpacesSettings.gameMusic]!.getValue()) {
         playMusic();
       }
     } else {
       stopMusic();
-      fullScreen.value = false;
+      hideSidebar.value = false;
       Get.offAll(const ChatPage(), transition: Transition.fadeIn);
     }
   }

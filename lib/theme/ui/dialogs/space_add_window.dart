@@ -65,6 +65,8 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
         children: [
           Text("Create a space".tr, style: theme.textTheme.titleMedium),
           verticalSpacing(sectionSpacing),
+          /*
+          verticalSpacing(sectionSpacing),
           Obx(
             () => FJTextField(
               controller: _controller,
@@ -72,7 +74,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
               errorText: _errorText.value,
             ),
           ),
-          verticalSpacing(defaultSpacing),
+          */
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -90,12 +92,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButton(
             onTap: () async {
-              if (_controller.text.isEmpty) {
-                _errorText.value = "enter.name".tr;
-                return;
-              }
-
-              Get.find<SpacesController>().createSpace(_controller.text, public.value);
+              Get.find<SpacesController>().createSpace("", public.value);
               Get.back();
             },
             label: "create".tr,

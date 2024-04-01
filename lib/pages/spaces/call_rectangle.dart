@@ -12,7 +12,6 @@ import 'package:chat_interface/pages/spaces/widgets/call_controls.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -161,6 +160,7 @@ class _CallRectangleState extends State<CallRectangle> {
             children: [
               Obx(
                 () => LoadingIconButton(
+                  background: true,
                   loading: false.obs,
                   onTap: () {
                     if (controller.playMode.value) {
@@ -178,14 +178,14 @@ class _CallRectangleState extends State<CallRectangle> {
                           }));
                       return;
                     }
-                    controller.fullScreen.toggle();
-                    if (controller.fullScreen.value) {
+                    controller.hideSidebar.toggle();
+                    if (controller.hideSidebar.value) {
                       Get.offAll(const CallPage(), transition: Transition.fadeIn);
                     } else {
                       Get.offAll(const ChatPage(), transition: Transition.fadeIn);
                     }
                   },
-                  icon: controller.fullScreen.value ? Icons.arrow_forward : Icons.arrow_back_rounded,
+                  icon: controller.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back_rounded,
                   iconSize: 30,
                 ),
               ),
@@ -195,21 +195,45 @@ class _CallRectangleState extends State<CallRectangle> {
               Obx(
                 () {
                   if (Get.find<TabletopController>().enabled.value) {
-                    return LoadingIconButton(
-                      key: tabletopKey,
-                      loading: false.obs,
-                      onTap: () {
-                        Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
-                      },
-                      icon: Icons.crop_rotate,
-                      iconSize: 30,
+                    return Padding(
+                      padding: const EdgeInsets.only(right: defaultSpacing),
+                      child: LoadingIconButton(
+                        key: tabletopKey,
+                        loading: false.obs,
+                        background: true,
+                        onTap: () {
+                          Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+                        },
+                        icon: Icons.crop_rotate,
+                        iconSize: 30,
+                      ),
                     );
                   }
 
+                  if (controller.cinemaWidget.value != null) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: defaultSpacing),
+                      child: LoadingIconButton(
+                        tooltip: "spaces.toggle_people".tr,
+                        loading: false.obs,
+                        background: true,
+                        onTap: () => controller.hideOverlay.toggle(),
+                        icon: controller.hideOverlay.value ? Icons.visibility_off : Icons.visibility,
+                        iconSize: 30,
+                      ),
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+              Obx(
+                () {
                   return LoadingIconButton(
                     loading: false.obs,
-                    onTap: () => controller.hideOverlay.toggle(),
-                    icon: controller.hideOverlay.value ? Icons.visibility_off : Icons.visibility,
+                    background: true,
+                    onTap: () => controller.toggleFullScreen(),
+                    icon: controller.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
                     iconSize: 30,
                   );
                 },

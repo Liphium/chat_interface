@@ -10,20 +10,23 @@ class LoadingIconButton extends StatelessWidget {
   final double iconSize;
   final double extra;
   final double padding;
+  final bool background;
   final Function() onTap;
   final Function(BuildContext)? onTapContext;
 
-  const LoadingIconButton(
-      {super.key,
-      this.loading,
-      required this.onTap,
-      this.tooltip,
-      this.onTapContext,
-      required this.icon,
-      this.color,
-      this.extra = 17,
-      this.iconSize = 23,
-      this.padding = 0});
+  const LoadingIconButton({
+    super.key,
+    this.loading,
+    required this.onTap,
+    this.tooltip,
+    this.onTapContext,
+    required this.icon,
+    this.color,
+    this.extra = 17,
+    this.iconSize = 23,
+    this.padding = 0,
+    this.background = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,7 @@ class LoadingIconButton extends StatelessWidget {
         height: iconSize + extra + padding,
         child: Material(
           borderRadius: BorderRadius.circular(50),
-          color: Colors.transparent,
+          color: background ? Get.theme.colorScheme.primaryContainer : Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(50),
             onTap: () {
@@ -51,20 +54,22 @@ class LoadingIconButton extends StatelessWidget {
             },
             hoverColor: Get.theme.hoverColor,
             child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: loading != null
-                    ? Obx(
-                        () => loading!.value
-                            ? Padding(
-                                padding: const EdgeInsets.all(defaultSpacing),
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 3.0,
-                                    color: Get.theme.colorScheme.onPrimary),
-                              )
-                            : Icon(icon,
-                                color: color ?? Colors.white, size: iconSize),
-                      )
-                    : Icon(icon, color: color ?? Colors.white, size: iconSize)),
+              padding: EdgeInsets.all(padding),
+              child: loading != null
+                  ? Obx(
+                      () => loading!.value
+                          ? Padding(
+                              padding: const EdgeInsets.all(defaultSpacing),
+                              child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                            )
+                          : Icon(icon, color: color ?? Colors.white, size: iconSize),
+                    )
+                  : Icon(
+                      icon,
+                      color: color ?? Colors.white,
+                      size: iconSize,
+                    ),
+            ),
           ),
         ),
       ),

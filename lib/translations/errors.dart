@@ -7,9 +7,9 @@ class ErrorTranslations extends Translations {
         'en_US': {
           'error': 'Error',
           'server.error': 'Something went wrong on the server, please try again later.',
-          'friends.error': 'There was an error while loading your friends. Please try again later or contact support.',
+          'friends.error': 'There was an error while loading your friends. Please try again later or contact your administrator.',
           'node.error': 'The chat server didn\'t respond, please try again later.',
-          'mail.error': 'There was an error with our mail servers. Please try again later or contact support.',
+          'mail.error': 'There was an error with our mail servers. Please try again later or contact your administrator.',
           'app.error': 'There was an error with the app. Please report this to the developers.',
           'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
           'new.version': 'A new version is available, please update the app.',

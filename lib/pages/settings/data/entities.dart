@@ -90,6 +90,7 @@ class Setting<T> {
   }
 
   T getValue() => value.value == null ? defaultValue : value.value!;
+  T? getOrNull() => value.value;
 
   T getOr(T other) => value.value ?? other;
   T getWhenValue(T other, T def) => value.value == other ? def : value.value ?? defaultValue;

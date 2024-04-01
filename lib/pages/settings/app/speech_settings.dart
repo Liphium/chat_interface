@@ -25,7 +25,7 @@ class AudioSettings {
   static const String microphoneSensitivity = "audio.microphone.sensitivity";
 
   static var microphoneModes = [
-    SelectableItem("audio.microphone.sensitivity.automatic".tr, Icons.filter_alt),
+    SelectableItem("audio.microphone.sensitivity.automatic".tr, Icons.auto_awesome, experimental: true),
     SelectableItem("audio.microphone.sensitivity.manual".tr, Icons.adjust),
   ];
 

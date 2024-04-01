@@ -5,6 +5,7 @@ use cpal::{
     StreamConfig,
 };
 use once_cell::sync::Lazy;
+use voice_activity_detector::VoiceActivityDetector;
 
 use crate::{frb_generated::StreamSink, logger, util};
 
@@ -73,11 +74,14 @@ pub fn record() {
         let config: StreamConfig = StreamConfig {
             channels: mic_channels,
             sample_rate: cpal::SampleRate(sample_rate),
-            buffer_size: cpal::BufferSize::Fixed(4096),
+            buffer_size: cpal::BufferSize::Fixed(2048),
         };
 
+        let mut vad =
+            VoiceActivityDetector::<2048>::try_with_sample_rate(default_config.sample_rate().0)
+                .expect("how dare you");
+
         // Create a stream
-        let mut historic_fluctuations = vec![0.0; 10];
         let mut talking_streak = 0;
         let stream = match device.build_input_stream(
             &config.into(),
@@ -107,25 +111,15 @@ pub fn record() {
 
                 // Detect if the user is talking
                 let talking: bool = if options.detection_mode == 0 {
-                    if historic_fluctuations.len() >= 10 {
-                        historic_fluctuations.remove(0);
-                    }
-                    historic_fluctuations.push(max);
+                    let probability = vad.predict(samples);
 
-                    // Calculate the fluctuation
-                    let mut fluctuation = 0.0;
-                    for i in 0..historic_fluctuations.len() {
-                        fluctuation += (max - historic_fluctuations[i]).abs();
-                    }
-                    fluctuation /= historic_fluctuations.len() as f32;
-
-                    fluctuation > 0.0011
+                    probability > 0.79
                 } else {
                     max > options.talking_amplitude
                 };
 
                 if talking {
-                    talking_streak = 25;
+                    talking_streak = 100;
 
                     if !options.talking {
                         logger::send_log(logger::TAG_AUDIO, "Started talking.");
@@ -134,7 +128,7 @@ pub fn record() {
                     options.talking = true;
                 } else if talking_streak <= 0 {
                     if options.talking {
-                        logger::send_log(logger::TAG_AUDIO, "Stopped talking.");
+                        logger::send_log(logger::TAG_AUDIO, "Stopped talking."); // sadjasdasiodjasidjiasdiasjdaisjdiasdiasdjasdjaisd
                         util::print_action(super::ACTION_STOPPED_TALKING);
                     }
                     options.talking = false;

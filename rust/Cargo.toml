@@ -10,3 +10,4 @@ crate-type = ["cdylib", "staticlib", "lib"]
 cpal = { version = "0.15.2", features = ["jack"] }
 once_cell = "1.18.0"
 flutter_rust_bridge = "=2.0.0-dev.28"
+voice_activity_detector = { path = "voice_activity_detector" }

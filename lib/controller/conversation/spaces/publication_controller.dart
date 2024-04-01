@@ -2,6 +2,7 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -78,21 +79,33 @@ class PublicationController extends GetxController {
     if (_connected) {
       try {
         final controller = Get.find<SpaceMemberController>();
+        final setCamera = Get.find<SettingController>().settings[VideoSettings.camera]!.getOrNull();
         if (newVideoEnabled) {
-          await SpacesController.livekitRoom?.localParticipant!.setCameraEnabled(true);
+          final device = await _getDevice(setCamera ?? "hi");
+          await SpacesController.livekitRoom?.localParticipant!.setCameraEnabled(
+            true,
+            cameraCaptureOptions: CameraCaptureOptions(
+              deviceId: device?.deviceId,
+            ),
+          );
         } else {
           await SpacesController.livekitRoom?.localParticipant!.setCameraEnabled(false);
         }
         controller.members[SpaceMemberController.ownId]!.isVideo.value = newVideoEnabled;
         videoEnabled.value = newVideoEnabled;
       } catch (e) {
-        sendLog("SCREEN SHARE ERROR $e");
+        sendLog("CAMERA ERROR $e");
       }
     }
     videoLoading.value = false;
   }
 
-  //* Video
+  Future<MediaDevice?> _getDevice(String label) async {
+    final list = await Hardware.instance.enumerateDevices(type: "videoinput");
+    return list.firstWhereOrNull((element) => element.label == label);
+  }
+
+  //* Screen share
   final screenshareLoading = false.obs;
   final screenshareEnabled = false.obs;
 

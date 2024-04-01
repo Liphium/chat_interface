@@ -10,8 +10,12 @@ import 'package:livekit_client/livekit_client.dart';
 
 import '../data/entities.dart';
 
+class VideoSettings {
+  static const String camera = "video.camera";
+}
+
 void addVideoSettings(SettingController controller) {
-  controller.settings["video.camera"] = Setting<String>("video.camera", "def");
+  controller.settings[VideoSettings.camera] = Setting<String>(VideoSettings.camera, "def");
 }
 
 class VideoSettingsPage extends StatefulWidget {
@@ -38,7 +42,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
 
   void _getMicrophones(List<MediaDevice> list) {
     SettingController controller = Get.find();
-    String currentMic = controller.settings["video.camera"]!.getValue();
+    String currentMic = controller.settings[VideoSettings.camera]!.getValue();
 
     // Filter for cameras
     _cameras.clear();
@@ -88,45 +92,53 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
 
       RepaintBoundary(
         child: Obx(
-          () => ListView.builder(
-            itemCount: _cameras.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              String current = _cameras[index].label;
+          () => Column(
+            children: List.generate(_cameras.length, (index) {
+              final current = _cameras[index].label;
 
-              return Obx(
-                () => Material(
-                  color:
-                      controller.settings["video.camera"]!.getWhenValue("def", _cameras[0].label) == current ? theme.colorScheme.primary : theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(defaultSpacing),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(defaultSpacing),
-                    onTap: () async {
-                      controller.settings["video.camera"]!.setValue(current);
+              final first = index == 0;
+              final last = index == _cameras.length - 1;
 
-                      // Refresh camera preview
-                      if (_cameraTrack.value != null) {
-                        _startPreview(_cameras[index].label);
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(defaultSpacing),
-                      child: Row(
-                        children: [
-                          //* Icon
-                          Icon(Icons.camera_alt, color: theme.colorScheme.onPrimary),
+              final radius = BorderRadius.vertical(
+                top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+              );
 
-                          horizontalSpacing(defaultSpacing * 0.5),
+              return Padding(
+                padding: EdgeInsets.only(top: index == 0 ? 0 : elementSpacing),
+                child: Obx(
+                  () => Material(
+                    color: controller.settings[VideoSettings.camera]!.getWhenValue("def", _cameras[0].label) == current ? theme.colorScheme.primary : theme.colorScheme.onBackground,
+                    borderRadius: radius,
+                    child: InkWell(
+                      borderRadius: radius,
+                      onTap: () async {
+                        controller.settings[VideoSettings.camera]!.setValue(current);
 
-                          //* Label
-                          Text(_cameras[index].label, style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface)),
-                        ],
+                        // Refresh camera preview
+                        if (_cameraTrack.value != null) {
+                          _startPreview(_cameras[index].label);
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(defaultSpacing),
+                        child: Row(
+                          children: [
+                            //* Icon
+                            Icon(Icons.camera_alt, color: theme.colorScheme.onPrimary),
+
+                            horizontalSpacing(defaultSpacing * 0.5),
+
+                            //* Label
+                            Text(_cameras[index].label, style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface)),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               );
-            },
+            }),
           ),
         ),
       ),

@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart' as log;
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
+import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 
@@ -51,6 +52,7 @@ final list = <String>[].obs;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
 
   // Initialize sodium
   await initSodium();
@@ -73,6 +75,16 @@ void main() async {
 
   // Initialize controllers
   initializeControllers();
+
+  await windowManager.waitUntilReadyToShow(
+    const WindowOptions(
+      minimumSize: Size(1000, 800),
+      fullScreen: false,
+    ),
+    () async {
+      await windowManager.show();
+    },
+  );
 
   runApp(const ChatApp());
 }

@@ -83,49 +83,56 @@ Future<ReleaseData?> fetchReleaseDataFor(String owner, String repo) async {
 }
 
 Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async {
-  var location = await getApplicationSupportDirectory();
-  location = Directory(path.join(location.path, "versions"));
+  try {
+    var location = await getApplicationSupportDirectory();
+    location = Directory(path.join(location.path, "versions"));
 
-  final res = await dio.download(
-    data.downloadUrl,
-    path.join(location.path, "download.zip"),
-    onReceiveProgress: (count, total) {
-      status.value = "Downloading ${((count / total) * 100.0).toStringAsFixed(0)}%..";
-    },
-    options: Options(
-      validateStatus: (status) => true,
-    ),
-  );
+    final res = await dio.download(
+      data.downloadUrl,
+      path.join(location.path, "download.zip"),
+      onReceiveProgress: (count, total) {
+        status.value = "Downloading ${((count / total) * 100.0).toStringAsFixed(0)}%..";
+      },
+      options: Options(
+        validateStatus: (status) => true,
+      ),
+    );
 
-  if (res.statusCode != 200) {
-    status.value = "Couldn't download from GitHub";
+    if (res.statusCode != 200) {
+      status.value = "Couldn't download from GitHub";
+      return false;
+    }
+
+    status.value = "Extracting..";
+    final dir = await Directory(path.join(location.path, data.version)).create();
+    await extractFileToDisk(path.join(location.path, "download.zip"), dir.path, asyncWrite: true);
+
+    status.value = "Deleting old files..";
+    if (prev != null) {
+      await Directory(path.join(location.path, prev)).delete(recursive: true);
+    }
+    await File(path.join(location.path, "download.zip")).delete();
+
+    final linkDir = path.join(getDesktopDirectory().path, "Liphium");
+    final link = Link(linkDir);
+    await File(linkDir).delete();
+    if (Platform.isWindows) {
+      await link.create(path.join(location.path, data.version, "chat_interface.exe"));
+    } else if (Platform.isMacOS) {
+      await link.create(path.join(location.path, data.version, "chat_interface.dmg"));
+    } else if (Platform.isLinux) {
+      await link.create(path.join(location.path, data.version, "chat_interface"));
+      Process.run("chmod", ["+x", path.join(location.path, data.version, "chat_interface")]);
+      status.value = "Since you are on Linux, you might have to give the executable we just downloaded for you some permissions.";
+      await Future.delayed(30.seconds);
+    }
+
+    status.value = "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
+    return true;
+  } catch (e) {
+    status.value = "There was an error during the update: $e";
     return false;
   }
-
-  status.value = "Extracting..";
-  final dir = await Directory(path.join(location.path, data.version)).create();
-  await extractFileToDisk(path.join(location.path, "download.zip"), dir.path, asyncWrite: true);
-
-  status.value = "Deleting old files..";
-  if (prev != null) {
-    await Directory(path.join(location.path, prev)).delete();
-  }
-  await File(path.join(location.path, "download.zip")).delete();
-
-  final link = Link(path.join(getDesktopDirectory().path, "Liphium"));
-  if (Platform.isWindows) {
-    await link.create(path.join(location.path, data.version, "chat_interface.exe"));
-  } else if (Platform.isMacOS) {
-    await link.create(path.join(location.path, data.version, "chat_interface.dmg"));
-  } else if (Platform.isLinux) {
-    await link.create(path.join(location.path, data.version, "chat_interface"));
-    Process.run("chmod", ["+x", path.join(location.path, data.version, "chat_interface")]);
-    status.value = "Since you are on Linux, you might have to give the executable we just downloaded for you some permissions.";
-    await Future.delayed(30.seconds);
-  }
-
-  status.value = "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
-  return true;
 }
 
 Directory getDesktopDirectory() {

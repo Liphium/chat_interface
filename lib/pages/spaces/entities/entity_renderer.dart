@@ -16,7 +16,7 @@ List<Widget> renderEntites(double bottom, double right, BoxConstraints constrain
 
   for (int i = 0; i < toRender.length; i++) {
     //* Add member renderer
-    Widget memberRenderer = controller.hasVideo.value
+    Widget memberRenderer = controller.hasVideo.value || memberController.members.length > 1
         ? ConstrainedBox(
             constraints: constraints,
             child: RectangleMemberEntity(

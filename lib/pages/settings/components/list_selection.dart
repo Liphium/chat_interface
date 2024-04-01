@@ -6,8 +6,9 @@ import 'package:get/get.dart';
 class SelectableItem {
   final String label;
   final IconData icon;
+  final bool experimental;
 
-  const SelectableItem(this.label, this.icon);
+  const SelectableItem(this.label, this.icon, {this.experimental = false});
 }
 
 class ListSelectionSetting extends StatefulWidget {
@@ -40,9 +41,7 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
           child: Obx(
             () => Material(
-              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index
-                  ? Get.theme.colorScheme.primary
-                  : Get.theme.colorScheme.onBackground,
+              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,
@@ -62,6 +61,27 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
                         widget.items[index].label.tr,
                         style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.onSurface),
                       ),
+                      horizontalSpacing(defaultSpacing),
+                      widget.items[index].experimental
+                          ? Container(
+                              decoration: BoxDecoration(
+                                color: Get.theme.colorScheme.error.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(defaultSpacing),
+                              ),
+                              padding: const EdgeInsets.all(elementSpacing),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.science, color: Get.theme.colorScheme.error),
+                                  horizontalSpacing(elementSpacing),
+                                  Text(
+                                    "settings.experimental".tr,
+                                    style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
+                                  ),
+                                  horizontalSpacing(elementSpacing)
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ],
                   ),
                 ),

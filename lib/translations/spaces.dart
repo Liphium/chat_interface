@@ -5,6 +5,9 @@ class SpacesTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
         //* English US
         'en_US': {
+          // General
+          'spaces.toggle_people': 'Toggle showing people',
+
           // Game hub
           'game.lobby': 'Ready to start. (@count/@max)',
           'game.lobby_waiting': 'Waiting for more players. (@count/@min)',
