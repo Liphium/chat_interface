@@ -250,6 +250,13 @@ abstract class TableObject {
     lastRotation = rot;
   }
 
+  void newRotation(double rot) {
+    spaceConnector.sendAction(Message("tobj_rotate", <String, dynamic>{
+      "id": id,
+      "r": rot,
+    }));
+  }
+
   void hoverRotation(double rot) {
     lastRotation = rotation.realValue;
     rotation.setValue(rot);

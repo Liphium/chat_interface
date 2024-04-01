@@ -14,7 +14,7 @@ class TextObject extends TableObject {
   double fontSize = 0;
   String text = "";
 
-  TextObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.card);
+  TextObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.text);
 
   factory TextObject.createFromText(Offset location, String text, double fontSize) {
     final obj = TextObject("", location, const Size(0, 0));

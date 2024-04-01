@@ -40,10 +40,13 @@ class AttachmentController extends GetxController {
     final res = await dio.post(
       server("/account/files/upload").toString(),
       data: formData,
-      options: dio_rs.Options(headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": "Bearer $sessionToken",
-      }),
+      options: dio_rs.Options(
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": "Bearer $sessionToken",
+        },
+        validateStatus: (status) => true,
+      ),
       onSendProgress: (count, total) {
         data.progress.value = count / total;
         sendLog(data.progress.value);
