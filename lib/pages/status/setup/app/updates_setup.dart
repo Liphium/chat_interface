@@ -124,8 +124,7 @@ Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async 
     await Future.delayed(30.seconds);
   }
 
-  status.value =
-      "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
+  status.value = "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
   return true;
 }
 
@@ -138,6 +137,10 @@ Directory getDesktopDirectory() {
     home = envVars['HOME']!;
   } else if (Platform.isWindows) {
     home = envVars["UserProfile"]!;
+    final exists = Directory(path.join(home, "Desktop")).existsSync();
+    if (!exists) {
+      home = path.join(home, "OneDrive");
+    }
   }
 
   return Directory(path.join(home, "Desktop"));
