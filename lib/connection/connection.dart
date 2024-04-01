@@ -45,7 +45,7 @@ class Connector {
 
     // Grab public key from the node
     final normalizedUrl = url.replaceAll("ws://", "").replaceAll("wss://", "").split("/")[0];
-    final res = await post(Uri.parse("$nodeProtocol$normalizedUrl/pub"));
+    final res = await post(Uri.parse("${nodeProtocol()}$normalizedUrl/pub"));
     if (res.statusCode != 200) {
       sendLog("COULDN'T GET NODE PUBLIC KEY");
       return false;
