@@ -357,7 +357,7 @@ class SpaceConnectionContainer extends ShareContainer {
     final http.Response req;
     try {
       req = await http.post(
-        Uri.parse("$nodeProtocol$node/info"),
+        Uri.parse("${nodeProtocol()}$node/info"),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },

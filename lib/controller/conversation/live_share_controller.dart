@@ -194,7 +194,7 @@ class LiveShareController extends GetxController {
 
     // Get info about the file
     final json = await postAny(
-      "$nodeProtocol${container.url}/liveshare/info",
+      "${nodeProtocol()}${container.url}/liveshare/info",
       {"id": container.id, "token": container.token},
     );
     if (!json["success"]) {
@@ -212,7 +212,7 @@ class LiveShareController extends GetxController {
       "token": container.token,
     });
     final res = await dio.post(
-      "$nodeProtocol${container.url}/liveshare/subscribe",
+      "${nodeProtocol()}${container.url}/liveshare/subscribe",
       data: formData,
       options: d.Options(
         validateStatus: (status) => status != 404,
@@ -285,7 +285,7 @@ class LiveShareController extends GetxController {
               "chunk": currentChunk,
             });
             final res = await dio.download(
-              "$nodeProtocol${container.url}/liveshare/download",
+              "${nodeProtocol()}${container.url}/liveshare/download",
               "${receiveDir.path}/chunk_$currentChunk",
               data: formData,
               options: d.Options(
@@ -349,7 +349,7 @@ class LiveShareController extends GetxController {
   void _tellReceived(String url, String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
     // Send receive confirmation
     final res = await dio.post(
-      "$nodeProtocol$url/liveshare/received",
+      "${nodeProtocol()}$url/liveshare/received",
       data: jsonEncode({
         "id": id,
         "token": token,

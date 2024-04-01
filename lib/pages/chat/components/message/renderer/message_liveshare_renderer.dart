@@ -49,7 +49,7 @@ class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
       return;
     }
 
-    final json = await postAny("$nodeProtocol${container!.url}/liveshare/info", {
+    final json = await postAny("${nodeProtocol()}${container!.url}/liveshare/info", {
       "id": container!.id,
       "token": container!.token,
     });

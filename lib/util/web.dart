@@ -38,7 +38,7 @@ String basePath = 'http://localhost:3000';
 RSAPublicKey? serverPublicKey;
 
 String nodePath(String path) {
-  return "$nodeProtocol$nodeDomain$path";
+  return "${nodeProtocol()}$nodeDomain$path";
 }
 
 String authorizationValue() {
@@ -128,7 +128,7 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
     return <String, dynamic>{"success": false, "error": defaultError};
   }
 
-  return _postTCP(connector.nodePublicKey!, "$nodeProtocol$nodeDomain$path", body, defaultError: defaultError, token: sessionToken);
+  return _postTCP(connector.nodePublicKey!, "${nodeProtocol()}$nodeDomain$path", body, defaultError: defaultError, token: sessionToken);
 }
 
 // Post request to any domain
