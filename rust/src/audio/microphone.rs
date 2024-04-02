@@ -78,11 +78,11 @@ pub fn record() {
         let config: StreamConfig = StreamConfig {
             channels: mic_channels,
             sample_rate: cpal::SampleRate(sample_rate),
-            buffer_size: cpal::BufferSize::Fixed(1024),
+            buffer_size: cpal::BufferSize::Fixed(2048),
         };
 
         let mut vad =
-            VoiceActivityDetector::<1024>::try_with_sample_rate(16000).expect("how dare you");
+            VoiceActivityDetector::<2048>::try_with_sample_rate(44100).expect("how dare you");
         // Create a stream
         let mut prob_streak = 0;
         let mut talking_streak = 0;
@@ -112,26 +112,26 @@ pub fn record() {
                     }
                 }
 
-                // Linux default value
-                // macOS default value: 0.79
+                //
+                // macOS default value: 0.35
 
                 // Detect if the user is talking
                 let talking: bool = if options.detection_mode == 0 {
                     let probability = vad.predict(samples);
 
-                    if probability > 0.06 {
-                        prob_streak += if probability > 0.6 { 3 } else { 1 };
+                    if probability > 0.35 {
+                        prob_streak += if probability > 0.7 { 3 } else { 1 };
                     } else {
                         prob_streak = 0;
                     }
 
-                    prob_streak > 5
+                    prob_streak > 2
                 } else {
                     max > options.talking_amplitude
                 };
 
                 if talking {
-                    talking_streak = 50;
+                    talking_streak = 25;
 
                     if !options.talking {
                         logger::send_log(logger::TAG_AUDIO, "Started talking.");
