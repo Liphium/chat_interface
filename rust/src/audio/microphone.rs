@@ -1,4 +1,4 @@
-use std::{sync::Mutex, thread, time::Duration};
+use std::{default, sync::Mutex, thread, time::Duration};
 
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
@@ -46,7 +46,11 @@ fn pcm_to_db(pcm: f32) -> f32 {
 pub fn record() {
     thread::spawn(move || {
         // Get a cpal host
-        let host = cpal::default_host(); // Current host on computer
+        let mut host = cpal::default_host(); // Current host on computer
+        #[cfg(target_os = "linux")]
+        {
+            host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
+        }
 
         // Get input device (using new API)
         let mut device = host
@@ -74,14 +78,13 @@ pub fn record() {
         let config: StreamConfig = StreamConfig {
             channels: mic_channels,
             sample_rate: cpal::SampleRate(sample_rate),
-            buffer_size: cpal::BufferSize::Fixed(2048),
+            buffer_size: cpal::BufferSize::Fixed(1024),
         };
 
         let mut vad =
-            VoiceActivityDetector::<2048>::try_with_sample_rate(default_config.sample_rate().0)
-                .expect("how dare you");
-
+            VoiceActivityDetector::<1024>::try_with_sample_rate(16000).expect("how dare you");
         // Create a stream
+        let mut prob_streak = 0;
         let mut talking_streak = 0;
         let stream = match device.build_input_stream(
             &config.into(),
@@ -113,7 +116,13 @@ pub fn record() {
                 let talking: bool = if options.detection_mode == 0 {
                     let probability = vad.predict(samples);
 
-                    probability > 0.79
+                    if probability > 0.1 {
+                        prob_streak += 1;
+                    } else {
+                        prob_streak = 0;
+                    }
+
+                    prob_streak > 5
                 } else {
                     max > options.talking_amplitude
                 };

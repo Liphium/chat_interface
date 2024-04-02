@@ -1,3 +1,5 @@
+use std::usize;
+
 use ort::{GraphOptimizationLevel, Session};
 
 use crate::{error::Error, Sample};

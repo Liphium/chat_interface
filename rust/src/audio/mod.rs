@@ -16,6 +16,8 @@ pub struct AudioOptions {
     pub amplitude_logging: bool,
     pub talking: bool,
     pub talking_amplitude: f32,
+    pub ai_probability: f32,
+    pub ai_sample_rate: i32,
     pub input_device: String,
     pub output_device: String,
 }
@@ -29,6 +31,8 @@ pub static AUDIO_OPTIONS: Lazy<Mutex<AudioOptions>> = Lazy::new(|| {
         amplitude_logging: false,
         talking: false,
         talking_amplitude: 0.07,
+        ai_probability: 0.5,
+        ai_sample_rate: 32000,
         input_device: String::from(api::interaction::DEFAULT_NAME),
         output_device: String::from(api::interaction::DEFAULT_NAME),
     })
@@ -94,6 +98,26 @@ pub fn set_input_device(microphone: String) {
 pub fn set_detection_mode(mode: i32) {
     let mut options = get_options();
     (*options).detection_mode = mode;
+}
+
+pub fn set_ai_sample_rate(sample_rate: i32) {
+    let mut options = get_options();
+    (*options).ai_sample_rate = sample_rate;
+}
+
+pub fn set_ai_probability(probability: f32) {
+    let mut options = get_options();
+    (*options).ai_probability = probability;
+}
+
+pub fn get_ai_probability() -> f32 {
+    let options = get_options();
+    options.ai_probability
+}
+
+pub fn get_ai_sample_rate() -> i32 {
+    let options = get_options();
+    options.ai_sample_rate
 }
 
 pub fn get_detection_mode() -> i32 {
