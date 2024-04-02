@@ -112,19 +112,26 @@ pub fn record() {
                     }
                 }
 
+                // Linux default value
                 // macOS default value: 0.79
 
                 // Detect if the user is talking
                 let talking: bool = if options.detection_mode == 0 {
                     let probability = vad.predict(samples);
 
-                    probability > 0.79
+                    if probability > 0.06 {
+                        prob_streak += if probability > 0.6 { 3 } else { 1 };
+                    } else {
+                        prob_streak = 0;
+                    }
+
+                    prob_streak > 5
                 } else {
                     max > options.talking_amplitude
                 };
 
                 if talking {
-                    talking_streak = 100;
+                    talking_streak = 50;
 
                     if !options.talking {
                         logger::send_log(logger::TAG_AUDIO, "Started talking.");
