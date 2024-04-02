@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
@@ -7,9 +8,13 @@ import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class MicrophoneTab extends StatefulWidget {
@@ -22,6 +27,7 @@ class MicrophoneTab extends StatefulWidget {
 class _MicrophoneTabState extends State<MicrophoneTab> {
   final _microphones = <api.InputDevice>[].obs;
   final talking = false.obs;
+  final windowsWarning = false.obs;
   final _sensitivity = 0.0.obs;
   bool _started = false;
   StreamSubscription? _sub, _actionSub;
@@ -67,10 +73,44 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
     _sub = api.createAmplitudeStream().listen((amp) {
       _sensitivity.value = amp;
     });
+
+    if (io.Platform.isWindows) {
+      tryGettingWindowsCommunicationsMode();
+    }
   }
 
   String _getCurrent() {
     return Get.find<SettingController>().settings[AudioSettings.microphone]!.getOr(AudioSettings.defaultDeviceName);
+  }
+
+  void tryGettingWindowsCommunicationsMode() async {
+    try {
+      io.ProcessResult result = await io.Process.run(
+        'powershell',
+        [
+          '-Command',
+          'Get-ItemProperty -Path \'HKCU:\\Software\\Microsoft\\Multimedia\\Audio\' -Name UserDuckingPreference',
+        ],
+      );
+      final args = result.stdout.toString().split("\n");
+      final line = args[2].trim();
+      final value = line.split(":")[1].trim();
+      if (value != "3") {
+        windowsWarning.value = true;
+      }
+    } catch (e) {
+      sendLog("ERROR $e");
+    }
+  }
+
+  Future<void> setUserDuckingPreference(int value) async {
+    await io.Process.run(
+      'powershell',
+      [
+        '-Command',
+        'Set-ItemProperty -Path \'HKCU:\\Software\\Microsoft\\Multimedia\\Audio\' -Name UserDuckingPreference -Value $value',
+      ],
+    );
   }
 
   void _changeMicrophone(String device) async {
@@ -99,6 +139,58 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        //* Windows communications alert
+        Obx(
+          () => Animate(
+            effects: [
+              ExpandEffect(
+                axis: Axis.vertical,
+                alignment: Alignment.topLeft,
+                curve: Curves.easeInOutBack,
+                duration: 500.ms,
+              ),
+            ],
+            target: windowsWarning.value ? 1 : 0,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: sectionSpacing),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(defaultSpacing),
+                    decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(defaultSpacing)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.error, color: Theme.of(context).colorScheme.onPrimary),
+                        horizontalSpacing(defaultSpacing),
+                        Flexible(
+                          child: Text(
+                            "audio.microphone.windows_warning".tr,
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  verticalSpacing(defaultSpacing),
+                  FJElevatedButton(
+                    smallCorners: true,
+                    onTap: () {
+                      windowsWarning.value = false;
+                      setUserDuckingPreference(3);
+                    },
+                    child: Text("Fix my settings", style: Get.theme.textTheme.labelMedium),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
         //* Device selection
         Text("audio.device".tr, style: theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
@@ -239,9 +331,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id
-              ? Get.theme.colorScheme.primary
-              : Get.theme.colorScheme.onBackground,
+          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,
