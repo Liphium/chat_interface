@@ -16,15 +16,13 @@ class WordgridGrid extends StatefulWidget {
   final int gridSize;
   final double fontSize;
 
-  const WordgridGrid(
-      {super.key, required this.fontSize, required this.gridSize});
+  const WordgridGrid({super.key, required this.fontSize, required this.gridSize});
 
   @override
   State<WordgridGrid> createState() => _KanagridGridState();
 }
 
-class _KanagridGridState extends State<WordgridGrid>
-    with SingleTickerProviderStateMixin {
+class _KanagridGridState extends State<WordgridGrid> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final selected = Rx<GridCoordinate?>(null);
   GridCoordinate? swapping;
@@ -38,12 +36,7 @@ class _KanagridGridState extends State<WordgridGrid>
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: 500.ms);
-    grid.value = List.generate(
-        widget.gridSize,
-        (x) => List.generate(
-            widget.gridSize,
-            (y) => alphabet[Random.secure().nextInt(alphabet.length)]
-                .toUpperCase()));
+    grid.value = List.generate(widget.gridSize, (x) => List.generate(widget.gridSize, (y) => alphabet[Random.secure().nextInt(alphabet.length)].toUpperCase()));
   }
 
   @override
@@ -70,28 +63,18 @@ class _KanagridGridState extends State<WordgridGrid>
               return RepaintBoundary(
                 child: Obx(() {
                   final letter = grid[x][y];
-                  final isSelected =
-                      selected.value?.x == x && selected.value?.y == y;
-                  final isNeighbor = selected.value != null &&
-                      (selected.value!.x - x).abs() <= 1 &&
-                      (selected.value!.y - y).abs() <= 1;
+                  final isSelected = selected.value?.x == x && selected.value?.y == y;
+                  final isNeighbor = selected.value != null && (selected.value!.x - x).abs() <= 1 && (selected.value!.y - y).abs() <= 1;
 
                   if (swap.value && isSelected) {
                     return RepaintBoundary(
                       child: Obx(() {
                         final diffX = swapping!.x - x;
                         final diffY = swapping!.y - y;
-                        final offX =
-                            diffX * value.value * widget.fontSize * 1.5 +
-                                elementSpacing * 2 * diffX;
-                        final offY =
-                            diffY * value.value * widget.fontSize * 1.5 +
-                                elementSpacing * 2 * diffY;
+                        final offX = diffX * value.value * widget.fontSize * 1.5 + elementSpacing * 2 * diffX;
+                        final offY = diffY * value.value * widget.fontSize * 1.5 + elementSpacing * 2 * diffY;
 
-                        return Transform.translate(
-                            offset: Offset(offY, offX),
-                            child: renderLetter(
-                                isSelected, isNeighbor, letter, () => {}));
+                        return Transform.translate(offset: Offset(offY, offX), child: renderLetter(isSelected, isNeighbor, letter, () => {}));
                       }),
                     );
                   }
@@ -101,17 +84,10 @@ class _KanagridGridState extends State<WordgridGrid>
                       child: Obx(() {
                         final diffX = selected.value!.x - x;
                         final diffY = selected.value!.y - y;
-                        final offX =
-                            diffX * value.value * widget.fontSize * 1.5 +
-                                elementSpacing * 2 * diffX;
-                        final offY =
-                            diffY * value.value * widget.fontSize * 1.5 +
-                                elementSpacing * 2 * diffY;
+                        final offX = diffX * value.value * widget.fontSize * 1.5 + elementSpacing * 2 * diffX;
+                        final offY = diffY * value.value * widget.fontSize * 1.5 + elementSpacing * 2 * diffY;
 
-                        return Transform.translate(
-                            offset: Offset(offY, offX),
-                            child: renderLetter(
-                                isSelected, isNeighbor, letter, () => {}));
+                        return Transform.translate(offset: Offset(offY, offX), child: renderLetter(isSelected, isNeighbor, letter, () => {}));
                       }),
                     );
                   }
@@ -132,8 +108,7 @@ class _KanagridGridState extends State<WordgridGrid>
                       _controller.value = 0;
                       swapping = GridCoordinate(x, y);
                       swap.value = true;
-                      _controller.animateTo(1.0,
-                          curve: Curves.ease, duration: 500.ms);
+                      _controller.animateTo(1.0, curve: Curves.ease, duration: 500.ms);
                       _controller.addListener(updateAnimation);
                       return;
                     }
@@ -166,8 +141,7 @@ class _KanagridGridState extends State<WordgridGrid>
     grid.refresh();
   }
 
-  Widget renderLetter(
-      bool isSelected, bool isNeighbor, String letter, Function() onTap) {
+  Widget renderLetter(bool isSelected, bool isNeighbor, String letter, Function() onTap) {
     return Padding(
       padding: const EdgeInsets.all(elementSpacing),
       child: SizedBox(
