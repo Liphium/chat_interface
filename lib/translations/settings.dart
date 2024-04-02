@@ -42,6 +42,7 @@ class SettingsTranslations extends Translations {
           'audio.microphone.sensitivity.text': 'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
           'audio.microphone.sensitivity.automatic': 'Automatic',
           'audio.microphone.sensitivity.manual': 'Manual',
+          'audio.microphone.sensitivity.audio_detector': 'This thing shows if you are talking or not, if it\'s colored we would be transmitting your voice.',
           'audio.microphone.processing': 'Microphone processing',
           'audio.microphone.processing.text': 'When changing any of these settings, please rejoin the space to apply them.',
           'audio.microphone.echo_cancellation': 'Echo cancellation',

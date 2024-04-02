@@ -138,7 +138,6 @@ class PublicationController extends GetxController {
     // Set settings
     await api.setTalkingAmplitude(amplitude: settingController.settings[AudioSettings.microphoneSensitivity]!.getOr(0.0));
     await api.setInputDevice(id: settingController.settings[AudioSettings.microphone]!.getValue());
-    await api.setOutputDevice(id: settingController.settings[AudioSettings.output]!.getValue());
     _connected = true;
 
     // Set mute

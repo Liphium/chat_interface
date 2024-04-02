@@ -82,9 +82,9 @@ pub fn record() {
         };
 
         let mut vad =
-            VoiceActivityDetector::<2048>::try_with_sample_rate(44100).expect("how dare you");
+            VoiceActivityDetector::<2048>::try_with_sample_rate(sample_rate).expect("how dare you");
         // Create a stream
-        let mut prob_streak = 0;
+        let mut historic_probability = vec![0.0f32; 10];
         let mut talking_streak = 0;
         let stream = match device.build_input_stream(
             &config.into(),
@@ -112,20 +112,20 @@ pub fn record() {
                     }
                 }
 
-                //
+                // Linux is generally fine with 0.35 as well
                 // macOS default value: 0.35
 
                 // Detect if the user is talking
                 let talking: bool = if options.detection_mode == 0 {
                     let probability = vad.predict(samples);
 
-                    if probability > 0.35 {
-                        prob_streak += if probability > 0.7 { 3 } else { 1 };
-                    } else {
-                        prob_streak = 0;
+                    if historic_probability.len() > 10 {
+                        historic_probability.remove(0);
                     }
 
-                    prob_streak > 2
+                    historic_probability.push(probability);
+
+                    probability > 0.45
                 } else {
                     max > options.talking_amplitude
                 };
