@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
@@ -20,6 +21,7 @@ class MicrophoneTab extends StatefulWidget {
 
 class _MicrophoneTabState extends State<MicrophoneTab> {
   final _microphones = <api.InputDevice>[].obs;
+  final talking = false.obs;
   final _sensitivity = 0.0.obs;
   bool _started = false;
   StreamSubscription? _sub, _actionSub;
@@ -49,6 +51,19 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
     } else {
       await api.setAmplitudeLogging(amplitudeLogging: true);
     }
+
+    if (SpacesController.livekitRoom != null) {
+      _actionSub = Get.find<SpaceMemberController>().members[SpaceMemberController.ownId]!.isSpeaking.listenAndPump((event) {
+        talking.value = event;
+      });
+    } else {
+      _actionSub = api.createActionStream().listen((event) {
+        talking.value = event.action == SpaceMemberController.startedTalkingAction;
+      });
+    }
+    api.setDetectionMode(detectionMode: controller.settings[AudioSettings.microphoneMode]!.getValue() as int);
+    api.setTalkingAmplitude(amplitude: controller.settings[AudioSettings.microphoneSensitivity]!.getValue() as double);
+
     _sub = api.createAmplitudeStream().listen((amp) {
       _sensitivity.value = amp;
     });
@@ -152,21 +167,20 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         ListSelectionSetting(
           settingName: AudioSettings.microphoneMode,
           items: AudioSettings.microphoneModes,
+          callback: (value) {
+            api.setDetectionMode(detectionMode: AudioSettings.microphoneModes.indexOf(value));
+          },
         ),
 
         RepaintBoundary(
           child: Obx(
             () {
               if (controller.settings[AudioSettings.microphoneMode]!.value.value == 0) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: defaultSpacing),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onBackground,
-                      borderRadius: BorderRadius.circular(elementSpacing),
-                    ),
-                    height: 15,
-                  ),
+                return const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("hello wrold"),
+                  ],
                 );
               }
 
@@ -183,9 +197,23 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                 onChanged: (value) => sens.value.value = value,
                 onChangeEnd: (value) {
                   sens.setValue(value);
+                  api.setTalkingAmplitude(amplitude: value);
                 },
               );
             },
+          ),
+        ),
+
+        verticalSpacing(defaultSpacing),
+        Text("audio.microphone.sensitivity.audio_detector".tr, style: Get.theme.textTheme.bodyMedium),
+        verticalSpacing(defaultSpacing),
+        Obx(
+          () => Container(
+            decoration: BoxDecoration(
+              color: talking.value ? theme.colorScheme.secondary.withAlpha(150) : theme.colorScheme.onBackground,
+              borderRadius: BorderRadius.circular(elementSpacing),
+            ),
+            height: 15,
           ),
         ),
 
@@ -211,7 +239,9 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id
+              ? Get.theme.colorScheme.primary
+              : Get.theme.colorScheme.onBackground,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,

@@ -1,4 +1,4 @@
-use std::{sync::Mutex, thread, time::Duration};
+use std::{default, sync::Mutex, thread, time::Duration};
 
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
@@ -46,7 +46,11 @@ fn pcm_to_db(pcm: f32) -> f32 {
 pub fn record() {
     thread::spawn(move || {
         // Get a cpal host
-        let host = cpal::default_host(); // Current host on computer
+        let mut host = cpal::default_host(); // Current host on computer
+        #[cfg(target_os = "linux")]
+        {
+            host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
+        }
 
         // Get input device (using new API)
         let mut device = host
@@ -78,10 +82,9 @@ pub fn record() {
         };
 
         let mut vad =
-            VoiceActivityDetector::<2048>::try_with_sample_rate(default_config.sample_rate().0)
-                .expect("how dare you");
-
+            VoiceActivityDetector::<2048>::try_with_sample_rate(sample_rate).expect("how dare you");
         // Create a stream
+        let mut historic_probability = vec![0.0f32; 10];
         let mut talking_streak = 0;
         let stream = match device.build_input_stream(
             &config.into(),
@@ -109,17 +112,26 @@ pub fn record() {
                     }
                 }
 
+                // Linux is generally fine with 0.35 as well
+                // macOS default value: 0.35
+
                 // Detect if the user is talking
                 let talking: bool = if options.detection_mode == 0 {
                     let probability = vad.predict(samples);
 
-                    probability > 0.79
+                    if historic_probability.len() > 10 {
+                        historic_probability.remove(0);
+                    }
+
+                    historic_probability.push(probability);
+
+                    probability > 0.45
                 } else {
                     max > options.talking_amplitude
                 };
 
                 if talking {
-                    talking_streak = 100;
+                    talking_streak = 25;
 
                     if !options.talking {
                         logger::send_log(logger::TAG_AUDIO, "Started talking.");
