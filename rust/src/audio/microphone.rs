@@ -1,4 +1,4 @@
-use std::{default, sync::Mutex, thread, time::Duration};
+use std::{sync::Mutex, thread, time::Duration};
 
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
