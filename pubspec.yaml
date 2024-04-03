@@ -43,6 +43,7 @@ dependencies:
   unicode_emojis: ^0.4.0
   archive: ^3.4.10
   window_manager: ^0.3.8
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

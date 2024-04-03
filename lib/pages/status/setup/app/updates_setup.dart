@@ -84,6 +84,13 @@ Future<ReleaseData?> fetchReleaseDataFor(String owner, String repo) async {
 
 Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async {
   try {
+    if (Platform.isWindows && !executableArguments.contains("--update")) {
+      status.value = "Re-running with admin privilege..";
+      restartProcessAsAdmin(status);
+      await Future.delayed(3.seconds);
+      exit(0);
+    }
+
     var location = await getApplicationSupportDirectory();
     location = Directory(path.join(location.path, "versions"));
 
@@ -133,6 +140,15 @@ Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async 
     status.value = "There was an error during the update: $e";
     return false;
   }
+}
+
+void restartProcessAsAdmin(RxString status) async {
+  sendLog(Platform.resolvedExecutable);
+  final result = await Process.run(
+    'powershell',
+    ['Start-Process "${Platform.resolvedExecutable}" -ArgumentList "--update" -Verb RunAs'],
+  );
+  status.value = result.exitCode.toString() + result.stdout.toString() + result.stderr.toString();
 }
 
 Directory getDesktopDirectory() {

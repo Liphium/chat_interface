@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
@@ -50,9 +52,12 @@ Future<bool> initSodium() async {
 
 final list = <String>[].obs;
 
-void main() async {
+var executableArguments = <String>[];
+
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
+  executableArguments = args;
 
   // Initialize sodium
   await initSodium();

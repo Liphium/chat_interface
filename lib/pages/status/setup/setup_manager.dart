@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/main.dart';
