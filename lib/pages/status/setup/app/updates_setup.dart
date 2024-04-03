@@ -122,7 +122,9 @@ Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async 
 
     final linkDir = path.join(getDesktopDirectory().path, "Liphium");
     final link = Link(linkDir);
-    await File(linkDir).delete();
+    if (link.existsSync()) {
+      await File(linkDir).delete();
+    }
     if (Platform.isWindows) {
       await link.create(path.join(location.path, data.version, "chat_interface.exe"));
     } else if (Platform.isMacOS) {
@@ -134,7 +136,8 @@ Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async 
       await Future.delayed(30.seconds);
     }
 
-    status.value = "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
+    status.value =
+        "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
     return true;
   } catch (e) {
     status.value = "There was an error during the update: $e";
