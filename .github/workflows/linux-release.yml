@@ -13,12 +13,6 @@ jobs:
       steps:
         - uses: actions/checkout@v3
 
-        - name: Setup Ninja
-          uses: ashutoshvarma/setup-ninja@master
-          with:
-            # ninja version to download. Default: 1.10.0
-            version: 1.10.1
-
         # Get flutter downloaded
         - name: Set up Flutter
           uses: subosito/flutter-action@v2
@@ -38,6 +32,9 @@ jobs:
         # Get all the dependencies
         - name: Get dependencies
           run: flutter pub get
+
+        - name: Install all dependencies with apt
+          run: sudo apt install cmake ninja-build
   
         # Runs a set of commands using the runners shell
         - name: Start release build
