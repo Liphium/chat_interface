@@ -232,8 +232,7 @@ class _MessageFeedState extends State<MessageFeed> with TickerProviderStateMixin
                                                               extra: 4,
                                                               padding: 4,
                                                               onTap: () {
-                                                                //MessageSendHelper.addReplyToCurrentDraft(message);
-                                                                message.controller!.loop(count: 1, reverse: true);
+                                                                MessageSendHelper.addReplyToCurrentDraft(message);
                                                               },
                                                               icon: Icons.reply,
                                                             )
@@ -259,11 +258,10 @@ class _MessageFeedState extends State<MessageFeed> with TickerProviderStateMixin
                                                 axis: Axis.vertical,
                                               ),
                                               MoveEffect(
-                                                begin: Offset(self ? 500 : -500, 0),
+                                                begin: const Offset(0, 50),
                                                 end: const Offset(0, 0),
-                                                curve: scaleAnimationCurve,
                                                 duration: 500.ms,
-                                              )
+                                              ),
                                             ],
                                             autoPlay: false,
                                             controller: message.controller!,

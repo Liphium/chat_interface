@@ -1,14 +1,11 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_render_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -70,7 +67,7 @@ class _MessageRendererState extends State<MessageRenderer> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Flexible(
                     child: LayoutBuilder(builder: (context, constraints) {
@@ -123,8 +120,8 @@ class _MessageRendererState extends State<MessageRenderer> {
                                                   horizontalSpacing(elementSpacing),
                                                   Flexible(
                                                     child: Text(
-                                                      AnswerData.answerContent(widget.message.answerMessage.value!.type, widget.message.answerMessage.value!.content,
-                                                          widget.message.answerMessage.value!.attachments),
+                                                      AnswerData.answerContent(
+                                                          widget.message.answerMessage.value!.type, widget.message.answerMessage.value!.content, widget.message.answerMessage.value!.attachments),
                                                       style: Get.theme.textTheme.labelMedium,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,
@@ -183,8 +180,11 @@ class _MessageRendererState extends State<MessageRenderer> {
                   horizontalSpacing(defaultSpacing),
 
                   //* Timestamp
-                  SelectionContainer.disabled(
-                    child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                  Padding(
+                    padding: const EdgeInsets.only(top: defaultSpacing),
+                    child: SelectionContainer.disabled(
+                      child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                    ),
                   ),
 
                   horizontalSpacing(defaultSpacing),
