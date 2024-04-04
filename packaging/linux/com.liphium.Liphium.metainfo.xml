@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.liphium.Liphium</id>
+  
+  <name>Liphium</name>
+  <summary>A chat app that's fun again, while also being secure</summary>
+  <url type="homepage">https://liphium.com</url>
+  
+  <metadata_license>MIT</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <releases>
+    <release version="0.0.1-dev.2" date="2024-01-18">
+      <description>
+        <p>This was a minor dev release, getting closer to the Alpha</p>
+        <ul>
+          <li>Added a new instance screen that is more clear</li>
+          <li>Added a talking indicator in the microphone settings</li>
+          <li>Improved Automatic Voice Detection by using AI</li>
+          <li>The Windows updater was fixed (why am I putting this on Flathub?)</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+
+  <content_rating type="oars-1.0">
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-info">moderate</content_attribute>
+    <content_attribute id="social-audio">intense</content_attribute>
+  </content_rating>
+
+  <developer id="com.liphium">
+    <name>Liphium contributors</name>
+  </developer>
+  
+  <description>
+    <p>
+      Well, Liphium is just a chat app. A self-hosted one. But, you know, we also have end-to-end encryption while not sacrificing security over the features we provide to you. Just like on other apps that aren&apos;t encrypted, you can set a status, have nice voice conversations (with actual good quality and advanced settings, so not everyone hears your beautiful voice), play some card games and even share files up to any size using our file sharing offerings. The app is also a little customizable meaning that you can select colors you want as your theme as well as if you want a dark or light theme. In general, if you&apos;re looking for a really solid chat app that doesn&apos;t sacrifice security, that you can self-host for you and your friends, Liphium might be the right choice.
+    </p>
+  </description>
+  
+  <launchable type="desktop-id">com.liphium.Liphium.desktop</launchable>
+</component>

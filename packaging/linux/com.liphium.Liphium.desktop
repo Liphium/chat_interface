@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Liphium
+GenericName=Chat application
+Comment=A chat app that's fun again, while also being secure.
+Categories=Network;InstantMessaging;
+Icon=com.liphium.Liphium
+Exec=chat_interface
+Terminal=false
+StartupWMClass=chat_interface
