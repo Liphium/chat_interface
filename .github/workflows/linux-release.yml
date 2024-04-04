@@ -1,0 +1,39 @@
+name: Linux Release
+# Do this whenever someone pushes to the main branch
+on:
+    push:
+      branches: [ "main" ]
+    pull_request:
+      branches: [ "main" ]
+jobs:
+    build:
+      # Normally you should build this stuff on older versions, but I don't want people to have old shit, so we're gonna do it this way
+      runs-on: ubuntu-latest
+  
+      steps:
+        - uses: actions/checkout@v3
+
+        # Get flutter downloaded
+        - name: Set up Flutter
+          uses: subosito/flutter-action@v2
+          with:
+            flutter-version: "3.19.0"
+            channel: 'stable'
+
+        # Download cargo
+        - name: Set up Rust and Cargo
+          uses: hecrj/setup-rust-action@v2
+          with:
+            rust-version: "stable"
+
+        # Just to make sure
+        - run: flutter --version
+
+        # Get all the dependencies
+        - name: Get dependencies
+          run: flutter pub get
+  
+        # Runs a set of commands using the runners shell
+        - name: Start release build
+          run: flutter build appbundle
+  
