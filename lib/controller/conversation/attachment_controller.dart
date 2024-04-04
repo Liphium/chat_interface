@@ -54,7 +54,7 @@ class AttachmentController extends GetxController {
     );
 
     if (res.statusCode != 200) {
-      return FileUploadResponse("server.error", null);
+      return FileUploadResponse("server.error.code".trParams({"code": res.statusCode.toString()}), null);
     }
 
     final json = res.data;

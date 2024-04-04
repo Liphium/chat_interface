@@ -117,6 +117,7 @@ class _LibraryTabState extends State<LibraryTab> {
             );
           }
           return Material(
+            key: ValueKey(container.id),
             borderRadius: BorderRadius.circular(defaultSpacing),
             child: InkWell(
               borderRadius: BorderRadius.circular(defaultSpacing),

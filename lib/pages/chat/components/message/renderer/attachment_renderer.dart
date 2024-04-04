@@ -5,6 +5,7 @@ import 'package:chat_interface/database/accounts/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -191,9 +192,20 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.file_copy, color: Get.theme.colorScheme.onPrimary),
+            Icon(getIconForFileName(widget.container.name), color: Get.theme.colorScheme.onPrimary),
             horizontalSpacing(defaultSpacing),
-            Text(widget.container.name, style: Get.theme.textTheme.labelMedium),
+            Flexible(
+              child: Text(
+                "${widget.container.name.split(".").first}.",
+                overflow: TextOverflow.ellipsis,
+                style: Get.theme.textTheme.labelMedium,
+              ),
+            ),
+            Text(
+              widget.container.name.split(".").last,
+              overflow: TextOverflow.ellipsis,
+              style: Get.theme.textTheme.labelMedium,
+            ),
             horizontalSpacing(defaultSpacing),
             SizedBox(
               width: 35,

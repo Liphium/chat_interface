@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/hash.dart';
@@ -14,6 +15,8 @@ import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart' as material;
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class MessageController extends GetxController {
@@ -140,6 +143,7 @@ class MessageController extends GetxController {
       index -= 1;
       break;
     }
+    message.playAnimation = true;
     messages.insert(index, message);
   }
 }
@@ -161,9 +165,24 @@ class Message {
 
   bool renderingAttachments = false;
   final attachmentsRenderer = <AttachmentContainer>[].obs;
+  final answerMessage = Rx<Message?>(null);
 
   /// Extracts and decrypts the attachments
   void initAttachments() async {
+    //* Load answer
+    if (answer != "") {
+      final message = await (db.message.select()
+            ..where((tbl) => tbl.id.equals(answer))
+            ..where((tbl) => tbl.conversationId.equals(conversation)))
+          .getSingleOrNull();
+      if (message != null) {
+        answerMessage.value = Message.fromMessageData(message);
+      }
+    } else {
+      answerMessage.value = null;
+    }
+
+    //* Load attachments
     if (attachmentsRenderer.isNotEmpty || renderingAttachments) {
       return;
     }
@@ -204,6 +223,20 @@ class Message {
       }
       renderingAttachments = false;
     }
+  }
+
+  //* Animation when a new message enters the chat
+  bool playAnimation = false;
+  material.AnimationController? controller;
+  void initAnimation(material.TickerProvider provider) {
+    if (controller != null) {
+      return;
+    }
+
+    controller = material.AnimationController(vsync: provider, duration: 250.ms);
+    Timer(250.ms, () {
+      controller!.forward(from: 0);
+    });
   }
 
   Message(

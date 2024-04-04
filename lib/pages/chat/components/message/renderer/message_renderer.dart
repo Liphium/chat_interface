@@ -6,6 +6,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/attachment
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_render_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
@@ -26,33 +27,17 @@ class MessageRenderer extends StatefulWidget {
 
 class _MessageRendererState extends State<MessageRenderer> {
   final hovering = false.obs;
-  final answerMessage = Rx<Message?>(null);
 
   @override
   void initState() {
+    widget.message.initAttachments();
     super.initState();
-  }
-
-  void loadAnswer() async {
-    if (widget.message.answer != "") {
-      final message = await (db.message.select()
-            ..where((tbl) => tbl.id.equals(widget.message.answer))
-            ..where((tbl) => tbl.conversationId.equals(widget.message.conversation)))
-          .getSingleOrNull();
-      if (message != null) {
-        answerMessage.value = Message.fromMessageData(message);
-      }
-    } else {
-      answerMessage.value = null;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     Friend sender = widget.sender ?? Friend.unknown(widget.accountId);
     ThemeData theme = Theme.of(context);
-    widget.message.initAttachments();
-    loadAnswer();
 
     return RepaintBoundary(
       child: Padding(
@@ -108,7 +93,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                                   children: [
                                     //* Reply message
                                     Obx(() {
-                                      if (answerMessage.value == null) {
+                                      if (widget.message.answerMessage.value == null) {
                                         return const SizedBox();
                                       }
 
@@ -119,26 +104,27 @@ class _MessageRendererState extends State<MessageRenderer> {
                                           color: widget.self ? theme.colorScheme.onPrimary.withOpacity(0.2) : theme.colorScheme.background,
                                           child: InkWell(
                                             borderRadius: BorderRadius.circular(defaultSpacing),
-                                            onTap: () => Get.dialog(MessageRenderWindow(message: answerMessage.value!)),
+                                            onTap: () => Get.dialog(MessageRenderWindow(message: widget.message.answerMessage.value!)),
                                             child: Padding(
                                               padding: const EdgeInsets.all(elementSpacing),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  UserAvatar(id: answerMessage.value!.senderAccount, size: 30),
+                                                  UserAvatar(id: widget.message.answerMessage.value!.senderAccount, size: 30),
                                                   horizontalSpacing(elementSpacing),
-                                                  if (answerMessage.value!.type == MessageType.call)
+                                                  if (widget.message.answerMessage.value!.type == MessageType.call)
                                                     Icon(Icons.public, color: theme.colorScheme.onPrimary)
-                                                  else if (answerMessage.value!.type == MessageType.liveshare)
+                                                  else if (widget.message.answerMessage.value!.type == MessageType.liveshare)
                                                     Icon(Icons.electric_bolt, color: theme.colorScheme.onPrimary)
-                                                  else if (answerMessage.value!.type == MessageType.system)
+                                                  else if (widget.message.answerMessage.value!.type == MessageType.system)
                                                     Icon(Icons.info, color: theme.colorScheme.onPrimary)
                                                   else
                                                     const SizedBox(),
                                                   horizontalSpacing(elementSpacing),
                                                   Flexible(
                                                     child: Text(
-                                                      AnswerData.answerContent(answerMessage.value!.type, answerMessage.value!.content, answerMessage.value!.attachments),
+                                                      AnswerData.answerContent(widget.message.answerMessage.value!.type, widget.message.answerMessage.value!.content,
+                                                          widget.message.answerMessage.value!.attachments),
                                                       style: Get.theme.textTheme.labelMedium,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,
@@ -177,6 +163,7 @@ class _MessageRendererState extends State<MessageRenderer> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: renderer.map((e) {
                                           return Padding(
+                                            key: ValueKey(e.filePath),
                                             padding: const EdgeInsets.only(top: elementSpacing),
                                             child: AttachmentRenderer(container: e),
                                           );

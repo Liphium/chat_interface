@@ -218,6 +218,7 @@ class Friend {
   var profilePictureUsages = 0;
   AttachmentContainer? profilePicture;
   final profilePictureImage = Rx<ui.Image?>(null);
+  bool profilePictureDataNull = false;
   var profilePictureData = ProfilePictureData(1, 0, 0);
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -246,14 +247,16 @@ class Friend {
     }
 
     // Return if images is already loaded
-    if (profilePictureImage.value != null) return;
+    if (profilePictureImage.value != null || profilePictureDataNull) return;
 
     // Load the image
     final data = await ProfilePictureHelper.getProfileDataLocal(id);
     if (data == null) {
       sendLog("NOTHING FOUND");
+      profilePictureDataNull = true; // To prevent this thing from constantly loading again
       return;
     }
+    profilePictureDataNull = false;
 
     final json = jsonDecode(data.pictureContainer);
     final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);

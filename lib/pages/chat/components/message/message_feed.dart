@@ -29,6 +29,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 part 'message_actions.dart';
@@ -42,7 +43,7 @@ class MessageFeed extends StatefulWidget {
   State<MessageFeed> createState() => _MessageFeedState();
 }
 
-class _MessageFeedState extends State<MessageFeed> {
+class _MessageFeedState extends State<MessageFeed> with TickerProviderStateMixin {
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
   final textNode = FocusNode();
@@ -147,7 +148,6 @@ class _MessageFeedState extends State<MessageFeed> {
                                         switch (message.type) {
                                           case MessageType.text:
                                             renderer = MessageRenderer(
-                                              key: ValueKey(message.id),
                                               message: message,
                                               accountId: message.senderAccount,
                                               self: self,
@@ -157,7 +157,6 @@ class _MessageFeedState extends State<MessageFeed> {
 
                                           case MessageType.call:
                                             renderer = SpaceMessageRenderer(
-                                              key: ValueKey(message.id),
                                               message: message,
                                               self: self,
                                               last: last,
@@ -166,7 +165,6 @@ class _MessageFeedState extends State<MessageFeed> {
 
                                           case MessageType.liveshare:
                                             renderer = LiveshareMessageRenderer(
-                                              key: ValueKey(message.id),
                                               message: message,
                                               self: self,
                                               last: last,
@@ -175,7 +173,6 @@ class _MessageFeedState extends State<MessageFeed> {
 
                                           case MessageType.system:
                                             renderer = SystemMessageRenderer(
-                                              key: ValueKey(message.id),
                                               message: message,
                                               accountId: message.senderAccount,
                                             );
@@ -183,7 +180,9 @@ class _MessageFeedState extends State<MessageFeed> {
 
                                         final GlobalKey contextMenuKey = GlobalKey();
                                         final hovering = false.obs;
-                                        return Column(
+
+                                        final messageWidget = Column(
+                                          key: ValueKey(message.id),
                                           children: [
                                             if (newHeading || index == controller.messages.length)
                                               Padding(
@@ -233,7 +232,8 @@ class _MessageFeedState extends State<MessageFeed> {
                                                               extra: 4,
                                                               padding: 4,
                                                               onTap: () {
-                                                                MessageSendHelper.addReplyToCurrentDraft(message);
+                                                                //MessageSendHelper.addReplyToCurrentDraft(message);
+                                                                message.controller!.loop(count: 1, reverse: true);
                                                               },
                                                               icon: Icons.reply,
                                                             )
@@ -247,6 +247,32 @@ class _MessageFeedState extends State<MessageFeed> {
                                             ),
                                           ],
                                         );
+
+                                        if (message.playAnimation) {
+                                          message.initAnimation(this);
+                                          return Animate(
+                                            effects: [
+                                              ExpandEffect(
+                                                alignment: Alignment.center,
+                                                duration: 250.ms,
+                                                curve: scaleAnimationCurve,
+                                                axis: Axis.vertical,
+                                              ),
+                                              MoveEffect(
+                                                begin: Offset(self ? 500 : -500, 0),
+                                                end: const Offset(0, 0),
+                                                curve: scaleAnimationCurve,
+                                                duration: 500.ms,
+                                              )
+                                            ],
+                                            autoPlay: false,
+                                            controller: message.controller!,
+                                            onComplete: (controller) => message.playAnimation = false,
+                                            child: messageWidget,
+                                          );
+                                        }
+
+                                        return messageWidget;
                                       },
                                     );
                                   },
