@@ -5,26 +5,20 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SystemMessageRenderer extends StatefulWidget {
+class BubblesSystemMessageRenderer extends StatefulWidget {
   final String accountId;
   final Message message;
   final bool self;
   final bool last;
   final Friend? sender;
 
-  const SystemMessageRenderer(
-      {super.key,
-      required this.message,
-      required this.accountId,
-      this.self = false,
-      this.last = false,
-      this.sender});
+  const BubblesSystemMessageRenderer({super.key, required this.message, required this.accountId, this.self = false, this.last = false, this.sender});
 
   @override
-  State<SystemMessageRenderer> createState() => _MessageRendererState();
+  State<BubblesSystemMessageRenderer> createState() => _MessageRendererState();
 }
 
-class _MessageRendererState extends State<SystemMessageRenderer> {
+class _MessageRendererState extends State<BubblesSystemMessageRenderer> {
   @override
   Widget build(BuildContext context) {
     final message = SystemMessages.messages[widget.message.content]!;
@@ -43,9 +37,7 @@ class _MessageRendererState extends State<SystemMessageRenderer> {
             //* Icon
             SizedBox(
               width: 50,
-              child: Center(
-                  child: Icon(message.icon,
-                      size: 30, color: Get.theme.colorScheme.onPrimary)),
+              child: Center(child: Icon(message.icon, size: 30, color: Get.theme.colorScheme.onPrimary)),
             ),
             horizontalSpacing(defaultSpacing),
 

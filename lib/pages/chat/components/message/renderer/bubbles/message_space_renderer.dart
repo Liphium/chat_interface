@@ -11,19 +11,19 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SpaceMessageRenderer extends StatefulWidget {
+class BubblesSpaceMessageRenderer extends StatefulWidget {
   final Message message;
   final bool self;
   final bool last;
   final Friend? sender;
 
-  const SpaceMessageRenderer({super.key, required this.message, this.self = false, this.last = false, this.sender});
+  const BubblesSpaceMessageRenderer({super.key, required this.message, this.self = false, this.last = false, this.sender});
 
   @override
-  State<SpaceMessageRenderer> createState() => _CallMessageRendererState();
+  State<BubblesSpaceMessageRenderer> createState() => _CallMessageRendererState();
 }
 
-class _CallMessageRendererState extends State<SpaceMessageRenderer> {
+class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
   final loading = false.obs;
 
   @override

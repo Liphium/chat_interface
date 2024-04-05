@@ -11,19 +11,19 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class LiveshareMessageRenderer extends StatefulWidget {
+class BubblesLiveshareMessageRenderer extends StatefulWidget {
   final Message message;
   final bool self;
   final bool last;
   final Friend? sender;
 
-  const LiveshareMessageRenderer({super.key, required this.message, this.self = false, this.last = false, this.sender});
+  const BubblesLiveshareMessageRenderer({super.key, required this.message, this.self = false, this.last = false, this.sender});
 
   @override
-  State<LiveshareMessageRenderer> createState() => _LiveshareMessageRendererState();
+  State<BubblesLiveshareMessageRenderer> createState() => _BubblesLiveshareMessageRendererState();
 }
 
-class _LiveshareMessageRendererState extends State<LiveshareMessageRenderer> {
+class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessageRenderer> {
   final loading = true.obs;
   final available = false.obs;
   LiveshareInviteContainer? container;

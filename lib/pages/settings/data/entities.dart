@@ -8,6 +8,7 @@ import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/app/video_settings.dart';
+import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,7 @@ enum SettingLabel {
 
   // Everything to do with the appereance of the app
   appearance("settings.tab.appearance", [
+    SettingCategory("chat", Icons.chat_bubble, ChatSettingsPage()),
     SettingCategory("colors", Icons.color_lens, ThemeSettingsPage()),
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),

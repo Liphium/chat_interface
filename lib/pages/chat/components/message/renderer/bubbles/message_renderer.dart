@@ -9,20 +9,20 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class MessageRenderer extends StatefulWidget {
+class BubblesMessageRenderer extends StatefulWidget {
   final String accountId;
   final Message message;
   final bool self;
   final bool last;
   final Friend? sender;
 
-  const MessageRenderer({super.key, required this.message, required this.accountId, this.self = false, this.last = false, this.sender});
+  const BubblesMessageRenderer({super.key, required this.message, required this.accountId, this.self = false, this.last = false, this.sender});
 
   @override
-  State<MessageRenderer> createState() => _MessageRendererState();
+  State<BubblesMessageRenderer> createState() => _BubblesMessageRendererState();
 }
 
-class _MessageRendererState extends State<MessageRenderer> {
+class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
   final hovering = false.obs;
 
   @override
@@ -120,8 +120,8 @@ class _MessageRendererState extends State<MessageRenderer> {
                                                   horizontalSpacing(elementSpacing),
                                                   Flexible(
                                                     child: Text(
-                                                      AnswerData.answerContent(
-                                                          widget.message.answerMessage.value!.type, widget.message.answerMessage.value!.content, widget.message.answerMessage.value!.attachments),
+                                                      AnswerData.answerContent(widget.message.answerMessage.value!.type, widget.message.answerMessage.value!.content,
+                                                          widget.message.answerMessage.value!.attachments),
                                                       style: Get.theme.textTheme.labelMedium,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,

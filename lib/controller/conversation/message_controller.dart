@@ -71,6 +71,16 @@ class MessageController extends GetxController {
     }
   }
 
+  /// Delete all system messages of the same kind before the message send time
+  void deleteOldSystemMessagesOfKind(String id, String kind, DateTime after) {
+    sendLog("DELETING $kind $after");
+    db.message.delete()
+      ..where((tbl) => tbl.content.equals(kind))
+      ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(after.millisecondsSinceEpoch)))
+      ..where((tbl) => tbl.id.isNotValue(id))
+      ..go();
+  }
+
   // Delete a message from the client with an id
   void deleteMessageFromClient(String id) async {
     // Get the message from the database on the client

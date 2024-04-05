@@ -24,6 +24,7 @@ class SettingsTranslations extends Translations {
           'settings.encryption': 'Encryption',
           'settings.spaces': 'Spaces',
           'settings.tabletop': 'Tabletop',
+          'settings.chat': 'Chat',
           'settings.files': 'Files',
           'settings.invites': 'Invites',
           'settings.trusted_links': 'Trusted Links',
@@ -132,7 +133,8 @@ class SettingsTranslations extends Translations {
           'settings.tabletop.decks.error':
               'An error occurred while loading your decks. This is probably something you\'ll need to report to us or it\'s just your connection. You can also try to see if there\'s a new version of the app available or try again later.',
           'settings.tabletop.decks.limit': 'Decks (@count/@limit)',
-          'decks.description': 'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
+          'decks.description':
+              'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
           'decks.create': 'Create a new deck',
           'decks.dialog.delete.title': 'Delete deck',
           'decks.dialog.delete': 'Are you sure you want to delete this deck? Think about all the cards you\'ll lose!',
@@ -169,6 +171,11 @@ class SettingsTranslations extends Translations {
           'video.camera.device': 'Select a camera',
           'video.camera.preview': 'Camera preview',
           'video.camera.preview.start': 'Start camera preview',
+
+          // Chat theme settings
+          'appearance.chat.theme': 'Chat theme',
+          'appearance.chat.theme.material': 'Material',
+          'appearance.chat.theme.bubbles': 'Chat bubbles',
         },
 
         //* German
