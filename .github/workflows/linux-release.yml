@@ -56,6 +56,6 @@ jobs:
             name: linux-build
             path: ./build/linux/x64/release/bundle/
             retention-days: 14
-            compression-level: 0
+            compression-level: 6
             overwrite: false
   
