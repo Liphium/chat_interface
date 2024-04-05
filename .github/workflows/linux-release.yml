@@ -51,13 +51,10 @@ jobs:
         - name: List directory (in case I'm stupid rn)
           run: ls -a
 
-        - name: Build a zip from the release build
-          run: zip -r ./linux.zip ./build/linux/x64/release/bundle/*
-
         - uses: actions/upload-artifact@v4
           with:
             name: linux-build
-            path: ./linux.zip
+            path: ./build/linux/x64/release/bundle/
             retention-days: 14
             compression-level: 0
             overwrite: false
