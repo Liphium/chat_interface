@@ -8,6 +8,8 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
+import 'package:chat_interface/pages/settings/account/data_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
@@ -144,6 +146,67 @@ class _SidebarState extends State<Sidebar> {
                     ),
                     padding: const EdgeInsets.all(defaultSpacing),
                     child: Text("conversations.hidden".tr, style: theme.textTheme.bodyMedium),
+                  ),
+                ),
+              );
+            }),
+
+            //* The bar
+            Obx(() {
+              final bool enabled =
+                  (Get.find<SettingController>().settings[DataSettings.socialFeatures]!.value.value ?? true) && Get.find<StatusController>().type.value != statusDoNotDisturb;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                child: Animate(
+                  effects: [
+                    ExpandEffect(
+                      alignment: Alignment.bottomCenter,
+                      duration: 500.ms,
+                      curve: scaleAnimationCurve,
+                      axis: Axis.vertical,
+                    ),
+                    FadeEffect(
+                      begin: 0,
+                      end: 1,
+                      duration: 500.ms,
+                    ),
+                  ],
+                  target: enabled ? 1 : 0,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: defaultSpacing),
+                    child: Material(
+                      borderRadius: BorderRadius.circular(defaultSpacing),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        hoverColor: theme.colorScheme.primary.withAlpha(150),
+                        onTap: () {
+                          // TODO: Join the townsquare
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(elementSpacing2),
+                          child: Row(
+                            children: [
+                              Icon(Icons.location_city, color: Get.theme.colorScheme.onPrimary, size: 35),
+                              horizontalSpacing(defaultSpacing),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text("Townsquare", style: Get.theme.textTheme.labelMedium),
+                                      horizontalSpacing(elementSpacing),
+                                      Icon(Icons.science, size: 22, color: Get.theme.colorScheme.error),
+                                    ],
+                                  ),
+                                  Text("0/20 people viewing", style: Get.theme.textTheme.bodySmall),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               );

@@ -93,6 +93,10 @@ class SettingsTranslations extends Translations {
           'files.live_share.experiment': 'Enable Live Share',
 
           // Data settings
+          'settings.data.social': 'Social features',
+          'settings.data.social.text':
+              'Liphium\'s social features allow you to share things not just with your friends, but also with the people on your instance. You can chat with everyone, but therefore it\'s not encrypted, so we allow you to disable it.',
+          'data.social': 'Enable social features',
           'settings.data.profile_picture': 'Profile picture',
           'settings.data.profile_picture.select': 'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
           'settings.data.profile_picture.requirements': 'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',

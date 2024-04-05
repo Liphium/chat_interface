@@ -420,9 +420,9 @@ class _MessageFeedState extends State<MessageFeed> with TickerProviderStateMixin
                                                     curve: scaleAnimationCurve,
                                                     axis: Axis.vertical,
                                                   ),
-                                                  MoveEffect(
-                                                    begin: const Offset(0, 50),
-                                                    end: const Offset(0, 0),
+                                                  FadeEffect(
+                                                    begin: 0,
+                                                    end: 1,
                                                     duration: 500.ms,
                                                   ),
                                                 ],
