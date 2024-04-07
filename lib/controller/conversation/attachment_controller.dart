@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
@@ -11,6 +12,7 @@ import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio_rs;
 import 'package:path_provider/path_provider.dart';
@@ -81,7 +83,6 @@ class AttachmentController extends GetxController {
     final file = File(container.filePath);
     final exists = await file.exists();
     if (!exists) {
-      container.error.value = true;
       return null;
     }
 
@@ -323,6 +324,8 @@ class AttachmentContainer {
   final String id;
   final String name;
   final String url;
+  int? width;
+  int? height;
   final SecureKey? key;
 
   // Download status
@@ -355,10 +358,40 @@ class AttachmentContainer {
     filePath = path.join(AttachmentController.getFilePathForType(type), id);
   }
 
+  Future<Size?> precalculateWidthAndHeight() async {
+    if (attachmentType != AttachmentContainerType.file) {
+      return null;
+    }
+    bool found = false;
+    for (var extension in FileSettings.imageTypes) {
+      if (filePath.endsWith(".$extension")) {
+        found = true;
+      }
+    }
+
+    if (!found) {
+      return null;
+    }
+
+    // Grab resolution from it
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(filePath).readAsBytes());
+    final descriptor = await ui.ImageDescriptor.encoded(buffer);
+    final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
+
+    width = size.width.toInt();
+    height = size.height.toInt();
+
+    sendLog("PRECALC $width $height");
+    return size;
+  }
+
   AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
 
   factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json) {
-    return AttachmentContainer(type, json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
+    final container = AttachmentContainer(type, json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
+    container.width = json["w"];
+    container.height = json["h"];
+    return container;
   }
 
   String toAttachment() {
@@ -373,6 +406,13 @@ class AttachmentContainer {
   }
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{"id": id, "name": name, "url": url, "key": packageSymmetricKey(key!)};
+    return <String, dynamic>{
+      "id": id,
+      "name": name,
+      "url": url,
+      "key": packageSymmetricKey(key!),
+      if (width != null) "w": width,
+      if (height != null) "h": height,
+    };
   }
 }

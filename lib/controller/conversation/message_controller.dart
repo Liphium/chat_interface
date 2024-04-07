@@ -37,7 +37,7 @@ class MessageController extends GetxController {
   }
 
   void selectConversation(Conversation conversation) async {
-    //Get.find<WritingController>().init(conversation.id); // TODO: Reimplement typing indicator
+    loaded.value = false;
     selectedConversation.value = conversation;
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
@@ -46,16 +46,19 @@ class MessageController extends GetxController {
 
     // Load messages
     messages.clear();
-    var loaded = await (db.select(db.message)
+    var loadedMessages = await (db.select(db.message)
           ..limit(30)
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
           ..where((tbl) => tbl.conversationId.equals(conversation.id))
           ..where((tbl) => tbl.system.equals(false)))
         .get();
 
-    for (var message in loaded) {
-      messages.add(Message.fromMessageData(message));
+    for (var message in loadedMessages) {
+      final msg = Message.fromMessageData(message);
+      await msg.initAttachments();
+      messages.add(msg);
     }
+    loaded.value = true;
   }
 
   // Push read state to the server
@@ -129,11 +132,9 @@ class MessageController extends GetxController {
     sendLog(message.type);
     if (message.type == MessageType.system) {
       if (SystemMessages.messages[message.content]?.store == true) {
-        sendLog("STORING ${message.content}");
         db.into(db.message).insertOnConflictUpdate(message.entity(!SystemMessages.messages[message.content]!.render));
       }
     } else {
-      sendLog("WE ARE STORING");
       db.into(db.message).insertOnConflictUpdate(message.entity(false));
     }
 
@@ -174,11 +175,11 @@ class Message {
   final bool edited;
 
   bool renderingAttachments = false;
-  final attachmentsRenderer = <AttachmentContainer>[].obs;
-  final answerMessage = Rx<Message?>(null);
+  final attachmentsRenderer = <AttachmentContainer>[];
+  Message? answerMessage;
 
   /// Extracts and decrypts the attachments
-  void initAttachments() async {
+  Future<bool> initAttachments() async {
     //* Load answer
     if (answer != "") {
       final message = await (db.message.select()
@@ -186,19 +187,18 @@ class Message {
             ..where((tbl) => tbl.conversationId.equals(conversation)))
           .getSingleOrNull();
       if (message != null) {
-        answerMessage.value = Message.fromMessageData(message);
+        answerMessage = Message.fromMessageData(message);
       }
     } else {
-      answerMessage.value = null;
+      answerMessage = null;
     }
 
     //* Load attachments
     if (attachmentsRenderer.isNotEmpty || renderingAttachments) {
-      return;
+      return true;
     }
     renderingAttachments = true;
     if (attachments.isNotEmpty) {
-      sendLog(attachments.length);
       for (var attachment in attachments) {
         if (attachment.isURL) {
           attachmentsRenderer.add(AttachmentContainer.remoteImage(attachment));
@@ -233,6 +233,8 @@ class Message {
       }
       renderingAttachments = false;
     }
+
+    return true;
   }
 
   //* Animation when a new message enters the chat

@@ -32,7 +32,7 @@ class ErrorTranslations extends Translations {
 
           // Chat
           'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
-          'file.not_uploaded': 'File not found. Maybe it was deleted?',
+          'file.not_uploaded': 'File not found.',
           'file.too_large': 'The maximum file size is @1MB.',
           'file.unsafe': 'The provider of this file (@domain) isn\'t trusted.',
           'chat.add_file': 'Attach a file',

@@ -68,6 +68,7 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
       callback.call();
       return;
     }
+    await res.container!.precalculateWidthAndHeight();
     attachments.add(res.data);
   }
 

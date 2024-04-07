@@ -5,6 +5,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/attachment
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_render_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,12 +25,6 @@ class BubblesMessageRenderer extends StatefulWidget {
 
 class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
   final hovering = false.obs;
-
-  @override
-  void initState() {
-    widget.message.initAttachments();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,39 +84,37 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                   crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                   children: [
                                     //* Reply message
-                                    Obx(() {
-                                      if (widget.message.answerMessage.value == null) {
-                                        return const SizedBox();
-                                      }
-
-                                      return Padding(
+                                    if (widget.message.answerMessage == null)
+                                      const SizedBox()
+                                    else
+                                      Padding(
                                         padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
                                         child: Material(
                                           borderRadius: BorderRadius.circular(defaultSpacing),
                                           color: widget.self ? theme.colorScheme.onPrimary.withOpacity(0.2) : theme.colorScheme.background,
                                           child: InkWell(
                                             borderRadius: BorderRadius.circular(defaultSpacing),
-                                            onTap: () => Get.dialog(MessageRenderWindow(message: widget.message.answerMessage.value!)),
+                                            onTap: () => Get.dialog(MessageRenderWindow(message: widget.message.answerMessage!)),
                                             child: Padding(
                                               padding: const EdgeInsets.all(elementSpacing),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  UserAvatar(id: widget.message.answerMessage.value!.senderAccount, size: 30),
+                                                  UserAvatar(id: widget.message.answerMessage!.senderAccount, size: 30),
                                                   horizontalSpacing(elementSpacing),
-                                                  if (widget.message.answerMessage.value!.type == MessageType.call)
+                                                  if (widget.message.answerMessage!.type == MessageType.call)
                                                     Icon(Icons.public, color: theme.colorScheme.onPrimary)
-                                                  else if (widget.message.answerMessage.value!.type == MessageType.liveshare)
+                                                  else if (widget.message.answerMessage!.type == MessageType.liveshare)
                                                     Icon(Icons.electric_bolt, color: theme.colorScheme.onPrimary)
-                                                  else if (widget.message.answerMessage.value!.type == MessageType.system)
+                                                  else if (widget.message.answerMessage!.type == MessageType.system)
                                                     Icon(Icons.info, color: theme.colorScheme.onPrimary)
                                                   else
                                                     const SizedBox(),
                                                   horizontalSpacing(elementSpacing),
                                                   Flexible(
                                                     child: Text(
-                                                      AnswerData.answerContent(widget.message.answerMessage.value!.type, widget.message.answerMessage.value!.content,
-                                                          widget.message.answerMessage.value!.attachments),
+                                                      AnswerData.answerContent(widget.message.answerMessage!.type, widget.message.answerMessage!.content,
+                                                          widget.message.answerMessage!.attachments),
                                                       style: Get.theme.textTheme.labelMedium,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,
@@ -134,8 +127,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                             ),
                                           ),
                                         ),
-                                      );
-                                    }),
+                                      ),
 
                                     // Actual message
                                     Text(
@@ -149,26 +141,29 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
 
                             //* Attachments
                             SelectionContainer.disabled(
-                              child: Obx(
-                                () {
-                                  final renderer = widget.message.attachmentsRenderer;
-                                  return Visibility(
-                                    visible: widget.message.attachmentsRenderer.isNotEmpty,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: renderer.map((e) {
-                                          return Padding(
-                                            key: ValueKey(e.filePath),
-                                            padding: const EdgeInsets.only(top: elementSpacing),
-                                            child: AttachmentRenderer(container: e),
-                                          );
-                                        }).toList(),
-                                      ),
-                                    ),
-                                  );
-                                },
+                              child: Visibility(
+                                visible: widget.message.attachmentsRenderer.isNotEmpty,
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: List.generate(widget.message.attachmentsRenderer.length, (index) {
+                                      final container = widget.message.attachmentsRenderer[index];
+
+                                      if (container.width == null && container.height != null) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
+                                          child: const Text("image with width and size"),
+                                        );
+                                      }
+
+                                      return Padding(
+                                        padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
+                                        child: AttachmentRenderer(container: container),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                               ),
                             ),
                           ],

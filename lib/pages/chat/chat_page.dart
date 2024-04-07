@@ -29,7 +29,7 @@ class _ChatPageState extends State<ChatPage> {
                 child: Sidebar(),
               ),
               Expanded(
-                child: Obx(() => MessageFeed(id: controller.selectedConversation.value.id)),
+                child: Obx(() => MessageFeed(conversation: controller.selectedConversation.value)),
               ),
             ],
           ),
