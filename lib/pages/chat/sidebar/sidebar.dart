@@ -5,6 +5,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
@@ -151,31 +152,29 @@ class _SidebarState extends State<Sidebar> {
               );
             }),
 
-            //* The bar
+            //* Townsquare
             Obx(() {
-              final bool enabled =
-                  (Get.find<SettingController>().settings[DataSettings.socialFeatures]!.value.value ?? true) && Get.find<StatusController>().type.value != statusDoNotDisturb;
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                child: Animate(
-                  effects: [
-                    ExpandEffect(
-                      alignment: Alignment.bottomCenter,
-                      duration: 500.ms,
-                      curve: scaleAnimationCurve,
-                      axis: Axis.vertical,
-                    ),
-                    FadeEffect(
-                      begin: 0,
-                      end: 1,
-                      duration: 500.ms,
-                    ),
-                  ],
-                  target: enabled ? 1 : 0,
+              return Animate(
+                effects: [
+                  ExpandEffect(
+                    alignment: Alignment.bottomCenter,
+                    duration: 500.ms,
+                    curve: scaleAnimationCurve,
+                    axis: Axis.vertical,
+                  ),
+                  FadeEffect(
+                    begin: 0,
+                    end: 1,
+                    duration: 500.ms,
+                  ),
+                ],
+                target: Get.find<TownsquareController>().enabled.value ? 1 : 0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
                   child: Padding(
                     padding: const EdgeInsets.only(top: defaultSpacing),
                     child: Material(
+                      color: Get.theme.colorScheme.onBackground,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),

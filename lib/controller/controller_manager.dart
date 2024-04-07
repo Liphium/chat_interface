@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/notification_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/accounts/trusted_links.dart';
@@ -38,6 +39,7 @@ void initializeControllers() {
   Get.put(SettingController());
   Get.put(ThemeManager());
   Get.put(TransitionController());
+  Get.put(TownsquareController());
 
   // Space controls
   Get.put(SpacesController());

@@ -49,11 +49,27 @@ class _MessageFeedState extends State<MessageFeed> with TickerProviderStateMixin
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
   final textNode = FocusNode();
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    sendLog("adding listener");
+    _scrollController.addListener(() {
+      final trigger = 0.8 * _scrollController.position.maxScrollExtent;
+
+      if (_scrollController.position.pixels > trigger) {
+        sendLog("new pull");
+      }
+      sendLog(trigger);
+    });
+  }
 
   @override
   void dispose() {
     _message.dispose();
     super.dispose();
+    _scrollController.dispose();
   }
 
   @override
@@ -99,348 +115,348 @@ class _MessageFeedState extends State<MessageFeed> with TickerProviderStateMixin
                     children: [
                       //* Message list
                       Expanded(
-                        child: SingleChildScrollView(
-                          reverse: true,
-                          child: SelectableRegion(
-                            focusNode: textNode,
-                            selectionControls: desktopTextSelectionControls,
-                            child: Center(
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? Get.width : 1200),
-                                child: Obx(
-                                  () {
-                                    return ListView.builder(
-                                      itemCount: controller.messages.length + 1,
-                                      reverse: true,
-                                      shrinkWrap: true,
-                                      addAutomaticKeepAlives: false,
-                                      addRepaintBoundaries: false,
-                                      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                                      itemBuilder: (context, index) {
-                                        switch (ChatSettings.chatThemeSetting.value.value ?? 1) {
-                                          //* Material
-                                          case 0:
-                                            if (index == 0) {
-                                              return verticalSpacing(defaultSpacing);
+                        child: SelectableRegion(
+                          focusNode: textNode,
+                          selectionControls: desktopTextSelectionControls,
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? Get.width : 1200),
+                              child: Obx(
+                                () {
+                                  sendLog("refresh");
+                                  return ListView.builder(
+                                    itemCount: controller.messages.length + 1,
+                                    reverse: true,
+                                    //shrinkWrap: true,
+                                    controller: _scrollController,
+                                    addAutomaticKeepAlives: false,
+                                    addRepaintBoundaries: false,
+                                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                    itemBuilder: (context, index) {
+                                      sendLog("render $index");
+                                      switch (ChatSettings.chatThemeSetting.value.value ?? 1) {
+                                        //* Material
+                                        case 0:
+                                          if (index == 0) {
+                                            return verticalSpacing(defaultSpacing);
+                                          }
+
+                                          final message = controller.messages[index - 1];
+                                          if (message.type == MessageType.system) {
+                                            return BubblesSystemMessageRenderer(message: message, accountId: MessageController.systemSender);
+                                          }
+                                          final sender = friendController.friends[message.senderAccount];
+                                          final self = message.senderAccount == statusController.id.value;
+
+                                          bool last = false;
+                                          bool newHeading = false;
+                                          if (index != controller.messages.length) {
+                                            final lastMessage = controller.messages[index];
+
+                                            // Check if the last message was a day before the current one
+                                            if (lastMessage.createdAt.day != message.createdAt.day) {
+                                              newHeading = true;
                                             }
 
-                                            final message = controller.messages[index - 1];
-                                            if (message.type == MessageType.system) {
-                                              return BubblesSystemMessageRenderer(message: message, accountId: MessageController.systemSender);
+                                            if (lastMessage.sender == message.sender && lastCount < 5 && !newHeading) {
+                                              last = true;
+                                              lastCount++;
+                                            } else {
+                                              lastCount = 0;
                                             }
-                                            final sender = friendController.friends[message.senderAccount];
-                                            final self = message.senderAccount == statusController.id.value;
+                                          }
 
-                                            bool last = false;
-                                            bool newHeading = false;
-                                            if (index != controller.messages.length) {
-                                              final lastMessage = controller.messages[index];
+                                          final Widget renderer;
+                                          switch (message.type) {
+                                            case MessageType.text:
+                                              renderer = MaterialMessageRenderer(
+                                                message: message,
+                                                accountId: message.senderAccount,
+                                                self: self,
+                                                last: last,
+                                                sender: self ? Friend.me() : sender,
+                                              );
 
-                                              // Check if the last message was a day before the current one
-                                              if (lastMessage.createdAt.day != message.createdAt.day) {
-                                                newHeading = true;
-                                              }
+                                            case MessageType.call:
+                                              renderer = BubblesSpaceMessageRenderer(
+                                                message: message,
+                                                self: self,
+                                                last: last,
+                                                sender: self ? Friend.me() : sender,
+                                              );
 
-                                              if (lastMessage.sender == message.sender && lastCount < 5 && !newHeading) {
-                                                last = true;
-                                                lastCount++;
-                                              } else {
-                                                lastCount = 0;
-                                              }
-                                            }
+                                            case MessageType.liveshare:
+                                              renderer = BubblesLiveshareMessageRenderer(
+                                                message: message,
+                                                self: self,
+                                                last: last,
+                                                sender: self ? Friend.me() : sender,
+                                              );
 
-                                            final Widget renderer;
-                                            switch (message.type) {
-                                              case MessageType.text:
-                                                renderer = MaterialMessageRenderer(
-                                                  message: message,
-                                                  accountId: message.senderAccount,
-                                                  self: self,
-                                                  last: last,
-                                                  sender: self ? Friend.me() : sender,
-                                                );
+                                            case MessageType.system:
+                                              renderer = BubblesSystemMessageRenderer(
+                                                message: message,
+                                                accountId: message.senderAccount,
+                                              );
+                                          }
 
-                                              case MessageType.call:
-                                                renderer = BubblesSpaceMessageRenderer(
-                                                  message: message,
-                                                  self: self,
-                                                  last: last,
-                                                  sender: self ? Friend.me() : sender,
-                                                );
+                                          final GlobalKey contextMenuKey = GlobalKey();
+                                          final hovering = false.obs;
 
-                                              case MessageType.liveshare:
-                                                renderer = BubblesLiveshareMessageRenderer(
-                                                  message: message,
-                                                  self: self,
-                                                  last: last,
-                                                  sender: self ? Friend.me() : sender,
-                                                );
-
-                                              case MessageType.system:
-                                                renderer = BubblesSystemMessageRenderer(
-                                                  message: message,
-                                                  accountId: message.senderAccount,
-                                                );
-                                            }
-
-                                            final GlobalKey contextMenuKey = GlobalKey();
-                                            final hovering = false.obs;
-
-                                            final messageWidget = Column(
-                                              key: ValueKey(message.id),
-                                              children: [
-                                                if (newHeading || index == controller.messages.length)
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
-                                                    child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
-                                                  ),
-                                                MouseRegion(
-                                                  onEnter: (event) => hovering.value = true,
-                                                  onHover: (event) {
-                                                    if (hovering.value) {
-                                                      return;
-                                                    }
-                                                    hovering.value = true;
-                                                  },
-                                                  onExit: (event) => hovering.value = false,
-                                                  child: Row(
-                                                    children: [
-                                                      Flexible(
-                                                        child: renderer,
-                                                      ),
-                                                      Obx(
-                                                        () => SizedBox(
-                                                          height: 34,
-                                                          child: Visibility(
-                                                            visible: hovering.value,
-                                                            child: Row(
-                                                              children: [
-                                                                LoadingIconButton(
-                                                                  key: contextMenuKey,
-                                                                  iconSize: 22,
-                                                                  extra: 4,
-                                                                  padding: 4,
-                                                                  onTap: () {
-                                                                    Get.dialog(
-                                                                      MessageOptionsWindow(
-                                                                        data: ContextMenuData.fromKey(contextMenuKey),
-                                                                        self: self,
-                                                                        message: message,
-                                                                      ),
-                                                                    );
-                                                                  },
-                                                                  icon: Icons.more_horiz,
-                                                                ),
-                                                                LoadingIconButton(
-                                                                  iconSize: 22,
-                                                                  extra: 4,
-                                                                  padding: 4,
-                                                                  onTap: () {
-                                                                    MessageSendHelper.addReplyToCurrentDraft(message);
-                                                                  },
-                                                                  icon: Icons.reply,
-                                                                )
-                                                              ],
-                                                            ),
+                                          final messageWidget = Column(
+                                            key: ValueKey(message.id),
+                                            children: [
+                                              if (newHeading || index == controller.messages.length)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
+                                                  child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
+                                                ),
+                                              MouseRegion(
+                                                onEnter: (event) => hovering.value = true,
+                                                onHover: (event) {
+                                                  if (hovering.value) {
+                                                    return;
+                                                  }
+                                                  hovering.value = true;
+                                                },
+                                                onExit: (event) => hovering.value = false,
+                                                child: Row(
+                                                  children: [
+                                                    Flexible(
+                                                      child: renderer,
+                                                    ),
+                                                    Obx(
+                                                      () => SizedBox(
+                                                        height: 34,
+                                                        child: Visibility(
+                                                          visible: hovering.value,
+                                                          child: Row(
+                                                            children: [
+                                                              LoadingIconButton(
+                                                                key: contextMenuKey,
+                                                                iconSize: 22,
+                                                                extra: 4,
+                                                                padding: 4,
+                                                                onTap: () {
+                                                                  Get.dialog(
+                                                                    MessageOptionsWindow(
+                                                                      data: ContextMenuData.fromKey(contextMenuKey),
+                                                                      self: self,
+                                                                      message: message,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                icon: Icons.more_horiz,
+                                                              ),
+                                                              LoadingIconButton(
+                                                                iconSize: 22,
+                                                                extra: 4,
+                                                                padding: 4,
+                                                                onTap: () {
+                                                                  MessageSendHelper.addReplyToCurrentDraft(message);
+                                                                },
+                                                                icon: Icons.reply,
+                                                              )
+                                                            ],
                                                           ),
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          );
+
+                                          if (message.playAnimation) {
+                                            message.initAnimation(this);
+                                            return Animate(
+                                              effects: [
+                                                ExpandEffect(
+                                                  alignment: Alignment.center,
+                                                  duration: 250.ms,
+                                                  curve: scaleAnimationCurve,
+                                                  axis: Axis.vertical,
+                                                ),
+                                                MoveEffect(
+                                                  begin: const Offset(0, 50),
+                                                  end: const Offset(0, 0),
+                                                  duration: 500.ms,
                                                 ),
                                               ],
+                                              autoPlay: false,
+                                              controller: message.controller!,
+                                              onComplete: (controller) => message.playAnimation = false,
+                                              child: messageWidget,
                                             );
+                                          }
 
-                                            if (message.playAnimation) {
-                                              message.initAnimation(this);
-                                              return Animate(
-                                                effects: [
-                                                  ExpandEffect(
-                                                    alignment: Alignment.center,
-                                                    duration: 250.ms,
-                                                    curve: scaleAnimationCurve,
-                                                    axis: Axis.vertical,
-                                                  ),
-                                                  MoveEffect(
-                                                    begin: const Offset(0, 50),
-                                                    end: const Offset(0, 0),
-                                                    duration: 500.ms,
-                                                  ),
-                                                ],
-                                                autoPlay: false,
-                                                controller: message.controller!,
-                                                onComplete: (controller) => message.playAnimation = false,
-                                                child: messageWidget,
+                                          return messageWidget;
+
+                                        //* Chat bubbles
+                                        case 1:
+                                          if (index == 0) {
+                                            return verticalSpacing(defaultSpacing);
+                                          }
+
+                                          final message = controller.messages[index - 1];
+                                          if (message.type == MessageType.system) {
+                                            return BubblesSystemMessageRenderer(message: message, accountId: MessageController.systemSender);
+                                          }
+                                          final sender = friendController.friends[message.senderAccount];
+                                          final self = message.senderAccount == statusController.id.value;
+
+                                          bool last = false;
+                                          bool newHeading = false;
+                                          if (index != controller.messages.length) {
+                                            final lastMessage = controller.messages[index];
+
+                                            // Check if the last message was a day before the current one
+                                            if (lastMessage.createdAt.day != message.createdAt.day) {
+                                              newHeading = true;
+                                            }
+
+                                            if (lastMessage.sender == message.sender && lastCount < 5 && !newHeading) {
+                                              last = true;
+                                              lastCount++;
+                                            } else {
+                                              lastCount = 0;
+                                            }
+                                          }
+
+                                          final Widget renderer;
+                                          switch (message.type) {
+                                            case MessageType.text:
+                                              renderer = BubblesMessageRenderer(
+                                                message: message,
+                                                accountId: message.senderAccount,
+                                                self: self,
+                                                last: last,
+                                                sender: self ? Friend.me() : sender,
                                               );
-                                            }
 
-                                            return messageWidget;
+                                            case MessageType.call:
+                                              renderer = BubblesSpaceMessageRenderer(
+                                                message: message,
+                                                self: self,
+                                                last: last,
+                                                sender: self ? Friend.me() : sender,
+                                              );
 
-                                          //* Chat bubbles
-                                          case 1:
-                                            if (index == 0) {
-                                              return verticalSpacing(defaultSpacing);
-                                            }
+                                            case MessageType.liveshare:
+                                              renderer = BubblesLiveshareMessageRenderer(
+                                                message: message,
+                                                self: self,
+                                                last: last,
+                                                sender: self ? Friend.me() : sender,
+                                              );
 
-                                            final message = controller.messages[index - 1];
-                                            if (message.type == MessageType.system) {
-                                              return BubblesSystemMessageRenderer(message: message, accountId: MessageController.systemSender);
-                                            }
-                                            final sender = friendController.friends[message.senderAccount];
-                                            final self = message.senderAccount == statusController.id.value;
+                                            case MessageType.system:
+                                              renderer = BubblesSystemMessageRenderer(
+                                                message: message,
+                                                accountId: message.senderAccount,
+                                              );
+                                          }
 
-                                            bool last = false;
-                                            bool newHeading = false;
-                                            if (index != controller.messages.length) {
-                                              final lastMessage = controller.messages[index];
+                                          final GlobalKey contextMenuKey = GlobalKey();
+                                          final hovering = false.obs;
 
-                                              // Check if the last message was a day before the current one
-                                              if (lastMessage.createdAt.day != message.createdAt.day) {
-                                                newHeading = true;
-                                              }
-
-                                              if (lastMessage.sender == message.sender && lastCount < 5 && !newHeading) {
-                                                last = true;
-                                                lastCount++;
-                                              } else {
-                                                lastCount = 0;
-                                              }
-                                            }
-
-                                            final Widget renderer;
-                                            switch (message.type) {
-                                              case MessageType.text:
-                                                renderer = BubblesMessageRenderer(
-                                                  message: message,
-                                                  accountId: message.senderAccount,
-                                                  self: self,
-                                                  last: last,
-                                                  sender: self ? Friend.me() : sender,
-                                                );
-
-                                              case MessageType.call:
-                                                renderer = BubblesSpaceMessageRenderer(
-                                                  message: message,
-                                                  self: self,
-                                                  last: last,
-                                                  sender: self ? Friend.me() : sender,
-                                                );
-
-                                              case MessageType.liveshare:
-                                                renderer = BubblesLiveshareMessageRenderer(
-                                                  message: message,
-                                                  self: self,
-                                                  last: last,
-                                                  sender: self ? Friend.me() : sender,
-                                                );
-
-                                              case MessageType.system:
-                                                renderer = BubblesSystemMessageRenderer(
-                                                  message: message,
-                                                  accountId: message.senderAccount,
-                                                );
-                                            }
-
-                                            final GlobalKey contextMenuKey = GlobalKey();
-                                            final hovering = false.obs;
-
-                                            final messageWidget = Column(
-                                              key: ValueKey(message.id),
-                                              children: [
-                                                if (newHeading || index == controller.messages.length)
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
-                                                    child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
-                                                  ),
-                                                MouseRegion(
-                                                  onEnter: (event) => hovering.value = true,
-                                                  onHover: (event) {
-                                                    if (hovering.value) {
-                                                      return;
-                                                    }
-                                                    hovering.value = true;
-                                                  },
-                                                  onExit: (event) => hovering.value = false,
-                                                  child: Row(
-                                                    textDirection: self ? TextDirection.rtl : TextDirection.ltr,
-                                                    children: [
-                                                      Flexible(
-                                                        child: renderer,
-                                                      ),
-                                                      Obx(
-                                                        () => SizedBox(
-                                                          height: 34,
-                                                          child: Visibility(
-                                                            visible: hovering.value,
-                                                            child: Row(
-                                                              children: [
-                                                                LoadingIconButton(
-                                                                  key: contextMenuKey,
-                                                                  iconSize: 22,
-                                                                  extra: 4,
-                                                                  padding: 4,
-                                                                  onTap: () {
-                                                                    Get.dialog(
-                                                                      MessageOptionsWindow(
-                                                                        data: ContextMenuData.fromKey(contextMenuKey),
-                                                                        self: self,
-                                                                        message: message,
-                                                                      ),
-                                                                    );
-                                                                  },
-                                                                  icon: Icons.more_horiz,
-                                                                ),
-                                                                LoadingIconButton(
-                                                                  iconSize: 22,
-                                                                  extra: 4,
-                                                                  padding: 4,
-                                                                  onTap: () {
-                                                                    MessageSendHelper.addReplyToCurrentDraft(message);
-                                                                  },
-                                                                  icon: Icons.reply,
-                                                                )
-                                                              ],
-                                                            ),
+                                          final messageWidget = Column(
+                                            key: ValueKey(message.id),
+                                            children: [
+                                              if (newHeading || index == controller.messages.length)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
+                                                  child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
+                                                ),
+                                              MouseRegion(
+                                                onEnter: (event) => hovering.value = true,
+                                                onHover: (event) {
+                                                  if (hovering.value) {
+                                                    return;
+                                                  }
+                                                  hovering.value = true;
+                                                },
+                                                onExit: (event) => hovering.value = false,
+                                                child: Row(
+                                                  textDirection: self ? TextDirection.rtl : TextDirection.ltr,
+                                                  children: [
+                                                    Flexible(
+                                                      child: renderer,
+                                                    ),
+                                                    Obx(
+                                                      () => SizedBox(
+                                                        height: 34,
+                                                        child: Visibility(
+                                                          visible: hovering.value,
+                                                          child: Row(
+                                                            children: [
+                                                              LoadingIconButton(
+                                                                key: contextMenuKey,
+                                                                iconSize: 22,
+                                                                extra: 4,
+                                                                padding: 4,
+                                                                onTap: () {
+                                                                  Get.dialog(
+                                                                    MessageOptionsWindow(
+                                                                      data: ContextMenuData.fromKey(contextMenuKey),
+                                                                      self: self,
+                                                                      message: message,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                icon: Icons.more_horiz,
+                                                              ),
+                                                              LoadingIconButton(
+                                                                iconSize: 22,
+                                                                extra: 4,
+                                                                padding: 4,
+                                                                onTap: () {
+                                                                  MessageSendHelper.addReplyToCurrentDraft(message);
+                                                                },
+                                                                icon: Icons.reply,
+                                                              )
+                                                            ],
                                                           ),
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          );
+
+                                          if (message.playAnimation) {
+                                            message.initAnimation(this);
+                                            return Animate(
+                                              effects: [
+                                                ExpandEffect(
+                                                  alignment: Alignment.center,
+                                                  duration: 250.ms,
+                                                  curve: scaleAnimationCurve,
+                                                  axis: Axis.vertical,
+                                                ),
+                                                FadeEffect(
+                                                  begin: 0,
+                                                  end: 1,
+                                                  duration: 500.ms,
                                                 ),
                                               ],
+                                              autoPlay: false,
+                                              controller: message.controller!,
+                                              onComplete: (controller) => message.playAnimation = false,
+                                              child: messageWidget,
                                             );
+                                          }
 
-                                            if (message.playAnimation) {
-                                              message.initAnimation(this);
-                                              return Animate(
-                                                effects: [
-                                                  ExpandEffect(
-                                                    alignment: Alignment.center,
-                                                    duration: 250.ms,
-                                                    curve: scaleAnimationCurve,
-                                                    axis: Axis.vertical,
-                                                  ),
-                                                  FadeEffect(
-                                                    begin: 0,
-                                                    end: 1,
-                                                    duration: 500.ms,
-                                                  ),
-                                                ],
-                                                autoPlay: false,
-                                                controller: message.controller!,
-                                                onComplete: (controller) => message.playAnimation = false,
-                                                child: messageWidget,
-                                              );
-                                            }
+                                          return messageWidget;
+                                      }
 
-                                            return messageWidget;
-                                        }
-
-                                        return const SizedBox.shrink();
-                                      },
-                                    );
-                                  },
-                                ),
+                                      return const SizedBox.shrink();
+                                    },
+                                  );
+                                },
                               ),
                             ),
                           ),

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_password_window.dart';
@@ -21,7 +22,7 @@ class DataSettings {
   static const String socialFeatures = "data.social";
 
   static void registerSettings(SettingController controller) {
-    controller.settings[socialFeatures] = Setting<bool>(socialFeatures, false);
+    controller.settings[socialFeatures] = Setting<bool>(socialFeatures, true);
   }
 }
 
@@ -62,7 +63,10 @@ class DataSettingsPage extends StatelessWidget {
         verticalSpacing(defaultSpacing),
         Text("settings.data.social.text".tr, style: Get.theme.textTheme.bodyMedium),
         verticalSpacing(defaultSpacing),
-        const BoolSettingSmall(settingName: DataSettings.socialFeatures),
+        BoolSettingSmall(
+          settingName: DataSettings.socialFeatures,
+          onChanged: (b) => Get.find<TownsquareController>().updateEnabledState(),
+        ),
         verticalSpacing(sectionSpacing),
 
         //* Profile picture

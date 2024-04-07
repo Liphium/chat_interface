@@ -8,6 +8,7 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
@@ -128,6 +129,7 @@ class StatusController extends GetxController {
       if (event.data["success"] == true) {
         if (message != null) status.value = utf8.decode(base64Decode(message));
         if (type != null) this.type.value = type;
+        Get.find<TownsquareController>().updateEnabledState();
       }
     });
 
