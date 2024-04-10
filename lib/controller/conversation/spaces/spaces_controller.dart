@@ -173,7 +173,8 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces",
+        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
@@ -253,13 +254,20 @@ class SpacesController extends GetxController {
 
         // Connect to new voice chat
         livekitRoom = Room();
+        final keyProvider = await BaseKeyProvider.create();
         await livekitRoom!.connect(
           event.data["url"],
           event.data["token"],
           connectOptions: const ConnectOptions(
             autoSubscribe: false,
           ),
+          roomOptions: RoomOptions(
+            e2eeOptions: E2EEOptions(
+              keyProvider: keyProvider,
+            ),
+          ),
         );
+        await keyProvider.setKey(base64Encode(key!.extractBytes()));
         Get.find<SpaceMemberController>().onLivekitConnected();
         await api.startTalkingEngine();
         livekitRoom!.addListener(_onRoomUpdate);
@@ -350,7 +358,8 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
+      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {
