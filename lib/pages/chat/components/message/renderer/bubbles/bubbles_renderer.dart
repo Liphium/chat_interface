@@ -32,7 +32,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
   Widget build(BuildContext context) {
     final controller = Get.find<MessageController>();
     final friendController = Get.find<FriendController>();
-    sendLog("render ${widget.index}");
 
     //* Chat bubbles
     if (widget.index == 0) {

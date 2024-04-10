@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/image_attachment_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_render_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -150,10 +151,10 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                     children: List.generate(widget.message.attachmentsRenderer.length, (index) {
                                       final container = widget.message.attachmentsRenderer[index];
 
-                                      if (container.width == null && container.height != null) {
+                                      if (container.width != null && container.height != null) {
                                         return Padding(
                                           padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                                          child: const Text("image with width and size"),
+                                          child: ImageAttachmentRenderer(image: container),
                                         );
                                       }
 
