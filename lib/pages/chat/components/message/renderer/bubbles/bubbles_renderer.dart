@@ -17,14 +17,20 @@ import 'package:get/get.dart';
 
 class BubblesRenderer extends StatefulWidget {
   final int index;
+  final Message? message;
 
-  const BubblesRenderer({super.key, required this.index});
+  const BubblesRenderer({
+    super.key,
+    required this.index,
+    this.message,
+  });
 
   @override
   State<BubblesRenderer> createState() => _BubblesRendererState();
 }
 
 class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderStateMixin {
+  final GlobalKey _heightKey = GlobalKey();
   final GlobalKey contextMenuKey = GlobalKey();
   final hovering = false.obs;
 
@@ -34,11 +40,20 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     final friendController = Get.find<FriendController>();
 
     //* Chat bubbles
-    if (widget.index == 0) {
+    if (widget.index == 0 && widget.message == null) {
       return verticalSpacing(defaultSpacing);
     }
 
-    final message = controller.messages[widget.index - 1];
+    final message = widget.message ?? controller.messages[widget.index - 1];
+
+    if (message.heightCallback) {
+      sendLog("HEIGHT CALLBACK");
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        sendLog(_heightKey.currentContext!.size!.height);
+        Get.find<MessageController>().messageHeightCallback(message, _heightKey.currentContext!.size!.height);
+      });
+    }
+
     if (message.type == MessageType.system) {
       return BubblesSystemMessageRenderer(message: message, accountId: MessageController.systemSender);
     }
@@ -90,70 +105,74 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         );
     }
 
-    final messageWidget = Column(
-      key: ValueKey(message.id),
-      children: [
-        if (newHeading || widget.index == controller.messages.length)
-          Padding(
-            padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
-            child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
-          ),
-        MouseRegion(
-          onEnter: (event) => hovering.value = true,
-          onHover: (event) {
-            if (hovering.value) {
-              return;
-            }
-            hovering.value = true;
-          },
-          onExit: (event) => hovering.value = false,
-          child: Row(
-            textDirection: self ? TextDirection.rtl : TextDirection.ltr,
-            children: [
-              Flexible(
-                child: renderer,
-              ),
-              Obx(
-                () => SizedBox(
-                  height: 34,
-                  child: Visibility(
-                    visible: hovering.value,
-                    child: Row(
-                      children: [
-                        LoadingIconButton(
-                          key: contextMenuKey,
-                          iconSize: 22,
-                          extra: 4,
-                          padding: 4,
-                          onTap: () {
-                            Get.dialog(
-                              MessageOptionsWindow(
-                                data: ContextMenuData.fromKey(contextMenuKey),
-                                self: self,
-                                message: message,
-                              ),
-                            );
-                          },
-                          icon: Icons.more_horiz,
-                        ),
-                        LoadingIconButton(
-                          iconSize: 22,
-                          extra: 4,
-                          padding: 4,
-                          onTap: () {
-                            MessageSendHelper.addReplyToCurrentDraft(message);
-                          },
-                          icon: Icons.reply,
-                        )
-                      ],
+    final messageWidget = SizedBox(
+      key: _heightKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        key: ValueKey(message.id),
+        children: [
+          if (newHeading || widget.index == controller.messages.length)
+            Padding(
+              padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
+              child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
+            ),
+          MouseRegion(
+            onEnter: (event) => hovering.value = true,
+            onHover: (event) {
+              if (hovering.value) {
+                return;
+              }
+              hovering.value = true;
+            },
+            onExit: (event) => hovering.value = false,
+            child: Row(
+              textDirection: self ? TextDirection.rtl : TextDirection.ltr,
+              children: [
+                Flexible(
+                  child: renderer,
+                ),
+                Obx(
+                  () => SizedBox(
+                    height: 34,
+                    child: Visibility(
+                      visible: hovering.value,
+                      child: Row(
+                        children: [
+                          LoadingIconButton(
+                            key: contextMenuKey,
+                            iconSize: 22,
+                            extra: 4,
+                            padding: 4,
+                            onTap: () {
+                              Get.dialog(
+                                MessageOptionsWindow(
+                                  data: ContextMenuData.fromKey(contextMenuKey),
+                                  self: self,
+                                  message: message,
+                                ),
+                              );
+                            },
+                            icon: Icons.more_horiz,
+                          ),
+                          LoadingIconButton(
+                            iconSize: 22,
+                            extra: 4,
+                            padding: 4,
+                            onTap: () {
+                              MessageSendHelper.addReplyToCurrentDraft(message);
+                            },
+                            icon: Icons.reply,
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
 
     if (message.playAnimation) {
@@ -179,6 +198,20 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
       );
     }
 
-    return messageWidget;
+    if (message.heightCallback) {
+      return Obx(
+        () => Align(
+          alignment: Alignment.topCenter,
+          heightFactor: message.canScroll.value ? 1 : 0,
+          child: messageWidget,
+        ),
+      );
+    }
+
+    return Align(
+      heightFactor: 1,
+      alignment: Alignment.topCenter,
+      child: messageWidget,
+    );
   }
 }

@@ -6,7 +6,6 @@ import 'package:chat_interface/pages/chat/components/message/renderer/image_atta
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_render_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,7 +17,14 @@ class BubblesMessageRenderer extends StatefulWidget {
   final bool last;
   final Friend? sender;
 
-  const BubblesMessageRenderer({super.key, required this.message, required this.accountId, this.self = false, this.last = false, this.sender});
+  const BubblesMessageRenderer({
+    super.key,
+    required this.message,
+    required this.accountId,
+    this.self = false,
+    this.last = false,
+    this.sender,
+  });
 
   @override
   State<BubblesMessageRenderer> createState() => _BubblesMessageRendererState();

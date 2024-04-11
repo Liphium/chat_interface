@@ -45,15 +45,7 @@ class _MessageFeedState extends State<MessageFeed> {
   @override
   void initState() {
     super.initState();
-    sendLog("adding listener");
-    _scrollController.addListener(() {
-      final trigger = 0.8 * _scrollController.position.maxScrollExtent;
-
-      if (_scrollController.position.pixels > trigger) {
-        sendLog("new pull");
-      }
-      sendLog(trigger);
-    });
+    Get.find<MessageController>().newScrollController(_scrollController);
   }
 
   @override
@@ -105,7 +97,7 @@ class _MessageFeedState extends State<MessageFeed> {
                           selectionControls: desktopTextSelectionControls,
                           child: Center(
                             child: ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? Get.width : 1200),
+                              constraints: BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200),
                               child: Obx(
                                 () {
                                   if (!controller.loaded.value) {

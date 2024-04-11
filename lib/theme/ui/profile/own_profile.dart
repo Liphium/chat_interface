@@ -1,17 +1,23 @@
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/emojis/emoji_window.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/measurement.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:drift_db_viewer/drift_db_viewer.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
@@ -267,13 +273,60 @@ class _ProfileState extends State<OwnProfile> {
                   ProfileButton(
                     icon: Icons.emoji_emotions,
                     label: 'profile.test'.tr,
-                    onTap: () => Get.dialog(const EmojiWindow()),
+                    onTap: () {
+                      final GlobalKey key = GlobalKey();
+                      Get.dialog(
+                        SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(10, (index) {
+                              if (index == 0) {
+                                return Align(
+                                  alignment: Alignment.topCenter,
+                                  heightFactor: 0,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(defaultSpacing),
+                                    child: Container(
+                                      key: key,
+                                      width: 100,
+                                      height: 100,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return Padding(
+                                padding: const EdgeInsets.all(defaultSpacing),
+                                child: SizedBox(
+                                  width: 100,
+                                  height: 100,
+                                  child: Material(
+                                    color: Colors.yellow,
+                                    child: InkWell(
+                                      onTap: () {
+                                        sendLog(key.currentContext!.size!);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+                      );
+                    },
                     loading: false.obs,
                   ),
                   verticalSpacing(elementSpacing),
 
                   //* Friends page
-                  ProfileButton(icon: Icons.group, label: 'profile.friends'.tr, onTap: () => Get.dialog(const FriendsPage()), loading: false.obs),
+                  ProfileButton(
+                    icon: Icons.group,
+                    label: 'profile.friends'.tr,
+                    onTap: () => Get.dialog(const FriendsPage()),
+                    loading: false.obs,
+                  ),
                   verticalSpacing(elementSpacing),
 
                   //* Hide profile

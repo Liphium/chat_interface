@@ -47,7 +47,7 @@ class MessageController extends GetxController {
     // Load messages
     messages.clear();
     var loadedMessages = await (db.select(db.message)
-          ..limit(30)
+          ..limit(5)
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
           ..where((tbl) => tbl.conversationId.equals(conversation.id))
           ..where((tbl) => tbl.system.equals(false)))
@@ -116,14 +116,14 @@ class MessageController extends GetxController {
       // Check if it is a system message and if it should be rendered or not
       if (message.type == MessageType.system) {
         if (SystemMessages.messages[message.content]?.render == true) {
-          addMessageToSelected(message);
+          addMessageToBottom(message);
         }
       } else {
         // Store normal type of message
         if (messages.isNotEmpty && messages[0].id != message.id) {
-          addMessageToSelected(message);
+          addMessageToBottom(message);
         } else if (messages.isEmpty) {
-          addMessageToSelected(message);
+          addMessageToBottom(message);
         }
       }
     }
@@ -144,7 +144,11 @@ class MessageController extends GetxController {
     }
   }
 
-  void addMessageToSelected(Message message) {
+  //* Scroll
+  static const newLoadOffset = 100;
+  late material.ScrollController controller;
+
+  void addMessageToBottom(Message message, {bool animation = true}) async {
     int index = 0;
     for (var msg in messages) {
       index++;
@@ -154,8 +158,37 @@ class MessageController extends GetxController {
       index -= 1;
       break;
     }
-    message.playAnimation = true;
-    messages.insert(index, message);
+
+    await message.initAttachments();
+    if (index == 0) {
+      if (controller.position.pixels <= newLoadOffset) {
+        if (controller.position.pixels == 0) {
+          message.playAnimation = true;
+          messages.insert(index, message);
+          return;
+        }
+
+        message.heightCallback = true;
+        sendLog("HEIGHT CALLBACK MESSAGE");
+        messages.insert(index, message);
+        return;
+      }
+    } else {
+      message.playAnimation = animation;
+      messages.insert(index, message);
+    }
+  }
+
+  void messageHeightCallback(Message message, double height) {
+    message.canScroll.value = true;
+    controller.jumpTo(controller.position.pixels + height);
+  }
+
+  void newScrollController(material.ScrollController newController) {
+    controller = newController;
+    controller.addListener(() {
+      sendLog("scroll ${controller.position.pixels}");
+    });
   }
 }
 
@@ -174,6 +207,8 @@ class Message {
   final String conversation;
   final bool edited;
 
+  final canScroll = false.obs;
+  bool heightCallback = false;
   bool renderingAttachments = false;
   final attachmentsRenderer = <AttachmentContainer>[];
   Message? answerMessage;

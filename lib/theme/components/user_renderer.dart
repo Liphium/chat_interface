@@ -57,16 +57,19 @@ class _UserAvatarState extends State<UserAvatar> {
             );
           }
 
-          return CircleAvatar(
-            backgroundColor: Get.theme.colorScheme.primaryContainer,
-            radius: widget.size ?? 45,
-            child: SelectionContainer.disabled(
-              child: Text(
-                friend.name.substring(0, 1),
-                style: Get.theme.textTheme.labelMedium!.copyWith(
-                  fontSize: (widget.size ?? 45) * 0.5,
-                  fontWeight: FontWeight.bold,
-                  color: widget.id == StatusController.ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary,
+          return ClipOval(
+            child: Container(
+              color: Get.theme.colorScheme.primaryContainer,
+              child: SelectionContainer.disabled(
+                child: Center(
+                  child: Text(
+                    friend.name.substring(0, 1),
+                    style: Get.theme.textTheme.labelMedium!.copyWith(
+                      fontSize: (widget.size ?? 45) * 0.5,
+                      fontWeight: FontWeight.bold,
+                      color: widget.id == StatusController.ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary,
+                    ),
+                  ),
                 ),
               ),
             ),
