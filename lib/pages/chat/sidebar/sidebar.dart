@@ -154,6 +154,8 @@ class _SidebarState extends State<Sidebar> {
 
             //* Townsquare
             Obx(() {
+              final tsController = Get.find<TownsquareController>();
+              final loading = tsController.connecting.value;
               return Animate(
                 effects: [
                   ExpandEffect(
@@ -168,20 +170,22 @@ class _SidebarState extends State<Sidebar> {
                     duration: 500.ms,
                   ),
                 ],
-                target: Get.find<TownsquareController>().enabled.value ? 1 : 0,
+                target: tsController.enabled.value ? 1 : 0,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
                   child: Padding(
                     padding: const EdgeInsets.only(top: defaultSpacing),
                     child: Material(
-                      color: Get.theme.colorScheme.onBackground,
+                      color: tsController.inView.value ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         hoverColor: theme.colorScheme.primary.withAlpha(150),
-                        onTap: () {
-                          // TODO: Join the townsquare
-                        },
+                        onTap: !loading
+                            ? () {
+                                tsController.view();
+                              }
+                            : null,
                         child: Padding(
                           padding: const EdgeInsets.all(elementSpacing2),
                           child: Row(
@@ -198,7 +202,14 @@ class _SidebarState extends State<Sidebar> {
                                       Icon(Icons.science, size: 22, color: Get.theme.colorScheme.error),
                                     ],
                                   ),
-                                  Text("0/20 people viewing", style: Get.theme.textTheme.bodySmall),
+                                  Text(
+                                      loading
+                                          ? "townsquare.connecting".tr
+                                          : "townsquare.viewing".trParams({
+                                              "count": "0",
+                                              "total": "20",
+                                            }),
+                                      style: Get.theme.textTheme.bodySmall),
                                 ],
                               )
                             ],

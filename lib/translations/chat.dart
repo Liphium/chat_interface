@@ -135,6 +135,11 @@ class ChatPageTranslations extends Translations {
           'chat.space_invite': 'Space invitation',
           'chat.space.not_found': 'This space already ended.',
           'tabletop.general.smooth_scrolling': 'Smooth scrolling',
+
+          // Townsquare
+          'townsquare.connection_error': "Couldn't connect to Townsquare. Please contact the admins of your instance about this or try again later.",
+          'townsquare.connecting': "Connecting..",
+          "townsquare.viewing": "@count/@total on the square",
         },
 
         //* German

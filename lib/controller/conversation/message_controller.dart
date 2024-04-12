@@ -8,6 +8,7 @@ import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
+import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
@@ -37,6 +38,7 @@ class MessageController extends GetxController {
   }
 
   void selectConversation(Conversation conversation) async {
+    Get.find<TownsquareController>().close();
     loaded.value = false;
     selectedConversation.value = conversation;
     if (conversation.notificationCount.value != 0) {
