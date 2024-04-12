@@ -104,6 +104,10 @@ class _MessageFeedState extends State<MessageFeed> {
                                     return const SizedBox();
                                   }
 
+                                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                    controller.checkCurrentScrollHeight();
+                                  });
+
                                   return ListView.builder(
                                     itemCount: controller.messages.length + 1,
                                     reverse: true,

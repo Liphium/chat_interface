@@ -47,7 +47,7 @@ class MessageController extends GetxController {
     // Load messages
     messages.clear();
     var loadedMessages = await (db.select(db.message)
-          ..limit(5)
+          ..limit(messageLimit)
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
           ..where((tbl) => tbl.conversationId.equals(conversation.id))
           ..where((tbl) => tbl.system.equals(false)))
@@ -145,7 +145,8 @@ class MessageController extends GetxController {
   }
 
   //* Scroll
-  static const newLoadOffset = 100;
+  static const messageLimit = 10;
+  static const newLoadOffset = 200;
   late material.ScrollController controller;
 
   void addMessageToBottom(Message message, {bool animation = true}) async {
@@ -169,7 +170,6 @@ class MessageController extends GetxController {
         }
 
         message.heightCallback = true;
-        sendLog("HEIGHT CALLBACK MESSAGE");
         messages.insert(index, message);
         return;
       }
@@ -186,9 +186,39 @@ class MessageController extends GetxController {
 
   void newScrollController(material.ScrollController newController) {
     controller = newController;
-    controller.addListener(() {
-      sendLog("scroll ${controller.position.pixels}");
-    });
+    controller.addListener(() => checkCurrentScrollHeight());
+  }
+
+  void checkCurrentScrollHeight() {
+    final approximateTop = controller.position.pixels + Get.height - 100;
+    sendLog(approximateTop);
+    if (approximateTop > controller.position.maxScrollExtent - newLoadOffset) {
+      loadNewMessagesTop();
+    }
+  }
+
+  bool loading = false;
+  void loadNewMessagesTop() async {
+    if (loading) {
+      return;
+    }
+    loading = true;
+    final finalMessage = messages.last;
+
+    final loadedMessages = await (db.select(db.message)
+          ..limit(messageLimit)
+          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+          ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+          ..where((tbl) => tbl.system.equals(false))
+          ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(finalMessage.createdAt.millisecondsSinceEpoch))))
+        .get();
+
+    for (var msg in loadedMessages) {
+      final message = Message.fromMessageData(msg);
+      await message.initAttachments();
+      messages.add(message);
+    }
+    loading = false;
   }
 }
 
