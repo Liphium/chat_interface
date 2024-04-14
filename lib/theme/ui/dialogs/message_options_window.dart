@@ -37,6 +37,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
     return SlidingWindowBase(
       lessPadding: true,
       position: widget.data,
+      maxSize: 250,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -11,12 +11,11 @@ import 'package:get/get.dart';
 class RegisterHandler {
   static String? registrationToken;
 
-  static void goToRegistration() {
-    Widget page = const RegisterStartPage();
+  static void goToRegistration([String? email]) {
+    Widget page = RegisterStartPage(email: email);
     if (registrationToken != null) {
       // Get step from registration token
-      final json = jsonDecode(
-          String.fromCharCodes(base64Decode(registrationToken!.split(".")[1])));
+      final json = jsonDecode(String.fromCharCodes(base64Decode(registrationToken!.split(".")[1])));
       final step = json["step"];
       if (step == 1) {
         page = const RegisterCodePage();
@@ -29,8 +28,7 @@ class RegisterHandler {
   }
 
   /// Start the registration process (returns an error or null if successful)
-  static Future<String?> startRegister(
-      RxBool loading, String email, String invite) async {
+  static Future<String?> startRegister(RxBool loading, String email, String invite) async {
     loading.value = true;
 
     // Send a start request to the server
@@ -73,8 +71,7 @@ class RegisterHandler {
   }
 
   /// Finish the registration (returns an error or null if successful)
-  static Future<String?> finishRegistration(
-      RxBool loading, String username, String tag, String password) async {
+  static Future<String?> finishRegistration(RxBool loading, String username, String tag, String password) async {
     loading.value = true;
 
     // Send a register finish request to the server

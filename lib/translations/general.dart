@@ -40,11 +40,14 @@ class GeneralTranslations extends Translations {
           'open.friends': 'Open friends page',
           'reset': 'Reset',
 
+          // Placeholder
+          'placeholder.domain': 'example.com',
+
           // Time TODO: Differentiate between PM and AM
           'message.time': '@hour:@minute',
           'time.yesterday': 'Yesterday',
           'time.today': 'Today',
-          'time': '@month/@day/@year',
+          'time': '@day/@month/@year',
 
           // Log out thing
           'log_out': 'Log out',

@@ -13,6 +13,7 @@ class SetupTranslations extends Translations {
           'setup.choose.instance': 'Choose an instance.',
           'setup.instance.name': 'Enter a new name',
           'setup.choose.server': 'Choose a server',
+          'server.choose.server.connecting': 'Currently connecting to',
 
           // Login/register
           'register.title': 'Register an account.',

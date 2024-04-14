@@ -22,7 +22,7 @@ class DataSettings {
   static const String socialFeatures = "data.social";
 
   static void registerSettings(SettingController controller) {
-    controller.settings[socialFeatures] = Setting<bool>(socialFeatures, true);
+    controller.settings[socialFeatures] = Setting<bool>(socialFeatures, false);
   }
 }
 
@@ -36,37 +36,45 @@ class DataSettingsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         //* Social features
-        Row(
-          children: [
-            Text("settings.data.social".tr, style: Get.theme.textTheme.labelLarge),
-            horizontalSpacing(defaultSpacing),
-            Container(
-              decoration: BoxDecoration(
-                color: Get.theme.colorScheme.error.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(defaultSpacing),
-              ),
-              padding: const EdgeInsets.all(elementSpacing),
-              child: Row(
-                children: [
-                  Icon(Icons.science, color: Get.theme.colorScheme.error),
-                  horizontalSpacing(elementSpacing),
-                  Text(
-                    "settings.experimental".tr,
-                    style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
-                  ),
-                  horizontalSpacing(elementSpacing)
-                ],
-              ),
-            )
-          ],
-        ),
-        verticalSpacing(defaultSpacing),
-        Text("settings.data.social.text".tr, style: Get.theme.textTheme.bodyMedium),
-        verticalSpacing(defaultSpacing),
-        BoolSettingSmall(
-          settingName: DataSettings.socialFeatures,
-          onChanged: (b) => Get.find<TownsquareController>().updateEnabledState(),
-        ),
+        if (Get.find<SettingController>().settings[DataSettings.socialFeatures]!.getValue())
+          Padding(
+            padding: const EdgeInsets.only(bottom: sectionSpacing),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Text("settings.data.social".tr, style: Get.theme.textTheme.labelLarge),
+                    horizontalSpacing(defaultSpacing),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Get.theme.colorScheme.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                      ),
+                      padding: const EdgeInsets.all(elementSpacing),
+                      child: Row(
+                        children: [
+                          Icon(Icons.science, color: Get.theme.colorScheme.error),
+                          horizontalSpacing(elementSpacing),
+                          Text(
+                            "settings.experimental".tr,
+                            style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
+                          ),
+                          horizontalSpacing(elementSpacing)
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                Text("settings.data.social.text".tr, style: Get.theme.textTheme.bodyMedium),
+                verticalSpacing(defaultSpacing),
+                BoolSettingSmall(
+                  settingName: DataSettings.socialFeatures,
+                  onChanged: (b) => Get.find<TownsquareController>().updateEnabledState(),
+                ),
+              ],
+            ),
+          ),
         verticalSpacing(sectionSpacing),
 
         //* Profile picture

@@ -133,18 +133,23 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
 
 // Post request to any domain
 Future<Map<String, dynamic>> postAny(String url, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
-  final res = await dio.post(
-    url,
-    data: jsonEncode(body),
-    options: d.Options(
-      validateStatus: (status) => status != 404,
-    ),
-  );
-  if (res.statusCode != 200) {
+  try {
+    final res = await dio.post(
+      url,
+      data: jsonEncode(body),
+      options: d.Options(
+        validateStatus: (status) => true,
+      ),
+    );
+    if (res.statusCode != 200) {
+      return <String, dynamic>{"success": false, "error": defaultError};
+    }
+
+    return res.data;
+  } catch (e) {
+    e.printError();
     return <String, dynamic>{"success": false, "error": defaultError};
   }
-
-  return res.data;
 }
 
 String padBase64(String str) {

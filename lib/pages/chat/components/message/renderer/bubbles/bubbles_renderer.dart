@@ -47,7 +47,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     final message = widget.message ?? controller.messages[widget.index - 1];
 
     if (message.heightCallback) {
-      sendLog("HEIGHT CALLBACK");
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         sendLog(_heightKey.currentContext!.size!.height);
         Get.find<MessageController>().messageHeightCallback(message, _heightKey.currentContext!.size!.height);

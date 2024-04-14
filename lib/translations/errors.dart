@@ -6,6 +6,7 @@ class ErrorTranslations extends Translations {
         //* English US
         'en_US': {
           'error': 'Error',
+          'server.not_found': 'The server couldn\'t be reached. Make sure you have the right domain.',
           'server.error': 'Something went wrong on the server, please try again later.',
           'server.error.code': 'Something went wrong on the server, please try again later. Status code: @code',
           'friends.error': 'There was an error while loading your friends. Please try again later or contact your administrator.',
