@@ -24,18 +24,6 @@ Future<void> testVoice(
 
 Future<void> stop({dynamic hint}) => RustLib.instance.api.stop(hint: hint);
 
-Future<void> setMuted({required bool muted, dynamic hint}) =>
-    RustLib.instance.api.setMuted(muted: muted, hint: hint);
-
-Future<void> setDeafen({required bool deafened, dynamic hint}) =>
-    RustLib.instance.api.setDeafen(deafened: deafened, hint: hint);
-
-Future<bool> isMuted({dynamic hint}) =>
-    RustLib.instance.api.isMuted(hint: hint);
-
-Future<bool> isDeafened({dynamic hint}) =>
-    RustLib.instance.api.isDeafened(hint: hint);
-
 Future<void> setAmplitudeLogging(
         {required bool amplitudeLogging, dynamic hint}) =>
     RustLib.instance.api
@@ -49,9 +37,6 @@ Future<void> setTalkingAmplitude({required double amplitude, dynamic hint}) =>
 
 Future<double> getTalkingAmplitude({dynamic hint}) =>
     RustLib.instance.api.getTalkingAmplitude(hint: hint);
-
-Future<void> setSilentMute({required bool silentMute, dynamic hint}) =>
-    RustLib.instance.api.setSilentMute(silentMute: silentMute, hint: hint);
 
 Stream<double> createAmplitudeStream({dynamic hint}) =>
     RustLib.instance.api.createAmplitudeStream(hint: hint);

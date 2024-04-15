@@ -10,16 +10,18 @@ PODS:
     - FlutterMacOS
   - flutter_webrtc (0.9.36):
     - FlutterMacOS
-    - WebRTC-SDK (= 114.5735.08)
+    - WebRTC-SDK (= 114.5735.09)
   - FlutterMacOS (1.0.0)
-  - livekit_client (2.0.2):
+  - livekit_client (2.1.2):
     - FlutterMacOS
-    - WebRTC-SDK (= 114.5735.08)
+    - WebRTC-SDK (= 114.5735.09)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - ReachabilitySwift (5.2.1)
   - rust_builder (0.0.1):
+    - FlutterMacOS
+  - screen_retriever (0.0.1):
     - FlutterMacOS
   - sodium_libs (2.2.1):
     - FlutterMacOS
@@ -40,7 +42,9 @@ PODS:
     - sqlite3/rtree
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
-  - WebRTC-SDK (114.5735.08)
+  - WebRTC-SDK (114.5735.09)
+  - window_manager (0.2.0):
+    - FlutterMacOS
 
 DEPENDENCIES:
   - audioplayers_darwin (from `Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos`)
@@ -52,9 +56,11 @@ DEPENDENCIES:
   - livekit_client (from `Flutter/ephemeral/.symlinks/plugins/livekit_client/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - rust_builder (from `Flutter/ephemeral/.symlinks/plugins/rust_builder/macos`)
+  - screen_retriever (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos`)
   - sodium_libs (from `Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
+  - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
 SPEC REPOS:
   trunk:
@@ -81,29 +87,35 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   rust_builder:
     :path: Flutter/ephemeral/.symlinks/plugins/rust_builder/macos
+  screen_retriever:
+    :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos
   sodium_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos
   sqlite3_flutter_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
+  window_manager:
+    :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
   audioplayers_darwin: dcad41de4fbd0099cb3749f7ab3b0cb8f70b810c
   connectivity_plus: 18d3c32514c886e046de60e9c13895109866c747
   device_info_plus: ce1b7762849d3ec103d0e0517299f2db7ad60720
   file_selector_macos: 468fb6b81fac7c0e88d71317f3eec34c3b008ff9
-  flutter_webrtc: cf7dc44d26cbb5c5f1ae5f583dab545871f287f9
+  flutter_webrtc: e72bd998301fa4abde8ac5fdea3d6ca2dcab1fc0
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  livekit_client: adb67a39ca58349381437faa564f1b35dad9ae52
+  livekit_client: 89fdd9fbbd10340b3d03bf632b541f493baac762
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
   rust_builder: 6738c8d8b69bd450ecab698785e4915a3cbf756f
+  screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
   sodium_libs: d39bd76697736cb11ce4a0be73b9b4bc64466d6f
   sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
   sqlite3_flutter_libs: 06a05802529659a272beac4ee1350bfec294f386
   url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
-  WebRTC-SDK: c24d2a6c9f571f2ed42297cb8ffba9557093142b
+  WebRTC-SDK: efc3e67e0355b1ee14bfe3c91188cada6000cb94
+  window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 
 PODFILE CHECKSUM: 236401fc2c932af29a9fcf0e97baeeb2d750d367
 

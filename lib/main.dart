@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
@@ -9,14 +7,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart' as log;
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 
-var logger = log.Logger();
 final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;

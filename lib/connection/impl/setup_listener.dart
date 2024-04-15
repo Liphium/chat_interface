@@ -36,7 +36,7 @@ void setupSetupListeners() {
 
   //* Setup finished
   connector.listen("setup_fin", (event) {
-    logger.i("Setup finished");
+    sendLog("Setup finished");
   });
 }
 
