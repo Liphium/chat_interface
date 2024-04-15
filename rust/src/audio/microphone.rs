@@ -81,8 +81,12 @@ pub fn record() {
             buffer_size: cpal::BufferSize::Fixed(2048),
         };
 
-        let mut vad =
-            VoiceActivityDetector::<2048>::try_with_sample_rate(sample_rate).expect("how dare you");
+        let mut vad = VoiceActivityDetector::builder()
+            .sample_rate(sample_rate)
+            .chunk_size(2048usize)
+            .build()
+            .expect("how dare you");
+
         // Create a stream
         let mut historic_probability = vec![0.0f32; 10];
         let mut talking_streak = 0;

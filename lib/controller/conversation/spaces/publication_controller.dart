@@ -21,7 +21,8 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isDeafened.value = newOutput;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
+          newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       if (controller.members[SpaceMemberController.ownId]!.participant.value != null) {
         if (newOutput) {
           // Stop all audio and unsubscribe from tracks
@@ -54,7 +55,8 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isMuted.value = newMuted;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
+          newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       final participant = controller.members[SpaceMemberController.ownId]!.participant.value as LocalParticipant;
       if (newMuted) {
         participant.audioTrackPublications.firstOrNull?.mute();
@@ -131,8 +133,6 @@ class PublicationController extends GetxController {
   void onConnect() async {
     // Enforce defaults
     final settingController = Get.find<SettingController>();
-    await api.setDeafen(deafened: false);
-    await api.setSilentMute(silentMute: false);
     deafened.value = false;
 
     // Set settings
@@ -142,7 +142,6 @@ class PublicationController extends GetxController {
 
     // Set mute
     final startMuted = settingController.settings[AudioSettings.startMuted]!.getValue() as bool;
-    await api.setMuted(muted: startMuted);
     await Future.delayed(500.milliseconds);
     setMuted(startMuted);
 
