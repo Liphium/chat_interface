@@ -9,11 +9,15 @@ class SetupTranslations extends Translations {
           'retry.text.1': 'Trying again in',
           'retry.text.2': 'seconds.',
 
-          // Instance setup
+          // General setup
           'setup.choose.instance': 'Choose an instance.',
           'setup.instance.name': 'Enter a new name',
           'setup.choose.server': 'Choose a server',
           'server.choose.server.connecting': 'Currently connecting to',
+          'setup.policy': 'Your privacy on Liphium.',
+          'setup.policy.text':
+              'By pressing \'Accept\', you acknowledge that you have carefully reviewed and accepted our Privacy Policy and Terms of Service which you can read by clicking on \'View agreements\' below, after which the \'Accept\' button will appear.',
+          'setup.policy.error': 'It seems like we couldn\'t open a browser on your device. Please check your internet connection or contact the developers of this app.',
 
           // Login/register
           'register.title': 'Register an account.',

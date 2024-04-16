@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/app/policy_setup.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page.dart';
@@ -47,6 +48,7 @@ class SetupManager {
     // Initialize setups
 
     // Setup app
+    _steps.add(PolicySetup());
     _steps.add(UpdateSetup());
     _steps.add(InstanceSetup());
     _steps.add(ServerSetup());

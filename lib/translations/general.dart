@@ -14,6 +14,7 @@ class GeneralTranslations extends Translations {
           'no.got': 'No, you got me',
           'yeah': 'Yeah',
           'yes': 'Yes',
+          'accept': 'Accept',
           'no': 'No',
           'change': 'Change',
           'save': 'Save',
