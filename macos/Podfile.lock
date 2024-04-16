@@ -18,7 +18,7 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - ReachabilitySwift (5.2.1)
+  - ReachabilitySwift (5.2.2)
   - rust_builder (0.0.1):
     - FlutterMacOS
   - screen_retriever (0.0.1):
@@ -107,7 +107,7 @@ SPEC CHECKSUMS:
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   livekit_client: 89fdd9fbbd10340b3d03bf632b541f493baac762
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
-  ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
+  ReachabilitySwift: 2128f3a8c9107e1ad33574c6e58e8285d460b149
   rust_builder: 6738c8d8b69bd450ecab698785e4915a3cbf756f
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
   sodium_libs: d39bd76697736cb11ce4a0be73b9b4bc64466d6f

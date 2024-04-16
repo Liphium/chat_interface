@@ -38,7 +38,8 @@ pub fn send_log(tag: &str, msg: &str) {
                     .as_secs() as i64,
                 tag: tag.into(),
                 msg: msg.into(),
-            });
+            })
+            .expect("how dare you");
         }
         None => {}
     }

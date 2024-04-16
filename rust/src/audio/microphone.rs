@@ -46,7 +46,7 @@ fn pcm_to_db(pcm: f32) -> f32 {
 pub fn record() {
     thread::spawn(move || {
         // Get a cpal host
-        let mut host = cpal::default_host(); // Current host on computer
+        let host = cpal::default_host(); // Current host on computer
         #[cfg(target_os = "linux")]
         {
             host = cpal::host_from_id(cpal::HostId::Jack).unwrap();

@@ -2,7 +2,7 @@ use std::sync::Mutex;
 
 use once_cell::sync::Lazy;
 
-use crate::{api, frb_generated::StreamSink, logger};
+use crate::{api, frb_generated::StreamSink};
 
 static ACTION_SINK: Lazy<Mutex<Option<StreamSink<api::interaction::Action>>>> =
     Lazy::new(|| Mutex::new(None));
@@ -20,7 +20,8 @@ pub fn print_action(action: &str) {
             s.add(api::interaction::Action {
                 action: action.to_string(),
                 data: "".to_string(),
-            });
+            })
+            .unwrap();
         }
         None => {}
     }
@@ -30,7 +31,7 @@ pub fn send_action(action: api::interaction::Action) {
     let mut sink = ACTION_SINK.lock().unwrap();
     match *sink {
         Some(ref mut s) => {
-            s.add(action);
+            s.add(action).unwrap();
         }
         None => {}
     }
