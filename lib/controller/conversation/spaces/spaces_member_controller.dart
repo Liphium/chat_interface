@@ -104,6 +104,9 @@ class SpaceMemberController extends GetxController {
           return;
         }
         sendLog("participant connected");
+        if (members[event.participant.identity] != null) {
+          sendLog("participant not found ${event.participant.identity}");
+        }
         members[event.participant.identity]?.joinVoice(event.participant);
       })
       ..on<ParticipantDisconnectedEvent>((event) {
@@ -115,6 +118,8 @@ class SpaceMemberController extends GetxController {
     members[ownId]!.joinVoice(SpacesController.livekitRoom!.localParticipant!);
 
     for (var remote in SpacesController.livekitRoom!.remoteParticipants.values) {
+      assert(members[remote.identity] != null);
+      members[remote.identity]?.joinVoice(remote);
       for (var pub in remote.trackPublications.values) {
         if (!pub.isScreenShare) {
           pub.subscribe();
@@ -164,9 +169,15 @@ class SpaceMember {
         _disableVideo(event.publication);
       })
       ..on<TrackMutedEvent>((event) async {
+        if (event.publication.kind == TrackType.AUDIO) {
+          isSpeaking.value = false;
+        }
         _disableVideo(event.publication);
       })
       ..on<TrackUnmutedEvent>((event) async {
+        if (event.publication.kind == TrackType.AUDIO) {
+          isSpeaking.value = true;
+        }
         _enableVideo(event.publication);
       })
       ..on<TrackUnsubscribedEvent>((event) async {
@@ -195,6 +206,8 @@ class SpaceMember {
       } else {
         isVideo.value = false;
       }
+      sendLog("disabled video for ${friend.name}");
+      Get.find<SpacesController>().updateRoomVideoState();
     }
   }
 
@@ -205,6 +218,8 @@ class SpaceMember {
       } else {
         isVideo.value = true;
       }
+      sendLog("enabled video for ${friend.name}");
+      Get.find<SpacesController>().updateRoomVideoState();
     }
   }
 

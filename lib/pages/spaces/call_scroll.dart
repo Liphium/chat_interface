@@ -42,7 +42,9 @@ class _CallScrollViewState extends State<CallScrollView> {
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                   child: Padding(
                     // Horizontal/vertical padding
-                    padding: widget.scrollDirection == Axis.horizontal ? const EdgeInsets.symmetric(vertical: defaultSpacing * 2) : const EdgeInsets.symmetric(horizontal: defaultSpacing * 2),
+                    padding: widget.scrollDirection == Axis.horizontal
+                        ? const EdgeInsets.symmetric(vertical: defaultSpacing * 2)
+                        : const EdgeInsets.symmetric(horizontal: defaultSpacing * 2),
 
                     child: widget.scrollDirection == Axis.vertical
                         ?
@@ -59,6 +61,7 @@ class _CallScrollViewState extends State<CallScrollView> {
                                 maxWidth: constraints.maxWidth - defaultSpacing * 3,
                                 maxHeight: widget.maxHeight,
                               ),
+                              axis: Axis.vertical,
                             ),
                           )
                         :
@@ -75,6 +78,7 @@ class _CallScrollViewState extends State<CallScrollView> {
                                 maxHeight: constraints.maxHeight - defaultSpacing * 3,
                                 maxWidth: widget.maxWidth,
                               ),
+                              axis: Axis.horizontal,
                             ),
                           ),
                   ),

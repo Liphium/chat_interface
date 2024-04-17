@@ -69,7 +69,11 @@ class SpacesController extends GetxController {
 
   void cinemaMode(Widget widget) {
     if (cinemaWidget.value != null) {
-      cinemaWidget.value = null;
+      if (cinemaWidget.value == widget) {
+        cinemaWidget.value = null;
+        return;
+      }
+      cinemaWidget.value = widget;
       return;
     }
     cinemaWidget.value = widget;
@@ -173,8 +177,7 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces",
-        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
@@ -270,7 +273,6 @@ class SpacesController extends GetxController {
         await keyProvider.setKey(base64Encode(key!.extractBytes()));
         Get.find<SpaceMemberController>().onLivekitConnected();
         await api.startTalkingEngine();
-        livekitRoom!.addListener(_onRoomUpdate);
 
         connected.value = true;
         inSpace.value = true;
@@ -287,7 +289,6 @@ class SpacesController extends GetxController {
     id.value = "";
     spaceConnector.disconnect();
     livekitRoom?.disconnect();
-    livekitRoom?.removeListener(_onRoomUpdate);
 
     // Tell other controllers about it
     Get.find<StatusController>().stopSharing();
@@ -302,7 +303,7 @@ class SpacesController extends GetxController {
   }
 
   /// Called every time the room updates
-  void _onRoomUpdate() {
+  void updateRoomVideoState() {
     hasVideo.value = livekitRoom!.remoteParticipants.values.any((element) => element.isCameraEnabled() || element.isScreenShareEnabled()) ||
         livekitRoom!.localParticipant!.isCameraEnabled() ||
         livekitRoom!.localParticipant!.isScreenShareEnabled();
@@ -358,8 +359,7 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
-      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {

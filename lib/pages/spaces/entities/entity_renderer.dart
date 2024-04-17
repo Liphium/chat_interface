@@ -3,11 +3,12 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_member_cont
 import 'package:chat_interface/pages/spaces/entities/circle_member_entity.dart';
 import 'package:chat_interface/pages/spaces/entities/rectangle_member_entity.dart';
 import 'package:chat_interface/pages/spaces/entities/screenshare_player_entity.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 
-List<Widget> renderEntites(double bottom, double right, BoxConstraints constraints, [int maxHero = 17, List<String>? toRender]) {
+List<Widget> renderEntites(double bottom, double right, BoxConstraints constraints, {int maxHero = 17, List<String>? toRender, Axis? axis}) {
   SpacesController controller = Get.find();
   SpaceMemberController memberController = Get.find();
   toRender ??= memberController.members.keys.toList();
@@ -43,7 +44,17 @@ List<Widget> renderEntites(double bottom, double right, BoxConstraints constrain
     }
 
     // Add to list
-    entities.add(entities.length > maxHero ? memberRenderer : memberRenderer);
+    if (axis != null) {
+      final spacing = i == 0 ? 0.0 : defaultSpacing;
+      entities.add(
+        Padding(
+          padding: axis == Axis.vertical ? EdgeInsets.only(top: spacing) : EdgeInsets.only(left: spacing),
+          child: memberRenderer,
+        ),
+      );
+    } else {
+      entities.add(memberRenderer);
+    }
   }
 
   return entities;
