@@ -71,12 +71,46 @@ class _SpaceRendererState extends State<SpaceRenderer> {
     return RepaintBoundary(
       child: Obx(() {
         if (_loading.value || _info.value == null) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(defaultSpacing),
-              child: CircularProgressIndicator(
-                color: Get.theme.colorScheme.onPrimary,
-                backgroundColor: Get.theme.colorScheme.primary,
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(defaultSpacing),
+              color: Get.theme.colorScheme.primaryContainer,
+            ),
+            padding: const EdgeInsets.all(defaultSpacing),
+            child: SizedBox(
+              height: 44,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(elementSpacing),
+                    child: SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: CircularProgressIndicator(
+                        color: Get.theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                  horizontalSpacing(defaultSpacing),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "chat.space.loading".tr,
+                          style: Get.theme.textTheme.labelMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        verticalSpacing(elementSpacing),
+                        Text(
+                          "#${widget.container.roomId}",
+                          style: Get.theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -93,7 +127,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
             ),
             padding: const EdgeInsets.all(defaultSpacing),
             child: SizedBox(
-              height: 42,
+              height: 44,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -108,6 +142,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                           style: Get.theme.textTheme.labelMedium,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        verticalSpacing(elementSpacing),
                         Text(
                           "#${widget.container.roomId}",
                           style: Get.theme.textTheme.bodySmall,
@@ -170,7 +205,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                             child: Flexible(
                               child: SizedBox(
                                 width: 40 + 25 * (renderAmount - 1),
-                                height: 42,
+                                height: 44,
                                 child: Stack(
                                   children: List.generate(renderAmount, (index) {
                                     return Positioned(

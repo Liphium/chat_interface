@@ -117,14 +117,22 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
               child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
             ),
           MouseRegion(
-            onEnter: (event) => hovering.value = true,
+            onEnter: (event) {
+              hovering.value = true;
+              Get.find<MessageController>().hoveredMessage = message;
+              sendLog("enter");
+            },
             onHover: (event) {
               if (hovering.value) {
                 return;
               }
               hovering.value = true;
             },
-            onExit: (event) => hovering.value = false,
+            onExit: (event) {
+              hovering.value = false;
+              Get.find<MessageController>().hoveredMessage = null;
+              sendLog("exit");
+            },
             child: Row(
               textDirection: self ? TextDirection.rtl : TextDirection.ltr,
               children: [

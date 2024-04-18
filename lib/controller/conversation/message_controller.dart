@@ -23,6 +23,7 @@ import 'package:get/get.dart';
 
 class MessageController extends GetxController {
   // Constants
+  Message? hoveredMessage;
   static String systemSender = "6969";
 
   final loaded = false.obs;

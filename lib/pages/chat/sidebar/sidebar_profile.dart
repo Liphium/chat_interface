@@ -64,7 +64,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                   children: [
                                     //Text(controller.title.value, style: Get.theme.textTheme.labelMedium),
                                     //verticalSpacing(elementSpacing),
-                                    Obx(() => renderMiniAvatars(Get.find<SpaceMemberController>().members.length)),
+                                    Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
                                   ],
                                 ),
                                 horizontalSpacing(defaultSpacing),

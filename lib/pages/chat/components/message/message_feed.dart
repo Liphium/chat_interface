@@ -23,6 +23,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 part 'message_actions.dart';
@@ -122,7 +123,9 @@ class _MessageFeedState extends State<MessageFeed> {
                       ),
 
                       //* Message input
-                      widget.conversation!.borked ? const SizedBox.shrink() : const MessageInput()
+                      SelectionContainer.disabled(
+                        child: widget.conversation!.borked ? const SizedBox.shrink() : const MessageInput(),
+                      )
                     ],
                   ),
                 ),

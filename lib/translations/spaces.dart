@@ -6,6 +6,7 @@ class SpacesTranslations extends Translations {
         //* English US
         'en_US': {
           // General
+          'spaces.count': '@count members',
           'spaces.toggle_people': 'Toggle showing people',
 
           // Game hub

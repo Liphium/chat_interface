@@ -134,6 +134,7 @@ class ChatPageTranslations extends Translations {
           'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
           'chat.space_invite': 'Space invitation',
           'chat.space.not_found': 'This space already ended.',
+          'chat.space.loading': 'Loading space..',
           'tabletop.general.smooth_scrolling': 'Smooth scrolling',
 
           // Townsquare

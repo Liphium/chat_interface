@@ -65,7 +65,16 @@ class GeneralTranslations extends Translations {
           // For specifically adding the links to GIFs or images on a different server
           'file.images.trust.title': 'Add to trusted links',
           'file.images.trust.description':
-              'If you add @domain to your list of trusted providers, this means they will be able to see your IP address or other personal information that may be exposed using a web request. Do you want to add @domain to your list of trusted providers?'
+              'If you add @domain to your list of trusted providers, this means they will be able to see your IP address or other personal information that may be exposed using a web request. Do you want to add @domain to your list of trusted providers?',
+
+          // Context menu
+          'context_menu.cut': 'Cut',
+          'context_menu.copy': 'Copy',
+          'context_menu.paste': 'Paste',
+          'context_menu.selectAll': 'Select all',
+          'context_menu.share': 'Share',
+          'context_menu.delete': 'Delete',
+          'context_menu.custom': 'Custom'
         },
 
         //* German

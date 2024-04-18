@@ -15,12 +15,14 @@ class MessageOptionsWindow extends StatefulWidget {
   final ContextMenuData data;
   final bool self;
   final Message message;
+  final List<ProfileButton>? extra;
 
   const MessageOptionsWindow({
     super.key,
     required this.data,
     required this.self,
     required this.message,
+    this.extra,
   });
 
   @override
@@ -41,6 +43,14 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Add extra context menu buttons (copy, etc. (if passed in))
+          if (widget.extra != null)
+            for (var button in widget.extra!)
+              Padding(
+                padding: const EdgeInsets.only(bottom: elementSpacing),
+                child: button,
+              ),
+          if (widget.extra != null) verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.info,
             label: "message.info".tr,
