@@ -90,6 +90,9 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
           for (var fileType in FileSettings.imageTypes) {
             if (word.endsWith(".$fileType")) {
               attachments.add(word);
+              if (message.trim() == word) {
+                message = "";
+              }
               found = true;
               break;
             }

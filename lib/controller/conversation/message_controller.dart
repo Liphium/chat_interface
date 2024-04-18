@@ -17,6 +17,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart' as material;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
@@ -183,7 +184,14 @@ class MessageController extends GetxController {
 
   void messageHeightCallback(Message message, double height) {
     message.canScroll.value = true;
+    message.currentHeight = height;
     controller.jumpTo(controller.position.pixels + height);
+  }
+
+  void messageHeightChange(Message message, double extraHeight) {
+    if (message.heightKey != null) {
+      controller.jumpTo(controller.position.pixels + extraHeight);
+    }
   }
 
   void newScrollController(material.ScrollController newController) {
@@ -240,6 +248,8 @@ class Message {
   final bool edited;
 
   final canScroll = false.obs;
+  double? currentHeight;
+  GlobalKey? heightKey;
   bool heightCallback = false;
   bool renderingAttachments = false;
   final attachmentsRenderer = <AttachmentContainer>[];
@@ -268,7 +278,9 @@ class Message {
     if (attachments.isNotEmpty) {
       for (var attachment in attachments) {
         if (attachment.isURL) {
-          attachmentsRenderer.add(AttachmentContainer.remoteImage(attachment));
+          final container = AttachmentContainer.remoteImage(attachment);
+          await container.init();
+          attachmentsRenderer.add(container);
           continue;
         }
         final json = jsonDecode(attachment);

@@ -320,7 +320,7 @@ enum AttachmentContainerType { link, remoteImage, file }
 class AttachmentContainer {
   late final String filePath;
   late final AttachmentContainerType attachmentType;
-  final StorageType type;
+  final StorageType storageType;
   final String id;
   final String name;
   final String url;
@@ -342,7 +342,13 @@ class AttachmentContainer {
     downloaded.value = false;
   }
 
-  AttachmentContainer(this.type, this.id, this.name, this.url, this.key) {
+  Future<bool> init() async {
+    unsafeLocation.value = !(await TrustedLinkHelper.isLinkTrusted(url));
+    sendLog("TRUSTED ${unsafeLocation.value} $url");
+    return true;
+  }
+
+  AttachmentContainer(this.storageType, this.id, this.name, this.url, this.key) {
     if (id == "" && name == "") {
       for (var fileType in FileSettings.imageTypes) {
         if (url.endsWith(".$fileType")) {
@@ -355,7 +361,7 @@ class AttachmentContainer {
     } else {
       attachmentType = AttachmentContainerType.file;
     }
-    filePath = path.join(AttachmentController.getFilePathForType(type), id);
+    filePath = path.join(AttachmentController.getFilePathForType(storageType), id);
   }
 
   Future<Size?> precalculateWidthAndHeight() async {

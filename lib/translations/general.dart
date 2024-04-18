@@ -60,7 +60,12 @@ class GeneralTranslations extends Translations {
           'file.uploading': 'Uploading @index of @total..',
           'file.links.title': 'Unknown location found',
           'file.links.description':
-              'You are trying to download a file from an unknown server. This could potentially lead to your IP address or personal information being exposed. Do you want to add @domain to your list of trusted providers?',
+              'You are trying to download a file from @domain. This could potentially lead to your IP address or personal information being exposed. Do you want to add @domain to your list of trusted providers?',
+
+          // For specifically adding the links to GIFs or images on a different server
+          'file.images.trust.title': 'Add to trusted links',
+          'file.images.trust.description':
+              'If you add @domain to your list of trusted providers, this means they will be able to see your IP address or other personal information that may be exposed using a web request. Do you want to add @domain to your list of trusted providers?'
         },
 
         //* German

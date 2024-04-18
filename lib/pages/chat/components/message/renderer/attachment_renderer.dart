@@ -1,10 +1,13 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/database/accounts/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -13,31 +16,49 @@ import 'package:get/get.dart';
 import 'package:open_app_file/open_app_file.dart';
 
 class AttachmentRenderer extends StatefulWidget {
+  final Message? message;
   final AttachmentContainer container;
 
-  const AttachmentRenderer({super.key, required this.container});
+  const AttachmentRenderer({super.key, required this.container, this.message});
 
   @override
   State<AttachmentRenderer> createState() => _AttachmentRendererState();
 }
 
 class _AttachmentRendererState extends State<AttachmentRenderer> {
-  final loading = false.obs;
-  final linkTrusted = false.obs;
+  Image? _networkImage;
+  final GlobalKey _heightKey = GlobalKey();
+  final loading = true.obs;
 
   @override
   void initState() {
     super.initState();
-    if (!widget.container.downloaded.value) {}
-    if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
-      tryLink();
+    if (widget.container.attachmentType == AttachmentContainerType.remoteImage && widget.message != null && (widget.message?.heightCallback ?? false)) {
+      _networkImage = Image.network(
+        widget.container.url,
+        fit: BoxFit.cover,
+      );
+      final stream = _networkImage!.image.resolve(const ImageConfiguration());
+      final listener = ImageStreamListener((image, synchronousCall) {
+        if (!loading.value) {
+          return;
+        }
+        loading.value = false;
+        sendLog("current height ${widget.message!.currentHeight}");
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          sendLog("NEW HEIGHT ${widget.message!.heightKey!.currentContext!.size!.height}");
+          final currentHeight = widget.message!.heightKey!.currentContext!.size!.height;
+          Get.find<MessageController>().messageHeightChange(widget.message!, currentHeight - widget.message!.currentHeight!);
+        });
+      });
+      stream.addListener(listener);
+    } else if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
+      _networkImage = Image.network(
+        widget.container.url,
+        fit: BoxFit.cover,
+      );
+      loading.value = false;
     }
-  }
-
-  void tryLink() async {
-    loading.value = true;
-    linkTrusted.value = await TrustedLinkHelper.isLinkTrusted(widget.container.url);
-    loading.value = false;
   }
 
   @override
@@ -53,7 +74,9 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
     //* Remote images
     if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
       return Obx(() {
-        if (loading.value) {
+        if (widget.container.unsafeLocation.value) {
+          final domain = TrustedLinkHelper.extractDomain(widget.container.url);
+
           return Container(
             padding: const EdgeInsets.all(defaultSpacing),
             decoration: BoxDecoration(
@@ -64,43 +87,63 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Get.theme.colorScheme.onPrimary,
-                    strokeWidth: 3,
-                  ),
+                Icon(
+                  Icons.public_off,
+                  color: Get.theme.colorScheme.error,
+                  size: Get.theme.textTheme.bodyMedium!.fontSize! * 1.5,
                 ),
-                horizontalSpacing(defaultSpacing),
-                Text("image.loading".tr)
+                horizontalSpacing(elementSpacing),
+                Flexible(
+                  child: Text("file.unsafe".trParams({"domain": domain})),
+                ),
+                horizontalSpacing(elementSpacing),
+                LoadingIconButton(
+                  iconSize: 22,
+                  extra: 4,
+                  padding: 4,
+                  onTap: () async {
+                    final result = await showConfirmPopup(ConfirmWindow(
+                      title: "file.images.trust.title".tr,
+                      text: "file.images.trust.description".trParams({"domain": domain}),
+                    ));
+
+                    if (result) {
+                      await TrustedLinkHelper.addToTrustedLinks(domain);
+                      widget.container.unsafeLocation.value = false;
+                      // TODO: Go through all messages and make them re-check their status
+                    }
+                  },
+                  icon: Icons.add,
+                ),
               ],
             ),
           );
         }
 
-        if (!linkTrusted.value) {
-          return const SizedBox();
-        }
-
-        return LibraryFavoriteButton(
-          container: widget.container,
-          child: InkWell(
-            onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
-            borderRadius: BorderRadius.circular(defaultSpacing),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(defaultSpacing),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 350,
-                ),
-                child: Image.network(
-                  widget.container.url,
-                  fit: BoxFit.cover,
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              key: _heightKey,
+              heightFactor: loading.value ? 0 : 1,
+              child: LibraryFavoriteButton(
+                container: widget.container,
+                child: InkWell(
+                  onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
+                  borderRadius: BorderRadius.circular(defaultSpacing),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: 350,
+                      ),
+                      child: _networkImage,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         );
       });
     }

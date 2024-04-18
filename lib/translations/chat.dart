@@ -127,7 +127,7 @@ class ChatPageTranslations extends Translations {
           'library.all': 'Everything',
           'library.images': 'Images',
           'library.gifs': 'GIFs',
-          'library.empty': 'The library is currently empty. You can add stuff to it by favoriting images or GIFs in conversations.',
+          'library.empty': 'It\'s pretty empty in here. You can add stuff to it by favoriting images or GIFs in conversations.',
 
           // Spaces
           'join.space': 'Join Space',

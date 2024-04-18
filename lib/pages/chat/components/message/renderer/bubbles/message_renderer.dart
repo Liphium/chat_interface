@@ -166,7 +166,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
 
                                       return Padding(
                                         padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                                        child: AttachmentRenderer(container: container),
+                                        child: AttachmentRenderer(container: container, message: widget.message),
                                       );
                                     }).toList(),
                                   ),

@@ -39,7 +39,6 @@ class MessageFeed extends StatefulWidget {
 class _MessageFeedState extends State<MessageFeed> {
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
-  final textNode = FocusNode();
   final _scrollController = ScrollController();
 
   @override
@@ -92,35 +91,31 @@ class _MessageFeedState extends State<MessageFeed> {
                     children: [
                       //* Message list
                       Expanded(
-                        child: SelectableRegion(
-                          focusNode: textNode,
-                          selectionControls: desktopTextSelectionControls,
-                          child: Center(
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200),
-                              child: Obx(
-                                () {
-                                  if (!controller.loaded.value) {
-                                    return const SizedBox();
-                                  }
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200),
+                            child: Obx(
+                              () {
+                                if (!controller.loaded.value) {
+                                  return const SizedBox();
+                                }
 
-                                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                    controller.checkCurrentScrollHeight();
-                                  });
+                                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                  controller.checkCurrentScrollHeight();
+                                });
 
-                                  return ListView.builder(
-                                    itemCount: controller.messages.length + 1,
-                                    reverse: true,
-                                    controller: _scrollController,
-                                    addAutomaticKeepAlives: false,
-                                    addRepaintBoundaries: false,
-                                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                                    itemBuilder: (context, index) {
-                                      return BubblesRenderer(index: index);
-                                    },
-                                  );
-                                },
-                              ),
+                                return ListView.builder(
+                                  itemCount: controller.messages.length + 1,
+                                  reverse: true,
+                                  controller: _scrollController,
+                                  addAutomaticKeepAlives: false,
+                                  addRepaintBoundaries: false,
+                                  physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                  itemBuilder: (context, index) {
+                                    return BubblesRenderer(index: index);
+                                  },
+                                );
+                              },
                             ),
                           ),
                         ),
