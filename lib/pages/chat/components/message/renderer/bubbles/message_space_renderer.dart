@@ -106,7 +106,7 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                     //* Content
                     ConstrainedBox(
                       constraints: const BoxConstraints(
-                        maxWidth: 250,
+                        maxWidth: 350,
                       ),
                       child: SpaceRenderer(
                         container: container,

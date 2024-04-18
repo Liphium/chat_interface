@@ -92,18 +92,31 @@ class _SpaceRendererState extends State<SpaceRenderer> {
               color: Get.theme.colorScheme.primaryContainer,
             ),
             padding: const EdgeInsets.all(defaultSpacing),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.public_off, color: Get.theme.colorScheme.error),
-                horizontalSpacing(elementSpacing),
-                Flexible(
-                  child: Text(
-                    "chat.space.not_found".tr,
-                    style: Get.theme.textTheme.bodyMedium,
+            child: SizedBox(
+              height: 42,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.public_off, color: Get.theme.colorScheme.error, size: 34),
+                  horizontalSpacing(defaultSpacing),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "chat.space.not_found".tr,
+                          style: Get.theme.textTheme.labelMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          "#${widget.container.roomId}",
+                          style: Get.theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }
@@ -157,7 +170,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                             child: Flexible(
                               child: SizedBox(
                                 width: 40 + 25 * (renderAmount - 1),
-                                height: 40,
+                                height: 42,
                                 child: Stack(
                                   children: List.generate(renderAmount, (index) {
                                     return Positioned(

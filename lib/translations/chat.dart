@@ -91,7 +91,7 @@ class ChatPageTranslations extends Translations {
           'message.copy': 'Copy content',
           'message.profile': 'Open profile',
           'message.delete': 'Delete message',
-          'message.info.text': 'This message was sent by @account (@token) at @hour:@minute on @month/@day/@year.',
+          'message.info.text': 'This message was sent by @account (@token) at @hour:@minute on @day/@month/@year.',
           'message.info.copy_id': 'Copy ID',
           'message.info.copy_signature': 'Copy signature',
           'message.info.copy_sender': 'Copy sender ID',
