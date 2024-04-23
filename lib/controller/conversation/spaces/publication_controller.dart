@@ -21,8 +21,7 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isDeafened.value = newOutput;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
-          newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       if (controller.members[SpaceMemberController.ownId]!.participant.value != null) {
         if (newOutput) {
           // Stop all audio and unsubscribe from tracks
@@ -55,8 +54,7 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isMuted.value = newMuted;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
-          newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       final participant = controller.members[SpaceMemberController.ownId]!.participant.value as LocalParticipant;
       if (newMuted) {
         participant.audioTrackPublications.firstOrNull?.mute();
@@ -144,10 +142,6 @@ class PublicationController extends GetxController {
     final startMuted = settingController.settings[AudioSettings.startMuted]!.getValue() as bool;
     await Future.delayed(500.milliseconds);
     setMuted(startMuted);
-
-    // Set detection mode
-    final detectionMode = settingController.settings[AudioSettings.microphoneMode]!.getValue() as int;
-    await api.setDetectionMode(detectionMode: detectionMode);
 
     final devices = await Hardware.instance.enumerateDevices();
     final outputDevice = devices.firstWhereOrNull((element) => element.label == settingController.settings[AudioSettings.output]!.getValue());

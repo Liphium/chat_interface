@@ -5,7 +5,6 @@ use cpal::{
     StreamConfig,
 };
 use once_cell::sync::Lazy;
-use voice_activity_detector::VoiceActivityDetector;
 
 use crate::{frb_generated::StreamSink, logger, util};
 
@@ -81,14 +80,7 @@ pub fn record() {
             buffer_size: cpal::BufferSize::Fixed(2048),
         };
 
-        let mut vad = VoiceActivityDetector::builder()
-            .sample_rate(sample_rate)
-            .chunk_size(2048usize)
-            .build()
-            .expect("how dare you");
-
         // Create a stream
-        let mut historic_probability = vec![0.0f32; 10];
         let mut talking_streak = 0;
         let stream = match device.build_input_stream(
             &config.into(),
@@ -99,40 +91,24 @@ pub fn record() {
                     data.to_vec()
                 };
 
-                let mut max = 0.0;
+                let mut avg = 0.0;
                 for sample in samples.iter() {
-                    if *sample > max {
-                        max = *sample;
-                    }
+                    avg += *sample;
                 }
-                max = pcm_to_db(max);
+                avg = avg / samples.len() as f32;
+                avg = pcm_to_db(avg);
 
                 let mut options = super::get_options();
 
                 if options.amplitude_logging {
                     let mut sink = AMPLITUDE_SINK.lock().unwrap();
                     if let Some(s) = &mut *sink {
-                        s.add(max).expect("couldn't log amplitude");
+                        s.add(avg).expect("couldn't log amplitude");
                     }
                 }
 
-                // Linux is generally fine with 0.35 as well
-                // macOS default value: 0.35
-
                 // Detect if the user is talking
-                let talking: bool = if options.detection_mode == 0 {
-                    let probability = vad.predict(samples);
-
-                    if historic_probability.len() > 10 {
-                        historic_probability.remove(0);
-                    }
-
-                    historic_probability.push(probability);
-
-                    probability > 0.45
-                } else {
-                    max > options.talking_amplitude
-                };
+                let talking: bool = avg > options.talking_amplitude;
 
                 if talking {
                     talking_streak = 25;
@@ -196,7 +172,26 @@ pub fn record() {
     });
 }
 
-// From copilot chat
+fn calculate_standard_deviation(data: &[f32], average: f32) -> f64 {
+    // Check for empty data
+    if data.is_empty() {
+        return f64::NAN; // Not a number
+    }
+
+    // Calculate squared deviations from the mean
+    let mut squared_deviations = 0.0;
+    for sample in data {
+        let diff = (*sample - average) as f64;
+        squared_deviations += diff * diff;
+    }
+
+    // Calculate variance (average squared deviation)
+    let variance = squared_deviations / data.len() as f64;
+
+    // Standard deviation is the square root of variance
+    variance.sqrt()
+}
+
 fn stereo_to_mono(pcm: &[f32]) -> Vec<f32> {
     let mut mono = Vec::with_capacity(pcm.len() / 2);
     for i in (0..pcm.len()).step_by(2) {

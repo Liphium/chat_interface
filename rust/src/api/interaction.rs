@@ -93,12 +93,11 @@ pub static DEFAULT_NAME: &str = "def";
 pub fn list_input_devices() -> Vec<InputDevice> {
     let mut input_devices = Vec::new();
     let mut host = cpal::default_host();
-
     // On linux, use jack
-    #[cfg(target_os = "linux")]
-    {
-        host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
-    }
+    // #[cfg(target_os = "linux")]
+    // {
+    //     host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
+    // }
 
     let input_devices_iter = host.input_devices().unwrap();
 
