@@ -616,7 +616,7 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     final controller = Get.find<AttachmentController>();
     _current.value = 0;
     for (var file in widget.files) {
-      final response = await controller.uploadFile(UploadData(file), StorageType.permanent, favorite: true);
+      final response = await controller.uploadFile(UploadData(File(file.path)), StorageType.permanent, favorite: true);
       if (response.container == null) {
         Get.back(result: finished);
         showErrorPopup("error", response.message);

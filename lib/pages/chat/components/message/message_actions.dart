@@ -47,7 +47,7 @@ class MessageDraft {
 }
 
 class UploadData {
-  final XFile file;
+  final File file;
   final progress = 0.0.obs;
 
   UploadData(this.file);

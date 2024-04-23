@@ -4,7 +4,6 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:drift/drift.dart';

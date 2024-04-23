@@ -30,7 +30,7 @@ class DialogBase extends StatelessWidget {
   final Widget child;
   final double maxWidth;
 
-  const DialogBase({super.key, required this.child, this.maxWidth = 300});
+  const DialogBase({super.key, required this.child, this.maxWidth = 400});
 
   @override
   Widget build(BuildContext context) {

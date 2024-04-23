@@ -23,11 +23,11 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false, popups = true}) async {
+  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false, popups = true, String? fileName}) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
-    final name = encryptSymmetric(data.file.name, key);
+    final name = encryptSymmetric(fileName ?? path.basename(data.file.path), key);
 
     // Upload file
     final formData = dio_rs.FormData.fromMap({
@@ -35,7 +35,7 @@ class AttachmentController extends GetxController {
       "name": name,
       "favorite": favorite ? "true" : "false",
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
-      "extension": data.file.name.split(".").last
+      "extension": path.basename(data.file.path).split(".").last
     });
 
     sendLog(server("/account/files/upload").toString());
@@ -66,7 +66,7 @@ class AttachmentController extends GetxController {
 
     final file = File(path.join(AttachmentController.getFilePathForType(type), json["id"].toString()));
     await file.writeAsBytes(bytes);
-    final container = AttachmentContainer(type, json["id"], data.file.name, json["url"], key);
+    final container = AttachmentContainer(type, json["id"], path.basename(data.file.path), json["url"], key);
     sendLog("SENT ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
     attachments[container.id] = container;

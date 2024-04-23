@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -213,7 +214,7 @@ class _MessageInputState extends State<MessageInput> {
                               showErrorPopup("error".tr, "file.too_large".tr);
                               return;
                             }
-                            MessageSendHelper.currentDraft.value!.files.add(UploadData(result));
+                            MessageSendHelper.currentDraft.value!.files.add(UploadData(File(result.path)));
                           },
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,

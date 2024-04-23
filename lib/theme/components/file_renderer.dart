@@ -6,6 +6,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:path/path.dart' as path;
 
 enum FileTypes {
   image,
@@ -54,12 +55,12 @@ IconData getIconForType(FileTypes type) {
 }
 
 class FilePreview extends StatelessWidget {
-  final XFile file;
+  final File file;
   const FilePreview({super.key, required this.file});
 
   @override
   Widget build(BuildContext context) {
-    final extension = file.name.split(".").last;
+    final extension = path.basename(file.path).split(".").last;
     final type = extensionToType[extension] ?? FileTypes.unidentified;
 
     switch (type) {
@@ -138,10 +139,11 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                       children: [
                         horizontalSpacing(defaultSpacing),
                         Expanded(
-                            child: Text(
-                          widget.file.file.name,
-                          overflow: TextOverflow.ellipsis,
-                        )),
+                          child: Text(
+                            path.basename(widget.file.file.path),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                         horizontalSpacing(defaultSpacing),
                         Obx(
                           () => Visibility(

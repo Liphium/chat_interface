@@ -42,7 +42,7 @@ class ErrorTranslations extends Translations {
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
           'profile_picture.not_set': 'Your profile picture couldn\'t be set. Please try again later or contact support.',
-          'tag.invalid': 'Your tag is doesn\'t match the requirements. Please make it longer than 3 characters and don\'t use special characters.',
+          'tag.invalid': 'Your tag doesn\'t match the requirements. Please make it longer than 3 characters and don\'t use special characters.',
           'username.invalid': 'Your username doesn\'t match the requirements. Please make it longer than 3 characters.',
           'username.taken': 'This combination of username and tag is taken, please choose something else.',
           'password.mismatch': 'The passwords don\'t match.',

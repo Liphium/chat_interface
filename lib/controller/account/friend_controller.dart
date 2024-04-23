@@ -219,16 +219,14 @@ class Friend {
   AttachmentContainer? profilePicture;
   final profilePictureImage = Rx<ui.Image?>(null);
   bool profilePictureDataNull = false;
-  var profilePictureData = ProfilePictureData(1, 0, 0);
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Update the profile picture of this friend
-  void updateProfilePicture(AttachmentContainer picture, ProfilePictureData data) async {
+  void updateProfilePicture(AttachmentContainer picture) async {
     // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: jsonEncode(picture.toJson()), pictureData: jsonEncode(data.toJson()), data: ""));
+    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: jsonEncode(picture.toJson()), data: ""));
 
     profilePicture = picture;
-    profilePictureData = data;
     profilePictureImage.value = await ProfilePictureHelper.loadImage(picture.filePath);
   }
 
@@ -261,7 +259,6 @@ class Friend {
     final json = jsonDecode(data.pictureContainer);
     final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
     profilePicture = AttachmentContainer.fromJson(type, json);
-    profilePictureData = ProfilePictureData.fromJson(jsonDecode(data.pictureData));
     profilePictureImage.value = await ProfilePictureHelper.loadImage(profilePicture!.filePath);
     sendLog("LOADED!!");
   }

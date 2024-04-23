@@ -50,7 +50,6 @@ class ProfilePictureHelper {
     }
 
     // Decrypt the profile picture data
-    final profileData = ProfilePictureData.fromJson(jsonDecode(decryptSymmetric(json["profile"]["picture_data"], friend.keyStorage.profileKey)));
     final container = AttachmentContainer.fromJson(StorageType.permanent, jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
 
     if (container.id != json["profile"]["picture"]) {
@@ -77,15 +76,15 @@ class ProfilePictureHelper {
     }
 
     // Save the profile picture data
-    friend.updateProfilePicture(container, profileData);
+    friend.updateProfilePicture(container);
 
     return json["profile"]["id"];
   }
 
   /// Upload a profile picture to the server and set it as the current profile picture
-  static Future<bool> uploadProfilePicture(XFile file, ProfilePictureData data) async {
+  static Future<bool> uploadProfilePicture(File file, String originalName) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent);
+    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, fileName: originalName);
     if (response.container == null) {
       showErrorPopup("error", response.message);
       return false;
@@ -94,7 +93,7 @@ class ProfilePictureHelper {
     // Update the profile picture
     final json = await postAuthorizedJSON("/account/profile/set_picture", {
       "file": response.container!.id,
-      "data": encryptSymmetric(jsonEncode(data.toJson()), profileKey),
+      "data": "", // Potentially something to be useful in the future again
       "container": encryptSymmetric(jsonEncode(response.container!.toJson()), profileKey),
     });
 
@@ -102,7 +101,7 @@ class ProfilePictureHelper {
       showErrorPopup("error", "profile_picture.not_set");
       return false;
     }
-    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!, data);
+    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!);
 
     // TODO: Update for other devices
     return true;
@@ -128,22 +127,4 @@ class ProfilePictureHelper {
     });
     return completer.future;
   }
-}
-
-/// Class for storing the data of a profile picture (scale factor, x/y position)
-class ProfilePictureData {
-  final double scaleFactor, moveX, moveY;
-  ProfilePictureData(this.scaleFactor, this.moveX, this.moveY);
-
-  factory ProfilePictureData.fromJson(Map<String, dynamic> json) => ProfilePictureData(
-        json["s"],
-        json["x"],
-        json["y"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "s": scaleFactor,
-        "x": moveX,
-        "y": moveY,
-      };
 }
