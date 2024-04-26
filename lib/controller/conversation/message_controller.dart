@@ -210,7 +210,7 @@ class MessageController extends GetxController {
 
   bool loading = false;
   void loadNewMessagesTop() async {
-    if (loading) {
+    if (loading || messages.isEmpty) {
       return;
     }
     loading = true;
@@ -224,11 +224,18 @@ class MessageController extends GetxController {
           ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(finalMessage.createdAt.millisecondsSinceEpoch))))
         .get();
 
+    final newMessages = <Message>[];
     for (var msg in loadedMessages) {
       final message = Message.fromMessageData(msg);
       await message.initAttachments();
-      messages.add(message);
+      newMessages.add(message);
     }
+
+    if (newMessages.isEmpty) {
+      return;
+    }
+
+    messages.addAll(newMessages);
     loading = false;
   }
 }
