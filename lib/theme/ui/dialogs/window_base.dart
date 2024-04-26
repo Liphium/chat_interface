@@ -41,7 +41,14 @@ class DialogBase extends StatelessWidget {
     return Center(
       child: Animate(
           effects: [
-            ScaleEffect(delay: 100.ms, duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), alignment: Alignment.center, curve: const ElasticOutCurve(0.8)),
+            ScaleEffect(
+              delay: 100.ms,
+              duration: 500.ms,
+              begin: const Offset(0, 0),
+              end: const Offset(1, 1),
+              alignment: Alignment.center,
+              curve: const ElasticOutCurve(0.8),
+            ),
             ShakeEffect(
                 delay: 100.ms,
                 duration: 400.ms,
@@ -49,7 +56,11 @@ class DialogBase extends StatelessWidget {
                 offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
                 rotation: 0,
                 curve: Curves.decelerate),
-            FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut)
+            FadeEffect(
+              delay: 100.ms,
+              duration: 250.ms,
+              curve: Curves.easeOut,
+            )
           ],
           target: 1,
           child: Material(
