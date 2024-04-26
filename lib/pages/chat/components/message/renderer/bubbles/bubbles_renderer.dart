@@ -46,9 +46,10 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
     final message = widget.message ?? controller.messages[widget.index - 1];
 
-    if (message.heightCallback) {
+    if (message.heightCallback && !message.heightReported) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         sendLog(_heightKey.currentContext!.size!.height);
+        message.heightReported = true;
         message.heightKey = _heightKey;
         Get.find<MessageController>().messageHeightCallback(message, _heightKey.currentContext!.size!.height);
       });
@@ -120,7 +121,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
             onEnter: (event) {
               hovering.value = true;
               Get.find<MessageController>().hoveredMessage = message;
-              sendLog("enter");
             },
             onHover: (event) {
               if (hovering.value) {
@@ -131,7 +131,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
             onExit: (event) {
               hovering.value = false;
               Get.find<MessageController>().hoveredMessage = null;
-              sendLog("exit");
             },
             child: Row(
               textDirection: self ? TextDirection.rtl : TextDirection.ltr,

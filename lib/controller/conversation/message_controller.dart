@@ -80,7 +80,6 @@ class MessageController extends GetxController {
 
   /// Delete all system messages of the same kind before the message send time
   void deleteOldSystemMessagesOfKind(String id, String kind, DateTime after) {
-    sendLog("DELETING $kind $after");
     db.message.delete()
       ..where((tbl) => tbl.content.equals(kind))
       ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(after.millisecondsSinceEpoch)))
@@ -115,7 +114,6 @@ class MessageController extends GetxController {
       if (message.sender != selectedConversation.value.token.id) {
         overwriteRead(selectedConversation.value);
       }
-      sendLog("MESSAGE RECEIVED ${message.id}");
 
       // Check if it is a system message and if it should be rendered or not
       if (message.type == MessageType.system) {
@@ -154,32 +152,37 @@ class MessageController extends GetxController {
   late material.ScrollController controller;
 
   void addMessageToBottom(Message message, {bool animation = true}) async {
-    int index = 0;
-    for (var msg in messages) {
-      index++;
-      if (msg.createdAt.isAfter(message.createdAt)) {
-        continue;
-      }
-      index -= 1;
-      break;
-    }
+    // Check if there are more messages after the current messages (just in case)
+    if (messages.isNotEmpty) {
+      sendLog("OLDER MESSAGE, ignoring");
+      final availableMessage = await (db.select(db.message)
+            ..limit(1)
+            ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+            ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+            ..where((tbl) => tbl.system.equals(false))
+            ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(messages.first.createdAt.millisecondsSinceEpoch))))
+          .getSingleOrNull();
 
-    await message.initAttachments();
-    if (index == 0) {
-      if (controller.position.pixels <= newLoadOffset) {
-        if (controller.position.pixels == 0) {
-          message.playAnimation = true;
-          messages.insert(index, message);
-          return;
-        }
-
-        message.heightCallback = true;
-        messages.insert(index, message);
+      // If there is a message before this one at the bottom, don't render
+      if (availableMessage != null) {
         return;
       }
-    } else {
-      message.playAnimation = animation;
-      messages.insert(index, message);
+    }
+
+    // Initialize all message data
+    await message.initAttachments();
+
+    // Only load the message, if scrolled near enough to the bottom
+    if (controller.position.pixels <= newLoadOffset) {
+      if (controller.position.pixels == 0) {
+        message.playAnimation = true;
+        messages.insert(0, message);
+        return;
+      }
+
+      message.heightCallback = true;
+      messages.insert(0, message);
+      return;
     }
   }
 
@@ -200,15 +203,21 @@ class MessageController extends GetxController {
     controller.addListener(() => checkCurrentScrollHeight());
   }
 
+  // Run on every scroll to check if new messages should be loaded
   void checkCurrentScrollHeight() {
-    final approximateTop = controller.position.pixels + Get.height - 100;
-    sendLog(approximateTop);
-    if (approximateTop > controller.position.maxScrollExtent - newLoadOffset) {
+    if (controller.position.pixels > controller.position.maxScrollExtent - newLoadOffset) {
+      sendLog("load top");
       loadNewMessagesTop();
+    } else if (controller.position.pixels <= newLoadOffset) {
+      sendLog("load bottom");
+      loadNewMessagesBottom();
     }
   }
 
+  // Loading state for new messages (at top or bottom)
   bool loading = false;
+
+  /// Load "messageLimit" new messages at the top
   void loadNewMessagesTop() async {
     if (loading || messages.isEmpty) {
       return;
@@ -216,6 +225,7 @@ class MessageController extends GetxController {
     loading = true;
     final finalMessage = messages.last;
 
+    // Get the the "messageLimit" newest messages, that aren't system messages (like delete or react)
     final loadedMessages = await (db.select(db.message)
           ..limit(messageLimit)
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
@@ -224,12 +234,14 @@ class MessageController extends GetxController {
           ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(finalMessage.createdAt.millisecondsSinceEpoch))))
         .get();
 
+    // Add them all to a list (adding them one by one would cause one giant state update since we use async code here)
     final newMessages = <Message>[];
     for (var msg in loadedMessages) {
       final message = Message.fromMessageData(msg);
       await message.initAttachments();
       newMessages.add(message);
     }
+    loading = false;
 
     if (newMessages.isEmpty) {
       return;
@@ -237,6 +249,44 @@ class MessageController extends GetxController {
 
     messages.addAll(newMessages);
     loading = false;
+  }
+
+  /// Load "messageLimit" new messages at the bottom
+  void loadNewMessagesBottom() async {
+    if (loading || messages.isEmpty) {
+      sendLog("loading or sth");
+      return;
+    }
+    loading = true; // We'll use the same loading as above to make sure this doesn't break anything
+    final firstMessage = messages.first;
+
+    // Get the the "messageLimit" newest messages, that aren't system messages (like delete or react)
+    final loadedMessages = await (db.select(db.message)
+          ..limit(messageLimit)
+          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+          ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+          ..where((tbl) => tbl.system.equals(false))
+          ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(firstMessage.createdAt.millisecondsSinceEpoch))))
+        .get();
+
+    sendLog(loadedMessages.length);
+
+    // Add them all to a list (adding them one by one would cause one giant state update since we use async code here)
+    final newMessages = <Message>[];
+    for (var msg in loadedMessages) {
+      final message = Message.fromMessageData(msg);
+      await message.initAttachments();
+      message.heightCallback = true; // To prevent the viewport from scrolling up
+      newMessages.add(message);
+    }
+    loading = false;
+
+    if (newMessages.isEmpty) {
+      return;
+    }
+
+    // Add them all to the bottom
+    messages.insertAll(0, newMessages);
   }
 }
 
@@ -258,6 +308,7 @@ class Message {
   final canScroll = false.obs;
   double? currentHeight;
   GlobalKey? heightKey;
+  bool heightReported = false;
   bool heightCallback = false;
   bool renderingAttachments = false;
   final attachmentsRenderer = <AttachmentContainer>[];
