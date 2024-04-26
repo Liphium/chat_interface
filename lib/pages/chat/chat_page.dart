@@ -32,6 +32,8 @@ class _ChatPageState extends State<ChatPage> {
     ContextMenuButtonType.custom: Icons.extension,
   };
 
+  bool optionsOpened = false;
+
   @override
   Widget build(BuildContext context) {
     final TownsquareController tsController = Get.find();
@@ -65,13 +67,19 @@ class _ChatPageState extends State<ChatPage> {
             ));
           }
 
-          // Show the context menu
-          return MessageOptionsWindow(
-            data: menuData,
-            self: controller.hoveredMessage!.senderAccount == StatusController.ownAccountId,
-            message: controller.hoveredMessage!,
-            extra: extraButtons.isEmpty ? null : extraButtons,
-          );
+          if (!optionsOpened) {
+            optionsOpened = true;
+            WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+              await Get.dialog(MessageOptionsWindow(
+                data: menuData,
+                self: controller.hoveredMessage!.senderAccount == StatusController.ownAccountId,
+                message: controller.hoveredMessage!,
+                extra: extraButtons.isEmpty ? null : extraButtons,
+              ));
+              optionsOpened = false;
+            });
+          }
+          return const SizedBox();
         },
         child: Row(
           children: [
