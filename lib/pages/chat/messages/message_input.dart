@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -8,15 +9,22 @@ import 'package:chat_interface/pages/chat/components/library/library_window.dart
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:mime/mime.dart';
+import 'package:pasteboard/pasteboard.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../theme/components/icon_button.dart';
 import '../../../util/vertical_spacing.dart';
+
+import 'package:path/path.dart' as path;
 
 class MessageInput extends StatefulWidget {
   const MessageInput({super.key});
@@ -91,6 +99,60 @@ class _MessageInputState extends State<MessageInput> {
 
           sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, MessageSendHelper.currentDraft.value!.files,
               MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
+          return null;
+        },
+      ),
+
+      // For support to paste files
+      PasteIntent: CallbackAction<PasteIntent>(
+        onInvoke: (PasteIntent intent) async {
+          sendLog("psste");
+          final image = await Pasteboard.image;
+          final data = await Clipboard.getData(Clipboard.kTextPlain);
+
+          // When nothing is copied
+          if (data == null && image == null) {
+            return;
+          }
+
+          // Check if an image is copied
+          if (image != null) {
+            sendLog("image");
+            final tempPath = await getTemporaryDirectory();
+
+            // Get the mime type of the image
+            final mimeType = lookupMimeType("", headerBytes: image);
+            if (mimeType == null) {
+              sendLog("no mime type");
+              return;
+            }
+
+            // Get the file extension of the image
+            final args = mimeType.split("/");
+            if (args[0] != "image") {
+              sendLog("$mimeType isn't an image type");
+              return;
+            }
+
+            // Save the file
+            final tempFile = File(path.join(tempPath.path, "pasted_image_${getRandomString(5)}.${args[1]}"));
+            await tempFile.writeAsBytes(image, flush: true);
+            MessageSendHelper.currentDraft.value!.files.add(UploadData(tempFile));
+            return;
+          }
+
+          // Compute the new offset before the text is changed
+          final beforeLeft = _message.selection.baseOffset > _message.selection.extentOffset ? _message.selection.baseOffset : _message.selection.extentOffset;
+          final newOffset = beforeLeft - (_message.selection.end - _message.selection.start) + data!.text!.length;
+
+          // Change the text in the field to include the pasted text
+          _message.text = _message.text.substring(0, _message.selection.start) + data.text! + _message.text.substring(_message.selection.end, _message.text.length);
+
+          // Change the selection to the calculated offset
+          _message.selection = _message.selection.copyWith(
+            baseOffset: newOffset,
+            extentOffset: newOffset,
+          );
           return null;
         },
       ),
@@ -223,25 +285,35 @@ class _MessageInputState extends State<MessageInput> {
                         //* Attach from the library
                         horizontalSpacing(defaultSpacing),
                         Expanded(
-                          child: Shortcuts(
+                          child: FocusableActionDetector(
+                            autofocus: true,
+                            actions: actionsMap,
                             shortcuts: {
                               LogicalKeySet(LogicalKeyboardKey.enter): const SendIntent(),
+                              LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyV): const PasteIntent(),
                             },
-                            child: TextField(
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'chat.message'.tr,
+                            descendantsAreTraversable: false,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(maxHeight: Get.height * 0.5),
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'chat.message'.tr,
+                                ),
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(1000),
+                                ],
+                                focusNode: _inputFocus,
+                                onChanged: (value) => MessageSendHelper.currentDraft.value!.message = value,
+                                onAppPrivateCommand: (action, data) {
+                                  sendLog("app private command");
+                                },
+                                cursorColor: theme.colorScheme.tertiary,
+                                style: theme.textTheme.labelLarge,
+                                controller: _message,
+                                maxLines: null,
+                                keyboardType: TextInputType.multiline,
                               ),
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(1000),
-                              ],
-                              focusNode: _inputFocus,
-                              onChanged: (value) => MessageSendHelper.currentDraft.value!.message = value,
-                              cursorColor: theme.colorScheme.tertiary,
-                              style: theme.textTheme.labelLarge,
-                              controller: _message,
-                              maxLines: null,
-                              keyboardType: TextInputType.multiline,
                             ),
                           ),
                         ),
@@ -278,6 +350,6 @@ class SendIntent extends Intent {
   const SendIntent();
 }
 
-class InsertFileIntent extends Intent {
-  const InsertFileIntent();
+class PasteIntent extends Intent {
+  const PasteIntent();
 }
