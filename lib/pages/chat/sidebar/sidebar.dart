@@ -9,8 +9,6 @@ import 'package:chat_interface/controller/conversation/townsquare_controller.dar
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
-import 'package:chat_interface/pages/settings/account/data_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';

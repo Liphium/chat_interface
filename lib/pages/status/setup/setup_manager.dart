@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/app/policy_setup.dart';

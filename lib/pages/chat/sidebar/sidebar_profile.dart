@@ -1,9 +1,7 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_info_window.dart';
@@ -62,8 +60,6 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    //Text(controller.title.value, style: Get.theme.textTheme.labelMedium),
-                                    //verticalSpacing(elementSpacing),
                                     Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
                                   ],
                                 ),
@@ -120,59 +116,61 @@ class _SidebarProfileState extends State<SidebarProfile> {
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: theme.colorScheme.background,
                     child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                                child: Row(
-                              children: [
-                                UserAvatar(id: StatusController.ownAccountId, size: 40),
-                                horizontalSpacing(defaultSpacing * 0.75),
-                                Expanded(
-                                  child: Obx(
-                                    () => Visibility(
-                                      visible: !controller.statusLoading.value,
-                                      replacement: const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(defaultSpacing),
-                                          child: SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 4.0,
-                                            ),
+                      padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                              child: Row(
+                            children: [
+                              UserAvatar(id: StatusController.ownAccountId, size: 40),
+                              horizontalSpacing(defaultSpacing * 0.75),
+                              Expanded(
+                                child: Obx(
+                                  () => Visibility(
+                                    visible: !controller.statusLoading.value,
+                                    replacement: const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(defaultSpacing),
+                                        child: SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 4.0,
                                           ),
                                         ),
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          //* Profile name and status type
-                                          Row(
-                                            children: [
-                                              Flexible(
-                                                child: Obx(
-                                                  () => Text(
-                                                    controller.name.value,
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: theme.textTheme.titleMedium,
-                                                    textHeightBehavior: noTextHeight,
-                                                  ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        //* Profile name and status type
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: Obx(
+                                                () => Text(
+                                                  controller.name.value,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: theme.textTheme.titleMedium,
+                                                  textHeightBehavior: noTextHeight,
                                                 ),
                                               ),
-                                              horizontalSpacing(defaultSpacing),
-                                              Obx(
-                                                () => StatusRenderer(status: controller.type.value, text: false),
-                                              )
-                                            ],
-                                          ),
+                                            ),
+                                            horizontalSpacing(defaultSpacing),
+                                            Obx(
+                                              () => StatusRenderer(status: controller.type.value, text: false),
+                                            )
+                                          ],
+                                        ),
 
-                                          //* Status message
-                                          Obx(() => Visibility(
-                                              visible: controller.status.value != "-",
-                                              child: Column(children: [
+                                        //* Status message
+                                        Obx(
+                                          () => Visibility(
+                                            visible: controller.status.value != "-",
+                                            child: Column(
+                                              children: [
                                                 verticalSpacing(defaultSpacing * 0.25),
 
                                                 //* Status message
@@ -182,30 +180,34 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                                   textHeightBehavior: noTextHeight,
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
-                                              ])))
-                                        ],
-                                      ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ),
-                                )
-                              ],
-                            )),
-                            horizontalSpacing(defaultSpacing),
-                            Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () => Get.dialog(const FriendsPage()),
-                                  icon: const Icon(Icons.group, color: Colors.white),
                                 ),
-                                horizontalSpacing(defaultSpacing * 0.5),
-                                IconButton(
-                                  onPressed: () => Get.to(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
-                                  icon: const Icon(Icons.settings, color: Colors.white),
-                                ),
-                              ],
-                            )
-                          ],
-                        )),
+                              )
+                            ],
+                          )),
+                          horizontalSpacing(defaultSpacing),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () => Get.dialog(const FriendsPage()),
+                                icon: const Icon(Icons.group, color: Colors.white),
+                              ),
+                              horizontalSpacing(defaultSpacing * 0.5),
+                              IconButton(
+                                onPressed: () => Get.to(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
+                                icon: const Icon(Icons.settings, color: Colors.white),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],

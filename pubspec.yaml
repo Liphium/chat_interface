@@ -71,6 +71,9 @@ flutter:
     - family: Open Sans
       fonts:
         - asset: assets/OpenSans.ttf
+    - family: Emoji
+      fonts:
+        - asset: assets/NotoColorEmoji-Regular.ttf
 
   assets:
   - assets/img/

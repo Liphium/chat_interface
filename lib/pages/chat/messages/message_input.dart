@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/pages/chat/components/emojis/emoji_window.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
@@ -14,7 +14,6 @@ import 'package:chat_interface/util/snackbar.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:mime/mime.dart';
@@ -39,6 +38,7 @@ class _MessageInputState extends State<MessageInput> {
   final FocusNode _inputFocus = FocusNode();
   StreamSubscription<Conversation>? _sub;
   final GlobalKey _libraryKey = GlobalKey();
+  final GlobalKey _emojiKey = GlobalKey();
 
   @override
   void dispose() {
@@ -78,11 +78,27 @@ class _MessageInputState extends State<MessageInput> {
     loading.value = false;
   }
 
+  /// Replace the current selection with a new text
+  void replaceSelection(String replacer) {
+    // Compute the new offset before the text is changed
+    final beforeLeft = _message.selection.baseOffset > _message.selection.extentOffset ? _message.selection.baseOffset : _message.selection.extentOffset;
+    final newOffset = beforeLeft - (_message.selection.end - _message.selection.start) + replacer.length;
+
+    // Change the text in the field to include the pasted text
+    _message.text = _message.text.substring(0, _message.selection.start) + replacer + _message.text.substring(_message.selection.end, _message.text.length);
+
+    // Change the selection to the calculated offset
+    _message.selection = _message.selection.copyWith(
+      baseOffset: newOffset,
+      extentOffset: newOffset,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    // Setup actions
+    // All actions that can be performed using shortcuts in the input field-
     final actionsMap = {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) {
@@ -142,17 +158,7 @@ class _MessageInputState extends State<MessageInput> {
           }
 
           // Compute the new offset before the text is changed
-          final beforeLeft = _message.selection.baseOffset > _message.selection.extentOffset ? _message.selection.baseOffset : _message.selection.extentOffset;
-          final newOffset = beforeLeft - (_message.selection.end - _message.selection.start) + data!.text!.length;
-
-          // Change the text in the field to include the pasted text
-          _message.text = _message.text.substring(0, _message.selection.start) + data.text! + _message.text.substring(_message.selection.end, _message.text.length);
-
-          // Change the selection to the calculated offset
-          _message.selection = _message.selection.copyWith(
-            baseOffset: newOffset,
-            extentOffset: newOffset,
-          );
+          replaceSelection(data!.text!);
           return null;
         },
       ),
@@ -317,6 +323,17 @@ class _MessageInputState extends State<MessageInput> {
                             ),
                           ),
                         ),
+                        IconButton(
+                          key: _emojiKey,
+                          onPressed: () async {
+                            final result = await Get.dialog(EmojiWindow(data: ContextMenuData.fromKey(_emojiKey, above: true, right: true)));
+                            _inputFocus.requestFocus();
+                            replaceSelection(result);
+                          },
+                          icon: const Icon(Icons.emoji_emotions),
+                          color: theme.colorScheme.tertiary,
+                        ),
+                        horizontalSpacing(elementSpacing),
                         IconButton(
                           key: _libraryKey,
                           onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),

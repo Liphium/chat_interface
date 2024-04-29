@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';

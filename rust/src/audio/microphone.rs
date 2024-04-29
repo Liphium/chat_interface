@@ -172,26 +172,6 @@ pub fn record() {
     });
 }
 
-fn calculate_standard_deviation(data: &[f32], average: f32) -> f64 {
-    // Check for empty data
-    if data.is_empty() {
-        return f64::NAN; // Not a number
-    }
-
-    // Calculate squared deviations from the mean
-    let mut squared_deviations = 0.0;
-    for sample in data {
-        let diff = (*sample - average) as f64;
-        squared_deviations += diff * diff;
-    }
-
-    // Calculate variance (average squared deviation)
-    let variance = squared_deviations / data.len() as f64;
-
-    // Standard deviation is the square root of variance
-    variance.sqrt()
-}
-
 fn stereo_to_mono(pcm: &[f32]) -> Vec<f32> {
     let mut mono = Vec::with_capacity(pcm.len() / 2);
     for i in (0..pcm.len()).step_by(2) {

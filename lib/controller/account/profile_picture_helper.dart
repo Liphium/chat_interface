@@ -14,7 +14,6 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:get/get.dart';
 
 class ProfilePictureHelper {
