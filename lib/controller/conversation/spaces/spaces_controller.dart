@@ -300,12 +300,11 @@ class SpacesController extends GetxController {
 
 class SpaceInfo {
   late bool exists;
-  late String title;
   late DateTime start;
   final List<Friend> friends = [];
   late final List<String> members;
 
-  SpaceInfo(this.title, this.start, this.members) {
+  SpaceInfo(this.start, this.members) {
     exists = true;
     final controller = Get.find<FriendController>();
     for (var member in members) {
@@ -315,11 +314,6 @@ class SpaceInfo {
   }
 
   SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
-    if (json["data"] != "") {
-      title = decryptSymmetric(json["data"], container.key);
-    } else {
-      title = "";
-    }
     start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
     members = List<String>.from(json["members"].map((e) => decryptSymmetric(e, container.key)));
     exists = true;
@@ -361,6 +355,7 @@ class SpaceConnectionContainer extends ShareContainer {
   }
 
   Future<SpaceInfo> getInfo({bool timer = false}) async {
+    // Request the info from the server
     final http.Response req;
     try {
       req = await http.post(
@@ -373,10 +368,16 @@ class SpaceConnectionContainer extends ShareContainer {
     } catch (e) {
       return SpaceInfo.notLoaded();
     }
+
+    // Return a not loaded state if the request wasn't successful
     if (req.statusCode != 200) {
       return SpaceInfo.notLoaded();
     }
+
+    // Parse the json
     final body = jsonDecode(req.body);
+
+    // Start a periodic timer to refresh info (if desired)
     if (timer && _timer == null) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
         final info = await getInfo();
@@ -385,9 +386,13 @@ class SpaceConnectionContainer extends ShareContainer {
         }
       });
     }
+
+    // Return a not loaded state if the request wasn't successful
     if (!body["success"]) {
       return SpaceInfo.notLoaded();
     }
+
+    // Return the proper info
     info.value = SpaceInfo.fromJson(this, body);
     return info.value!;
   }
