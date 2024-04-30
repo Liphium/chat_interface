@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/image_attachment_renderer.dart';
+import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_render_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -74,7 +75,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                   Flexible(
                     child: LayoutBuilder(builder: (context, constraints) {
                       return ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: (Get.width - 350) * 0.5), // TODO: Fix on mobile
+                        constraints: BoxConstraints(maxWidth: (Get.width - 350) * 0.5),
                         child: Column(
                           crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                           children: [
@@ -136,10 +137,10 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                         ),
                                       ),
 
-                                    // Actual message
-                                    Text(
-                                      widget.message.content,
-                                      style: theme.textTheme.labelLarge,
+                                    //* Actual message (with formatted renderer)
+                                    FormattedText(
+                                      text: widget.message.content,
+                                      baseStyle: theme.textTheme.labelLarge!,
                                     ),
                                   ],
                                 ),

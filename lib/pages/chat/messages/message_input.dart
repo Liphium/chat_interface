@@ -329,6 +329,9 @@ class _MessageInputState extends State<MessageInput> {
                           onPressed: () async {
                             final result = await Get.dialog(EmojiWindow(data: ContextMenuData.fromKey(_emojiKey, above: true, right: true)));
                             _inputFocus.requestFocus();
+                            if (result == null) {
+                              return;
+                            }
                             replaceSelection(result);
                           },
                           icon: const Icon(Icons.emoji_emotions),

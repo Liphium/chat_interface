@@ -90,7 +90,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButton(
             onTap: () async {
-              Get.find<SpacesController>().createSpace("", public.value);
+              Get.find<SpacesController>().createSpace(public.value);
               Get.back();
             },
             label: "create".tr,

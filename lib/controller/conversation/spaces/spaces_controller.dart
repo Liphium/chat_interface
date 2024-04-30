@@ -35,7 +35,6 @@ class SpacesController extends GetxController {
   final inSpace = false.obs;
   final spaceLoading = false.obs;
   final connected = false.obs;
-  final title = "Space".obs;
   final start = DateTime.now().obs;
 
   //* Game mode
@@ -79,12 +78,12 @@ class SpacesController extends GetxController {
     cinemaWidget.value = widget;
   }
 
-  void createSpace(String title, bool publish) {
+  void createSpace(bool publish) {
     _startSpace((container) {
       if (publish) {
         Get.find<StatusController>().share(container);
       }
-    }, connectedCallback: () => setSpaceTitle(title));
+    });
   }
 
   void createAndConnect(String conversationId) {
@@ -133,18 +132,6 @@ class SpacesController extends GetxController {
 
   void openShelf() {
     gameShelf.value = !gameShelf.value;
-  }
-
-  void setSpaceTitle(String title) {
-    if (connected.value) {
-      spaceConnector.sendAction(msg.Message("set_data", {"data": encryptSymmetric(title, key!)}), handler: (event) {
-        if (!event.data["success"]) {
-          showErrorPopup("error", "server.error");
-          return;
-        }
-        this.title.value = title;
-      });
-    }
   }
 
   void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {

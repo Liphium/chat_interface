@@ -1,9 +1,8 @@
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 
 class MessageFormatter {
   final TextStyle normalStyle;
-  final TextStyle formattedStyle;
+  final TextStyle? formattedStyle;
 
   MessageFormatter(this.normalStyle, this.formattedStyle);
 
@@ -48,7 +47,9 @@ class MessageFormatter {
       // Check for the respective patterns and apply text styles
       if (matchedString.startsWith("***") && matchedString.length != 3) {
         // Bold and italic
-        parsedText.add(TextSpan(text: text.substring(match.start, match.start + 3), style: formattedStyle));
+        if (formattedStyle != null) {
+          parsedText.add(TextSpan(text: text.substring(match.start, match.start + 3), style: formattedStyle));
+        }
         parsedText.addAll(_parseWithEmojis(
           text.substring(match.start + 3, match.end - 3),
           normalStyle.copyWith(
@@ -56,37 +57,51 @@ class MessageFormatter {
             fontStyle: FontStyle.italic,
           ),
         ));
-        parsedText.add(TextSpan(text: text.substring(match.end - 3, match.end), style: formattedStyle));
+        if (formattedStyle != null) {
+          parsedText.add(TextSpan(text: text.substring(match.end - 3, match.end), style: formattedStyle));
+        }
       } else if (matchedString.startsWith("**") && matchedString.length != 2) {
         // Bold
-        parsedText.add(TextSpan(text: text.substring(match.start, match.start + 2), style: formattedStyle));
+        if (formattedStyle != null) {
+          parsedText.add(TextSpan(text: text.substring(match.start, match.start + 2), style: formattedStyle));
+        }
         parsedText.addAll(_parseWithEmojis(
           text.substring(match.start + 2, match.end - 2),
           normalStyle.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ));
-        parsedText.add(TextSpan(text: text.substring(match.end - 2, match.end), style: formattedStyle));
+        if (formattedStyle != null) {
+          parsedText.add(TextSpan(text: text.substring(match.end - 2, match.end), style: formattedStyle));
+        }
       } else if (matchedString.startsWith("*")) {
         // Italic
-        parsedText.add(TextSpan(text: text.substring(match.start, match.start + 1), style: formattedStyle));
+        if (formattedStyle != null) {
+          parsedText.add(TextSpan(text: text.substring(match.start, match.start + 1), style: formattedStyle));
+        }
         parsedText.addAll(_parseWithEmojis(
           text.substring(match.start + 1, match.end - 1),
           normalStyle.copyWith(
             fontStyle: FontStyle.italic,
           ),
         ));
-        parsedText.add(TextSpan(text: text.substring(match.end - 1, match.end), style: formattedStyle));
+        if (formattedStyle != null) {
+          parsedText.add(TextSpan(text: text.substring(match.end - 1, match.end), style: formattedStyle));
+        }
       } else if (matchedString.startsWith("~~")) {
         // Stroke
-        parsedText.add(TextSpan(text: text.substring(match.start, match.start + 2), style: formattedStyle));
+        if (formattedStyle != null) {
+          parsedText.add(TextSpan(text: text.substring(match.start, match.start + 2), style: formattedStyle));
+        }
         parsedText.addAll(_parseWithEmojis(
           text.substring(match.start + 2, match.end - 2),
           normalStyle.copyWith(
             decoration: TextDecoration.lineThrough,
           ),
         ));
-        parsedText.add(TextSpan(text: text.substring(match.end - 2, match.end), style: formattedStyle));
+        if (formattedStyle != null) {
+          parsedText.add(TextSpan(text: text.substring(match.end - 2, match.end), style: formattedStyle));
+        }
       }
     }
     parsedText.addAll(_parseWithEmojis(text.substring(currentStart, text.length), normalStyle));
@@ -106,5 +121,26 @@ class FormattedTextEditingController extends TextEditingController {
   @override
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
     return formatter.build(text);
+  }
+}
+
+/// Widget to display formatting directives
+class FormattedText extends StatelessWidget {
+  final String text;
+  final TextStyle baseStyle;
+  final TextStyle? formatStyle;
+
+  const FormattedText({
+    super.key,
+    required this.text,
+    required this.baseStyle,
+    this.formatStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final MessageFormatter formatter = MessageFormatter(baseStyle, formatStyle);
+
+    return Text.rich(formatter.build(text));
   }
 }
