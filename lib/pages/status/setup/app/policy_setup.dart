@@ -22,10 +22,29 @@ class PolicySetup extends Setup {
 
   @override
   Future<Widget?> load() async {
+    // Check when the file was created
+    final supportDir = await getApplicationSupportDirectory();
+    var file = File(path.join(supportDir.path, agreeFile));
+    final exists = await file.exists();
+    if (exists) {
+      final lastModified = await file.lastModified();
+
+      // Return if already checked in the last 7 days
+      if (lastModified.add(const Duration(days: 7)).isAfter(DateTime.now())) {
+        return null;
+      }
+    }
+
+    // Check the current version on the server
     final res = await dio.get("https://liphium.com/legal/terms");
     if (res.statusCode != 200) {
       sendLog("ERROR ${res.statusCode}");
       return null;
+    }
+
+    // Set a new last access date
+    if (exists) {
+      await file.setLastModified(DateTime.now());
     }
 
     // Get the version from the html
@@ -34,8 +53,7 @@ class PolicySetup extends Setup {
     final uncoveredDate = splittedAtLast[1].substring(1, 11);
 
     // Check if the agreements file has already been created and contains the latest date
-    final supportDir = await getApplicationSupportDirectory();
-    final file = File(path.join(supportDir.path, agreeFile));
+    file = File(path.join(supportDir.path, agreeFile));
     if (!file.existsSync()) {
       return PolicyAcceptPage(
         versionToWrite: uncoveredDate,
