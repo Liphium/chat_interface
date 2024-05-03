@@ -22,7 +22,7 @@ class PolicySetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    final res = await dio.get("https://liphium.com/legal");
+    final res = await dio.get("https://liphium.com/legal/terms");
     if (res.statusCode != 200) {
       sendLog("ERROR ${res.statusCode}");
       return null;
