@@ -212,7 +212,7 @@ class Request {
         updatedAt: BigInt.from(updatedAt),
       );
 
-  Friend get friend => Friend(id, name, vaultId, keyStorage, updatedAt);
+  Friend get friend => Friend(id, name, name, vaultId, keyStorage, updatedAt);
 
   // Accept friend request
   void accept(Function(String) success) {

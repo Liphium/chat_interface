@@ -210,7 +210,8 @@ class _MessageInputState extends State<MessageInput> {
                                 Expanded(
                                   child: Text(
                                     "message.reply.text".trParams({
-                                      "name": Get.find<FriendController>().friends[answer.senderAccount]?.name ?? Friend.unknown(answer.senderAccount).name,
+                                      "name": Get.find<FriendController>().friends[answer.senderAccount]?.displayName.value ??
+                                          Friend.unknown(answer.senderAccount).displayName.value,
                                     }),
                                     style: theme.textTheme.labelMedium,
                                     maxLines: 1,

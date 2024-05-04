@@ -1536,6 +1536,12 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _displayNameMeta =
+      const VerificationMeta('displayName');
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+      'display_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _vaultIdMeta =
       const VerificationMeta('vaultId');
   @override
@@ -1554,7 +1560,8 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
       'updated_at', aliasedName, false,
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, name, vaultId, keys, updatedAt];
+  List<GeneratedColumn> get $columns =>
+      [id, name, displayName, vaultId, keys, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1575,6 +1582,14 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+          _displayNameMeta,
+          displayName.isAcceptableOrUnknown(
+              data['display_name']!, _displayNameMeta));
+    } else if (isInserting) {
+      context.missing(_displayNameMeta);
     }
     if (data.containsKey('vault_id')) {
       context.handle(_vaultIdMeta,
@@ -1607,6 +1622,8 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      displayName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}display_name'])!,
       vaultId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
       keys: attachedDatabase.typeMapping
@@ -1625,12 +1642,14 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
 class FriendData extends DataClass implements Insertable<FriendData> {
   final String id;
   final String name;
+  final String displayName;
   final String vaultId;
   final String keys;
   final BigInt updatedAt;
   const FriendData(
       {required this.id,
       required this.name,
+      required this.displayName,
       required this.vaultId,
       required this.keys,
       required this.updatedAt});
@@ -1639,6 +1658,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
+    map['display_name'] = Variable<String>(displayName);
     map['vault_id'] = Variable<String>(vaultId);
     map['keys'] = Variable<String>(keys);
     map['updated_at'] = Variable<BigInt>(updatedAt);
@@ -1649,6 +1669,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return FriendCompanion(
       id: Value(id),
       name: Value(name),
+      displayName: Value(displayName),
       vaultId: Value(vaultId),
       keys: Value(keys),
       updatedAt: Value(updatedAt),
@@ -1661,6 +1682,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return FriendData(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      displayName: serializer.fromJson<String>(json['displayName']),
       vaultId: serializer.fromJson<String>(json['vaultId']),
       keys: serializer.fromJson<String>(json['keys']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
@@ -1672,6 +1694,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
+      'displayName': serializer.toJson<String>(displayName),
       'vaultId': serializer.toJson<String>(vaultId),
       'keys': serializer.toJson<String>(keys),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
@@ -1681,12 +1704,14 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   FriendData copyWith(
           {String? id,
           String? name,
+          String? displayName,
           String? vaultId,
           String? keys,
           BigInt? updatedAt}) =>
       FriendData(
         id: id ?? this.id,
         name: name ?? this.name,
+        displayName: displayName ?? this.displayName,
         vaultId: vaultId ?? this.vaultId,
         keys: keys ?? this.keys,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -1696,6 +1721,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return (StringBuffer('FriendData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('displayName: $displayName, ')
           ..write('vaultId: $vaultId, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt')
@@ -1704,13 +1730,15 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, vaultId, keys, updatedAt);
+  int get hashCode =>
+      Object.hash(id, name, displayName, vaultId, keys, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is FriendData &&
           other.id == this.id &&
           other.name == this.name &&
+          other.displayName == this.displayName &&
           other.vaultId == this.vaultId &&
           other.keys == this.keys &&
           other.updatedAt == this.updatedAt);
@@ -1719,6 +1747,7 @@ class FriendData extends DataClass implements Insertable<FriendData> {
 class FriendCompanion extends UpdateCompanion<FriendData> {
   final Value<String> id;
   final Value<String> name;
+  final Value<String> displayName;
   final Value<String> vaultId;
   final Value<String> keys;
   final Value<BigInt> updatedAt;
@@ -1726,6 +1755,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   const FriendCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.displayName = const Value.absent(),
     this.vaultId = const Value.absent(),
     this.keys = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1734,18 +1764,21 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   FriendCompanion.insert({
     required String id,
     required String name,
+    required String displayName,
     required String vaultId,
     required String keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
+        displayName = Value(displayName),
         vaultId = Value(vaultId),
         keys = Value(keys),
         updatedAt = Value(updatedAt);
   static Insertable<FriendData> custom({
     Expression<String>? id,
     Expression<String>? name,
+    Expression<String>? displayName,
     Expression<String>? vaultId,
     Expression<String>? keys,
     Expression<BigInt>? updatedAt,
@@ -1754,6 +1787,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (displayName != null) 'display_name': displayName,
       if (vaultId != null) 'vault_id': vaultId,
       if (keys != null) 'keys': keys,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1764,6 +1798,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   FriendCompanion copyWith(
       {Value<String>? id,
       Value<String>? name,
+      Value<String>? displayName,
       Value<String>? vaultId,
       Value<String>? keys,
       Value<BigInt>? updatedAt,
@@ -1771,6 +1806,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     return FriendCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      displayName: displayName ?? this.displayName,
       vaultId: vaultId ?? this.vaultId,
       keys: keys ?? this.keys,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1786,6 +1822,9 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
     }
     if (vaultId.present) {
       map['vault_id'] = Variable<String>(vaultId.value);
@@ -1807,6 +1846,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     return (StringBuffer('FriendCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('displayName: $displayName, ')
           ..write('vaultId: $vaultId, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt, ')

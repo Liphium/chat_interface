@@ -71,7 +71,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
 
   // Prepare the conversation
   final conversationKey = randomSymmetricKey();
-  final ownMemberContainer = MemberContainer(Get.find<StatusController>().id.value).encrypted(conversationKey);
+  final ownMemberContainer = MemberContainer(StatusController.ownAccountId).encrypted(conversationKey);
   final memberContainers = <String, String>{};
   for (final friend in friends) {
     final container = MemberContainer(friend.id);
@@ -114,7 +114,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   }
 
   final statusController = Get.find<StatusController>();
-  await conversationController.addCreated(conversation, members, admin: Member(conversation.token.id, statusController.id.value, MemberRole.admin));
+  await conversationController.addCreated(conversation, members, admin: Member(conversation.token.id, StatusController.ownAccountId, MemberRole.admin));
   subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), conversation.token, deletions: false);
 
   return true;

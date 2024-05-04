@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
@@ -152,6 +150,40 @@ class DataSettingsPage extends StatelessWidget {
 
         //* Name settings
         Text("Account data".tr, style: Get.theme.textTheme.labelLarge),
+        verticalSpacing(defaultSpacing),
+
+        //* Display name
+        Container(
+          decoration: BoxDecoration(
+            color: Get.theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(sectionSpacing),
+          ),
+          padding: const EdgeInsets.all(sectionSpacing),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("display_name".tr, style: Get.theme.textTheme.labelMedium),
+                  verticalSpacing(elementSpacing),
+                  Text(
+                    controller.displayName.value == controller.name.value
+                        ? List.generate(controller.name.value.length, (index) => "*").join("")
+                        : controller.displayName.value,
+                    style: Get.theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+              horizontalSpacing(defaultSpacing),
+              FJElevatedButton(
+                smallCorners: true,
+                onTap: () => Get.dialog(const ChangeNameWindow()),
+                child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
+              ),
+            ],
+          ),
+        ),
         verticalSpacing(defaultSpacing),
 
         //* Username

@@ -107,52 +107,67 @@ class Friend {
   Timer? _timer;
   int updatedAt;
 
+  // Display name of the friend
+  final displayName = "".obs;
+
+  void updateDisplayName(String displayName) {
+    this.displayName.value = displayName;
+    db.friend.insertOnConflictUpdate(entity());
+  }
+
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, this.vaultId, this.keyStorage, this.updatedAt);
-
-  Friend.system()
-      : id = "system",
-        name = "System",
-        vaultId = "",
-        keyStorage = KeyStorage.empty(),
-        updatedAt = 0;
-  Friend.me([StatusController? controller])
-      : id = '',
-        name = '',
-        vaultId = '',
-        keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
-        updatedAt = 0 {
-    final StatusController statusController = controller ?? Get.find();
-    id = statusController.id.value;
-    name = statusController.name.value;
-  }
-  Friend.unknown(this.id)
-      : name = 'fj-$id',
-        vaultId = '',
-        keyStorage = KeyStorage.empty(),
-        updatedAt = 0 {
-    unknown = true;
+  Friend(this.id, this.name, String displayName, this.vaultId, this.keyStorage, this.updatedAt) {
+    this.displayName.value = displayName;
   }
 
-  Friend.fromEntity(FriendData data)
-      : id = data.id,
-        name = data.name,
-        vaultId = data.vaultId,
-        keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
-        updatedAt = data.updatedAt.toInt();
+  /// The friend for a system component (used in system messages for members)
+  factory Friend.system() {
+    return Friend("system", "system", "system", "", KeyStorage.empty(), 0);
+  }
 
-  Friend.fromStoredPayload(Map<String, dynamic> json, this.updatedAt)
-      : id = json["id"],
-        name = json["name"],
-        vaultId = "",
-        keyStorage = KeyStorage.fromJson(json);
+  /// Own account as a friend (used to make implementations simpler)
+  factory Friend.me([StatusController? controller]) {
+    controller ??= Get.find<StatusController>();
+    return Friend(
+      StatusController.ownAccountId,
+      controller.name.value,
+      controller.name.value,
+      "",
+      KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+      0,
+    );
+  }
 
-  // Convert to a stored payload for the server
+  /// Used for unknown accounts where only an id is known
+  factory Friend.unknown(String id) {
+    final friend = Friend(id, "lph-$id", "lph-$id", "", KeyStorage.empty(), 0);
+    friend.unknown = true;
+    return friend;
+  }
+
+  /// Convert the database entity to the actual type
+  factory Friend.fromEntity(FriendData data) {
+    return Friend(
+      data.id,
+      data.name,
+      data.displayName,
+      data.vaultId,
+      KeyStorage.fromJson(jsonDecode(data.keys)),
+      data.updatedAt.toInt(),
+    );
+  }
+
+  /// Convert a json to a friend (used for friends vault)
+  factory Friend.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
+    return Friend(json["id"], json["name"], json["name"], "", KeyStorage.fromJson(json), updatedAt);
+  }
+
+  // Convert to a stored payload for the friends vault
   String toStoredPayload() {
     final reqPayload = <String, dynamic>{
-      "rq": false,
+      "rq": false, // If it is a request or not (requests are stored in the same place)
       "id": id,
       "name": name,
     };
@@ -160,6 +175,18 @@ class Friend {
 
     return jsonEncode(reqPayload);
   }
+
+  // Check if vault id is known (this would require a restart of the app)
+  bool canBeDeleted() => vaultId != "";
+
+  FriendData entity() => FriendData(
+        id: id,
+        name: name,
+        displayName: displayName.value,
+        vaultId: vaultId,
+        keys: jsonEncode(keyStorage.toJson()),
+        updatedAt: BigInt.from(updatedAt),
+      );
 
   // Update in database
   Future<bool> update() async {
@@ -216,10 +243,14 @@ class Friend {
   /// Update the profile picture of this friend
   void updateProfilePicture(AttachmentContainer picture) async {
     // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: jsonEncode(picture.toJson()), data: ""));
+    db.profile.insertOnConflictUpdate(ProfileData(
+      id: id,
+      pictureContainer: jsonEncode(picture.toJson()),
+      data: "",
+    ));
 
     profilePicture = picture;
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(picture.filePath);
+    profilePictureImage.value = await ProfileHelper.loadImage(picture.filePath);
   }
 
   /// Load the profile picture of this friend
@@ -227,10 +258,9 @@ class Friend {
     profilePictureUsages++;
 
     if (DateTime.now().difference(lastProfilePictureUpdate).inMinutes > 2) {
-      sendLog("REDOWNLOADING");
       lastProfilePictureUpdate = DateTime.now();
 
-      final result = await ProfilePictureHelper.downloadProfilePicture(this);
+      final result = await ProfileHelper.downloadProfilePicture(this);
       if (result != null) {
         return;
       }
@@ -240,7 +270,7 @@ class Friend {
     if (profilePictureImage.value != null || profilePictureDataNull) return;
 
     // Load the image
-    final data = await ProfilePictureHelper.getProfileDataLocal(id);
+    final data = await ProfileHelper.getProfileDataLocal(id);
     if (data == null) {
       sendLog("NOTHING FOUND");
       profilePictureDataNull = true; // To prevent this thing from constantly loading again
@@ -251,7 +281,7 @@ class Friend {
     final json = jsonDecode(data.pictureContainer);
     final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
     profilePicture = AttachmentContainer.fromJson(type, json);
-    profilePictureImage.value = await ProfilePictureHelper.loadImage(profilePicture!.filePath);
+    profilePictureImage.value = await ProfileHelper.loadImage(profilePicture!.filePath);
     sendLog("LOADED!!");
   }
 
@@ -276,15 +306,4 @@ class Friend {
     loading.value = false;
     return true;
   }
-
-  // Check if vault id is known (this would require a restart of the app)
-  bool canBeDeleted() => vaultId != "";
-
-  FriendData entity() => FriendData(
-        id: id,
-        name: name,
-        vaultId: vaultId,
-        keys: jsonEncode(keyStorage.toJson()),
-        updatedAt: BigInt.from(updatedAt),
-      );
 }

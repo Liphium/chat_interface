@@ -16,8 +16,9 @@ import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
-class ProfilePictureHelper {
-  /// Download the profile picture of a friend.
+class ProfileHelper {
+  /// Download the profile picture of a friend (if it isn't downloaded or changed).
+  /// Also checks for name changes and display name changes.
   /// Returns the file ID associated with the profile picture.
   static Future<String?> downloadProfilePicture(Friend friend) async {
     // Get old profile picture
@@ -35,6 +36,11 @@ class ProfilePictureHelper {
     if (json["name"] != friend.name) {
       friend.name = json["name"];
       await friend.update();
+    }
+
+    // Check if there is a new display name
+    if (json["profile"]["name"] != friend.displayName.value) {
+      friend.updateDisplayName(json["profile"]["name"]);
     }
 
     String? oldPictureId;

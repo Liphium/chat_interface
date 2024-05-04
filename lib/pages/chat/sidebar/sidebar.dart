@@ -239,7 +239,7 @@ class _SidebarState extends State<Sidebar> {
                         final prevId = index > 0 ? controller.order.elementAt(index - 1) : null;
                         final prev = prevId != null ? controller.conversations[prevId] : null;
                         if (prev != null && !prev.isGroup) {
-                          final otherGuy = prev.members.values.firstWhere((element) => element.account != statusController.id.value);
+                          final otherGuy = prev.members.values.firstWhere((element) => element.account != StatusController.ownAccountId);
 
                           //* Shared content renderer
                           if (statusController.sharedContent.containsKey(otherGuy.account) && !renderedShared) {
@@ -282,7 +282,7 @@ class _SidebarState extends State<Sidebar> {
                         Friend? friend;
                         if (!conversation.isGroup) {
                           String id = conversation.members.values
-                              .firstWhere((element) => element.account != statusController.id.value, orElse: () => Member("-", "-", MemberRole.user))
+                              .firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member("-", "-", MemberRole.user))
                               .account;
                           if (id == "-") {
                             friend = Friend.me();

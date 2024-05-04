@@ -22,7 +22,11 @@ class AccountSetup extends Setup {
     // Set all account data
     StatusController controller = Get.find();
     controller.name.value = account["username"];
-    controller.id.value = account["id"];
+    if (body["display_name"] != "") {
+      controller.displayName.value = body["display_name"];
+    } else {
+      controller.displayName.value = account["username"];
+    }
     StatusController.ownAccountId = account["id"];
 
     // Init file paths with account id

@@ -50,7 +50,10 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                 Visibility(
                   visible: !widget.last,
                   replacement: const SizedBox(width: 34), //* Show timestamp instead
-                  child: Tooltip(message: sender.name, child: UserAvatar(id: sender.id, size: 34)),
+                  child: Tooltip(
+                    message: sender.displayName.value,
+                    child: UserAvatar(id: sender.id, size: 34),
+                  ),
                 ),
                 horizontalSpacing(defaultSpacing),
 

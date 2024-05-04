@@ -25,11 +25,11 @@ class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
     String members = "";
     for (var member in widget.writers) {
       lastWriter = member;
-      members += '${friendController.friends[member]!.name}, ';
+      members += '${friendController.friends[member]!.displayName.value}, ';
     }
 
     if (widget.writers.isEmpty && lastWriter != "-1") {
-      members = friendController.friends[lastWriter]!.name;
+      members = friendController.friends[lastWriter]!.displayName.value;
     } else if (lastWriter != "-1") {
       members = members.substring(0, members.length - 2);
     }
@@ -58,17 +58,13 @@ class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
             color: Colors.black,
             borderRadius: BorderRadius.circular(30),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.person,
-                      size: 20, color: theme.colorScheme.primary),
+                  Icon(Icons.person, size: 20, color: theme.colorScheme.primary),
                   horizontalSpacing(defaultSpacing * 0.5),
-                  Text(
-                      "$members ${widget.writers.length > 1 ? "are".tr : "is".tr} typing",
-                      style: Theme.of(context).textTheme.bodyMedium),
+                  Text("$members ${widget.writers.length > 1 ? "are".tr : "is".tr} typing", style: Theme.of(context).textTheme.bodyMedium),
                   horizontalSpacing(defaultSpacing * 0.5),
                   const SizedBox(
                       height: 20,

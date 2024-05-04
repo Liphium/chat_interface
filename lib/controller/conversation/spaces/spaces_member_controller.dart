@@ -26,7 +26,7 @@ class SpaceMemberController extends GetxController {
   void onMembersChanged(List<dynamic> members) {
     sendLog("members changed");
     final statusController = Get.find<StatusController>();
-    final myId = statusController.id.value;
+    final myId = StatusController.ownAccountId;
     final membersFound = <String>[];
 
     // id = encryptedId:clientId

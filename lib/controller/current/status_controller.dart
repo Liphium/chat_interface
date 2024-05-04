@@ -32,8 +32,8 @@ class StatusController extends GetxController {
     });
   }
 
-  final name = 'test'.obs;
-  final id = '0'.obs;
+  final displayName = 'not-set'.obs;
+  final name = 'not-set'.obs;
 
   // Status message
   final statusLoading = true.obs;
@@ -48,7 +48,6 @@ class StatusController extends GetxController {
 
   void setName(String value) => name.value = value;
   void setId(String value) {
-    id.value = value;
     StatusController.ownAccountId = value;
   }
 
@@ -73,7 +72,7 @@ class StatusController extends GetxController {
   }
 
   String generateFriendId() {
-    return hashSha(id.value + name.value + storedActionKey);
+    return hashSha(ownAccountId + name.value + storedActionKey);
   }
 
   String statusPacket(String statusJson) {

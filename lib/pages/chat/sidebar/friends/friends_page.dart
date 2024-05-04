@@ -8,7 +8,6 @@ import 'package:chat_interface/pages/chat/sidebar/friends/friend_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/request_button.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/containers/success_container.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -127,8 +126,10 @@ class _FriendsPageState extends State<FriendsPage> {
                             ),
 
                             Obx(() {
-                              final found = friendController.friends.values
-                                  .any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()) && friend.id != StatusController.ownAccountId);
+                              final found = friendController.friends.values.any((friend) =>
+                                  (friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
+                                      friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
+                                  friend.id != StatusController.ownAccountId);
                               final hashtag = query.value.contains("#");
                               return Animate(
                                   effects: [
@@ -281,7 +282,9 @@ class _FriendsPageState extends State<FriendsPage> {
                                           return Obx(
                                             () {
                                               final friend = friendController.friends.values.elementAt(index);
-                                              final visible = query.value.isEmpty || friend.name.toLowerCase().startsWith(query.value.toLowerCase());
+                                              final visible = query.value.isEmpty ||
+                                                  friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
+                                                  friend.name.toLowerCase().contains(query.value.toLowerCase());
                                               return Visibility(
                                                 visible: friend.id != StatusController.ownAccountId,
                                                 child: Animate(

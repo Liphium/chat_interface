@@ -60,7 +60,7 @@ class _UserAvatarState extends State<UserAvatar> {
               child: SelectionContainer.disabled(
                 child: Center(
                   child: Text(
-                    friend.name.substring(0, 1),
+                    friend.displayName.value.substring(0, 1),
                     style: Get.theme.textTheme.labelMedium!.copyWith(
                       fontSize: (widget.size ?? 45) * 0.5,
                       fontWeight: FontWeight.bold,
@@ -103,7 +103,7 @@ class UserRenderer extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(friend.name, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium),
+                  Text(friend.displayName.value, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium),
                   horizontalSpacing(defaultSpacing),
                   Obx(() => StatusRenderer(status: own ? statusController!.type.value : friend!.statusType.value)),
                 ],

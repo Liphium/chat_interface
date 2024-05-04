@@ -232,7 +232,7 @@ class SpacesController extends GetxController {
       msg.Message(
         "setup",
         <String, dynamic>{
-          "data": encryptSymmetric(Get.find<StatusController>().id.value, key!),
+          "data": encryptSymmetric(StatusController.ownAccountId, key!),
         },
       ),
       handler: (event) async {

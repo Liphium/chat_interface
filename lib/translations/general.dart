@@ -31,6 +31,7 @@ class GeneralTranslations extends Translations {
           'close': 'Close',
           'open': 'Open',
           'username': 'Username',
+          'display_name': "Display name",
           'password': 'Password',
           'password.current': 'Current password',
           'invite': 'Invite',

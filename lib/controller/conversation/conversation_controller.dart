@@ -175,7 +175,7 @@ class Conversation {
   bool get isGroup => type == model.ConversationType.group;
   String get dmName => (Get.find<FriendController>().friends[members.values
               .firstWhere(
-                (element) => element.account != Get.find<StatusController>().id.value,
+                (element) => element.account != StatusController.ownAccountId,
                 orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user),
               )
               .account] ??
@@ -184,7 +184,7 @@ class Conversation {
   bool get borked =>
       !isGroup &&
       Get.find<FriendController>().friends[members.values
-              .firstWhere((element) => element.account != Get.find<StatusController>().id.value,
+              .firstWhere((element) => element.account != StatusController.ownAccountId,
                   orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
               .account] ==
           null;

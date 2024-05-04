@@ -131,7 +131,7 @@ class _ProfileState extends State<Profile> {
               children: [
                 UserAvatar(id: widget.friend.id, size: 40),
                 horizontalSpacing(defaultSpacing),
-                Text(widget.friend.name, style: Get.theme.textTheme.titleMedium),
+                Text(widget.friend.displayName.value, style: Get.theme.textTheme.titleMedium),
               ],
             ),
 

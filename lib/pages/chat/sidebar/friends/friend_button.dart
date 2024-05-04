@@ -40,7 +40,7 @@ class _FriendButtonState extends State<FriendButton> {
                 children: [
                   Icon(Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                   const SizedBox(width: 10),
-                  Text(widget.friend.name, style: Get.theme.textTheme.labelMedium),
+                  Text(widget.friend.displayName.value, style: Get.theme.textTheme.labelMedium),
                 ],
               ),
 

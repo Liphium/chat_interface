@@ -56,7 +56,7 @@ class _MessageRenderWindowState extends State<MessageRenderWindow> {
               UserAvatar(id: widget.message.senderAccount, size: 32),
               horizontalSpacing(defaultSpacing),
               Text(
-                "${friend.name} (${friend.id})",
+                "${friend.displayName.value} (${friend.name} with id ${friend.id})",
                 style: Get.textTheme.labelLarge,
               ),
               const Expanded(child: SizedBox()),

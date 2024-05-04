@@ -37,7 +37,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
   }
 
   void initImage() async {
-    final image = await ProfilePictureHelper.loadImage(widget.file.path);
+    final image = await ProfileHelper.loadImage(widget.file.path);
     if (image == null) return;
 
     // Calculate the scale factor to fit the image into the window
@@ -160,7 +160,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                   final currentFile = File(widget.file.path);
                   final cutFile = File(path.join(currentFile.parent.path, ".cut-${widget.file.name}"));
                   await cutFile.writeAsBytes(image);
-                  await ProfilePictureHelper.uploadProfilePicture(cutFile, widget.file.name);
+                  await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name);
                   await cutFile.delete();
                   uploading.value = false;
                   Get.back();
