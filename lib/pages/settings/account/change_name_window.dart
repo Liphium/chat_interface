@@ -18,7 +18,6 @@ class ChangeNameWindow extends StatefulWidget {
 class _ChangeNameWindowState extends State<ChangeNameWindow> {
   // Text controllers
   final _usernameController = TextEditingController();
-  final _tagController = TextEditingController();
 
   // State
   final _errorText = ''.obs;
@@ -27,7 +26,6 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
   @override
   void dispose() {
     _usernameController.dispose();
-    _tagController.dispose();
     super.dispose();
   }
 
@@ -42,30 +40,11 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
         children: [
           Text("settings.data.change_name.dialog".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(sectionSpacing),
-          LayoutBuilder(builder: (context, size) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: size.maxWidth * 0.6,
-                  child: FJTextField(
-                    hintText: 'placeholder.username'.tr,
-                    controller: _usernameController,
-                    maxLength: 16,
-                  ),
-                ),
-                Text('#', style: Get.theme.textTheme.headlineMedium),
-                SizedBox(
-                  width: size.maxWidth * 0.3,
-                  child: FJTextField(
-                    hintText: 'placeholder.tag'.tr,
-                    controller: _tagController,
-                    maxLength: 5,
-                  ),
-                ),
-              ],
-            );
-          }),
+          FJTextField(
+            hintText: 'placeholder.username'.tr,
+            controller: _usernameController,
+            maxLength: 16,
+          ),
           verticalSpacing(defaultSpacing),
           AnimatedErrorContainer(
             message: _errorText,
@@ -81,7 +60,6 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
 
               final json = await postAuthorizedJSON("/account/settings/change_name", {
                 "name": _usernameController.text,
-                "tag": _tagController.text,
               });
 
               if (!json["success"]) {

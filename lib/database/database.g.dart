@@ -1536,11 +1536,6 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _tagMeta = const VerificationMeta('tag');
-  @override
-  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
-      'tag', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _vaultIdMeta =
       const VerificationMeta('vaultId');
   @override
@@ -1559,8 +1554,7 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
       'updated_at', aliasedName, false,
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, tag, vaultId, keys, updatedAt];
+  List<GeneratedColumn> get $columns => [id, name, vaultId, keys, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1581,12 +1575,6 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
-    }
-    if (data.containsKey('tag')) {
-      context.handle(
-          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
-    } else if (isInserting) {
-      context.missing(_tagMeta);
     }
     if (data.containsKey('vault_id')) {
       context.handle(_vaultIdMeta,
@@ -1619,8 +1607,6 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      tag: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
       vaultId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
       keys: attachedDatabase.typeMapping
@@ -1639,14 +1625,12 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
 class FriendData extends DataClass implements Insertable<FriendData> {
   final String id;
   final String name;
-  final String tag;
   final String vaultId;
   final String keys;
   final BigInt updatedAt;
   const FriendData(
       {required this.id,
       required this.name,
-      required this.tag,
       required this.vaultId,
       required this.keys,
       required this.updatedAt});
@@ -1655,7 +1639,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
-    map['tag'] = Variable<String>(tag);
     map['vault_id'] = Variable<String>(vaultId);
     map['keys'] = Variable<String>(keys);
     map['updated_at'] = Variable<BigInt>(updatedAt);
@@ -1666,7 +1649,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return FriendCompanion(
       id: Value(id),
       name: Value(name),
-      tag: Value(tag),
       vaultId: Value(vaultId),
       keys: Value(keys),
       updatedAt: Value(updatedAt),
@@ -1679,7 +1661,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return FriendData(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      tag: serializer.fromJson<String>(json['tag']),
       vaultId: serializer.fromJson<String>(json['vaultId']),
       keys: serializer.fromJson<String>(json['keys']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
@@ -1691,7 +1672,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'tag': serializer.toJson<String>(tag),
       'vaultId': serializer.toJson<String>(vaultId),
       'keys': serializer.toJson<String>(keys),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
@@ -1701,14 +1681,12 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   FriendData copyWith(
           {String? id,
           String? name,
-          String? tag,
           String? vaultId,
           String? keys,
           BigInt? updatedAt}) =>
       FriendData(
         id: id ?? this.id,
         name: name ?? this.name,
-        tag: tag ?? this.tag,
         vaultId: vaultId ?? this.vaultId,
         keys: keys ?? this.keys,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -1718,7 +1696,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     return (StringBuffer('FriendData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('tag: $tag, ')
           ..write('vaultId: $vaultId, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt')
@@ -1727,14 +1704,13 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, tag, vaultId, keys, updatedAt);
+  int get hashCode => Object.hash(id, name, vaultId, keys, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is FriendData &&
           other.id == this.id &&
           other.name == this.name &&
-          other.tag == this.tag &&
           other.vaultId == this.vaultId &&
           other.keys == this.keys &&
           other.updatedAt == this.updatedAt);
@@ -1743,7 +1719,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
 class FriendCompanion extends UpdateCompanion<FriendData> {
   final Value<String> id;
   final Value<String> name;
-  final Value<String> tag;
   final Value<String> vaultId;
   final Value<String> keys;
   final Value<BigInt> updatedAt;
@@ -1751,7 +1726,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   const FriendCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.tag = const Value.absent(),
     this.vaultId = const Value.absent(),
     this.keys = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1760,21 +1734,18 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   FriendCompanion.insert({
     required String id,
     required String name,
-    required String tag,
     required String vaultId,
     required String keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
-        tag = Value(tag),
         vaultId = Value(vaultId),
         keys = Value(keys),
         updatedAt = Value(updatedAt);
   static Insertable<FriendData> custom({
     Expression<String>? id,
     Expression<String>? name,
-    Expression<String>? tag,
     Expression<String>? vaultId,
     Expression<String>? keys,
     Expression<BigInt>? updatedAt,
@@ -1783,7 +1754,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (tag != null) 'tag': tag,
       if (vaultId != null) 'vault_id': vaultId,
       if (keys != null) 'keys': keys,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1794,7 +1764,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   FriendCompanion copyWith(
       {Value<String>? id,
       Value<String>? name,
-      Value<String>? tag,
       Value<String>? vaultId,
       Value<String>? keys,
       Value<BigInt>? updatedAt,
@@ -1802,7 +1771,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     return FriendCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      tag: tag ?? this.tag,
       vaultId: vaultId ?? this.vaultId,
       keys: keys ?? this.keys,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1818,9 +1786,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
-    }
-    if (tag.present) {
-      map['tag'] = Variable<String>(tag.value);
     }
     if (vaultId.present) {
       map['vault_id'] = Variable<String>(vaultId.value);
@@ -1842,7 +1807,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     return (StringBuffer('FriendCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('tag: $tag, ')
           ..write('vaultId: $vaultId, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1866,11 +1830,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _tagMeta = const VerificationMeta('tag');
-  @override
-  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
-      'tag', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _selfMeta = const VerificationMeta('self');
   @override
@@ -1905,7 +1864,7 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, tag, self, vaultId, storedActionId, keys, updatedAt];
+      [id, name, self, vaultId, storedActionId, keys, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1926,12 +1885,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
-    }
-    if (data.containsKey('tag')) {
-      context.handle(
-          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
-    } else if (isInserting) {
-      context.missing(_tagMeta);
     }
     if (data.containsKey('self')) {
       context.handle(
@@ -1978,8 +1931,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      tag: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
       self: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}self'])!,
       vaultId: attachedDatabase.typeMapping
@@ -2002,7 +1953,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
 class RequestData extends DataClass implements Insertable<RequestData> {
   final String id;
   final String name;
-  final String tag;
   final bool self;
   final String vaultId;
   final String storedActionId;
@@ -2011,7 +1961,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   const RequestData(
       {required this.id,
       required this.name,
-      required this.tag,
       required this.self,
       required this.vaultId,
       required this.storedActionId,
@@ -2022,7 +1971,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
-    map['tag'] = Variable<String>(tag);
     map['self'] = Variable<bool>(self);
     map['vault_id'] = Variable<String>(vaultId);
     map['stored_action_id'] = Variable<String>(storedActionId);
@@ -2035,7 +1983,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     return RequestCompanion(
       id: Value(id),
       name: Value(name),
-      tag: Value(tag),
       self: Value(self),
       vaultId: Value(vaultId),
       storedActionId: Value(storedActionId),
@@ -2050,7 +1997,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     return RequestData(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      tag: serializer.fromJson<String>(json['tag']),
       self: serializer.fromJson<bool>(json['self']),
       vaultId: serializer.fromJson<String>(json['vaultId']),
       storedActionId: serializer.fromJson<String>(json['storedActionId']),
@@ -2064,7 +2010,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'tag': serializer.toJson<String>(tag),
       'self': serializer.toJson<bool>(self),
       'vaultId': serializer.toJson<String>(vaultId),
       'storedActionId': serializer.toJson<String>(storedActionId),
@@ -2076,7 +2021,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   RequestData copyWith(
           {String? id,
           String? name,
-          String? tag,
           bool? self,
           String? vaultId,
           String? storedActionId,
@@ -2085,7 +2029,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       RequestData(
         id: id ?? this.id,
         name: name ?? this.name,
-        tag: tag ?? this.tag,
         self: self ?? this.self,
         vaultId: vaultId ?? this.vaultId,
         storedActionId: storedActionId ?? this.storedActionId,
@@ -2097,7 +2040,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     return (StringBuffer('RequestData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('tag: $tag, ')
           ..write('self: $self, ')
           ..write('vaultId: $vaultId, ')
           ..write('storedActionId: $storedActionId, ')
@@ -2108,15 +2050,14 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, tag, self, vaultId, storedActionId, keys, updatedAt);
+  int get hashCode =>
+      Object.hash(id, name, self, vaultId, storedActionId, keys, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RequestData &&
           other.id == this.id &&
           other.name == this.name &&
-          other.tag == this.tag &&
           other.self == this.self &&
           other.vaultId == this.vaultId &&
           other.storedActionId == this.storedActionId &&
@@ -2127,7 +2068,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
 class RequestCompanion extends UpdateCompanion<RequestData> {
   final Value<String> id;
   final Value<String> name;
-  final Value<String> tag;
   final Value<bool> self;
   final Value<String> vaultId;
   final Value<String> storedActionId;
@@ -2137,7 +2077,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   const RequestCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.tag = const Value.absent(),
     this.self = const Value.absent(),
     this.vaultId = const Value.absent(),
     this.storedActionId = const Value.absent(),
@@ -2148,7 +2087,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   RequestCompanion.insert({
     required String id,
     required String name,
-    required String tag,
     required bool self,
     required String vaultId,
     required String storedActionId,
@@ -2157,7 +2095,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
-        tag = Value(tag),
         self = Value(self),
         vaultId = Value(vaultId),
         storedActionId = Value(storedActionId),
@@ -2166,7 +2103,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   static Insertable<RequestData> custom({
     Expression<String>? id,
     Expression<String>? name,
-    Expression<String>? tag,
     Expression<bool>? self,
     Expression<String>? vaultId,
     Expression<String>? storedActionId,
@@ -2177,7 +2113,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (tag != null) 'tag': tag,
       if (self != null) 'self': self,
       if (vaultId != null) 'vault_id': vaultId,
       if (storedActionId != null) 'stored_action_id': storedActionId,
@@ -2190,7 +2125,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   RequestCompanion copyWith(
       {Value<String>? id,
       Value<String>? name,
-      Value<String>? tag,
       Value<bool>? self,
       Value<String>? vaultId,
       Value<String>? storedActionId,
@@ -2200,7 +2134,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     return RequestCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      tag: tag ?? this.tag,
       self: self ?? this.self,
       vaultId: vaultId ?? this.vaultId,
       storedActionId: storedActionId ?? this.storedActionId,
@@ -2218,9 +2151,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
-    }
-    if (tag.present) {
-      map['tag'] = Variable<String>(tag.value);
     }
     if (self.present) {
       map['self'] = Variable<bool>(self.value);
@@ -2248,7 +2178,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     return (StringBuffer('RequestCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('tag: $tag, ')
           ..write('self: $self, ')
           ..write('vaultId: $vaultId, ')
           ..write('storedActionId: $storedActionId, ')
@@ -2276,18 +2205,13 @@ class $UnknownProfileTable extends UnknownProfile
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _tagMeta = const VerificationMeta('tag');
-  @override
-  late final GeneratedColumn<String> tag = GeneratedColumn<String>(
-      'tag', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
       'keys', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, name, tag, keys];
+  List<GeneratedColumn> get $columns => [id, name, keys];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2309,12 +2233,6 @@ class $UnknownProfileTable extends UnknownProfile
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('tag')) {
-      context.handle(
-          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
-    } else if (isInserting) {
-      context.missing(_tagMeta);
-    }
     if (data.containsKey('keys')) {
       context.handle(
           _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
@@ -2334,8 +2252,6 @@ class $UnknownProfileTable extends UnknownProfile
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      tag: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}tag'])!,
       keys: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
     );
@@ -2351,19 +2267,14 @@ class UnknownProfileData extends DataClass
     implements Insertable<UnknownProfileData> {
   final String id;
   final String name;
-  final String tag;
   final String keys;
   const UnknownProfileData(
-      {required this.id,
-      required this.name,
-      required this.tag,
-      required this.keys});
+      {required this.id, required this.name, required this.keys});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
-    map['tag'] = Variable<String>(tag);
     map['keys'] = Variable<String>(keys);
     return map;
   }
@@ -2372,7 +2283,6 @@ class UnknownProfileData extends DataClass
     return UnknownProfileCompanion(
       id: Value(id),
       name: Value(name),
-      tag: Value(tag),
       keys: Value(keys),
     );
   }
@@ -2383,7 +2293,6 @@ class UnknownProfileData extends DataClass
     return UnknownProfileData(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      tag: serializer.fromJson<String>(json['tag']),
       keys: serializer.fromJson<String>(json['keys']),
     );
   }
@@ -2393,17 +2302,14 @@ class UnknownProfileData extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'tag': serializer.toJson<String>(tag),
       'keys': serializer.toJson<String>(keys),
     };
   }
 
-  UnknownProfileData copyWith(
-          {String? id, String? name, String? tag, String? keys}) =>
+  UnknownProfileData copyWith({String? id, String? name, String? keys}) =>
       UnknownProfileData(
         id: id ?? this.id,
         name: name ?? this.name,
-        tag: tag ?? this.tag,
         keys: keys ?? this.keys,
       );
   @override
@@ -2411,58 +2317,50 @@ class UnknownProfileData extends DataClass
     return (StringBuffer('UnknownProfileData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('tag: $tag, ')
           ..write('keys: $keys')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, tag, keys);
+  int get hashCode => Object.hash(id, name, keys);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UnknownProfileData &&
           other.id == this.id &&
           other.name == this.name &&
-          other.tag == this.tag &&
           other.keys == this.keys);
 }
 
 class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
   final Value<String> id;
   final Value<String> name;
-  final Value<String> tag;
   final Value<String> keys;
   final Value<int> rowid;
   const UnknownProfileCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.tag = const Value.absent(),
     this.keys = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UnknownProfileCompanion.insert({
     required String id,
     required String name,
-    required String tag,
     required String keys,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
-        tag = Value(tag),
         keys = Value(keys);
   static Insertable<UnknownProfileData> custom({
     Expression<String>? id,
     Expression<String>? name,
-    Expression<String>? tag,
     Expression<String>? keys,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (tag != null) 'tag': tag,
       if (keys != null) 'keys': keys,
       if (rowid != null) 'rowid': rowid,
     });
@@ -2471,13 +2369,11 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
   UnknownProfileCompanion copyWith(
       {Value<String>? id,
       Value<String>? name,
-      Value<String>? tag,
       Value<String>? keys,
       Value<int>? rowid}) {
     return UnknownProfileCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      tag: tag ?? this.tag,
       keys: keys ?? this.keys,
       rowid: rowid ?? this.rowid,
     );
@@ -2491,9 +2387,6 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
-    }
-    if (tag.present) {
-      map['tag'] = Variable<String>(tag.value);
     }
     if (keys.present) {
       map['keys'] = Variable<String>(keys.value);
@@ -2509,7 +2402,6 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
     return (StringBuffer('UnknownProfileCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('tag: $tag, ')
           ..write('keys: $keys, ')
           ..write('rowid: $rowid')
           ..write(')'))

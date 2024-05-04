@@ -157,7 +157,7 @@ class StatusController extends GetxController {
 }
 
 String friendId(Friend friend) {
-  return hashSha(friend.id + friend.name + friend.tag + friend.keyStorage.storedActionKey);
+  return hashSha(friend.id + friend.name + friend.keyStorage.storedActionKey);
 }
 
 enum ShareType { space }

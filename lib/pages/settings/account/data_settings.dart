@@ -170,7 +170,7 @@ class DataSettingsPage extends StatelessWidget {
                   Text("username".tr, style: Get.theme.textTheme.labelMedium),
                   verticalSpacing(elementSpacing),
                   Text(
-                    "${controller.name.value}#${List.generate(Random().nextInt(3) + 3, (index) => "*").join("")}",
+                    List.generate(controller.name.value.length, (index) => "*").join(""),
                     style: Get.theme.textTheme.bodyMedium,
                   ),
                 ],

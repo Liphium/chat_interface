@@ -37,7 +37,7 @@ class ChatPageTranslations extends Translations {
           'request.sent': 'Request successfully sent!',
           'friends.empty': 'Seems like you don\'t have any friends with that name.',
           'friends.send_request': 'Now just press \'Enter\' whenever you\'re done typing. And we\'ll find your friend for you.',
-          'friends.example': 'If you want to add someone, please provide their username#tag. Example: Julian#1234',
+          'friends.example': 'If you want to add someone, just provide their username.',
           'request.confirm.title': 'Confirm request',
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
@@ -176,7 +176,7 @@ class ChatPageTranslations extends Translations {
           'request.sent': 'Anfrage erfolgreich gesendet!',
           'friends.empty': 'Es scheint, als hättest du keine Freunde mit diesem Namen.',
           'friends.send_request': 'Drücke einfach \'Enter\', wenn du fertig bist. Und wir finden deinen Freund für dich.',
-          'friends.example': 'Wenn du jemanden hinzufügen willst, gib bitte Benutzername#Tag ein. Beispiel: Julian#1234',
+          'friends.example': 'Wenn du jemanden hinzufügen willst, gib bitte Benutzername ein.',
           'request.confirm.title': 'Anfrage bestätigen',
           'request.confirm.text':
               'Wenn du eine Freundschaftsanfrage sendest, wird die andere Person dein Profil (Profilbild, Beschreibung, usw.) dauerhaft sehen können, es sei denn, du änderst deine Schlüssel. Bist du sicher, dass du dieser Person diese Informationen geben willst?',

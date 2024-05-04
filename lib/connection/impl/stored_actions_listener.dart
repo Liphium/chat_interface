@@ -71,8 +71,8 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     sendLog("WARNING: couldn't delete stored action");
   }
 
-  // Get friend by name and tag
-  final resJson = await postAuthorizedJSON("/account/stored_actions/details", {"username": json["name"], "tag": json["tag"]});
+  // Get friend by name (only works on current server)
+  final resJson = await postAuthorizedJSON("/account/stored_actions/details", {"username": json["name"]});
 
   if (!resJson["success"]) {
     sendLog("invalid friend request: ${json["error"]}");
@@ -122,7 +122,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 
   // Add friend request to vault
   final profileKey = unpackageSymmetricKey(json["pf"]);
-  request = Request(id, json["name"], json["tag"], "", actionId, KeyStorage(publicKey, signatureKey, profileKey, json["sa"]), DateTime.now().millisecondsSinceEpoch);
+  request = Request(id, json["name"], "", actionId, KeyStorage(publicKey, signatureKey, profileKey, json["sa"]), DateTime.now().millisecondsSinceEpoch);
 
   final vaultId = await storeInFriendsVault(request.toStoredPayload(false));
   if (vaultId == null) {

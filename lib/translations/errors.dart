@@ -42,9 +42,8 @@ class ErrorTranslations extends Translations {
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
           'profile_picture.not_set': 'Your profile picture couldn\'t be set. Please try again later or contact support.',
-          'tag.invalid': 'Your tag doesn\'t match the requirements. Please make it longer than 3 characters and don\'t use special characters.',
           'username.invalid': 'Your username doesn\'t match the requirements. Please make it longer than 3 characters.',
-          'username.taken': 'This combination of username and tag is taken, please choose something else.',
+          'username.taken': 'This username is taken, please choose a different one.',
           'password.mismatch': 'The passwords don\'t match.',
 
           // Game
@@ -83,9 +82,8 @@ class ErrorTranslations extends Translations {
           // Settings
           'profile_picture.not_uploaded': 'Dein Profilbild konnte nicht hochgeladen werden. Bitte versuche es später erneut oder kontaktiere den Support.',
           'profile_picture.not_set': 'Dein Profilbild konnte nicht gesetzt werden. Bitte versuche es später erneut oder kontaktiere den Support.',
-          'tag.invalid': 'Dein Tag entspricht nicht den Anforderungen. Bitte mache es länger als 3 Zeichen und verwende nur Buchstaben und Zahlen.',
           'username.invalid': 'Dein Benutzername entspricht nicht den Anforderungen. Bitte mache ihn länger als 3 Zeichen und verwende nur Buchstaben und Zahlen.',
-          'username.taken': 'Diese Kombination aus Benutzername und Tag ist bereits vergeben, bitte wähle etwas anderes.',
+          'username.taken': 'Dieser Benutzername ist bereits vergeben, bitte wähle einen anderen.',
           'password.mismatch': 'Die Passwörter stimmen nicht überein.',
 
           // Game

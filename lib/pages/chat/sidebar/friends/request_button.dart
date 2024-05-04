@@ -24,8 +24,7 @@ class _RequestButtonState extends State<RequestButton> {
     final children = <Widget>[
       IconButton(
         icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
-        onPressed: () =>
-            widget.self ? widget.request.cancel() : widget.request.ignore(),
+        onPressed: () => widget.self ? widget.request.cancel() : widget.request.ignore(),
       )
     ];
 
@@ -56,41 +55,35 @@ class _RequestButtonState extends State<RequestButton> {
 
         //* Request item content
         child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Row(
                 children: [
+                  Icon(Icons.email, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                  const SizedBox(width: 10),
+                  Text(widget.request.name, style: Get.theme.textTheme.titleMedium),
+                ],
+              ),
+
+              //* Request actions
+              Obx(() => widget.request.loading.value
+                  ? const SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: Padding(
+                        padding: EdgeInsets.all(defaultSpacing * 0.25),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                        ),
+                      ),
+                    )
+                  :
+
+                  //* Accept/decline
                   Row(
-                    children: [
-                      Icon(Icons.email,
-                          size: 30,
-                          color: Theme.of(context).colorScheme.onPrimary),
-                      const SizedBox(width: 10),
-                      Text("${widget.request.name}#${widget.request.tag}",
-                          style: Get.theme.textTheme.titleMedium),
-                    ],
-                  ),
-
-                  //* Request actions
-                  Obx(() => widget.request.loading.value
-                      ? const SizedBox(
-                          width: 25,
-                          height: 25,
-                          child: Padding(
-                            padding: EdgeInsets.all(defaultSpacing * 0.25),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                            ),
-                          ),
-                        )
-                      :
-
-                      //* Accept/decline
-                      Row(
-                          children: children,
-                        )),
-                ])),
+                      children: children,
+                    )),
+            ])),
       ),
     );
   }

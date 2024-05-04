@@ -101,7 +101,6 @@ class FriendController extends GetxController {
 class Friend {
   String id;
   String name;
-  String tag;
   String vaultId;
   KeyStorage keyStorage;
   bool unknown = false;
@@ -111,19 +110,17 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, this.tag, this.vaultId, this.keyStorage, this.updatedAt);
+  Friend(this.id, this.name, this.vaultId, this.keyStorage, this.updatedAt);
 
   Friend.system()
       : id = "system",
         name = "System",
-        tag = "fjc",
         vaultId = "",
         keyStorage = KeyStorage.empty(),
         updatedAt = 0;
   Friend.me([StatusController? controller])
       : id = '',
         name = '',
-        tag = '',
         vaultId = '',
         keyStorage = KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
         updatedAt = 0 {
@@ -133,7 +130,6 @@ class Friend {
   }
   Friend.unknown(this.id)
       : name = 'fj-$id',
-        tag = 'tag',
         vaultId = '',
         keyStorage = KeyStorage.empty(),
         updatedAt = 0 {
@@ -143,7 +139,6 @@ class Friend {
   Friend.fromEntity(FriendData data)
       : id = data.id,
         name = data.name,
-        tag = data.tag,
         vaultId = data.vaultId,
         keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
         updatedAt = data.updatedAt.toInt();
@@ -151,7 +146,6 @@ class Friend {
   Friend.fromStoredPayload(Map<String, dynamic> json, this.updatedAt)
       : id = json["id"],
         name = json["name"],
-        tag = json["tag"],
         vaultId = "",
         keyStorage = KeyStorage.fromJson(json);
 
@@ -161,7 +155,6 @@ class Friend {
       "rq": false,
       "id": id,
       "name": name,
-      "tag": tag,
     };
     reqPayload.addAll(keyStorage.toJson());
 
@@ -290,7 +283,6 @@ class Friend {
   FriendData entity() => FriendData(
         id: id,
         name: name,
-        tag: tag,
         vaultId: vaultId,
         keys: jsonEncode(keyStorage.toJson()),
         updatedAt: BigInt.from(updatedAt),

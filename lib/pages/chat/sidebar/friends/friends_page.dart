@@ -324,14 +324,7 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   void doAction() {
-    var args = query.value.split("#");
-    if (args.length != 2) {
-      // TODO: Open friend settings
-      sendLog("TODO: This is where we open friend settings or detect if the friend the user is trying to add doesn't exist");
-      return;
-    }
-
-    newFriendRequest(args[0], args[1], (message) {
+    newFriendRequest(query.value, (message) {
       revealSuccess.value = true;
       Timer(const Duration(seconds: 3), () {
         revealSuccess.value = false;

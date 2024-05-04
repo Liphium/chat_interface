@@ -66,7 +66,7 @@ class RequestController extends GetxController {
 
 final requestsLoading = false.obs;
 
-void newFriendRequest(String name, String tag, Function(String) success) async {
+void newFriendRequest(String name, Function(String) success) async {
   requestsLoading.value = true;
 
   final controller = Get.find<StatusController>();
@@ -79,7 +79,6 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   // Get public key and id of the user
   var json = await postAuthorizedJSON("/account/stored_actions/details", <String, dynamic>{
     "username": name,
-    "tag": tag,
   });
   if (!json["success"]) {
     showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
@@ -96,11 +95,11 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   await showConfirmPopup(ConfirmWindow(
     title: "request.confirm.title".tr,
     text: "request.confirm.text".trParams(<String, String>{
-      "username": "$name#$tag",
+      "username": name,
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(controller, name, tag, id, publicKey, signatureKey, success);
+      sendFriendRequest(controller, name, id, publicKey, signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -111,12 +110,12 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   return;
 }
 
-void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
+void sendFriendRequest(StatusController controller, String name, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
-    "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, "$name#$tag"),
+    "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, name),
     "pf": packageSymmetricKey(profileKey),
     "sa": storedActionKey,
   });
@@ -138,7 +137,7 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
     success("request.accepted");
   } else {
     // Save friend request in own vault
-    var request = Request(id, name, tag, "", "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
+    var request = Request(id, name, "", "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
     final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
 
     if (vaultId == null) {
@@ -161,7 +160,6 @@ void sendFriendRequest(StatusController controller, String name, String tag, Str
 class Request {
   final String id;
   final String name;
-  final String tag;
   String vaultId;
   String storedActionId;
   int updatedAt;
@@ -170,15 +168,13 @@ class Request {
 
   Request.mock(this.id)
       : name = "fj-$id",
-        tag = "tag",
         vaultId = "",
         storedActionId = "",
         keyStorage = KeyStorage.empty(),
         updatedAt = 0;
-  Request(this.id, this.name, this.tag, this.vaultId, this.storedActionId, this.keyStorage, this.updatedAt);
+  Request(this.id, this.name, this.vaultId, this.storedActionId, this.keyStorage, this.updatedAt);
   Request.fromEntity(RequestData data)
       : name = data.name,
-        tag = data.tag,
         vaultId = data.vaultId,
         storedActionId = data.storedActionId,
         keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
@@ -187,7 +183,6 @@ class Request {
 
   Request.fromStoredPayload(Map<String, dynamic> json, this.updatedAt)
       : name = json["name"],
-        tag = json["tag"],
         vaultId = "",
         storedActionId = json["sai"],
         keyStorage = KeyStorage.fromJson(json),
@@ -201,7 +196,6 @@ class Request {
       "self": self,
       "name": name,
       "sai": storedActionId,
-      "tag": tag,
     };
     reqPayload.addAll(keyStorage.toJson());
 
@@ -211,7 +205,6 @@ class Request {
   RequestData entity(bool self) => RequestData(
         id: id,
         name: name,
-        tag: tag,
         vaultId: vaultId,
         storedActionId: storedActionId,
         keys: jsonEncode(keyStorage.toJson()),
@@ -219,11 +212,11 @@ class Request {
         updatedAt: BigInt.from(updatedAt),
       );
 
-  Friend get friend => Friend(id, name, tag, vaultId, keyStorage, updatedAt);
+  Friend get friend => Friend(id, name, vaultId, keyStorage, updatedAt);
 
   // Accept friend request
   void accept(Function(String) success) {
-    sendFriendRequest(Get.find<StatusController>(), name, tag, id, keyStorage.publicKey, keyStorage.signatureKey, (msg) async {
+    sendFriendRequest(Get.find<StatusController>(), name, id, keyStorage.publicKey, keyStorage.signatureKey, (msg) async {
       success(msg);
     });
   }

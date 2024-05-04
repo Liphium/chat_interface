@@ -238,7 +238,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                                     size: 35,
                                   ),
                                   horizontalSpacing(defaultSpacing),
-                                  Text("${friend.name}#${friend.tag}", style: theme.textTheme.labelLarge),
+                                  Text(friend.name, style: theme.textTheme.labelLarge),
                                 ],
                               ),
                             ),

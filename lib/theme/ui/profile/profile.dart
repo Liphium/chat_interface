@@ -132,13 +132,6 @@ class _ProfileState extends State<Profile> {
                 UserAvatar(id: widget.friend.id, size: 40),
                 horizontalSpacing(defaultSpacing),
                 Text(widget.friend.name, style: Get.theme.textTheme.titleMedium),
-                Text(
-                  "#${widget.friend.tag}",
-                  style: Get.theme.textTheme.titleMedium!.copyWith(
-                    fontWeight: FontWeight.normal,
-                    color: Get.theme.colorScheme.onPrimary,
-                  ),
-                ),
               ],
             ),
 

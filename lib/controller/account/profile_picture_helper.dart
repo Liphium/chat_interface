@@ -31,10 +31,9 @@ class ProfilePictureHelper {
       return null;
     }
 
-    // Check if there is a new name and tag (also handled by the profile endpoint)
-    if (json["name"] != friend.name || json["tag"] != friend.tag) {
+    // Check if there is a new name (also handled by the profile endpoint)
+    if (json["name"] != friend.name) {
       friend.name = json["name"];
-      friend.tag = json["tag"];
       await friend.update();
     }
 
