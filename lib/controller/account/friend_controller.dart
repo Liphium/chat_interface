@@ -130,7 +130,6 @@ class Friend {
     final StatusController statusController = controller ?? Get.find();
     id = statusController.id.value;
     name = statusController.name.value;
-    tag = statusController.tag.value;
   }
   Friend.unknown(this.id)
       : name = 'fj-$id',

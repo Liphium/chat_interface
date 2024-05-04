@@ -79,11 +79,6 @@ class _ProfileState extends State<OwnProfile> {
                             style: theme.textTheme.titleMedium,
                             textHeightBehavior: noTextHeight,
                           ),
-                          Text(
-                            "#${controller.tag.value}",
-                            textHeightBehavior: noTextHeight,
-                            style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary),
-                          ),
                         ],
                       ),
 

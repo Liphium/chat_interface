@@ -33,7 +33,6 @@ class StatusController extends GetxController {
   }
 
   final name = 'test'.obs;
-  final tag = 'hi'.obs;
   final id = '0'.obs;
 
   // Status message
@@ -48,7 +47,6 @@ class StatusController extends GetxController {
   final ownContainer = Rx<ShareContainer?>(null);
 
   void setName(String value) => name.value = value;
-  void setTag(String value) => tag.value = value;
   void setId(String value) {
     id.value = value;
     StatusController.ownAccountId = value;
@@ -75,7 +73,7 @@ class StatusController extends GetxController {
   }
 
   String generateFriendId() {
-    return hashSha(id.value + name.value + tag.value + storedActionKey);
+    return hashSha(id.value + name.value + storedActionKey);
   }
 
   String statusPacket(String statusJson) {

@@ -1,4 +1,3 @@
-
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
@@ -36,14 +35,12 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
   Widget build(BuildContext context) {
     final controller = Get.find<StatusController>();
     _usernameController.text = controller.name.value;
-    _tagController.text = controller.tag.value;
 
     return DialogBase(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("settings.data.change_name.dialog".tr,
-              style: Get.theme.textTheme.bodyMedium),
+          Text("settings.data.change_name.dialog".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(sectionSpacing),
           LayoutBuilder(builder: (context, size) {
             return Row(
@@ -82,8 +79,7 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
               _loading.value = true;
               _errorText.value = "";
 
-              final json =
-                  await postAuthorizedJSON("/account/settings/change_name", {
+              final json = await postAuthorizedJSON("/account/settings/change_name", {
                 "name": _usernameController.text,
                 "tag": _tagController.text,
               });
@@ -95,12 +91,10 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
               }
 
               controller.name.value = _usernameController.text;
-              controller.tag.value = _tagController.text;
               _loading.value = false;
               Get.back();
             },
-            child: Center(
-                child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
+            child: Center(child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
           )
         ],
       ),

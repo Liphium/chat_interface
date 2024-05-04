@@ -70,15 +70,14 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   requestsLoading.value = true;
 
   final controller = Get.find<StatusController>();
-  if (name == controller.name.value && tag == controller.tag.value) {
+  if (name == controller.name.value) {
     showErrorPopup("request.self", "request.self.text");
     requestsLoading.value = false;
     return;
   }
 
   // Get public key and id of the user
-  var json = await postAuthorizedJSON(
-      "/account/stored_actions/details", <String, dynamic>{
+  var json = await postAuthorizedJSON("/account/stored_actions/details", <String, dynamic>{
     "username": name,
     "tag": tag,
   });
@@ -101,8 +100,7 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(
-          controller, name, tag, id, publicKey, signatureKey, success);
+      sendFriendRequest(controller, name, tag, id, publicKey, signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -113,21 +111,12 @@ void newFriendRequest(String name, String tag, Function(String) success) async {
   return;
 }
 
-void sendFriendRequest(
-    StatusController controller,
-    String name,
-    String tag,
-    String id,
-    Uint8List publicKey,
-    Uint8List signatureKey,
-    Function(String) success) async {
+void sendFriendRequest(StatusController controller, String name, String tag, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
-    "tag": controller.tag.value,
-    "s": encryptAsymmetricAuth(
-        publicKey, asymmetricKeyPair.secretKey, "$name#$tag"),
+    "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, "$name#$tag"),
     "pf": packageSymmetricKey(profileKey),
     "sa": storedActionKey,
   });
@@ -142,25 +131,15 @@ void sendFriendRequest(
 
   // Accept friend request if there is one from the other user
   final requestController = Get.find<RequestController>();
-  final requestSent = requestController.requests.firstWhere(
-      (element) => element.id == id,
-      orElse: () => Request.mock("hi"));
+  final requestSent = requestController.requests.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
   if (requestSent.id != "hi") {
     requestController.deleteRequest(requestSent);
     await Get.find<FriendController>().addFromRequest(requestSent);
     success("request.accepted");
   } else {
     // Save friend request in own vault
-    var request = Request(
-        id,
-        name,
-        tag,
-        "",
-        "",
-        KeyStorage(publicKey, signatureKey, profileKey, ""),
-        DateTime.now().millisecondsSinceEpoch);
-    final vaultId = await storeInFriendsVault(request.toStoredPayload(true),
-        errorPopup: true, prefix: "request");
+    var request = Request(id, name, tag, "", "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
+    final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
 
     if (vaultId == null) {
       requestsLoading.value = false;
@@ -196,8 +175,7 @@ class Request {
         storedActionId = "",
         keyStorage = KeyStorage.empty(),
         updatedAt = 0;
-  Request(this.id, this.name, this.tag, this.vaultId, this.storedActionId,
-      this.keyStorage, this.updatedAt);
+  Request(this.id, this.name, this.tag, this.vaultId, this.storedActionId, this.keyStorage, this.updatedAt);
   Request.fromEntity(RequestData data)
       : name = data.name,
         tag = data.tag,
@@ -245,8 +223,7 @@ class Request {
 
   // Accept friend request
   void accept(Function(String) success) {
-    sendFriendRequest(Get.find<StatusController>(), name, tag, id,
-        keyStorage.publicKey, keyStorage.signatureKey, (msg) async {
+    sendFriendRequest(Get.find<StatusController>(), name, tag, id, keyStorage.publicKey, keyStorage.signatureKey, (msg) async {
       success(msg);
     });
   }

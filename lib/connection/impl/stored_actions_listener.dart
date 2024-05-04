@@ -83,7 +83,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   final publicKey = unpackagePublicKey(resJson["key"]);
   final signatureKey = unpackagePublicKey(resJson["sg"]);
   final statusController = Get.find<StatusController>();
-  final signedMessage = "${statusController.name.value}#${statusController.tag.value}";
+  final signedMessage = statusController.name.value;
   final result = decryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, json["s"]);
   if (!result.success || result.message != signedMessage) {
     sendLog("invalid friend request: invalid signature");

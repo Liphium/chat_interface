@@ -22,7 +22,6 @@ class AccountSetup extends Setup {
     // Set all account data
     StatusController controller = Get.find();
     controller.name.value = account["username"];
-    controller.tag.value = account["tag"];
     controller.id.value = account["id"];
     StatusController.ownAccountId = account["id"];
 
