@@ -75,7 +75,7 @@ class _ProfileState extends State<OwnProfile> {
                           Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
                           Text(
-                            controller.name.value,
+                            controller.displayName.value,
                             style: theme.textTheme.titleMedium,
                             textHeightBehavior: noTextHeight,
                           ),
