@@ -19,6 +19,7 @@ class RegisterFinishPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterFinishPage> {
   final _usernameController = TextEditingController();
+  final _displayNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -29,6 +30,7 @@ class _RegisterPageState extends State<RegisterFinishPage> {
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _displayNameController.dispose();
     _usernameController.dispose();
     super.dispose();
   }
@@ -56,10 +58,23 @@ class _RegisterPageState extends State<RegisterFinishPage> {
 
                 Text("username".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
                 verticalSpacing(elementSpacing),
+                Text("username.description".tr, textAlign: TextAlign.left, style: theme.textTheme.bodyMedium),
+                verticalSpacing(elementSpacing),
                 FJTextField(
                   hintText: 'placeholder.username'.tr,
                   controller: _usernameController,
                   maxLength: 16,
+                ),
+                verticalSpacing(defaultSpacing),
+
+                Text("display_name".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
+                verticalSpacing(elementSpacing),
+                Text("display_name.description".tr, textAlign: TextAlign.left, style: theme.textTheme.bodyMedium),
+                verticalSpacing(elementSpacing),
+                FJTextField(
+                  hintText: 'placeholder.display_name'.tr,
+                  controller: _displayNameController,
+                  maxLength: 20,
                 ),
                 verticalSpacing(defaultSpacing),
 
@@ -90,8 +105,15 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                     _errorText.value = "";
 
                     // Check all the stuff
-                    if (_usernameController.text == '') {
+                    if (_usernameController.text == '' || _usernameController.text.length < 3) {
                       _errorText.value = 'username.invalid'.tr;
+                      _loading.value = false;
+                      return;
+                    }
+
+                    // Check all the stuff
+                    if (_displayNameController.text == '' || _displayNameController.text.length < 3) {
+                      _errorText.value = 'display_name.invalid'.tr;
                       _loading.value = false;
                       return;
                     }
@@ -109,7 +131,7 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                     }
 
                     // Send registration finish request
-                    final error = await RegisterHandler.finishRegistration(_loading, _usernameController.text, _passwordController.text);
+                    final error = await RegisterHandler.finishRegistration(_loading, _usernameController.text, _displayNameController.text, _passwordController.text);
                     if (error != null) {
                       _errorText.value = error;
                       return;

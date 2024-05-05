@@ -119,6 +119,7 @@ class SettingsTranslations extends Translations {
           'settings.data.danger_zone.delete_account.confirm':
               'This is just a request and your actual data will be deleted in 30 days. We do this to make sure you didn\'t just accidentally click this button and that you are the actual owner of this account. Are you sure you want to delete your account?',
           'settings.data.change_name.dialog': 'Want to change your username? Just provide it below and we\'ll handle it for you.',
+          'settings.data.change_display_name.dialog': 'Want to change your display name? We\'ll handle your request right here.',
 
           // Invite settings (this is mostly alpha only)
           'settings.invites.description':

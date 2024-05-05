@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_password_window.dart';
 import 'package:chat_interface/pages/settings/account/log_out_window.dart';
@@ -167,18 +168,20 @@ class DataSettingsPage extends StatelessWidget {
                 children: [
                   Text("display_name".tr, style: Get.theme.textTheme.labelMedium),
                   verticalSpacing(elementSpacing),
-                  Text(
-                    controller.displayName.value == controller.name.value
-                        ? List.generate(controller.name.value.length, (index) => "*").join("")
-                        : controller.displayName.value,
-                    style: Get.theme.textTheme.bodyMedium,
+                  Obx(
+                    () => Text(
+                      controller.displayName.value.toLowerCase() == controller.name.value.toLowerCase()
+                          ? List.generate(controller.name.value.length, (index) => "*").join("")
+                          : controller.displayName.value,
+                      style: Get.theme.textTheme.bodyMedium,
+                    ),
                   ),
                 ],
               ),
               horizontalSpacing(defaultSpacing),
               FJElevatedButton(
                 smallCorners: true,
-                onTap: () => Get.dialog(const ChangeNameWindow()),
+                onTap: () => Get.dialog(const ChangeDisplayNameWindow()),
                 child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
               ),
             ],

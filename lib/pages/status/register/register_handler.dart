@@ -71,13 +71,14 @@ class RegisterHandler {
   }
 
   /// Finish the registration (returns an error or null if successful)
-  static Future<String?> finishRegistration(RxBool loading, String username, String password) async {
+  static Future<String?> finishRegistration(RxBool loading, String username, String displayName, String password) async {
     loading.value = true;
 
     // Send a register finish request to the server
     final json = await postJSON("/auth/register/finish", {
       "token": registrationToken,
       "username": username,
+      "display_name": displayName,
       "password": password,
     });
     loading.value = false;

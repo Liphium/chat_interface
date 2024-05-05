@@ -8,16 +8,16 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ChangeNameWindow extends StatefulWidget {
-  const ChangeNameWindow({super.key});
+class ChangeDisplayNameWindow extends StatefulWidget {
+  const ChangeDisplayNameWindow({super.key});
 
   @override
-  State<ChangeNameWindow> createState() => _ChangeNameWindowState();
+  State<ChangeDisplayNameWindow> createState() => _ChangeNameWindowState();
 }
 
-class _ChangeNameWindowState extends State<ChangeNameWindow> {
+class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
   // Text controllers
-  final _usernameController = TextEditingController();
+  final _displayNameController = TextEditingController();
 
   // State
   final _errorText = ''.obs;
@@ -25,26 +25,26 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _displayNameController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<StatusController>();
-    _usernameController.text = controller.name.value;
+    _displayNameController.text = controller.displayName.value;
 
     return DialogBase(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("settings.data.change_name.dialog".tr, style: Get.theme.textTheme.labelMedium),
+          Text("settings.data.change_display_name.dialog".tr, style: Get.theme.textTheme.labelMedium),
           verticalSpacing(sectionSpacing),
-          Text("username.description".tr, style: Get.theme.textTheme.bodyMedium),
+          Text("display_name.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           FJTextField(
-            hintText: 'placeholder.username'.tr,
-            controller: _usernameController,
+            hintText: 'placeholder.display_name'.tr,
+            controller: _displayNameController,
             maxLength: 16,
           ),
           verticalSpacing(defaultSpacing),
@@ -60,8 +60,8 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
               _loading.value = true;
               _errorText.value = "";
 
-              final json = await postAuthorizedJSON("/account/settings/change_name", {
-                "name": _usernameController.text,
+              final json = await postAuthorizedJSON("/account/settings/change_display_name", {
+                "name": _displayNameController.text,
               });
 
               if (!json["success"]) {
@@ -70,7 +70,7 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
                 return;
               }
 
-              controller.name.value = _usernameController.text;
+              controller.displayName.value = _displayNameController.text;
               _loading.value = false;
               Get.back();
             },

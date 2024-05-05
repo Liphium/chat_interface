@@ -21,7 +21,8 @@ class SetupTranslations extends Translations {
 
           // Login/register
           'register.title': 'Register an account.',
-          'placeholder.username': 'name',
+          'placeholder.username': 'test123',
+          'placeholder.display_name': 'Test 123',
           'placeholder.password': 'yourmum123 (don\'t use this)',
           'placeholder.invite': 'your-invite-code',
           'password.invalid': 'Please enter a password that is longer than 8 characters.',

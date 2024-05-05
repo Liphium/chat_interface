@@ -23,7 +23,7 @@ class AccountSetup extends Setup {
     StatusController controller = Get.find();
     controller.name.value = account["username"];
     if (body["display_name"] != "") {
-      controller.displayName.value = body["display_name"];
+      controller.displayName.value = account["display_name"];
     } else {
       controller.displayName.value = account["username"];
     }
