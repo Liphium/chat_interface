@@ -127,7 +127,7 @@ class _FriendsPageState extends State<FriendsPage> {
 
                             Obx(() {
                               final found = friendController.friends.values.any((friend) =>
-                                  (friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
+                                  (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
                                       friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
                                   friend.id != StatusController.ownAccountId);
                               final hashtag = query.value.contains("#");
@@ -171,45 +171,48 @@ class _FriendsPageState extends State<FriendsPage> {
                             }),
 
                             //* Requests
-                            Obx(() => Animate(
-                                  effects: [
-                                    ReverseExpandEffect(
-                                      curve: Curves.easeInOut,
-                                      duration: 250.ms,
-                                      axis: Axis.vertical,
-                                    )
-                                  ],
-                                  target: query.value.isEmpty ? 0.0 : 1.0,
-                                  child: Visibility(
-                                      visible: requestController.requests.isNotEmpty,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          verticalSpacing(sectionSpacing),
-                                          Text("friends.requests".tr, style: theme.textTheme.labelLarge),
-                                          verticalSpacing(elementSpacing),
-                                          Builder(
-                                            builder: (context) {
-                                              if (requestController.requests.isEmpty) {
-                                                return const SizedBox.shrink();
-                                              }
-                                              return Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: requestController.requests.map((request) {
-                                                  return RequestButton(request: request, self: false);
-                                                }).toList(),
-                                              );
-                                            },
-                                          ),
-                                          Visibility(
-                                            visible: friendController.friends.length > 1 || requestController.requestsSent.isNotEmpty,
-                                            child: verticalSpacing(sectionSpacing - elementSpacing),
-                                          )
-                                        ],
-                                      )),
-                                )),
+                            Obx(
+                              () => Animate(
+                                effects: [
+                                  ReverseExpandEffect(
+                                    curve: Curves.easeInOut,
+                                    duration: 250.ms,
+                                    axis: Axis.vertical,
+                                  )
+                                ],
+                                target: query.value.isEmpty ? 0.0 : 1.0,
+                                child: Visibility(
+                                  visible: requestController.requests.isNotEmpty,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      verticalSpacing(sectionSpacing),
+                                      Text("friends.requests".tr, style: theme.textTheme.labelLarge),
+                                      verticalSpacing(elementSpacing),
+                                      Builder(
+                                        builder: (context) {
+                                          if (requestController.requests.isEmpty) {
+                                            return const SizedBox.shrink();
+                                          }
+                                          return Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: requestController.requests.map((request) {
+                                              return RequestButton(request: request, self: false);
+                                            }).toList(),
+                                          );
+                                        },
+                                      ),
+                                      Visibility(
+                                        visible: friendController.friends.length > 1 || requestController.requestsSent.isNotEmpty,
+                                        child: verticalSpacing(sectionSpacing - elementSpacing),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
 
                             //* Sent requests
                             Obx(
@@ -283,7 +286,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                             () {
                                               final friend = friendController.friends.values.elementAt(index);
                                               final visible = query.value.isEmpty ||
-                                                  friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
+                                                  friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
                                                   friend.name.toLowerCase().contains(query.value.toLowerCase());
                                               return Visibility(
                                                 visible: friend.id != StatusController.ownAccountId,

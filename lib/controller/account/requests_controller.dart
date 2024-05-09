@@ -7,6 +7,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -66,6 +67,7 @@ class RequestController extends GetxController {
 
 final requestsLoading = false.obs;
 
+/// Send a new friend request to an account by name
 void newFriendRequest(String name, Function(String) success) async {
   requestsLoading.value = true;
 
@@ -95,11 +97,11 @@ void newFriendRequest(String name, Function(String) success) async {
   await showConfirmPopup(ConfirmWindow(
     title: "request.confirm.title".tr,
     text: "request.confirm.text".trParams(<String, String>{
-      "username": name,
+      "username": "${json["display_name"]} ($name)",
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(controller, name, id, publicKey, signatureKey, success);
+      sendFriendRequest(controller, name, UTFString.untransform(json["display_name"]), id, publicKey, signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -110,11 +112,14 @@ void newFriendRequest(String name, Function(String) success) async {
   return;
 }
 
-void sendFriendRequest(StatusController controller, String name, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
+/// Send a friend request to an account
+void sendFriendRequest(
+    StatusController controller, String name, UTFString displayName, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
+    "dname": controller.displayName.value.text,
     "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, name),
     "pf": packageSymmetricKey(profileKey),
     "sa": storedActionKey,
@@ -137,7 +142,7 @@ void sendFriendRequest(StatusController controller, String name, String id, Uint
     success("request.accepted");
   } else {
     // Save friend request in own vault
-    var request = Request(id, name, "", "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
+    var request = Request(id, name, displayName, "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
     final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
 
     if (vaultId == null) {
@@ -160,33 +165,42 @@ void sendFriendRequest(StatusController controller, String name, String id, Uint
 class Request {
   final String id;
   final String name;
+  final UTFString displayName;
   String vaultId;
-  String storedActionId;
   int updatedAt;
   final KeyStorage keyStorage;
   final loading = false.obs;
 
-  Request.mock(this.id)
-      : name = "fj-$id",
-        vaultId = "",
-        storedActionId = "",
-        keyStorage = KeyStorage.empty(),
-        updatedAt = 0;
-  Request(this.id, this.name, this.vaultId, this.storedActionId, this.keyStorage, this.updatedAt);
-  Request.fromEntity(RequestData data)
-      : name = data.name,
-        vaultId = data.vaultId,
-        storedActionId = data.storedActionId,
-        keyStorage = KeyStorage.fromJson(jsonDecode(data.keys)),
-        id = data.id,
-        updatedAt = data.updatedAt.toInt();
+  Request(this.id, this.name, this.displayName, this.vaultId, this.keyStorage, this.updatedAt);
 
-  Request.fromStoredPayload(Map<String, dynamic> json, this.updatedAt)
-      : name = json["name"],
-        vaultId = "",
-        storedActionId = json["sai"],
-        keyStorage = KeyStorage.fromJson(json),
-        id = json["id"];
+  /// Type to mock a request in case of orElse: statements. DON'T USE FOR TESTING
+  factory Request.mock(String id) {
+    return Request(id, "", UTFString(""), "", KeyStorage.empty(), 0);
+  }
+
+  /// Get a request from the database object
+  factory Request.fromEntity(RequestData data) {
+    return Request(
+      data.id,
+      data.name,
+      UTFString.untransform(data.displayName),
+      data.vaultId,
+      KeyStorage.fromJson(jsonDecode(data.keys)),
+      data.updatedAt.toInt(),
+    );
+  }
+
+  /// Get a request from a stored payload in the database
+  factory Request.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
+    return Request(
+      json["id"],
+      json["name"],
+      UTFString.untransform(json["display_name"]),
+      "",
+      KeyStorage.fromJson(json),
+      updatedAt,
+    );
+  }
 
   // Convert to a payload for the friends vault (on the server)
   String toStoredPayload(bool self) {
@@ -195,28 +209,31 @@ class Request {
       "id": id,
       "self": self,
       "name": name,
-      "sai": storedActionId,
+      "display_name": displayName.transform(),
     };
     reqPayload.addAll(keyStorage.toJson());
 
     return jsonEncode(reqPayload);
   }
 
+  /// Convert a request object to the equivalent database object
   RequestData entity(bool self) => RequestData(
         id: id,
         name: name,
+        displayName: displayName.transform(),
         vaultId: vaultId,
-        storedActionId: storedActionId,
         keys: jsonEncode(keyStorage.toJson()),
         self: self,
         updatedAt: BigInt.from(updatedAt),
       );
 
-  Friend get friend => Friend(id, name, name, vaultId, keyStorage, updatedAt);
+  /// Convert a request to a friend (for when the request is accepted)
+  Friend get friend => Friend(id, name, displayName, vaultId, keyStorage, updatedAt);
 
   // Accept friend request
   void accept(Function(String) success) {
-    sendFriendRequest(Get.find<StatusController>(), name, id, keyStorage.publicKey, keyStorage.signatureKey, (msg) async {
+    // Send a request to the same guy (this thing will detect that the request already exist and then add him, this avoids code duplication)
+    sendFriendRequest(Get.find<StatusController>(), name, displayName, id, keyStorage.publicKey, keyStorage.signatureKey, (msg) async {
       success(msg);
     });
   }
@@ -225,7 +242,6 @@ class Request {
   void ignore() async {
     // Delete from friends vault
     await removeFromFriendsVault(vaultId);
-    await deleteStoredAction(storedActionId);
 
     // Delete from requests
     final requestController = Get.find<RequestController>();

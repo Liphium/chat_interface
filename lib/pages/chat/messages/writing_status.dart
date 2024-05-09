@@ -29,7 +29,7 @@ class _WritingStatusNotifierState extends State<WritingStatusNotifier> {
     }
 
     if (widget.writers.isEmpty && lastWriter != "-1") {
-      members = friendController.friends[lastWriter]!.displayName.value;
+      members = friendController.friends[lastWriter]!.displayName.value.text;
     } else if (lastWriter != "-1") {
       members = members.substring(0, members.length - 2);
     }

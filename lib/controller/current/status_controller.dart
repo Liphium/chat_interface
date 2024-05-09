@@ -13,6 +13,7 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
@@ -32,7 +33,7 @@ class StatusController extends GetxController {
     });
   }
 
-  final displayName = 'not-set'.obs;
+  final displayName = UTFString("not-set").obs;
   final name = 'not-set'.obs;
 
   // Status message

@@ -359,6 +359,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                       sens.setValue(value);
                       api.setTalkingAmplitude(amplitude: value);
                     },
+                    label: "${(sens.value.value as double).toStringAsFixed(1)} dB",
                   ),
                 ],
               );

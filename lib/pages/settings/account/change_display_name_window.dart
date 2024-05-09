@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -32,7 +33,7 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<StatusController>();
-    _displayNameController.text = controller.displayName.value;
+    _displayNameController.text = controller.displayName.value.text;
 
     return DialogBase(
       child: Column(
@@ -61,7 +62,7 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
               _errorText.value = "";
 
               final json = await postAuthorizedJSON("/account/settings/change_display_name", {
-                "name": _displayNameController.text,
+                "name": UTFString(_displayNameController.text).transform(),
               });
 
               if (!json["success"]) {
@@ -70,7 +71,7 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
                 return;
               }
 
-              controller.displayName.value = _displayNameController.text;
+              controller.displayName.value = UTFString(_displayNameController.text);
               _loading.value = false;
               Get.back();
             },

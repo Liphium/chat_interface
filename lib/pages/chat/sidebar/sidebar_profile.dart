@@ -150,7 +150,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                             Flexible(
                                               child: Obx(
                                                 () => Text(
-                                                  controller.displayName.value,
+                                                  controller.displayName.value.text,
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: theme.textTheme.titleMedium,

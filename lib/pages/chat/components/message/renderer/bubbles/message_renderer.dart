@@ -55,7 +55,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
               visible: !widget.last,
               replacement: const SizedBox(width: 34), //* Show timestamp instead
               child: Tooltip(
-                message: sender.displayName.value,
+                message: sender.displayName.value.text,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onTap: () => Get.dialog(Profile(friend: sender)),

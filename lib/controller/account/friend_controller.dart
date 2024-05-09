@@ -5,13 +5,13 @@ import 'dart:ui' as ui;
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
@@ -57,9 +57,6 @@ class FriendController extends GetxController {
       sendLog("ADDING REGARDLESS");
       return false;
     }
-
-    // Remove stored action from server
-    await deleteStoredAction(request.storedActionId);
 
     // Add friend to vault
     final id = await storeInFriendsVault(request.friend.toStoredPayload());
@@ -108,9 +105,9 @@ class Friend {
   int updatedAt;
 
   // Display name of the friend
-  final displayName = "".obs;
+  final displayName = UTFString("").obs;
 
-  void updateDisplayName(String displayName) {
+  void updateDisplayName(UTFString displayName) {
     this.displayName.value = displayName;
     db.friend.insertOnConflictUpdate(entity());
   }
@@ -118,13 +115,13 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, String displayName, this.vaultId, this.keyStorage, this.updatedAt) {
+  Friend(this.id, this.name, UTFString displayName, this.vaultId, this.keyStorage, this.updatedAt) {
     this.displayName.value = displayName;
   }
 
   /// The friend for a system component (used in system messages for members)
   factory Friend.system() {
-    return Friend("system", "system", "system", "", KeyStorage.empty(), 0);
+    return Friend("system", "system", UTFString("system"), "", KeyStorage.empty(), 0);
   }
 
   /// Own account as a friend (used to make implementations simpler)
@@ -133,7 +130,7 @@ class Friend {
     return Friend(
       StatusController.ownAccountId,
       controller.name.value,
-      controller.name.value,
+      controller.displayName.value,
       "",
       KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
       0,
@@ -142,7 +139,7 @@ class Friend {
 
   /// Used for unknown accounts where only an id is known
   factory Friend.unknown(String id) {
-    final friend = Friend(id, "lph-$id", "lph-$id", "", KeyStorage.empty(), 0);
+    final friend = Friend(id, "lph-$id", UTFString("lph-$id"), "", KeyStorage.empty(), 0);
     friend.unknown = true;
     return friend;
   }
@@ -152,7 +149,7 @@ class Friend {
     return Friend(
       data.id,
       data.name,
-      data.displayName,
+      UTFString.untransform(data.displayName),
       data.vaultId,
       KeyStorage.fromJson(jsonDecode(data.keys)),
       data.updatedAt.toInt(),
@@ -161,7 +158,7 @@ class Friend {
 
   /// Convert a json to a friend (used for friends vault)
   factory Friend.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
-    return Friend(json["id"], json["name"], json["name"], "", KeyStorage.fromJson(json), updatedAt);
+    return Friend(json["id"], json["name"], UTFString.untransform(json["dname"]), "", KeyStorage.fromJson(json), updatedAt);
   }
 
   // Convert to a stored payload for the friends vault
@@ -170,6 +167,7 @@ class Friend {
       "rq": false, // If it is a request or not (requests are stored in the same place)
       "id": id,
       "name": name,
+      "dname": displayName.value.transform(),
     };
     reqPayload.addAll(keyStorage.toJson());
 
@@ -182,7 +180,7 @@ class Friend {
   FriendData entity() => FriendData(
         id: id,
         name: name,
-        displayName: displayName.value,
+        displayName: displayName.value.transform(),
         vaultId: vaultId,
         keys: jsonEncode(keyStorage.toJson()),
         updatedAt: BigInt.from(updatedAt),

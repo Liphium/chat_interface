@@ -1,6 +1,7 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/register/register_handler.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
@@ -131,7 +132,8 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                     }
 
                     // Send registration finish request
-                    final error = await RegisterHandler.finishRegistration(_loading, _usernameController.text, _displayNameController.text, _passwordController.text);
+                    final error = await RegisterHandler.finishRegistration(
+                        _loading, _usernameController.text, UTFString(_displayNameController.text).transform(), _passwordController.text);
                     if (error != null) {
                       _errorText.value = error;
                       return;

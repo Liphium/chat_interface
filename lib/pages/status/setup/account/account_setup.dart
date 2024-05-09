@@ -2,6 +2,8 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,10 +24,12 @@ class AccountSetup extends Setup {
     // Set all account data
     StatusController controller = Get.find();
     controller.name.value = account["username"];
-    if (body["display_name"] != "") {
-      controller.displayName.value = account["display_name"];
+    if (account["display_name"] != "") {
+      sendLog("HELLO DISPLAY NAME FROM SERVER ${account["display_name"]}");
+      controller.displayName.value = UTFString.untransform(account["display_name"]);
     } else {
-      controller.displayName.value = account["username"];
+      controller.displayName.value = UTFString(account["username"]);
+      sendLog("SETTING DISPLAY NAME ${controller.displayName.value.text}");
     }
     StatusController.ownAccountId = account["id"];
 

@@ -12,6 +12,7 @@ import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -93,7 +94,6 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   // Check if the current account already sent this account a friend request (-> add friend)
   final id = resJson["account"];
   var request = Get.find<RequestController>().requestsSent.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
-  sendLog("${request.id} | $id");
 
   if (request.id != "hi") {
     // This request doesn't have the right key storage yet
@@ -122,7 +122,14 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 
   // Add friend request to vault
   final profileKey = unpackageSymmetricKey(json["pf"]);
-  request = Request(id, json["name"], "", actionId, KeyStorage(publicKey, signatureKey, profileKey, json["sa"]), DateTime.now().millisecondsSinceEpoch);
+  request = Request(
+    id,
+    json["name"],
+    UTFString.untransform(json["dname"]),
+    "",
+    KeyStorage(publicKey, signatureKey, profileKey, json["sa"]),
+    DateTime.now().millisecondsSinceEpoch,
+  );
 
   final vaultId = await storeInFriendsVault(request.toStoredPayload(false));
   if (vaultId == null) {

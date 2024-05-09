@@ -50,7 +50,12 @@ class FJSlider extends StatelessWidget {
               onChangeEnd: onChangeEnd,
             ),
           ),
-          label != null ? Text(label!) : const SizedBox(),
+          label != null
+              ? Padding(
+                  padding: const EdgeInsets.only(left: defaultSpacing),
+                  child: Text(label!),
+                )
+              : const SizedBox(),
         ],
       ),
     );

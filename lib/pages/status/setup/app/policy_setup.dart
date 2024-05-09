@@ -120,7 +120,7 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> {
                 ),
                 FJElevatedButton(
                   onTap: () async {
-                    const url = "https://liphium.com/legal";
+                    const url = "https://liphium.com/legal/terms";
                     if (await canLaunchUrl(Uri.parse(url))) {
                       final result = await launchUrl(Uri.parse(url));
                       if (result) {

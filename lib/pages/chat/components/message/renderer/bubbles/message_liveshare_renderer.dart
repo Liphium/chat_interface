@@ -100,7 +100,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                 Visibility(
                   visible: !widget.last,
                   replacement: const SizedBox(width: 34), //* Show timestamp instead
-                  child: Obx(() => Tooltip(message: sender.displayName.value, child: UserAvatar(id: sender.id, size: 34))),
+                  child: Obx(() => Tooltip(message: sender.displayName.value.text, child: UserAvatar(id: sender.id, size: 34))),
                 ),
                 horizontalSpacing(defaultSpacing),
 
