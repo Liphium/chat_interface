@@ -255,7 +255,9 @@ class Friend {
   void loadProfilePicture() async {
     profilePictureUsages++;
 
-    if (DateTime.now().difference(lastProfilePictureUpdate).inMinutes > 2) {
+    sendLog(DateTime.now().difference(lastProfilePictureUpdate));
+    if (DateTime.now().difference(lastProfilePictureUpdate).inSeconds >= 1) {
+      sendLog("refresh");
       lastProfilePictureUpdate = DateTime.now();
 
       final result = await ProfileHelper.downloadProfilePicture(this);

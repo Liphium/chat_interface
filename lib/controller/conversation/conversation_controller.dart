@@ -166,21 +166,30 @@ class Conversation {
   }
 
   Future<bool> fetchNotificationCount() async {
-    final count = await db.customSelect("SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?",
-        variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))], readsFrom: {db.message}).getSingle();
+    final count = await db.customSelect(
+      "SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?",
+      variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))],
+      readsFrom: {db.message},
+    ).getSingle();
     notificationCount.value += (count.data["c"] ?? 0) as int;
     return true;
   }
 
   bool get isGroup => type == model.ConversationType.group;
-  String get dmName => (Get.find<FriendController>().friends[members.values
-              .firstWhere(
-                (element) => element.account != StatusController.ownAccountId,
-                orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user),
-              )
-              .account] ??
-          Friend.unknown(container.name))
-      .name;
+
+  String get dmName {
+    final member = members.values.firstWhere(
+      (element) => element.account != StatusController.ownAccountId,
+      orElse: () => Member(
+        StatusController.ownAccountId,
+        StatusController.ownAccountId,
+        MemberRole.user,
+      ),
+    );
+    final friend = Get.find<FriendController>().friends[member.account] ?? Friend.unknown(container.name);
+    return friend.displayName.value.text;
+  }
+
   bool get borked =>
       !isGroup &&
       Get.find<FriendController>().friends[members.values

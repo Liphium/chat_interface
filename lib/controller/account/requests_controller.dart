@@ -119,7 +119,7 @@ void sendFriendRequest(
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
     "name": controller.name.value,
-    "dname": controller.displayName.value.text,
+    "dname": controller.displayName.value.transform(),
     "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, name),
     "pf": packageSymmetricKey(profileKey),
     "sa": storedActionKey,
