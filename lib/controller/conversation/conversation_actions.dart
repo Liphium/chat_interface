@@ -138,10 +138,9 @@ Future<bool> addToConversation(Conversation conv, Friend friend) async {
   return result;
 }
 
-String _conversationPayload(String id, ConversationToken token, String packagedKey, Friend friend) {
+Map<String, dynamic> _conversationPayload(String id, ConversationToken token, String packagedKey, Friend friend) {
   final signature = signMessage(signatureKeyPair.secretKey, "$id${friend.id}");
-  return storedAction("conv", {
-    "s": StatusController.ownAccountId,
+  return authenticatedStoredAction("conv", {
     "id": id,
     "sg": signature,
     "token": token.toJson(),

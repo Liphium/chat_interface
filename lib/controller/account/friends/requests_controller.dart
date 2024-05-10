@@ -114,7 +114,14 @@ void newFriendRequest(String name, Function(String) success) async {
 
 /// Send a friend request to an account
 void sendFriendRequest(
-    StatusController controller, String name, UTFString displayName, String id, Uint8List publicKey, Uint8List signatureKey, Function(String) success) async {
+  StatusController controller,
+  String name,
+  UTFString displayName,
+  String id,
+  Uint8List publicKey,
+  Uint8List signatureKey,
+  Function(String) success,
+) async {
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
@@ -143,7 +150,7 @@ void sendFriendRequest(
   } else {
     // Save friend request in own vault
     var request = Request(id, name, displayName, "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
-    final vaultId = await storeInFriendsVault(request.toStoredPayload(true), errorPopup: true, prefix: "request");
+    final vaultId = await FriendsVault.store(request.toStoredPayload(true), errorPopup: true, prefix: "request");
 
     if (vaultId == null) {
       requestsLoading.value = false;
@@ -241,7 +248,7 @@ class Request {
   // Decline friend request
   void ignore() async {
     // Delete from friends vault
-    await removeFromFriendsVault(vaultId);
+    await FriendsVault.remove(vaultId);
 
     // Delete from requests
     final requestController = Get.find<RequestController>();
@@ -251,7 +258,7 @@ class Request {
   // Cancel friend request (only for sent requests)
   void cancel() async {
     // Delete from friends vault
-    await removeFromFriendsVault(vaultId);
+    await FriendsVault.remove(vaultId);
 
     // Delete from sent requests
     final requestController = Get.find<RequestController>();

@@ -5,13 +5,14 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/setup_listener.dart';
-import 'package:chat_interface/controller/account/friend_controller.dart';
-import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -34,15 +35,71 @@ void setupStoredActionListener() {
 }
 
 Future<bool> processStoredAction(Map<String, dynamic> action) async {
-  // Decrypt stored action payload
+  // Delete stored action
+  final response = await deleteStoredAction(action["id"]);
+  if (!response) {
+    sendLog("WARNING: couldn't delete stored action, maybe other device?");
+  }
+
+  // Handle authenticated stored actions
+  if (action["a"]) {
+    // Decrypt payload with sequence number
+    final extracted = SequencedInfo.extract(action["payload"]);
+    if (extracted.error) {
+      sendLog("ERROR: invalid format for authenticated stored action");
+      return false;
+    }
+
+    // Parse the json and get the sender
+    final json = jsonDecode(extracted.text);
+    final sender = Get.find<FriendController>().friends[json["s"]];
+    if (sender == null) {
+      sendLog("ERROR: sender of authenticated stored action isn't a friend");
+      return false;
+    }
+    if (sender.vaultId == "") {
+      sendLog("ERROR: vault id of sender is not available for authenticated stored action");
+      return false;
+    }
+
+    // Check if the sequence number (date) is higher than the last received
+    final lastReceived = await FriendsVault.lastReceiveDate(sender.vaultId);
+    if (lastReceived == null) {
+      sendLog("ERROR: couldn't retrieve the last received date of sender for authenticated stored action");
+      return false;
+    }
+    if (extracted.seq <= lastReceived.millisecondsSinceEpoch) {
+      sendLog("ERROR: sequence number on authenticated stored action is out of date");
+      return false;
+    }
+
+    // Verify the signature
+    if (!extracted.verifySignature(sender.keyStorage.signatureKey)) {
+      sendLog("ERROR: signature of authenticated stored action is invalid");
+      return false;
+    }
+
+    // Update the last receive date to the latest sequence number
+    final result = await FriendsVault.setReceiveDate(sender.vaultId, DateTime.fromMillisecondsSinceEpoch(extracted.seq));
+    if (!result) {
+      sendLog("WARNING: the last receive date couldn't be updated, this might cause future replay attacks, ignoring for now");
+      return false;
+    }
+
+    switch (json["a"]) {
+      // Handle conversation opening
+      case "conv":
+        sendLog("handling friend request");
+        await _handleConversationOpening(action["id"], json);
+        break;
+    }
+
+    return true;
+  }
+
+  // Handle normal stored actions
   final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, action["payload"]);
   if (payload == "") {
-    // Delete the action (invalid)
-    sendLog("invalid stored action: couldn't decrypt payload (DELETED)");
-    final response = await deleteStoredAction(action["id"]);
-    if (!response) {
-      sendLog("WARNING: couldn't delete stored action");
-    }
     return true;
   }
 
@@ -52,12 +109,6 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
     case "fr_rq":
       sendLog("handling friend request");
       await _handleFriendRequestAction(action["id"], json);
-      break;
-
-    // Handle conversation opening
-    case "conv":
-      sendLog("handling conversation opening");
-      await _handleConversationOpening(action["id"], json);
       break;
   }
 
@@ -131,7 +182,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     DateTime.now().millisecondsSinceEpoch,
   );
 
-  final vaultId = await storeInFriendsVault(request.toStoredPayload(false));
+  final vaultId = await FriendsVault.store(request.toStoredPayload(false));
   if (vaultId == null) {
     sendLog("couldn't store in vault: something happened");
     return true;
@@ -158,6 +209,8 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     sendLog("invalid conversation opening: friend doesn't exist");
     return true;
   }
+
+  // Check the signature
 
   final token = jsonDecode(actionJson["token"]);
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"id": token["id"], "token": token["token"]});

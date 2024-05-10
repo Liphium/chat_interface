@@ -6,11 +6,12 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
-import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -20,7 +21,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
-part 'key_container.dart';
 part 'friends_vault.dart';
 
 class FriendController extends GetxController {
@@ -51,7 +51,7 @@ class FriendController extends GetxController {
 
     // Remove request from server
     sendLog(request.vaultId);
-    final friendsVault = await removeFromFriendsVault(request.vaultId);
+    final friendsVault = await FriendsVault.remove(request.vaultId);
     if (!friendsVault) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
       sendLog("ADDING REGARDLESS");
@@ -59,7 +59,7 @@ class FriendController extends GetxController {
     }
 
     // Add friend to vault
-    final id = await storeInFriendsVault(request.friend.toStoredPayload());
+    final id = await FriendsVault.store(request.friend.toStoredPayload(), lastPacket: request.updatedAt);
     sendLog("STORING IN FRIENDS VAULT");
 
     if (id == null) {
@@ -191,8 +191,8 @@ class Friend {
     if (id == StatusController.ownAccountId) {
       return false;
     }
-    await removeFromFriendsVault(vaultId);
-    final result = await storeInFriendsVault(toStoredPayload());
+    await FriendsVault.remove(vaultId);
+    final result = await FriendsVault.store(toStoredPayload());
     if (result == null) {
       // TODO: Log somewhere
       sendLog("FRIEND CONFLICT: Couldn't update in vault!");
@@ -299,7 +299,7 @@ class Friend {
   Future<bool> remove(RxBool loading) async {
     loading.value = true;
 
-    await removeFromFriendsVault(vaultId);
+    await FriendsVault.remove(vaultId);
     db.friend.deleteWhere((tbl) => tbl.id.equals(id));
     Get.find<FriendController>().friends.remove(id);
 

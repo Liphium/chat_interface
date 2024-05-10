@@ -174,6 +174,16 @@ String storedAction(String name, Map<String, dynamic> payload) {
   return jsonEncode(prefixJson);
 }
 
+// Creates an authenticated stored action with the given name and payload
+Map<String, dynamic> authenticatedStoredAction(String name, Map<String, dynamic> payload) {
+  final prefixJson = <String, dynamic>{
+    "a": name,
+  };
+  prefixJson.addAll(payload);
+
+  return prefixJson;
+}
+
 /// Translate an error with parameters (for example: file.not_uploaded:PARAMETER)
 String translateError(String error) {
   final args = error.split(":");
