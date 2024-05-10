@@ -72,7 +72,8 @@ class _MessageInputState extends State<MessageInput> {
 
   void resetCurrentDraft() {
     if (MessageSendHelper.currentDraft.value != null) {
-      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] = MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
+      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] =
+          MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
       MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
       _message.clear();
     }
@@ -82,11 +83,13 @@ class _MessageInputState extends State<MessageInput> {
   /// Replace the current selection with a new text
   void replaceSelection(String replacer) {
     // Compute the new offset before the text is changed
-    final beforeLeft = _message.selection.baseOffset > _message.selection.extentOffset ? _message.selection.baseOffset : _message.selection.extentOffset;
+    final beforeLeft =
+        _message.selection.baseOffset > _message.selection.extentOffset ? _message.selection.baseOffset : _message.selection.extentOffset;
     final newOffset = beforeLeft - (_message.selection.end - _message.selection.start) + replacer.length;
 
     // Change the text in the field to include the pasted text
-    _message.text = _message.text.substring(0, _message.selection.start) + replacer + _message.text.substring(_message.selection.end, _message.text.length);
+    _message.text =
+        _message.text.substring(0, _message.selection.start) + replacer + _message.text.substring(_message.selection.end, _message.text.length);
 
     // Change the selection to the calculated offset
     _message.selection = _message.selection.copyWith(
@@ -105,8 +108,8 @@ class _MessageInputState extends State<MessageInput> {
         onInvoke: (SendIntent intent) {
           final controller = Get.find<MessageController>();
           if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
-            sendTextMessage(
-                loading, controller.selectedConversation.value.id, _message.text, [], MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
+            sendTextMessage(loading, controller.selectedConversation.value.id, _message.text, [],
+                MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
             return;
           }
 
@@ -210,8 +213,8 @@ class _MessageInputState extends State<MessageInput> {
                                 Expanded(
                                   child: Text(
                                     "message.reply.text".trParams({
-                                      "name": Get.find<FriendController>().friends[answer.senderAccount]?.displayName.value.text ??
-                                          Friend.unknown(answer.senderAccount).displayName.value.text,
+                                      "name": Get.find<FriendController>().friends[answer.senderAccount]?.name ??
+                                          Friend.unknown(answer.senderAccount).name,
                                     }),
                                     style: theme.textTheme.labelMedium,
                                     maxLines: 1,
@@ -275,6 +278,7 @@ class _MessageInputState extends State<MessageInput> {
                             if (MessageSendHelper.currentDraft.value!.files.length == 5) {
                               return;
                             }
+
                             final result = await openFile();
                             if (result == null) {
                               return;
