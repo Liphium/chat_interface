@@ -15,6 +15,8 @@ PODS:
   - livekit_client (2.1.2):
     - FlutterMacOS
     - WebRTC-SDK (= 114.5735.09)
+  - pasteboard (0.0.1):
+    - FlutterMacOS
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -54,6 +56,7 @@ DEPENDENCIES:
   - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - livekit_client (from `Flutter/ephemeral/.symlinks/plugins/livekit_client/macos`)
+  - pasteboard (from `Flutter/ephemeral/.symlinks/plugins/pasteboard/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - rust_builder (from `Flutter/ephemeral/.symlinks/plugins/rust_builder/macos`)
   - screen_retriever (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos`)
@@ -83,6 +86,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   livekit_client:
     :path: Flutter/ephemeral/.symlinks/plugins/livekit_client/macos
+  pasteboard:
+    :path: Flutter/ephemeral/.symlinks/plugins/pasteboard/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   rust_builder:
@@ -106,9 +111,10 @@ SPEC CHECKSUMS:
   flutter_webrtc: e72bd998301fa4abde8ac5fdea3d6ca2dcab1fc0
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   livekit_client: 89fdd9fbbd10340b3d03bf632b541f493baac762
+  pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   ReachabilitySwift: 2128f3a8c9107e1ad33574c6e58e8285d460b149
-  rust_builder: 6738c8d8b69bd450ecab698785e4915a3cbf756f
+  rust_builder: d12bee1ea4ace21cd643a25b0062811e337da901
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
   sodium_libs: d39bd76697736cb11ce4a0be73b9b4bc64466d6f
   sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
