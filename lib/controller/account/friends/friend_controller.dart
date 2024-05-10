@@ -77,7 +77,9 @@ class FriendController extends GetxController {
   void add(Friend friend) {
     sendLog("registered friend ${friend.id}");
     friends[friend.id] = friend;
-    db.friend.insertOnConflictUpdate(friend.entity());
+    if (friend.id != StatusController.ownAccountId) {
+      db.friend.insertOnConflictUpdate(friend.entity());
+    }
     friendIdLookup[friendId(friend)] = friend;
   }
 
@@ -108,6 +110,9 @@ class Friend {
   final displayName = UTFString("").obs;
 
   void updateDisplayName(UTFString displayName) {
+    if (id == StatusController.ownAccountId) {
+      return;
+    }
     this.displayName.value = displayName;
     db.friend.insertOnConflictUpdate(entity());
   }
@@ -116,7 +121,9 @@ class Friend {
   final openConversationLoading = false.obs;
 
   Friend(this.id, this.name, UTFString displayName, this.vaultId, this.keyStorage, this.updatedAt) {
+    sendLog("SETTING 123456");
     this.displayName.value = displayName;
+    sendLog("DISPLAY FRIEND ${this.displayName.value.text}");
   }
 
   /// The friend for a system component (used in system messages for members)

@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,7 +33,11 @@ class _UserAvatarState extends State<UserAvatar> {
   }
 
   Friend getFriend() {
-    return (widget.user ?? (widget.controller ?? Get.find<FriendController>()).friends[widget.id]) ?? Friend.unknown(widget.id);
+    if (widget.user != null) {
+      return widget.user!;
+    }
+    final controller = widget.controller ?? Get.find<FriendController>();
+    return controller.friends[widget.id] ?? Friend.unknown(widget.id);
   }
 
   @override
@@ -53,6 +58,8 @@ class _UserAvatarState extends State<UserAvatar> {
               ),
             );
           }
+
+          sendLog(friend.name);
 
           return ClipOval(
             child: Container(
