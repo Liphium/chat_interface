@@ -19,7 +19,7 @@ Future<bool> sendAuthenticatedStoredAction(Friend friend, Map<String, dynamic> p
   final json = await postJSON("/account/stored_actions/send_auth", <String, dynamic>{
     "account": friend.id,
     // actual data (safe from replay attacks thanks to sequence numbers)
-    "payload": SequencedInfo.builder(jsonEncode(payload), DateTime.now().millisecondsSinceEpoch).finish(friend.keyStorage.publicKey),
+    "payload": AsymmetricSequencedInfo.builder(jsonEncode(payload), DateTime.now().millisecondsSinceEpoch).finish(friend.keyStorage.publicKey),
     "key": friend.keyStorage.storedActionKey,
   });
 

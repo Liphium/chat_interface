@@ -715,12 +715,6 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
       'content', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _signatureMeta =
-      const VerificationMeta('signature');
-  @override
-  late final GeneratedColumn<String> signature = GeneratedColumn<String>(
-      'signature', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _attachmentsMeta =
       const VerificationMeta('attachments');
   @override
@@ -776,7 +770,6 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
         system,
         type,
         content,
-        signature,
         attachments,
         certificate,
         sender,
@@ -824,12 +817,6 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           content.isAcceptableOrUnknown(data['content']!, _contentMeta));
     } else if (isInserting) {
       context.missing(_contentMeta);
-    }
-    if (data.containsKey('signature')) {
-      context.handle(_signatureMeta,
-          signature.isAcceptableOrUnknown(data['signature']!, _signatureMeta));
-    } else if (isInserting) {
-      context.missing(_signatureMeta);
     }
     if (data.containsKey('attachments')) {
       context.handle(
@@ -906,8 +893,6 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
-      signature: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}signature'])!,
       attachments: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!,
       certificate: attachedDatabase.typeMapping
@@ -939,7 +924,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final bool system;
   final int type;
   final String content;
-  final String signature;
   final String attachments;
   final String certificate;
   final String sender;
@@ -954,7 +938,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       required this.system,
       required this.type,
       required this.content,
-      required this.signature,
       required this.attachments,
       required this.certificate,
       required this.sender,
@@ -971,7 +954,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     map['system'] = Variable<bool>(system);
     map['type'] = Variable<int>(type);
     map['content'] = Variable<String>(content);
-    map['signature'] = Variable<String>(signature);
     map['attachments'] = Variable<String>(attachments);
     map['certificate'] = Variable<String>(certificate);
     map['sender'] = Variable<String>(sender);
@@ -990,7 +972,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       system: Value(system),
       type: Value(type),
       content: Value(content),
-      signature: Value(signature),
       attachments: Value(attachments),
       certificate: Value(certificate),
       sender: Value(sender),
@@ -1011,7 +992,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       system: serializer.fromJson<bool>(json['system']),
       type: serializer.fromJson<int>(json['type']),
       content: serializer.fromJson<String>(json['content']),
-      signature: serializer.fromJson<String>(json['signature']),
       attachments: serializer.fromJson<String>(json['attachments']),
       certificate: serializer.fromJson<String>(json['certificate']),
       sender: serializer.fromJson<String>(json['sender']),
@@ -1031,7 +1011,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       'system': serializer.toJson<bool>(system),
       'type': serializer.toJson<int>(type),
       'content': serializer.toJson<String>(content),
-      'signature': serializer.toJson<String>(signature),
       'attachments': serializer.toJson<String>(attachments),
       'certificate': serializer.toJson<String>(certificate),
       'sender': serializer.toJson<String>(sender),
@@ -1049,7 +1028,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           bool? system,
           int? type,
           String? content,
-          String? signature,
           String? attachments,
           String? certificate,
           String? sender,
@@ -1064,7 +1042,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
         system: system ?? this.system,
         type: type ?? this.type,
         content: content ?? this.content,
-        signature: signature ?? this.signature,
         attachments: attachments ?? this.attachments,
         certificate: certificate ?? this.certificate,
         sender: sender ?? this.sender,
@@ -1082,7 +1059,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           ..write('system: $system, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
-          ..write('signature: $signature, ')
           ..write('attachments: $attachments, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')
@@ -1102,7 +1078,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       system,
       type,
       content,
-      signature,
       attachments,
       certificate,
       sender,
@@ -1120,7 +1095,6 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           other.system == this.system &&
           other.type == this.type &&
           other.content == this.content &&
-          other.signature == this.signature &&
           other.attachments == this.attachments &&
           other.certificate == this.certificate &&
           other.sender == this.sender &&
@@ -1137,7 +1111,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<bool> system;
   final Value<int> type;
   final Value<String> content;
-  final Value<String> signature;
   final Value<String> attachments;
   final Value<String> certificate;
   final Value<String> sender;
@@ -1153,7 +1126,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.system = const Value.absent(),
     this.type = const Value.absent(),
     this.content = const Value.absent(),
-    this.signature = const Value.absent(),
     this.attachments = const Value.absent(),
     this.certificate = const Value.absent(),
     this.sender = const Value.absent(),
@@ -1170,7 +1142,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required bool system,
     required int type,
     required String content,
-    required String signature,
     required String attachments,
     required String certificate,
     required String sender,
@@ -1185,7 +1156,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
         system = Value(system),
         type = Value(type),
         content = Value(content),
-        signature = Value(signature),
         attachments = Value(attachments),
         certificate = Value(certificate),
         sender = Value(sender),
@@ -1200,7 +1170,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     Expression<bool>? system,
     Expression<int>? type,
     Expression<String>? content,
-    Expression<String>? signature,
     Expression<String>? attachments,
     Expression<String>? certificate,
     Expression<String>? sender,
@@ -1217,7 +1186,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       if (system != null) 'system': system,
       if (type != null) 'type': type,
       if (content != null) 'content': content,
-      if (signature != null) 'signature': signature,
       if (attachments != null) 'attachments': attachments,
       if (certificate != null) 'certificate': certificate,
       if (sender != null) 'sender': sender,
@@ -1236,7 +1204,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<bool>? system,
       Value<int>? type,
       Value<String>? content,
-      Value<String>? signature,
       Value<String>? attachments,
       Value<String>? certificate,
       Value<String>? sender,
@@ -1252,7 +1219,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       system: system ?? this.system,
       type: type ?? this.type,
       content: content ?? this.content,
-      signature: signature ?? this.signature,
       attachments: attachments ?? this.attachments,
       certificate: certificate ?? this.certificate,
       sender: sender ?? this.sender,
@@ -1282,9 +1248,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
-    }
-    if (signature.present) {
-      map['signature'] = Variable<String>(signature.value);
     }
     if (attachments.present) {
       map['attachments'] = Variable<String>(attachments.value);
@@ -1324,7 +1287,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
           ..write('system: $system, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
-          ..write('signature: $signature, ')
           ..write('attachments: $attachments, ')
           ..write('certificate: $certificate, ')
           ..write('sender: $sender, ')

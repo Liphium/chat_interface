@@ -44,7 +44,7 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
   // Handle authenticated stored actions
   if (action["a"]) {
     // Decrypt payload with sequence number
-    final extracted = SequencedInfo.extract(action["payload"]);
+    final extracted = AsymmetricSequencedInfo.extract(action["payload"]);
     if (extracted.error) {
       sendLog("ERROR: invalid format for authenticated stored action");
       return false;

@@ -13,6 +13,7 @@ import 'package:chat_interface/database/conversation/conversation.dart' as model
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -297,7 +298,6 @@ class Message {
   List<String> attachments;
   final verified = true.obs;
   String answer;
-  String signature;
   final String certificate;
   final String sender;
   final String senderAccount;
@@ -395,7 +395,6 @@ class Message {
     this.content,
     this.answer,
     this.attachments,
-    this.signature,
     this.certificate,
     this.sender,
     this.senderAccount,
@@ -410,7 +409,7 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) {
     // Convert to message
     final account = Get.find<ConversationController>().conversations[json["conversation"]]!.members[json["sender"]]?.account ?? "removed";
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], "", json["certificate"], json["sender"], account,
+    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account,
         DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"], json["edited"], false);
 
     // Decrypt content
@@ -424,9 +423,10 @@ class Message {
     }
 
     // Check signature
-    message.content = decryptSymmetric(message.content, conversation.key);
+    final info = SymmetricSequencedInfo.extract(message.content, conversation.key);
+    message.content = info.text;
     message.loadContent();
-    message.verifySignature();
+    message.verifySignature(info);
 
     return message;
   }
@@ -441,7 +441,6 @@ class Message {
       } else {
         content = contentJson["c"];
       }
-      signature = contentJson["s"];
     } else {
       content = contentJson["c"];
     }
@@ -450,7 +449,7 @@ class Message {
   }
 
   /// Verifies the signature of the message
-  void verifySignature() async {
+  void verifySignature(SymmetricSequencedInfo info) async {
     final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
     sendLog("${conversation.members} | ${this.sender}");
     final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
@@ -459,32 +458,8 @@ class Message {
       verified.value = false;
       return;
     }
-    String hash;
-    if (type != MessageType.text) {
-      final contentJson = jsonEncode(<String, dynamic>{
-        "c": content,
-        "t": type.index,
-        "a": attachments,
-        "r": answer,
-      });
-      hash = hashSha(contentJson + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
-    } else {
-      final contentJson = jsonEncode(<String, dynamic>{
-        "c": base64Encode(utf8.encode(content)),
-        "t": type.index,
-        "a": attachments,
-        "r": answer,
-      });
-      hash = hashSha(contentJson + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
-    }
-    sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
-    verified.value = checkSignature(signature, sender.signatureKey, hash);
+    verified.value = info.verifySignature(sender.signatureKey);
     db.message.insertOnConflictUpdate(entity(false));
-    if (!verified.value) {
-      sendLog("invalid signature");
-    } else {
-      sendLog("valid signature");
-    }
   }
 
   Message.fromMessageData(MessageData messageData)
@@ -498,7 +473,6 @@ class Message {
         senderAccount = messageData.senderAccount,
         createdAt = DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
         conversation = messageData.conversationId,
-        signature = messageData.signature,
         edited = messageData.edited {
     verified.value = messageData.verified;
   }
@@ -509,7 +483,6 @@ class Message {
       type: type.index,
       content: content,
       answer: answer,
-      signature: signature,
       attachments: jsonEncode(attachments),
       certificate: certificate,
       sender: sender,
