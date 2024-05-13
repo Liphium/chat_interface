@@ -9,6 +9,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
 
+// TODO: This needs to get better big time
+
 class EmojiWindow extends StatefulWidget {
   final ContextMenuData data;
 
@@ -29,15 +31,8 @@ class _EmojiWindowState extends State<EmojiWindow> {
 
   @override
   void initState() {
-    addRow();
     super.initState();
-
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
-        addRow();
-        return;
-      }
-    });
+    emojis.value = UnicodeEmojis.allEmojis.sublist(0, 100);
   }
 
   @override
@@ -48,35 +43,13 @@ class _EmojiWindowState extends State<EmojiWindow> {
     super.dispose();
   }
 
-  void addRow() {
-    currentTimer?.cancel();
-    final query = _currentSearch.value == "" ? UnicodeEmojis.allEmojis : UnicodeEmojis.search(_currentSearch.value);
-    if (query.length <= currentIndex * 10) {
-      return;
-    }
-    emojis.addAll(query.sublist(currentIndex * 10, min((currentIndex + 1) * 10, query.length)));
-    currentIndex++;
-    final currentQuery = _currentSearch.value;
-    if (query.length <= currentIndex * 10) {
-      return;
-    }
-
-    currentTimer = Timer(100.ms, () {
-      if (gone || currentQuery != _currentSearch.value) {
-        return;
-      }
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
-        addRow();
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return SlidingWindowBase(
       position: widget.data,
       maxSize: 500,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           FJTextField(
             controller: _controller,
@@ -86,9 +59,8 @@ class _EmojiWindowState extends State<EmojiWindow> {
             hintText: "Search emojis",
             onChange: (value) {
               _currentSearch.value = value;
-              emojis.clear();
-              currentIndex = 0;
-              addRow();
+              final search = UnicodeEmojis.search(value);
+              emojis.value = search.sublist(0, min(50, search.length));
             },
           ),
           ConstrainedBox(
@@ -99,6 +71,7 @@ class _EmojiWindowState extends State<EmojiWindow> {
                 color: Colors.transparent,
                 child: Obx(
                   () => GridView.builder(
+                    key: const ValueKey("the grid"),
                     controller: _scrollController,
                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 30 * 1.5,

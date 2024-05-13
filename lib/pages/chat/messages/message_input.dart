@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/pages/chat/components/emojis/emoji_window.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
@@ -20,6 +19,7 @@ import 'package:get/get.dart';
 import 'package:mime/mime.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:unicode_emojis/unicode_emojis.dart';
 
 import '../../../theme/components/icon_button.dart';
 import '../../../util/vertical_spacing.dart';
@@ -39,7 +39,8 @@ class _MessageInputState extends State<MessageInput> {
   final FocusNode _inputFocus = FocusNode();
   StreamSubscription<Conversation>? _sub;
   final GlobalKey _libraryKey = GlobalKey();
-  final GlobalKey _emojiKey = GlobalKey();
+  // final GlobalKey _emojiKey = GlobalKey();
+  final _emojiSuggestions = <Emoji>[].obs;
 
   @override
   void dispose() {
@@ -123,7 +124,6 @@ class _MessageInputState extends State<MessageInput> {
       // For support to paste files
       PasteIntent: CallbackAction<PasteIntent>(
         onInvoke: (PasteIntent intent) async {
-          sendLog("psste");
           final image = await Pasteboard.image;
           final data = await Clipboard.getData(Clipboard.kTextPlain);
 
@@ -233,6 +233,59 @@ class _MessageInputState extends State<MessageInput> {
                       },
                     ),
 
+                    //* Emoji suggestions
+                    Obx(
+                      () {
+                        if (_emojiSuggestions.isEmpty) {
+                          return const SizedBox();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.all(elementSpacing),
+                          child: Row(
+                            children: [
+                              for (var emoji in _emojiSuggestions)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: elementSpacing),
+                                  child: Tooltip(
+                                    key: ValueKey(emoji.shortName),
+                                    exitDuration: 0.ms,
+                                    message: ":${emoji.shortName}:",
+                                    child: Center(
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(1000),
+                                        onTap: () {
+                                          // Search for emojis
+                                          final regex = RegExp(":(.*?)\\s|:(.*\$)|");
+                                          final cursorPos = _message.selection.start;
+                                          for (var match in regex.allMatches(_message.text)) {
+                                            // Check if the cursor is inside of the current emoji
+                                            if (match.start < cursorPos && match.end >= cursorPos) {
+                                              final query = _message.text.substring(match.start + 1, cursorPos);
+                                              if (query.length >= 2) {
+                                                _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
+                                                _message.text =
+                                                    "${_message.text.substring(0, match.start)}${emoji.emoji} ${_message.text.substring(cursorPos, _message.text.length)}";
+                                                _emojiSuggestions.clear();
+                                                _inputFocus.requestFocus();
+                                                // TODO: Move cursor to right position
+                                              }
+                                            }
+                                          }
+                                        },
+                                        child: Text(
+                                          emoji.emoji,
+                                          style: Get.theme.textTheme.titleLarge!.copyWith(fontFamily: "Emoji", fontSize: 30),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+
                     //* File preview
                     Obx(
                       () {
@@ -312,7 +365,25 @@ class _MessageInputState extends State<MessageInput> {
                                   LengthLimitingTextInputFormatter(1000),
                                 ],
                                 focusNode: _inputFocus,
-                                onChanged: (value) => MessageSendHelper.currentDraft.value!.message = value,
+                                onChanged: (value) {
+                                  _emojiSuggestions.clear();
+
+                                  // Search for emojis
+                                  final regex = RegExp(":(.*?)\\s|:(.*\$)|");
+                                  final cursorPos = _message.selection.start;
+                                  for (var match in regex.allMatches(value)) {
+                                    // Check if the cursor is inside of the current emoji
+                                    if (match.start < cursorPos && match.end >= cursorPos) {
+                                      final query = _message.text.substring(match.start + 1, cursorPos);
+                                      if (query.length >= 2) {
+                                        sendLog("current emoji query: $query");
+                                        _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
+                                      }
+                                    }
+                                  }
+
+                                  MessageSendHelper.currentDraft.value!.message = value;
+                                },
                                 onAppPrivateCommand: (action, data) {
                                   sendLog("app private command");
                                 },
@@ -325,20 +396,20 @@ class _MessageInputState extends State<MessageInput> {
                             ),
                           ),
                         ),
-                        IconButton(
-                          key: _emojiKey,
-                          onPressed: () async {
-                            final result = await Get.dialog(EmojiWindow(data: ContextMenuData.fromKey(_emojiKey, above: true, right: true)));
-                            _inputFocus.requestFocus();
-                            if (result == null) {
-                              return;
-                            }
-                            replaceSelection(result);
-                          },
-                          icon: const Icon(Icons.emoji_emotions),
-                          color: theme.colorScheme.tertiary,
-                        ),
-                        horizontalSpacing(elementSpacing),
+                        // IconButton(
+                        //   key: _emojiKey,
+                        //   onPressed: () async {
+                        //     final result = await Get.dialog(EmojiWindow(data: ContextMenuData.fromKey(_emojiKey, above: true, right: true)));
+                        //     _inputFocus.requestFocus();
+                        //     if (result == null) {
+                        //       return;
+                        //     }
+                        //     replaceSelection(result);
+                        //   },
+                        //   icon: const Icon(Icons.emoji_emotions),
+                        //   color: theme.colorScheme.tertiary,
+                        // ),
+                        // horizontalSpacing(elementSpacing),
                         IconButton(
                           key: _libraryKey,
                           onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),

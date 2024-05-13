@@ -121,9 +121,7 @@ class Friend {
   final openConversationLoading = false.obs;
 
   Friend(this.id, this.name, UTFString displayName, this.vaultId, this.keyStorage, this.updatedAt) {
-    sendLog("SETTING 123456");
     this.displayName.value = displayName;
-    sendLog("DISPLAY FRIEND ${this.displayName.value.text}");
   }
 
   /// The friend for a system component (used in system messages for members)
