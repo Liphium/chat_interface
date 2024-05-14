@@ -8,19 +8,23 @@ import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
+import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart' as material;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class MessageController extends GetxController {
   // Constants
+  Message? hoveredMessage;
   static String systemSender = "6969";
 
   final loaded = false.obs;
@@ -37,7 +41,8 @@ class MessageController extends GetxController {
   }
 
   void selectConversation(Conversation conversation) async {
-    //Get.find<WritingController>().init(conversation.id); // TODO: Reimplement typing indicator
+    Get.find<TownsquareController>().close();
+    loaded.value = false;
     selectedConversation.value = conversation;
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
@@ -46,16 +51,19 @@ class MessageController extends GetxController {
 
     // Load messages
     messages.clear();
-    var loaded = await (db.select(db.message)
-          ..limit(30)
+    var loadedMessages = await (db.select(db.message)
+          ..limit(messageLimit)
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
           ..where((tbl) => tbl.conversationId.equals(conversation.id))
           ..where((tbl) => tbl.system.equals(false)))
         .get();
 
-    for (var message in loaded) {
-      messages.add(Message.fromMessageData(message));
+    for (var message in loadedMessages) {
+      final msg = Message.fromMessageData(message);
+      await msg.initAttachments();
+      messages.add(msg);
     }
+    loaded.value = true;
   }
 
   // Push read state to the server
@@ -69,6 +77,15 @@ class MessageController extends GetxController {
       conversation.notificationCount.value = 0;
       conversation.readAt.value = DateTime.now().millisecondsSinceEpoch;
     }
+  }
+
+  /// Delete all system messages of the same kind before the message send time
+  void deleteOldSystemMessagesOfKind(String id, String kind, DateTime after) {
+    db.message.delete()
+      ..where((tbl) => tbl.content.equals(kind))
+      ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(after.millisecondsSinceEpoch)))
+      ..where((tbl) => tbl.id.isNotValue(id))
+      ..go();
   }
 
   // Delete a message from the client with an id
@@ -98,19 +115,18 @@ class MessageController extends GetxController {
       if (message.sender != selectedConversation.value.token.id) {
         overwriteRead(selectedConversation.value);
       }
-      sendLog("MESSAGE RECEIVED ${message.id}");
 
       // Check if it is a system message and if it should be rendered or not
       if (message.type == MessageType.system) {
         if (SystemMessages.messages[message.content]?.render == true) {
-          addMessageToSelected(message);
+          addMessageToBottom(message);
         }
       } else {
         // Store normal type of message
         if (messages.isNotEmpty && messages[0].id != message.id) {
-          addMessageToSelected(message);
+          addMessageToBottom(message);
         } else if (messages.isEmpty) {
-          addMessageToSelected(message);
+          addMessageToBottom(message);
         }
       }
     }
@@ -119,11 +135,9 @@ class MessageController extends GetxController {
     sendLog(message.type);
     if (message.type == MessageType.system) {
       if (SystemMessages.messages[message.content]?.store == true) {
-        sendLog("STORING ${message.content}");
         db.into(db.message).insertOnConflictUpdate(message.entity(!SystemMessages.messages[message.content]!.render));
       }
     } else {
-      sendLog("WE ARE STORING");
       db.into(db.message).insertOnConflictUpdate(message.entity(false));
     }
 
@@ -133,18 +147,147 @@ class MessageController extends GetxController {
     }
   }
 
-  void addMessageToSelected(Message message) {
-    int index = 0;
-    for (var msg in messages) {
-      index++;
-      if (msg.createdAt.isAfter(message.createdAt)) {
-        continue;
+  //* Scroll
+  static const messageLimit = 10;
+  static const newLoadOffset = 200;
+  late material.ScrollController controller;
+
+  void addMessageToBottom(Message message, {bool animation = true}) async {
+    // Check if there are more messages after the current messages (just in case)
+    if (messages.isNotEmpty) {
+      sendLog("OLDER MESSAGE, ignoring");
+      final availableMessage = await (db.select(db.message)
+            ..limit(1)
+            ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+            ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+            ..where((tbl) => tbl.system.equals(false))
+            ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(messages.first.createdAt.millisecondsSinceEpoch))))
+          .getSingleOrNull();
+
+      // If there is a message before this one at the bottom, don't render
+      if (availableMessage != null) {
+        return;
       }
-      index -= 1;
-      break;
     }
-    message.playAnimation = true;
-    messages.insert(index, message);
+
+    // Initialize all message data
+    await message.initAttachments();
+
+    // Only load the message, if scrolled near enough to the bottom
+    if (controller.position.pixels <= newLoadOffset) {
+      if (controller.position.pixels == 0) {
+        message.playAnimation = true;
+        messages.insert(0, message);
+        return;
+      }
+
+      message.heightCallback = true;
+      messages.insert(0, message);
+      return;
+    }
+  }
+
+  void messageHeightCallback(Message message, double height) {
+    message.canScroll.value = true;
+    message.currentHeight = height;
+    controller.jumpTo(controller.position.pixels + height);
+  }
+
+  void messageHeightChange(Message message, double extraHeight) {
+    if (message.heightKey != null) {
+      controller.jumpTo(controller.position.pixels + extraHeight);
+    }
+  }
+
+  void newScrollController(material.ScrollController newController) {
+    controller = newController;
+    controller.addListener(() => checkCurrentScrollHeight());
+  }
+
+  // Run on every scroll to check if new messages should be loaded
+  void checkCurrentScrollHeight() {
+    if (controller.position.pixels > controller.position.maxScrollExtent - newLoadOffset) {
+      sendLog("load top");
+      loadNewMessagesTop();
+    } else if (controller.position.pixels <= newLoadOffset) {
+      sendLog("load bottom");
+      loadNewMessagesBottom();
+    }
+  }
+
+  // Loading state for new messages (at top or bottom)
+  bool loading = false;
+
+  /// Load "messageLimit" new messages at the top
+  void loadNewMessagesTop() async {
+    if (loading || messages.isEmpty) {
+      return;
+    }
+    loading = true;
+    final finalMessage = messages.last;
+
+    // Get the the "messageLimit" newest messages, that aren't system messages (like delete or react)
+    final loadedMessages = await (db.select(db.message)
+          ..limit(messageLimit)
+          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+          ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+          ..where((tbl) => tbl.system.equals(false))
+          ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(finalMessage.createdAt.millisecondsSinceEpoch))))
+        .get();
+
+    // Add them all to a list (adding them one by one would cause one giant state update since we use async code here)
+    final newMessages = <Message>[];
+    for (var msg in loadedMessages) {
+      final message = Message.fromMessageData(msg);
+      await message.initAttachments();
+      newMessages.add(message);
+    }
+    loading = false;
+
+    if (newMessages.isEmpty) {
+      return;
+    }
+
+    messages.addAll(newMessages);
+    loading = false;
+  }
+
+  /// Load "messageLimit" new messages at the bottom
+  void loadNewMessagesBottom() async {
+    if (loading || messages.isEmpty) {
+      sendLog("loading or sth");
+      return;
+    }
+    loading = true; // We'll use the same loading as above to make sure this doesn't break anything
+    final firstMessage = messages.first;
+
+    // Get the the "messageLimit" newest messages, that aren't system messages (like delete or react)
+    final loadedMessages = await (db.select(db.message)
+          ..limit(messageLimit)
+          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+          ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+          ..where((tbl) => tbl.system.equals(false))
+          ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(firstMessage.createdAt.millisecondsSinceEpoch))))
+        .get();
+
+    sendLog(loadedMessages.length);
+
+    // Add them all to a list (adding them one by one would cause one giant state update since we use async code here)
+    final newMessages = <Message>[];
+    for (var msg in loadedMessages) {
+      final message = Message.fromMessageData(msg);
+      await message.initAttachments();
+      message.heightCallback = true; // To prevent the viewport from scrolling up
+      newMessages.add(message);
+    }
+    loading = false;
+
+    if (newMessages.isEmpty) {
+      return;
+    }
+
+    // Add them all to the bottom
+    messages.insertAll(0, newMessages);
   }
 }
 
@@ -155,7 +298,6 @@ class Message {
   List<String> attachments;
   final verified = true.obs;
   String answer;
-  String signature;
   final String certificate;
   final String sender;
   final String senderAccount;
@@ -163,12 +305,17 @@ class Message {
   final String conversation;
   final bool edited;
 
+  final canScroll = false.obs;
+  double? currentHeight;
+  GlobalKey? heightKey;
+  bool heightReported = false;
+  bool heightCallback = false;
   bool renderingAttachments = false;
-  final attachmentsRenderer = <AttachmentContainer>[].obs;
-  final answerMessage = Rx<Message?>(null);
+  final attachmentsRenderer = <AttachmentContainer>[];
+  Message? answerMessage;
 
   /// Extracts and decrypts the attachments
-  void initAttachments() async {
+  Future<bool> initAttachments() async {
     //* Load answer
     if (answer != "") {
       final message = await (db.message.select()
@@ -176,22 +323,23 @@ class Message {
             ..where((tbl) => tbl.conversationId.equals(conversation)))
           .getSingleOrNull();
       if (message != null) {
-        answerMessage.value = Message.fromMessageData(message);
+        answerMessage = Message.fromMessageData(message);
       }
     } else {
-      answerMessage.value = null;
+      answerMessage = null;
     }
 
     //* Load attachments
     if (attachmentsRenderer.isNotEmpty || renderingAttachments) {
-      return;
+      return true;
     }
     renderingAttachments = true;
     if (attachments.isNotEmpty) {
-      sendLog(attachments.length);
       for (var attachment in attachments) {
         if (attachment.isURL) {
-          attachmentsRenderer.add(AttachmentContainer.remoteImage(attachment));
+          final container = AttachmentContainer.remoteImage(attachment);
+          await container.init();
+          attachmentsRenderer.add(container);
           continue;
         }
         final json = jsonDecode(attachment);
@@ -223,6 +371,8 @@ class Message {
       }
       renderingAttachments = false;
     }
+
+    return true;
   }
 
   //* Animation when a new message enters the chat
@@ -245,7 +395,6 @@ class Message {
     this.content,
     this.answer,
     this.attachments,
-    this.signature,
     this.certificate,
     this.sender,
     this.senderAccount,
@@ -260,7 +409,7 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) {
     // Convert to message
     final account = Get.find<ConversationController>().conversations[json["conversation"]]!.members[json["sender"]]?.account ?? "removed";
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], "", json["certificate"], json["sender"], account,
+    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account,
         DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"], json["edited"], false);
 
     // Decrypt content
@@ -274,9 +423,10 @@ class Message {
     }
 
     // Check signature
-    message.content = decryptSymmetric(message.content, conversation.key);
+    final info = SymmetricSequencedInfo.extract(message.content, conversation.key);
+    message.content = info.text;
     message.loadContent();
-    message.verifySignature();
+    message.verifySignature(info);
 
     return message;
   }
@@ -291,7 +441,6 @@ class Message {
       } else {
         content = contentJson["c"];
       }
-      signature = contentJson["s"];
     } else {
       content = contentJson["c"];
     }
@@ -300,7 +449,7 @@ class Message {
   }
 
   /// Verifies the signature of the message
-  void verifySignature() async {
+  void verifySignature(SymmetricSequencedInfo info) async {
     final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
     sendLog("${conversation.members} | ${this.sender}");
     final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
@@ -309,32 +458,8 @@ class Message {
       verified.value = false;
       return;
     }
-    String hash;
-    if (type != MessageType.text) {
-      final contentJson = jsonEncode(<String, dynamic>{
-        "c": content,
-        "t": type.index,
-        "a": attachments,
-        "r": answer,
-      });
-      hash = hashSha(contentJson + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
-    } else {
-      final contentJson = jsonEncode(<String, dynamic>{
-        "c": base64Encode(utf8.encode(content)),
-        "t": type.index,
-        "a": attachments,
-        "r": answer,
-      });
-      hash = hashSha(contentJson + createdAt.millisecondsSinceEpoch.toStringAsFixed(0) + conversation.id);
-    }
-    sendLog("MESSAGE HASH: $hash ${content + conversation.id}");
-    verified.value = checkSignature(signature, sender.signatureKey, hash);
+    verified.value = info.verifySignature(sender.signatureKey);
     db.message.insertOnConflictUpdate(entity(false));
-    if (!verified.value) {
-      sendLog("invalid signature");
-    } else {
-      sendLog("valid signature");
-    }
   }
 
   Message.fromMessageData(MessageData messageData)
@@ -348,7 +473,6 @@ class Message {
         senderAccount = messageData.senderAccount,
         createdAt = DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
         conversation = messageData.conversationId,
-        signature = messageData.signature,
         edited = messageData.edited {
     verified.value = messageData.verified;
   }
@@ -359,7 +483,6 @@ class Message {
       type: type.index,
       content: content,
       answer: answer,
-      signature: signature,
       attachments: jsonEncode(attachments),
       certificate: certificate,
       sender: sender,

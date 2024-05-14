@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class FJSlider extends StatelessWidget {
+  final double? secondaryTrackValue;
   final double value;
   final double min, max;
   final String? label;
@@ -15,7 +14,16 @@ class FJSlider extends StatelessWidget {
   final Function(double)? onChanged;
   final Function(double)? onChangeEnd;
 
-  const FJSlider({super.key, required this.value, required this.onChanged, this.min = 0.0, this.max = 1.0, this.onChangeEnd, this.label});
+  const FJSlider({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.min = 0.0,
+    this.max = 1.0,
+    this.secondaryTrackValue,
+    this.onChangeEnd,
+    this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +44,18 @@ class FJSlider extends StatelessWidget {
               activeColor: Get.theme.colorScheme.onPrimary,
               min: min,
               max: max,
+              secondaryActiveColor: Get.theme.colorScheme.secondary,
+              secondaryTrackValue: secondaryTrackValue?.clamp(min, max),
               onChanged: onChanged,
               onChangeEnd: onChangeEnd,
             ),
           ),
-          label != null ? Text(label!) : const SizedBox(),
+          label != null
+              ? Padding(
+                  padding: const EdgeInsets.only(left: defaultSpacing),
+                  child: Text(label!),
+                )
+              : const SizedBox(),
         ],
       ),
     );

@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
@@ -15,12 +15,14 @@ class MessageOptionsWindow extends StatefulWidget {
   final ContextMenuData data;
   final bool self;
   final Message message;
+  final List<ProfileButton>? extra;
 
   const MessageOptionsWindow({
     super.key,
     required this.data,
     required this.self,
     required this.message,
+    this.extra,
   });
 
   @override
@@ -37,25 +39,24 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
     return SlidingWindowBase(
       lessPadding: true,
       position: widget.data,
+      maxSize: 250,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Add extra context menu buttons (copy, etc. (if passed in))
+          if (widget.extra != null)
+            for (var button in widget.extra!)
+              Padding(
+                padding: const EdgeInsets.only(bottom: elementSpacing),
+                child: button,
+              ),
+          if (widget.extra != null) verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.info,
             label: "message.info".tr,
             onTap: () {
               Get.back();
               Get.dialog(MessageInfoWindow(message: widget.message));
-            },
-            loading: false.obs,
-          ),
-          verticalSpacing(elementSpacing),
-          ProfileButton(
-            icon: Icons.security,
-            label: "message.reverify".tr,
-            onTap: () {
-              widget.message.verifySignature();
-              Get.back();
             },
             loading: false.obs,
           ),

@@ -11,39 +11,39 @@ dependencies:
   flutter:
     sdk: flutter
     
-  flutter_animate: any
-  get: ^4.6.6
-  path_provider: any
-  path: any
-  drift: any
-  sqlite3_flutter_libs: any
-  logger: any
-  web_socket_channel: any
-  crypto: any
-  http: any
-  animations: any
-  pointycastle: any
-  livekit_client: any
-  logging: any
-  url_launcher: any
-  flutter_webrtc: any
-  sodium_libs: any
-  ffi: any
-  flutter_rust_bridge: 2.0.0-dev.28
-  freezed_annotation: any
-  file_selector: any
-  drift_db_viewer: any
-  smooth_scroll_multiplatform: any
-  audioplayers: any
-  dio: any
-  encrypt: any
-  open_app_file: any
+  flutter_animate: '>=4.5.0 <5.0.0'
+  get: '>=4.6.6 <5.0.0'
+  path_provider: '>=2.1.3 <3.0.0'
+  path: '>=1.9.0 <2.0.0'
+  drift: '>=2.16.0 <3.0.0'
+  sqlite3_flutter_libs: '>=0.5.20'
+  web_socket_channel: '>=2.4.5 <3.0.0'
+  crypto: '>=3.0.3 <4.0.0'
+  http: '>=1.2.1 <2.0.0'
+  pointycastle: '>=3.8.0 <4.0.0'
+  livekit_client: '>=2.1.2 <3.0.0'
+  logging: '>=1.2.0 <2.0.0'
+  url_launcher: '>=6.2.6 <7.0.0'
+  flutter_webrtc: '>=0.10.3 <1.0.0'
+  sodium_libs: '>=2.2.1 <3.0.0'
+  ffi: '>=2.1.2 <3.0.0'
+  flutter_rust_bridge: 2.0.0-dev.32
+  freezed_annotation: '>=2.4.1 <3.0.0'
+  file_selector: '>=1.0.3 <2.0.0'
+  drift_db_viewer: '>=2.1.0'
+  audioplayers: '>=6.0.0 <7.0.0'
+  dio: '>=5.4.3 <6.0.0'
+  encrypt: '>=5.0.3 <6.0.0'
+  open_app_file: '>=4.0.2 <5.0.0'
   rust_builder:
     path: rust_builder
-  unicode_emojis: ^0.4.0
-  archive: ^3.4.10
-  window_manager: ^0.3.8
-  permission_handler: ^11.3.1
+  unicode_emojis: '>=0.4.0 <1.0.0'
+  archive: '>=3.4.10 <4.0.0'
+  window_manager: '>=0.3.8 <1.0.0'
+  permission_handler: '>=11.3.1 <12.0.0'
+  screenshot: ^2.3.0
+  pasteboard: ^0.2.0
+  mime: ^1.0.5
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +71,9 @@ flutter:
     - family: Open Sans
       fonts:
         - asset: assets/OpenSans.ttf
+    - family: Emoji
+      fonts:
+        - asset: assets/NotoColorEmoji-Regular.ttf
 
   assets:
   - assets/img/

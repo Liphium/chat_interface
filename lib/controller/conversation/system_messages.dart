@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -116,6 +116,7 @@ class SystemMessages {
       Icons.delete,
       render: false,
       handler: (msg) {
+        Get.find<MessageController>().deleteOldSystemMessagesOfKind(msg.id, msg.content, msg.createdAt);
         Get.find<MessageController>().deleteMessageFromClient(msg.attachments[0]);
       },
       translation: (msg) {

@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:chat_interface/controller/account/friend_controller.dart';
-import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friend_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/request_button.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/containers/success_container.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -127,8 +126,10 @@ class _FriendsPageState extends State<FriendsPage> {
                             ),
 
                             Obx(() {
-                              final found = friendController.friends.values
-                                  .any((friend) => friend.name.toLowerCase().startsWith(query.value.toLowerCase()) && friend.id != StatusController.ownAccountId);
+                              final found = friendController.friends.values.any((friend) =>
+                                  (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
+                                      friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
+                                  friend.id != StatusController.ownAccountId);
                               final hashtag = query.value.contains("#");
                               return Animate(
                                   effects: [
@@ -170,45 +171,48 @@ class _FriendsPageState extends State<FriendsPage> {
                             }),
 
                             //* Requests
-                            Obx(() => Animate(
-                                  effects: [
-                                    ReverseExpandEffect(
-                                      curve: Curves.easeInOut,
-                                      duration: 250.ms,
-                                      axis: Axis.vertical,
-                                    )
-                                  ],
-                                  target: query.value.isEmpty ? 0.0 : 1.0,
-                                  child: Visibility(
-                                      visible: requestController.requests.isNotEmpty,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          verticalSpacing(sectionSpacing),
-                                          Text("friends.requests".tr, style: theme.textTheme.labelLarge),
-                                          verticalSpacing(elementSpacing),
-                                          Builder(
-                                            builder: (context) {
-                                              if (requestController.requests.isEmpty) {
-                                                return const SizedBox.shrink();
-                                              }
-                                              return Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: requestController.requests.map((request) {
-                                                  return RequestButton(request: request, self: false);
-                                                }).toList(),
-                                              );
-                                            },
-                                          ),
-                                          Visibility(
-                                            visible: friendController.friends.length > 1 || requestController.requestsSent.isNotEmpty,
-                                            child: verticalSpacing(sectionSpacing - elementSpacing),
-                                          )
-                                        ],
-                                      )),
-                                )),
+                            Obx(
+                              () => Animate(
+                                effects: [
+                                  ReverseExpandEffect(
+                                    curve: Curves.easeInOut,
+                                    duration: 250.ms,
+                                    axis: Axis.vertical,
+                                  )
+                                ],
+                                target: query.value.isEmpty ? 0.0 : 1.0,
+                                child: Visibility(
+                                  visible: requestController.requests.isNotEmpty,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      verticalSpacing(sectionSpacing),
+                                      Text("friends.requests".tr, style: theme.textTheme.labelLarge),
+                                      verticalSpacing(elementSpacing),
+                                      Builder(
+                                        builder: (context) {
+                                          if (requestController.requests.isEmpty) {
+                                            return const SizedBox.shrink();
+                                          }
+                                          return Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: requestController.requests.map((request) {
+                                              return RequestButton(request: request, self: false);
+                                            }).toList(),
+                                          );
+                                        },
+                                      ),
+                                      Visibility(
+                                        visible: friendController.friends.length > 1 || requestController.requestsSent.isNotEmpty,
+                                        child: verticalSpacing(sectionSpacing - elementSpacing),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
 
                             //* Sent requests
                             Obx(
@@ -281,7 +285,9 @@ class _FriendsPageState extends State<FriendsPage> {
                                           return Obx(
                                             () {
                                               final friend = friendController.friends.values.elementAt(index);
-                                              final visible = query.value.isEmpty || friend.name.toLowerCase().startsWith(query.value.toLowerCase());
+                                              final visible = query.value.isEmpty ||
+                                                  friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
+                                                  friend.name.toLowerCase().contains(query.value.toLowerCase());
                                               return Visibility(
                                                 visible: friend.id != StatusController.ownAccountId,
                                                 child: Animate(
@@ -324,14 +330,7 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   void doAction() {
-    var args = query.value.split("#");
-    if (args.length != 2) {
-      // TODO: Open friend settings
-      sendLog("TODO: This is where we open friend settings or detect if the friend the user is trying to add doesn't exist");
-      return;
-    }
-
-    newFriendRequest(args[0], args[1], (message) {
+    newFriendRequest(query.value, (message) {
       revealSuccess.value = true;
       Timer(const Duration(seconds: 3), () {
         revealSuccess.value = false;

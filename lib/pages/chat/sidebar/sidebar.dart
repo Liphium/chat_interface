@@ -1,10 +1,11 @@
 import 'dart:math';
 
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
@@ -149,6 +150,76 @@ class _SidebarState extends State<Sidebar> {
               );
             }),
 
+            //* Townsquare
+            Obx(() {
+              final tsController = Get.find<TownsquareController>();
+              final loading = tsController.connecting.value;
+              return Animate(
+                effects: [
+                  ExpandEffect(
+                    alignment: Alignment.bottomCenter,
+                    duration: 500.ms,
+                    curve: scaleAnimationCurve,
+                    axis: Axis.vertical,
+                  ),
+                  FadeEffect(
+                    begin: 0,
+                    end: 1,
+                    duration: 500.ms,
+                  ),
+                ],
+                target: tsController.enabled.value ? 1 : 0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: defaultSpacing),
+                    child: Material(
+                      color: tsController.inView.value ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+                      borderRadius: BorderRadius.circular(defaultSpacing),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        hoverColor: theme.colorScheme.primary.withAlpha(150),
+                        onTap: !loading
+                            ? () {
+                                tsController.view();
+                              }
+                            : null,
+                        child: Padding(
+                          padding: const EdgeInsets.all(elementSpacing2),
+                          child: Row(
+                            children: [
+                              Icon(Icons.location_city, color: Get.theme.colorScheme.onPrimary, size: 35),
+                              horizontalSpacing(defaultSpacing),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text("Townsquare", style: Get.theme.textTheme.labelMedium),
+                                      horizontalSpacing(elementSpacing),
+                                      Icon(Icons.science, size: 22, color: Get.theme.colorScheme.error),
+                                    ],
+                                  ),
+                                  Text(
+                                      loading
+                                          ? "townsquare.connecting".tr
+                                          : "townsquare.viewing".trParams({
+                                              "count": "0",
+                                              "total": "20",
+                                            }),
+                                      style: Get.theme.textTheme.bodySmall),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+
             //* Selected tab
             Expanded(
               child: Padding(
@@ -168,7 +239,7 @@ class _SidebarState extends State<Sidebar> {
                         final prevId = index > 0 ? controller.order.elementAt(index - 1) : null;
                         final prev = prevId != null ? controller.conversations[prevId] : null;
                         if (prev != null && !prev.isGroup) {
-                          final otherGuy = prev.members.values.firstWhere((element) => element.account != statusController.id.value);
+                          final otherGuy = prev.members.values.firstWhere((element) => element.account != StatusController.ownAccountId);
 
                           //* Shared content renderer
                           if (statusController.sharedContent.containsKey(otherGuy.account) && !renderedShared) {
@@ -211,7 +282,7 @@ class _SidebarState extends State<Sidebar> {
                         Friend? friend;
                         if (!conversation.isGroup) {
                           String id = conversation.members.values
-                              .firstWhere((element) => element.account != statusController.id.value, orElse: () => Member("-", "-", MemberRole.user))
+                              .firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member("-", "-", MemberRole.user))
                               .account;
                           if (id == "-") {
                             friend = Friend.me();

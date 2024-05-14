@@ -131,8 +131,6 @@ class PublicationController extends GetxController {
   void onConnect() async {
     // Enforce defaults
     final settingController = Get.find<SettingController>();
-    await api.setDeafen(deafened: false);
-    await api.setSilentMute(silentMute: false);
     deafened.value = false;
 
     // Set settings
@@ -142,13 +140,8 @@ class PublicationController extends GetxController {
 
     // Set mute
     final startMuted = settingController.settings[AudioSettings.startMuted]!.getValue() as bool;
-    await api.setMuted(muted: startMuted);
     await Future.delayed(500.milliseconds);
     setMuted(startMuted);
-
-    // Set detection mode
-    final detectionMode = settingController.settings[AudioSettings.microphoneMode]!.getValue() as int;
-    await api.setDetectionMode(detectionMode: detectionMode);
 
     final devices = await Hardware.instance.enumerateDevices();
     final outputDevice = devices.firstWhereOrNull((element) => element.label == settingController.settings[AudioSettings.output]!.getValue());

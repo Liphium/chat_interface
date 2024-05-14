@@ -5,13 +5,15 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
@@ -31,9 +33,8 @@ class StatusController extends GetxController {
     });
   }
 
-  final name = 'test'.obs;
-  final tag = 'hi'.obs;
-  final id = '0'.obs;
+  final displayName = UTFString("not-set").obs;
+  final name = 'not-set'.obs;
 
   // Status message
   final statusLoading = true.obs;
@@ -47,9 +48,7 @@ class StatusController extends GetxController {
   final ownContainer = Rx<ShareContainer?>(null);
 
   void setName(String value) => name.value = value;
-  void setTag(String value) => tag.value = value;
   void setId(String value) {
-    id.value = value;
     StatusController.ownAccountId = value;
   }
 
@@ -74,7 +73,7 @@ class StatusController extends GetxController {
   }
 
   String generateFriendId() {
-    return hashSha(id.value + name.value + tag.value + storedActionKey);
+    return hashSha(ownAccountId + name.value + storedActionKey);
   }
 
   String statusPacket(String statusJson) {
@@ -128,6 +127,7 @@ class StatusController extends GetxController {
       if (event.data["success"] == true) {
         if (message != null) status.value = utf8.decode(base64Decode(message));
         if (type != null) this.type.value = type;
+        Get.find<TownsquareController>().updateEnabledState();
       }
     });
 
@@ -157,7 +157,7 @@ class StatusController extends GetxController {
 }
 
 String friendId(Friend friend) {
-  return hashSha(friend.id + friend.name + friend.tag + friend.keyStorage.storedActionKey);
+  return hashSha(friend.id + friend.name + friend.keyStorage.storedActionKey);
 }
 
 enum ShareType { space }

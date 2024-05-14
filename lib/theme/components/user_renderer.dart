@@ -1,6 +1,7 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,7 +33,11 @@ class _UserAvatarState extends State<UserAvatar> {
   }
 
   Friend getFriend() {
-    return (widget.user ?? (widget.controller ?? Get.find<FriendController>()).friends[widget.id]) ?? Friend.unknown(widget.id);
+    if (widget.user != null) {
+      return widget.user!;
+    }
+    final controller = widget.controller ?? Get.find<FriendController>();
+    return controller.friends[widget.id] ?? Friend.unknown(widget.id);
   }
 
   @override
@@ -46,27 +51,29 @@ class _UserAvatarState extends State<UserAvatar> {
         () {
           if (friend.profilePictureImage.value != null) {
             final image = friend.profilePictureImage.value!;
-            final scale = friend.profilePictureData.scaleFactor * (300 / (widget.size ?? 45));
             return ClipOval(
               child: RawImage(
-                fit: BoxFit.none,
-                scale: scale,
+                fit: BoxFit.contain,
                 image: image,
-                alignment: Alignment(friend.profilePictureData.moveX, friend.profilePictureData.moveY),
               ),
             );
           }
 
-          return CircleAvatar(
-            backgroundColor: Get.theme.colorScheme.primaryContainer,
-            radius: widget.size ?? 45,
-            child: SelectionContainer.disabled(
-              child: Text(
-                friend.name.substring(0, 1),
-                style: Get.theme.textTheme.labelMedium!.copyWith(
-                  fontSize: (widget.size ?? 45) * 0.5,
-                  fontWeight: FontWeight.bold,
-                  color: widget.id == StatusController.ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary,
+          sendLog(friend.name);
+
+          return ClipOval(
+            child: Container(
+              color: Get.theme.colorScheme.primaryContainer,
+              child: SelectionContainer.disabled(
+                child: Center(
+                  child: Text(
+                    friend.displayName.value.text.substring(0, 1),
+                    style: Get.theme.textTheme.labelMedium!.copyWith(
+                      fontSize: (widget.size ?? 45) * 0.5,
+                      fontWeight: FontWeight.bold,
+                      color: widget.id == StatusController.ownAccountId ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -103,7 +110,7 @@ class UserRenderer extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(friend.name, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium),
+                  Text(friend.displayName.value.text, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium),
                   horizontalSpacing(defaultSpacing),
                   Obx(() => StatusRenderer(status: own ? statusController!.type.value : friend!.statusType.value)),
                 ],

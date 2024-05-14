@@ -4,21 +4,22 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:get/get.dart';
 
-class ProfilePictureHelper {
-  /// Download the profile picture of a friend.
+class ProfileHelper {
+  /// Download the profile picture of a friend (if it isn't downloaded or changed).
+  /// Also checks for name changes and display name changes.
   /// Returns the file ID associated with the profile picture.
   static Future<String?> downloadProfilePicture(Friend friend) async {
     // Get old profile picture
@@ -29,14 +30,25 @@ class ProfilePictureHelper {
     });
 
     if (!json["success"]) {
+      sendLog("ERROR WHILE GETTING PROFILE: ${json["error"]}");
       return null;
     }
 
-    // Check if there is a new name and tag (also handled by the profile endpoint)
-    if (json["name"] != friend.name || json["tag"] != friend.tag) {
+    // Check if there is a new name (also handled by the profile endpoint)
+    if (json["name"] != friend.name) {
       friend.name = json["name"];
-      friend.tag = json["tag"];
       await friend.update();
+    }
+
+    // Check if there is a new display name
+    final displayName = UTFString.untransform(json["display_name"]);
+    if (displayName != friend.displayName.value) {
+      friend.updateDisplayName(displayName);
+    }
+
+    // Check if there is a profile picture
+    if (json["profile"]["picture"] == null) {
+      return null;
     }
 
     String? oldPictureId;
@@ -50,7 +62,6 @@ class ProfilePictureHelper {
     }
 
     // Decrypt the profile picture data
-    final profileData = ProfilePictureData.fromJson(jsonDecode(decryptSymmetric(json["profile"]["picture_data"], friend.keyStorage.profileKey)));
     final container = AttachmentContainer.fromJson(StorageType.permanent, jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
 
     if (container.id != json["profile"]["picture"]) {
@@ -77,15 +88,15 @@ class ProfilePictureHelper {
     }
 
     // Save the profile picture data
-    friend.updateProfilePicture(container, profileData);
+    friend.updateProfilePicture(container);
 
     return json["profile"]["id"];
   }
 
   /// Upload a profile picture to the server and set it as the current profile picture
-  static Future<bool> uploadProfilePicture(XFile file, ProfilePictureData data) async {
+  static Future<bool> uploadProfilePicture(File file, String originalName) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent);
+    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, fileName: originalName);
     if (response.container == null) {
       showErrorPopup("error", response.message);
       return false;
@@ -94,7 +105,7 @@ class ProfilePictureHelper {
     // Update the profile picture
     final json = await postAuthorizedJSON("/account/profile/set_picture", {
       "file": response.container!.id,
-      "data": encryptSymmetric(jsonEncode(data.toJson()), profileKey),
+      "data": "", // Potentially something to be useful in the future again
       "container": encryptSymmetric(jsonEncode(response.container!.toJson()), profileKey),
     });
 
@@ -102,7 +113,7 @@ class ProfilePictureHelper {
       showErrorPopup("error", "profile_picture.not_set");
       return false;
     }
-    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!, data);
+    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!);
 
     // TODO: Update for other devices
     return true;
@@ -128,22 +139,4 @@ class ProfilePictureHelper {
     });
     return completer.future;
   }
-}
-
-/// Class for storing the data of a profile picture (scale factor, x/y position)
-class ProfilePictureData {
-  final double scaleFactor, moveX, moveY;
-  ProfilePictureData(this.scaleFactor, this.moveX, this.moveY);
-
-  factory ProfilePictureData.fromJson(Map<String, dynamic> json) => ProfilePictureData(
-        json["s"],
-        json["x"],
-        json["y"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "s": scaleFactor,
-        "x": moveX,
-        "y": moveY,
-      };
 }

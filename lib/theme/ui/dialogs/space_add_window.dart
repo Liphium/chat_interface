@@ -1,9 +1,8 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_switch.dart';
-import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,7 +21,6 @@ class SpaceAddWindow extends StatefulWidget {
 class _ConversationAddWindowState extends State<SpaceAddWindow> {
   final public = true.obs;
   final _conversationLoading = false.obs;
-  final _errorText = Rx<String?>(null);
 
   final _controller = TextEditingController();
 
@@ -92,7 +90,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButton(
             onTap: () async {
-              Get.find<SpacesController>().createSpace("", public.value);
+              Get.find<SpacesController>().createSpace(public.value);
               Get.back();
             },
             label: "create".tr,

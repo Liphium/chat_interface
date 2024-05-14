@@ -1,7 +1,6 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/emojis/emoji_window.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/settings_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
@@ -76,24 +75,22 @@ class _ProfileState extends State<OwnProfile> {
                           Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
                           Text(
-                            controller.name.value,
+                            controller.displayName.value.text,
                             style: theme.textTheme.titleMedium,
                             textHeightBehavior: noTextHeight,
                           ),
-                          Text("#${controller.tag.value}",
-                              textHeightBehavior: noTextHeight,
-                              style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.normal, color: theme.colorScheme.onPrimary)),
                         ],
                       ),
 
                       //* Copy button
                       LoadingIconButton(
-                          loading: false.obs,
-                          onTap: () {
-                            db.conversation.deleteAll();
-                            db.message.deleteAll();
-                          },
-                          icon: Icons.copy)
+                        loading: false.obs,
+                        onTap: () {
+                          db.conversation.deleteAll();
+                          db.message.deleteAll();
+                        },
+                        icon: Icons.copy,
+                      )
                     ],
                   ),
                   verticalSpacing(defaultSpacing),
@@ -263,17 +260,13 @@ class _ProfileState extends State<OwnProfile> {
                   ),
                   verticalSpacing(elementSpacing),
 
-                  //* Emoji testing
+                  //* Friends page
                   ProfileButton(
-                    icon: Icons.emoji_emotions,
-                    label: 'profile.test'.tr,
-                    onTap: () => Get.dialog(const EmojiWindow()),
+                    icon: Icons.group,
+                    label: 'profile.friends'.tr,
+                    onTap: () => Get.dialog(const FriendsPage()),
                     loading: false.obs,
                   ),
-                  verticalSpacing(elementSpacing),
-
-                  //* Friends page
-                  ProfileButton(icon: Icons.group, label: 'profile.friends'.tr, onTap: () => Get.dialog(const FriendsPage()), loading: false.obs),
                   verticalSpacing(elementSpacing),
 
                   //* Hide profile

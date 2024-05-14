@@ -6,7 +6,7 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/spaces/space_connection.dart';
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
@@ -35,7 +35,6 @@ class SpacesController extends GetxController {
   final inSpace = false.obs;
   final spaceLoading = false.obs;
   final connected = false.obs;
-  final title = "Space".obs;
   final start = DateTime.now().obs;
 
   //* Game mode
@@ -69,18 +68,22 @@ class SpacesController extends GetxController {
 
   void cinemaMode(Widget widget) {
     if (cinemaWidget.value != null) {
-      cinemaWidget.value = null;
+      if (cinemaWidget.value == widget) {
+        cinemaWidget.value = null;
+        return;
+      }
+      cinemaWidget.value = widget;
       return;
     }
     cinemaWidget.value = widget;
   }
 
-  void createSpace(String title, bool publish) {
+  void createSpace(bool publish) {
     _startSpace((container) {
       if (publish) {
         Get.find<StatusController>().share(container);
       }
-    }, connectedCallback: () => setSpaceTitle(title));
+    });
   }
 
   void createAndConnect(String conversationId) {
@@ -131,18 +134,6 @@ class SpacesController extends GetxController {
     gameShelf.value = !gameShelf.value;
   }
 
-  void setSpaceTitle(String title) {
-    if (connected.value) {
-      spaceConnector.sendAction(msg.Message("set_data", {"data": encryptSymmetric(title, key!)}), handler: (event) {
-        if (!event.data["success"]) {
-          showErrorPopup("error", "server.error");
-          return;
-        }
-        this.title.value = title;
-      });
-    }
-  }
-
   void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {
     if (connected.value) {
       showErrorPopup("error", "already.calling");
@@ -173,8 +164,7 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces",
-        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
@@ -242,7 +232,7 @@ class SpacesController extends GetxController {
       msg.Message(
         "setup",
         <String, dynamic>{
-          "data": encryptSymmetric(Get.find<StatusController>().id.value, key!),
+          "data": encryptSymmetric(StatusController.ownAccountId, key!),
         },
       ),
       handler: (event) async {
@@ -270,7 +260,6 @@ class SpacesController extends GetxController {
         await keyProvider.setKey(base64Encode(key!.extractBytes()));
         Get.find<SpaceMemberController>().onLivekitConnected();
         await api.startTalkingEngine();
-        livekitRoom!.addListener(_onRoomUpdate);
 
         connected.value = true;
         inSpace.value = true;
@@ -287,7 +276,6 @@ class SpacesController extends GetxController {
     id.value = "";
     spaceConnector.disconnect();
     livekitRoom?.disconnect();
-    livekitRoom?.removeListener(_onRoomUpdate);
 
     // Tell other controllers about it
     Get.find<StatusController>().stopSharing();
@@ -302,7 +290,7 @@ class SpacesController extends GetxController {
   }
 
   /// Called every time the room updates
-  void _onRoomUpdate() {
+  void updateRoomVideoState() {
     hasVideo.value = livekitRoom!.remoteParticipants.values.any((element) => element.isCameraEnabled() || element.isScreenShareEnabled()) ||
         livekitRoom!.localParticipant!.isCameraEnabled() ||
         livekitRoom!.localParticipant!.isScreenShareEnabled();
@@ -312,12 +300,11 @@ class SpacesController extends GetxController {
 
 class SpaceInfo {
   late bool exists;
-  late String title;
   late DateTime start;
   final List<Friend> friends = [];
   late final List<String> members;
 
-  SpaceInfo(this.title, this.start, this.members) {
+  SpaceInfo(this.start, this.members) {
     exists = true;
     final controller = Get.find<FriendController>();
     for (var member in members) {
@@ -327,11 +314,6 @@ class SpaceInfo {
   }
 
   SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
-    if (json["data"] != "") {
-      title = decryptSymmetric(json["data"], container.key);
-    } else {
-      title = "";
-    }
     start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
     members = List<String>.from(json["members"].map((e) => decryptSymmetric(e, container.key)));
     exists = true;
@@ -358,8 +340,7 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
-      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {
@@ -374,6 +355,7 @@ class SpaceConnectionContainer extends ShareContainer {
   }
 
   Future<SpaceInfo> getInfo({bool timer = false}) async {
+    // Request the info from the server
     final http.Response req;
     try {
       req = await http.post(
@@ -386,10 +368,16 @@ class SpaceConnectionContainer extends ShareContainer {
     } catch (e) {
       return SpaceInfo.notLoaded();
     }
+
+    // Return a not loaded state if the request wasn't successful
     if (req.statusCode != 200) {
       return SpaceInfo.notLoaded();
     }
+
+    // Parse the json
     final body = jsonDecode(req.body);
+
+    // Start a periodic timer to refresh info (if desired)
     if (timer && _timer == null) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
         final info = await getInfo();
@@ -398,9 +386,13 @@ class SpaceConnectionContainer extends ShareContainer {
         }
       });
     }
+
+    // Return a not loaded state if the request wasn't successful
     if (!body["success"]) {
       return SpaceInfo.notLoaded();
     }
+
+    // Return the proper info
     info.value = SpaceInfo.fromJson(this, body);
     return info.value!;
   }

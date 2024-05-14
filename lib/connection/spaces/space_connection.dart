@@ -35,7 +35,6 @@ void setupSpaceListeners() {
 
 void handleRoomData(Event event) {
   final controller = Get.find<SpacesController>();
-  controller.title.value = event.data["room"] == "" ? "space".tr : "";
   controller.start.value = DateTime.fromMillisecondsSinceEpoch(event.data["start"]);
 
   // Update members

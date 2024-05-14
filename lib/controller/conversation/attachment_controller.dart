@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
@@ -11,6 +12,7 @@ import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio_rs;
 import 'package:path_provider/path_provider.dart';
@@ -21,11 +23,11 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false, popups = true}) async {
+  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false, popups = true, String? fileName}) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
-    final name = encryptSymmetric(data.file.name, key);
+    final name = encryptSymmetric(fileName ?? path.basename(data.file.path), key);
 
     // Upload file
     final formData = dio_rs.FormData.fromMap({
@@ -33,7 +35,7 @@ class AttachmentController extends GetxController {
       "name": name,
       "favorite": favorite ? "true" : "false",
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
-      "extension": data.file.name.split(".").last
+      "extension": path.basename(data.file.path).split(".").last
     });
 
     sendLog(server("/account/files/upload").toString());
@@ -64,7 +66,7 @@ class AttachmentController extends GetxController {
 
     final file = File(path.join(AttachmentController.getFilePathForType(type), json["id"].toString()));
     await file.writeAsBytes(bytes);
-    final container = AttachmentContainer(type, json["id"], data.file.name, json["url"], key);
+    final container = AttachmentContainer(type, json["id"], path.basename(data.file.path), json["url"], key);
     sendLog("SENT ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
     attachments[container.id] = container;
@@ -81,7 +83,6 @@ class AttachmentController extends GetxController {
     final file = File(container.filePath);
     final exists = await file.exists();
     if (!exists) {
-      container.error.value = true;
       return null;
     }
 
@@ -319,10 +320,12 @@ enum AttachmentContainerType { link, remoteImage, file }
 class AttachmentContainer {
   late final String filePath;
   late final AttachmentContainerType attachmentType;
-  final StorageType type;
+  final StorageType storageType;
   final String id;
   final String name;
   final String url;
+  int? width;
+  int? height;
   final SecureKey? key;
 
   // Download status
@@ -339,7 +342,13 @@ class AttachmentContainer {
     downloaded.value = false;
   }
 
-  AttachmentContainer(this.type, this.id, this.name, this.url, this.key) {
+  Future<bool> init() async {
+    unsafeLocation.value = !(await TrustedLinkHelper.isLinkTrusted(url));
+    sendLog("TRUSTED ${unsafeLocation.value} $url");
+    return true;
+  }
+
+  AttachmentContainer(this.storageType, this.id, this.name, this.url, this.key) {
     if (id == "" && name == "") {
       for (var fileType in FileSettings.imageTypes) {
         if (url.endsWith(".$fileType")) {
@@ -352,13 +361,43 @@ class AttachmentContainer {
     } else {
       attachmentType = AttachmentContainerType.file;
     }
-    filePath = path.join(AttachmentController.getFilePathForType(type), id);
+    filePath = path.join(AttachmentController.getFilePathForType(storageType), id);
+  }
+
+  Future<Size?> precalculateWidthAndHeight() async {
+    if (attachmentType != AttachmentContainerType.file) {
+      return null;
+    }
+    bool found = false;
+    for (var extension in FileSettings.imageTypes) {
+      if (filePath.endsWith(".$extension")) {
+        found = true;
+      }
+    }
+
+    if (!found) {
+      return null;
+    }
+
+    // Grab resolution from it
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(filePath).readAsBytes());
+    final descriptor = await ui.ImageDescriptor.encoded(buffer);
+    final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
+
+    width = size.width.toInt();
+    height = size.height.toInt();
+
+    sendLog("PRECALC $width $height");
+    return size;
   }
 
   AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
 
   factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json) {
-    return AttachmentContainer(type, json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
+    final container = AttachmentContainer(type, json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
+    container.width = json["w"];
+    container.height = json["h"];
+    return container;
   }
 
   String toAttachment() {
@@ -373,6 +412,13 @@ class AttachmentContainer {
   }
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{"id": id, "name": name, "url": url, "key": packageSymmetricKey(key!)};
+    return <String, dynamic>{
+      "id": id,
+      "name": name,
+      "url": url,
+      "key": packageSymmetricKey(key!),
+      if (width != null) "w": width,
+      if (height != null) "h": height,
+    };
   }
 }

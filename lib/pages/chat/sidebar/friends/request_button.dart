@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -24,8 +24,7 @@ class _RequestButtonState extends State<RequestButton> {
     final children = <Widget>[
       IconButton(
         icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
-        onPressed: () =>
-            widget.self ? widget.request.cancel() : widget.request.ignore(),
+        onPressed: () => widget.self ? widget.request.cancel() : widget.request.ignore(),
       )
     ];
 
@@ -33,19 +32,20 @@ class _RequestButtonState extends State<RequestButton> {
     if (!widget.self) {
       children.insert(0, horizontalSpacing(defaultSpacing * 0.5));
       children.insert(
-          0,
-          LoadingIconButton(
-            loading: requestLoading,
-            icon: Icons.check,
-            color: Get.theme.colorScheme.onPrimary,
-            onTap: () {
-              requestLoading.value = true;
-              widget.request.accept((p0) {
-                sendLog("Request accepted");
-                requestLoading.value = false;
-              });
-            },
-          ));
+        0,
+        LoadingIconButton(
+          loading: requestLoading,
+          icon: Icons.check,
+          color: Get.theme.colorScheme.onPrimary,
+          onTap: () {
+            requestLoading.value = true;
+            widget.request.accept((p0) {
+              sendLog("Request accepted");
+              requestLoading.value = false;
+            });
+          },
+        ),
+      );
     }
 
     return Material(
@@ -56,41 +56,41 @@ class _RequestButtonState extends State<RequestButton> {
 
         //* Request item content
         child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.email,
-                          size: 30,
-                          color: Theme.of(context).colorScheme.onPrimary),
-                      const SizedBox(width: 10),
-                      Text("${widget.request.name}#${widget.request.tag}",
-                          style: Get.theme.textTheme.titleMedium),
-                    ],
-                  ),
+                  Icon(Icons.email, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                  const SizedBox(width: 10),
+                  Text(widget.request.displayName.text, style: Get.theme.textTheme.titleMedium),
+                ],
+              ),
 
-                  //* Request actions
-                  Obx(() => widget.request.loading.value
-                      ? const SizedBox(
-                          width: 25,
-                          height: 25,
-                          child: Padding(
-                            padding: EdgeInsets.all(defaultSpacing * 0.25),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                            ),
+              //* Request actions
+              Obx(
+                () => widget.request.loading.value
+                    ? const SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: Padding(
+                          padding: EdgeInsets.all(defaultSpacing * 0.25),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
                           ),
-                        )
-                      :
+                        ),
+                      )
+                    :
 
-                      //* Accept/decline
-                      Row(
-                          children: children,
-                        )),
-                ])),
+                    //* Accept/decline
+                    Row(
+                        children: children,
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

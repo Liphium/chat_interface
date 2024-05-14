@@ -9,16 +9,21 @@ class SetupTranslations extends Translations {
           'retry.text.1': 'Trying again in',
           'retry.text.2': 'seconds.',
 
-          // Instance setup
+          // General setup
           'setup.choose.instance': 'Choose an instance.',
           'setup.instance.name': 'Enter a new name',
           'setup.choose.server': 'Choose a server',
+          'server.choose.server.connecting': 'Currently connecting to',
+          'setup.policy': 'Your privacy on Liphium.',
+          'setup.policy.text':
+              'By pressing \'Accept\', you acknowledge that you have carefully reviewed and accepted our Privacy Policy and Terms of Service which you can read by clicking on \'View agreements\' below, after which the \'Accept\' button will appear.',
+          'setup.policy.error': 'It seems like we couldn\'t open a browser on your device. Please check your internet connection or contact the developers of this app.',
 
           // Login/register
           'register.title': 'Register an account.',
-          'placeholder.username': 'name',
+          'placeholder.username': 'test123',
+          'placeholder.display_name': 'Test 123',
           'placeholder.password': 'yourmum123 (don\'t use this)',
-          'placeholder.tag': '1234',
           'placeholder.invite': 'your-invite-code',
           'password.invalid': 'Please enter a password that is longer than 8 characters.',
           'invite.invalid': 'Please enter a valid invite code.',
@@ -42,41 +47,5 @@ class SetupTranslations extends Translations {
           'login.forgot.text': 'Forgot your password?',
           'login.forgot': 'Reset it',
         },
-
-        //* German
-        'de_DE': {
-          /*
-          // Error page
-          'retry.text.1': 'Versuche es in',
-          'retry.text.2': 'Sekunden erneut.',
-
-          // Instance setup
-          'setup.choose.instance': 'Wähle eine Instanz.',
-          'setup.instance.name': 'Gib einen Namen ein',
-
-          // Login/register
-          'register.title': 'Registriere einen Account.',
-          'placeholder.username': 'Benutzername',
-          'placeholder.password': 'deinemutter123 (bitte nicht benutzen)',
-          'placeholder.tag': '1234',
-          'placeholder.email': 'deine@email.com',
-          'placeholder.invite': 'dein-einladungs-code',
-          'password.invalid': 'Bitte gib ein Passwort ein, das länger als 8 Zeichen ist.',
-          'invite.invalid': 'Bitte gib eine gültige Einladung ein.',
-          'invite.info': 'Einladungen sind dein Weg in die App. Du kannst einen von einem Freund oder von offiziellen Quellen bekommen.',
-          'email.invalid': 'Bitte gib eine gültige Email ein.',
-          'register.register': 'Registrieren',
-          'register.account.text': 'Du hast einen Account?',
-          'register.login': 'Einloggen',
-          'input.email': 'Deine Email, bitte',
-          'login.next': 'Nächster Schritt',
-          'login.no_account.text': 'Du hast keinen Account?',
-          'login.register_reminder': 'Du hast keinen Accountt? Es gibt einen Link zum Registrieren direkt unter dem "Nächster Schritt"-Knopf.',
-          'login.no_account': 'Registrieren',
-          'input.password': 'Dein Passwort, bitte',
-          'login.forgot.text': 'Passwort vergessen?',
-          'login.forgot': 'Zurücksetzen',
-          */
-        }
       };
 }

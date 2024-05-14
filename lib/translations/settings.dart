@@ -24,6 +24,7 @@ class SettingsTranslations extends Translations {
           'settings.encryption': 'Encryption',
           'settings.spaces': 'Spaces',
           'settings.tabletop': 'Tabletop',
+          'settings.chat': 'Chat',
           'settings.files': 'Files',
           'settings.invites': 'Invites',
           'settings.trusted_links': 'Trusted Links',
@@ -92,6 +93,10 @@ class SettingsTranslations extends Translations {
           'files.live_share.experiment': 'Enable Live Share',
 
           // Data settings
+          'settings.data.social': 'Social features',
+          'settings.data.social.text':
+              'Liphium\'s social features allow you to share things not just with your friends, but also with the people on your instance. You can chat with everyone, but therefore it\'s not encrypted, so we allow you to disable it.',
+          'data.social': 'Enable social features',
           'settings.data.profile_picture': 'Profile picture',
           'settings.data.profile_picture.select': 'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
           'settings.data.profile_picture.requirements': 'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',
@@ -113,7 +118,8 @@ class SettingsTranslations extends Translations {
           'settings.data.danger_zone.delete_account': 'Delete account',
           'settings.data.danger_zone.delete_account.confirm':
               'This is just a request and your actual data will be deleted in 30 days. We do this to make sure you didn\'t just accidentally click this button and that you are the actual owner of this account. Are you sure you want to delete your account?',
-          'settings.data.change_name.dialog': 'Let\'s get you a fresh username and tag. But please don\'t change it to something stupid. Your friends will thank you.',
+          'settings.data.change_name.dialog': 'Want to change your username? Just provide it below and we\'ll handle it for you.',
+          'settings.data.change_display_name.dialog': 'Want to change your display name? We\'ll handle your request right here.',
 
           // Invite settings (this is mostly alpha only)
           'settings.invites.description':
@@ -132,7 +138,8 @@ class SettingsTranslations extends Translations {
           'settings.tabletop.decks.error':
               'An error occurred while loading your decks. This is probably something you\'ll need to report to us or it\'s just your connection. You can also try to see if there\'s a new version of the app available or try again later.',
           'settings.tabletop.decks.limit': 'Decks (@count/@limit)',
-          'decks.description': 'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
+          'decks.description':
+              'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
           'decks.create': 'Create a new deck',
           'decks.dialog.delete.title': 'Delete deck',
           'decks.dialog.delete': 'Are you sure you want to delete this deck? Think about all the cards you\'ll lose!',
@@ -169,108 +176,11 @@ class SettingsTranslations extends Translations {
           'video.camera.device': 'Select a camera',
           'video.camera.preview': 'Camera preview',
           'video.camera.preview.start': 'Start camera preview',
+
+          // Chat theme settings
+          'appearance.chat.theme': 'Chat theme',
+          'appearance.chat.theme.material': 'Material',
+          'appearance.chat.theme.bubbles': 'Chat bubbles',
         },
-
-        //* German
-        'de_DE': {
-          /*
-          // Categories
-          'settings.tab.account': 'Konto',
-          'settings.tab.appearance': 'Aussehen',
-          'settings.tab.app': 'App',
-          'settings.tab.privacy': 'Privatsphäre',
-          'settings.data': 'Daten',
-          'settings.profile': 'Profil',
-          'settings.security': 'Sicherheit',
-          'settings.devices': 'Geräte',
-          'settings.video': 'Video',
-          'settings.audio': 'Audio',
-          'settings.notifications': 'Benachrichtigungen',
-          'settings.language': 'Sprache',
-          'settings.colors': 'Farben',
-          'settings.call_app': 'Anrufe',
-          'settings.requests': 'Freundschaftsanfragen',
-          'settings.encryption': 'Verschlüsselung',
-          'settings.spaces': 'Spaces',
-          'settings.files': 'Dateien',
-          'settings.invites': 'Einladungen',
-          'settings.invites.title': 'Du hast @count Einladungen übrig.',
-
-          // Audio settings
-          'audio.device': 'Wähle ein Gerät aus',
-          'audio.device.default': 'Wenn du nicht weißt, was du hier auswählen sollst, ist oft das Standardgerät in Ordnung:',
-          'audio.device.default.button': 'Systemstandard verwenden',
-          'audio.microphone': 'Mikrofon',
-          'audio.microphone.device': 'Oder du wählst einfach eines dieser Geräte aus (der grüne Verifizierungsindikator steht für das beste Mikrofon):',
-          'audio.microphone.muted': 'In einem Space stummgeschaltet starten',
-          'audio.microphone.sensitivity': 'Mikrofonempfindlichkeit',
-          'audio.microphone.sensitivity.text': 'Die grüne Linie ist deine aktuelle Lautstärke. Ziehe den Regler an die Stelle, an der andere dich hören sollen.',
-          'audio.output': 'Ausgabe',
-          'audio.output.device': 'Oder du wählst einfach eines dieser Geräte aus:',
-
-          // File settings
-          'auto_download.images': 'Bilder automatisch herunterladen',
-          'auto_download.videos': 'Videos automatisch herunterladen',
-          'auto_download.audio': 'Audio automatisch herunterladen',
-          'settings.file.auto_download.types': 'Dateitypen, die automatisch heruntergeladen werden sollen',
-          'settings.file.max_size': 'Maximale Dateigröße für automatische Downloads',
-          'settings.file.max_size.description': 'Dateien, die größer sind, werden nicht automatisch heruntergeladen.',
-          'settings.file.cache': 'Dateicache',
-          'settings.file.cache.description':
-              'Der Dateicache speichert alle Dateien, die automatisch heruntergeladen wurden. Dazu gehören Profilbilder und alle anderen Daten, die du oben ausgewählt hast. Wenn er voll ist, werden alte Dateien automatisch gelöscht. In Zukunft kannst du ihn vielleicht sogar ausschalten. Du kannst die Größe mit dem Regler unten auswählen.',
-          'settings.file.mb': 'MB',
-
-          // Theme settings
-          'theme.presets': 'Vorlagen',
-          'theme.default_dark': 'Dunkel',
-          'theme.default_light': 'Hell',
-          'theme.winter': 'Winter',
-          'theme.custom': 'Erstelle dein eigenes',
-          'theme.custom.title': 'Eigenes Design',
-          'custom.primary_hue': 'Primärfarbe',
-          'custom.secondary_hue': 'Sekundärfarbe',
-          'custom.base_saturation': 'Sättigung',
-          'custom.theme_mode': 'Helligkeit',
-          'custom.dark': 'Dunkel',
-          'custom.light': 'Hell',
-          'custom.background_mode': 'Welche Farbe soll der Hintergrund haben?',
-          'custom.none': 'Keine',
-          'custom.colored': 'Primärfarbe',
-          'theme.apply': 'Design anwenden',
-
-          // Data settings
-          'settings.data.profile_picture': 'Profilbild',
-          'settings.data.profile_picture.select': 'Wähle dein neuestes Meme aus, damit jeder sehen kann, wie cool du bist!',
-          'settings.data.profile_picture.requirements': 'Kann nur ein JPEG- oder PNG-Bild sein und darf nicht größer als 10 MB sein.',
-          'settings.data.profile_picture.remove': 'Profilbild entfernen',
-          'settings.data.profile_picture.remove.confirm': 'Bist du sicher, dass du dein Profilbild entfernen möchtest?',
-          'settings.data.permissions': 'Berechtigungen',
-          'settings.data.permissions.description':
-              'Falls du nicht weißt, was das hier ist, ist es nicht schlimm. Das hier sind einfach nur Daten vom Server nach denen wir dich im Fall von Problemen fragen können. Hier sind deine Berechtigungen:',
-          'settings.data.account': 'Kontodaten',
-          'settings.data.password.description': 'Wir zeigen dir dein Passwort hier nicht an. Das wäre dumm.',
-          'settings.data.log_out': 'Von deinem Konto abmelden',
-          'settings.data.log_out.description': 'Diese Funktion ist noch in Entwicklung. Wir wollten es dich nur wissen lassen, damit du nicht weiter danach suchst.',
-          'settings.data.danger_zone': 'Gefahrenzone',
-          'settings.data.danger_zone.description':
-              'Hallo und willkommen hier unten! Ich hoffe, du bist nicht hierher gekommen, um dein Konto zu löschen. Wenn doch, kannst du das hier tun. Aber bitte nicht. Wir werden dich vermissen. :( ... Wie auch immer, danke, dass du etwas Speicherplatz in unserer Datenbank freigibst!',
-          'settings.data.danger_zone.delete_account': 'Konto löschen',
-          'settings.data.danger_zone.delete_account.confirm':
-              'Das ist nur eine Anfrage und deine eigentlichen Daten werden in 30 Tagen gelöscht. Wir tun das, um sicherzustellen, dass du nicht versehentlich auf diesen Button geklickt hast und dass du der eigentliche Besitzer dieses Kontos bist. Bist du sicher, dass du dein Konto löschen möchtest?',
-          'settings.data.change_name.dialog': 'Lass uns dir einen neuen Benutzernamen und Tag geben. Aber bitte ändere ihn nicht zu etwas Dummem. Deine Freunde werden dir danken.',
-
-          // Invite settings (this is mostly alpha only)
-          'settings.invites.description':
-              "Einladungen sind ein Token, der zum Erstellen eines Kontos in der Chat-App erforderlich ist. Wenn du willst, dass einer deiner Freunde hier ist, schick ihm eine Einladung! Sie werden zufällig in Wellen verteilt, um einen Zustrom von zu vielen neuen Benutzern auf einmal zu verhindern und garantieren auch, dass die neuen Benutzer, die hereinkommen, tatsächlich deine Freunde sind.",
-          'settings.invites.generate': 'Einladung generieren',
-          'settings.invites.generated': 'Einladung generiert! Sie wurde in deine Zwischenablage kopiert.',
-          'settings.invites.history': 'Verlauf',
-          'settings.invites.history.description': 'Hier sind alle Einladungen, die du bereits generiert hast. Halte den Mauszeiger darüber, um den Token zu sehen.',
-          'settings.invites.history.empty': 'Du hast noch keine Einladungen generiert oder sie wurden alle eingelöst.',
-
-          // Spaces settings
-          'game.music': 'Musik im Spielmodus abspielen',
-          */
-        }
       };
 }

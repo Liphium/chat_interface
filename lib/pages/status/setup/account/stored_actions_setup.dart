@@ -13,8 +13,7 @@ class StoredActionsSetup extends Setup {
   @override
   Future<Widget?> load() async {
     // Get account from database
-    final body = await postAuthorizedJSON(
-        "/account/stored_actions/list", <String, dynamic>{});
+    final body = await postAuthorizedJSON("/account/stored_actions/list", <String, dynamic>{});
     if (!body["success"]) {
       return ErrorPage(
         title: "server.error".tr,

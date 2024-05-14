@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
@@ -9,18 +7,16 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart' as log;
+import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 
-var logger = log.Logger();
 final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;
-const appVersion = 1; // TODO: ALWAYS change to the new one saved in the node backend
 bool isHttps = true;
 const bool isDebug = true; // TODO: Set to false before release
 const bool checkVersion = true; // TODO: Set to true in release builds
@@ -58,6 +54,7 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
   executableArguments = args;
+  sendLog("Current save directory: ${(await getApplicationSupportDirectory()).path}");
 
   // Initialize sodium
   await initSodium();
@@ -83,7 +80,7 @@ void main(List<String> args) async {
 
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
-      minimumSize: Size(1000, 800),
+      minimumSize: Size(800, 500),
       fullScreen: false,
     ),
     () async {

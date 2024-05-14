@@ -133,18 +133,23 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
 
 // Post request to any domain
 Future<Map<String, dynamic>> postAny(String url, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
-  final res = await dio.post(
-    url,
-    data: jsonEncode(body),
-    options: d.Options(
-      validateStatus: (status) => status != 404,
-    ),
-  );
-  if (res.statusCode != 200) {
+  try {
+    final res = await dio.post(
+      url,
+      data: jsonEncode(body),
+      options: d.Options(
+        validateStatus: (status) => true,
+      ),
+    );
+    if (res.statusCode != 200) {
+      return <String, dynamic>{"success": false, "error": defaultError};
+    }
+
+    return res.data;
+  } catch (e) {
+    e.printError();
     return <String, dynamic>{"success": false, "error": defaultError};
   }
-
-  return res.data;
 }
 
 String padBase64(String str) {
@@ -167,6 +172,16 @@ String storedAction(String name, Map<String, dynamic> payload) {
   prefixJson.addAll(payload);
 
   return jsonEncode(prefixJson);
+}
+
+// Creates an authenticated stored action with the given name and payload
+Map<String, dynamic> authenticatedStoredAction(String name, Map<String, dynamic> payload) {
+  final prefixJson = <String, dynamic>{
+    "a": name,
+  };
+  prefixJson.addAll(payload);
+
+  return prefixJson;
 }
 
 /// Translate an error with parameters (for example: file.not_uploaded:PARAMETER)

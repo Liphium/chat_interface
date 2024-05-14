@@ -1,6 +1,7 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/register/register_handler.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
@@ -19,7 +20,7 @@ class RegisterFinishPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterFinishPage> {
   final _usernameController = TextEditingController();
-  final _tagController = TextEditingController();
+  final _displayNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -30,8 +31,8 @@ class _RegisterPageState extends State<RegisterFinishPage> {
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _displayNameController.dispose();
     _usernameController.dispose();
-    _tagController.dispose();
     super.dispose();
   }
 
@@ -53,45 +54,33 @@ class _RegisterPageState extends State<RegisterFinishPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("register.final".tr,
-                    textAlign: TextAlign.left,
-                    style: theme.textTheme.headlineMedium),
+                Text("register.final".tr, textAlign: TextAlign.left, style: theme.textTheme.headlineMedium),
                 verticalSpacing(sectionSpacing),
 
-                Text("username".tr,
-                    textAlign: TextAlign.left,
-                    style: theme.textTheme.labelLarge),
+                Text("username".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
                 verticalSpacing(elementSpacing),
-                LayoutBuilder(builder: (context, size) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: size.maxWidth * 0.6,
-                        child: FJTextField(
-                          hintText: 'placeholder.username'.tr,
-                          controller: _usernameController,
-                          maxLength: 16,
-                        ),
-                      ),
-                      Text('#', style: theme.textTheme.headlineMedium),
-                      SizedBox(
-                        width: size.maxWidth * 0.3,
-                        child: FJTextField(
-                          hintText: 'placeholder.tag'.tr,
-                          controller: _tagController,
-                          maxLength: 5,
-                        ),
-                      ),
-                    ],
-                  );
-                }),
+                Text("username.description".tr, textAlign: TextAlign.left, style: theme.textTheme.bodyMedium),
+                verticalSpacing(elementSpacing),
+                FJTextField(
+                  hintText: 'placeholder.username'.tr,
+                  controller: _usernameController,
+                  maxLength: 16,
+                ),
+                verticalSpacing(defaultSpacing),
+
+                Text("display_name".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
+                verticalSpacing(elementSpacing),
+                Text("display_name.description".tr, textAlign: TextAlign.left, style: theme.textTheme.bodyMedium),
+                verticalSpacing(elementSpacing),
+                FJTextField(
+                  hintText: 'placeholder.display_name'.tr,
+                  controller: _displayNameController,
+                  maxLength: 20,
+                ),
                 verticalSpacing(defaultSpacing),
 
                 // Password
-                Text("password".tr,
-                    textAlign: TextAlign.left,
-                    style: theme.textTheme.labelLarge),
+                Text("password".tr, textAlign: TextAlign.left, style: theme.textTheme.labelLarge),
                 verticalSpacing(elementSpacing),
                 FJTextField(
                   hintText: 'placeholder.password'.tr,
@@ -117,14 +106,15 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                     _errorText.value = "";
 
                     // Check all the stuff
-                    if (_usernameController.text == '') {
+                    if (_usernameController.text == '' || _usernameController.text.length < 3) {
                       _errorText.value = 'username.invalid'.tr;
                       _loading.value = false;
                       return;
                     }
 
-                    if (_tagController.text == '') {
-                      _errorText.value = 'tag.invalid'.tr;
+                    // Check all the stuff
+                    if (_displayNameController.text == '' || _displayNameController.text.length < 3) {
+                      _errorText.value = 'display_name.invalid'.tr;
                       _loading.value = false;
                       return;
                     }
@@ -135,8 +125,7 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                       return;
                     }
 
-                    if (_passwordController.text !=
-                        _confirmPasswordController.text) {
+                    if (_passwordController.text != _confirmPasswordController.text) {
                       _errorText.value = 'password.mismatch'.tr;
                       _loading.value = false;
                       return;
@@ -144,24 +133,19 @@ class _RegisterPageState extends State<RegisterFinishPage> {
 
                     // Send registration finish request
                     final error = await RegisterHandler.finishRegistration(
-                        _loading,
-                        _usernameController.text,
-                        _tagController.text,
-                        _passwordController.text);
+                        _loading, _usernameController.text, UTFString(_displayNameController.text).transform(), _passwordController.text);
                     if (error != null) {
                       _errorText.value = error;
                       return;
                     }
 
                     // Transition to the next page
-                    Get.find<TransitionController>()
-                        .modelTransition(const LoginPage());
+                    Get.find<TransitionController>().modelTransition(const LoginPage());
                     sendLog("registration finished");
                   },
                   loading: _loading,
                   child: Center(
-                    child: Text('register.register'.tr,
-                        style: theme.textTheme.labelLarge),
+                    child: Text('register.register'.tr, style: theme.textTheme.labelLarge),
                   ),
                 ),
                 verticalSpacing(defaultSpacing),
@@ -172,15 +156,11 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                     horizontalSpacing(defaultSpacing),
                     TextButton(
                       style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all(
-                            theme.colorScheme.onPrimary),
+                        foregroundColor: MaterialStateProperty.all(theme.colorScheme.onPrimary),
                         backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) => states.contains(MaterialState.hovered)
-                                ? theme.colorScheme.primary.withOpacity(0.3)
-                                : theme.colorScheme.primary.withOpacity(0)),
+                            (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
                       ),
-                      onPressed: () => Get.find<TransitionController>()
-                          .modelTransition(const LoginPage()),
+                      onPressed: () => Get.find<TransitionController>().modelTransition(const LoginPage()),
                       child: Text('register.login'.tr),
                     ),
                   ],

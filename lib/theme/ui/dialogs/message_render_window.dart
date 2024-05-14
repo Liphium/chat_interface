@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
@@ -56,7 +56,7 @@ class _MessageRenderWindowState extends State<MessageRenderWindow> {
               UserAvatar(id: widget.message.senderAccount, size: 32),
               horizontalSpacing(defaultSpacing),
               Text(
-                "${friend.name} (${friend.id})",
+                "${friend.displayName.value} (${friend.name} with id ${friend.id})",
                 style: Get.textTheme.labelLarge,
               ),
               const Expanded(child: SizedBox()),

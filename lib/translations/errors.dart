@@ -6,6 +6,7 @@ class ErrorTranslations extends Translations {
         //* English US
         'en_US': {
           'error': 'Error',
+          'server.not_found': 'The server couldn\'t be reached. Make sure you have the right domain.',
           'server.error': 'Something went wrong on the server, please try again later.',
           'server.error.code': 'Something went wrong on the server, please try again later. Status code: @code',
           'friends.error': 'There was an error while loading your friends. Please try again later or contact your administrator.',
@@ -32,7 +33,7 @@ class ErrorTranslations extends Translations {
 
           // Chat
           'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
-          'file.not_uploaded': 'File not found. Maybe it was deleted?',
+          'file.not_uploaded': 'File not found.',
           'file.too_large': 'The maximum file size is @1MB.',
           'file.unsafe': 'The provider of this file (@domain) isn\'t trusted.',
           'chat.add_file': 'Attach a file',
@@ -41,9 +42,9 @@ class ErrorTranslations extends Translations {
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
           'profile_picture.not_set': 'Your profile picture couldn\'t be set. Please try again later or contact support.',
-          'tag.invalid': 'Your tag is doesn\'t match the requirements. Please make it longer than 3 characters and don\'t use special characters.',
           'username.invalid': 'Your username doesn\'t match the requirements. Please make it longer than 3 characters.',
-          'username.taken': 'This combination of username and tag is taken, please choose something else.',
+          'display_name.invalid': 'Your display name doesn\'t match the requirements. Please make it longer than 3 characters.',
+          'username.taken': 'This username is taken, please choose a different one.',
           'password.mismatch': 'The passwords don\'t match.',
 
           // Game
@@ -82,9 +83,8 @@ class ErrorTranslations extends Translations {
           // Settings
           'profile_picture.not_uploaded': 'Dein Profilbild konnte nicht hochgeladen werden. Bitte versuche es später erneut oder kontaktiere den Support.',
           'profile_picture.not_set': 'Dein Profilbild konnte nicht gesetzt werden. Bitte versuche es später erneut oder kontaktiere den Support.',
-          'tag.invalid': 'Dein Tag entspricht nicht den Anforderungen. Bitte mache es länger als 3 Zeichen und verwende nur Buchstaben und Zahlen.',
           'username.invalid': 'Dein Benutzername entspricht nicht den Anforderungen. Bitte mache ihn länger als 3 Zeichen und verwende nur Buchstaben und Zahlen.',
-          'username.taken': 'Diese Kombination aus Benutzername und Tag ist bereits vergeben, bitte wähle etwas anderes.',
+          'username.taken': 'Dieser Benutzername ist bereits vergeben, bitte wähle einen anderen.',
           'password.mismatch': 'Die Passwörter stimmen nicht überein.',
 
           // Game

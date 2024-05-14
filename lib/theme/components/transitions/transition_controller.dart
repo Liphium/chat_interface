@@ -10,8 +10,7 @@ class TransitionController extends GetxController {
   Timer? currentTimer;
 
   void modelTransition(dynamic page) {
-    transitionTo(
-        page, (page) => Get.offAll(page, transition: Transition.noTransition));
+    transitionTo(page, (page) => Get.offAll(page, transition: Transition.fade));
   }
 
   void transitionTo(dynamic page, Function(dynamic) goTo) {

@@ -71,7 +71,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
 
   // Prepare the conversation
   final conversationKey = randomSymmetricKey();
-  final ownMemberContainer = MemberContainer(Get.find<StatusController>().id.value).encrypted(conversationKey);
+  final ownMemberContainer = MemberContainer(StatusController.ownAccountId).encrypted(conversationKey);
   final memberContainers = <String, String>{};
   for (final friend in friends) {
     final container = MemberContainer(friend.id);
@@ -114,7 +114,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   }
 
   final statusController = Get.find<StatusController>();
-  await conversationController.addCreated(conversation, members, admin: Member(conversation.token.id, statusController.id.value, MemberRole.admin));
+  await conversationController.addCreated(conversation, members, admin: Member(conversation.token.id, StatusController.ownAccountId, MemberRole.admin));
   subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), conversation.token, deletions: false);
 
   return true;
@@ -138,10 +138,9 @@ Future<bool> addToConversation(Conversation conv, Friend friend) async {
   return result;
 }
 
-String _conversationPayload(String id, ConversationToken token, String packagedKey, Friend friend) {
+Map<String, dynamic> _conversationPayload(String id, ConversationToken token, String packagedKey, Friend friend) {
   final signature = signMessage(signatureKeyPair.secretKey, "$id${friend.id}");
-  return storedAction("conv", {
-    "s": StatusController.ownAccountId,
+  return authenticatedStoredAction("conv", {
     "id": id,
     "sg": signature,
     "token": token.toJson(),

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friend_controller.dart';
-import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
@@ -20,8 +20,7 @@ class FriendsSetup extends Setup {
     await Get.find<FriendController>().loadFriends();
 
     // Load friends from vault
-    final json =
-        await postAuthorizedJSON("/account/friends/list", <String, dynamic>{
+    final json = await postAuthorizedJSON("/account/friends/list", <String, dynamic>{
       "after": 0,
     });
     if (!json["success"]) {
@@ -30,8 +29,7 @@ class FriendsSetup extends Setup {
 
     final requestsDone = <String>[], friendsDone = <String>[];
     for (var friend in json["friends"]) {
-      final decrypted = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey,
-          asymmetricKeyPair.secretKey, friend["friend"]);
+      final decrypted = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, friend["friend"]);
       final data = jsonDecode(decrypted);
 
       // Check if request or friend
@@ -39,13 +37,8 @@ class FriendsSetup extends Setup {
         requestsDone.add(data["id"]);
 
         // Check if request is already in the database
-        final sentRequest = Get.find<RequestController>()
-            .requestsSent
-            .firstWhere((element) => element.id == data["id"],
-                orElse: () => Request.mock("hi"));
-        final request = Get.find<RequestController>().requests.firstWhere(
-            (element) => element.id == data["id"],
-            orElse: () => Request.mock("hi"));
+        final sentRequest = Get.find<RequestController>().requestsSent.firstWhere((element) => element.id == data["id"], orElse: () => Request.mock("hi"));
+        final request = Get.find<RequestController>().requests.firstWhere((element) => element.id == data["id"], orElse: () => Request.mock("hi"));
         if (request.id != "hi" || sentRequest.id != "hi") {
           if (request.vaultId == "") {
             request.vaultId = friend["id"];

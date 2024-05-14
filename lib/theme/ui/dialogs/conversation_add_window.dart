@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
@@ -166,7 +166,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       // Make the first friend that matches the search the selected one
                       if (friendController.friends.isNotEmpty) {
                         final member = friendController.friends.values.firstWhere(
-                          (element) => element.name.toLowerCase().contains(value.toLowerCase()) && element.id != StatusController.ownAccountId,
+                          (element) =>
+                              (element.name.toLowerCase().contains(value.toLowerCase()) || element.displayName.value.text.toLowerCase().contains(value.toLowerCase())) &&
+                              element.id != StatusController.ownAccountId,
                           orElse: () => Friend.unknown("-"),
                         );
                         if (member.id != "-") {
@@ -206,7 +208,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
                   return Obx(() {
                     final search = _search.value;
-                    if (search.isNotEmpty && !friend.name.toLowerCase().contains(_search.value.toLowerCase())) {
+                    if (search.isNotEmpty &&
+                        !(friend.name.toLowerCase().contains(search.toLowerCase()) || friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
                       return const SizedBox();
                     }
 
@@ -238,7 +241,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                                     size: 35,
                                   ),
                                   horizontalSpacing(defaultSpacing),
-                                  Text("${friend.name}#${friend.tag}", style: theme.textTheme.labelLarge),
+                                  Obx(() => Text(friend.displayName.value.text, style: theme.textTheme.labelLarge)),
                                 ],
                               ),
                             ),

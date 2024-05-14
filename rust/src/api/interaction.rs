@@ -46,22 +46,6 @@ pub fn stop() {
 }
 
 //* Audio crab */
-pub fn set_muted(muted: bool) {
-    audio::set_muted(muted)
-}
-
-pub fn set_deafen(deafened: bool) {
-    audio::set_deafen(deafened)
-}
-
-pub fn is_muted() -> bool {
-    audio::is_muted()
-}
-
-pub fn is_deafened() -> bool {
-    audio::is_deafened()
-}
-
 pub fn set_amplitude_logging(amplitude_logging: bool) {
     audio::set_amplitude_logging(amplitude_logging)
 }
@@ -76,10 +60,6 @@ pub fn set_talking_amplitude(amplitude: f32) {
 
 pub fn get_talking_amplitude() -> f32 {
     audio::get_talking_amplitude()
-}
-
-pub fn set_silent_mute(silent_mute: bool) {
-    audio::set_silent_mute(silent_mute)
 }
 
 pub fn create_amplitude_stream(s: StreamSink<f32>) {
@@ -113,12 +93,11 @@ pub static DEFAULT_NAME: &str = "def";
 pub fn list_input_devices() -> Vec<InputDevice> {
     let mut input_devices = Vec::new();
     let mut host = cpal::default_host();
-
     // On linux, use jack
-    #[cfg(target_os = "linux")]
-    {
-        host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
-    }
+    // #[cfg(target_os = "linux")]
+    // {
+    //     host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
+    // }
 
     let input_devices_iter = host.input_devices().unwrap();
 

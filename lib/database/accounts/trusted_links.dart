@@ -56,6 +56,15 @@ class TrustedLinkHelper {
     return result;
   }
 
+  /// Returns wether it was added
+  static Future<bool> addToTrustedLinks(String domain) async {
+    if (await isLinkTrusted(domain)) {
+      return false;
+    }
+    db.trustedLink.insertOnConflictUpdate(TrustedLinkData(domain: domain));
+    return true;
+  }
+
   static Future<bool> isLinkTrusted(String url) async {
     if (url.startsWith("http://") && !_unsafeSetting.getValue()) {
       return false;

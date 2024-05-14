@@ -14,6 +14,7 @@ class GeneralTranslations extends Translations {
           'no.got': 'No, you got me',
           'yeah': 'Yeah',
           'yes': 'Yes',
+          'accept': 'Accept',
           'no': 'No',
           'change': 'Change',
           'save': 'Save',
@@ -30,6 +31,9 @@ class GeneralTranslations extends Translations {
           'close': 'Close',
           'open': 'Open',
           'username': 'Username',
+          'username.description': 'Your username can only contain lowercase characters, numbers and "_" or "-".',
+          'display_name': "Display name",
+          'display_name.description': 'Your display name is the name everyone sees. No special requirements.',
           'password': 'Password',
           'password.current': 'Current password',
           'invite': 'Invite',
@@ -40,11 +44,14 @@ class GeneralTranslations extends Translations {
           'open.friends': 'Open friends page',
           'reset': 'Reset',
 
+          // Placeholder
+          'placeholder.domain': 'example.com',
+
           // Time TODO: Differentiate between PM and AM
           'message.time': '@hour:@minute',
           'time.yesterday': 'Yesterday',
           'time.today': 'Today',
-          'time': '@month/@day/@year',
+          'time': '@day/@month/@year',
 
           // Log out thing
           'log_out': 'Log out',
@@ -56,7 +63,21 @@ class GeneralTranslations extends Translations {
           'file.uploading': 'Uploading @index of @total..',
           'file.links.title': 'Unknown location found',
           'file.links.description':
-              'You are trying to download a file from an unknown server. This could potentially lead to your IP address or personal information being exposed. Do you want to add @domain to your list of trusted providers?',
+              'You are trying to download a file from @domain. This could potentially lead to your IP address or personal information being exposed. Do you want to add @domain to your list of trusted providers?',
+
+          // For specifically adding the links to GIFs or images on a different server
+          'file.images.trust.title': 'Add to trusted links',
+          'file.images.trust.description':
+              'If you add @domain to your list of trusted providers, this means they will be able to see your IP address or other personal information that may be exposed using a web request. Do you want to add @domain to your list of trusted providers?',
+
+          // Context menu
+          'context_menu.cut': 'Cut',
+          'context_menu.copy': 'Copy',
+          'context_menu.paste': 'Paste',
+          'context_menu.selectAll': 'Select all',
+          'context_menu.share': 'Share',
+          'context_menu.delete': 'Delete',
+          'context_menu.custom': 'Custom'
         },
 
         //* German

@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
@@ -131,14 +131,7 @@ class _ProfileState extends State<Profile> {
               children: [
                 UserAvatar(id: widget.friend.id, size: 40),
                 horizontalSpacing(defaultSpacing),
-                Text(widget.friend.name, style: Get.theme.textTheme.titleMedium),
-                Text(
-                  "#${widget.friend.tag}",
-                  style: Get.theme.textTheme.titleMedium!.copyWith(
-                    fontWeight: FontWeight.normal,
-                    color: Get.theme.colorScheme.onPrimary,
-                  ),
-                ),
+                Text(widget.friend.displayName.value.text, style: Get.theme.textTheme.titleMedium),
               ],
             ),
 

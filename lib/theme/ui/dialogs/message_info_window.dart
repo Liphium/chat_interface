@@ -57,16 +57,6 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.copy,
-            label: "message.info.copy_signature".tr,
-            onTap: () {
-              Clipboard.setData(ClipboardData(text: widget.message.signature));
-              Get.back();
-            },
-            loading: false.obs,
-          ),
-          verticalSpacing(elementSpacing),
-          ProfileButton(
-            icon: Icons.copy,
             label: "message.info.copy_sender".tr,
             onTap: () {
               Clipboard.setData(ClipboardData(text: conversationToken.tokenId));

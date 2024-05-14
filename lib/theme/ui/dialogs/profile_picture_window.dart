@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
@@ -8,6 +9,8 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:path/path.dart' as path;
 
 class ProfilePictureWindow extends StatefulWidget {
   final XFile file;
@@ -34,7 +37,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
   }
 
   void initImage() async {
-    final image = await ProfilePictureHelper.loadImage(widget.file.path);
+    final image = await ProfileHelper.loadImage(widget.file.path);
     if (image == null) return;
 
     // Calculate the scale factor to fit the image into the window
@@ -138,7 +141,27 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                 onTap: () async {
                   if (uploading.value) return;
                   uploading.value = true;
-                  await ProfilePictureHelper.uploadProfilePicture(widget.file, ProfilePictureData(scaleFactor.value, moveX.value, moveY.value));
+
+                  final screenshotController = ScreenshotController();
+                  final scale = scaleFactor.value * (300 / 500);
+
+                  final image = await screenshotController.captureFromWidget(
+                    SizedBox(
+                      width: 500,
+                      height: 500,
+                      child: RawImage(
+                        fit: BoxFit.none,
+                        scale: scale,
+                        image: _image.value!,
+                        alignment: Alignment(moveX.value, moveY.value),
+                      ),
+                    ),
+                  );
+                  final currentFile = File(widget.file.path);
+                  final cutFile = File(path.join(currentFile.parent.path, ".cut-${widget.file.name}"));
+                  await cutFile.writeAsBytes(image);
+                  await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name);
+                  await cutFile.delete();
                   uploading.value = false;
                   Get.back();
                 },

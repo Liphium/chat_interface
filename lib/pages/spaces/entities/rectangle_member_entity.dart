@@ -19,7 +19,7 @@ class _RectangleMemberEntityState extends State<RectangleMemberEntity> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(defaultSpacing),
+      borderRadius: BorderRadius.circular(sectionSpacing),
       child: AspectRatio(
         aspectRatio: 16 / 9,
         child: Material(
@@ -59,7 +59,7 @@ class _RectangleMemberEntityState extends State<RectangleMemberEntity> {
                     Obx(
                       () => Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          borderRadius: BorderRadius.circular(sectionSpacing),
                           border: Border.all(
                             color: widget.member.isSpeaking.value ? Colors.green : Colors.transparent,
                             width: 4,

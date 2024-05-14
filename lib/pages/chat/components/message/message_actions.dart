@@ -47,12 +47,13 @@ class MessageDraft {
 }
 
 class UploadData {
-  final XFile file;
+  final File file;
   final progress = 0.0.obs;
 
   UploadData(this.file);
 }
 
+/// Send a text message with files attached (files will be uploaded)
 void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<UploadData> files, String answer, Function() callback) async {
   if (loading.value) {
     return;
@@ -68,6 +69,7 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
       callback.call();
       return;
     }
+    await res.container!.precalculateWidthAndHeight();
     attachments.add(res.data);
   }
 
@@ -75,12 +77,13 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), answer, callback);
 }
 
+/// Send a text message with attachments
 void sendTextMessage(RxBool loading, String conversationId, String message, List<String> attachments, String answer, Function() callback) async {
   if (loading.value) {
     return;
   }
 
-  // Scan for links with remote images
+  // Scan for links with remote images (and add them as attachments)
   if (attachments.isEmpty) {
     for (var line in message.split("\n")) {
       bool found = false;
@@ -89,7 +92,10 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
           for (var fileType in FileSettings.imageTypes) {
             if (word.endsWith(".$fileType")) {
               attachments.add(word);
-              found = true;
+              if (message.trim() == word) {
+                message = "";
+              }
+              found = attachments.length > 3;
               break;
             }
           }
@@ -118,26 +124,14 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   // Encrypt message with signature
   ConversationController controller = Get.find();
   final conversation = controller.conversations[conversationId]!;
-  var key = conversation.key;
   final stamp = DateTime.now().millisecondsSinceEpoch;
-  final contentJson = <String, dynamic>{
+  final content = jsonEncode(<String, dynamic>{
     "c": message,
     "t": type.index,
     "a": attachments,
     "r": answer,
-  };
-  var hash = hashSha(jsonEncode(contentJson) + stamp.toStringAsFixed(0) + conversationId); // Adding a time stamp to the message to prevent replay attacks
-  sendLog("MESSAGE HASH SENT: $hash ${message + conversationId}");
-
-  var encrypted = encryptSymmetric(
-      jsonEncode(<String, dynamic>{
-        "c": message,
-        "t": type.index,
-        "a": attachments,
-        "r": answer,
-        "s": signMessage(signatureKeyPair.secretKey, hash),
-      }),
-      key);
+  });
+  final info = SymmetricSequencedInfo.builder(content, stamp).finish(conversation.key);
 
   // Send message
   final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
@@ -145,7 +139,7 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
     "token_id": conversation.token.id,
     "token": conversation.token.token,
     "timestamp": stamp,
-    "data": encrypted,
+    "data": info,
   });
 
   callback.call();

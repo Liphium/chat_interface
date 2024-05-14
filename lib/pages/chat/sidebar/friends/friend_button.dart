@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -40,7 +40,7 @@ class _FriendButtonState extends State<FriendButton> {
                 children: [
                   Icon(Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                   const SizedBox(width: 10),
-                  Text(widget.friend.name, style: Get.theme.textTheme.labelMedium),
+                  Text(widget.friend.displayName.value.text, style: Get.theme.textTheme.labelMedium),
                 ],
               ),
 
