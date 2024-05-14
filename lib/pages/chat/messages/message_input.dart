@@ -114,6 +114,31 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
+  /// Replace the emoji selector in the input with an emoji
+  void doEmojiSuggestion(String emoji) {
+    // Search for emojis
+    final regex = RegExp(":(.*?)\\s|:(.*\$)|");
+    final cursorPos = _message.selection.start;
+    for (var match in regex.allMatches(_message.text)) {
+      // Check if the cursor is inside of the current emoji
+      if (match.start < cursorPos && match.end >= cursorPos) {
+        final query = _message.text.substring(match.start + 1, cursorPos);
+        if (query.length >= 2) {
+          _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
+          _message.text = "${_message.text.substring(0, match.start)}$emoji ${_message.text.substring(cursorPos, _message.text.length)}";
+          _emojiSuggestions.clear();
+          _inputFocus.requestFocus();
+          // Change the selection to the calculated offset
+          final newOffset = cursorPos - query.length + 2;
+          _message.selection = _message.selection.copyWith(
+            baseOffset: newOffset,
+            extentOffset: newOffset,
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
@@ -122,6 +147,12 @@ class _MessageInputState extends State<MessageInput> {
     final actionsMap = {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) {
+          // Do emoji suggestion instead when pressing enter
+          if (_emojiSuggestions.isNotEmpty) {
+            doEmojiSuggestion(_emojiSuggestions[0].emoji);
+            return;
+          }
+
           final controller = Get.find<MessageController>();
           if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
             sendTextMessage(
@@ -272,23 +303,7 @@ class _MessageInputState extends State<MessageInput> {
                                       child: InkWell(
                                         borderRadius: BorderRadius.circular(1000),
                                         onTap: () {
-                                          // Search for emojis
-                                          final regex = RegExp(":(.*?)\\s|:(.*\$)|");
-                                          final cursorPos = _message.selection.start;
-                                          for (var match in regex.allMatches(_message.text)) {
-                                            // Check if the cursor is inside of the current emoji
-                                            if (match.start < cursorPos && match.end >= cursorPos) {
-                                              final query = _message.text.substring(match.start + 1, cursorPos);
-                                              if (query.length >= 2) {
-                                                _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
-                                                _message.text =
-                                                    "${_message.text.substring(0, match.start)}${emoji.emoji} ${_message.text.substring(cursorPos, _message.text.length)}";
-                                                _emojiSuggestions.clear();
-                                                _inputFocus.requestFocus();
-                                                // TODO: Move cursor to right position
-                                              }
-                                            }
-                                          }
+                                          doEmojiSuggestion(emoji.emoji);
                                         },
                                         child: Text(
                                           emoji.emoji,
