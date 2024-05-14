@@ -60,6 +60,24 @@ class _MessageInputState extends State<MessageInput> {
         loadDraft(conversation.id);
       });
     });
+
+    _message.addListener(() {
+      _emojiSuggestions.clear();
+
+      // Search for emojis
+      final regex = RegExp(":(.*?)\\s|:(.*\$)|");
+      final cursorPos = _message.selection.start;
+      for (var match in regex.allMatches(_message.text)) {
+        // Check if the cursor is inside of the current emoji
+        if (match.start < cursorPos && match.end >= cursorPos) {
+          final query = _message.text.substring(match.start + 1, cursorPos);
+          if (query.length >= 2) {
+            sendLog("current emoji query: $query");
+            _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
+          }
+        }
+      }
+    });
   }
 
   void loadDraft(String conversation) {
@@ -366,22 +384,6 @@ class _MessageInputState extends State<MessageInput> {
                                 ],
                                 focusNode: _inputFocus,
                                 onChanged: (value) {
-                                  _emojiSuggestions.clear();
-
-                                  // Search for emojis
-                                  final regex = RegExp(":(.*?)\\s|:(.*\$)|");
-                                  final cursorPos = _message.selection.start;
-                                  for (var match in regex.allMatches(value)) {
-                                    // Check if the cursor is inside of the current emoji
-                                    if (match.start < cursorPos && match.end >= cursorPos) {
-                                      final query = _message.text.substring(match.start + 1, cursorPos);
-                                      if (query.length >= 2) {
-                                        sendLog("current emoji query: $query");
-                                        _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
-                                      }
-                                    }
-                                  }
-
                                   MessageSendHelper.currentDraft.value!.message = value;
                                 },
                                 onAppPrivateCommand: (action, data) {
