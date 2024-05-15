@@ -139,7 +139,7 @@ Widget renderMiniAvatars(int amount) {
                 height: sectionSpacing * 1.5,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(sectionSpacing * 1.5),
-                  color: Get.theme.colorScheme.background,
+                  color: Get.theme.colorScheme.inverseSurface,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: elementSpacing),

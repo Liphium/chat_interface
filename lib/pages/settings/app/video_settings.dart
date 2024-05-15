@@ -108,7 +108,9 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                 padding: EdgeInsets.only(top: index == 0 ? 0 : elementSpacing),
                 child: Obx(
                   () => Material(
-                    color: controller.settings[VideoSettings.camera]!.getWhenValue("def", _cameras[0].label) == current ? theme.colorScheme.primary : theme.colorScheme.onBackground,
+                    color: controller.settings[VideoSettings.camera]!.getWhenValue("def", _cameras[0].label) == current
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onInverseSurface,
                     borderRadius: radius,
                     child: InkWell(
                       borderRadius: radius,

@@ -46,7 +46,7 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
               padding: const EdgeInsets.only(right: defaultSpacing),
               child: Material(
                 borderRadius: BorderRadius.circular(defaultSpacing),
-                color: Get.theme.colorScheme.background,
+                color: Get.theme.colorScheme.inverseSurface,
                 child: InkWell(
                   onTap: () => rotateTable(math.pi / 2 * (index + 1), tableController),
                   borderRadius: BorderRadius.circular(defaultSpacing),

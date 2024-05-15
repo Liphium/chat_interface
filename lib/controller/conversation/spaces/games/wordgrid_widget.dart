@@ -153,7 +153,7 @@ class _KanagridGridState extends State<WordgridGrid> with SingleTickerProviderSt
               ? Get.theme.colorScheme.primary
               : isNeighbor
                   ? Get.theme.colorScheme.onTertiary
-                  : Get.theme.colorScheme.onBackground,
+                  : Get.theme.colorScheme.onInverseSurface,
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(defaultSpacing),

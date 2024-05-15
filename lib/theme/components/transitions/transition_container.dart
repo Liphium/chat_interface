@@ -47,7 +47,7 @@ class _AnimatedContainerState extends State<TransitionContainer> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: widget.borderRadius,
-                  color: widget.color ?? Theme.of(context).colorScheme.onBackground,
+                  color: widget.color ?? Theme.of(context).colorScheme.onInverseSurface,
                 ),
                 child: Animate(
                   effects: [

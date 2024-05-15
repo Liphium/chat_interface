@@ -36,7 +36,7 @@ class _ObjectCreateMenuState extends State<ObjectCreateMenu> {
               return Padding(
                 padding: index == 0 ? const EdgeInsets.all(0) : const EdgeInsets.only(top: defaultSpacing),
                 child: Material(
-                  color: Get.theme.colorScheme.background,
+                  color: Get.theme.colorScheme.inverseSurface,
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(defaultSpacing),

@@ -83,8 +83,8 @@ ThemeData getThemeData() {
         colorScheme: ColorScheme(
           // Background color
           brightness: Brightness.dark,
-          background: factory.getBackground1(),
-          onBackground: factory.getBackground2(),
+          inverseSurface: factory.getBackground1(),
+          onInverseSurface: factory.getBackground2(),
           primaryContainer: factory.getBackground3(),
 
           // Online color
@@ -115,7 +115,6 @@ ThemeData getThemeData() {
 
           // Important font color
           onSurface: factory.getFontColor(),
-          inverseSurface: factory.getFontColorInverse(),
         ),
         textSelectionTheme: const TextSelectionThemeData(
           cursorColor: Color(0xFF99c1f1),
@@ -199,8 +198,8 @@ ThemeData getThemeData() {
         colorScheme: ColorScheme(
           // Background color
           brightness: Brightness.light,
-          background: factory.getBackground1(),
-          onBackground: factory.getBackground2(),
+          inverseSurface: factory.getBackground1(),
+          onInverseSurface: factory.getBackground2(),
           primaryContainer: factory.getBackground3(),
 
           // Online color

@@ -22,7 +22,7 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
     final memberController = Get.find<SpaceMemberController>();
     final gameController = Get.find<GameHubController>();
     return Scaffold(
-      backgroundColor: Get.theme.colorScheme.background,
+      backgroundColor: Get.theme.colorScheme.inverseSurface,
       body: LayoutBuilder(builder: (context, constraints) {
         return Row(
           children: [
@@ -42,7 +42,7 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
               },
               target: 1.0,
               child: Container(
-                color: Get.theme.colorScheme.onBackground,
+                color: Get.theme.colorScheme.onInverseSurface,
                 width: min(max(constraints.maxWidth / 4, 350), 420),
                 height: constraints.maxHeight,
                 child: SingleChildScrollView(
@@ -94,7 +94,7 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                                                               height: 40,
                                                               child: CircleAvatar(
                                                                 backgroundColor: selected
-                                                                    ? Get.theme.colorScheme.onBackground
+                                                                    ? Get.theme.colorScheme.onInverseSurface
                                                                     : index % 2 == 0
                                                                         ? Get.theme.colorScheme.primary
                                                                         : Get.theme.colorScheme.tertiaryContainer,
@@ -187,7 +187,7 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                       LayoutBuilder(
                         builder: (context, constraints) {
                           return Container(
-                              color: Get.theme.colorScheme.background,
+                              color: Get.theme.colorScheme.inverseSurface,
                               padding: const EdgeInsets.all(defaultSpacing),
                               width: constraints.maxWidth,
                               child: const Center(child: CallControls()));

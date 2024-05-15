@@ -12,7 +12,7 @@ class SuccessContainer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(dialogPadding),
       decoration: BoxDecoration(
-        color: Get.theme.colorScheme.background,
+        color: Get.theme.colorScheme.inverseSurface,
         borderRadius: BorderRadius.circular(dialogBorderRadius),
       ),
       child: Row(

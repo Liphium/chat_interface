@@ -143,7 +143,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
           //* Input
           Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.background,
+              color: theme.colorScheme.inverseSurface,
               borderRadius: BorderRadius.circular(defaultSpacing),
             ),
             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),

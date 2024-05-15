@@ -55,7 +55,7 @@ class _FriendsPageState extends State<FriendsPage> {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: Get.theme.colorScheme.background,
+              color: Get.theme.colorScheme.inverseSurface,
               borderRadius: BorderRadius.circular(dialogBorderRadius),
             ),
             padding: const EdgeInsets.only(left: dialogPadding, top: dialogPadding, right: dialogPadding),
@@ -71,6 +71,9 @@ class _FriendsPageState extends State<FriendsPage> {
                       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
                       child: Row(
                         children: [
+                          horizontalSpacing(defaultSpacing),
+                          Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
+                          horizontalSpacing(defaultSpacing),
                           Expanded(
                             child: TextField(
                               autofocus: true,
@@ -81,7 +84,6 @@ class _FriendsPageState extends State<FriendsPage> {
                                 iconColor: Get.theme.colorScheme.onPrimary,
                                 fillColor: Get.theme.colorScheme.onPrimary,
                                 hoverColor: Get.theme.colorScheme.onPrimary,
-                                prefixIcon: Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
                                 hintText: "friends.placeholder".tr,
                               ),
                               onChanged: (value) {
@@ -145,7 +147,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                     child: Container(
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(defaultSpacing),
-                                        color: theme.colorScheme.onBackground,
+                                        color: theme.colorScheme.onInverseSurface,
                                       ),
                                       padding: const EdgeInsets.all(defaultSpacing),
                                       child: Column(
@@ -336,27 +338,5 @@ class _FriendsPageState extends State<FriendsPage> {
         revealSuccess.value = false;
       });
     });
-  }
-
-  Widget buildInput(ThemeData theme) {
-    return Expanded(
-      child: Material(
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(defaultSpacing * 1.5),
-        ),
-        color: theme.colorScheme.primary,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
-          child: TextField(
-            style: Get.theme.textTheme.labelMedium,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
-              hintText: 'friends.placeholder'.tr,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

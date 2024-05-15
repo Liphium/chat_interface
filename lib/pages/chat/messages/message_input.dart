@@ -224,7 +224,7 @@ class _MessageInputState extends State<MessageInput> {
           Actions(
             actions: actionsMap,
             child: Material(
-              color: theme.colorScheme.onBackground,
+              color: theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
               child: Padding(
                 padding: const EdgeInsets.symmetric(

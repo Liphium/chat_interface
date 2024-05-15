@@ -20,7 +20,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.inverseSurface,
       body: LayoutBuilder(builder: (context, constraints) {
         const sidebarWidth = 250.0;
         final biggestWidth = constraints.biggest.width;

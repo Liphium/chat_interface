@@ -1,7 +1,6 @@
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
@@ -71,10 +70,10 @@ class _FJTextFieldState extends State<FJTextField> {
         ],
         target: _focus.value && widget.animation ? 1 : 0,
         child: Material(
-          color: widget.secondaryColor ? Get.theme.colorScheme.onBackground : Get.theme.colorScheme.background,
+          color: widget.secondaryColor ? Get.theme.colorScheme.onInverseSurface : Get.theme.colorScheme.inverseSurface,
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
+            padding: const EdgeInsets.all(defaultSpacing * 1.5),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

@@ -17,7 +17,7 @@ class _FJTextFieldState extends State<FJOptionButton> {
     final ThemeData theme = Theme.of(context);
 
     return Material(
-      color: theme.colorScheme.background,
+      color: theme.colorScheme.inverseSurface,
       borderRadius: BorderRadius.circular(defaultSpacing),
       child: InkWell(
         borderRadius: BorderRadius.circular(defaultSpacing),
@@ -25,12 +25,7 @@ class _FJTextFieldState extends State<FJOptionButton> {
         child: Padding(
             padding: const EdgeInsets.all(defaultSpacing),
             child: Row(
-              children: [
-                Expanded(
-                    child:
-                        Text(widget.text, style: theme.textTheme.labelLarge)),
-                const Icon(Icons.arrow_forward)
-              ],
+              children: [Expanded(child: Text(widget.text, style: theme.textTheme.labelLarge)), const Icon(Icons.arrow_forward)],
             )),
       ),
     );

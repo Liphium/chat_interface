@@ -94,7 +94,7 @@ class _ConversationsPageState extends State<UploadedFilesTab> {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                           child: Material(
-                            color: Get.theme.colorScheme.onBackground,
+                            color: Get.theme.colorScheme.onInverseSurface,
                             borderRadius: BorderRadius.circular(10),
                             child: MouseRegion(
                               child: InkWell(
@@ -154,7 +154,7 @@ class _ConversationsPageState extends State<UploadedFilesTab> {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                           child: Material(
-                            color: Get.theme.colorScheme.onBackground,
+                            color: Get.theme.colorScheme.onInverseSurface,
                             borderRadius: BorderRadius.circular(10),
                             child: MouseRegion(
                               child: InkWell(

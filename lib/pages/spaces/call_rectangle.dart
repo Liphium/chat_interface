@@ -38,7 +38,7 @@ class _CallRectangleState extends State<CallRectangle> {
     return Hero(
       tag: "call",
       child: Container(
-        color: Get.theme.colorScheme.background,
+        color: Get.theme.colorScheme.inverseSurface,
         child: LayoutBuilder(builder: (context, constraints) {
           return MouseRegion(
             onEnter: (event) {
