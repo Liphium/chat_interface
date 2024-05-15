@@ -22,7 +22,7 @@ class TabletopPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint background = Paint()..color = Get.theme.colorScheme.background;
+    Paint background = Paint()..color = Get.theme.colorScheme.inverseSurface;
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
     canvas.drawRect(rect, background);

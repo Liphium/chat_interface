@@ -20,7 +20,7 @@ class _FriendButtonState extends State<FriendButton> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Get.theme.colorScheme.onBackground,
+      color: Get.theme.colorScheme.onInverseSurface,
       borderRadius: BorderRadius.circular(10),
       child: MouseRegion(
         onHover: (event) => widget.position.value = event.position,

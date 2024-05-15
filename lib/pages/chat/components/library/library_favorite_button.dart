@@ -75,7 +75,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
               () => Visibility(
                 visible: visible.value,
                 child: Material(
-                  color: Get.theme.colorScheme.background,
+                  color: Get.theme.colorScheme.inverseSurface,
                   borderRadius: BorderRadius.circular(elementSpacing),
                   child: InkWell(
                     highlightColor: Colors.transparent,

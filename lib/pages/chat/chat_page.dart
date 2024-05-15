@@ -41,7 +41,7 @@ class _ChatPageState extends State<ChatPage> {
     ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.inverseSurface,
       body: SelectionArea(
         contextMenuBuilder: (context, selectableRegionState) {
           final controller = Get.find<MessageController>();

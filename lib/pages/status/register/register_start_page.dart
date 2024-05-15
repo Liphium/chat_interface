@@ -41,7 +41,7 @@ class _RegisterPageState extends State<RegisterStartPage> {
     _emailController.text = widget.email ?? "";
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.inverseSurface,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -49,7 +49,7 @@ class _RegisterPageState extends State<RegisterStartPage> {
             TransitionContainer(
               tag: "login",
               borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
-              color: theme.colorScheme.onBackground,
+              color: theme.colorScheme.onInverseSurface,
               width: 370,
               child: Padding(
                 padding: const EdgeInsets.all(defaultSpacing * 2),

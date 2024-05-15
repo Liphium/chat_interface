@@ -107,7 +107,7 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
                   decoration: BoxDecoration(
-                    color: Get.theme.colorScheme.onBackground,
+                    color: Get.theme.colorScheme.onInverseSurface,
                     borderRadius: BorderRadius.circular(defaultSpacing),
                   ),
                   child: Row(

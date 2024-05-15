@@ -51,12 +51,12 @@ class _ErrorPageState extends State<ErrorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Get.theme.colorScheme.background,
+      backgroundColor: Get.theme.colorScheme.inverseSurface,
       body: Center(
         child: TransitionContainer(
           tag: "login",
           borderRadius: BorderRadius.circular(modelBorderRadius),
-          color: Get.theme.colorScheme.onBackground,
+          color: Get.theme.colorScheme.onInverseSurface,
           width: 370,
           child: Padding(
             padding: const EdgeInsets.all(modelPadding),
@@ -96,8 +96,7 @@ class _ErrorPageState extends State<ErrorPage> {
                 verticalSpacing(defaultSpacing),
                 FJElevatedButton(
                   onTap: () => setupManager.restart(),
-                  child: Center(
-                      child: Text('retry'.tr, style: Get.textTheme.labelLarge)),
+                  child: Center(child: Text('retry'.tr, style: Get.textTheme.labelLarge)),
                 ),
               ],
             ),

@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginStepPage> {
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.inverseSurface,
       body: Center(
         child: SizedBox(
           width: 370,
@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginStepPage> {
               TransitionContainer(
                 tag: "login",
                 borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
-                color: theme.colorScheme.onBackground,
+                color: theme.colorScheme.onInverseSurface,
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing * 2),
                   child: Column(

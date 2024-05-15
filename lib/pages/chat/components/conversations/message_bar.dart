@@ -38,7 +38,7 @@ class _MessageBarState extends State<MessageBar> {
 
     if (widget.conversation.borked) {
       return Material(
-        color: Get.theme.colorScheme.onBackground,
+        color: Get.theme.colorScheme.onInverseSurface,
         child: Padding(
           padding: const EdgeInsets.all(defaultSpacing),
           child: Row(
@@ -53,7 +53,7 @@ class _MessageBarState extends State<MessageBar> {
     }
 
     return Material(
-      color: Get.theme.colorScheme.onBackground,
+      color: Get.theme.colorScheme.onInverseSurface,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
         child: Row(

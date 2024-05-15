@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginChoosePage> {
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.inverseSurface,
       body: Center(
         child: TransitionContainer(
           tag: "login",
@@ -33,16 +33,14 @@ class _LoginPageState extends State<LoginChoosePage> {
             bottomLeft: Radius.circular(defaultSpacing * 1.5),
             bottomRight: Radius.circular(defaultSpacing * 1.5),
           ),
-          color: theme.colorScheme.onBackground,
+          color: theme.colorScheme.onInverseSurface,
           width: 370,
           child: Padding(
             padding: const EdgeInsets.all(defaultSpacing * 2),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("login.choose".tr,
-                    textAlign: TextAlign.start,
-                    style: theme.textTheme.headlineMedium),
+                Text("login.choose".tr, textAlign: TextAlign.start, style: theme.textTheme.headlineMedium),
                 verticalSpacing(defaultSpacing * 0.5),
                 Column(
                   children: List.generate(widget.options.length, (index) {
@@ -53,9 +51,7 @@ class _LoginPageState extends State<LoginChoosePage> {
                       child: FJOptionButton(
                         text: "choose.${type.name}".tr,
                         onTap: () {
-                          Get.find<TransitionController>().modelTransition(
-                              LoginStepPage(type, widget.token,
-                                  options: widget.options));
+                          Get.find<TransitionController>().modelTransition(LoginStepPage(type, widget.token, options: widget.options));
                         },
                       ),
                     );

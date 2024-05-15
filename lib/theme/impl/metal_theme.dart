@@ -10,8 +10,8 @@ final ThemeData lightMetalTheme = defaultLightTheme.copyWith(
       onPrimary: Color(0xFFE5E5E5),
       secondary: Color(0xFFE5E5E5),
       onSecondary: Color(0xFFE5E5E5),
-      background: Color(0xFFE5E5E5),
-      onBackground: Color(0xFFE5E5E5),
+      inverseSurface: Color(0xFFE5E5E5),
+      onInverseSurface: Color(0xFFE5E5E5),
       error: Color(0xFFE5E5E5),
       onError: Color(0xFFE5E5E5),
       surface: Color(0xFFE5E5E5),
@@ -23,8 +23,8 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     colorScheme: const ColorScheme(
       // Background color
       brightness: Brightness.dark,
-      background: Color(0xFF292929),
-      onBackground: Color(0xFF1c1c1c),
+      inverseSurface: Color(0xFF292929),
+      onInverseSurface: Color(0xFF1c1c1c),
       primaryContainer: Color(0xFF171717),
 
       // Online color

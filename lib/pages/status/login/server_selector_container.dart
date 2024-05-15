@@ -17,7 +17,7 @@ class ServerSelectorContainer extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
-          color: Get.theme.colorScheme.onBackground,
+          color: Get.theme.colorScheme.onInverseSurface,
         ),
         width: 370,
         child: Padding(
@@ -34,7 +34,7 @@ class ServerSelectorContainer extends StatelessWidget {
               ),
               verticalSpacing(defaultSpacing),
               Material(
-                color: Get.theme.colorScheme.background,
+                color: Get.theme.colorScheme.inverseSurface,
                 borderRadius: BorderRadius.circular(defaultSpacing),
                 child: InkWell(
                   onTap: () => Get.find<TransitionController>().modelTransition(ServerSelectorPage(nextPage: pageToGoBack.call())),

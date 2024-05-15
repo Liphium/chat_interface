@@ -54,7 +54,7 @@ class ConversationMembers extends StatelessWidget {
                     key: listKey,
                     padding: const EdgeInsets.only(bottom: elementSpacing),
                     child: Material(
-                      color: Get.theme.colorScheme.onBackground,
+                      color: Get.theme.colorScheme.onInverseSurface,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         onTap: () {

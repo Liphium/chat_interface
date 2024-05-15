@@ -25,12 +25,12 @@ class _StartingPageState extends State<StartingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Get.theme.colorScheme.background,
+      backgroundColor: Get.theme.colorScheme.inverseSurface,
       body: Center(
         child: TransitionContainer(
           borderRadius: BorderRadius.circular(modelBorderRadius),
           fade: true,
-          color: Get.theme.colorScheme.onBackground,
+          color: Get.theme.colorScheme.onInverseSurface,
           width: 250,
           tag: "login",
           child: ClipRRect(

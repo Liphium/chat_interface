@@ -13,14 +13,13 @@ class AnimatedContainerTestPage extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.inverseSurface,
       body: Center(
         child: TransitionContainer(
           tag: "test",
-          color: theme.colorScheme.onBackground,
+          color: theme.colorScheme.onInverseSurface,
           child: InkWell(
-              onTap: () => Get.find<TransitionController>()
-                  .modelTransition(const AnimatedContainerTestPage2()),
+              onTap: () => Get.find<TransitionController>().modelTransition(const AnimatedContainerTestPage2()),
               child: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

@@ -129,7 +129,7 @@ class _MessageFeedState extends State<MessageFeed> {
                 () => Visibility(
                   visible: controller.selectedConversation.value.isGroup && settingController.settings[AppSettings.showGroupMembers]!.value.value,
                   child: Container(
-                    color: Get.theme.colorScheme.onBackground,
+                    color: Get.theme.colorScheme.onInverseSurface,
                     width: 300,
                     child: ConversationMembers(
                       conversation: widget.conversation!,

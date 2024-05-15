@@ -44,7 +44,7 @@ class _SidebarState extends State<Sidebar> {
     //* Sidebar
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.onBackground,
+        color: theme.colorScheme.onInverseSurface,
       ),
 
       //* Sidebar content
@@ -69,6 +69,9 @@ class _SidebarState extends State<Sidebar> {
                           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
                           child: Row(
                             children: [
+                              horizontalSpacing(defaultSpacing),
+                              Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
+                              horizontalSpacing(defaultSpacing),
                               Expanded(
                                 child: TextField(
                                   style: theme.textTheme.labelMedium,
@@ -78,7 +81,6 @@ class _SidebarState extends State<Sidebar> {
                                     iconColor: theme.colorScheme.onPrimary,
                                     fillColor: theme.colorScheme.onPrimary,
                                     hoverColor: theme.colorScheme.onPrimary,
-                                    prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
                                     hintText: "conversations.placeholder".tr,
                                   ),
                                   onChanged: (value) {
@@ -174,7 +176,7 @@ class _SidebarState extends State<Sidebar> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: defaultSpacing),
                     child: Material(
-                      color: tsController.inView.value ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+                      color: tsController.inView.value ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),

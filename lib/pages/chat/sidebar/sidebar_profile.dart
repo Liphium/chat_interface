@@ -47,11 +47,11 @@ class _SidebarProfileState extends State<SidebarProfile> {
                     children: [
                       Material(
                         borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: shown ? theme.colorScheme.background : theme.colorScheme.primaryContainer,
+                        color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
                         child: InkWell(
                           onTap: () => Get.find<MessageController>().unselectConversation(),
                           splashColor: theme.hoverColor,
-                          hoverColor: shown ? theme.colorScheme.background : theme.colorScheme.background,
+                          hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
@@ -114,7 +114,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                     onTap: () => Get.dialog(const OwnProfile(position: Offset(defaultSpacing, 60))),
                     splashColor: theme.hoverColor.withAlpha(10),
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    hoverColor: theme.colorScheme.background,
+                    hoverColor: theme.colorScheme.inverseSurface,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
                       child: Row(

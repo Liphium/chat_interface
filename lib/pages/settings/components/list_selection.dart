@@ -41,7 +41,7 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
           child: Obx(
             () => Material(
-              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,

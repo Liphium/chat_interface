@@ -65,7 +65,7 @@ class DialogBase extends StatelessWidget {
           target: 1,
           child: Material(
             elevation: 2.0,
-            color: Get.theme.colorScheme.onBackground,
+            color: Get.theme.colorScheme.onInverseSurface,
             borderRadius: BorderRadius.circular(dialogBorderRadius),
             child: Container(width: maxWidth, padding: const EdgeInsets.all(dialogPadding), child: child),
           )),
@@ -116,7 +116,7 @@ class SlidingWindowBase extends StatelessWidget {
               width: maxSize,
               child: Material(
                 elevation: 2.0,
-                color: Get.theme.colorScheme.onBackground,
+                color: Get.theme.colorScheme.onInverseSurface,
                 borderRadius: BorderRadius.circular(dialogBorderRadius),
                 child: Padding(
                   padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),

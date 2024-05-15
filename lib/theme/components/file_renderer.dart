@@ -131,7 +131,7 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(defaultSpacing),
-                      color: Get.theme.colorScheme.background,
+                      color: Get.theme.colorScheme.inverseSurface,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

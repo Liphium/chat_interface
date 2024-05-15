@@ -194,7 +194,7 @@ class _ShouldUpdateSetupPageState extends State<ShouldUpdateSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Get.theme.colorScheme.background,
+      backgroundColor: Get.theme.colorScheme.inverseSurface,
       body: Center(
         child: TransitionContainer(
           borderRadius: BorderRadius.circular(modelBorderRadius),

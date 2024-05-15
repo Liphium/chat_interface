@@ -28,7 +28,7 @@ class ErrorWindow extends StatelessWidget {
               width: 300,
               child: Material(
                 elevation: 2.0,
-                color: Get.theme.colorScheme.onBackground,
+                color: Get.theme.colorScheme.onInverseSurface,
                 borderRadius: BorderRadius.circular(modelBorderRadius),
                 child: Padding(
                   padding: const EdgeInsets.all(modelPadding),
@@ -42,8 +42,7 @@ class ErrorWindow extends StatelessWidget {
                       FJElevatedButton(
                         onTap: () => Get.back(),
                         child: Center(
-                          child: Text("ok".tr,
-                              style: Get.theme.textTheme.titleMedium),
+                          child: Text("ok".tr, style: Get.theme.textTheme.titleMedium),
                         ),
                       )
                     ],

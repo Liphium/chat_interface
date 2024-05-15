@@ -11,14 +11,7 @@ class ProfileButton extends StatelessWidget {
   final Color? iconColor;
   final RxBool loading;
 
-  const ProfileButton(
-      {super.key,
-      required this.icon,
-      required this.label,
-      required this.onTap,
-      required this.loading,
-      this.color,
-      this.iconColor});
+  const ProfileButton({super.key, required this.icon, required this.label, required this.onTap, required this.loading, this.color, this.iconColor});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +20,7 @@ class ProfileButton extends StatelessWidget {
 
     return Material(
       borderRadius: BorderRadius.circular(defaultSpacing),
-      color: theme.colorScheme.background,
+      color: theme.colorScheme.inverseSurface,
       child: InkWell(
         borderRadius: BorderRadius.circular(defaultSpacing),
         hoverColor: backgroundColor,
@@ -53,15 +46,11 @@ class ProfileButton extends StatelessWidget {
                         ),
                       ),
                     )
-                  : Icon(icon,
-                      size: 25,
-                      color: iconColor ?? theme.colorScheme.onPrimary)),
+                  : Icon(icon, size: 25, color: iconColor ?? theme.colorScheme.onPrimary)),
 
               //* Label
               horizontalSpacing(defaultSpacing),
-              Text(label,
-                  style: theme.textTheme.bodyMedium!
-                      .copyWith(color: theme.colorScheme.onSurface))
+              Text(label, style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface))
             ],
           ),
         ),

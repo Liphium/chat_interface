@@ -373,7 +373,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         Obx(
           () => Container(
             decoration: BoxDecoration(
-              color: talking.value ? theme.colorScheme.secondary.withAlpha(150) : theme.colorScheme.onBackground,
+              color: talking.value ? theme.colorScheme.secondary.withAlpha(150) : theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(elementSpacing),
             ),
             height: 15,
@@ -404,7 +404,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         () => Material(
           color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id
               ? Get.theme.colorScheme.primary
-              : Get.theme.colorScheme.onBackground,
+              : Get.theme.colorScheme.onInverseSurface,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,
@@ -534,7 +534,8 @@ class _OutputTabState extends State<OutputTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onBackground,
+          color:
+              controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,
