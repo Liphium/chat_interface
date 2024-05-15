@@ -1,5 +1,5 @@
 name: chat_interface
-description: Frontend for the Fajurion Chat Network.
+description: The Liphium chat app client.
 publish_to: 'none'
 
 version: 1.0.0-ALPHA
@@ -41,7 +41,7 @@ dependencies:
   archive: '>=3.4.10 <4.0.0'
   window_manager: '>=0.3.8 <1.0.0'
   permission_handler: '>=11.3.1 <12.0.0'
-  screenshot: ">=3.0.0 <4.0.0"
+  screenshot: '>=3.0.0 <4.0.0'
   pasteboard: ^0.2.0
   mime: ^1.0.5
 
