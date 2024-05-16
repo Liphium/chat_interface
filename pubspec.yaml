@@ -78,11 +78,12 @@ flutter:
   assets:
   - assets/img/
   - assets/music/
+  - assets/
 
 msix_config:
-  display_name: The chat app
-  publisher_display_name: Fajurion
-  identity_name: com.fajurion.chat
+  display_name: Liphium
+  publisher_display_name: Liphium
+  identity_name: com.liphium.chat
   msix_version: 1.0.0.0
   logo_path: C:/Users/thisi/OneDrive/Bilder/Logos/chat.png
   capabilities: internetClient, microphone, webcam
