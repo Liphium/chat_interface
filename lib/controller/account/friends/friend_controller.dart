@@ -260,9 +260,7 @@ class Friend {
   void loadProfilePicture() async {
     profilePictureUsages++;
 
-    sendLog(DateTime.now().difference(lastProfilePictureUpdate));
-    if (DateTime.now().difference(lastProfilePictureUpdate).inSeconds >= 1) {
-      sendLog("refresh");
+    if (DateTime.now().difference(lastProfilePictureUpdate).inSeconds >= 60) {
       lastProfilePictureUpdate = DateTime.now();
 
       final result = await ProfileHelper.downloadProfilePicture(this);

@@ -23,7 +23,11 @@ class AnswerData {
         if (content == "" && attachments.isEmpty) {
           content = "message.empty".tr;
         } else if (content == "" && attachments.isNotEmpty) {
-          content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+          if (attachments.first.isURL) {
+            content = attachments.first;
+          } else {
+            content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+          }
         }
         return content;
       case MessageType.call:
