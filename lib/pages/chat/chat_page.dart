@@ -1,8 +1,5 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/chat/components/townsquare/townsquare_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -37,12 +34,8 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final TownsquareController tsController = Get.find();
-    final MessageController controller = Get.find();
-    ThemeData theme = Theme.of(context);
-
     return Scaffold(
-      backgroundColor: theme.colorScheme.inverseSurface,
+      backgroundColor: Get.theme.colorScheme.inverseSurface,
       body: SelectionArea(
         contextMenuBuilder: (context, selectableRegionState) {
           final controller = Get.find<MessageController>();

@@ -1,21 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
-import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart' as material;
@@ -29,23 +27,26 @@ class MessageController extends GetxController {
   static String systemSender = "6969";
 
   final loaded = false.obs;
-  final selectedConversation =
-      Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0).obs;
+  final currentConversation = Rx<Conversation?>(null);
   final messages = <Message>[].obs;
 
   void unselectConversation({String? id}) {
-    if (id != null && selectedConversation.value.id != id) {
+    if (id != null && currentConversation.value?.id == id) {
       return;
     }
-    selectedConversation.value = Conversation("0", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer("hi"), randomSymmetricKey(), 0);
+    currentConversation.value = null;
     messages.clear();
   }
 
   void selectConversation(Conversation conversation) async {
     Get.find<TownsquareController>().close();
     loaded.value = false;
-    Get.offAll(const ConversationPage(), transition: Transition.fadeIn);
-    selectedConversation.value = conversation;
+    if (isMobileMode()) {
+      Get.to(ConversationPage(conversation: conversation));
+    } else {
+      Get.offAll(ConversationPage(conversation: conversation));
+    }
+    currentConversation.value = conversation;
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
       overwriteRead(conversation);
@@ -91,15 +92,18 @@ class MessageController extends GetxController {
   }
 
   // Delete a message from the client with an id
-  void deleteMessageFromClient(String id) async {
+  void deleteMessageFromClient(String conversation, String id) async {
     // Get the message from the database on the client
-    final data = await (db.message.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    final data = await (db.message.select()
+          ..where((tbl) => tbl.id.equals(id))
+          ..where((tbl) => tbl.conversationId.equals(conversation)))
+        .getSingleOrNull();
     if (data == null) {
       return;
     }
 
     // Check if message is in the selected conversation
-    if (selectedConversation.value.id == data.conversationId) {
+    if (currentConversation.value?.id == data.conversationId) {
       messages.removeWhere((element) => element.id == id);
     }
 
@@ -110,12 +114,12 @@ class MessageController extends GetxController {
   void storeMessage(Message message) async {
     // Update message reading
     Get.find<ConversationController>()
-        .updateMessageRead(message.conversation, increment: selectedConversation.value.id != message.conversation, messageSendTime: message.createdAt.millisecondsSinceEpoch);
+        .updateMessageRead(message.conversation, increment: currentConversation.value?.id != message.conversation, messageSendTime: message.createdAt.millisecondsSinceEpoch);
 
     // Add message to message history if it's the selected one
-    if (selectedConversation.value.id == message.conversation) {
-      if (message.sender != selectedConversation.value.token.id) {
-        overwriteRead(selectedConversation.value);
+    if (currentConversation.value?.id == message.conversation) {
+      if (message.sender != currentConversation.value?.token.id) {
+        overwriteRead(currentConversation.value!);
       }
 
       // Check if it is a system message and if it should be rendered or not
@@ -161,7 +165,7 @@ class MessageController extends GetxController {
       final availableMessage = await (db.select(db.message)
             ..limit(1)
             ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-            ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+            ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id))
             ..where((tbl) => tbl.system.equals(false))
             ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(messages.first.createdAt.millisecondsSinceEpoch))))
           .getSingleOrNull();
@@ -232,7 +236,7 @@ class MessageController extends GetxController {
     final loadedMessages = await (db.select(db.message)
           ..limit(messageLimit)
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-          ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+          ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id))
           ..where((tbl) => tbl.system.equals(false))
           ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(finalMessage.createdAt.millisecondsSinceEpoch))))
         .get();
@@ -267,7 +271,7 @@ class MessageController extends GetxController {
     final loadedMessages = await (db.select(db.message)
           ..limit(messageLimit)
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-          ..where((tbl) => tbl.conversationId.equals(selectedConversation.value.id))
+          ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id))
           ..where((tbl) => tbl.system.equals(false))
           ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(firstMessage.createdAt.millisecondsSinceEpoch))))
         .get();

@@ -1,7 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/live_share_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
@@ -29,7 +28,6 @@ class MessageBar extends StatefulWidget {
 
 class _MessageBarState extends State<MessageBar> {
   final callLoading = false.obs;
-  final GlobalKey _groupAddKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +115,7 @@ class _MessageBarState extends State<MessageBar> {
                     tooltip: "chat.add_space".tr,
                     onTap: () {
                       final controller = Get.find<SpacesController>();
-                      controller.inviteToCall(Get.find<MessageController>().selectedConversation.value.id);
+                      controller.inviteToCall(widget.conversation.id);
                     },
                   ),
 
@@ -128,77 +126,14 @@ class _MessageBarState extends State<MessageBar> {
                   tooltip: "chat.start_space".tr,
                   onTap: () {
                     final controller = Get.find<SpacesController>();
-                    controller.createAndConnect(Get.find<MessageController>().selectedConversation.value.id);
+                    controller.createAndConnect(widget.conversation.id);
                   },
                 ),
 
                 //* Invite people
-                LoadingIconButton(
-                  key: _groupAddKey,
-                  icon: Icons.group_add,
-                  iconSize: 27,
+                ConversationAddButton(
+                  conversation: widget.conversation,
                   loading: callLoading,
-                  onTap: () {
-                    // Calculate position of the window
-                    final RenderBox box = _groupAddKey.currentContext?.findRenderObject() as RenderBox;
-                    final Offset globalPos = box.localToGlobal(box.size.bottomRight(const Offset(0, elementSpacing)));
-                    final windowWidth = Get.mediaQuery.size.width;
-                    final position = Offset(windowWidth - globalPos.dx, globalPos.dy);
-
-                    // Open conversation add window based on the type of conversation
-                    if (widget.conversation.isGroup) {
-                      // Get all friends in conversation
-                      var initial = <Friend>[];
-                      for (var member in widget.conversation.members.values) {
-                        if (member.account == StatusController.ownAccountId) {
-                          continue;
-                        }
-                        final friend = member.getFriend();
-                        if (friend.unknown) {
-                          return;
-                        }
-                        initial.add(friend);
-                      }
-                      Get.dialog(ConversationAddWindow(
-                        title: "conversations.add",
-                        action: "add",
-                        nameField: false,
-                        position: ContextMenuData(position, true, false),
-                        initial: initial,
-                        onDone: (friends, name) async {
-                          final finalList = <Friend>[];
-                          for (var friend in friends) {
-                            if (!initial.any((element) => element.id == friend.id)) {
-                              finalList.add(friend);
-                            }
-                          }
-                          sendLog(finalList);
-
-                          // Add the people to the conversation
-                          for (var friend in finalList) {
-                            final res = await addToConversation(widget.conversation, friend);
-                            if (!res) {
-                              showErrorPopup("error", "server.error");
-                              return null;
-                            }
-                          }
-
-                          return null;
-                        },
-                      ));
-                    } else {
-                      // Get the friend and open the window
-                      final friend = widget.conversation.members.values.firstWhere((element) => element.account != StatusController.ownAccountId).getFriend();
-                      if (friend.unknown) {
-                        return;
-                      }
-                      Get.dialog(ConversationAddWindow(
-                        title: "conversations.add.create",
-                        position: ContextMenuData(position, true, false),
-                        initial: [friend],
-                      ));
-                    }
-                  },
                 ),
                 horizontalSpacing(elementSpacing),
 
@@ -232,6 +167,91 @@ class _MessageBarState extends State<MessageBar> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ConversationAddButton extends StatefulWidget {
+  final Conversation conversation;
+  final RxBool loading;
+
+  const ConversationAddButton({super.key, required this.conversation, required this.loading});
+
+  @override
+  State<ConversationAddButton> createState() => _ConversationAddButtonState();
+}
+
+class _ConversationAddButtonState extends State<ConversationAddButton> {
+  final GlobalKey _groupAddKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return LoadingIconButton(
+      key: _groupAddKey,
+      icon: Icons.group_add,
+      iconSize: 27,
+      loading: widget.loading,
+      onTap: () {
+        // Calculate position of the window
+        final RenderBox box = _groupAddKey.currentContext?.findRenderObject() as RenderBox;
+        final Offset globalPos = box.localToGlobal(box.size.bottomRight(const Offset(0, elementSpacing)));
+        final windowWidth = Get.mediaQuery.size.width;
+        final position = Offset(windowWidth - globalPos.dx, globalPos.dy);
+
+        // Open conversation add window based on the type of conversation
+        if (widget.conversation.isGroup) {
+          // Get all friends in conversation
+          var initial = <Friend>[];
+          for (var member in widget.conversation.members.values) {
+            if (member.account == StatusController.ownAccountId) {
+              continue;
+            }
+            final friend = member.getFriend();
+            if (friend.unknown) {
+              return;
+            }
+            initial.add(friend);
+          }
+          Get.dialog(ConversationAddWindow(
+            title: "conversations.add",
+            action: "add",
+            nameField: false,
+            position: ContextMenuData(position, true, false),
+            initial: initial,
+            onDone: (friends, name) async {
+              final finalList = <Friend>[];
+              for (var friend in friends) {
+                if (!initial.any((element) => element.id == friend.id)) {
+                  finalList.add(friend);
+                }
+              }
+              sendLog(finalList);
+
+              // Add the people to the conversation
+              for (var friend in finalList) {
+                final res = await addToConversation(widget.conversation, friend);
+                if (!res) {
+                  showErrorPopup("error", "server.error");
+                  return null;
+                }
+              }
+
+              return null;
+            },
+          ));
+        } else {
+          // Get the friend and open the window
+          final friend = widget.conversation.members.values.firstWhere((element) => element.account != StatusController.ownAccountId).getFriend();
+          if (friend.unknown) {
+            return;
+          }
+          Get.dialog(ConversationAddWindow(
+            title: "conversations.add.create",
+            position: ContextMenuData(position, true, false),
+            initial: [friend],
+          ));
+        }
+      },
     );
   }
 }

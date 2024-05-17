@@ -117,7 +117,7 @@ class SystemMessages {
       render: false,
       handler: (msg) {
         Get.find<MessageController>().deleteOldSystemMessagesOfKind(msg.id, msg.content, msg.createdAt);
-        Get.find<MessageController>().deleteMessageFromClient(msg.attachments[0]);
+        Get.find<MessageController>().deleteMessageFromClient(msg.conversation, msg.attachments[0]);
       },
       translation: (msg) {
         return "msg.deleted".tr;

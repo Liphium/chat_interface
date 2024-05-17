@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -12,7 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ConversationPage extends StatefulWidget {
-  const ConversationPage({super.key});
+  final Conversation conversation;
+
+  const ConversationPage({super.key, required this.conversation});
 
   @override
   State<ConversationPage> createState() => _ChatPageState();
@@ -37,7 +40,6 @@ class _ChatPageState extends State<ConversationPage> {
   @override
   Widget build(BuildContext context) {
     final TownsquareController tsController = Get.find();
-    final MessageController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
     return Scaffold(
@@ -84,7 +86,7 @@ class _ChatPageState extends State<ConversationPage> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             if (constraints.biggest.width < 800) {
-              return MessageFeed(conversation: controller.selectedConversation.value);
+              return MessageFeed(conversation: widget.conversation);
             }
 
             return Row(
@@ -100,7 +102,7 @@ class _ChatPageState extends State<ConversationPage> {
                     if (tsController.inView.value) {
                       return const TownsquareFeed();
                     }
-                    return MessageFeed(conversation: controller.selectedConversation.value);
+                    return MessageFeed(conversation: widget.conversation);
                   }),
                 ),
               ],

@@ -41,7 +41,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                   if (!controller.inSpace.value) {
                     return const SizedBox.shrink();
                   }
-                  final shown = Get.find<MessageController>().selectedConversation.value.id == "0";
+                  final shown = Get.find<MessageController>().currentConversation.value == null;
 
                   return Column(
                     children: [

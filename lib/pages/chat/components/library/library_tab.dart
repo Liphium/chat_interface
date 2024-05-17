@@ -124,10 +124,10 @@ class _LibraryTabState extends State<LibraryTab> {
               onTap: () {
                 //* Send message with the library element
                 final controller = Get.find<MessageController>();
-                if (controller.selectedConversation.value.id == "") {
+                if (controller.currentConversation.value == null) {
                   return;
                 }
-                sendActualMessage(false.obs, controller.selectedConversation.value.id, MessageType.text, [container.toAttachment()], "", "", () => {});
+                sendActualMessage(false.obs, controller.currentConversation.value!.id, MessageType.text, [container.toAttachment()], "", "", () => {});
                 Get.back();
               },
               child: ClipRRect(

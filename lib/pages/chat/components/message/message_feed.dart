@@ -3,16 +3,15 @@ import 'dart:io';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
+import 'package:chat_interface/pages/chat/components/conversations/message_bar_mobile.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_mobile_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
-import 'package:chat_interface/pages/spaces/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
@@ -25,7 +24,7 @@ import 'package:get/get.dart';
 part 'message_actions.dart';
 
 class MessageFeed extends StatefulWidget {
-  final Conversation? conversation;
+  final Conversation conversation;
 
   const MessageFeed({super.key, required this.conversation});
 
@@ -59,7 +58,7 @@ class _MessageFeedState extends State<MessageFeed> {
     return Column(
       children: [
         //* Header
-        MessageBar(conversation: controller.selectedConversation.value),
+        if (isMobileMode()) MobileMessageBar(conversation: widget.conversation) else MessageBar(conversation: widget.conversation),
 
         Expanded(
           child: Row(
@@ -106,7 +105,11 @@ class _MessageFeedState extends State<MessageFeed> {
 
                       //* Message input
                       SelectionContainer.disabled(
-                        child: widget.conversation!.borked ? const SizedBox.shrink() : const MessageInput(),
+                        child: widget.conversation.borked
+                            ? const SizedBox.shrink()
+                            : MessageInput(
+                                conversation: widget.conversation,
+                              ),
                       )
                     ],
                   ),
@@ -114,12 +117,12 @@ class _MessageFeedState extends State<MessageFeed> {
               ),
               Obx(
                 () => Visibility(
-                  visible: controller.selectedConversation.value.isGroup && settingController.settings[AppSettings.showGroupMembers]!.value.value,
+                  visible: widget.conversation.isGroup && settingController.settings[AppSettings.showGroupMembers]!.value.value,
                   child: Container(
                     color: Get.theme.colorScheme.onInverseSurface,
                     width: 300,
                     child: ConversationMembers(
-                      conversation: widget.conversation!,
+                      conversation: widget.conversation,
                     ),
                   ),
                 ),
