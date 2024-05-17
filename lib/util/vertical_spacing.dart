@@ -23,6 +23,10 @@ String getRandomString(int length) {
   return String.fromCharCodes(List.generate(length, (index) => chars.codeUnitAt(random.nextInt(chars.length))));
 }
 
+bool isMobileMode() {
+  return Get.width < 800;
+}
+
 const defaultSpacing = 8.0;
 const elementSpacing = defaultSpacing * 0.5;
 const elementSpacing2 = elementSpacing * 1.5;

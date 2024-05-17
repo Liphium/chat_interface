@@ -80,7 +80,7 @@ void main(List<String> args) async {
 
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
-      minimumSize: Size(800, 500),
+      minimumSize: Size(300, 500),
       fullScreen: false,
     ),
     () async {

@@ -215,8 +215,9 @@ class _MessageInputState extends State<MessageInput> {
     };
 
     // Build actual widget
+    final padding = isMobileMode() ? defaultSpacing : sectionSpacing;
     return Padding(
-      padding: const EdgeInsets.only(right: sectionSpacing, left: sectionSpacing, bottom: sectionSpacing),
+      padding: EdgeInsets.only(right: padding, left: padding, bottom: padding),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -413,20 +414,6 @@ class _MessageInputState extends State<MessageInput> {
                             ),
                           ),
                         ),
-                        // IconButton(
-                        //   key: _emojiKey,
-                        //   onPressed: () async {
-                        //     final result = await Get.dialog(EmojiWindow(data: ContextMenuData.fromKey(_emojiKey, above: true, right: true)));
-                        //     _inputFocus.requestFocus();
-                        //     if (result == null) {
-                        //       return;
-                        //     }
-                        //     replaceSelection(result);
-                        //   },
-                        //   icon: const Icon(Icons.emoji_emotions),
-                        //   color: theme.colorScheme.tertiary,
-                        // ),
-                        // horizontalSpacing(elementSpacing),
                         IconButton(
                           key: _libraryKey,
                           onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),

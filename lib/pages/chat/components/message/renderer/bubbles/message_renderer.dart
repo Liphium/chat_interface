@@ -41,9 +41,9 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
 
     return RepaintBoundary(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(
           vertical: elementSpacing,
-          horizontal: sectionSpacing,
+          horizontal: isMobileMode() ? defaultSpacing : sectionSpacing,
         ),
         child: Row(
           textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
@@ -75,7 +75,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                   Flexible(
                     child: LayoutBuilder(builder: (context, constraints) {
                       return ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: (Get.width - 350) * 0.5),
+                        constraints: BoxConstraints(maxWidth: isMobileMode() ? Get.width * 0.75 : (Get.width - 350) * 0.5),
                         child: Column(
                           crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                           children: [
@@ -142,6 +142,36 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                       text: widget.message.content,
                                       baseStyle: theme.textTheme.labelLarge!,
                                     ),
+
+                                    //* Mobile timestamp and verified indicator
+                                    if (isMobileMode())
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: elementSpacing),
+                                            child: SelectionContainer.disabled(
+                                              child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                                            ),
+                                          ),
+                                          Obx(() {
+                                            final verified = widget.message.verified.value;
+                                            return Visibility(
+                                              visible: !verified,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(left: elementSpacing),
+                                                child: Tooltip(
+                                                  message: "chat.not.signed".tr,
+                                                  child: const Icon(
+                                                    Icons.warning_rounded,
+                                                    color: Colors.amber,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          })
+                                        ],
+                                      ),
                                   ],
                                 ),
                               ),
@@ -180,32 +210,35 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                     }),
                   ),
 
-                  horizontalSpacing(defaultSpacing),
+                  //* Desktop timestamp
+                  if (!isMobileMode()) horizontalSpacing(defaultSpacing),
 
-                  //* Timestamp
-                  Padding(
-                    padding: const EdgeInsets.only(top: defaultSpacing),
-                    child: SelectionContainer.disabled(
-                      child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
-                    ),
-                  ),
-
-                  horizontalSpacing(defaultSpacing),
-
-                  //* Verified indicator
-                  Obx(() {
-                    final verified = widget.message.verified.value;
-                    return Visibility(
-                      visible: !verified,
-                      child: Tooltip(
-                        message: "chat.not.signed".tr,
-                        child: const Icon(
-                          Icons.warning_rounded,
-                          color: Colors.amber,
-                        ),
+                  if (!isMobileMode())
+                    Padding(
+                      padding: const EdgeInsets.only(top: defaultSpacing),
+                      child: SelectionContainer.disabled(
+                        child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
                       ),
-                    );
-                  })
+                    ),
+
+                  //* Mobile verified indicator
+                  if (!isMobileMode()) horizontalSpacing(defaultSpacing),
+
+                  //* Mobile verified indicator
+                  if (!isMobileMode())
+                    Obx(() {
+                      final verified = widget.message.verified.value;
+                      return Visibility(
+                        visible: !verified,
+                        child: Tooltip(
+                          message: "chat.not.signed".tr,
+                          child: const Icon(
+                            Icons.warning_rounded,
+                            color: Colors.amber,
+                          ),
+                        ),
+                      );
+                    })
                 ],
               ),
             )

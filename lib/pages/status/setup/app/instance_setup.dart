@@ -96,6 +96,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                 Text(
                   'setup.choose.instance'.tr,
                   style: Get.textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
                 ),
                 verticalSpacing(sectionSpacing),
                 Text("If you don't know what this is, just click on default and you'll be fine.", style: Get.textTheme.bodyMedium),

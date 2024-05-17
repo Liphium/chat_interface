@@ -38,7 +38,6 @@ class AttachmentController extends GetxController {
       "extension": path.basename(data.file.path).split(".").last
     });
 
-    sendLog(server("/account/files/upload").toString());
     final res = await dio.post(
       server("/account/files/upload").toString(),
       data: formData,

@@ -11,6 +11,7 @@ import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
@@ -43,6 +44,7 @@ class MessageController extends GetxController {
   void selectConversation(Conversation conversation) async {
     Get.find<TownsquareController>().close();
     loaded.value = false;
+    Get.offAll(const ConversationPage(), transition: Transition.fadeIn);
     selectedConversation.value = conversation;
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server

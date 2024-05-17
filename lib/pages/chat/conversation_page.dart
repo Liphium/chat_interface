@@ -8,18 +8,17 @@ import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+class ConversationPage extends StatefulWidget {
+  const ConversationPage({super.key});
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ConversationPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ConversationPage> {
   static const _buttonIcons = <ContextMenuButtonType, IconData>{
     ContextMenuButtonType.cut: Icons.content_cut,
     ContextMenuButtonType.copy: Icons.content_copy,
@@ -85,7 +84,7 @@ class _ChatPageState extends State<ChatPage> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             if (constraints.biggest.width < 800) {
-              return const Sidebar();
+              return MessageFeed(conversation: controller.selectedConversation.value);
             }
 
             return Row(
@@ -97,16 +96,12 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-                      verticalSpacing(sectionSpacing),
-                      Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-                      verticalSpacing(elementSpacing),
-                      Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
-                    ],
-                  ),
+                  child: Obx(() {
+                    if (tsController.inView.value) {
+                      return const TownsquareFeed();
+                    }
+                    return MessageFeed(conversation: controller.selectedConversation.value);
+                  }),
                 ),
               ],
             );

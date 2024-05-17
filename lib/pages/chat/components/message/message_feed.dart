@@ -7,6 +7,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_mobile_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
@@ -15,7 +16,6 @@ import 'package:chat_interface/pages/spaces/call_rectangle.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -53,23 +53,6 @@ class _MessageFeedState extends State<MessageFeed> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.conversation == null || widget.conversation?.id == "0") {
-      if (Get.find<SpacesController>().inSpace.value) {
-        return const CallRectangle();
-      }
-
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-          verticalSpacing(sectionSpacing),
-          Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-          verticalSpacing(elementSpacing),
-          Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
-        ],
-      );
-    }
-
     MessageController controller = Get.find();
     SettingController settingController = Get.find();
 
@@ -109,6 +92,9 @@ class _MessageFeedState extends State<MessageFeed> {
                                   addRepaintBoundaries: false,
                                   physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                                   itemBuilder: (context, index) {
+                                    if (isMobileMode()) {
+                                      return BubblesMobileRenderer(index: index);
+                                    }
                                     return BubblesRenderer(index: index);
                                   },
                                 );
