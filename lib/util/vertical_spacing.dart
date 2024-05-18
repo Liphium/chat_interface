@@ -27,9 +27,9 @@ bool isMobileMode() {
   return Get.width < 800;
 }
 
-void showModal(Widget widget) {
+void showModal(Widget widget, {mobileSliding = false}) {
   if (isMobileMode()) {
-    Get.bottomSheet(widget);
+    Get.to(widget);
   } else {
     Get.dialog(widget);
   }

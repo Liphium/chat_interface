@@ -413,7 +413,7 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         IconButton(
                           key: _libraryKey,
-                          onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
+                          onPressed: () => showModal(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),

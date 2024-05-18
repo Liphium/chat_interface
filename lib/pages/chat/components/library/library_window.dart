@@ -26,6 +26,7 @@ class _LibraryWindowState extends State<LibraryWindow> {
   @override
   Widget build(BuildContext context) {
     return SlidingWindowBase(
+      title: const [],
       maxSize: 500,
       position: widget.data,
       child: Column(

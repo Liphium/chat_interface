@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,15 @@ class DialogBase extends StatelessWidget {
         color: Get.theme.colorScheme.onInverseSurface,
         child: Padding(
           padding: const EdgeInsets.all(sectionSpacing),
-          child: child,
+          child: Column(
+            children: [
+              IconButton(
+                onPressed: () => {},
+                icon: const Icon(Icons.arrow_back),
+              ),
+              child,
+            ],
+          ),
         ),
       );
     }
@@ -98,10 +107,12 @@ class SlidingWindowBase extends StatelessWidget {
   final ContextMenuData position;
   final bool lessPadding;
   final Widget child;
+  final List<Widget> title;
   final double maxSize;
 
   const SlidingWindowBase({
     super.key,
+    required this.title,
     required this.position,
     this.lessPadding = false,
     required this.child,
@@ -119,8 +130,32 @@ class SlidingWindowBase extends StatelessWidget {
         ),
         color: Get.theme.colorScheme.onInverseSurface,
         child: Padding(
-          padding: const EdgeInsets.all(sectionSpacing),
-          child: child,
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(elementSpacing),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    LoadingIconButton(
+                      onTap: () => Get.back(),
+                      color: Get.theme.colorScheme.onPrimary,
+                      padding: 0,
+                      iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
+                      extra: defaultSpacing,
+                      icon: Icons.arrow_back,
+                    ),
+                    horizontalSpacing(defaultSpacing),
+                    ...title,
+                  ],
+                ),
+              ),
+              verticalSpacing(defaultSpacing),
+              child,
+            ],
+          ),
         ),
       );
     }

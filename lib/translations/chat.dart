@@ -57,7 +57,7 @@ class ChatPageTranslations extends Translations {
           'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
           'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
           'conversations.add': 'Add a member',
-          'conversations.add.create': 'Create new conversation',
+          'conversations.add.create': 'New conversation',
           'choose.members': 'Choose more than one member to create a group chat.',
 
           // Conversation members

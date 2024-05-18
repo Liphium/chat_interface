@@ -36,6 +36,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
 
     if (Get.find<FriendController>().friends.length == 1) {
       return SlidingWindowBase(
+        title: const [],
         position: ContextMenuData(widget.position, true, true),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,6 +58,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
     }
 
     return SlidingWindowBase(
+      title: const [],
       position: ContextMenuData(widget.position, true, true),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

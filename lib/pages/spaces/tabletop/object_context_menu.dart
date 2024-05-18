@@ -20,6 +20,7 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
   Widget build(BuildContext context) {
     final additions = widget.object.getContextMenuAdditions();
     return SlidingWindowBase(
+      title: const [], // Only for mobile (sort of)
       position: widget.data,
       child: Column(
         children: [

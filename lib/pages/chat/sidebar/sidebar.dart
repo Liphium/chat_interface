@@ -317,7 +317,7 @@ class _SidebarState extends State<Sidebar> {
                               child: Obx(
                                 () => Material(
                                   borderRadius: BorderRadius.circular(defaultSpacing),
-                                  color: messageController.currentConversation.value == conversation ? theme.colorScheme.primary : Colors.transparent,
+                                  color: messageController.currentConversation.value == conversation && !isMobileMode() ? theme.colorScheme.primary : Colors.transparent,
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(defaultSpacing),
                                     hoverColor: theme.colorScheme.primary.withAlpha(150),
@@ -328,7 +328,7 @@ class _SidebarState extends State<Sidebar> {
 
                                     //* When conversation is tapped (open conversation)
                                     onTap: () {
-                                      if (messageController.currentConversation.value == conversation) return;
+                                      if (messageController.currentConversation.value == conversation && !isMobileMode()) return;
                                       messageController.selectConversation(conversation);
                                     },
 

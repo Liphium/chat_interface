@@ -104,6 +104,7 @@ class _ProfileState extends State<Profile> {
     //* Context menu
     if (widget.position != null) {
       return SlidingWindowBase(
+        title: const [],
         lessPadding: true,
         position: ContextMenuData(widget.position!, true, widget.leftAligned),
         maxSize: widget.size.toDouble(),

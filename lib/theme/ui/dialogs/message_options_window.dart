@@ -40,6 +40,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
       lessPadding: true,
       position: widget.data,
       maxSize: 250,
+      title: const [],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -46,6 +46,7 @@ class _EmojiWindowState extends State<EmojiWindow> {
   @override
   Widget build(BuildContext context) {
     return SlidingWindowBase(
+      title: const [],
       position: widget.data,
       maxSize: 500,
       child: Column(

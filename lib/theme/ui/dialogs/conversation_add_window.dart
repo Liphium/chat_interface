@@ -108,6 +108,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
     if (friendController.friends.length == 1) {
       return SlidingWindowBase(
+        title: [
+          Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
+        ],
         position: widget.position,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,16 +133,14 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
     return SlidingWindowBase(
       position: widget.position,
+      title: [
+        Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
+        const Spacer(),
+        Obx(() => Text("${_members.length}/100", style: Get.theme.textTheme.bodyLarge)),
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [Text(widget.title.tr, style: theme.textTheme.titleMedium), Obx(() => Text("${_members.length}/100", style: theme.textTheme.bodyMedium))],
-          ),
-          verticalSpacing(defaultSpacing),
-
           //* Input
           Container(
             decoration: BoxDecoration(
