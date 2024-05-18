@@ -34,41 +34,62 @@ class DialogBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Return without animation on mobile
+    if (isMobileMode()) {
+      return Material(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(sectionSpacing),
+          topRight: Radius.circular(defaultSpacing),
+        ),
+        color: Get.theme.colorScheme.onInverseSurface,
+        child: Padding(
+          padding: const EdgeInsets.all(sectionSpacing),
+          child: child,
+        ),
+      );
+    }
+
     final random = math.Random();
     final randomOffset = random.nextDouble() * 5 + 8;
     final randomHz = random.nextDouble() * 0.5 + 2;
 
     return Center(
       child: Animate(
-          effects: [
-            ScaleEffect(
-              delay: 100.ms,
-              duration: 500.ms,
-              begin: const Offset(0, 0),
-              end: const Offset(1, 1),
-              alignment: Alignment.center,
-              curve: const ElasticOutCurve(0.8),
-            ),
-            ShakeEffect(
-                delay: 100.ms,
-                duration: 400.ms,
-                hz: randomHz,
-                offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
-                rotation: 0,
-                curve: Curves.decelerate),
-            FadeEffect(
-              delay: 100.ms,
-              duration: 250.ms,
-              curve: Curves.easeOut,
-            )
-          ],
-          target: 1,
-          child: Material(
-            elevation: 2.0,
-            color: Get.theme.colorScheme.onInverseSurface,
-            borderRadius: BorderRadius.circular(dialogBorderRadius),
-            child: Container(width: maxWidth, padding: const EdgeInsets.all(dialogPadding), child: child),
-          )),
+        effects: [
+          ScaleEffect(
+            delay: 100.ms,
+            duration: 500.ms,
+            begin: const Offset(0, 0),
+            end: const Offset(1, 1),
+            alignment: Alignment.center,
+            curve: const ElasticOutCurve(0.8),
+          ),
+          ShakeEffect(
+            delay: 100.ms,
+            duration: 400.ms,
+            hz: randomHz,
+            offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+            rotation: 0,
+            curve: Curves.decelerate,
+          ),
+          FadeEffect(
+            delay: 100.ms,
+            duration: 250.ms,
+            curve: Curves.easeOut,
+          )
+        ],
+        target: 1,
+        child: Material(
+          elevation: 2.0,
+          color: Get.theme.colorScheme.onInverseSurface,
+          borderRadius: BorderRadius.circular(dialogBorderRadius),
+          child: Container(
+            width: maxWidth,
+            padding: const EdgeInsets.all(dialogPadding),
+            child: child,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -89,6 +110,21 @@ class SlidingWindowBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Return without animation on mobile
+    if (isMobileMode()) {
+      return Material(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(sectionSpacing),
+          topRight: Radius.circular(defaultSpacing),
+        ),
+        color: Get.theme.colorScheme.onInverseSurface,
+        child: Padding(
+          padding: const EdgeInsets.all(sectionSpacing),
+          child: child,
+        ),
+      );
+    }
+
     final random = math.Random();
     final randomOffset = random.nextDouble() * 3 + 2;
     final randomHz = random.nextDouble() * 1 + 1.5;

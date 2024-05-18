@@ -27,6 +27,14 @@ bool isMobileMode() {
   return Get.width < 800;
 }
 
+void showModal(Widget widget) {
+  if (isMobileMode()) {
+    Get.bottomSheet(widget);
+  } else {
+    Get.dialog(widget);
+  }
+}
+
 const defaultSpacing = 8.0;
 const elementSpacing = defaultSpacing * 0.5;
 const elementSpacing2 = elementSpacing * 1.5;

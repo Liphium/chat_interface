@@ -44,7 +44,7 @@ class MessageController extends GetxController {
     if (isMobileMode()) {
       Get.to(ConversationPage(conversation: conversation));
     } else {
-      Get.offAll(ConversationPage(conversation: conversation));
+      Get.offAll(ConversationPage(conversation: conversation), transition: Transition.fadeIn);
     }
     currentConversation.value = conversation;
     if (conversation.notificationCount.value != 0) {

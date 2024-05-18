@@ -115,9 +115,10 @@ class _MessageFeedState extends State<MessageFeed> {
                   ),
                 ),
               ),
-              Obx(
-                () => Visibility(
-                  visible: widget.conversation.isGroup && settingController.settings[AppSettings.showGroupMembers]!.value.value,
+              Obx(() {
+                final visible = settingController.settings[AppSettings.showGroupMembers]!.value.value;
+                return Visibility(
+                  visible: widget.conversation.isGroup && visible,
                   child: Container(
                     color: Get.theme.colorScheme.onInverseSurface,
                     width: 300,
@@ -125,8 +126,8 @@ class _MessageFeedState extends State<MessageFeed> {
                       conversation: widget.conversation,
                     ),
                   ),
-                ),
-              )
+                );
+              })
             ],
           ),
         ),

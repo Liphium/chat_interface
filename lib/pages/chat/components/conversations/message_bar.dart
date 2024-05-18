@@ -142,7 +142,7 @@ class _MessageBarState extends State<MessageBar> {
                   icon: Icons.info,
                   iconSize: 27,
                   onTap: () {
-                    Get.dialog(ConversationInfoWindow(conversation: widget.conversation));
+                    showModal(ConversationInfoWindow(conversation: widget.conversation));
                   },
                 ),
 
@@ -225,7 +225,6 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
                   finalList.add(friend);
                 }
               }
-              sendLog(finalList);
 
               // Add the people to the conversation
               for (var friend in finalList) {
@@ -245,7 +244,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
           if (friend.unknown) {
             return;
           }
-          Get.dialog(ConversationAddWindow(
+          showModal(ConversationAddWindow(
             title: "conversations.add.create",
             position: ContextMenuData(position, true, false),
             initial: [friend],
