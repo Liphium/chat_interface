@@ -36,7 +36,13 @@ class _FriendsPageState extends State<FriendsPage> {
 
     return Animate(
       effects: [
-        ScaleEffect(delay: 100.ms, duration: 500.ms, begin: const Offset(0, 0), end: const Offset(1, 1), alignment: Alignment.center, curve: const ElasticOutCurve(0.8)),
+        ScaleEffect(
+            delay: 100.ms,
+            duration: 500.ms,
+            begin: const Offset(0, 0),
+            end: const Offset(1, 1),
+            alignment: Alignment.center,
+            curve: const ElasticOutCurve(0.8)),
         ShakeEffect(
           delay: 100.ms,
           duration: 400.ms,
@@ -156,7 +162,10 @@ class _FriendsPageState extends State<FriendsPage> {
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
                                           Animate(
-                                            effects: [ReverseExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical, alignment: Alignment.topLeft)],
+                                            effects: [
+                                              ReverseExpandEffect(
+                                                  curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical, alignment: Alignment.topLeft)
+                                            ],
                                             target: hashtag ? 1.0 : 0.0,
                                             child: Padding(
                                               padding: const EdgeInsets.only(bottom: defaultSpacing),

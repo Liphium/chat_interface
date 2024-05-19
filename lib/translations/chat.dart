@@ -42,7 +42,8 @@ class ChatPageTranslations extends Translations {
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
           'request.already.exists': 'Already exists',
-          'request.already.exists.text': 'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
+          'request.already.exists.text':
+              'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
 
           // Conversations
           'conversations.placeholder': 'Search',
@@ -54,7 +55,8 @@ class ChatPageTranslations extends Translations {
           'chat.start_space': 'Start a private Space',
           'chat.add_space': 'Add to Space',
           'conversations.leave': 'Leave conversation',
-          'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
+          'conversations.leave.text':
+              'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
           'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
           'conversations.add': 'Add a member',
           'conversations.add.create': 'New conversation',
@@ -130,6 +132,7 @@ class ChatPageTranslations extends Translations {
           'library.empty': 'It\'s pretty empty in here. You can add stuff to it by favoriting images or GIFs in conversations.',
 
           // Spaces
+          'chat.space.add': 'New space',
           'join.space': 'Join Space',
           'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
           'chat.space_invite': 'Space invitation',
