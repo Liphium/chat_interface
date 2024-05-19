@@ -77,7 +77,7 @@ class _ChatPageState extends State<ChatPage> {
         },
         child: LayoutBuilder(
           builder: (context, constraints) {
-            if (constraints.biggest.width < 800) {
+            if (isMobileMode()) {
               return const Sidebar();
             }
 

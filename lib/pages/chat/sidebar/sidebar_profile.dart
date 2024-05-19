@@ -195,7 +195,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                           Row(
                             children: [
                               IconButton(
-                                onPressed: () => Get.dialog(const FriendsPage()),
+                                onPressed: () => showModal(const FriendsPage()),
                                 icon: const Icon(Icons.group, color: Colors.white),
                               ),
                               horizontalSpacing(defaultSpacing * 0.5),

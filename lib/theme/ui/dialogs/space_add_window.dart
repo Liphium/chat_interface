@@ -47,7 +47,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
             FJElevatedButton(
               onTap: () {
                 Get.back();
-                Get.dialog(const FriendsPage());
+                showModal(const FriendsPage());
               },
               child: Center(
                 child: Text("open.friends".tr, style: theme.textTheme.labelLarge),

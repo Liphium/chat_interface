@@ -107,9 +107,13 @@ class _SidebarState extends State<Sidebar> {
                                   final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
 
                                   //* Open conversation add window
-                                  Get.dialog(ConversationAddWindow(
-                                      position:
-                                          ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true)));
+                                  showModal(ConversationAddWindow(
+                                    position: ContextMenuData(
+                                      box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))),
+                                      true,
+                                      true,
+                                    ),
+                                  ));
                                 },
                                 icon: Icon(Icons.chat_bubble, color: theme.colorScheme.onPrimary),
                               ),

@@ -65,6 +65,7 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
                 Text(
                   "${'setup.choose.server'.tr}.",
                   style: Get.textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
                 ),
                 verticalSpacing(sectionSpacing),
                 FJTextField(

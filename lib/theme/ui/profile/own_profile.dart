@@ -155,7 +155,8 @@ class _ProfileState extends State<OwnProfile> {
                                       Icon(icon, size: 13.0, color: color),
                                       horizontalSpacing(defaultSpacing),
                                       Text("status.${index.toString()}".tr,
-                                          style: theme.textTheme.bodyMedium!.copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface),
+                                          style: theme.textTheme.bodyMedium!
+                                              .copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface),
                                           textHeightBehavior: noTextHeight),
                                     ],
                                   ),
@@ -264,7 +265,7 @@ class _ProfileState extends State<OwnProfile> {
                   ProfileButton(
                     icon: Icons.group,
                     label: 'profile.friends'.tr,
-                    onTap: () => Get.dialog(const FriendsPage()),
+                    onTap: () => showModal(const FriendsPage()),
                     loading: false.obs,
                   ),
                   verticalSpacing(elementSpacing),

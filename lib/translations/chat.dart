@@ -26,18 +26,20 @@ class ChatPageTranslations extends Translations {
 
           // Friends
           'friends': 'Friends',
-          'friends.placeholder': 'Search friends (type name to add)',
+          'friends.placeholder': 'Search friends',
           'friends.remove': 'Remove friend',
           'friend.removed': 'You removed this person.',
           'friends.add': 'Add friend',
+          'friends.add.desc': 'To add your friend, we\'ll need his username. Please provide that below.',
+          'friends.add.button': 'Send friend request',
+          'friends.name_placeholder': 'some_guy',
           'friends.message': 'Start direct message',
           'friends.invite_to_space': 'Invite to current space',
-          'friends.requests_sent': 'Requests sent',
           'friends.requests': 'Requests',
+          'friends.requests_sent': 'Sent requests',
           'request.sent': 'Request successfully sent!',
-          'friends.empty': 'Seems like you don\'t have any friends with that name.',
-          'friends.send_request': 'Now just press \'Enter\' whenever you\'re done typing. And we\'ll find your friend for you.',
-          'friends.example': 'If you want to add someone, just provide their username.',
+          'friends.empty':
+              'Seems like you don\'t have any friends with that name. You can add friends by clicking the icon on the right inside of the input field.',
           'request.confirm.title': 'Confirm request',
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',

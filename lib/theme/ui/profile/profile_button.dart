@@ -50,7 +50,13 @@ class ProfileButton extends StatelessWidget {
 
               //* Label
               horizontalSpacing(defaultSpacing),
-              Text(label, style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface))
+              Flexible(
+                child: Text(
+                  label,
+                  style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )
             ],
           ),
         ),

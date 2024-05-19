@@ -30,13 +30,21 @@ class WindowBase extends StatelessWidget {
 class DialogBase extends StatelessWidget {
   final Widget child;
   final double maxWidth;
+  final bool showTitleDesktop;
+  final List<Widget> title;
 
-  const DialogBase({super.key, required this.child, this.maxWidth = 400});
+  const DialogBase({
+    super.key,
+    required this.child,
+    this.maxWidth = 400,
+    this.title = const [],
+    this.showTitleDesktop = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     // Return without animation on mobile
-    if (isMobileMode()) {
+    if (isMobileMode() && title.isNotEmpty) {
       return Material(
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(sectionSpacing),
@@ -44,13 +52,29 @@ class DialogBase extends StatelessWidget {
         ),
         color: Get.theme.colorScheme.onInverseSurface,
         child: Padding(
-          padding: const EdgeInsets.all(sectionSpacing),
+          padding: const EdgeInsets.all(defaultSpacing),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IconButton(
-                onPressed: () => {},
-                icon: const Icon(Icons.arrow_back),
+              Padding(
+                padding: const EdgeInsets.all(elementSpacing),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    LoadingIconButton(
+                      onTap: () => Get.back(),
+                      color: Get.theme.colorScheme.onPrimary,
+                      padding: 0,
+                      iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
+                      extra: defaultSpacing,
+                      icon: Icons.arrow_back,
+                    ),
+                    horizontalSpacing(defaultSpacing),
+                    ...title,
+                  ],
+                ),
               ),
+              verticalSpacing(defaultSpacing),
               child,
             ],
           ),
@@ -95,7 +119,19 @@ class DialogBase extends StatelessWidget {
           child: Container(
             width: maxWidth,
             padding: const EdgeInsets.all(dialogPadding),
-            child: child,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showTitleDesktop && title.isNotEmpty)
+                  Row(
+                    children: [
+                      ...title,
+                    ],
+                  ),
+                if (showTitleDesktop && title.isNotEmpty) verticalSpacing(defaultSpacing),
+                child,
+              ],
+            ),
           ),
         ),
       ),
