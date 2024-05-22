@@ -289,8 +289,7 @@ class _SidebarState extends State<Sidebar> {
                         Friend? friend;
                         if (!conversation.isGroup) {
                           String id = conversation.members.values
-                              .firstWhere((element) => element.account != StatusController.ownAccountId,
-                                  orElse: () => Member("-", "-", MemberRole.user))
+                              .firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member("-", "-", MemberRole.user))
                               .account;
                           if (id == "-") {
                             friend = Friend.me();
@@ -323,9 +322,7 @@ class _SidebarState extends State<Sidebar> {
                               child: Obx(
                                 () => Material(
                                   borderRadius: BorderRadius.circular(defaultSpacing),
-                                  color: messageController.currentConversation.value == conversation && !isMobileMode()
-                                      ? theme.colorScheme.primary
-                                      : Colors.transparent,
+                                  color: messageController.currentConversation.value == conversation && !isMobileMode() ? theme.colorScheme.primary : Colors.transparent,
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(defaultSpacing),
                                     hoverColor: theme.colorScheme.primary.withAlpha(150),
@@ -408,8 +405,7 @@ class _SidebarState extends State<Sidebar> {
                                                       conversation.isGroup
                                                           ? Text(
                                                               //* Conversation status message
-                                                              "chat.members"
-                                                                  .trParams(<String, String>{'count': conversation.members.length.toString()}),
+                                                              "chat.members".trParams(<String, String>{'count': conversation.members.length.toString()}),
 
                                                               style: theme.textTheme.bodySmall,
                                                               maxLines: 1,

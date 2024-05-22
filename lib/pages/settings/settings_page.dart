@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:chat_interface/pages/settings/data/entities.dart';
+import 'package:chat_interface/pages/settings/settings_page_mobile.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Use mobile version on mobile
+    if (isMobileMode()) {
+      return const SettingsPageMobile();
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.inverseSurface,
       body: LayoutBuilder(builder: (context, constraints) {

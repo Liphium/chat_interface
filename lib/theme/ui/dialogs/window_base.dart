@@ -227,7 +227,16 @@ class SlidingWindowBase extends StatelessWidget {
                 borderRadius: BorderRadius.circular(dialogBorderRadius),
                 child: Padding(
                   padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
-                  child: child,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: title,
+                      ),
+                      if (title.isNotEmpty) verticalSpacing(defaultSpacing),
+                      child,
+                    ],
+                  ),
                 ),
               ),
             ),

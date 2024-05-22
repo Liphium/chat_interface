@@ -43,6 +43,7 @@ class GeneralTranslations extends Translations {
           'no.friends': 'You have no friends yet. If you want to add some, you can do that in the friends page.',
           'open.friends': 'Open friends page',
           'reset': 'Reset',
+          'app.settings': 'App settings',
 
           // Placeholder
           'placeholder.domain': 'example.com',
