@@ -108,11 +108,7 @@ class _SidebarState extends State<Sidebar> {
 
                                   //* Open conversation add window
                                   showModal(ConversationAddWindow(
-                                    position: ContextMenuData(
-                                      box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))),
-                                      true,
-                                      true,
-                                    ),
+                                    position: ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
                                   ));
                                 },
                                 icon: Icon(Icons.chat_bubble, color: theme.colorScheme.onPrimary),
