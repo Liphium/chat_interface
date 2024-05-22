@@ -153,6 +153,37 @@ class DataSettingsPage extends StatelessWidget {
         Text("Account data".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
+        //* Key requests
+        Container(
+          decoration: BoxDecoration(
+            color: Get.theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(sectionSpacing),
+          ),
+          padding: const EdgeInsets.all(sectionSpacing),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("settings.data.key_requests".tr, style: Get.theme.textTheme.labelMedium),
+                    verticalSpacing(elementSpacing),
+                    Text("settings.data.key_requests.description".tr, style: Get.theme.textTheme.bodyMedium),
+                  ],
+                ),
+              ),
+              horizontalSpacing(defaultSpacing),
+              FJElevatedButton(
+                smallCorners: true,
+                onTap: () => Get.dialog(const ChangePasswordWindow()),
+                child: Text("view".tr, style: Get.theme.textTheme.labelMedium),
+              ),
+            ],
+          ),
+        ),
+        verticalSpacing(defaultSpacing),
+
         //* Display name
         Container(
           decoration: BoxDecoration(

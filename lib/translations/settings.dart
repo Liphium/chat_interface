@@ -113,6 +113,8 @@ class SettingsTranslations extends Translations {
           'settings.data.profile_picture.requirements': 'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',
           'settings.data.profile_picture.remove': 'Remove profile picture',
           'settings.data.profile_picture.remove.confirm': 'Are you sure you want to remove your profile picture?',
+          'settings.data.key_requests': 'Key synchronization requests',
+          'settings.data.key_requests.description': 'If we ask you to accept a key request on another device, you can find them here.',
           'settings.data.permissions': 'Permissions',
           'settings.data.permissions.description':
               'If you don\'t know what this is, it\'s fine. This is just data from the server that we can ask you for in case of problems. Here\'s which permissions you have:',

@@ -18,6 +18,7 @@ class GeneralTranslations extends Translations {
           'no': 'No',
           'change': 'Change',
           'save': 'Save',
+          'view': 'View',
           'delete': 'Delete',
           'cancel': 'Cancel',
           'remove': 'Remove',
