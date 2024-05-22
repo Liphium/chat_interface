@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
@@ -17,8 +16,6 @@ import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/chat/chat_page.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/spaces/gamemode/spaces_game_hub.dart';
-import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -40,9 +37,6 @@ class SpacesController extends GetxController {
   //* Game mode
   final playMode = false.obs;
   final gameShelf = false.obs;
-  AudioPlayer? audioPlayer;
-
-  final loopSource = AssetSource("music/arcade_loop.wav");
 
   //* Space information
   static String? currentDomain;
@@ -105,29 +99,10 @@ class SpacesController extends GetxController {
     if (playMode.value) {
       Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
       hideSidebar.value = true;
-      if (Get.find<SettingController>().settings[SpacesSettings.gameMusic]!.getValue()) {
-        playMusic();
-      }
     } else {
-      stopMusic();
       hideSidebar.value = false;
       Get.offAll(const ChatPage(), transition: Transition.fadeIn);
     }
-  }
-
-  void playMusic() {
-    audioPlayer = AudioPlayer();
-    _sub = audioPlayer!.onSeekComplete.listen((event) {
-      audioPlayer!.setReleaseMode(ReleaseMode.loop);
-      audioPlayer!.play(loopSource, volume: 0.01, mode: PlayerMode.mediaPlayer);
-    });
-    audioPlayer!.play(AssetSource("music/arcade_full.wav"), volume: 0.01);
-  }
-
-  void stopMusic() {
-    _sub?.cancel();
-    audioPlayer?.dispose();
-    audioPlayer = null;
   }
 
   void openShelf() {
@@ -164,7 +139,8 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces",
+        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
@@ -340,7 +316,8 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
+      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {

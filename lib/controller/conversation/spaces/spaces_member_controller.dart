@@ -42,8 +42,11 @@ class SpaceMemberController extends GetxController {
       }
       membersFound.add(clientId);
       if (this.members[clientId] == null) {
-        this.members[clientId] = SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)),
-            clientId, member["muted"], member["deafened"]);
+        this.members[clientId] = SpaceMember(
+            Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)),
+            clientId,
+            member["muted"],
+            member["deafened"]);
       }
     }
 
@@ -55,7 +58,7 @@ class SpaceMemberController extends GetxController {
   void onConnect(SecureKey key) async {
     this.key = key;
 
-    sub = api.createActionStream().listen((event) async {
+    sub = (await api.createActionStream()).listen((event) async {
       if (members[ownId] == null) {
         return;
       }
