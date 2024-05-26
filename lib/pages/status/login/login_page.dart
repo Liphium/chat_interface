@@ -107,9 +107,9 @@ class _LoginPageState extends State<LoginPage> {
                         horizontalSpacing(defaultSpacing),
                         TextButton(
                           style: ButtonStyle(
-                            foregroundColor: MaterialStateProperty.all(theme.colorScheme.onPrimary),
-                            backgroundColor: MaterialStateProperty.resolveWith(
-                                (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
+                            foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
+                            backgroundColor: WidgetStateProperty.resolveWith(
+                                (states) => states.contains(WidgetState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
                           ),
                           onPressed: () => RegisterHandler.goToRegistration(_emailController.text),
                           child: Text('login.no_account'.tr),

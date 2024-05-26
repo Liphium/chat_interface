@@ -10,7 +10,7 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';

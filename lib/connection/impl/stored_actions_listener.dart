@@ -11,7 +11,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/web.dart';

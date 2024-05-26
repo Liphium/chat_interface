@@ -9,7 +9,7 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';

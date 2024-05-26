@@ -1,4 +1,3 @@
-
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/app/policy_setup.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
@@ -24,7 +23,7 @@ import 'package:get/get.dart';
 import '../error/error_page.dart';
 import 'account/account_setup.dart';
 import 'account/vault_setup.dart';
-import 'encryption/key_setup.dart';
+import 'account/key_setup.dart';
 
 abstract class Setup {
   final String name;

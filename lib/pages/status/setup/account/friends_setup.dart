@@ -4,7 +4,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';

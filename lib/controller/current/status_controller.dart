@@ -11,7 +11,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:drift/drift.dart';

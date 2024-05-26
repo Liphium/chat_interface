@@ -1,7 +1,7 @@
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
@@ -24,9 +24,7 @@ class VaultSetup extends Setup {
 
     // Load conversations from the database
     final conversationController = Get.find<ConversationController>();
-    final conversations = await (db.select(db.conversation)
-          ..orderBy([(u) => OrderingTerm.asc(u.updatedAt)]))
-        .get();
+    final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
     for (var conversation in conversations) {
       await conversationController.add(Conversation.fromData(conversation));
     }
@@ -56,8 +54,7 @@ Future<String?> refreshVault() async {
   await startFetch();
 
   // Load conversations
-  final json =
-      await postAuthorizedJSON("/account/vault/list", <String, dynamic>{
+  final json = await postAuthorizedJSON("/account/vault/list", <String, dynamic>{
     "after": lastFetchTime.millisecondsSinceEpoch, // Unix
     "tag": Constants.conversationTag,
   });
