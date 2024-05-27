@@ -193,7 +193,7 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                   onTap: () async {
                     final json = await postJSON("/account/keys/requests/check", {
                       "token": refreshToken,
-                      "signature": widget.signature,
+                      "signature": signMessage(widget.signatureKeyPair.secretKey, widget.signature),
                       "key": packagePublicKey(widget.signatureKeyPair.publicKey),
                     });
 

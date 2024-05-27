@@ -4,6 +4,7 @@ import 'package:chat_interface/pages/settings/account/change_display_name_window
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_password_window.dart';
 import 'package:chat_interface/pages/settings/account/log_out_window.dart';
+import 'package:chat_interface/pages/settings/account/key_requests_window.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
@@ -176,7 +177,7 @@ class DataSettingsPage extends StatelessWidget {
               horizontalSpacing(defaultSpacing),
               FJElevatedButton(
                 smallCorners: true,
-                onTap: () => Get.dialog(const ChangePasswordWindow()),
+                onTap: () => Get.dialog(const KeyRequestsWindow()),
                 child: Text("view".tr, style: Get.theme.textTheme.labelMedium),
               ),
             ],

@@ -54,6 +54,7 @@ class GeneralTranslations extends Translations {
           'time.yesterday': 'Yesterday',
           'time.today': 'Today',
           'time': '@day/@month/@year',
+          'general_time': '@day/@month/@year @hour:@minute',
 
           // Log out thing
           'log_out': 'Log out',

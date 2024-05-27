@@ -61,6 +61,16 @@ String formatMessageTime(DateTime time) {
   return "message.time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0")});
 }
 
+String formatGeneralTime(DateTime time) {
+  return "general_time".trParams({
+    "day": time.day.toString().padLeft(2, "0"),
+    "month": time.month.toString().padLeft(2, "0"),
+    "year": time.year.toString(),
+    "hour": time.hour.toString().padLeft(2, "0"),
+    "minute": time.minute.toString().padLeft(2, "0"),
+  });
+}
+
 class ExpandEffect extends CustomEffect {
   ExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, super.delay})
       : super(builder: (context, value, child) {
