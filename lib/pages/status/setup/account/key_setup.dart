@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/database/database.dart';
@@ -11,6 +15,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -101,21 +106,31 @@ class KeySetup extends Setup {
   static Future<Widget> openKeySynchronization() async {
     // Check if there is a keypair already in there
     late final String signature;
-    late final KeyPair keyPair;
+    late final KeyPair encryptionKeyPair, signatureKeyPair;
     final syncPub = await (db.setting.select()..where((t) => t.key.equals("key_sync_pub"))).getSingleOrNull();
     if (syncPub == null) {
-      // Generate the key pair for key sync exchange
-      keyPair = generateSignatureKeyPair();
+      // Generate the key pairs for key sync exchange
+      encryptionKeyPair = generateAsymmetricKeyPair();
+      signatureKeyPair = generateSignatureKeyPair();
       signature = getRandomString(6);
 
       // Insert all the values
-      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_pub", value: packagePublicKey(keyPair.publicKey)));
-      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_priv", value: packagePrivateKey(keyPair.secretKey)));
+      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_pub", value: packagePublicKey(encryptionKeyPair.publicKey)));
+      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_priv", value: packagePrivateKey(encryptionKeyPair.secretKey)));
+      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_sig_pub", value: packagePublicKey(signatureKeyPair.publicKey)));
+      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_sig_priv", value: packagePrivateKey(signatureKeyPair.secretKey)));
       db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_sig", value: signature));
     } else {
       // Load the key pair and signature
       final syncPriv = await (db.setting.select()..where((t) => t.key.equals("key_sync_priv"))).getSingle();
-      keyPair = toKeyPair(syncPub.value, syncPriv.value);
+      encryptionKeyPair = toKeyPair(syncPub.value, syncPriv.value);
+
+      // Get the signature key pair
+      final syncSigPub = await (db.setting.select()..where((t) => t.key.equals("key_sync_sig_pub"))).getSingle();
+      final syncSigPriv = await (db.setting.select()..where((t) => t.key.equals("key_sync_sig_priv"))).getSingle();
+      signatureKeyPair = toKeyPair(syncSigPub.value, syncSigPriv.value);
+
+      // Get the signature
       signature = (await (db.setting.select()..where((t) => t.key.equals("key_sync_sig"))).getSingle()).value;
     }
 
@@ -132,22 +147,30 @@ class KeySetup extends Setup {
     if (json["exists"]) {
       return KeyCodePage(
         signature: signature,
-        signatureKeyPair: keyPair,
+        signatureKeyPair: signatureKeyPair,
+        encryptionKeyPair: encryptionKeyPair,
       );
     }
 
     return KeySynchronizationPage(
       signature: signature,
-      signatureKeyPair: keyPair,
+      signatureKeyPair: signatureKeyPair,
+      encryptionKeyPair: encryptionKeyPair,
     );
   }
 }
 
 class KeySynchronizationPage extends StatefulWidget {
+  final KeyPair encryptionKeyPair;
   final KeyPair signatureKeyPair;
   final String signature;
 
-  const KeySynchronizationPage({super.key, required this.signatureKeyPair, required this.signature});
+  const KeySynchronizationPage({
+    super.key,
+    required this.signatureKeyPair,
+    required this.signature,
+    required this.encryptionKeyPair,
+  });
 
   @override
   State<KeySynchronizationPage> createState() => _KeySynchronizationPageState();
@@ -193,8 +216,8 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                   onTap: () async {
                     final json = await postJSON("/account/keys/requests/check", {
                       "token": refreshToken,
-                      "signature": signMessage(widget.signatureKeyPair.secretKey, widget.signature),
-                      "key": packagePublicKey(widget.signatureKeyPair.publicKey),
+                      "signature": signMessage(widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
+                      "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
                     });
 
                     if (!json["success"]) {
@@ -203,6 +226,7 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                     }
 
                     Get.find<TransitionController>().modelTransition(KeyCodePage(
+                      encryptionKeyPair: widget.encryptionKeyPair,
                       signatureKeyPair: widget.signatureKeyPair,
                       signature: widget.signature,
                     ));
@@ -219,16 +243,58 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
 }
 
 class KeyCodePage extends StatefulWidget {
-  final KeyPair signatureKeyPair;
+  final KeyPair signatureKeyPair, encryptionKeyPair;
   final String signature;
 
-  const KeyCodePage({super.key, required this.signatureKeyPair, required this.signature});
+  const KeyCodePage({
+    super.key,
+    required this.signatureKeyPair,
+    required this.signature,
+    required this.encryptionKeyPair,
+  });
 
   @override
   State<KeyCodePage> createState() => _KeyCodePageState();
 }
 
 class _KeyCodePageState extends State<KeyCodePage> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    // Check state on the server every 5 seconds
+    _timer = Timer.periodic(5000.ms, (timer) async {
+      final json = await postJSON("/account/keys/requests/check", {
+        "token": refreshToken,
+        "signature": signMessage(widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
+        "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
+      });
+
+      if (!json["success"]) {
+        showErrorPopup("error", json["error"]);
+        return;
+      }
+
+      // Add all the keys to the database if there is a payload
+      if (json["payload"] != null && json["payload"] != "") {
+        final payload = decryptAsymmetricAnonymous(widget.encryptionKeyPair.publicKey, widget.encryptionKeyPair.secretKey, json["payload"]);
+        final jsonPayload = jsonDecode(payload);
+        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "public_key", value: jsonPayload["pub"]));
+        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "private_key", value: jsonPayload["priv"]));
+        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "signature_public_key", value: jsonPayload["sig_pub"]));
+        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "signature_private_key", value: jsonPayload["sig_priv"]));
+        setupManager.restart();
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

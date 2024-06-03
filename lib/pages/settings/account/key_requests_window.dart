@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
@@ -11,6 +13,7 @@ import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -19,7 +22,8 @@ import 'package:get/get.dart';
 
 class KeyRequest {
   final String session;
-  final String pub;
+  final Uint8List encryptionPub;
+  final Uint8List signaturePub;
   final String payload;
   final String signature;
   final int createdAt;
@@ -27,16 +31,19 @@ class KeyRequest {
 
   KeyRequest({
     required this.session,
-    required this.pub,
+    required this.encryptionPub,
+    required this.signaturePub,
     required this.payload,
     required this.signature,
     required this.createdAt,
   });
 
   factory KeyRequest.fromJson(Map<String, dynamic> json) {
+    sendLog(json["pub"]);
     return KeyRequest(
       session: json['session'],
-      pub: json['pub'],
+      signaturePub: unpackagePublicKey((json['pub'] as String).split(":")[0]),
+      encryptionPub: unpackagePublicKey((json['pub'] as String).split(":")[1]),
       payload: json['payload'],
       signature: json['signature'],
       createdAt: json['creation'],
@@ -46,7 +53,7 @@ class KeyRequest {
   Map<String, dynamic> toJson() {
     return {
       'session': session,
-      'pub': pub,
+      'pub': '${packagePublicKey(signaturePub)}:${packagePublicKey(encryptionPub)}',
       'payload': payload,
       'signature': signature,
       'creation': createdAt,
@@ -60,7 +67,7 @@ class KeyRequest {
       payload = "";
     } else {
       payload = encryptAsymmetricAnonymous(
-        unpackagePublicKey(pub),
+        encryptionPub,
         jsonEncode({
           "pub": packagePublicKey(asymmetricKeyPair.publicKey),
           "priv": packagePrivateKey(asymmetricKeyPair.secretKey),
@@ -222,7 +229,12 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
                           return Row(
                             children: [
                               LoadingIconButton(
-                                onTap: () => Get.dialog(KeyRequestAcceptWindow(request: request)),
+                                onTap: () async {
+                                  final result = await Get.dialog(KeyRequestAcceptWindow(request: request));
+                                  if (result) {
+                                    requests.remove(request);
+                                  }
+                                },
                                 padding: 0,
                                 extra: defaultSpacing,
                                 icon: Icons.check,
@@ -298,13 +310,13 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> {
             label: "key_requests.code.button".tr,
             onTap: () {
               // Verify the code
-              if (!checkSignature(widget.request.signature, unpackagePublicKey(widget.request.pub), _codeController.text)) {
-                _error.value = "key_requests.code.error".tr;
+              if (!checkSignature(widget.request.signature, widget.request.signaturePub, hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)))) {
+                _error.value = "key_requests.code.error".tr; // JEeSqn
                 return;
               }
 
               widget.request.updateStatus(false, () {
-                Get.back();
+                Get.back(result: true);
               });
             },
           ),
