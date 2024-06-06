@@ -2,7 +2,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
-import 'package:chat_interface/pages/settings/settings_page.dart';
+import 'package:chat_interface/pages/settings/settings_home_page.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
@@ -155,8 +155,7 @@ class _ProfileState extends State<OwnProfile> {
                                       Icon(icon, size: 13.0, color: color),
                                       horizontalSpacing(defaultSpacing),
                                       Text("status.${index.toString()}".tr,
-                                          style: theme.textTheme.bodyMedium!
-                                              .copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface),
+                                          style: theme.textTheme.bodyMedium!.copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface),
                                           textHeightBehavior: noTextHeight),
                                     ],
                                   ),
@@ -256,7 +255,12 @@ class _ProfileState extends State<OwnProfile> {
                   ProfileButton(
                     icon: Icons.settings,
                     label: 'profile.settings'.tr,
-                    onTap: () => Get.off(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
+                    onTap: () => Get.to(
+                      const SettingsHomepage(),
+                      duration: 300.ms,
+                      transition: Transition.fade,
+                      curve: Curves.easeInOut,
+                    ),
                     loading: false.obs,
                   ),
                   verticalSpacing(elementSpacing),

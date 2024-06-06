@@ -6,6 +6,7 @@ import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_slider.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -68,39 +69,42 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        //* Tabs
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SidebarButton(
-              onTap: () => _selected.value = "audio.microphone",
-              radius: const BorderRadius.only(
-                bottomLeft: Radius.circular(defaultSpacing),
+    return SettingsPageBase(
+      label: "audio",
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //* Tabs
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SidebarButton(
+                onTap: () => _selected.value = "audio.microphone",
+                radius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(defaultSpacing),
+                ),
+                label: "audio.microphone",
+                selected: _selected,
               ),
-              label: "audio.microphone",
-              selected: _selected,
-            ),
-            horizontalSpacing(elementSpacing),
-            SidebarButton(
-              onTap: () => _selected.value = "audio.output",
-              radius: const BorderRadius.only(
-                topRight: Radius.circular(defaultSpacing),
-              ),
-              label: "audio.output",
-              selected: _selected,
-            )
-          ],
-        ),
+              horizontalSpacing(elementSpacing),
+              SidebarButton(
+                onTap: () => _selected.value = "audio.output",
+                radius: const BorderRadius.only(
+                  topRight: Radius.circular(defaultSpacing),
+                ),
+                label: "audio.output",
+                selected: _selected,
+              )
+            ],
+          ),
 
-        verticalSpacing(sectionSpacing),
+          verticalSpacing(sectionSpacing),
 
-        //* Current tab
-        Obx(() => _tabs[_selected.value]!)
-      ],
+          //* Current tab
+          Obx(() => _tabs[_selected.value]!)
+        ],
+      ),
     );
   }
 }
@@ -494,8 +498,7 @@ class _OutputTabState extends State<OutputTab> {
 
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing),
-            icon: Icons.done_all, label: "audio.device.default.button".tr),
+        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing - elementSpacing),
 
         Column(
@@ -535,9 +538,8 @@ class _OutputTabState extends State<OutputTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current
-              ? Get.theme.colorScheme.primary
-              : Get.theme.colorScheme.onInverseSurface,
+          color:
+              controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,

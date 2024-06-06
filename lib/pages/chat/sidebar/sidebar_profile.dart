@@ -3,7 +3,7 @@ import 'package:chat_interface/controller/conversation/spaces/publication_contro
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
-import 'package:chat_interface/pages/settings/settings_page.dart';
+import 'package:chat_interface/pages/settings/settings_home_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_info_window.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -200,7 +200,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                               ),
                               horizontalSpacing(defaultSpacing * 0.5),
                               IconButton(
-                                onPressed: () => Get.to(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
+                                onPressed: () => Get.to(const SettingsHomepage()),
                                 icon: const Icon(Icons.settings, color: Colors.white),
                               ),
                             ],

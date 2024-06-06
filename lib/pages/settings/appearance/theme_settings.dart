@@ -5,6 +5,7 @@ import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/default_theme.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
@@ -92,139 +93,142 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
       _factory.value = buildColorFactoryFromSettings();
     });
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 500,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("theme.presets".tr, style: Get.theme.textTheme.labelLarge),
-              verticalSpacing(elementSpacing),
-              ListSelectionSetting(settingName: ThemeSettings.themePreset, items: ThemeSettings.themePresets),
-              verticalSpacing(sectionSpacing),
-              Obx(() => Visibility(
-                  visible: controller.settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("theme.custom.title".tr, style: Get.theme.textTheme.labelLarge),
-                      verticalSpacing(defaultSpacing),
+    return SettingsPageBase(
+      label: "colors",
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 500,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("theme.presets".tr, style: Get.theme.textTheme.labelLarge),
+                verticalSpacing(elementSpacing),
+                ListSelectionSetting(settingName: ThemeSettings.themePreset, items: ThemeSettings.themePresets),
+                verticalSpacing(sectionSpacing),
+                Obx(() => Visibility(
+                    visible: controller.settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("theme.custom.title".tr, style: Get.theme.textTheme.labelLarge),
+                        verticalSpacing(defaultSpacing),
 
-                      //* Sliders
-                      const DoubleSelectionSetting(settingName: ThemeSettings.primaryHue, description: "custom.primary_hue", min: 0.0, max: 1.0),
-                      verticalSpacing(defaultSpacing),
+                        //* Sliders
+                        const DoubleSelectionSetting(settingName: ThemeSettings.primaryHue, description: "custom.primary_hue", min: 0.0, max: 1.0),
+                        verticalSpacing(defaultSpacing),
 
-                      const DoubleSelectionSetting(settingName: ThemeSettings.secondaryHue, description: "custom.secondary_hue", min: 0.0, max: 1.0),
-                      verticalSpacing(defaultSpacing),
+                        const DoubleSelectionSetting(settingName: ThemeSettings.secondaryHue, description: "custom.secondary_hue", min: 0.0, max: 1.0),
+                        verticalSpacing(defaultSpacing),
 
-                      const DoubleSelectionSetting(settingName: ThemeSettings.baseSaturation, description: "custom.base_saturation", min: 0.0, max: 1.0),
-                      verticalSpacing(defaultSpacing),
+                        const DoubleSelectionSetting(settingName: ThemeSettings.baseSaturation, description: "custom.base_saturation", min: 0.0, max: 1.0),
+                        verticalSpacing(defaultSpacing),
 
-                      //* Selections
-                      Text(
-                        "custom.theme_mode".tr,
-                      ),
-                      verticalSpacing(elementSpacing),
-                      ListSelectionSetting(
-                          settingName: ThemeSettings.themeMode,
-                          items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
-                      verticalSpacing(defaultSpacing),
+                        //* Selections
+                        Text(
+                          "custom.theme_mode".tr,
+                        ),
+                        verticalSpacing(elementSpacing),
+                        ListSelectionSetting(
+                            settingName: ThemeSettings.themeMode,
+                            items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
+                        verticalSpacing(defaultSpacing),
 
-                      Text(
-                        "custom.background_mode".tr,
-                      ),
-                      verticalSpacing(elementSpacing),
-                      ListSelectionSetting(settingName: ThemeSettings.backgroundMode, items: ThemeSettings.backgroundModes),
+                        Text(
+                          "custom.background_mode".tr,
+                        ),
+                        verticalSpacing(elementSpacing),
+                        ListSelectionSetting(settingName: ThemeSettings.backgroundMode, items: ThemeSettings.backgroundModes),
 
-                      verticalSpacing(sectionSpacing)
-                    ],
-                  ))),
-              FJElevatedButton(
-                  onTap: () {
-                    final ThemeData theme = getThemeData();
-                    Get.find<ThemeManager>().changeTheme(theme);
-                  },
-                  child: Text("theme.apply".tr, style: Get.theme.textTheme.labelLarge))
-            ],
+                        verticalSpacing(sectionSpacing)
+                      ],
+                    ))),
+                FJElevatedButton(
+                    onTap: () {
+                      final ThemeData theme = getThemeData();
+                      Get.find<ThemeManager>().changeTheme(theme);
+                    },
+                    child: Text("theme.apply".tr, style: Get.theme.textTheme.labelLarge))
+              ],
+            ),
           ),
-        ),
 
-        //* Color preview
-        Expanded(
-          child: Obx(() {
-            final colors = _factory.value!;
+          //* Color preview
+          Expanded(
+            child: Obx(() {
+              final colors = _factory.value!;
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colors.getBackground2(),
-                  borderRadius: BorderRadius.circular(defaultSpacing),
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
-                      child: Container(
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colors.getBackground2(),
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            color: colors.getPrimaryContainer(),
+                          ),
+                          padding: const EdgeInsets.all(defaultSpacing),
+                          height: 60,
+                          child: Row(
+                            children: [
+                              Icon(Icons.color_lens, color: colors.getPrimary(), size: 40),
+                              horizontalSpacing(defaultSpacing),
+                              Expanded(child: Text("theme.primary".tr, style: Get.theme.textTheme.labelLarge)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(sectionSpacing),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            color: colors.getSecondaryContainer(),
+                          ),
+                          padding: const EdgeInsets.all(defaultSpacing),
+                          height: 60,
+                          child: Row(
+                            children: [
+                              Icon(Icons.color_lens, color: colors.getSecondary(), size: 40),
+                              horizontalSpacing(defaultSpacing),
+                              Expanded(child: Text("theme.secondary".tr, style: Get.theme.textTheme.labelLarge)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      verticalSpacing(100),
+                      Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(defaultSpacing),
-                          color: colors.getPrimaryContainer(),
+                          color: colors.getBackground3(),
                         ),
                         padding: const EdgeInsets.all(defaultSpacing),
                         height: 60,
                         child: Row(
                           children: [
-                            Icon(Icons.color_lens, color: colors.getPrimary(), size: 40),
+                            Icon(Icons.person, color: colors.getPrimary(), size: 40),
                             horizontalSpacing(defaultSpacing),
-                            Expanded(child: Text("theme.primary".tr, style: Get.theme.textTheme.labelLarge)),
+                            Expanded(child: Text(Get.find<StatusController>().name.value, style: Get.theme.textTheme.labelLarge)),
                           ],
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(sectionSpacing),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          color: colors.getSecondaryContainer(),
-                        ),
-                        padding: const EdgeInsets.all(defaultSpacing),
-                        height: 60,
-                        child: Row(
-                          children: [
-                            Icon(Icons.color_lens, color: colors.getSecondary(), size: 40),
-                            horizontalSpacing(defaultSpacing),
-                            Expanded(child: Text("theme.secondary".tr, style: Get.theme.textTheme.labelLarge)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    verticalSpacing(100),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: colors.getBackground3(),
-                      ),
-                      padding: const EdgeInsets.all(defaultSpacing),
-                      height: 60,
-                      child: Row(
-                        children: [
-                          Icon(Icons.person, color: colors.getPrimary(), size: 40),
-                          horizontalSpacing(defaultSpacing),
-                          Expanded(child: Text(Get.find<StatusController>().name.value, style: Get.theme.textTheme.labelLarge)),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }),
-        ),
-      ],
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }

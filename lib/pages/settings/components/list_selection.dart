@@ -57,13 +57,24 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
                     children: [
                       Icon(widget.items[index].icon, color: Get.theme.colorScheme.onPrimary),
                       horizontalSpacing(defaultSpacing),
-                      Text(
-                        widget.items[index].label.tr,
-                        style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.onSurface),
+                      Flexible(
+                        child: Text(
+                          widget.items[index].label.tr,
+                          style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.onSurface),
+                        ),
                       ),
                       horizontalSpacing(defaultSpacing),
-                      widget.items[index].experimental
-                          ? Container(
+                      if (widget.items[index].experimental)
+                        LayoutBuilder(builder: (context, constraints) {
+                          if (isMobileMode()) {
+                            return Tooltip(
+                              message: "settings.experimental".tr,
+                              child: Icon(Icons.science, color: Get.theme.colorScheme.error),
+                            );
+                          }
+
+                          return Flexible(
+                            child: Container(
                               decoration: BoxDecoration(
                                 color: Get.theme.colorScheme.error.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(defaultSpacing),
@@ -73,15 +84,21 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
                                 children: [
                                   Icon(Icons.science, color: Get.theme.colorScheme.error),
                                   horizontalSpacing(elementSpacing),
-                                  Text(
-                                    "settings.experimental".tr,
-                                    style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
+                                  Flexible(
+                                    child: Text(
+                                      "settings.experimental".tr,
+                                      style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
+                                      overflow: TextOverflow.clip,
+                                    ),
                                   ),
                                   horizontalSpacing(elementSpacing)
                                 ],
                               ),
-                            )
-                          : const SizedBox.shrink(),
+                            ),
+                          );
+                        })
+                      else
+                        const SizedBox.shrink(),
                     ],
                   ),
                 ),
