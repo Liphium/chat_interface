@@ -155,8 +155,12 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
   Widget build(BuildContext context) {
     return DialogBase(
       title: [
-        Text("Synchronization requests".tr, style: Get.theme.textTheme.labelLarge),
-        const Spacer(),
+        Expanded(
+            child: Text(
+          "Synchronization requests".tr,
+          style: Get.theme.textTheme.labelLarge,
+          overflow: TextOverflow.ellipsis,
+        )),
         Obx(
           () => Visibility(
             visible: loading.value,
@@ -310,7 +314,8 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> {
             label: "key_requests.code.button".tr,
             onTap: () {
               // Verify the code
-              if (!checkSignature(widget.request.signature, widget.request.signaturePub, hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)))) {
+              if (!checkSignature(widget.request.signature, widget.request.signaturePub,
+                  hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)))) {
                 _error.value = "key_requests.code.error".tr; // JEeSqn
                 return;
               }

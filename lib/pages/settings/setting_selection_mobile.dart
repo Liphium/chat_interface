@@ -11,10 +11,8 @@ class SidebarMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: SettingLabel.values.length,
-      itemBuilder: (context, index) {
+    return Column(
+      children: List.generate(SettingLabel.values.length, (index) {
         final current = SettingLabel.values[index];
 
         //* Sidebar buttons
@@ -98,7 +96,7 @@ class SidebarMobile extends StatelessWidget {
             ],
           ),
         );
-      },
+      }),
     );
   }
 }

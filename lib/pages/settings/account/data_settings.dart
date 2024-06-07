@@ -180,7 +180,7 @@ class DataSettingsPage extends StatelessWidget {
                 horizontalSpacing(defaultSpacing),
                 FJElevatedButton(
                   smallCorners: true,
-                  onTap: () => Get.dialog(const KeyRequestsWindow()),
+                  onTap: () => showModal(const KeyRequestsWindow()),
                   child: Text("view".tr, style: Get.theme.textTheme.labelMedium),
                 ),
               ],
