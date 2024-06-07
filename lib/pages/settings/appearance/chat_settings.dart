@@ -42,7 +42,7 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //* Auto download types
+          //* Chat theme
           Text("appearance.chat.theme".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 

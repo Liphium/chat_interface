@@ -12,6 +12,8 @@ class AppearanceSettingsTranslations extends Translations {
           'theme.winter': 'Winter',
           'theme.custom': 'Create your own',
           'theme.custom.title': 'Custom theme',
+          'theme.primary': 'Primary color',
+          'theme.secondary': 'Secondary color',
           'custom.primary_hue': 'Primary hue',
           'custom.secondary_hue': 'Secondary hue',
           'custom.base_saturation': 'Base saturation',
