@@ -132,14 +132,15 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                 child: Obx(
                                   () => Visibility(
                                     visible: !controller.statusLoading.value,
-                                    replacement: const Center(
+                                    replacement: Center(
                                       child: Padding(
-                                        padding: EdgeInsets.all(defaultSpacing),
+                                        padding: const EdgeInsets.all(defaultSpacing),
                                         child: SizedBox(
                                           height: 20,
                                           width: 20,
                                           child: CircularProgressIndicator(
-                                            strokeWidth: 4.0,
+                                            strokeWidth: 3.0,
+                                            color: Get.theme.colorScheme.onPrimary,
                                           ),
                                         ),
                                       ),

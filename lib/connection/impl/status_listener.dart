@@ -42,6 +42,12 @@ void setupStatusListener() {
     sendLog("received status answer");
     handleStatus(event);
   }, afterSetup: true);
+
+  // Receive status changes from other devices
+  connector.listen("acc_st:o", (event) {
+    sendLog("received status change from other device");
+    handleStatus(event);
+  }, afterSetup: true);
 }
 
 Friend? handleStatus(Event event) {
