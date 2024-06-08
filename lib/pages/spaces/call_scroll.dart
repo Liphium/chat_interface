@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:chat_interface/pages/spaces/entities/entity_renderer.dart';
 import 'package:chat_interface/pages/spaces/widgets/call_scroll_overlay.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

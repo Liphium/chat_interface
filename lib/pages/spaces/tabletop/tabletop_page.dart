@@ -6,7 +6,7 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';

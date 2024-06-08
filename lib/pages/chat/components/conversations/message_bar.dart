@@ -6,7 +6,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/pages/chat/components/conversations/conversation_info_window.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -61,8 +61,7 @@ class _MessageBarState extends State<MessageBar> {
               children: [
                 Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                 horizontalSpacing(defaultSpacing),
-                Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
 
@@ -70,8 +69,7 @@ class _MessageBarState extends State<MessageBar> {
             Row(
               children: [
                 //* Live share
-                if (widget.conversation.type == model.ConversationType.directMessage &&
-                    controller.settings[FileSettings.liveShareExperiment]!.getValue())
+                if (widget.conversation.type == model.ConversationType.directMessage && controller.settings[FileSettings.liveShareExperiment]!.getValue())
                   Stack(
                     children: [
                       IconButton(

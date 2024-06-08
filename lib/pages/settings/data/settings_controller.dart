@@ -10,6 +10,9 @@ import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
+import 'package:chat_interface/pages/settings/settings_page_desktop.dart';
+import 'package:chat_interface/pages/settings/settings_page_mobile.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:get/get.dart';
 
 class AppSettings {
@@ -17,7 +20,16 @@ class AppSettings {
 }
 
 class SettingController extends GetxController {
+  final currentCategory = Rx<SettingCategory?>(null); // For persisting the page in the settings
   final settings = <String, Setting>{}; // label: Setting
+
+  static void openSettingsPage() {
+    if (isMobileMode()) {
+      Get.to(const SettingsPageMobile());
+    } else {
+      Get.to(const SettingsPageDesktop());
+    }
+  }
 
   SettingController() {
     AudioSettings.addSettings(this);

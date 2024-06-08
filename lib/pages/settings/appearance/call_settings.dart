@@ -1,7 +1,7 @@
 import 'package:chat_interface/pages/settings/appearance/call_preview.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -44,27 +44,22 @@ class _CallSettingsPageState extends State<CallSettingsPage> {
             Text("expansion.mode".tr, style: Get.theme.textTheme.labelLarge),
             verticalSpacing(defaultSpacing * 0.5),
 
-            ListSelectionSetting(
-                settingName: "call_app.expansionMode",
-                items: <SelectableItem>[
-                  SelectableItem("expansion.scroll_view".tr, Icons.view_list),
-                  SelectableItem("expansion.talking_overlay".tr, Icons.people),
-                  SelectableItem("expansion.none".tr, Icons.close),
-                ]),
+            ListSelectionSetting(settingName: "call_app.expansionMode", items: <SelectableItem>[
+              SelectableItem("expansion.scroll_view".tr, Icons.view_list),
+              SelectableItem("expansion.talking_overlay".tr, Icons.people),
+              SelectableItem("expansion.none".tr, Icons.close),
+            ]),
 
             //* Expansion positions
-            Text("expansion.position".tr,
-                style: Get.theme.textTheme.labelLarge),
+            Text("expansion.position".tr, style: Get.theme.textTheme.labelLarge),
             verticalSpacing(defaultSpacing * 0.5),
 
-            ListSelectionSetting(
-                settingName: "call_app.expansionPosition",
-                items: <SelectableItem>[
-                  SelectableItem("expansion.top".tr, Icons.arrow_upward),
-                  SelectableItem("expansion.right".tr, Icons.arrow_forward),
-                  SelectableItem("expansion.bottom".tr, Icons.arrow_downward),
-                  SelectableItem("expansion.left".tr, Icons.arrow_back),
-                ]),
+            ListSelectionSetting(settingName: "call_app.expansionPosition", items: <SelectableItem>[
+              SelectableItem("expansion.top".tr, Icons.arrow_upward),
+              SelectableItem("expansion.right".tr, Icons.arrow_forward),
+              SelectableItem("expansion.bottom".tr, Icons.arrow_downward),
+              SelectableItem("expansion.left".tr, Icons.arrow_back),
+            ]),
           ],
         ),
       ),

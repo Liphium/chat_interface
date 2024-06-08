@@ -36,11 +36,12 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
     _displayNameController.text = controller.displayName.value.text;
 
     return DialogBase(
+      title: [
+        Text("display_name".tr, style: Get.textTheme.labelLarge),
+      ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("settings.data.change_display_name.dialog".tr, style: Get.theme.textTheme.labelMedium),
-          verticalSpacing(sectionSpacing),
           Text("display_name.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           FJTextField(

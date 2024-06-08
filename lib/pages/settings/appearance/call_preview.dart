@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,18 +24,12 @@ class _CallPreviewState extends State<CallPreview> {
             children: [
               //* Top preview
               Obx(() => Visibility(
-                  visible: controller.settings["call_app.expansionPosition"]!
-                          .getValue() ==
-                      0,
+                  visible: controller.settings["call_app.expansionPosition"]!.getValue() == 0,
                   child: Expanded(
                       flex: 1,
                       child: Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: defaultSpacing),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children:
-                                  _buildEntities(theme, 0, defaultSpacing)))))),
+                          padding: const EdgeInsets.only(bottom: defaultSpacing),
+                          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: _buildEntities(theme, 0, defaultSpacing)))))),
 
               Expanded(
                 flex: 3,
@@ -43,19 +37,12 @@ class _CallPreviewState extends State<CallPreview> {
                   children: [
                     //* Left preview
                     Obx(() => Visibility(
-                        visible: controller
-                                .settings["call_app.expansionPosition"]!
-                                .getValue() ==
-                            3,
+                        visible: controller.settings["call_app.expansionPosition"]!.getValue() == 3,
                         child: Expanded(
                             flex: 1,
                             child: Padding(
-                                padding: const EdgeInsets.only(
-                                    right: defaultSpacing),
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: _buildEntities(
-                                        theme, defaultSpacing, 0)))))),
+                                padding: const EdgeInsets.only(right: defaultSpacing),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: _buildEntities(theme, defaultSpacing, 0)))))),
 
                     Expanded(
                       flex: 3,
@@ -69,36 +56,24 @@ class _CallPreviewState extends State<CallPreview> {
 
                     //* Right preview
                     Obx(() => Visibility(
-                        visible: controller
-                                .settings["call_app.expansionPosition"]!
-                                .getValue() ==
-                            1,
+                        visible: controller.settings["call_app.expansionPosition"]!.getValue() == 1,
                         child: Expanded(
                             flex: 1,
                             child: Padding(
-                                padding:
-                                    const EdgeInsets.only(left: defaultSpacing),
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: _buildEntities(
-                                        theme, defaultSpacing, 0)))))),
+                                padding: const EdgeInsets.only(left: defaultSpacing),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: _buildEntities(theme, defaultSpacing, 0)))))),
                   ],
                 ),
               ),
 
               //* Bottom preview
               Obx(() => Visibility(
-                  visible: controller.settings["call_app.expansionPosition"]!
-                          .getValue() ==
-                      2,
+                  visible: controller.settings["call_app.expansionPosition"]!.getValue() == 2,
                   child: Expanded(
                       flex: 1,
                       child: Padding(
                           padding: const EdgeInsets.only(top: defaultSpacing),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children:
-                                  _buildEntities(theme, 0, defaultSpacing)))))),
+                          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: _buildEntities(theme, 0, defaultSpacing)))))),
             ],
           )),
     );

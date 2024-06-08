@@ -5,7 +5,7 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
@@ -42,11 +42,8 @@ class SpaceMemberController extends GetxController {
       }
       membersFound.add(clientId);
       if (this.members[clientId] == null) {
-        this.members[clientId] = SpaceMember(
-            Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)),
-            clientId,
-            member["muted"],
-            member["deafened"]);
+        this.members[clientId] = SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)),
+            clientId, member["muted"], member["deafened"]);
       }
     }
 

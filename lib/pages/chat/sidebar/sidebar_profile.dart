@@ -3,15 +3,15 @@ import 'package:chat_interface/controller/conversation/spaces/publication_contro
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
-import 'package:chat_interface/pages/settings/settings_home_page.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_info_window.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/own_profile.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class SidebarProfile extends StatefulWidget {
@@ -22,6 +22,8 @@ class SidebarProfile extends StatefulWidget {
 }
 
 class _SidebarProfileState extends State<SidebarProfile> {
+  final GlobalKey _profileKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     StatusController controller = Get.find();
@@ -108,10 +110,11 @@ class _SidebarProfileState extends State<SidebarProfile> {
 
                 //* Actual profile
                 Material(
+                  key: _profileKey,
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   color: theme.colorScheme.primaryContainer,
                   child: InkWell(
-                    onTap: () => Get.dialog(const OwnProfile(position: Offset(defaultSpacing, 60))),
+                    onTap: () => showModal(OwnProfile(position: ContextMenuData.fromKey(_profileKey, above: true))),
                     splashColor: theme.hoverColor.withAlpha(10),
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: theme.colorScheme.inverseSurface,
@@ -200,7 +203,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                               ),
                               horizontalSpacing(defaultSpacing * 0.5),
                               IconButton(
-                                onPressed: () => Get.to(const SettingsHomepage()),
+                                onPressed: () => SettingController.openSettingsPage(),
                                 icon: const Icon(Icons.settings, color: Colors.white),
                               ),
                             ],

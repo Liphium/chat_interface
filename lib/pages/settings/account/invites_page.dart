@@ -78,8 +78,6 @@ class _InvitesPageState extends State<InvitesPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //* Profile picture
-            verticalSpacing(defaultSpacing),
             Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
             verticalSpacing(defaultSpacing),
             Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),

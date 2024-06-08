@@ -10,7 +10,7 @@ import 'package:chat_interface/controller/conversation/townsquare_controller.dar
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

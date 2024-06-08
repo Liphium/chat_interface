@@ -92,8 +92,6 @@ class SpacesController extends GetxController {
     return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
   }
 
-  StreamSubscription<void>? _sub;
-
   void switchToPlayMode() {
     playMode.value = !playMode.value;
     if (playMode.value) {
@@ -139,8 +137,7 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces",
-        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
@@ -316,8 +313,7 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
-      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {

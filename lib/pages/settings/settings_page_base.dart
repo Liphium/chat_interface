@@ -1,10 +1,14 @@
-import 'package:chat_interface/pages/settings/settings_frame.dart';
+import 'package:chat_interface/pages/settings/data/entities.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/settings_page_desktop.dart';
 import 'package:chat_interface/theme/ui/containers/universal_app_bar.dart';
+import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SettingsPageBase extends StatefulWidget {
+class SettingsPageBase extends StatelessWidget {
   final String label;
   final Widget child;
 
@@ -15,34 +19,32 @@ class SettingsPageBase extends StatefulWidget {
   });
 
   @override
-  State<SettingsPageBase> createState() => _SettingsPageBaseState();
-}
-
-class _SettingsPageBaseState extends State<SettingsPageBase> {
-  bool openedOnMobile = false;
-
-  @override
-  void initState() {
-    openedOnMobile = isMobileMode();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      // Use mobile version on mobile
-      if (!isMobileMode()) {
-        if (!openedOnMobile) {
-          return widget.child;
-        }
-        return const SettingsDesktopFrame();
-      }
+    if (!isMobileMode()) {
+      return child;
+    }
 
-      return Scaffold(
+    return PlatformCallback(
+      mobile: () {
+        sendLog("switch to mobile");
+      },
+      desktop: () {
+        sendLog("switch to desktop ($label)");
+        Get.back();
+        Get.off(const SettingsPageDesktop());
+        for (var settingLabel in SettingLabel.values) {
+          final category = settingLabel.categories.firstWhereOrNull((e) => e.label == label);
+          if (category != null) {
+            Get.find<SettingController>().currentCategory.value = category;
+            break;
+          }
+        }
+      },
+      child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.inverseSurface,
         body: Column(
           children: [
-            UniversalAppBar(label: "settings.${widget.label}".tr),
+            UniversalAppBar(label: "settings.$label".tr),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(left: sectionSpacing),
@@ -51,8 +53,12 @@ class _SettingsPageBaseState extends State<SettingsPageBase> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(bottom: defaultSpacing, right: sectionSpacing),
-                        child: widget.child,
+                        padding: const EdgeInsets.only(
+                          top: defaultSpacing,
+                          bottom: defaultSpacing,
+                          right: sectionSpacing,
+                        ),
+                        child: child,
                       ),
                     ],
                   ),
@@ -61,7 +67,7 @@ class _SettingsPageBaseState extends State<SettingsPageBase> {
             ),
           ],
         ),
-      );
-    });
+      ),
+    );
   }
 }

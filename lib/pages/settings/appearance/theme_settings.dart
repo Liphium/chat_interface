@@ -4,7 +4,7 @@ import 'package:chat_interface/pages/settings/appearance/color_preview.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/default_theme.dart';
@@ -161,8 +161,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 ),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
-                    settingName: ThemeSettings.themeMode,
-                    items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
+                    settingName: ThemeSettings.themeMode, items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
                 verticalSpacing(defaultSpacing),
 
                 Text(

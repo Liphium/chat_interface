@@ -7,7 +7,7 @@ import 'package:chat_interface/pages/settings/account/log_out_window.dart';
 import 'package:chat_interface/pages/settings/account/key_requests_window.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -78,7 +78,6 @@ class DataSettingsPage extends StatelessWidget {
                 ],
               ),
             ),
-          verticalSpacing(sectionSpacing),
 
           //* Profile picture
           Text("settings.data.profile_picture".tr, style: Get.theme.textTheme.labelLarge),
@@ -86,7 +85,7 @@ class DataSettingsPage extends StatelessWidget {
 
           Container(
             decoration: BoxDecoration(
-              color: Get.theme.colorScheme.primaryContainer,
+              color: Get.theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(sectionSpacing),
             ),
             padding: const EdgeInsets.all(sectionSpacing),
@@ -154,13 +153,13 @@ class DataSettingsPage extends StatelessWidget {
           verticalSpacing(sectionSpacing),
 
           //* Name settings
-          Text("Account data".tr, style: Get.theme.textTheme.labelLarge),
+          Text("settings.data.account".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
           //* Key requests
           Container(
             decoration: BoxDecoration(
-              color: Get.theme.colorScheme.primaryContainer,
+              color: Get.theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(sectionSpacing),
             ),
             padding: const EdgeInsets.all(sectionSpacing),
@@ -191,7 +190,7 @@ class DataSettingsPage extends StatelessWidget {
           //* Display name
           Container(
             decoration: BoxDecoration(
-              color: Get.theme.colorScheme.primaryContainer,
+              color: Get.theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(sectionSpacing),
             ),
             padding: const EdgeInsets.all(sectionSpacing),
@@ -216,7 +215,7 @@ class DataSettingsPage extends StatelessWidget {
                 horizontalSpacing(defaultSpacing),
                 FJElevatedButton(
                   smallCorners: true,
-                  onTap: () => Get.dialog(const ChangeDisplayNameWindow()),
+                  onTap: () => showModal(const ChangeDisplayNameWindow()),
                   child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
                 ),
               ],
@@ -227,7 +226,7 @@ class DataSettingsPage extends StatelessWidget {
           //* Username
           Container(
             decoration: BoxDecoration(
-              color: Get.theme.colorScheme.primaryContainer,
+              color: Get.theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(sectionSpacing),
             ),
             padding: const EdgeInsets.all(sectionSpacing),
@@ -248,7 +247,7 @@ class DataSettingsPage extends StatelessWidget {
                 horizontalSpacing(defaultSpacing),
                 FJElevatedButton(
                   smallCorners: true,
-                  onTap: () => Get.dialog(const ChangeNameWindow()),
+                  onTap: () => showModal(const ChangeNameWindow()),
                   child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
                 ),
               ],
@@ -259,7 +258,7 @@ class DataSettingsPage extends StatelessWidget {
           //* Password
           Container(
             decoration: BoxDecoration(
-              color: Get.theme.colorScheme.primaryContainer,
+              color: Get.theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(sectionSpacing),
             ),
             padding: const EdgeInsets.all(sectionSpacing),
@@ -279,7 +278,7 @@ class DataSettingsPage extends StatelessWidget {
                 horizontalSpacing(defaultSpacing),
                 FJElevatedButton(
                   smallCorners: true,
-                  onTap: () => Get.dialog(const ChangePasswordWindow()),
+                  onTap: () => showModal(const ChangePasswordWindow()),
                   child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
                 ),
               ],

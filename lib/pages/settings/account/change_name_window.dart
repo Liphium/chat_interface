@@ -35,11 +35,12 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
     _usernameController.text = controller.name.value;
 
     return DialogBase(
+      title: [
+        Text("username".tr, style: Get.textTheme.labelLarge),
+      ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("settings.data.change_name.dialog".tr, style: Get.theme.textTheme.labelMedium),
-          verticalSpacing(sectionSpacing),
           Text("username.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           FJTextField(
