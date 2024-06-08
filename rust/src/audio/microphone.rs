@@ -45,18 +45,16 @@ fn pcm_to_db(pcm: f32) -> f32 {
 pub fn record() {
     thread::spawn(move || {
         // Get a cpal host
-        let mut host = cpal::default_host(); // Current host on computer
-        #[cfg(target_os = "linux")]
-        {
-            host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
-        }
+        let host = cpal::default_host(); // Current host on computer
 
         // Get input device (using new API)
         let mut device = host
             .default_input_device()
             .expect("no input device available"); // Current device
         for d in host.input_devices().expect("Couldn't get input devices") {
+            logger::send_log(logger::TAG_AUDIO, d.name().unwrap().as_str());
             if d.name().unwrap() == super::get_input_device() {
+                logger::send_log(logger::TAG_AUDIO, "Found device!");
                 device = d;
                 break;
             }
