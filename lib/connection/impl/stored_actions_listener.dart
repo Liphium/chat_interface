@@ -247,7 +247,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     members,
   );
   final statusController = Get.find<StatusController>();
-  subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), convToken, deletions: false);
+  subscribeToConversation(statusController.statusJson(), convToken, deletions: false);
 
   return true;
 }

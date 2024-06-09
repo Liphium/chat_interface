@@ -176,7 +176,7 @@ class _ProfileState extends State<OwnProfile> {
                     () => Visibility(
                       visible: edit.value,
                       replacement: Text(
-                        controller.status.value == "-" ? 'status.message.add'.tr : controller.status.value,
+                        controller.status.value == "" ? 'status.message.add'.tr : controller.status.value,
                         style: theme.textTheme.bodyMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -194,7 +194,7 @@ class _ProfileState extends State<OwnProfile> {
 
                         //* Save status
                         onEditingComplete: () {
-                          if (_status.text == "") _status.text = "-";
+                          if (_status.text == "") _status.text = "";
                           controller.setStatus(message: _status.text);
                           edit.value = false;
                         },
@@ -214,7 +214,7 @@ class _ProfileState extends State<OwnProfile> {
                 () => LoadingIconButton(
                   loading: controller.statusLoading,
                   onTap: () {
-                    if (controller.status.value == "-" && !edit.value) {
+                    if (controller.status.value == "" && !edit.value) {
                       edit.value = true;
                       _status.text = "";
                       _statusFocus.requestFocus();
@@ -222,7 +222,7 @@ class _ProfileState extends State<OwnProfile> {
                     }
 
                     if (!edit.value) {
-                      controller.setStatus(message: "-");
+                      controller.setStatus(message: "");
                       _status.text = "";
                       return;
                     }
@@ -231,7 +231,7 @@ class _ProfileState extends State<OwnProfile> {
                     _statusFocus.unfocus();
                     controller.setStatus(message: _status.text);
                   },
-                  icon: statusMessage.value == "-"
+                  icon: statusMessage.value == ""
                       ? Icons.add
                       : edit.value
                           ? Icons.done

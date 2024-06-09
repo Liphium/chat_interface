@@ -25,7 +25,6 @@ part 'friends_vault.dart';
 
 class FriendController extends GetxController {
   final friends = <String, Friend>{}.obs;
-  final friendIdLookup = <String, Friend>{};
 
   Future<bool> loadFriends() async {
     for (FriendData data in await db.friend.select().get()) {
@@ -80,7 +79,6 @@ class FriendController extends GetxController {
     if (friend.id != StatusController.ownAccountId) {
       db.friend.insertOnConflictUpdate(friend.entity());
     }
-    friendIdLookup[friendId(friend)] = friend;
   }
 
   Future<bool> remove(Friend friend, {removal = true}) async {
@@ -209,7 +207,7 @@ class Friend {
   }
 
   //* Status
-  final status = "-".obs;
+  final status = "".obs;
   bool answerStatus = true;
   final statusType = 0.obs;
 
@@ -219,20 +217,22 @@ class Friend {
     try {
       status.value = utf8.decode(base64Decode(data["s"]));
     } catch (e) {
-      status.value = "-";
+      status.value = "";
     }
     statusType.value = data["t"];
 
-    _timer?.cancel();
-    _timer = Timer(const Duration(minutes: 2), () {
-      setOffline();
-      answerStatus = true;
-      _timer = null;
-    });
+    if (id != StatusController.ownAccountId) {
+      _timer?.cancel();
+      _timer = Timer(const Duration(minutes: 2), () {
+        setOffline();
+        answerStatus = true;
+        _timer = null;
+      });
+    }
   }
 
   void setOffline() {
-    status.value = "-";
+    status.value = "";
     statusType.value = 0;
   }
 

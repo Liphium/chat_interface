@@ -393,7 +393,7 @@ class _SidebarState extends State<Sidebar> {
                                                       friend == null
                                                           ? verticalSpacing(elementSpacing * 0.5)
                                                           : Visibility(
-                                                              visible: conversation.isGroup || friend.status.value != "-",
+                                                              visible: conversation.isGroup || friend.status.value != "",
                                                               child: verticalSpacing(defaultSpacing * 0.25),
                                                             ),
 
@@ -420,7 +420,7 @@ class _SidebarState extends State<Sidebar> {
                                                                 )
                                                               : Obx(
                                                                   () => Visibility(
-                                                                    visible: friend!.status.value != "-" && friend.statusType.value != statusOffline,
+                                                                    visible: friend!.status.value != "" && friend.statusType.value != statusOffline,
                                                                     child: Text(
                                                                       friend.status.value,
                                                                       style: theme.textTheme.bodySmall,

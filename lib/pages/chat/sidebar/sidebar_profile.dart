@@ -172,7 +172,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                         //* Status message
                                         Obx(
                                           () => Visibility(
-                                            visible: controller.status.value != "-",
+                                            visible: controller.status.value != "",
                                             child: Column(
                                               children: [
                                                 verticalSpacing(defaultSpacing * 0.25),

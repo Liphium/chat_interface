@@ -117,7 +117,7 @@ class UserRenderer extends StatelessWidget {
               ),
               Obx(
                 () => Visibility(
-                  visible: own ? statusController!.status.value != "-" : friend!.status.value != "-",
+                  visible: own ? statusController!.status.value != "" : friend!.status.value != "",
                   child: Text(
                     own ? statusController!.status.value : friend!.status.value,
                     style: Get.theme.textTheme.bodySmall,
