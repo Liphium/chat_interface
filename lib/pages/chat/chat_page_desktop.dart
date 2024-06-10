@@ -1,6 +1,8 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
+import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
+import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -10,6 +12,14 @@ import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+Widget getChatPage() {
+  if (isMobileMode()) {
+    return const ChatPageMobile();
+  }
+
+  return const ChatPageDesktop();
+}
 
 class ChatPageDesktop extends StatefulWidget {
   const ChatPageDesktop({super.key});
@@ -78,7 +88,15 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
           return const SizedBox();
         },
         child: PlatformCallback(
-          mobile: () => Get.off(const ChatPageMobile()),
+          mobile: () {
+            final controller = Get.find<MessageController>();
+            if (controller.currentConversation.value != null) {
+              Get.off(const ChatPageMobile());
+              Get.to(ConversationPage(conversation: controller.currentConversation.value!));
+            } else {
+              Get.off(const ChatPageMobile());
+            }
+          },
           child: Row(
             children: [
               const SelectionContainer.disabled(
@@ -88,15 +106,24 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                 ),
               ),
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-                    verticalSpacing(sectionSpacing),
-                    Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-                    verticalSpacing(elementSpacing),
-                    Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
-                  ],
+                child: Obx(
+                  () {
+                    final controller = Get.find<MessageController>();
+                    if (controller.currentConversation.value == null) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
+                          verticalSpacing(sectionSpacing),
+                          Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
+                          verticalSpacing(elementSpacing),
+                          Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
+                        ],
+                      );
+                    }
+
+                    return MessageFeed(conversation: controller.currentConversation.value!);
+                  },
                 ),
               ),
             ],

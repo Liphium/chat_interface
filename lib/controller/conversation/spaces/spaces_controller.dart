@@ -99,7 +99,7 @@ class SpacesController extends GetxController {
       hideSidebar.value = true;
     } else {
       hideSidebar.value = false;
-      Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
+      Get.offAll(getChatPage(), transition: Transition.fadeIn);
     }
   }
 
@@ -259,7 +259,7 @@ class SpacesController extends GetxController {
     Get.find<TabletopController>().disconnect(leave: false);
 
     if (!error) {
-      Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
+      Get.offAll(getChatPage(), transition: Transition.fadeIn);
     }
   }
 

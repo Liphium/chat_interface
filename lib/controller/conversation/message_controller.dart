@@ -43,8 +43,6 @@ class MessageController extends GetxController {
     loaded.value = false;
     if (isMobileMode()) {
       Get.to(ConversationPage(conversation: conversation));
-    } else {
-      Get.offAll(ConversationPage(conversation: conversation), transition: Transition.fadeIn);
     }
     currentConversation.value = conversation;
     if (conversation.notificationCount.value != 0) {
@@ -113,8 +111,8 @@ class MessageController extends GetxController {
 
   void storeMessage(Message message) async {
     // Update message reading
-    Get.find<ConversationController>()
-        .updateMessageRead(message.conversation, increment: currentConversation.value?.id != message.conversation, messageSendTime: message.createdAt.millisecondsSinceEpoch);
+    Get.find<ConversationController>().updateMessageRead(message.conversation,
+        increment: currentConversation.value?.id != message.conversation, messageSendTime: message.createdAt.millisecondsSinceEpoch);
 
     // Add message to message history if it's the selected one
     if (currentConversation.value?.id == message.conversation) {

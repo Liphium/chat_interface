@@ -124,8 +124,7 @@ class SetupManager {
       setup.executed = true;
       next(open: false);
     } else {
-      sendLog("opening");
-      Get.offAll(const ChatPageDesktop(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+      Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
     }
   }
 
