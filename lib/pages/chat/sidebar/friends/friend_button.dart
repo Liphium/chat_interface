@@ -30,7 +30,7 @@ class _FriendButtonState extends State<FriendButton> {
           splashColor: Theme.of(context).hoverColor,
 
           //* Show profile
-          onTap: () => Get.dialog(Profile(position: widget.position.value, friend: widget.friend)),
+          onTap: () => showModal(Profile(position: widget.position.value, friend: widget.friend)),
 
           //* Friend info
           child: Padding(

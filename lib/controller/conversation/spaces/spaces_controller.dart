@@ -13,7 +13,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_member_cont
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
-import 'package:chat_interface/pages/chat/chat_page.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/spaces/gamemode/spaces_game_hub.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -99,7 +99,7 @@ class SpacesController extends GetxController {
       hideSidebar.value = true;
     } else {
       hideSidebar.value = false;
-      Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+      Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
     }
   }
 
@@ -137,7 +137,8 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces",
+        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
@@ -258,7 +259,7 @@ class SpacesController extends GetxController {
     Get.find<TabletopController>().disconnect(leave: false);
 
     if (!error) {
-      Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+      Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
     }
   }
 
@@ -313,7 +314,8 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
+      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {

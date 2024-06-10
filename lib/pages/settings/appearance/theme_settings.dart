@@ -161,7 +161,8 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 ),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
-                    settingName: ThemeSettings.themeMode, items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
+                    settingName: ThemeSettings.themeMode,
+                    items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
                 verticalSpacing(defaultSpacing),
 
                 Text(

@@ -80,7 +80,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             label: "message.profile".tr,
             onTap: () {
               Get.back();
-              Get.dialog(Profile(friend: friend ?? Friend.unknown(widget.message.senderAccount)));
+              showModal(Profile(friend: friend ?? Friend.unknown(widget.message.senderAccount)));
             },
             loading: false.obs,
           ),

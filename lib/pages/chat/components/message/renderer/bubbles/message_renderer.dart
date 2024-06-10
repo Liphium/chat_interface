@@ -58,7 +58,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                 message: sender.displayName.value.text,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(100),
-                  onTap: () => Get.dialog(Profile(friend: sender)),
+                  onTap: () => showModal(Profile(friend: sender)),
                   child: UserAvatar(id: sender.id, size: 34),
                 ),
               ),
@@ -121,8 +121,8 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                                   horizontalSpacing(elementSpacing),
                                                   Flexible(
                                                     child: Text(
-                                                      AnswerData.answerContent(widget.message.answerMessage!.type, widget.message.answerMessage!.content,
-                                                          widget.message.answerMessage!.attachments),
+                                                      AnswerData.answerContent(widget.message.answerMessage!.type,
+                                                          widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
                                                       style: Get.theme.textTheme.labelMedium,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,

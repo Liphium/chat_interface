@@ -121,7 +121,7 @@ class DataSettingsPage extends StatelessWidget {
                                 return;
                               }
 
-                              Get.dialog(ProfilePictureWindow(file: result));
+                              showModal(ProfilePictureWindow(file: result));
                             },
                             child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
                           ),

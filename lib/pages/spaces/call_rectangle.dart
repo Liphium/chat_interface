@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/pages/chat/chat_page.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/spaces/call_cinema.dart';
 import 'package:chat_interface/pages/spaces/call_grid.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
@@ -182,7 +182,7 @@ class _CallRectangleState extends State<CallRectangle> {
                     if (controller.hideSidebar.value) {
                       Get.offAll(const CallPage(), transition: Transition.fadeIn);
                     } else {
-                      Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+                      Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
                     }
                   },
                   icon: controller.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back_rounded,

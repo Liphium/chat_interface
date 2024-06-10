@@ -2,7 +2,7 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/app/policy_setup.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/chat/chat_page.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
@@ -125,7 +125,7 @@ class SetupManager {
       next(open: false);
     } else {
       sendLog("opening");
-      Get.offAll(const ChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
+      Get.offAll(const ChatPageDesktop(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
     }
   }
 

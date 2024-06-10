@@ -1,22 +1,24 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+class ChatPageDesktop extends StatefulWidget {
+  const ChatPageDesktop({super.key});
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatPageDesktop> createState() => _ChatPageDesktopState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageDesktopState extends State<ChatPageDesktop> {
   static const _buttonIcons = <ContextMenuButtonType, IconData>{
     ContextMenuButtonType.cut: Icons.content_cut,
     ContextMenuButtonType.copy: Icons.content_copy,
@@ -75,35 +77,30 @@ class _ChatPageState extends State<ChatPage> {
           }
           return const SizedBox();
         },
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (isMobileMode()) {
-              return const Sidebar();
-            }
-
-            return Row(
-              children: [
-                const SelectionContainer.disabled(
-                  child: SizedBox(
-                    width: 350,
-                    child: Sidebar(),
-                  ),
+        child: PlatformCallback(
+          mobile: () => Get.off(const ChatPageMobile()),
+          child: Row(
+            children: [
+              const SelectionContainer.disabled(
+                child: SizedBox(
+                  width: 350,
+                  child: Sidebar(),
                 ),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-                      verticalSpacing(sectionSpacing),
-                      Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-                      verticalSpacing(elementSpacing),
-                      Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
-                    ],
-                  ),
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
+                    verticalSpacing(sectionSpacing),
+                    Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
+                    verticalSpacing(elementSpacing),
+                    Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
+                  ],
                 ),
-              ],
-            );
-          },
+              ),
+            ],
+          ),
         ),
       ),
     );
