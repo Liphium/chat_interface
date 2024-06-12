@@ -44,12 +44,8 @@ class DialogBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Return without animation on mobile
-    if (isMobileMode() && title.isNotEmpty) {
+    if (isMobileMode()) {
       return Material(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(sectionSpacing),
-          topRight: Radius.circular(defaultSpacing),
-        ),
         color: Get.theme.colorScheme.onInverseSurface,
         child: Padding(
           padding: const EdgeInsets.all(defaultSpacing),
@@ -160,10 +156,6 @@ class SlidingWindowBase extends StatelessWidget {
     // Return without animation on mobile
     if (isMobileMode()) {
       return Material(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(sectionSpacing),
-          topRight: Radius.circular(defaultSpacing),
-        ),
         color: Get.theme.colorScheme.onInverseSurface,
         child: Padding(
           padding: const EdgeInsets.all(defaultSpacing),

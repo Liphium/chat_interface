@@ -12,10 +12,10 @@ class ConversationPage extends StatefulWidget {
   const ConversationPage({super.key, required this.conversation});
 
   @override
-  State<ConversationPage> createState() => _ChatPageState();
+  State<ConversationPage> createState() => _ConversationPageState();
 }
 
-class _ChatPageState extends State<ConversationPage> {
+class _ConversationPageState extends State<ConversationPage> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);

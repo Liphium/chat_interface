@@ -68,7 +68,8 @@ class ProfileAction {
   final Color? iconColor;
   final Function(Friend, RxBool) onTap;
 
-  const ProfileAction({required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
+  const ProfileAction(
+      {required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
 }
 
 class Profile extends StatefulWidget {
@@ -112,6 +113,7 @@ class _ProfileState extends State<Profile> {
       );
     } else {
       return DialogBase(
+        title: const [],
         maxWidth: widget.size.toDouble(),
         child: buildProfile(),
       );
