@@ -11,4 +11,4 @@
 [dependencies]
   cpal                = { version = "0.15.2" }
   once_cell           = "1.18.0"
-  flutter_rust_bridge = "=2.0.0-dev.31"
+flutter_rust_bridge = "=2.0.0-dev.38"
