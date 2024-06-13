@@ -108,9 +108,9 @@ bool verifySignature(Uint8List publicKey, String signature, String message, [Sod
 }
 */
 
-KeyPair toKeyPair(String publicKey, String privateKey) {
+KeyPair toKeyPair(String publicKey, String privateKey, [Sodium? sd]) {
   return KeyPair(
     publicKey: unpackagePublicKey(publicKey),
-    secretKey: unpackagePrivateKey(privateKey),
+    secretKey: unpackagePrivateKey(privateKey, sd),
   );
 }

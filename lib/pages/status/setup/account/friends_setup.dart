@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
@@ -11,6 +12,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 class FriendsSetup extends Setup {
   FriendsSetup() : super("loading.friends", false);
@@ -32,11 +34,6 @@ class FriendsSetup extends Setup {
 
     return null;
   }
-}
-
-class _FriendsListRequest {
-  final List<Map<String, dynamic>> json;
-  _FriendsListRequest(this.json);
 }
 
 class _FriendsListResponse {
@@ -61,6 +58,7 @@ class _FriendsListResponse {
   }
 }
 
+/// Refresh all friends and load them from the vault (also removes what's not on the server)
 Future<String?> refreshFriendsVault() async {
   // Load friends from vault
   final json = await postAuthorizedJSON("/account/friends/list", <String, dynamic>{
@@ -70,13 +68,11 @@ Future<String?> refreshFriendsVault() async {
     return "friends.error";
   }
 
-  // Parse the JSON (TODO: Different isolate? We would need encryption in Rust for that)
-  final friendsList = <Map<String, dynamic>>[];
-  for (var friend in json["friends"]) {
-    friend["friend"] = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, friend["friend"]);
-    friendsList.add(friend);
-  }
-  final res = _parseFriends(_FriendsListRequest(friendsList));
+  // Parse the JSON (in different isolate)
+  final res = await sodiumLib.runIsolated(
+    (sodium, keys, pairs) => _parseFriends(json, sodium, pairs[0]),
+    keyPairs: [asymmetricKeyPair],
+  );
 
   // Push requests
   final controller = Get.find<RequestController>();
@@ -101,12 +97,13 @@ Future<String?> refreshFriendsVault() async {
   return null;
 }
 
-_FriendsListResponse _parseFriends(_FriendsListRequest request) {
+Future<_FriendsListResponse> _parseFriends(Map<String, dynamic> json, Sodium sodium, KeyPair pair) async {
   final friends = <Friend>[];
   final requests = <Request>[];
   final requestsSent = <Request>[];
-  for (var friend in request.json) {
-    final data = jsonDecode(friend["friend"]);
+  for (var friend in json["friends"]) {
+    final decrypted = decryptAsymmetricAnonymous(pair.publicKey, pair.secretKey, friend["friend"], sodium);
+    final data = jsonDecode(decrypted);
 
     // Check if request or friend
     if (data["rq"]) {
