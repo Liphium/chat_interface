@@ -3,14 +3,12 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
-import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,6 +32,11 @@ class FriendsSetup extends Setup {
 
     return null;
   }
+}
+
+class _FriendsListRequest {
+  final List<Map<String, dynamic>> json;
+  _FriendsListRequest(this.json);
 }
 
 class _FriendsListResponse {
@@ -67,8 +70,13 @@ Future<String?> refreshFriendsVault() async {
     return "friends.error";
   }
 
-  // Parse the JSON in a different isolate
-  final res = await compute(_parseFriends, json);
+  // Parse the JSON (TODO: Different isolate? We would need encryption in Rust for that)
+  final friendsList = <Map<String, dynamic>>[];
+  for (var friend in json["friends"]) {
+    friend["friend"] = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, friend["friend"]);
+    friendsList.add(friend);
+  }
+  final res = _parseFriends(_FriendsListRequest(friendsList));
 
   // Push requests
   final controller = Get.find<RequestController>();
@@ -93,13 +101,12 @@ Future<String?> refreshFriendsVault() async {
   return null;
 }
 
-_FriendsListResponse _parseFriends(Map<String, dynamic> json) {
+_FriendsListResponse _parseFriends(_FriendsListRequest request) {
   final friends = <Friend>[];
   final requests = <Request>[];
   final requestsSent = <Request>[];
-  for (var friend in json["friends"]) {
-    final decrypted = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, friend["friend"]);
-    final data = jsonDecode(decrypted);
+  for (var friend in request.json) {
+    final data = jsonDecode(friend["friend"]);
 
     // Check if request or friend
     if (data["rq"]) {

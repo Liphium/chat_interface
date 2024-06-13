@@ -10,7 +10,7 @@ PODS:
     - FlutterMacOS
     - WebRTC-SDK (= 114.5735.10)
   - FlutterMacOS (1.0.0)
-  - livekit_client (2.1.4):
+  - livekit_client (2.2.0):
     - FlutterMacOS
     - WebRTC-SDK (= 114.5735.10)
   - pasteboard (0.0.1):
@@ -24,18 +24,18 @@ PODS:
     - FlutterMacOS
   - sodium_libs (2.2.1):
     - FlutterMacOS
-  - "sqlite3 (3.45.3+1)":
-    - "sqlite3/common (= 3.45.3+1)"
-  - "sqlite3/common (3.45.3+1)"
-  - "sqlite3/fts5 (3.45.3+1)":
+  - sqlite3 (3.46.0):
+    - sqlite3/common (= 3.46.0)
+  - sqlite3/common (3.46.0)
+  - sqlite3/fts5 (3.46.0):
     - sqlite3/common
-  - "sqlite3/perf-threadsafe (3.45.3+1)":
+  - sqlite3/perf-threadsafe (3.46.0):
     - sqlite3/common
-  - "sqlite3/rtree (3.45.3+1)":
+  - sqlite3/rtree (3.46.0):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - FlutterMacOS
-    - "sqlite3 (~> 3.45.3+1)"
+    - sqlite3 (~> 3.46.0)
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
@@ -102,14 +102,14 @@ SPEC CHECKSUMS:
   file_selector_macos: 54fdab7caa3ac3fc43c9fac4d7d8d231277f8cf2
   flutter_webrtc: 823284e171ecb2487b7210c214886a949c122a59
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  livekit_client: 180075d801c787bf562c9aff3678b53ecd02b934
+  livekit_client: 9b39e0f1b8e1a8ec794bb72a4f9bbfc28c959ece
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   rust_builder: 4c2cab83a48690c5037fedcda7c0fcec9110e304
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
   sodium_libs: d39bd76697736cb11ce4a0be73b9b4bc64466d6f
-  sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
-  sqlite3_flutter_libs: 8d204ef443cf0d5c1c8b058044eab53f3943a9c5
+  sqlite3: 154b084339ede06960a5b3c8160066adc9176b7d
+  sqlite3_flutter_libs: 1be4459672f8168ded2d8667599b8e3ca5e72b83
   url_launcher_macos: 5f437abeda8c85500ceb03f5c1938a8c5a705399
   WebRTC-SDK: 8c0edd05b880a39648118192c252667ea06dea51
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8

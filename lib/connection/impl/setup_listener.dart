@@ -17,7 +17,7 @@ void setupSetupListeners() {
     final data = event.data["data"]! as String;
     final controller = Get.find<StatusController>();
 
-    if (data == "") {
+    if (data == "" || data == "-") {
       controller.status.value = "";
       controller.type.value = statusOnline;
       subscribeToConversations(controller.statusJson());
