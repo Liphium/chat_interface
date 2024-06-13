@@ -3,10 +3,14 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,81 +23,101 @@ class FriendsSetup extends Setup {
     await Get.find<RequestController>().loadRequests();
     await Get.find<FriendController>().loadFriends();
 
-    // Load friends from vault
-    final json = await postAuthorizedJSON("/account/friends/list", <String, dynamic>{
-      "after": 0,
-    });
-    if (!json["success"]) {
-      return const ErrorPage(title: "friends.error");
+    // Refresh from server vault
+    final error = await refreshFriendsVault();
+    if (error != null) {
+      return ErrorPage(title: error);
     }
-
-    final requestsDone = <String>[], friendsDone = <String>[];
-    for (var friend in json["friends"]) {
-      final decrypted = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, friend["friend"]);
-      final data = jsonDecode(decrypted);
-
-      // Check if request or friend
-      if (data["rq"]) {
-        requestsDone.add(data["id"]);
-
-        // Check if request is already in the database
-        final sentRequest = Get.find<RequestController>().requestsSent.firstWhere((element) => element.id == data["id"], orElse: () => Request.mock("hi"));
-        final request = Get.find<RequestController>().requests.firstWhere((element) => element.id == data["id"], orElse: () => Request.mock("hi"));
-        if (request.id != "hi" || sentRequest.id != "hi") {
-          if (request.vaultId == "") {
-            request.vaultId = friend["id"];
-            request.save(data["self"]);
-          }
-
-          continue;
-        }
-
-        if (data["self"]) {
-          final rq = Request.fromStoredPayload(data, friend["updated_at"]);
-          rq.vaultId = friend["id"];
-          Get.find<RequestController>().addSentRequest(rq);
-        } else {
-          final rq = Request.fromStoredPayload(data, friend["updated_at"]);
-          rq.vaultId = friend["id"];
-          Get.find<RequestController>().addRequest(rq);
-        }
-      } else {
-        friendsDone.add(data["id"]);
-
-        final fr = Friend.fromStoredPayload(data, friend["updated_at"]);
-        fr.vaultId = friend["id"];
-        Get.find<FriendController>().add(fr);
-      }
-    }
-
-    // Delete requests and friends that are not in the vault
-    Get.find<RequestController>().requests.removeWhere((rq) {
-      if (!requestsDone.contains(rq.id)) {
-        Get.find<RequestController>().deleteSentRequest(rq, removal: false);
-        return true;
-      }
-      return false;
-    });
-
-    Get.find<RequestController>().requestsSent.removeWhere((rq) {
-      if (!requestsDone.contains(rq.id)) {
-        Get.find<RequestController>().deleteSentRequest(rq, removal: false);
-        return true;
-      }
-      return false;
-    });
-
-    Get.find<FriendController>().friends.removeWhere((key, value) {
-      if (!friendsDone.contains(key)) {
-        Get.find<FriendController>().remove(value, removal: false);
-        return true;
-      }
-      return false;
-    });
 
     // Add own account so status and stuff can be tracked there
     Get.find<FriendController>().addSelf();
 
     return null;
   }
+}
+
+class _FriendsListResponse {
+  final List<Request> requests;
+  final List<Request> requestsSent;
+  final List<Friend> friends;
+
+  // Strings lists for later processing
+  final List<String> friendIds = <String>[];
+  final List<String> requestIds = <String>[];
+
+  _FriendsListResponse(this.requests, this.requestsSent, this.friends) {
+    for (var friend in friends) {
+      friendIds.add(friend.id);
+    }
+    for (var request in requests) {
+      requestIds.add(request.id);
+    }
+    for (var sentRequest in requestsSent) {
+      requestIds.add(sentRequest.id);
+    }
+  }
+}
+
+Future<String?> refreshFriendsVault() async {
+  // Load friends from vault
+  final json = await postAuthorizedJSON("/account/friends/list", <String, dynamic>{
+    "after": 0,
+  });
+  if (!json["success"]) {
+    return "friends.error";
+  }
+
+  // Parse the JSON in a different isolate
+  final res = await compute(_parseFriends, json);
+
+  // Push requests
+  final controller = Get.find<RequestController>();
+  controller.requests.clear();
+  for (var request in res.requests) {
+    controller.addRequest(request);
+  }
+  controller.requestsSent.clear();
+  for (var request in res.requestsSent) {
+    controller.addSentRequest(request);
+  }
+  db.request.deleteWhere((t) => t.id.isIn(res.requestIds)); // Remove the other ones that aren't there
+
+  // Push friends
+  final friendController = Get.find<FriendController>();
+  friendController.friends.clear();
+  for (var friend in res.friends) {
+    friendController.add(friend);
+  }
+  db.friend.deleteWhere((t) => t.id.isIn(res.friendIds)); // Remove the other ones that aren't there
+
+  return null;
+}
+
+_FriendsListResponse _parseFriends(Map<String, dynamic> json) {
+  final friends = <Friend>[];
+  final requests = <Request>[];
+  final requestsSent = <Request>[];
+  for (var friend in json["friends"]) {
+    final decrypted = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, friend["friend"]);
+    final data = jsonDecode(decrypted);
+
+    // Check if request or friend
+    if (data["rq"]) {
+      if (data["self"]) {
+        final rq = Request.fromStoredPayload(data, friend["updated_at"]);
+        rq.vaultId = friend["id"];
+        requestsSent.add(rq);
+      } else {
+        final rq = Request.fromStoredPayload(data, friend["updated_at"]);
+        rq.vaultId = friend["id"];
+        requests.add(rq);
+      }
+    } else {
+      final fr = Friend.fromStoredPayload(data, friend["updated_at"]);
+      fr.vaultId = friend["id"];
+      friends.add(fr);
+    }
+  }
+
+  return _FriendsListResponse(requests, requestsSent, friends);
 }

@@ -13,10 +13,9 @@ class FriendsVault {
       "send_date": encryptDate(DateTime.fromMillisecondsSinceEpoch(0)),
     });
 
-    sendLog(json);
     if (!json["success"]) {
       if (errorPopup) {
-        showErrorPopup("$prefix.${json["error"]}", "$prefix.${json["error"]}.text");
+        showErrorPopup("$prefix.${json["error"]}", "$prefix.${json["error"]}");
       }
       return null;
     }

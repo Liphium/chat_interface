@@ -53,16 +53,19 @@ class FriendController extends GetxController {
     final friendsVault = await FriendsVault.remove(request.vaultId);
     if (!friendsVault) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
-      sendLog("ADDING REGARDLESS");
       return false;
     }
 
     // Add friend to vault
-    final id = await FriendsVault.store(request.friend.toStoredPayload(), lastPacket: request.updatedAt);
-    sendLog("STORING IN FRIENDS VAULT");
+    final id = await FriendsVault.store(
+      request.friend.toStoredPayload(),
+      lastPacket: request.updatedAt,
+      errorPopup: true,
+      prefix: "friend",
+    );
 
+    // Don't add if something failed
     if (id == null) {
-      add(request.friend); // probably already in the vault (from other device)
       return false;
     }
 
@@ -74,7 +77,6 @@ class FriendController extends GetxController {
   }
 
   void add(Friend friend) {
-    sendLog("registered friend ${friend.id}");
     friends[friend.id] = friend;
     if (friend.id != StatusController.ownAccountId) {
       db.friend.insertOnConflictUpdate(friend.entity());

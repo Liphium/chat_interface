@@ -149,10 +149,6 @@ class StatusController extends GetxController {
   }
 }
 
-String friendId(Friend friend) {
-  return hashSha(friend.id + friend.name + friend.keyStorage.storedActionKey);
-}
-
 enum ShareType { space }
 
 abstract class ShareContainer {

@@ -150,7 +150,11 @@ void sendFriendRequest(
   } else {
     // Save friend request in own vault
     var request = Request(id, name, displayName, "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
-    final vaultId = await FriendsVault.store(request.toStoredPayload(true), errorPopup: true, prefix: "request");
+    final vaultId = await FriendsVault.store(
+      request.toStoredPayload(true),
+      errorPopup: true,
+      prefix: "request",
+    );
 
     if (vaultId == null) {
       requestsLoading.value = false;
