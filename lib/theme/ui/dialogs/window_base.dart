@@ -47,32 +47,35 @@ class DialogBase extends StatelessWidget {
     if (isMobileMode()) {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
-        child: Padding(
-          padding: const EdgeInsets.all(defaultSpacing),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(elementSpacing),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    LoadingIconButton(
-                      onTap: () => Get.back(),
-                      color: Get.theme.colorScheme.onPrimary,
-                      padding: 0,
-                      iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
-                      extra: defaultSpacing,
-                      icon: Icons.arrow_back,
-                    ),
-                    horizontalSpacing(defaultSpacing),
-                    ...title,
-                  ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(defaultSpacing),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(elementSpacing),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      LoadingIconButton(
+                        onTap: () => Get.back(),
+                        color: Get.theme.colorScheme.onPrimary,
+                        padding: 0,
+                        iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
+                        extra: defaultSpacing,
+                        icon: Icons.arrow_back,
+                      ),
+                      horizontalSpacing(defaultSpacing),
+                      ...title,
+                    ],
+                  ),
                 ),
-              ),
-              verticalSpacing(defaultSpacing),
-              child,
-            ],
+                verticalSpacing(defaultSpacing),
+                child,
+              ],
+            ),
           ),
         ),
       );

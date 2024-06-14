@@ -163,7 +163,14 @@ class Friend {
 
   /// Convert a json to a friend (used for friends vault)
   factory Friend.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
-    return Friend(json["id"], json["name"], UTFString.untransform(json["dname"]), "", KeyStorage.fromJson(json), updatedAt);
+    return Friend(
+      json["id"],
+      json["name"],
+      UTFString.untransform(json["dname"]),
+      "",
+      KeyStorage.fromJson(json),
+      updatedAt,
+    );
   }
 
   // Convert to a stored payload for the friends vault

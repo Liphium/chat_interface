@@ -498,7 +498,8 @@ class _OutputTabState extends State<OutputTab> {
 
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
+        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing),
+            icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing - elementSpacing),
 
         Column(
@@ -538,8 +539,9 @@ class _OutputTabState extends State<OutputTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color:
-              controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
+          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current
+              ? Get.theme.colorScheme.primary
+              : Get.theme.colorScheme.onInverseSurface,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,

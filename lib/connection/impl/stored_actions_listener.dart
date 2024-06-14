@@ -149,7 +149,8 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   if (request.id != "hi") {
     // This request doesn't have the right key storage yet
     request.keyStorage.publicKey = publicKey;
-    request.keyStorage.profileKey = unpackageSymmetricKey(json["pf"]);
+    request.keyStorage.profileKeyPacked = json["pf"];
+    request.keyStorage.unpackedProfileKey = unpackageSymmetricKey(json["pf"]);
     request.keyStorage.storedActionKey = json["sa"];
 
     // Add friend

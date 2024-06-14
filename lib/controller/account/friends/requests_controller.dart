@@ -15,6 +15,7 @@ import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 import 'friend_controller.dart';
 

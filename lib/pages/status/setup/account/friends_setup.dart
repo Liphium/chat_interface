@@ -13,6 +13,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
+import 'package:sodium_libs/sodium_libs_sumo.dart';
 
 class FriendsSetup extends Setup {
   FriendsSetup() : super("loading.friends", false);

@@ -4,6 +4,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
@@ -42,8 +43,11 @@ class SpaceMemberController extends GetxController {
       }
       membersFound.add(clientId);
       if (this.members[clientId] == null) {
-        this.members[clientId] = SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)),
-            clientId, member["muted"], member["deafened"]);
+        this.members[clientId] = SpaceMember(
+            Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)),
+            clientId,
+            member["muted"],
+            member["deafened"]);
       }
     }
 
@@ -55,46 +59,50 @@ class SpaceMemberController extends GetxController {
   void onConnect(SecureKey key) async {
     this.key = key;
 
-    sub = (await api.createActionStream()).listen((event) async {
-      if (members[ownId] == null) {
-        return;
-      }
-      switch (event.action) {
-        // Talking stuff
-        case startedTalkingAction:
-          if (members[ownId]!.isMuted.value || members[ownId]!.isDeafened.value) {
-            return;
-          }
-          if (members[ownId]!.participant.value != null) {
-            final participant = members[ownId]!.participant.value! as LocalParticipant;
-            if (participant.audioTrackPublications.isEmpty) {
-              final controller = Get.find<SettingController>();
-              await participant.setMicrophoneEnabled(
-                true,
-                audioCaptureOptions: AudioCaptureOptions(
-                  echoCancellation: controller.settings[AudioSettings.echoCancellation]!.getValue(),
-                  autoGainControl: controller.settings[AudioSettings.autoGainControl]!.getValue(),
-                  noiseSuppression: controller.settings[AudioSettings.noiseSuppression]!.getValue(),
-                  highPassFilter: controller.settings[AudioSettings.highPassFilter]!.getValue(),
-                  typingNoiseDetection: controller.settings[AudioSettings.typingNoiseDetection]!.getValue(),
-                ),
-              );
-            } else if (participant.audioTrackPublications.isNotEmpty) {
-              await participant.audioTrackPublications.first.unmute();
+    // TODO: Just enable microphone again?
+    if (!configDisableRust) {
+      sub = api.createActionStream().listen((event) async {
+        if (members[ownId] == null) {
+          return;
+        }
+        switch (event.action) {
+          // Talking stuff
+          case startedTalkingAction:
+            if (members[ownId]!.isMuted.value || members[ownId]!.isDeafened.value) {
+              return;
             }
-          }
-          members[ownId]!.isSpeaking.value = true;
+            if (members[ownId]!.participant.value != null) {
+              final participant = members[ownId]!.participant.value! as LocalParticipant;
+              if (participant.audioTrackPublications.isEmpty) {
+                final controller = Get.find<SettingController>();
+                await participant.setMicrophoneEnabled(
+                  true,
+                  audioCaptureOptions: AudioCaptureOptions(
+                    echoCancellation: controller.settings[AudioSettings.echoCancellation]!.getValue(),
+                    autoGainControl: controller.settings[AudioSettings.autoGainControl]!.getValue(),
+                    noiseSuppression: controller.settings[AudioSettings.noiseSuppression]!.getValue(),
+                    highPassFilter: controller.settings[AudioSettings.highPassFilter]!.getValue(),
+                    typingNoiseDetection: controller.settings[AudioSettings.typingNoiseDetection]!.getValue(),
+                    stopAudioCaptureOnMute: false,
+                  ),
+                );
+              } else if (participant.audioTrackPublications.isNotEmpty) {
+                await participant.audioTrackPublications.first.unmute();
+              }
+            }
+            members[ownId]!.isSpeaking.value = true;
 
-        case stoppedTalkingAction:
-          if (members[ownId]!.participant.value != null) {
-            final participant = members[ownId]!.participant.value! as LocalParticipant;
-            if (participant.audioTrackPublications.isNotEmpty) {
-              await participant.audioTrackPublications.first.mute();
+          case stoppedTalkingAction:
+            if (members[ownId]!.participant.value != null) {
+              final participant = members[ownId]!.participant.value! as LocalParticipant;
+              if (participant.audioTrackPublications.isNotEmpty) {
+                await participant.audioTrackPublications.first.mute();
+              }
             }
-          }
-          members[ownId]!.isSpeaking.value = false;
-      }
-    });
+            members[ownId]!.isSpeaking.value = false;
+        }
+      });
+    }
   }
 
   void onLivekitConnected() {
@@ -131,7 +139,9 @@ class SpaceMemberController extends GetxController {
   void onDisconnect() {
     membersLoading.value = true;
     members.clear();
-    sub!.cancel();
+    if (!configDisableRust) {
+      sub!.cancel();
+    }
   }
 
   bool isLocalDeafened() {

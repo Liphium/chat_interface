@@ -22,6 +22,9 @@ const bool isDebug = true; // TODO: Set to false before release
 const bool checkVersion = true; // TODO: Set to true in release builds
 const bool driftLogger = true;
 
+// Build level settings
+const bool configDisableRust = bool.fromEnvironment("DISABLE_RUST", defaultValue: false);
+
 // Authentication types
 enum AuthType {
   password(0, "password"),
@@ -63,9 +66,11 @@ void main(List<String> args) async {
   await RustLib.init();
 
   // Initialize logging from the native side
-  (await api.createLogStream()).listen((event) {
-    sendLog("FROM RUST: ${event.tag} | ${event.msg}");
-  });
+  if (configDisableRust) {
+    api.createLogStream().listen((event) {
+      sendLog("FROM RUST: ${event.tag} | ${event.msg}");
+    });
+  }
 
   // Wait for it to be finished
   await Future.delayed(100.ms);

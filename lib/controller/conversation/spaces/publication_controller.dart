@@ -2,6 +2,7 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
@@ -21,7 +22,8 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isDeafened.value = newOutput;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
+          newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       if (controller.members[SpaceMemberController.ownId]!.participant.value != null) {
         if (newOutput) {
           // Stop all audio and unsubscribe from tracks
@@ -54,7 +56,8 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isMuted.value = newMuted;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
+          newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       final participant = controller.members[SpaceMemberController.ownId]!.participant.value as LocalParticipant;
       if (newMuted) {
         participant.audioTrackPublications.firstOrNull?.mute();
@@ -134,8 +137,10 @@ class PublicationController extends GetxController {
     deafened.value = false;
 
     // Set settings
-    await api.setTalkingAmplitude(amplitude: settingController.settings[AudioSettings.microphoneSensitivity]!.getOr(0.0));
-    await api.setInputDevice(id: settingController.settings[AudioSettings.microphone]!.getValue());
+    if (!configDisableRust) {
+      await api.setTalkingAmplitude(amplitude: settingController.settings[AudioSettings.microphoneSensitivity]!.getOr(0.0));
+      await api.setInputDevice(id: settingController.settings[AudioSettings.microphone]!.getValue());
+    }
     _connected = true;
 
     // Set mute

@@ -75,7 +75,7 @@ class FriendsVault {
 
 /// Class for storing all keys for a friend
 class KeyStorage {
-  SecureKey profileKey;
+  late String profileKeyPacked;
   String storedActionKey;
   Uint8List publicKey;
   Uint8List signatureKey;
@@ -83,16 +83,26 @@ class KeyStorage {
   KeyStorage.empty()
       : publicKey = Uint8List(0),
         signatureKey = Uint8List(0),
-        profileKey = randomSymmetricKey(),
+        profileKeyPacked = "unbreathable_was_here_but_2024",
         storedActionKey = "unbreathable_was_here";
-  KeyStorage(this.publicKey, this.signatureKey, this.profileKey, this.storedActionKey);
+  KeyStorage(this.publicKey, this.signatureKey, SecureKey profileKey, this.storedActionKey) {
+    profileKeyPacked = packageSymmetricKey(profileKey);
+    unpackedProfileKey = profileKey;
+  }
   KeyStorage.fromJson(Map<String, dynamic> json)
       : publicKey = unpackagePublicKey(json["pub"]),
-        profileKey = unpackageSymmetricKey(json["pf"]),
+        profileKeyPacked = json["pf"] ?? "",
         signatureKey = unpackagePublicKey(json["sg"]),
         storedActionKey = json["sa"] ?? "";
 
   Map<String, dynamic> toJson() {
-    return {"pub": packagePublicKey(publicKey), "pf": packageSymmetricKey(profileKey), "sg": packagePublicKey(signatureKey), "sa": storedActionKey};
+    return {"pub": packagePublicKey(publicKey), "pf": profileKeyPacked, "sg": packagePublicKey(signatureKey), "sa": storedActionKey};
+  }
+
+  // Just so we don't break the API anywhere yk
+  SecureKey? unpackedProfileKey;
+  SecureKey get profileKey {
+    unpackedProfileKey ??= unpackageSymmetricKey(profileKeyPacked);
+    return unpackedProfileKey!;
   }
 }

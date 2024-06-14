@@ -146,9 +146,13 @@ class _ProfileState extends State<Profile> {
             )
           ],
         ),
-        Text(
-          widget.friend.status.value,
-          style: Get.theme.textTheme.bodyMedium,
+        Obx(
+          () => widget.friend.status.value != ""
+              ? Text(
+                  widget.friend.status.value,
+                  style: Get.theme.textTheme.bodyMedium,
+                )
+              : const SizedBox(),
         ),
         verticalSpacing(defaultSpacing),
         ListView.builder(
