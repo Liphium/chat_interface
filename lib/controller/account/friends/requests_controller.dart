@@ -5,6 +5,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
@@ -15,13 +16,12 @@ import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 import 'friend_controller.dart';
 
 class RequestController extends GetxController {
-  final requestsSent = <Request>[].obs;
-  final requests = <Request>[].obs;
+  final requestsSent = <String, Request>{}.obs;
+  final requests = <String, Request>{}.obs;
 
   void reset() {
     requests.clear();
@@ -30,9 +30,9 @@ class RequestController extends GetxController {
   Future<bool> loadRequests() async {
     for (RequestData data in await db.request.select().get()) {
       if (data.self) {
-        requestsSent.add(Request.fromEntity(data));
+        requestsSent[data.id] = Request.fromEntity(data);
       } else {
-        requests.add(Request.fromEntity(data));
+        requests[data.id] == Request.fromEntity(data);
       }
     }
 
@@ -40,18 +40,18 @@ class RequestController extends GetxController {
   }
 
   void addSentRequest(Request request) {
-    requestsSent.add(request);
+    requestsSent[request.id] = request;
     db.request.insertOnConflictUpdate(request.entity(true));
   }
 
   void addRequest(Request request) {
-    requests.add(request);
+    requests[request.id] = request;
     db.request.insertOnConflictUpdate(request.entity(false));
   }
 
   Future<bool> deleteSentRequest(Request request, {removal = true}) async {
     if (removal) {
-      requestsSent.remove(request);
+      requestsSent.remove(request.id);
     }
     await db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
     return true;
@@ -59,7 +59,7 @@ class RequestController extends GetxController {
 
   Future<bool> deleteRequest(Request request, {removal = true}) async {
     if (removal) {
-      requests.remove(request);
+      requests.remove(request.id);
     }
     await db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
     return true;
@@ -123,6 +123,11 @@ void sendFriendRequest(
   Uint8List signatureKey,
   Function(String) success,
 ) async {
+  if (friendsVaultRefreshing.value) {
+    requestsLoading.value = false;
+    return;
+  }
+
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
@@ -143,8 +148,8 @@ void sendFriendRequest(
 
   // Accept friend request if there is one from the other user
   final requestController = Get.find<RequestController>();
-  final requestSent = requestController.requests.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
-  if (requestSent.id != "hi") {
+  final requestSent = requestController.requests[id];
+  if (requestSent != null) {
     requestController.deleteRequest(requestSent);
     await Get.find<FriendController>().addFromRequest(requestSent);
     success("request.accepted");

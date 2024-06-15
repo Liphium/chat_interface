@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -45,14 +44,16 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
             hintText: 'friends.name_placeholder'.tr,
           ),
           verticalSpacing(defaultSpacing),
-          FJElevatedLoadingButton(
-            onTap: () {
-              newFriendRequest(_name.text, (message) {
-                Get.back();
-              });
-            },
-            label: 'friends.add.button'.tr,
-            loading: requestsLoading,
+          Obx(
+            () => FJElevatedLoadingButton(
+              onTap: () {
+                newFriendRequest(_name.text, (message) {
+                  Get.back();
+                });
+              },
+              label: 'friends.add.button'.tr,
+              loading: (requestsLoading.value || friendsVaultRefreshing.value).obs,
+            ),
           ),
         ],
       ),

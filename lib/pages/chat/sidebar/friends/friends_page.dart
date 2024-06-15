@@ -1,11 +1,11 @@
-import 'dart:async';
-
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friend_add_window.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friend_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/request_button.dart';
+import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/containers/success_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -75,9 +75,10 @@ class _FriendsPageState extends State<FriendsPage> {
                           cursorColor: Get.theme.colorScheme.onPrimary,
                         ),
                       ),
-                      IconButton(
-                        onPressed: () => showModal(const FriendAddWindow()),
-                        icon: const Icon(Icons.person_add_alt_1),
+                      LoadingIconButton(
+                        loading: friendsVaultRefreshing,
+                        onTap: () => showModal(const FriendAddWindow()),
+                        icon: Icons.person_add_alt_1,
                       )
                     ],
                   ),
@@ -165,9 +166,10 @@ class _FriendsPageState extends State<FriendsPage> {
                                       }
                                       return Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        children: requestController.requests.map((request) {
+                                        children: List.generate(requestController.requests.length, (index) {
+                                          final request = requestController.requests.values.elementAt(index);
                                           return RequestButton(request: request, self: false);
-                                        }).toList(),
+                                        }),
                                       );
                                     },
                                   ),
@@ -208,16 +210,15 @@ class _FriendsPageState extends State<FriendsPage> {
                                         if (requestController.requestsSent.isEmpty) {
                                           return const SizedBox.shrink();
                                         }
-                                        return ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount: requestController.requestsSent.length,
-                                          itemBuilder: (context, index) {
-                                            final request = requestController.requestsSent.elementAt(index);
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: List.generate(requestController.requestsSent.length, (index) {
+                                            final request = requestController.requestsSent.values.elementAt(index);
                                             return Padding(
                                               padding: const EdgeInsets.only(bottom: elementSpacing),
                                               child: RequestButton(request: request, self: true),
                                             );
-                                          },
+                                          }),
                                         );
                                       },
                                     ),

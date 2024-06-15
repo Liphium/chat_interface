@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
@@ -25,12 +26,23 @@ part 'friends_vault.dart';
 
 class FriendController extends GetxController {
   final friends = <String, Friend>{}.obs;
+  Timer? _timer; // Timer to refresh the friends vault every 5 minutes
 
   Future<bool> loadFriends() async {
     for (FriendData data in await db.friend.select().get()) {
       friends[data.id] = Friend.fromEntity(data);
     }
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      sendLog("refreshing friends vault");
+      refreshFriendsVault();
+    });
     return true;
+  }
+
+  /// Cancels the timer (should be called when reloading)
+  void onReload() {
+    _timer?.cancel();
   }
 
   void addSelf() {

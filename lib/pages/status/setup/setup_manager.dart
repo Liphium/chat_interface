@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/app/policy_setup.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
@@ -81,7 +82,10 @@ class SetupManager {
 
   void restart() {
     current = -1;
-    api.stop();
+    if (!configDisableRust) {
+      api.stop();
+    }
+    Get.find<FriendController>().onReload();
     Get.find<TransitionController>().modelTransition(const StartingPage());
     db.close();
   }
