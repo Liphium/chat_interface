@@ -243,7 +243,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
       model.ConversationType.values[json["type"]],
       convToken,
       container,
-      key,
+      packageSymmetricKey(key),
       DateTime.now().millisecondsSinceEpoch,
     ),
     members,

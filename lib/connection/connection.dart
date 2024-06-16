@@ -10,7 +10,6 @@ import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -93,7 +92,7 @@ class Connector {
         Event event = Event.fromJson(String.fromCharCodes(msg));
         if (_handlers[event.name] == null) return;
 
-        if (_afterSetup[event.name] == true && !setupFinished) {
+        if (_afterSetup[event.name] == true && !SetupManager.setupFinished) {
           _afterSetupQueue.add(event);
           return;
         }

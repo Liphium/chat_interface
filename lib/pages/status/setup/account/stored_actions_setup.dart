@@ -1,6 +1,7 @@
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +21,8 @@ class StoredActionsSetup extends Setup {
       );
     }
 
+    sendLog("LOADING");
+
     storedActionKey = body["key"];
     final actions = body["actions"] as List<dynamic>;
     if (actions.isEmpty) {
@@ -27,6 +30,8 @@ class StoredActionsSetup extends Setup {
     }
 
     for (var element in actions) {
+      sendLog("hello wrold");
+      sendLog(element);
       await processStoredAction(element);
     }
 

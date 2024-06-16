@@ -38,7 +38,7 @@ class ConversationContainer {
   }
   String encrypted(SecureKey key) => encryptSymmetric(jsonEncode(<String, dynamic>{"name": name}), key);
 
-  String toJson() => jsonEncode(<String, dynamic>{"name": name});
+  Map<String, dynamic> toJson() => <String, dynamic>{"name": name};
 }
 
 const directMessagePrefix = "DM_";
@@ -47,7 +47,7 @@ const directMessagePrefix = "DM_";
 Future<bool> openDirectMessage(Friend friend) async {
   final conversation = Get.find<ConversationController>().conversations.values.firstWhere(
         (element) => element.members.length == 2 && element.members.values.any((element) => element.account == friend.id),
-        orElse: () => Conversation("", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer(""), randomSymmetricKey(), 0),
+        orElse: () => Conversation("", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer(""), "", 0),
       );
   if (conversation.id != "") {
     Get.find<MessageController>().selectConversation(conversation);
@@ -103,10 +103,10 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   //* Send the stuff to all other members
   final conversationController = Get.find<ConversationController>();
 
-  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
-      conversationContainer, conversationKey, DateTime.now().millisecondsSinceEpoch);
-  final members = <Member>[];
   final packagedKey = packageSymmetricKey(conversationKey);
+  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
+      conversationContainer, packagedKey, DateTime.now().millisecondsSinceEpoch);
+  final members = <Member>[];
   for (var friend in friends) {
     final token = ConversationToken.fromJson(body["tokens"][hashSha(memberContainers[friend.id]!)]);
     await sendAuthenticatedStoredAction(friend, _conversationPayload(body["conversation"], token, packagedKey, friend));

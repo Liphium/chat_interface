@@ -1,9 +1,10 @@
+import 'dart:convert';
+
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
-import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
-import 'package:chat_interface/pages/status/setup/fetch/fetch_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -51,23 +52,42 @@ class VaultEntry {
 
 // Returns an error string (null if successful)
 Future<String?> refreshVault() async {
-  await startFetch();
-
   // Load conversations
   final json = await postAuthorizedJSON("/account/vault/list", <String, dynamic>{
-    "after": lastFetchTime.millisecondsSinceEpoch, // Unix
+    "after": 0, // Unix
     "tag": Constants.conversationTag,
   });
   if (!json["success"]) {
     return json["error"];
   }
 
-  for (var unparsedEntry in json["entries"]) {
-    final entry = VaultEntry.fromJson(unparsedEntry);
-    sendLog(entry);
-    // TODO: Parse conversations from vault
-  }
+  sendLog("loading..");
+  sendLog(json["entries"].length);
 
-  await finishFetch();
+  final (conversations, ids) = await sodiumLib.runIsolated((sodium, keys, pairs) {
+    var list = <Conversation>[];
+    var ids = <String>[];
+    final keyPair = pairs[0];
+    for (var unparsedEntry in json["entries"]) {
+      final entry = VaultEntry.fromJson(unparsedEntry);
+      final payload = decryptAsymmetricAnonymous(keyPair.publicKey, keyPair.secretKey, entry.payload, sodium);
+      final decoded = jsonDecode(payload);
+      list.add(Conversation.fromJson(decoded, entry.id));
+    }
+
+    return (list, ids);
+  }, keyPairs: [asymmetricKeyPair]);
+
+  final controller = Get.find<ConversationController>();
+  controller.conversations.removeWhere((id, conv) => !ids.contains(id));
+  for (var conversation in conversations) {
+    if (controller.conversations[conversation.id] == null) {
+      controller.addFromVault(conversation);
+    }
+  }
+  db.conversation.deleteWhere((tbl) => tbl.id.isNotIn(ids));
+  db.member.deleteWhere((tbl) => tbl.conversationId.isNotIn(ids));
+  db.message.deleteWhere((tbl) => tbl.conversationId.isNotIn(ids));
+
   return null;
 }

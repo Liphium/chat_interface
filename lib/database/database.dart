@@ -26,7 +26,6 @@ late Database db;
   Profile,
   TrustedLink,
   LibraryEntry,
-  MessageReaction,
 ])
 class Database extends _$Database {
   Database(super.e);

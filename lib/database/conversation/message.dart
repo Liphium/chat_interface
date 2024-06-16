@@ -18,10 +18,3 @@ class Message extends Table {
   @override
   Set<Column<Object>>? get primaryKey => {id};
 }
-
-class MessageReaction extends Table {
-  TextColumn get messageId => text()();
-  TextColumn get sender => text()();
-  TextColumn get reaction => text()();
-  Int64Column get createdAt => int64()();
-}

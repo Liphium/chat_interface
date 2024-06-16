@@ -30,11 +30,14 @@ class ConversationController extends GetxController {
   final conversations = <String, Conversation>{};
   int newConvs = 0;
 
-  Future<bool> add(Conversation conversation) async {
+  /// Add a conversation to the cache
+  Future<bool> add(Conversation conversation, {loadMembers = true}) async {
+    // Insert into cache
     _insertToOrder(conversation.id);
     conversations[conversation.id] = conversation;
 
-    if (conversation.members.isEmpty) {
+    // Load members from the database
+    if (conversation.members.isEmpty && loadMembers) {
       final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
 
       for (var member in members) {
@@ -45,6 +48,23 @@ class ConversationController extends GetxController {
     return true;
   }
 
+  /// Add a new conversation and refresh members
+  Future<bool> addFromVault(Conversation conversation) async {
+    // Insert it into cache
+    add(conversation, loadMembers: false);
+
+    // Insert into database
+    conversation.save(fetchMembers: false);
+
+    // Get all the members of the conversation
+    var res = await conversation.fetchMembers(DateTime.fromMillisecondsSinceEpoch(0));
+    if (!res) {
+      return res;
+    }
+    return true;
+  }
+
+  /// Add a conversation to the cache and local database (after created)
   Future<bool> addCreated(Conversation conversation, List<Member> members, {Member? admin}) async {
     conversations[conversation.id] = conversation;
     _insertToOrder(conversation.id);
@@ -131,12 +151,18 @@ class Conversation {
   final readAt = 0.obs;
   final notificationCount = 0.obs;
   final containerSub = ConversationContainer("").obs; // Data subscription
-  SecureKey key;
+  String packedKey;
+  SecureKey? _cachedKey;
+
+  get key {
+    _cachedKey ??= unpackageSymmetricKey(packedKey);
+    return _cachedKey;
+  }
 
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.key, int updatedAt) {
+  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, int updatedAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
@@ -147,7 +173,7 @@ class Conversation {
           model.ConversationType.values[json["type"]],
           ConversationToken.fromJson(json["token"]),
           ConversationContainer.fromJson(json["data"]),
-          unpackageSymmetricKey(json["key"]),
+          json["key"],
           json["update"] ?? DateTime.now().millisecondsSinceEpoch,
         );
   Conversation.fromData(ConversationData data)
@@ -157,7 +183,7 @@ class Conversation {
           data.type,
           ConversationToken.fromJson(jsonDecode(data.token)),
           ConversationContainer.fromJson(jsonDecode(data.data)),
-          unpackageSymmetricKey(data.key),
+          data.key,
           data.updatedAt.toInt(),
         );
 
@@ -204,14 +230,13 @@ class Conversation {
       type: type,
       token: token.toJson(),
       key: packageSymmetricKey(key),
-      data: container.toJson(),
+      data: jsonEncode(container.toJson()),
       updatedAt: BigInt.from(updatedAt.value),
       readAt: BigInt.from(readAt.value));
   String toJson() => jsonEncode(<String, dynamic>{
         "id": id,
-        "vault_id": vaultId,
         "type": type.index,
-        "token": token.toJson(),
+        "token": token.toMap(),
         "key": packageSymmetricKey(key),
         "update": updatedAt.value.toInt(),
         "data": container.toJson(),
@@ -246,25 +271,27 @@ class Conversation {
     Get.find<ConversationController>().removeConversation(id);
   }
 
-  void save() {
+  void save({fetchMembers = true}) {
     db.conversation.insertOnConflictUpdate(entity);
-    for (var member in members.values) {
-      db.member.insertOnConflictUpdate(member.toData(id));
+    if (fetchMembers) {
+      for (var member in members.values) {
+        db.member.insertOnConflictUpdate(member.toData(id));
+      }
     }
   }
 
   DateTime? lastMemberFetch; // Makes sure we only do it once when multiple methods call it
 
   // Re-fetch members of conversation (and save to database)
-  void fetchMembers(DateTime message) async {
+  Future<bool> fetchMembers(DateTime message) async {
     if (membersLoading.value) {
-      return;
+      return false;
     }
 
     if (lastMemberFetch != null) {
       // Just making sure, not sure if this is actually needed
       if (message.isBefore(lastMemberFetch!)) {
-        return;
+        return false;
       }
     }
 
@@ -279,7 +306,7 @@ class Conversation {
     if (!json["success"]) {
       sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING");
       // TODO: Add to some sort of error collection
-      return;
+      return false;
     }
 
     final members = <String, Member>{};
@@ -300,5 +327,6 @@ class Conversation {
     save();
 
     lastMemberFetch = DateTime.now();
+    return true;
   }
 }
