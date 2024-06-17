@@ -49,7 +49,9 @@ class SetupManager {
 
     // Setup app
     _steps.add(PolicySetup());
-    _steps.add(UpdateSetup());
+    if (GetPlatform.isMobile || GetPlatform.isMacOS) {
+      _steps.add(UpdateSetup());
+    }
     _steps.add(InstanceSetup());
     _steps.add(ServerSetup());
 

@@ -54,7 +54,11 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("${"input.email".tr}.", textAlign: TextAlign.start, style: theme.textTheme.headlineMedium),
+                    Text(
+                      "${"input.email".tr}.",
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineMedium,
+                    ),
                     verticalSpacing(sectionSpacing),
                     AnimatedInfoContainer(
                       padding: const EdgeInsets.only(bottom: defaultSpacing),
@@ -100,21 +104,17 @@ class _LoginPageState extends State<LoginPage> {
                       label: 'login.next'.tr,
                     ),
                     verticalSpacing(defaultSpacing),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("login.no_account.text".tr),
-                        horizontalSpacing(defaultSpacing),
-                        TextButton(
-                          style: ButtonStyle(
-                            foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
-                            backgroundColor: WidgetStateProperty.resolveWith(
-                                (states) => states.contains(WidgetState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
-                          ),
-                          onPressed: () => RegisterHandler.goToRegistration(_emailController.text),
-                          child: Text('login.no_account'.tr),
+                    Center(
+                      child: TextButton(
+                        style: ButtonStyle(
+                          foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
+                          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered)
+                              ? theme.colorScheme.primary.withOpacity(0.3)
+                              : theme.colorScheme.primary.withOpacity(0)),
                         ),
-                      ],
+                        onPressed: () => RegisterHandler.goToRegistration(_emailController.text),
+                        child: Text('login.no_account'.tr),
+                      ),
                     ),
                   ],
                 ),

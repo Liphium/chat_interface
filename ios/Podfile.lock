@@ -12,7 +12,7 @@ PODS:
     - WebRTC-SDK (= 114.5735.10)
   - integration_test (0.0.1):
     - Flutter
-  - livekit_client (2.1.4):
+  - livekit_client (2.2.0):
     - Flutter
     - WebRTC-SDK (= 114.5735.10)
   - open_app_file (3.2.2):
@@ -28,18 +28,18 @@ PODS:
     - Flutter
   - sodium_libs (2.2.1):
     - Flutter
-  - "sqlite3 (3.45.3+1)":
-    - "sqlite3/common (= 3.45.3+1)"
-  - "sqlite3/common (3.45.3+1)"
-  - "sqlite3/fts5 (3.45.3+1)":
+  - "sqlite3 (3.46.0+1)":
+    - "sqlite3/common (= 3.46.0+1)"
+  - "sqlite3/common (3.46.0+1)"
+  - "sqlite3/fts5 (3.46.0+1)":
     - sqlite3/common
-  - "sqlite3/perf-threadsafe (3.45.3+1)":
+  - "sqlite3/perf-threadsafe (3.46.0+1)":
     - sqlite3/common
-  - "sqlite3/rtree (3.45.3+1)":
+  - "sqlite3/rtree (3.46.0+1)":
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - "sqlite3 (~> 3.45.3+1)"
+    - sqlite3 (~> 3.46.0)
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
@@ -104,19 +104,19 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
-  file_selector_ios: 146db144df431a266b1c44e7647b78b25c95c52f
+  file_selector_ios: f0670c1064a8c8450e38145d8043160105d0b97c
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_webrtc: b33475c3a57d59ff05bf87b4f5d3feceac63f291
   integration_test: ce0a3ffa1de96d1a89ca0ac26fca7ea18a749ef4
-  livekit_client: a0f20b48eaa10c5ffc352b22b756b730d7594362
+  livekit_client: 2b3f5185f95d46d62d3570bf981f3d98ad3051e2
   open_app_file: 205f73051668bfbd68356005fef8a62e620f0a77
   pasteboard: 982969ebaa7c78af3e6cc7761e8f5e77565d9ce0
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  rust_builder: f6978b592ea8050cb7ffe27cba97bdfb8bca8141
+  rust_builder: 3120d93e681986528a40db0a76bac0921a399658
   sodium_libs: 1faae17af662384acbd13e41867a0008cd2e2318
-  sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
-  sqlite3_flutter_libs: 9bfe005308998aeca155330bbc2ea6dddf834a3b
+  sqlite3: 292c3e1bfe89f64e51ea7fc7dab9182a017c8630
+  sqlite3_flutter_libs: 0d611efdf6d1c9297d5ab03dab21b75aeebdae31
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
   WebRTC-SDK: 8c0edd05b880a39648118192c252667ea06dea51
 

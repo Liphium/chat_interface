@@ -57,7 +57,11 @@ class _RegisterPageState extends State<RegisterStartPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("register.title".tr, textAlign: TextAlign.left, style: theme.textTheme.headlineMedium),
+                    Text(
+                      "register.title".tr,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineMedium,
+                    ),
                     verticalSpacing(sectionSpacing),
 
                     // Invite
@@ -119,21 +123,17 @@ class _RegisterPageState extends State<RegisterStartPage> {
                       label: 'login.next'.tr,
                     ),
                     verticalSpacing(defaultSpacing),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('register.account.text'.tr),
-                        horizontalSpacing(defaultSpacing),
-                        TextButton(
-                          style: ButtonStyle(
-                            foregroundColor: MaterialStateProperty.all(theme.colorScheme.onPrimary),
-                            backgroundColor: MaterialStateProperty.resolveWith(
-                                (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
-                          ),
-                          onPressed: () => Get.find<TransitionController>().modelTransition(LoginPage(email: _emailController.text)),
-                          child: Text('register.login'.tr),
+                    Center(
+                      child: TextButton(
+                        style: ButtonStyle(
+                          foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
+                          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered)
+                              ? theme.colorScheme.primary.withOpacity(0.3)
+                              : theme.colorScheme.primary.withOpacity(0)),
                         ),
-                      ],
+                        onPressed: () => Get.find<TransitionController>().modelTransition(LoginPage(email: _emailController.text)),
+                        child: Text('register.login'.tr),
+                      ),
                     ),
                   ],
                 ),

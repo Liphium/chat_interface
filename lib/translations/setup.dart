@@ -17,7 +17,8 @@ class SetupTranslations extends Translations {
           'setup.policy': 'Your privacy on Liphium.',
           'setup.policy.text':
               'By pressing \'Accept\', you acknowledge that you have carefully reviewed and accepted our Privacy Policy and Terms of Service which you can read by clicking on \'View agreements\' below, after which the \'Accept\' button will appear.',
-          'setup.policy.error': 'It seems like we couldn\'t open a browser on your device. Please check your internet connection or contact the developers of this app.',
+          'setup.policy.error':
+              'It seems like we couldn\'t open a browser on your device. Please check your internet connection or contact the developers of this app.',
 
           // Login/register
           'register.title': 'Register an account.',
@@ -37,12 +38,11 @@ class SetupTranslations extends Translations {
           'email.invalid': 'Please enter a valid email.',
           'register.register': 'Register',
           'register.account.text': 'Already have an account?',
-          'register.login': 'Login',
+          'register.login': 'Login instead',
           'input.email': 'Your email, please',
           'login.next': 'Next step',
-          'login.no_account.text': 'Don\'t have an account?',
           'login.register_reminder': 'Don\'t have an account? There is a register button below the next button.',
-          'login.no_account': 'Register one',
+          'login.no_account': 'Register an account',
           'input.password': 'Your password, please',
           'login.forgot.text': 'Forgot your password?',
           'login.forgot': 'Reset it',

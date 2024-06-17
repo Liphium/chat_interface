@@ -4,6 +4,7 @@ import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -18,8 +19,8 @@ final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;
 bool isHttps = true;
-const bool isDebug = true; // TODO: Set to false before release
-const bool checkVersion = true; // TODO: Set to true in release builds
+const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true); // TODO: Set to false before release
+const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true); // TODO: Set to true in release builds
 const bool driftLogger = true;
 
 // Build level settings
@@ -55,7 +56,11 @@ var executableArguments = <String>[];
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
+  if (!kIsWeb) {
+    if (!GetPlatform.isMobile) {
+      await windowManager.ensureInitialized();
+    }
+  }
   executableArguments = args;
   sendLog("Current save directory: ${(await getApplicationSupportDirectory()).path}");
 
@@ -83,15 +88,17 @@ void main(List<String> args) async {
   // Initialize controllers
   initializeControllers();
 
-  await windowManager.waitUntilReadyToShow(
-    const WindowOptions(
-      minimumSize: Size(300, 500),
-      fullScreen: false,
-    ),
-    () async {
-      await windowManager.show();
-    },
-  );
+  if (!GetPlatform.isMobile) {
+    await windowManager.waitUntilReadyToShow(
+      const WindowOptions(
+        minimumSize: Size(300, 500),
+        fullScreen: false,
+      ),
+      () async {
+        await windowManager.show();
+      },
+    );
+  }
 
   runApp(const ChatApp());
 }
