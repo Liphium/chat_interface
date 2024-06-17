@@ -38,6 +38,25 @@ class UpdateSetup extends Setup {
       sendLog("update required");
       return ShouldUpdateSetupPage(data: release);
     }
+
+    // Delete any leftover stuff (from other failed attemps, maybe?)
+    if (entries.length >= 2) {
+      for (var entry in entries) {
+        final name = path.basename(entry.path);
+        if (name.endsWith(".zip")) {
+          await entry.delete(recursive: true);
+        }
+      }
+    }
+
+    // Find the current version
+    for (var entry in entries) {
+      final name = path.basename(entry.path);
+      if (name == release.version) {
+        return null;
+      }
+    }
+
     final currentName = path.basename(entries[0].path);
     sendLog(currentName);
 
@@ -59,6 +78,32 @@ class ReleaseData {
   ReleaseData(this.version, this.body, this.downloadUrl);
 }
 
+/// Install the current version of the app
+Future<bool> installApp(RxString status, ReleaseData data) async {
+  try {
+    // Run with admin privilege on windows
+    if (Platform.isWindows && !executableArguments.contains("--update")) {
+      status.value = "Re-running with admin privilege..";
+      restartProcessAsAdmin(status);
+      await Future.delayed(3.seconds);
+      exit(0);
+    }
+
+    // Wait for the other process to exit (potentially)
+    await Future.delayed(const Duration(seconds: 30));
+
+    // Get the path for the versions folder
+    var location = await getApplicationSupportDirectory();
+    location = Directory(path.join(location.path, "versions"));
+
+    return true;
+  } catch (e) {
+    status.value = "There was an error during the update: $e";
+    return false;
+  }
+}
+
+/// Get the release data for a project from GitHub
 Future<ReleaseData?> fetchReleaseDataFor(String owner, String repo) async {
   final res = await dio.get("https://api.github.com/repos/$owner/$repo/releases/latest", options: Options(validateStatus: (s) => true));
   if (res.statusCode != 200) {
@@ -82,8 +127,10 @@ Future<ReleaseData?> fetchReleaseDataFor(String owner, String repo) async {
   return null;
 }
 
+/// Download and extract the executable as well as add it to the versions folder
 Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async {
   try {
+    // Run with admin privilege on windows
     if (Platform.isWindows && !executableArguments.contains("--update")) {
       status.value = "Re-running with admin privilege..";
       restartProcessAsAdmin(status);
@@ -91,9 +138,11 @@ Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async 
       exit(0);
     }
 
+    // Get the path for the versions folder
     var location = await getApplicationSupportDirectory();
     location = Directory(path.join(location.path, "versions"));
 
+    // Download the version
     final res = await dio.download(
       data.downloadUrl,
       path.join(location.path, "download.zip"),
@@ -105,21 +154,23 @@ Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async 
       ),
     );
 
+    // Check if download was successful
     if (res.statusCode != 200) {
       status.value = "Couldn't download from GitHub";
       return false;
     }
 
+    // Extract the downloaded archive into the versions folder
     status.value = "Extracting..";
     final dir = await Directory(path.join(location.path, data.version)).create();
     await extractFileToDisk(path.join(location.path, "download.zip"), dir.path, asyncWrite: true);
 
-    status.value = "Deleting old files..";
-    if (prev != null) {
-      await Directory(path.join(location.path, prev)).delete(recursive: true);
-    }
+    // Delete the downloaded archive
+    status.value = "Finishing up..";
     await File(path.join(location.path, "download.zip")).delete();
 
+    // Restart the app
+    status.value = "Restarting..";
     final linkDir = path.join(getDesktopDirectory().path, "Liphium");
     final link = Link(linkDir);
     if (link.existsSync()) {
@@ -131,13 +182,12 @@ Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async 
       await link.create(path.join(location.path, data.version, "chat_interface.dmg"));
     } else if (Platform.isLinux) {
       await link.create(path.join(location.path, data.version, "chat_interface"));
-      Process.run("chmod", ["+x", path.join(location.path, data.version, "chat_interface")]);
+      await Process.run("chmod", ["+x", path.join(location.path, data.version, "chat_interface")]);
       status.value = "Since you are on Linux, you might have to give the executable we just downloaded for you some permissions.";
       await Future.delayed(30.seconds);
     }
 
-    status.value =
-        "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
+    status.value = "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
     return true;
   } catch (e) {
     status.value = "There was an error during the update: $e";

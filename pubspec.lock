@@ -1063,10 +1063,10 @@ packages:
     dependency: "direct main"
     description:
       name: sodium_libs
-      sha256: "441444f6f433032bae3444c2ef5ed2cf5bc0def77f104abdff20aedcf79a7c7a"
+      sha256: aa764acd6ccc6113e119c2d99471aeeb4637a9a501639549b297d3a143ff49b3
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.1+5"
+    version: "2.2.1+6"
   source_gen:
     dependency: transitive
     description:
@@ -1119,10 +1119,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3_flutter_libs
-      sha256: "9f89a7e7dc36eac2035808427eba1c3fbd79e59c3a22093d8dace6d36b1fe89e"
+      sha256: "62bbb4073edbcdf53f40c80775f33eea01d301b7b81417e5b3fb7395416258c1"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.23"
+    version: "0.5.24"
   sqlparser:
     dependency: transitive
     description:
