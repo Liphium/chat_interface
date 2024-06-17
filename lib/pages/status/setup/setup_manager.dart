@@ -49,7 +49,7 @@ class SetupManager {
 
     // Setup app
     _steps.add(PolicySetup());
-    if (GetPlatform.isMobile || GetPlatform.isMacOS) {
+    if (!GetPlatform.isMobile && !GetPlatform.isMacOS) {
       _steps.add(UpdateSetup());
     }
     _steps.add(InstanceSetup());

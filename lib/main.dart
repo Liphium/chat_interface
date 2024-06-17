@@ -19,8 +19,8 @@ final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;
 bool isHttps = true;
-const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true); // TODO: Set to false before release
-const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true); // TODO: Set to true in release builds
+const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
+const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
 const bool driftLogger = true;
 
 // Build level settings
@@ -89,15 +89,9 @@ void main(List<String> args) async {
   initializeControllers();
 
   if (!GetPlatform.isMobile) {
-    await windowManager.waitUntilReadyToShow(
-      const WindowOptions(
-        minimumSize: Size(300, 500),
-        fullScreen: false,
-      ),
-      () async {
-        await windowManager.show();
-      },
-    );
+    await windowManager.setMinimumSize(const Size(300, 500));
+    await windowManager.setTitle("Liphium");
+    await windowManager.setAlignment(Alignment.center);
   }
 
   runApp(const ChatApp());
