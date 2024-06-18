@@ -21,12 +21,19 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
+enum OpenTabType {
+  conversation,
+  space,
+  townsquare;
+}
+
 class MessageController extends GetxController {
   // Constants
   Message? hoveredMessage;
   static String systemSender = "6969";
 
   final loaded = false.obs;
+  final currentOpenType = OpenTabType.conversation.obs;
   final currentConversation = Rx<Conversation?>(null);
   final messages = <Message>[].obs;
 
@@ -39,6 +46,7 @@ class MessageController extends GetxController {
   }
 
   void selectConversation(Conversation conversation) async {
+    currentOpenType.value = OpenTabType.conversation;
     Get.find<TownsquareController>().close();
     loaded.value = false;
     if (isMobileMode()) {
@@ -111,13 +119,25 @@ class MessageController extends GetxController {
 
   void storeMessage(Message message) async {
     // Update message reading
-    Get.find<ConversationController>().updateMessageRead(message.conversation,
-        increment: currentConversation.value?.id != message.conversation, messageSendTime: message.createdAt.millisecondsSinceEpoch);
+    Get.find<ConversationController>().updateMessageRead(
+      message.conversation,
+      increment: currentConversation.value?.id != message.conversation,
+      messageSendTime: message.createdAt.millisecondsSinceEpoch,
+    );
 
     // Add message to message history if it's the selected one
     if (currentConversation.value?.id == message.conversation) {
       if (message.sender != currentConversation.value?.token.id) {
         overwriteRead(currentConversation.value!);
+      }
+
+      // Check if message with this id already exists
+      final msg = await (db.message.select()
+            ..where((tbl) => tbl.id.equals(message.id))
+            ..where((tbl) => tbl.conversationId.equals(message.conversation)))
+          .getSingleOrNull();
+      if (msg != null) {
+        return;
       }
 
       // Check if it is a system message and if it should be rendered or not
@@ -159,17 +179,18 @@ class MessageController extends GetxController {
   void addMessageToBottom(Message message, {bool animation = true}) async {
     // Check if there are more messages after the current messages (just in case)
     if (messages.isNotEmpty) {
-      sendLog("OLDER MESSAGE, ignoring");
       final availableMessage = await (db.select(db.message)
             ..limit(1)
             ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
             ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id))
             ..where((tbl) => tbl.system.equals(false))
+            ..where((tbl) => tbl.id.isNotValue(message.id))
             ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(messages.first.createdAt.millisecondsSinceEpoch))))
           .getSingleOrNull();
 
       // If there is a message before this one at the bottom, don't render
       if (availableMessage != null) {
+        sendLog("OLDER MESSAGE, ignoring");
         return;
       }
     }

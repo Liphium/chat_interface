@@ -213,12 +213,10 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   }
 
   // Check the signature
-
   final token = jsonDecode(actionJson["token"]);
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"id": token["id"], "token": token["token"]});
   if (!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
-    // TODO: Could also mean it has been activated on another device
     Future.delayed(500.ms, () async {
       await refreshVault();
     });

@@ -72,7 +72,9 @@ Future<String?> refreshVault() async {
       final entry = VaultEntry.fromJson(unparsedEntry);
       final payload = decryptAsymmetricAnonymous(keyPair.publicKey, keyPair.secretKey, entry.payload, sodium);
       final decoded = jsonDecode(payload);
-      list.add(Conversation.fromJson(decoded, entry.id));
+      final conv = Conversation.fromJson(decoded, entry.id);
+      list.add(conv);
+      ids.add(conv.id);
     }
 
     return (list, ids);

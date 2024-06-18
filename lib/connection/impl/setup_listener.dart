@@ -13,7 +13,7 @@ import '../../util/logging_framework.dart';
 
 void setupSetupListeners() {
   //* New status
-  connector.listen("setup_st", (event) {
+  connector.listen("setup", (event) {
     final data = event.data["data"]! as String;
     final controller = Get.find<StatusController>();
 
@@ -29,11 +29,6 @@ void setupSetupListeners() {
 
     subscribeToConversations(controller.statusJson());
   }, afterSetup: true);
-
-  //* Setup finished
-  connector.listen("setup_fin", (event) {
-    sendLog("Setup finished");
-  });
 }
 
 // status is going to be encrypted in this function

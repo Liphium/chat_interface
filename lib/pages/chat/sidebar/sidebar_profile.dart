@@ -51,7 +51,11 @@ class _SidebarProfileState extends State<SidebarProfile> {
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
                         child: InkWell(
-                          onTap: () => Get.find<MessageController>().unselectConversation(),
+                          onTap: () {
+                            final controller = Get.find<MessageController>();
+                            controller.unselectConversation();
+                            controller.currentOpenType.value = OpenTabType.space;
+                          },
                           splashColor: theme.hoverColor,
                           hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
                           borderRadius: BorderRadius.circular(defaultSpacing),

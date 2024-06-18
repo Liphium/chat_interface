@@ -4,6 +4,7 @@ import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
+import 'package:chat_interface/pages/spaces/call_rectangle.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
@@ -108,21 +109,27 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
               Expanded(
                 child: Obx(
                   () {
+                    // Check if a space is selected (show the page if it is)
                     final controller = Get.find<MessageController>();
-                    if (controller.currentConversation.value == null) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-                          verticalSpacing(sectionSpacing),
-                          Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-                          verticalSpacing(elementSpacing),
-                          Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
-                        ],
-                      );
-                    }
+                    switch (controller.currentOpenType.value) {
+                      case OpenTabType.conversation:
+                        if (controller.currentConversation.value == null) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
+                              verticalSpacing(sectionSpacing),
+                              Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
+                              verticalSpacing(elementSpacing),
+                              Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
+                            ],
+                          );
+                        }
 
-                    return MessageFeed(conversation: controller.currentConversation.value!);
+                        return MessageFeed(conversation: controller.currentConversation.value!);
+                      default:
+                        return const CallRectangle();
+                    }
                   },
                 ),
               ),

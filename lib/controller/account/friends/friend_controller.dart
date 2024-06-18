@@ -12,6 +12,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -33,9 +34,10 @@ class FriendController extends GetxController {
       friends[data.id] = Friend.fromEntity(data);
     }
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      sendLog("refreshing friends vault");
-      refreshFriendsVault();
+    _timer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+      sendLog("refreshing all vaults");
+      await refreshFriendsVault();
+      await refreshVault();
     });
     return true;
   }

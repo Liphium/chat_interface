@@ -48,7 +48,7 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  /// Add a new conversation and refresh members
+  /// Add a new conversation and refresh members (also subscribes)
   Future<bool> addFromVault(Conversation conversation) async {
     // Insert it into cache
     add(conversation, loadMembers: false);
@@ -61,6 +61,10 @@ class ConversationController extends GetxController {
     if (!res) {
       return res;
     }
+
+    // Subscribe to conversation
+    subscribeToConversation(Get.find<StatusController>().statusJson(), conversation.token);
+
     return true;
   }
 
