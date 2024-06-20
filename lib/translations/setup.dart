@@ -44,8 +44,7 @@ class SetupTranslations extends Translations {
           'login.register_reminder': 'Don\'t have an account? There is a register button below the next button.',
           'login.no_account': 'Register an account',
           'input.password': 'Your password, please',
-          'login.forgot.text': 'Forgot your password?',
-          'login.forgot': 'Reset it',
+          'login.forgot': 'Reset your password',
         },
       };
 }

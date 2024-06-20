@@ -16,7 +16,7 @@ class SettingsSidebar extends StatelessWidget {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: sidebarWidth),
       child: Padding(
-        padding: const EdgeInsets.all(defaultSpacing),
+        padding: GetPlatform.isMobile && !isMobileMode() ? const EdgeInsets.only(left: defaultSpacing) : const EdgeInsets.all(defaultSpacing),
         child: ListView.builder(
           itemCount: SettingLabel.values.length + 1,
           itemBuilder: (context, index) {

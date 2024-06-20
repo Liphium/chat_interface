@@ -49,91 +49,96 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Get.theme.colorScheme.inverseSurface,
-      body: SelectionArea(
-        contextMenuBuilder: (context, selectableRegionState) {
-          final controller = Get.find<MessageController>();
-
-          // Don't show the context menu when there is no message hovered (we may wanna add like profile context menus and stuff)
-          if (controller.hoveredMessage == null) {
-            selectableRegionState.hideToolbar();
-            return const SizedBox.shrink();
-          }
-          final menuData = ContextMenuData.fromPosition(selectableRegionState.contextMenuAnchors.primaryAnchor);
-
-          // Add all the normal buttons to the context menu
-          final extraButtons = <ProfileButton>[];
-          for (var menuButton in selectableRegionState.contextMenuButtonItems) {
-            if (menuButton.type == ContextMenuButtonType.selectAll) {
-              continue;
-            }
-            extraButtons.add(ProfileButton(
-              icon: _buttonIcons[menuButton.type]!,
-              label: "context_menu.${menuButton.type.name}".tr,
-              onTap: menuButton.onPressed ?? () => sendLog("no function found for ${menuButton.type.toString()}"),
-              loading: false.obs,
-            ));
-          }
-
-          if (!optionsOpened) {
-            optionsOpened = true;
-            WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-              await Get.dialog(MessageOptionsWindow(
-                data: menuData,
-                self: controller.hoveredMessage!.senderAccount == StatusController.ownAccountId,
-                message: controller.hoveredMessage!,
-                extra: extraButtons.isEmpty ? null : extraButtons,
-              ));
-              optionsOpened = false;
-            });
-          }
-          return const SizedBox();
-        },
-        child: PlatformCallback(
-          mobile: () {
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        left: false,
+        child: SelectionArea(
+          contextMenuBuilder: (context, selectableRegionState) {
             final controller = Get.find<MessageController>();
-            if (controller.currentConversation.value != null) {
-              Get.off(const ChatPageMobile());
-              Get.to(ConversationPage(conversation: controller.currentConversation.value!));
-            } else {
-              Get.off(const ChatPageMobile());
-            }
-          },
-          child: Row(
-            children: [
-              const SelectionContainer.disabled(
-                child: SizedBox(
-                  width: 350,
-                  child: Sidebar(),
-                ),
-              ),
-              Expanded(
-                child: Obx(
-                  () {
-                    // Check if a space is selected (show the page if it is)
-                    final controller = Get.find<MessageController>();
-                    switch (controller.currentOpenType.value) {
-                      case OpenTabType.conversation:
-                        if (controller.currentConversation.value == null) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-                              verticalSpacing(sectionSpacing),
-                              Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-                              verticalSpacing(elementSpacing),
-                              Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
-                            ],
-                          );
-                        }
 
-                        return MessageFeed(conversation: controller.currentConversation.value!);
-                      default:
-                        return const CallRectangle();
-                    }
-                  },
+            // Don't show the context menu when there is no message hovered (we may wanna add like profile context menus and stuff)
+            if (controller.hoveredMessage == null) {
+              selectableRegionState.hideToolbar();
+              return const SizedBox.shrink();
+            }
+            final menuData = ContextMenuData.fromPosition(selectableRegionState.contextMenuAnchors.primaryAnchor);
+
+            // Add all the normal buttons to the context menu
+            final extraButtons = <ProfileButton>[];
+            for (var menuButton in selectableRegionState.contextMenuButtonItems) {
+              if (menuButton.type == ContextMenuButtonType.selectAll) {
+                continue;
+              }
+              extraButtons.add(ProfileButton(
+                icon: _buttonIcons[menuButton.type]!,
+                label: "context_menu.${menuButton.type.name}".tr,
+                onTap: menuButton.onPressed ?? () => sendLog("no function found for ${menuButton.type.toString()}"),
+                loading: false.obs,
+              ));
+            }
+
+            if (!optionsOpened) {
+              optionsOpened = true;
+              WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+                await Get.dialog(MessageOptionsWindow(
+                  data: menuData,
+                  self: controller.hoveredMessage!.senderAccount == StatusController.ownAccountId,
+                  message: controller.hoveredMessage!,
+                  extra: extraButtons.isEmpty ? null : extraButtons,
+                ));
+                optionsOpened = false;
+              });
+            }
+            return const SizedBox();
+          },
+          child: PlatformCallback(
+            mobile: () {
+              final controller = Get.find<MessageController>();
+              if (controller.currentConversation.value != null) {
+                Get.off(const ChatPageMobile());
+                Get.to(ConversationPage(conversation: controller.currentConversation.value!));
+              } else {
+                Get.off(const ChatPageMobile());
+              }
+            },
+            child: Row(
+              children: [
+                const SelectionContainer.disabled(
+                  child: SizedBox(
+                    width: 350,
+                    child: Sidebar(),
+                  ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Obx(
+                    () {
+                      // Check if a space is selected (show the page if it is)
+                      final controller = Get.find<MessageController>();
+                      switch (controller.currentOpenType.value) {
+                        case OpenTabType.conversation:
+                          if (controller.currentConversation.value == null) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
+                                verticalSpacing(sectionSpacing),
+                                Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
+                                verticalSpacing(elementSpacing),
+                                Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
+                              ],
+                            );
+                          }
+
+                          return MessageFeed(conversation: controller.currentConversation.value!);
+                        default:
+                          return const CallRectangle();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

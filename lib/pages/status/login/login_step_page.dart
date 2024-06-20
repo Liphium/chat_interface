@@ -120,16 +120,17 @@ class _LoginPageState extends State<LoginStepPage> {
                         ),
                       ),
                       verticalSpacing(defaultSpacing * 1.5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("login.forgot.text".tr),
-                          horizontalSpacing(defaultSpacing),
-                          TextButton(
-                            onPressed: () => Get.offAll(const RegisterStartPage(), transition: Transition.noTransition),
-                            child: Text('login.forgot'.tr),
+                      Center(
+                        child: TextButton(
+                          style: ButtonStyle(
+                            foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
+                            backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered)
+                                ? theme.colorScheme.primary.withOpacity(0.3)
+                                : theme.colorScheme.primary.withOpacity(0)),
                           ),
-                        ],
+                          onPressed: () => Get.offAll(const RegisterStartPage(), transition: Transition.noTransition),
+                          child: Text('login.forgot'.tr),
+                        ),
                       )
                     ],
                   ),

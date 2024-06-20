@@ -24,7 +24,7 @@ String getRandomString(int length) {
 }
 
 bool isMobileMode() {
-  return Get.width < 800;
+  return Get.width < 800 || Get.height < 500;
 }
 
 void showModal(Widget widget, {mobileSliding = false}) {
@@ -53,7 +53,8 @@ String formatDay(DateTime time) {
   } else if (time.day == now.day - 1) {
     return "time.yesterday".tr;
   } else {
-    return "time".trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+    return "time"
+        .trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
   }
 }
 

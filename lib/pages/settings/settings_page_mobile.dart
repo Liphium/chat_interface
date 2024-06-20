@@ -20,18 +20,28 @@ class _SettingsPageState extends State<SettingsPageMobile> {
         Get.off(const SettingsPageDesktop());
       },
       child: Scaffold(
-        backgroundColor: Get.theme.colorScheme.inverseSurface,
-        body: SafeArea(
-          child: Column(
-            children: [
-              UniversalAppBar(label: "app.settings".tr),
-              const Expanded(
-                child: SingleChildScrollView(
-                  child: SidebarMobile(),
+        backgroundColor: Get.theme.colorScheme.onInverseSurface,
+        body: Column(
+          children: [
+            UniversalAppBar(
+              label: "app.settings".tr,
+              applyPadding: true,
+            ),
+            Expanded(
+              child: Material(
+                color: Get.theme.colorScheme.onInverseSurface,
+                child: const SingleChildScrollView(
+                  child: SafeArea(
+                    bottom: true,
+                    left: true,
+                    right: true,
+                    top: false,
+                    child: SidebarMobile(),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

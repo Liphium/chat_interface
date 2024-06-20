@@ -15,7 +15,7 @@ class _ChatPageState extends State<ChatPageMobile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Get.theme.colorScheme.inverseSurface,
+      backgroundColor: Get.theme.colorScheme.onInverseSurface,
       body: PlatformCallback(
         desktop: () {
           Get.off(const ChatPageDesktop());
