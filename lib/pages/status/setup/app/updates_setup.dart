@@ -17,7 +17,7 @@ class UpdateSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    if (!checkVersion) {
+    if (!checkVersion || isDebug) {
       return null;
     }
 

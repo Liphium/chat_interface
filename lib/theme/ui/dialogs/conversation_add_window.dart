@@ -168,8 +168,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       if (friendController.friends.isNotEmpty) {
                         final member = friendController.friends.values.firstWhere(
                           (element) =>
-                              (element.name.toLowerCase().contains(value.toLowerCase()) ||
-                                  element.displayName.value.text.toLowerCase().contains(value.toLowerCase())) &&
+                              (element.name.toLowerCase().contains(value.toLowerCase()) || element.displayName.value.text.toLowerCase().contains(value.toLowerCase())) &&
                               element.id != StatusController.ownAccountId,
                           orElse: () => Friend.unknown("-"),
                         );
@@ -211,8 +210,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                   return Obx(() {
                     final search = _search.value;
                     if (search.isNotEmpty &&
-                        !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
-                            friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
+                        !(friend.name.toLowerCase().contains(search.toLowerCase()) || friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
                       return const SizedBox();
                     }
 

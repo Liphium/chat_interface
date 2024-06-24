@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
@@ -80,13 +81,26 @@ Future<String?> refreshVault() async {
     return (list, ids);
   }, keyPairs: [asymmetricKeyPair]);
 
+  // Delete all old conversations in the cache
+  final messageController = Get.find<MessageController>();
   final controller = Get.find<ConversationController>();
-  controller.conversations.removeWhere((id, conv) => !ids.contains(id));
+  controller.conversations.removeWhere((id, conv) {
+    final remove = !ids.contains(id);
+    if (remove) {
+      controller.order.remove(id);
+      messageController.unselectConversation(id: id);
+    }
+    return remove;
+  });
+
+  // Add all new conversations
   for (var conversation in conversations) {
     if (controller.conversations[conversation.id] == null) {
       controller.addFromVault(conversation);
     }
   }
+
+  // Delete all old conversations from the database
   db.conversation.deleteWhere((tbl) => tbl.id.isNotIn(ids));
   db.member.deleteWhere((tbl) => tbl.conversationId.isNotIn(ids));
   db.message.deleteWhere((tbl) => tbl.conversationId.isNotIn(ids));

@@ -37,8 +37,9 @@ class MessageController extends GetxController {
   final currentConversation = Rx<Conversation?>(null);
   final messages = <Message>[].obs;
 
+  /// Unselect a conversation (when id is set, the current conversation will only be closed if it has that id)
   void unselectConversation({String? id}) {
-    if (id != null && currentConversation.value?.id == id) {
+    if (id != null && currentConversation.value?.id != id) {
       return;
     }
     currentConversation.value = null;

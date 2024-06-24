@@ -19,11 +19,11 @@ final dio = Dio();
 late final Sodium sodiumLib;
 const appId = 1;
 bool isHttps = true;
-const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
-const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
 const bool driftLogger = true;
 
 // Build level settings
+const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
+const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
 const bool configDisableRust = bool.fromEnvironment("DISABLE_RUST", defaultValue: false);
 
 // Authentication types
