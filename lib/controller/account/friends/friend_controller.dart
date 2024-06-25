@@ -91,6 +91,7 @@ class FriendController extends GetxController {
   }
 
   void add(Friend friend) {
+    sendLog("ADDED ${friend.name}");
     friends[friend.id] = friend;
     if (friend.id != StatusController.ownAccountId) {
       db.friend.insertOnConflictUpdate(friend.entity());
@@ -116,7 +117,7 @@ class Friend {
   String name;
   String vaultId;
   KeyStorage keyStorage;
-  bool unknown = false;
+  bool unknown;
   Timer? _timer;
   int updatedAt;
 
@@ -134,7 +135,7 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, UTFString displayName, this.vaultId, this.keyStorage, this.updatedAt) {
+  Friend(this.id, this.name, UTFString displayName, this.vaultId, this.keyStorage, this.updatedAt, {this.unknown = false}) {
     this.displayName.value = displayName;
   }
 
@@ -158,7 +159,8 @@ class Friend {
 
   /// Used for unknown accounts where only an id is known
   factory Friend.unknown(String id) {
-    final friend = Friend(id, "lph-$id", UTFString("lph-$id"), "", KeyStorage.empty(), 0);
+    final shownId = id.substring(0, 5);
+    final friend = Friend(id, "lph-$shownId", UTFString("lph-$shownId"), "", KeyStorage.empty(), 0);
     friend.unknown = true;
     return friend;
   }
@@ -214,7 +216,7 @@ class Friend {
 
   // Update in database
   Future<bool> update() async {
-    if (id == StatusController.ownAccountId) {
+    if (id == StatusController.ownAccountId || unknown) {
       return false;
     }
     await FriendsVault.remove(vaultId);
@@ -281,6 +283,9 @@ class Friend {
 
   /// Load the profile picture of this friend
   void loadProfilePicture() async {
+    if (unknown) {
+      return;
+    }
     profilePictureUsages++;
 
     if (DateTime.now().difference(lastProfilePictureUpdate).inSeconds >= 60) {

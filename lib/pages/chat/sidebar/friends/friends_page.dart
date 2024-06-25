@@ -115,8 +115,7 @@ class _FriendsPageState extends State<FriendsPage> {
 
                         Obx(() {
                           final found = friendController.friends.values.any((friend) =>
-                              (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
-                                  friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
+                              (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) || friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
                               friend.id != StatusController.ownAccountId);
                           return Animate(
                               effects: [
@@ -250,12 +249,17 @@ class _FriendsPageState extends State<FriendsPage> {
                                     shrinkWrap: true,
                                     itemCount: friendController.friends.length,
                                     itemBuilder: (context, index) {
+                                      final friend = friendController.friends.values.elementAt(index);
+
+                                      if (friend.unknown) {
+                                        return const SizedBox();
+                                      }
                                       return Obx(
                                         () {
-                                          final friend = friendController.friends.values.elementAt(index);
                                           final visible = query.value.isEmpty ||
                                               friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
                                               friend.name.toLowerCase().contains(query.value.toLowerCase());
+
                                           return Visibility(
                                             visible: friend.id != StatusController.ownAccountId,
                                             child: Animate(

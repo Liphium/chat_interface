@@ -163,32 +163,34 @@ class SlidingWindowBase extends StatelessWidget {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(elementSpacing),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      LoadingIconButton(
-                        onTap: () => Get.back(),
-                        color: Get.theme.colorScheme.onPrimary,
-                        padding: 0,
-                        iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
-                        extra: defaultSpacing,
-                        icon: Icons.arrow_back,
-                      ),
-                      horizontalSpacing(defaultSpacing),
-                      ...title,
-                    ],
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(defaultSpacing),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(elementSpacing),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        LoadingIconButton(
+                          onTap: () => Get.back(),
+                          color: Get.theme.colorScheme.onPrimary,
+                          padding: 0,
+                          iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
+                          extra: defaultSpacing,
+                          icon: Icons.arrow_back,
+                        ),
+                        horizontalSpacing(defaultSpacing),
+                        ...title,
+                      ],
+                    ),
                   ),
-                ),
-                verticalSpacing(defaultSpacing),
-                child,
-              ],
+                  verticalSpacing(defaultSpacing),
+                  child,
+                ],
+              ),
             ),
           ),
         ),
@@ -254,7 +256,7 @@ class ContextMenuData {
   const ContextMenuData(this.start, this.fromTop, this.fromLeft);
 
   // Compute the position of the context menu based on a widget it should be next to
-  factory ContextMenuData.fromKey(GlobalKey key, {above = false, right = false}) {
+  factory ContextMenuData.fromKey(GlobalKey key, {above = false, right = false, below = false}) {
     final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
     var position = renderBox.localToGlobal(Offset.zero);
     final widgetDimensions = renderBox.size;
@@ -264,25 +266,30 @@ class ContextMenuData {
     final bool fromTop;
     if (position.dy > screenDimensions.height / 2) {
       fromTop = false;
-      position = above
-          ? Offset(position.dx, screenDimensions.height - position.dy + defaultSpacing)
-          : Offset(position.dx, screenDimensions.height - position.dy - widgetDimensions.height);
+      if (above) {
+        position = Offset(position.dx, screenDimensions.height - position.dy + defaultSpacing);
+      } else {
+        position = Offset(position.dx, screenDimensions.height - position.dy - widgetDimensions.height);
+      }
     } else {
       fromTop = true;
+      if (below) {
+        position = Offset(position.dx, position.dy + widgetDimensions.height + defaultSpacing);
+      }
     }
 
     // Calculate x position
     final bool fromLeft;
     if (position.dx > screenDimensions.width - 350 || right) {
       fromLeft = false;
-      if (above) {
+      if (above || below) {
         position = Offset(screenDimensions.width - position.dx - widgetDimensions.width, position.dy);
       } else {
         position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
       }
     } else {
       fromLeft = true;
-      position = above ? Offset(position.dx, position.dy) : Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
+      position = above || below ? Offset(position.dx, position.dy) : Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
     }
     sendLog(fromLeft);
 

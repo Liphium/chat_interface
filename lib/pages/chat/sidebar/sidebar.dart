@@ -258,9 +258,10 @@ class _SidebarState extends State<Sidebar> {
                             final otherGuy = prev.members.values.firstWhere((element) => element.account != StatusController.ownAccountId);
 
                             //* Shared content renderer
-                            if (statusController.sharedContent.containsKey(otherGuy.account) && !renderedShared) {
+                            final hasShared = statusController.sharedContent.containsKey(otherGuy.account);
+                            renderedShared = hasShared;
+                            if (hasShared && !renderedShared) {
                               additional += 1;
-                              renderedShared = true;
                               final content = statusController.sharedContent[otherGuy.account]!;
                               switch (content.type) {
                                 case ShareType.space:
@@ -288,6 +289,8 @@ class _SidebarState extends State<Sidebar> {
                                     ),
                                   );
                               }
+                            } else if (hasShared) {
+                              return const SizedBox();
                             }
                           }
                           renderedShared = false;
@@ -297,9 +300,7 @@ class _SidebarState extends State<Sidebar> {
 
                           Friend? friend;
                           if (!conversation.isGroup) {
-                            String id = conversation.members.values
-                                .firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member("-", "-", MemberRole.user))
-                                .account;
+                            String id = conversation.members.values.firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member("-", "-", MemberRole.user)).account;
                             if (id == "-") {
                               friend = Friend.me();
                             } else {
@@ -357,14 +358,18 @@ class _SidebarState extends State<Sidebar> {
                                               child: Row(
                                                 children: [
                                                   if (conversation.isGroup || friend == null)
-                                                    Icon(
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
+                                                      child: Icon(
                                                         conversation.isGroup
                                                             ? Icons.group
                                                             : friend == null
                                                                 ? Icons.person_off
                                                                 : Icons.person,
                                                         size: 35,
-                                                        color: theme.colorScheme.onPrimary)
+                                                        color: theme.colorScheme.onPrimary,
+                                                      ),
+                                                    )
                                                   else
                                                     UserAvatar(id: friend.id, size: 40),
                                                   horizontalSpacing(defaultSpacing * 0.75),
@@ -377,9 +382,7 @@ class _SidebarState extends State<Sidebar> {
                                                           if (conversation.isGroup) {
                                                             return Text(
                                                               conversation.containerSub.value.name,
-                                                              style: messageController.currentConversation.value == conversation
-                                                                  ? theme.textTheme.labelMedium
-                                                                  : theme.textTheme.bodyMedium,
+                                                              style: messageController.currentConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                               textHeightBehavior: noTextHeight,
                                                             );
                                                           }
@@ -389,9 +392,7 @@ class _SidebarState extends State<Sidebar> {
                                                               Flexible(
                                                                 child: Text(
                                                                   friend != null ? conversation.dmName : conversation.containerSub.value.name,
-                                                                  style: messageController.currentConversation.value == conversation
-                                                                      ? theme.textTheme.labelMedium
-                                                                      : theme.textTheme.bodyMedium,
+                                                                  style: messageController.currentConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                                   maxLines: 1,
                                                                   overflow: TextOverflow.ellipsis,
                                                                   textHeightBehavior: noTextHeight,

@@ -9,11 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ConversationInfoPage extends StatefulWidget {
+  final bool showMembers;
+  final ContextMenuData position;
   final Conversation conversation;
 
   const ConversationInfoPage({
     super.key,
+    required this.position,
     required this.conversation,
+    this.showMembers = true,
   });
 
   @override
@@ -23,59 +27,80 @@ class ConversationInfoPage extends StatefulWidget {
 class _ConversationInfoPageState extends State<ConversationInfoPage> {
   @override
   Widget build(BuildContext context) {
-    return DialogBase(
+    return SlidingWindowBase(
+      position: widget.position,
       title: [
-        Text(
-          widget.conversation.dmName,
-          style: Get.theme.textTheme.labelLarge,
+        Row(
+          children: [
+            Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+            horizontalSpacing(defaultSpacing),
+            Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName, style: Theme.of(context).textTheme.titleMedium),
+          ],
         ),
       ],
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "chat.members".trParams({"count": widget.conversation.members.length.toString()}),
-            style: Get.theme.textTheme.bodyMedium,
-          ),
-          verticalSpacing(defaultSpacing),
-          Column(
-            children: List.generate(widget.conversation.members.length, (index) {
-              final member = widget.conversation.members.values.elementAt(index).getFriend();
-              return Padding(
-                padding: EdgeInsets.only(top: index == 0 ? 0 : elementSpacing),
-                child: Material(
-                  color: Get.theme.colorScheme.inverseSurface,
-                  borderRadius: BorderRadius.circular(defaultSpacing),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(defaultSpacing),
-                    onTap: () => showModal(Profile(friend: member)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(defaultSpacing),
-                      child: UserRenderer(id: member.id),
-                    ),
-                  ),
+          Visibility(
+            visible: widget.showMembers,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "chat.members".trParams({"count": widget.conversation.members.length.toString()}),
+                  style: Get.theme.textTheme.bodyMedium,
                 ),
-              );
-            }),
+                verticalSpacing(defaultSpacing),
+                Column(
+                  children: List.generate(widget.conversation.members.length, (index) {
+                    final member = widget.conversation.members.values.elementAt(index).getFriend();
+                    return Padding(
+                      padding: EdgeInsets.only(top: index == 0 ? 0 : elementSpacing),
+                      child: Material(
+                        color: Get.theme.colorScheme.inverseSurface,
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          onTap: () => showModal(Profile(friend: member)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(defaultSpacing),
+                            child: UserRenderer(id: member.id),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                verticalSpacing(sectionSpacing),
+              ],
+            ),
           ),
-          verticalSpacing(sectionSpacing),
-          Text(
-            "Actions",
-            style: Get.theme.textTheme.bodyMedium,
+          Visibility(
+            visible: widget.showMembers,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: defaultSpacing),
+              child: Text(
+                "Actions",
+                style: Get.theme.textTheme.bodyMedium,
+              ),
+            ),
           ),
-          verticalSpacing(defaultSpacing),
-          ProfileButton(
-            icon: Icons.edit,
-            label: "Edit title",
-            onTap: () => {},
-            loading: false.obs,
-          ),
-          verticalSpacing(elementSpacing),
-          ProfileButton(
-            icon: Icons.person,
-            label: "View profile",
-            onTap: () => {},
-            loading: false.obs,
+          Visibility(
+            visible: widget.conversation.isGroup,
+            replacement: ProfileButton(
+              icon: Icons.person,
+              label: "View profile",
+              onTap: () => {},
+              loading: false.obs,
+            ),
+            child: ProfileButton(
+              icon: Icons.edit,
+              label: "Edit title",
+              onTap: () => {},
+              loading: false.obs,
+            ),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -89,14 +114,17 @@ class _ConversationInfoPageState extends State<ConversationInfoPage> {
             "Danger zone",
             style: Get.theme.textTheme.bodyMedium,
           ),
-          verticalSpacing(defaultSpacing),
-          ProfileButton(
-            color: Get.theme.colorScheme.errorContainer,
-            iconColor: Get.theme.colorScheme.error,
-            icon: Icons.delete,
-            label: "Remove friend",
-            onTap: () => {},
-            loading: false.obs,
+          verticalSpacing(elementSpacing),
+          Visibility(
+            visible: !widget.conversation.isGroup,
+            child: ProfileButton(
+              color: Get.theme.colorScheme.errorContainer,
+              iconColor: Get.theme.colorScheme.error,
+              icon: Icons.delete,
+              label: "Remove friend",
+              onTap: () => {},
+              loading: false.obs,
+            ),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(

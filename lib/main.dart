@@ -91,7 +91,9 @@ void main(List<String> args) async {
   if (!GetPlatform.isMobile) {
     await windowManager.setMinimumSize(const Size(300, 500));
     await windowManager.setTitle("Liphium");
-    await windowManager.setAlignment(Alignment.center);
+    if (!isDebug) {
+      await windowManager.setAlignment(Alignment.center);
+    }
   }
 
   runApp(const ChatApp());

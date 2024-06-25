@@ -121,8 +121,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                                   horizontalSpacing(elementSpacing),
                                                   Flexible(
                                                     child: Text(
-                                                      AnswerData.answerContent(widget.message.answerMessage!.type,
-                                                          widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
+                                                      AnswerData.answerContent(widget.message.answerMessage!.type, widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
                                                       style: Get.theme.textTheme.labelMedium,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,
@@ -221,20 +220,23 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                       ),
                     ),
 
-                  //* Mobile verified indicator
+                  //* Desktop verified indicator
                   if (!isMobileMode()) horizontalSpacing(defaultSpacing),
 
-                  //* Mobile verified indicator
+                  //* Desktop verified indicator
                   if (!isMobileMode())
                     Obx(() {
                       final verified = widget.message.verified.value;
                       return Visibility(
                         visible: !verified,
-                        child: Tooltip(
-                          message: "chat.not.signed".tr,
-                          child: const Icon(
-                            Icons.warning_rounded,
-                            color: Colors.amber,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: elementSpacing),
+                          child: Tooltip(
+                            message: "chat.not.signed".tr,
+                            child: const Icon(
+                              Icons.warning_rounded,
+                              color: Colors.amber,
+                            ),
                           ),
                         ),
                       );

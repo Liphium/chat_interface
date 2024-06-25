@@ -72,11 +72,9 @@ class ConversationMembers extends StatelessWidget {
                                   return [
                                         //* Promotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
-                                          ProfileAction(
-                                              icon: Icons.add_moderator, label: "chat.make_moderator".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id))
+                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_moderator".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id))
                                         else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
-                                          ProfileAction(
-                                              icon: Icons.add_moderator, label: "chat.make_admin".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id)),
+                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_admin".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id)),
 
                                         //* Demotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
@@ -116,7 +114,11 @@ class ConversationMembers extends StatelessWidget {
                           padding: const EdgeInsets.all(elementSpacing),
                           child: Row(
                             children: [
-                              Expanded(child: UserRenderer(id: member.account)),
+                              Expanded(
+                                child: UserRenderer(
+                                  id: member.account,
+                                ),
+                              ),
                               horizontalSpacing(elementSpacing),
                               if (member.role != MemberRole.user)
                                 Padding(

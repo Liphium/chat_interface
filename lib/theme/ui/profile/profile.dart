@@ -68,8 +68,7 @@ class ProfileAction {
   final Color? iconColor;
   final Function(Friend, RxBool) onTap;
 
-  const ProfileAction(
-      {required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
+  const ProfileAction({required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
 }
 
 class Profile extends StatefulWidget {
@@ -129,13 +128,21 @@ class _ProfileState extends State<Profile> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             //* Profile info
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                UserAvatar(id: widget.friend.id, size: 40),
-                horizontalSpacing(defaultSpacing),
-                Text(widget.friend.displayName.value.text, style: Get.theme.textTheme.titleMedium),
-              ],
+            Flexible(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  UserAvatar(id: widget.friend.id, size: 40),
+                  horizontalSpacing(defaultSpacing),
+                  Flexible(
+                    child: Text(
+                      widget.friend.displayName.value.text,
+                      overflow: TextOverflow.ellipsis,
+                      style: Get.theme.textTheme.titleMedium,
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             //* Call button

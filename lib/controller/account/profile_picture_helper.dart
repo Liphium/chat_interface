@@ -24,6 +24,7 @@ class ProfileHelper {
   static Future<String?> downloadProfilePicture(Friend friend) async {
     // Get old profile picture
     final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id))).getSingleOrNull();
+    sendLog("getting profile picture of ${friend.id}");
 
     final json = await postAuthorizedJSON("/account/profile/get", <String, dynamic>{
       "id": friend.id,

@@ -5,6 +5,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
 import 'package:chat_interface/pages/chat/components/conversations/conversation_info_window.dart';
+import 'package:chat_interface/pages/chat/conversation_info_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
@@ -26,6 +27,7 @@ class MessageBar extends StatefulWidget {
 }
 
 class _MessageBarState extends State<MessageBar> {
+  final GlobalKey _infoKey = GlobalKey();
   final callLoading = false.obs;
 
   @override
@@ -57,12 +59,34 @@ class _MessageBarState extends State<MessageBar> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             //* Conversation label
-            Row(
-              children: [
-                Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
-                horizontalSpacing(defaultSpacing),
-                Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName, style: Theme.of(context).textTheme.titleMedium),
-              ],
+            Material(
+              key: _infoKey,
+              color: Get.theme.colorScheme.onInverseSurface,
+              borderRadius: BorderRadius.circular(defaultSpacing),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(defaultSpacing),
+                hoverColor: Get.theme.hoverColor,
+                onTap: () {
+                  showModal(ConversationInfoPage(
+                    conversation: widget.conversation,
+                    position: ContextMenuData.fromKey(_infoKey, below: true),
+                    showMembers: false,
+                  ));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: elementSpacing,
+                    horizontal: defaultSpacing,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                      horizontalSpacing(defaultSpacing),
+                      Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName, style: Theme.of(context).textTheme.titleMedium),
+                    ],
+                  ),
+                ),
+              ),
             ),
 
             //* Conversation actions
@@ -151,10 +175,8 @@ class _MessageBarState extends State<MessageBar> {
                   child: Obx(
                     () => IconButton(
                       iconSize: 27,
-                      icon: Icon(Icons.group,
-                          color: controller.settings[AppSettings.showGroupMembers]!.value.value
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurface),
+                      icon:
+                          Icon(Icons.group, color: controller.settings[AppSettings.showGroupMembers]!.value.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
                         controller.settings[AppSettings.showGroupMembers]!.setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
                       },

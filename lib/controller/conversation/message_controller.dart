@@ -360,7 +360,7 @@ class Message {
       return true;
     }
     renderingAttachments = true;
-    if (attachments.isNotEmpty) {
+    if (attachments.isNotEmpty && type != MessageType.system) {
       for (var attachment in attachments) {
         if (attachment.isURL) {
           final container = AttachmentContainer.remoteImage(attachment);
@@ -435,8 +435,8 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) {
     // Convert to message
     final account = Get.find<ConversationController>().conversations[json["conversation"]]!.members[json["sender"]]?.account ?? "removed";
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account,
-        DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"], json["edited"], false);
+    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account, DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"],
+        json["edited"], false);
 
     // Decrypt content
     final conversation = Get.find<ConversationController>().conversations[json["conversation"]]!;

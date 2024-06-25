@@ -33,113 +33,116 @@ class _CallRectangleState extends State<CallRectangle> {
 
   @override
   Widget build(BuildContext context) {
-    SpacesController controller = Get.find();
-
     return Hero(
       tag: "call",
-      child: Container(
-        color: Get.theme.colorScheme.inverseSurface,
-        child: LayoutBuilder(builder: (context, constraints) {
-          return MouseRegion(
-            onEnter: (event) {
-              hovered.value = true;
-            },
-            onHover: (event) {
-              hovered.value = true;
-              if (timer != null) timer?.cancel();
-              timer = Timer(1000.ms, () {
-                hovered.value = false;
-              });
-            },
-            onExit: (event) {
+      flightShuttleBuilder: (flightContext, animation, flightDirection, fromHeroContext, toHeroContext) => buildRectangle(Get.find(), cache: true),
+      child: buildRectangle(Get.find()),
+    );
+  }
+
+  Widget buildRectangle(SpacesController controller, {cache = false}) {
+    return Container(
+      color: Get.theme.colorScheme.inverseSurface,
+      child: LayoutBuilder(builder: (context, constraints) {
+        return MouseRegion(
+          onEnter: (event) {
+            hovered.value = true;
+          },
+          onHover: (event) {
+            hovered.value = true;
+            if (timer != null) timer?.cancel();
+            timer = Timer(1000.ms, () {
               hovered.value = false;
-              timer?.cancel();
-            },
-            child: Stack(
-              children: [
-                Obx(
-                  () {
-                    if (Get.find<TabletopController>().enabled.value) {
-                      return const TabletopView();
-                    }
+            });
+          },
+          onExit: (event) {
+            hovered.value = false;
+            timer?.cancel();
+          },
+          child: Stack(
+            children: [
+              Obx(
+                () {
+                  if (Get.find<TabletopController>().enabled.value) {
+                    return const TabletopView();
+                  }
 
-                    if (controller.cinemaWidget.value != null) {
-                      return const CallCinemaView();
-                    }
+                  if (controller.cinemaWidget.value != null) {
+                    return const CallCinemaView();
+                  }
 
-                    return LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Padding(
-                          padding: const EdgeInsets.all(defaultSpacing),
-                          child: CallGridView(constraints: constraints),
-                        );
-                      },
-                    );
-                  },
-                ),
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Padding(
+                        padding: const EdgeInsets.all(defaultSpacing),
+                        child: CallGridView(constraints: constraints),
+                      );
+                    },
+                  );
+                },
+              ),
 
-                //* People
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Obx(
-                    () => Visibility(
-                      visible: Get.find<TabletopController>().enabled.value,
-                      child: SizedBox(
-                        height: 120,
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            return Padding(
-                              padding: const EdgeInsets.all(defaultSpacing),
-                              child: CallGridView(constraints: constraints),
-                            );
-                          },
-                        ),
+              //* People
+              Align(
+                alignment: Alignment.topCenter,
+                child: Obx(
+                  () => Visibility(
+                    visible: Get.find<TabletopController>().enabled.value,
+                    child: SizedBox(
+                      height: 120,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Padding(
+                            padding: const EdgeInsets.all(defaultSpacing),
+                            child: CallGridView(constraints: constraints),
+                          );
+                        },
                       ),
                     ),
                   ),
                 ),
+              ),
 
-                //* Controls
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Obx(
-                    () => Animate(
-                      effects: [
-                        FadeEffect(
-                          duration: 150.ms,
-                          end: 0.0,
-                          begin: 1.0,
-                        )
-                      ],
-                      target: hovered.value || controlsHovered.value ? 0 : 1,
-                      child: Container(
-                        width: double.infinity,
-                        // Create a gradient on this container from bottom to top
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: [
-                              Colors.black.withOpacity(0.2),
-                              Colors.black.withOpacity(0),
-                            ],
-                          ),
+              //* Controls
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Obx(
+                  () => Animate(
+                    effects: [
+                      FadeEffect(
+                        duration: 150.ms,
+                        end: 0.0,
+                        begin: 1.0,
+                      )
+                    ],
+                    target: hovered.value || controlsHovered.value ? 0 : 1,
+                    child: Container(
+                      width: double.infinity,
+                      // Create a gradient on this container from bottom to top
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.2),
+                            Colors.black.withOpacity(0),
+                          ],
                         ),
+                      ),
 
-                        child: MouseRegion(
-                          onEnter: (event) => controlsHovered.value = true,
-                          onExit: (event) => controlsHovered.value = false,
-                          child: buildControls(controller),
-                        ),
+                      child: MouseRegion(
+                        onEnter: (event) => controlsHovered.value = true,
+                        onExit: (event) => controlsHovered.value = false,
+                        child: buildControls(controller),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
-          );
-        }),
-      ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 

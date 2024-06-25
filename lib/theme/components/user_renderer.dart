@@ -110,7 +110,7 @@ class UserRenderer extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(friend.displayName.value.text, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium),
+                  Flexible(child: Text(friend.displayName.value.text, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium)),
                   horizontalSpacing(defaultSpacing),
                   Obx(() => StatusRenderer(status: own ? statusController!.type.value : friend!.statusType.value)),
                 ],
