@@ -46,6 +46,10 @@ class MessageController extends GetxController {
     messages.clear();
   }
 
+  void openTab(OpenTabType type) {
+    currentOpenType.value = type;
+  }
+
   void selectConversation(Conversation conversation) async {
     currentOpenType.value = OpenTabType.conversation;
     Get.find<TownsquareController>().close();

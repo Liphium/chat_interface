@@ -264,6 +264,7 @@ class SpacesController extends GetxController {
 
     if (!error) {
       Get.offAll(getChatPage(), transition: Transition.fadeIn);
+      Get.find<MessageController>().openTab(OpenTabType.conversation);
     }
   }
 
