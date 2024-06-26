@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/pages/chat/components/conversations/conversation_info_window.dart';
+import 'package:chat_interface/pages/chat/components/conversations/conversation_dev_window.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -92,7 +92,7 @@ class _ConversationInfoPageState extends State<ConversationInfoPage> {
             replacement: ProfileButton(
               icon: Icons.person,
               label: "View profile",
-              onTap: () => {},
+              onTap: () => Get.dialog(Profile(friend: widget.conversation.otherMember)),
               loading: false.obs,
             ),
             child: ProfileButton(

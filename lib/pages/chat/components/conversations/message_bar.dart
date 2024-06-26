@@ -4,7 +4,6 @@ import 'package:chat_interface/controller/conversation/live_share_controller.dar
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/conversation/conversation.dart' as model;
-import 'package:chat_interface/pages/chat/components/conversations/conversation_info_window.dart';
 import 'package:chat_interface/pages/chat/conversation_info_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -160,16 +159,6 @@ class _MessageBarState extends State<MessageBar> {
                 ),
                 horizontalSpacing(elementSpacing),
 
-                //* Conversation info
-                LoadingIconButton(
-                  icon: Icons.info,
-                  iconSize: 27,
-                  onTap: () {
-                    showModal(ConversationInfoWindow(conversation: widget.conversation));
-                  },
-                ),
-
-                horizontalSpacing(elementSpacing),
                 Visibility(
                   visible: widget.conversation.isGroup,
                   child: Obx(

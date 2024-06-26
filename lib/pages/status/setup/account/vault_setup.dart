@@ -21,15 +21,15 @@ class VaultSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    // Refresh the vault
-    await refreshVault();
-
     // Load conversations from the database
     final conversationController = Get.find<ConversationController>();
     final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
     for (var conversation in conversations) {
       await conversationController.add(Conversation.fromData(conversation));
     }
+
+    // Refresh the vault
+    await refreshVault();
 
     return null;
   }

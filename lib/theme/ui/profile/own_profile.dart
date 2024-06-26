@@ -5,6 +5,7 @@ import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/theme/ui/profile/developer_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -31,7 +32,9 @@ class _ProfileState extends State<OwnProfile> {
   final statusMessage = "".obs;
   final FocusNode _statusFocus = FocusNode();
 
+  // Developer things
   final testLoading = false.obs;
+  final _clicks = 0.obs;
 
   @override
   void dispose() {
@@ -78,6 +81,10 @@ class _ProfileState extends State<OwnProfile> {
               LoadingIconButton(
                 loading: false.obs,
                 onTap: () {
+                  _clicks.value++;
+                  if (_clicks.value > 7) {
+                    Get.dialog(const DeveloperWindow());
+                  }
                   Clipboard.setData(ClipboardData(text: controller.name.value));
                 },
                 icon: Icons.copy,
@@ -87,7 +94,6 @@ class _ProfileState extends State<OwnProfile> {
           verticalSpacing(defaultSpacing),
 
           //* Status
-
           Obx(() {
             if (controller.ownContainer.value != null) {
               return Padding(
@@ -146,8 +152,7 @@ class _ProfileState extends State<OwnProfile> {
                               Icon(icon, size: 13.0, color: color),
                               horizontalSpacing(defaultSpacing),
                               Text("status.${index.toString()}".tr,
-                                  style: theme.textTheme.bodyMedium!.copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface),
-                                  textHeightBehavior: noTextHeight),
+                                  style: theme.textTheme.bodyMedium!.copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface), textHeightBehavior: noTextHeight),
                             ],
                           ),
                         ),

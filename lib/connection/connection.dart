@@ -36,8 +36,11 @@ class Connector {
   RSAPublicKey? nodePublicKey;
   Uint8List? aesKey;
   String? aesBase64;
+  String? url;
 
   Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
+    this.url = url;
+
     // Generate an AES key for the connection
     aesKey = randomAESKey();
     aesBase64 = base64Encode(aesKey!);

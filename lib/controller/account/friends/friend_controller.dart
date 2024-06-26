@@ -13,6 +13,7 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
+import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -33,8 +34,13 @@ class FriendController extends GetxController {
     for (FriendData data in await db.friend.select().get()) {
       friends[data.id] = Friend.fromEntity(data);
     }
+
+    // Start timer to refresh the vault every couple of seconds (for multi-device synchronization)
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+      if (!SetupManager.setupFinished) {
+        return;
+      }
       sendLog("refreshing all vaults");
       await refreshFriendsVault();
       await refreshVault();

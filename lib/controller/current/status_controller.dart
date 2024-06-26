@@ -47,9 +47,6 @@ class StatusController extends GetxController {
   final ownContainer = Rx<ShareContainer?>(null);
 
   void setName(String value) => name.value = value;
-  void setId(String value) {
-    StatusController.ownAccountId = value;
-  }
 
   String statusJson() => jsonEncode(<String, dynamic>{
         "s": status.value,

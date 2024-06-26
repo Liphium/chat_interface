@@ -38,6 +38,8 @@ class InstanceSetup extends Setup {
   }
 }
 
+String currentInstance = "";
+
 Future<bool> setupInstance(String name, {bool next = false}) async {
   // Initialize database
   if (databaseInitialized) {
@@ -46,6 +48,7 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
   final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
   final file = File(path.join(dbFolder, '$name.db'));
   db = Database(NativeDatabase.createInBackground(file, logStatements: driftLogger));
+  currentInstance = name;
 
   sendLog("going on");
 

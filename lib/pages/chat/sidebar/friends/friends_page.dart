@@ -251,7 +251,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                     itemBuilder: (context, index) {
                                       final friend = friendController.friends.values.elementAt(index);
 
-                                      if (friend.unknown) {
+                                      if (friend.unknown || friend.id == StatusController.ownAccountId) {
                                         return const SizedBox();
                                       }
                                       return Obx(
@@ -260,21 +260,18 @@ class _FriendsPageState extends State<FriendsPage> {
                                               friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
                                               friend.name.toLowerCase().contains(query.value.toLowerCase());
 
-                                          return Visibility(
-                                            visible: friend.id != StatusController.ownAccountId,
-                                            child: Animate(
-                                              effects: [
-                                                ReverseExpandEffect(
-                                                  curve: Curves.easeInOut,
-                                                  duration: 250.ms,
-                                                  axis: Axis.vertical,
-                                                )
-                                              ],
-                                              target: visible ? 0.0 : 1.0,
-                                              child: Padding(
-                                                padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
-                                                child: FriendButton(friend: friend, position: position),
-                                              ),
+                                          return Animate(
+                                            effects: [
+                                              ReverseExpandEffect(
+                                                curve: Curves.easeInOut,
+                                                duration: 250.ms,
+                                                axis: Axis.vertical,
+                                              )
+                                            ],
+                                            target: visible ? 0.0 : 1.0,
+                                            child: Padding(
+                                              padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
+                                              child: FriendButton(friend: friend, position: position),
                                             ),
                                           );
                                         },

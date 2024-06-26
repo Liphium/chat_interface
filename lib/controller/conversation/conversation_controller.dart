@@ -100,8 +100,7 @@ class ConversationController extends GetxController {
   }
 
   void updateMessageRead(String conversation, {bool increment = true, required int messageSendTime}) {
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation)))
-        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
 
     // Swap in the map
     _insertToOrder(conversation);
@@ -207,6 +206,7 @@ class Conversation {
 
   bool get isGroup => type == model.ConversationType.group;
 
+  /// Only works for direct messages
   String get dmName {
     final member = members.values.firstWhere(
       (element) => element.account != StatusController.ownAccountId,
@@ -220,11 +220,23 @@ class Conversation {
     return friend.displayName.value.text;
   }
 
+  /// Only works for direct messages
+  Friend get otherMember {
+    final member = members.values.firstWhere(
+      (element) => element.account != StatusController.ownAccountId,
+      orElse: () => Member(
+        StatusController.ownAccountId,
+        StatusController.ownAccountId,
+        MemberRole.user,
+      ),
+    );
+    return Get.find<FriendController>().friends[member.account] ?? Friend.unknown(container.name);
+  }
+
   bool get borked =>
       !isGroup &&
       Get.find<FriendController>().friends[members.values
-              .firstWhere((element) => element.account != StatusController.ownAccountId,
-                  orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
+              .firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
               .account] ==
           null;
 

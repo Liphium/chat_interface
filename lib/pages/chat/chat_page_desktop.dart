@@ -54,6 +54,7 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
         bottom: false,
         left: false,
         child: SelectionArea(
+          key: const ValueKey("selection_area"),
           contextMenuBuilder: (context, selectableRegionState) {
             final controller = Get.find<MessageController>();
 
