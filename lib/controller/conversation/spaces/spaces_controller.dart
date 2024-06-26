@@ -149,8 +149,8 @@ class SpacesController extends GetxController {
       if (!event.data["success"]) {
         if (event.data["message"] == "already.in.space") {
           showConfirmPopup(ConfirmWindow(
-            title: "Spaces",
-            text: "Do you really want to leave the current space?",
+            title: "spaces".tr,
+            text: "chat.space.leave".tr,
             onDecline: () => {},
             onConfirm: () {
               connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) {
@@ -159,7 +159,7 @@ class SpacesController extends GetxController {
                     return _openNotAvailable();
                   }
                   return showErrorPopup("How?",
-                      "I don't understand this world anymore. I'm sorry. It seems like this feature is currently pretty broken for you, tell the admins about it and we'll fix it sometime, yk like never?");
+                      "I don't understand this world anymore. I'm sorry. It seems like this feature is currently pretty broken for you, tell the developers about it and we'll fix it sometime, yk like never?");
                 }
 
                 // Try joining again

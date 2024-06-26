@@ -45,6 +45,7 @@ class GeneralTranslations extends Translations {
           'open.friends': 'Open friends page',
           'reset': 'Reset',
           'app.settings': 'App settings',
+          'spaces': 'Spaces',
 
           // Placeholder
           'placeholder.domain': 'example.com',

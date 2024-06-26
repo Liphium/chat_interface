@@ -26,7 +26,8 @@ class _SidebarProfileState extends State<SidebarProfile> {
 
   @override
   Widget build(BuildContext context) {
-    StatusController controller = Get.find();
+    final controller = Get.find<SpacesController>();
+    final statusController = Get.find<StatusController>();
     ThemeData theme = Theme.of(context);
 
     return Container(
@@ -43,9 +44,30 @@ class _SidebarProfileState extends State<SidebarProfile> {
               width: constraints.maxWidth,
               child: Column(
                 children: [
-                  //* Spaces status
-                  GetX<SpacesController>(builder: (controller) {
+                  Obx(() {
                     if (!controller.inSpace.value) {
+                      // Render an embed letting the user know he's in a call on another device
+                      if (statusController.ownContainer.value != null && statusController.ownContainer.value is SpaceConnectionContainer) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                          child: Row(
+                            children: [
+                              Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+                              horizontalSpacing(defaultSpacing),
+                              Text("On another device", style: Get.theme.textTheme.bodyMedium),
+                              const Spacer(),
+                              LoadingIconButton(
+                                onTap: () => Get.find<SpacesController>().join(statusController.ownContainer.value! as SpaceConnectionContainer),
+                                icon: Icons.login,
+                                extra: defaultSpacing,
+                                iconSize: 25,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
                       return const SizedBox.shrink();
                     }
                     final shown = Get.find<MessageController>().currentConversation.value == null;
@@ -140,7 +162,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                 Expanded(
                                   child: Obx(
                                     () => Visibility(
-                                      visible: !controller.statusLoading.value,
+                                      visible: !statusController.statusLoading.value,
                                       replacement: Center(
                                         child: Padding(
                                           padding: const EdgeInsets.all(defaultSpacing),
@@ -163,7 +185,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                               Flexible(
                                                 child: Obx(
                                                   () => Text(
-                                                    controller.displayName.value.text,
+                                                    statusController.displayName.value.text,
                                                     maxLines: 1,
                                                     overflow: TextOverflow.ellipsis,
                                                     style: theme.textTheme.titleMedium,
@@ -173,7 +195,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                               ),
                                               horizontalSpacing(defaultSpacing),
                                               Obx(
-                                                () => StatusRenderer(status: controller.type.value, text: false),
+                                                () => StatusRenderer(status: statusController.type.value, text: false),
                                               )
                                             ],
                                           ),
@@ -181,14 +203,14 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                           //* Status message
                                           Obx(
                                             () => Visibility(
-                                              visible: controller.status.value != "",
+                                              visible: statusController.status.value != "",
                                               child: Column(
                                                 children: [
                                                   verticalSpacing(defaultSpacing * 0.25),
 
                                                   //* Status message
                                                   Text(
-                                                    controller.status.value,
+                                                    statusController.status.value,
                                                     style: theme.textTheme.bodySmall,
                                                     textHeightBehavior: noTextHeight,
                                                     overflow: TextOverflow.ellipsis,

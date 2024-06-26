@@ -81,7 +81,7 @@ class StatusController extends GetxController {
   }
 
   Future<bool> share(ShareContainer container) async {
-    if (ownContainer.value != null) return false;
+    if (ownContainer.value != null) return false; // TODO: Potentially remove
     ownContainer.value = container;
     await setStatus();
     return true;

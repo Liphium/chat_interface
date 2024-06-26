@@ -38,14 +38,12 @@ class ChatPageTranslations extends Translations {
           'friends.requests': 'Requests',
           'friends.requests_sent': 'Sent requests',
           'request.sent': 'Request successfully sent!',
-          'friends.empty':
-              'Seems like you don\'t have any friends with that name. You can add friends by clicking the icon on the right inside of the input field.',
+          'friends.empty': 'Seems like you don\'t have any friends with that name. You can add friends by clicking the icon on the right inside of the input field.',
           'request.confirm.title': 'Confirm request',
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
           'request.already.exists': 'Already exists',
-          'request.already.exists.text':
-              'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
+          'request.already.exists.text': 'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
 
           // Conversations
           'conversations.placeholder': 'Search',
@@ -57,8 +55,7 @@ class ChatPageTranslations extends Translations {
           'chat.start_space': 'Start a private Space',
           'chat.add_space': 'Add to Space',
           'conversations.leave': 'Leave conversation',
-          'conversations.leave.text':
-              'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
+          'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
           'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
           'conversations.add': 'Add a member',
           'conversations.add.create': 'New conversation',
@@ -140,6 +137,7 @@ class ChatPageTranslations extends Translations {
           'chat.space_invite': 'Space invitation',
           'chat.space.not_found': 'This space already ended.',
           'chat.space.loading': 'Loading space..',
+          'chat.space.leave': 'Do you really want to leave your current space?',
           'tabletop.general.smooth_scrolling': 'Smooth scrolling',
 
           // Townsquare
