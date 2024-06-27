@@ -6,6 +6,7 @@ class SpacesTranslations extends Translations {
         //* English US
         'en_US': {
           // General
+          'spaces.sharing_other_device': 'Sharing with friends',
           'spaces.count': '@count members',
           'spaces.toggle_people': 'Toggle showing people',
 

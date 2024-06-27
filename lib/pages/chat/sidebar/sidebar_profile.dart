@@ -54,7 +54,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                             children: [
                               Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
                               horizontalSpacing(defaultSpacing),
-                              Text("On another device", style: Get.theme.textTheme.bodyMedium),
+                              Text("spaces.sharing_other_device".tr, style: Get.theme.textTheme.bodyMedium),
                               const Spacer(),
                               LoadingIconButton(
                                 onTap: () => Get.find<SpacesController>().join(statusController.ownContainer.value! as SpaceConnectionContainer),
