@@ -237,6 +237,10 @@ class SpacesController extends GetxController {
           await api.startTalkingEngine();
         }
 
+        // Open the screen
+        Get.find<MessageController>().unselectConversation();
+        Get.find<MessageController>().openTab(OpenTabType.space);
+
         connected.value = true;
         inSpace.value = true;
         spaceLoading.value = false;

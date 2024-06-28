@@ -49,6 +49,8 @@ class ProfileHelper {
 
     // Check if there is a profile picture
     if (json["profile"]["picture"] == null) {
+      // Remove the current profile picture
+      friend.updateProfilePicture(null);
       return null;
     }
 
@@ -109,14 +111,27 @@ class ProfileHelper {
       "data": "", // Potentially something to be useful in the future again
       "container": encryptSymmetric(jsonEncode(response.container!.toJson()), profileKey),
     });
-
     if (!json["success"]) {
       showErrorPopup("error", "profile_picture.not_set");
       return false;
     }
+
+    // Set in local database
     Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!);
 
-    // TODO: Update for other devices
+    return true;
+  }
+
+  static Future<bool> deleteProfilePicture() async {
+    // Update the profile picture
+    final json = await postAuthorizedJSON("/account/profile/remove_picture", {});
+    if (!json["success"]) {
+      showErrorPopup("error", json["error"]);
+      return false;
+    }
+
+    // Set in local database
+    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(null);
     return true;
   }
 

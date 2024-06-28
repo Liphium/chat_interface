@@ -275,16 +275,27 @@ class Friend {
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Update the profile picture of this friend
-  void updateProfilePicture(AttachmentContainer picture) async {
-    // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(
-      id: id,
-      pictureContainer: jsonEncode(picture.toJson()),
-      data: "",
-    ));
+  void updateProfilePicture(AttachmentContainer? picture) async {
+    if (picture == null) {
+      // Delete the profile picture if it is null
+      db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: "", data: ""));
 
-    profilePicture = picture;
-    profilePictureImage.value = await ProfileHelper.loadImage(picture.filePath);
+      // Update the friend as well
+      profilePicture = null;
+      profilePictureImage.value = null;
+      profilePictureDataNull = true;
+    } else {
+      // Set a new profile picture if it is valid
+      db.profile.insertOnConflictUpdate(ProfileData(
+        id: id,
+        pictureContainer: jsonEncode(picture.toJson()),
+        data: "",
+      ));
+
+      // Update in the local cache (for this friend)
+      profilePicture = picture;
+      profilePictureImage.value = await ProfileHelper.loadImage(picture.filePath);
+    }
   }
 
   /// Load the profile picture of this friend

@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
@@ -15,6 +16,7 @@ import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/profile_picture_window.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -132,7 +134,13 @@ class DataSettingsPage extends StatelessWidget {
                               ConfirmWindow(
                                 title: "settings.data.profile_picture.remove".tr,
                                 text: "settings.data.profile_picture.remove.confirm".tr,
-                                onConfirm: () => {},
+                                onConfirm: () async {
+                                  // Tell the server to remove the picture
+                                  final valid = await ProfileHelper.deleteProfilePicture();
+                                  if (!valid) {
+                                    return;
+                                  }
+                                },
                                 onDecline: () => {},
                               ),
                             ),

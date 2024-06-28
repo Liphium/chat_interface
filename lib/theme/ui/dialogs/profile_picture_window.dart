@@ -5,6 +5,7 @@ import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_slider.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -160,9 +161,15 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                   final currentFile = File(widget.file.path);
                   final cutFile = File(path.join(currentFile.parent.path, ".cut-${widget.file.name}"));
                   await cutFile.writeAsBytes(image);
-                  await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name);
+                  final res = await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name);
+                  if (!res) {
+                    uploading.value = false;
+                    sendLog("kinda didn't work");
+                    return;
+                  }
                   await cutFile.delete();
                   uploading.value = false;
+                  sendLog("uploaded");
                   Get.back();
                 },
                 label: "select".tr,
