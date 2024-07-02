@@ -15,7 +15,7 @@ class ConnectionSetup extends Setup {
   Future<Widget?> load() async {
     final body = await postAuthorizedJSON("/node/connect", <String, dynamic>{
       "cluster": connectedCluster.id,
-      "app": appId,
+      "tag": appTag,
       "token": refreshToken,
     });
 

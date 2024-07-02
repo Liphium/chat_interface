@@ -17,7 +17,7 @@ import 'app.dart';
 
 final dio = Dio();
 late final Sodium sodiumLib;
-const appId = 1;
+const appTag = "liphium_chat";
 bool isHttps = true;
 const bool driftLogger = true;
 

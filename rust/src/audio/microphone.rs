@@ -36,10 +36,7 @@ pub fn stop() {
 }
 
 fn pcm_to_db(pcm: f32) -> f32 {
-    if pcm <= 0.0 {
-        return -100.0;
-    }
-    20.0 * pcm.log10()
+    20.0 * pcm.abs().log10()
 }
 
 pub fn record() {
@@ -91,9 +88,10 @@ pub fn record() {
 
                 let mut avg = 0.0;
                 for sample in samples.iter() {
-                    avg += *sample;
+                    avg += sample * sample * sample;
                 }
                 avg = avg / samples.len() as f32;
+                avg = avg.sqrt();
                 avg = pcm_to_db(avg);
 
                 let mut options = super::get_options();

@@ -155,13 +155,13 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
         talking.value = event;
       });
     } else {
-      _actionSub = (await api.createActionStream()).listen((event) {
+      _actionSub = api.createActionStream().listen((event) {
         talking.value = event.action == SpaceMemberController.startedTalkingAction;
       });
     }
     api.setTalkingAmplitude(amplitude: controller.settings[AudioSettings.microphoneSensitivity]!.getValue() as double);
 
-    _sub = (await api.createAmplitudeStream()).listen((amp) {
+    _sub = api.createAmplitudeStream().listen((amp) {
       _sensitivity.value = amp;
     });
 
@@ -353,7 +353,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                       ),
                     ),
                   ),
-                  FJSlider(
+                  MicrophoneSensitivitySlider(
                     value: clampDouble(sens.value.value, -70, 0),
                     min: -70,
                     max: 0,
@@ -406,9 +406,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id
-              ? Get.theme.colorScheme.primary
-              : Get.theme.colorScheme.onInverseSurface,
+          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,
@@ -441,6 +439,82 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class MicrophoneSensitivitySlider extends StatelessWidget {
+  final double secondaryTrackValue;
+  final double value;
+  final double min, max;
+  final String label;
+
+  final Function(double)? onChanged;
+  final Function(double)? onChangeEnd;
+
+  const MicrophoneSensitivitySlider({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    required this.secondaryTrackValue,
+    required this.label,
+    this.min = 0.0,
+    this.max = 1.0,
+    this.onChangeEnd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SliderTheme(
+      data: const SliderThemeData(
+        trackShape: CustomSliderTrackShape(),
+        thumbShape: CustomSliderThumbShape(),
+        overlayShape: CustomSliderOverlayShape(),
+        trackHeight: 6,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final sliderPercentage = (secondaryTrackValue - min) / (max - min);
+                return Stack(
+                  children: [
+                    Slider(
+                      value: value,
+                      inactiveColor: Get.theme.colorScheme.primary,
+                      thumbColor: Get.theme.colorScheme.onPrimary,
+                      activeColor: Get.theme.colorScheme.onPrimary,
+                      min: min,
+                      max: max,
+                      onChanged: onChanged,
+                      onChangeEnd: onChangeEnd,
+                    ),
+                    IgnorePointer(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: AnimatedContainer(
+                          duration: 100.ms,
+                          decoration: BoxDecoration(
+                            color: Get.theme.colorScheme.onSurface.withAlpha(150),
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                          ),
+                          height: 8,
+                          width: (constraints.maxWidth * sliderPercentage.clamp(0, 1)),
+                        ),
+                      ),
+                    )
+                  ],
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: defaultSpacing),
+            child: Text(label),
+          )
+        ],
       ),
     );
   }
@@ -498,8 +572,7 @@ class _OutputTabState extends State<OutputTab> {
 
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing),
-            icon: Icons.done_all, label: "audio.device.default.button".tr),
+        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing - elementSpacing),
 
         Column(
@@ -539,9 +612,7 @@ class _OutputTabState extends State<OutputTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current
-              ? Get.theme.colorScheme.primary
-              : Get.theme.colorScheme.onInverseSurface,
+          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,
