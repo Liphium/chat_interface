@@ -265,6 +265,7 @@ class Friend {
   void setOffline() {
     status.value = "";
     statusType.value = 0;
+    Get.find<StatusController>().sharedContent.remove(id);
   }
 
   //* Profile picture
