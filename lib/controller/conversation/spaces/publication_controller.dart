@@ -22,8 +22,7 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isDeafened.value = newOutput;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
-          newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       if (controller.members[SpaceMemberController.ownId]!.participant.value != null) {
         if (newOutput) {
           // Stop all audio and unsubscribe from tracks
@@ -56,14 +55,41 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isMuted.value = newMuted;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
-          newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       final participant = controller.members[SpaceMemberController.ownId]!.participant.value as LocalParticipant;
       if (newMuted) {
         participant.audioTrackPublications.firstOrNull?.mute();
       }
       _refreshState();
     }
+  }
+
+  /// Set a new microphone
+  void refreshMicrophone(String deviceName) async {
+    if (SpacesController.livekitRoom == null) {
+      return;
+    }
+    String? deviceId = await getMicrophone(deviceName);
+
+    // Check if there is one
+    if (deviceId == null) {
+      sendLog("couldn't find microphone to refresh to");
+      return;
+    }
+    SpacesController.livekitRoom!.localParticipant!.audioTrackPublications.first.track!.setDeviceId(deviceId);
+  }
+
+  /// Get the device id from a microphone
+  Future<String?> getMicrophone(String deviceName) async {
+    String? deviceId;
+    final list = await Hardware.instance.enumerateDevices(type: "audioinput");
+    for (var device in list) {
+      if (device.label == deviceName) {
+        deviceId = device.deviceId;
+      }
+    }
+
+    return deviceId;
   }
 
   void _refreshState() async {

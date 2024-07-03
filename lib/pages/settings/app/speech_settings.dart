@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
@@ -206,6 +207,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
 
   void _changeMicrophone(String device) async {
     Get.find<SettingController>().settings[AudioSettings.microphone]!.setValue(device);
+    Get.find<PublicationController>().refreshMicrophone(device);
     api.setInputDevice(id: device);
   }
 

@@ -55,30 +55,37 @@ Uri server(String path) {
 }
 
 /// Grab the public key from the server
-Future<bool> grabServerPublicKey() async {
+Future<String?> grabServerPublicKey({String defaultError = "server.error"}) async {
   final Response res;
   try {
     res = await post(server("/pub"));
   } catch (e) {
-    return false;
+    return defaultError;
   }
   if (res.statusCode != 200) {
-    return false;
+    return defaultError;
   }
 
   final json = jsonDecode(res.body);
+
+  // Check the protocol version
+  if (json["protocol_version"] != protocolVersion) {
+    return "protocol.error";
+  }
+
   serverPublicKey = unpackageRSAPublicKey(json['pub']);
   sendLog("RETRIEVED SERVER PUBLIC KEY: $serverPublicKey");
 
-  return true;
+  return null;
 }
 
 /// Post request to node-backend (with Through Cloudflare Protection)
 Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) async {
   if (serverPublicKey == null) {
-    final success = await grabServerPublicKey();
-    if (!success) {
-      return <String, dynamic>{"success": false, "error": defaultError};
+    final error = await grabServerPublicKey(defaultError: defaultError);
+    if (error != null) {
+      sendLog("there was an issue with getting the server public key");
+      return <String, dynamic>{"success": false, "error": error};
     }
   }
 

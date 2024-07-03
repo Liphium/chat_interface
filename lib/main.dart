@@ -15,9 +15,12 @@ import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 
+// Configuration constants
+const appTag = "liphium_chat";
+const protocolVersion = 1;
+
 final dio = Dio();
 late final Sodium sodiumLib;
-const appTag = "liphium_chat";
 bool isHttps = true;
 const bool driftLogger = true;
 

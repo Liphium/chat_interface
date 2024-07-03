@@ -88,7 +88,7 @@ pub fn record() {
 
                 let mut avg = 0.0;
                 for sample in samples.iter() {
-                    avg += sample * sample * sample;
+                    avg += sample * sample;
                 }
                 avg = avg / samples.len() as f32;
                 avg = avg.sqrt();

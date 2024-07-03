@@ -35,20 +35,29 @@ class ProfileSetup extends Setup {
       loadTokensFromPayload(body);
       await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
     } else {
+      // Check if the session is not verified
       if (body["error"] == "session.not_verified") {
         return await KeySetup.openKeySynchronization();
       }
 
+      // Check if the error says that the token can't be refreshed, but is still valid
       if (body["error"] == "session.duration") {
         return null;
       }
 
+      // Check if the status code isn't 200 (set by the _postTCP method)
       if (body["code"] != null && body["code"] != 200) {
         return const LoginPage();
       }
 
+      // Check if there was an issue on the server
       if (body["error"] == "server.error") {
         return const ErrorPage(title: "server.error");
+      }
+
+      // Check if the server's protocol isn't compatable
+      if (body["error"] == "protocol.error") {
+        return const ErrorPage(title: "protocol.error");
       }
 
       return const LoginPage();
