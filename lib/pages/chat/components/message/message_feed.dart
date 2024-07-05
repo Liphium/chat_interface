@@ -20,6 +20,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 part 'message_actions.dart';
 
@@ -35,7 +36,7 @@ class MessageFeed extends StatefulWidget {
 class _MessageFeedState extends State<MessageFeed> {
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
-  final _scrollController = ScrollController();
+  final _scrollController = AutoScrollController();
 
   @override
   void initState() {
@@ -84,7 +85,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                 });
 
                                 return ListView.builder(
-                                  itemCount: controller.messages.length + 1,
+                                  itemCount: controller.messages.length + 2,
                                   reverse: true,
                                   controller: _scrollController,
                                   addAutomaticKeepAlives: false,
@@ -92,9 +93,15 @@ class _MessageFeedState extends State<MessageFeed> {
                                   physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                                   itemBuilder: (context, index) {
                                     if (isMobileMode()) {
-                                      return BubblesMobileRenderer(index: index);
+                                      return BubblesMobileRenderer(
+                                        index: index,
+                                        controller: _scrollController,
+                                      );
                                     }
-                                    return BubblesRenderer(index: index);
+                                    return BubblesRenderer(
+                                      index: index,
+                                      controller: _scrollController,
+                                    );
                                   },
                                 );
                               },

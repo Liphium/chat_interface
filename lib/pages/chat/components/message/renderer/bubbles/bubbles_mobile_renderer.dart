@@ -10,14 +10,17 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 class BubblesMobileRenderer extends StatefulWidget {
   final int index;
   final Message? message;
+  final AutoScrollController controller;
 
   const BubblesMobileRenderer({
     super.key,
     required this.index,
+    required this.controller,
     this.message,
   });
 
@@ -35,11 +38,19 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
     final controller = Get.find<MessageController>();
     final friendController = Get.find<FriendController>();
 
-    //* Chat bubbles
+    // This is needed for jump to message
+    if (widget.index == controller.messages.length + 1) {
+      return SizedBox(
+        height: Get.height,
+      );
+    }
+
+    // Just to have some spacing above the actual message input
     if (widget.index == 0 && widget.message == null) {
       return verticalSpacing(defaultSpacing);
     }
 
+    //* Chat bubbles
     final message = widget.message ?? controller.messages[widget.index - 1];
 
     if (message.heightCallback && !message.heightReported) {
@@ -102,26 +113,31 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
         );
     }
 
-    final messageWidget = SizedBox(
-      key: _heightKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        key: ValueKey(message.id),
-        children: [
-          if (newHeading || widget.index == controller.messages.length)
-            Padding(
-              padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
-              child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
-            ),
-          Row(
-            textDirection: self ? TextDirection.rtl : TextDirection.ltr,
-            children: [
-              Flexible(
-                child: renderer,
+    final messageWidget = AutoScrollTag(
+      index: widget.index,
+      key: ValueKey(message.id),
+      controller: widget.controller,
+      child: SizedBox(
+        key: _heightKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          key: ValueKey(message.id),
+          children: [
+            if (newHeading || widget.index == controller.messages.length)
+              Padding(
+                padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
+                child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
               ),
-            ],
-          ),
-        ],
+            Row(
+              textDirection: self ? TextDirection.rtl : TextDirection.ltr,
+              children: [
+                Flexible(
+                  child: renderer,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
 

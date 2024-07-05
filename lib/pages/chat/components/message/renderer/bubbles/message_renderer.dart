@@ -5,7 +5,6 @@ import 'package:chat_interface/pages/chat/components/message/renderer/attachment
 import 'package:chat_interface/pages/chat/components/message/renderer/image_attachment_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
-import 'package:chat_interface/theme/ui/dialogs/message_render_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +101,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                           color: widget.self ? theme.colorScheme.onPrimary.withOpacity(0.2) : theme.colorScheme.inverseSurface,
                                           child: InkWell(
                                             borderRadius: BorderRadius.circular(defaultSpacing),
-                                            onTap: () => Get.dialog(MessageRenderWindow(message: widget.message.answerMessage!)),
+                                            onTap: () => Get.find<MessageController>().scrollToMessage(widget.message.answer),
                                             child: Padding(
                                               padding: const EdgeInsets.all(elementSpacing),
                                               child: Row(

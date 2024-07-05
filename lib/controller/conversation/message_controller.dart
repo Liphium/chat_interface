@@ -16,10 +16,12 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 enum OpenTabType {
   conversation,
@@ -179,7 +181,7 @@ class MessageController extends GetxController {
   //* Scroll
   static const messageLimit = 10;
   static const newLoadOffset = 200;
-  late material.ScrollController controller;
+  late AutoScrollController controller;
 
   void addMessageToBottom(Message message, {bool animation = true}) async {
     // Check if there are more messages after the current messages (just in case)
@@ -229,14 +231,15 @@ class MessageController extends GetxController {
     }
   }
 
-  void newScrollController(material.ScrollController newController) {
+  void newScrollController(AutoScrollController newController) {
     controller = newController;
     controller.addListener(() => checkCurrentScrollHeight());
   }
 
   // Run on every scroll to check if new messages should be loaded
   void checkCurrentScrollHeight() {
-    if (controller.position.pixels > controller.position.maxScrollExtent - newLoadOffset) {
+    // Get.height is in there because there is a little bit of buffer above
+    if (controller.position.pixels > controller.position.maxScrollExtent - Get.height / 2 - newLoadOffset) {
       sendLog("load top");
       loadNewMessagesTop();
     } else if (controller.position.pixels <= newLoadOffset) {
@@ -249,9 +252,9 @@ class MessageController extends GetxController {
   bool loading = false;
 
   /// Load "messageLimit" new messages at the top
-  void loadNewMessagesTop() async {
+  Future<bool> loadNewMessagesTop() async {
     if (loading || messages.isEmpty) {
-      return;
+      return false;
     }
     loading = true;
     final finalMessage = messages.last;
@@ -275,32 +278,37 @@ class MessageController extends GetxController {
     loading = false;
 
     if (newMessages.isEmpty) {
-      return;
+      return false;
     }
 
     messages.addAll(newMessages);
     loading = false;
+
+    return true;
   }
 
   /// Load "messageLimit" new messages at the bottom
-  void loadNewMessagesBottom() async {
+  Future<bool> loadNewMessagesBottom() async {
     if (loading || messages.isEmpty) {
       sendLog("loading or sth");
-      return;
+      return false;
     }
     loading = true; // We'll use the same loading as above to make sure this doesn't break anything
     final firstMessage = messages.first;
 
+    sendLog(messages.first.createdAt.toIso8601String());
+
     // Get the the "messageLimit" newest messages, that aren't system messages (like delete or react)
     final loadedMessages = await (db.select(db.message)
-          ..limit(messageLimit)
-          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
           ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id))
           ..where((tbl) => tbl.system.equals(false))
-          ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(firstMessage.createdAt.millisecondsSinceEpoch))))
+          ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(firstMessage.createdAt.millisecondsSinceEpoch)))
+          ..orderBy([(u) => OrderingTerm.asc(u.createdAt)])
+          ..limit(messageLimit))
         .get();
 
-    sendLog(loadedMessages.length);
+    // Sort the messages to prevent weird bugs
+    loadedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     // Add them all to a list (adding them one by one would cause one giant state update since we use async code here)
     final newMessages = <Message>[];
@@ -313,11 +321,62 @@ class MessageController extends GetxController {
     loading = false;
 
     if (newMessages.isEmpty) {
-      return;
+      return false;
     }
 
     // Add them all to the bottom
     messages.insertAll(0, newMessages);
+
+    return true;
+  }
+
+  /// Scroll to a message (not animated or anything sadly)
+  Future<bool> scrollToMessage(String id) async {
+    // Check if message is already on screen
+    var message = messages.firstWhereOrNull((msg) => msg.id == id);
+    if (message != null) {
+      controller.scrollToIndex(messages.indexOf(message) + 1);
+      if (message.highlightAnimation == null) {
+        // If the message is not yet rendered do it through a callback
+        message.highlightCallback = () {
+          Timer(500.ms, () {
+            message!.highlightAnimation!.value = 0;
+            message.highlightAnimation!.animateTo(1);
+          });
+        };
+      } else {
+        // If it is rendered, don't do it through a callback
+        message.highlightAnimation!.value = 0;
+        message.highlightAnimation!.animateTo(1);
+      }
+      return true;
+    }
+
+    // If message is not on screen, load it dynamically from the database
+    final messageDatabase = await (db.message.select()
+          ..where((tbl) => tbl.id.equals(id))
+          ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id)))
+        .getSingleOrNull();
+    if (messageDatabase == null) {
+      return false;
+    }
+
+    message = Message.fromMessageData(messageDatabase);
+    await message.initAttachments();
+    messages.clear();
+    messages.add(message);
+
+    // Highlight the message
+    message.highlightCallback = () {
+      Timer(500.ms, () {
+        message!.highlightAnimation!.value = 0;
+        message.highlightAnimation!.animateTo(1);
+      });
+    };
+
+    await loadNewMessagesBottom();
+
+    return true;
   }
 }
 
@@ -335,6 +394,8 @@ class Message {
   final String conversation;
   final bool edited;
 
+  Function()? highlightCallback;
+  AnimationController? highlightAnimation;
   final canScroll = false.obs;
   double? currentHeight;
   GlobalKey? heightKey;
