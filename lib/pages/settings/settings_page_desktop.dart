@@ -98,7 +98,7 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
                                     () {
                                       final category = Get.find<SettingController>().currentCategory;
                                       if (category.value == null) {
-                                        return SidebarMobile(
+                                        return SettingSelectionMobile(
                                           category: category,
                                           desktop: true,
                                         );

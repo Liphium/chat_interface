@@ -97,15 +97,18 @@ class _SidebarState extends State<Sidebar> {
                                     ),
                                   ),
                                   horizontalSpacing(defaultSpacing * 0.5),
-                                  IconButton(
-                                    key: _addSpaceKey,
-                                    onPressed: () {
-                                      final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
+                                  Visibility(
+                                    visible: !GetPlatform.isMobile,
+                                    child: IconButton(
+                                      key: _addSpaceKey,
+                                      onPressed: () {
+                                        final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
 
-                                      //* Open conversation add window
-                                      showModal(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                                    },
-                                    icon: Icon(Icons.rocket_launch, color: theme.colorScheme.onPrimary),
+                                        //* Open conversation add window
+                                        showModal(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                                      },
+                                      icon: Icon(Icons.rocket_launch, color: theme.colorScheme.onPrimary),
+                                    ),
                                   ),
                                   horizontalSpacing(defaultSpacing * 0.5),
                                   IconButton(

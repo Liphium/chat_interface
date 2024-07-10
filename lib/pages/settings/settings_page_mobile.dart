@@ -36,7 +36,7 @@ class _SettingsPageState extends State<SettingsPageMobile> {
                     left: true,
                     right: true,
                     top: false,
-                    child: SidebarMobile(),
+                    child: SettingSelectionMobile(),
                   ),
                 ),
               ),

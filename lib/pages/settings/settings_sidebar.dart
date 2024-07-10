@@ -47,50 +47,52 @@ class SettingsSidebar extends StatelessWidget {
                   verticalSpacing(defaultSpacing * 0.5),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: current.categories
-                        .map(
-                          (element) => Padding(
-                            padding: const EdgeInsets.only(top: defaultSpacing),
-                            child: Material(
-                              color: currentCategory == element.label ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(defaultSpacing),
-                              child: InkWell(
-                                onTap: () {
-                                  if (category != null) {
-                                    category!.value = element;
-                                  } else {
-                                    Get.to(
-                                      element.widget,
-                                      transition: Transition.fadeIn,
-                                    );
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(defaultSpacing),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(defaultSpacing),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        element.icon,
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                        size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
-                                      ),
-                                      horizontalSpacing(defaultSpacing),
-                                      Expanded(
-                                        child: Text(
-                                          "settings.${element.label}".tr,
-                                          style: Theme.of(context).textTheme.labelLarge!,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
+                    children: current.categories.map((element) {
+                      if (!element.mobile && GetPlatform.isMobile) {
+                        return const SizedBox();
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.only(top: defaultSpacing),
+                        child: Material(
+                          color: currentCategory == element.label ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          child: InkWell(
+                            onTap: () {
+                              if (category != null) {
+                                category!.value = element;
+                              } else {
+                                Get.to(
+                                  element.widget,
+                                  transition: Transition.fadeIn,
+                                );
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            child: Padding(
+                              padding: const EdgeInsets.all(defaultSpacing),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    element.icon,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
                                   ),
-                                ),
+                                  horizontalSpacing(defaultSpacing),
+                                  Expanded(
+                                    child: Text(
+                                      "settings.${element.label}".tr,
+                                      style: Theme.of(context).textTheme.labelLarge!,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        )
-                        .toList(),
+                        ),
+                      );
+                    }).toList(),
                   )
                 ],
               ),
