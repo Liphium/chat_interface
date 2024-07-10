@@ -27,11 +27,11 @@ bool isMobileMode() {
   return Get.width < 800 || Get.height < 500;
 }
 
-void showModal(Widget widget, {mobileSliding = false}) {
+Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) {
   if (isMobileMode()) {
-    Get.to(widget);
+    return Get.to<T>(widget);
   } else {
-    Get.dialog(widget);
+    return Get.dialog(widget);
   }
 }
 

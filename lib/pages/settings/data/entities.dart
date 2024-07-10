@@ -26,10 +26,10 @@ enum SettingLabel {
 
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
-    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage()),
+    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false),
     SettingCategory("files", Icons.folder, FileSettingsPage()),
-    SettingCategory("audio", Icons.campaign, AudioSettingsPage()),
-    SettingCategory("camera", Icons.videocam, VideoSettingsPage()),
+    SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false),
+    SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false),
     //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("language", Icons.public, LanguageSettingsPage()),
   ]),
@@ -37,7 +37,7 @@ enum SettingLabel {
   // Everything to do with the appereance of the app
   appearance("settings.tab.appearance", [
     SettingCategory("chat", Icons.chat_bubble, ChatSettingsPage()),
-    SettingCategory("colors", Icons.color_lens, ThemeSettingsPage()),
+    SettingCategory("colors", Icons.color_lens, ThemeSettingsPage(), mobile: false),
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 
@@ -58,9 +58,10 @@ class SettingCategory {
   final String label;
   final IconData icon;
   final Widget? widget;
+  final bool mobile;
   final bool displayTitle;
 
-  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true});
+  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true});
 }
 
 class Setting<T> {

@@ -163,9 +163,15 @@ class SlidingWindowBase extends StatelessWidget {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
         child: SafeArea(
+          bottom: false,
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(defaultSpacing),
+              padding: EdgeInsets.only(
+                right: defaultSpacing,
+                left: defaultSpacing,
+                top: defaultSpacing,
+                bottom: Get.mediaQuery.padding.bottom != 0 && GetPlatform.isMobile ? Get.mediaQuery.padding.bottom : defaultSpacing,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

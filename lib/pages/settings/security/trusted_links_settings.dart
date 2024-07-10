@@ -88,7 +88,7 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
           verticalSpacing(defaultSpacing),
           FJElevatedButton(
             onTap: () async {
-              final result = await Get.dialog(const TrustedLinkCreationWindow());
+              final result = await showModal(const TrustedLinkCreationWindow());
               final data = TrustedLinkData(domain: result);
               db.trustedLink.insertOnConflictUpdate(data);
               _trusted.add(data);
@@ -116,17 +116,19 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.done_all, color: Get.theme.colorScheme.onPrimary),
-                              horizontalSpacing(defaultSpacing),
-                              Flexible(
-                                child: Text(
-                                  _trusted[index].domain,
-                                  style: Get.theme.textTheme.labelMedium,
+                          Flexible(
+                            child: Row(
+                              children: [
+                                Icon(Icons.done_all, color: Get.theme.colorScheme.onPrimary),
+                                horizontalSpacing(defaultSpacing),
+                                Flexible(
+                                  child: Text(
+                                    _trusted[index].domain,
+                                    style: Get.theme.textTheme.labelMedium,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           IconButton(
                             onPressed: () {
@@ -168,11 +170,12 @@ class _TrustedLinkCreationWindowState extends State<TrustedLinkCreationWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
+      title: [
+        Text("links.trusted_list.add".tr, style: Get.theme.textTheme.titleMedium),
+      ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("links.trusted_list.add".tr, style: Get.theme.textTheme.titleMedium),
-          verticalSpacing(sectionSpacing),
           FJTextField(
             controller: _controller,
             hintText: "links.trusted_list.placeholder".tr,
