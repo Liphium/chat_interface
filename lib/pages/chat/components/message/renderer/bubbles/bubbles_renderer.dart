@@ -45,6 +45,19 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     super.dispose();
   }
 
+  /// Called when the height should be reported back to the message controller
+  void heightCallback(Message message, Duration timeStamp) {
+    if (_heightKey.currentContext == null) {
+      sendLog("couldn't find height, this message has been disposed");
+      return;
+    }
+
+    // Report the actual height to the controller to scroll up the viewport
+    message.heightReported = true;
+    message.heightKey = _heightKey;
+    Get.find<MessageController>().messageHeightCallback(message, _heightKey.currentContext!.size!.height);
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<MessageController>();
@@ -65,13 +78,9 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     //* Chat bubbles
     final message = widget.message ?? controller.messages[widget.index - 1];
 
+    // Call the height callback (in case requested, for keeping the viewport up to date with the scroll)
     if (message.heightCallback && !message.heightReported) {
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        sendLog(_heightKey.currentContext!.size!.height);
-        message.heightReported = true;
-        message.heightKey = _heightKey;
-        Get.find<MessageController>().messageHeightCallback(message, _heightKey.currentContext!.size!.height);
-      });
+      WidgetsBinding.instance.addPostFrameCallback((timestamp) => heightCallback(message, timestamp));
     }
 
     if (message.type == MessageType.system) {
@@ -137,7 +146,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         key: _heightKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          key: ValueKey(message.id),
           children: [
             if (newHeading || widget.index == controller.messages.length)
               Padding(
@@ -244,19 +252,15 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     }
 
     if (message.heightCallback) {
-      return Obx(
-        () => Align(
+      return Obx(() {
+        return Align(
           alignment: Alignment.topCenter,
           heightFactor: message.canScroll.value ? 1 : 0,
           child: messageWidget,
-        ),
-      );
+        );
+      });
     }
 
-    return Align(
-      heightFactor: 1,
-      alignment: Alignment.topCenter,
-      child: messageWidget,
-    );
+    return messageWidget;
   }
 }

@@ -59,8 +59,6 @@ class _UserAvatarState extends State<UserAvatar> {
             );
           }
 
-          sendLog(friend.name);
-
           return ClipOval(
             child: Container(
               color: Get.theme.colorScheme.primaryContainer,

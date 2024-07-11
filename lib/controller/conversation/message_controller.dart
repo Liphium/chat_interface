@@ -181,6 +181,7 @@ class MessageController extends GetxController {
   //* Scroll
   static const messageLimit = 10;
   static const newLoadOffset = 200;
+  bool topReached = false;
   late AutoScrollController controller;
 
   void addMessageToBottom(Message message, {bool animation = true}) async {
@@ -237,11 +238,13 @@ class MessageController extends GetxController {
   }
 
   // Run on every scroll to check if new messages should be loaded
-  void checkCurrentScrollHeight() {
+  void checkCurrentScrollHeight() async {
     // Get.height is in there because there is a little bit of buffer above
-    if (controller.position.pixels > controller.position.maxScrollExtent - Get.height / 2 - newLoadOffset) {
-      sendLog("load top");
-      loadNewMessagesTop();
+    if (controller.position.pixels > controller.position.maxScrollExtent - Get.height / 2 - newLoadOffset && !topReached) {
+      var (topReached, error) = await loadNewMessagesTop();
+      if (!error) {
+        this.topReached = topReached;
+      }
     } else if (controller.position.pixels <= newLoadOffset) {
       sendLog("load bottom");
       loadNewMessagesBottom();
@@ -251,10 +254,10 @@ class MessageController extends GetxController {
   // Loading state for new messages (at top or bottom)
   bool loading = false;
 
-  /// Load "messageLimit" new messages at the top
-  Future<bool> loadNewMessagesTop() async {
+  /// Load "messageLimit" new messages at the top (returns whether top has been reached, second is whether it was still loading)
+  Future<(bool, bool)> loadNewMessagesTop() async {
     if (loading || messages.isEmpty) {
-      return false;
+      return (false, true);
     }
     loading = true;
     final finalMessage = messages.last;
@@ -277,14 +280,14 @@ class MessageController extends GetxController {
     }
     loading = false;
 
+    // If there are no new messages, the top has been reached
     if (newMessages.isEmpty) {
-      return false;
+      return (true, false);
     }
 
+    // If there are new messages, the top has not been reached
     messages.addAll(newMessages);
-    loading = false;
-
-    return true;
+    return (false, false);
   }
 
   /// Load "messageLimit" new messages at the bottom

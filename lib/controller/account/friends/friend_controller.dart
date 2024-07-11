@@ -321,7 +321,6 @@ class Friend {
     // Load the image
     final data = await ProfileHelper.getProfileDataLocal(id);
     if (data == null) {
-      sendLog("NOTHING FOUND");
       profilePictureDataNull = true; // To prevent this thing from constantly loading again
       return;
     }
@@ -331,7 +330,6 @@ class Friend {
     final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
     profilePicture = AttachmentContainer.fromJson(type, json);
     profilePictureImage.value = await ProfileHelper.loadImage(profilePicture!.filePath);
-    sendLog("LOADED!!");
   }
 
   void disposeProfilePicture() {
