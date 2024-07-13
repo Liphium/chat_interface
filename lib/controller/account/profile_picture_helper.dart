@@ -70,12 +70,9 @@ class ProfileHelper {
       return null;
     }
 
+    // Delete the old profile picture file (in case it exists)
     if (oldProfile != null && oldPath != null) {
-      // Check if there is an attachment in any message using the file from the old profile picture
-      final messages = await (db.message.select()..where((tbl) => tbl.attachments.contains(oldPictureId!))).get();
-      if (messages.isEmpty) {
-        await File(oldPath).delete();
-      }
+      await File(oldPath).delete();
     }
 
     // Download the file

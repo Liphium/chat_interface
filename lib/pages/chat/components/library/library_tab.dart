@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/database/accounts/library_entry.dart';
+import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';

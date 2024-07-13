@@ -90,7 +90,7 @@ class SymmetricSequencedInfo {
   String finish(SecureKey key) => "$seq:$signature:${encryptSymmetric(text, key)}";
 
   /// Untransform time encrypted info using the secret key
-  factory SymmetricSequencedInfo.extract(String transformed, SecureKey key) {
+  factory SymmetricSequencedInfo.extract(String transformed, SecureKey key, [Sodium? sodium]) {
     final args = transformed.split(":");
 
     // Check if the thing is in the correct format (somewhat)
@@ -106,13 +106,13 @@ class SymmetricSequencedInfo {
 
     // Get all the rest
     final signature = args[1];
-    final decryptedText = decryptSymmetric(args[2], key);
+    final decryptedText = decryptSymmetric(args[2], key, sodium);
     return SymmetricSequencedInfo(seq, signature, decryptedText);
   }
 
   /// Verifies the signature of the sequenced info
-  bool verifySignature(Uint8List signaturePub) {
+  bool verifySignature(Uint8List signaturePub, [Sodium? sodium]) {
     final computedSignature = hashSha(text + seq.toString());
-    return checkSignature(signature, signaturePub, computedSignature);
+    return checkSignature(signature, signaturePub, computedSignature, sodium);
   }
 }

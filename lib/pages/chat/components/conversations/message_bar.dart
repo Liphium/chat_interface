@@ -3,7 +3,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/live_share_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/database/conversation/conversation.dart' as model;
+import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/chat/conversation_info_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';

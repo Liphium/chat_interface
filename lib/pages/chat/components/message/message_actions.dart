@@ -159,5 +159,6 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   }
 
   // Store message
-  Get.find<MessageController>().storeMessage(Message.fromJson(json["message"]));
+  final msg = await Message.unpackInIsolate(conversation, json["message"]);
+  Get.find<MessageController>().storeMessage(msg);
 }

@@ -1,6 +1,6 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/database/accounts/trusted_links.dart';
+import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';

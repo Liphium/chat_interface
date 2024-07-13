@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/database/accounts/trusted_links.dart';
+import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';

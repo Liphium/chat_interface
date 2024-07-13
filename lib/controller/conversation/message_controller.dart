@@ -7,21 +7,21 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
-import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 enum OpenTabType {
   conversation,
@@ -67,18 +67,8 @@ class MessageController extends GetxController {
 
     // Load messages
     messages.clear();
-    var loadedMessages = await (db.select(db.message)
-          ..limit(messageLimit)
-          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-          ..where((tbl) => tbl.conversationId.equals(conversation.id))
-          ..where((tbl) => tbl.system.equals(false)))
-        .get();
+    loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 
-    for (var message in loadedMessages) {
-      final msg = Message.fromMessageData(message);
-      await msg.initAttachments();
-      messages.add(msg);
-    }
     loaded.value = true;
   }
 
@@ -95,35 +85,17 @@ class MessageController extends GetxController {
     }
   }
 
-  /// Delete all system messages of the same kind before the message send time
-  void deleteOldSystemMessagesOfKind(String id, String kind, DateTime after) {
-    db.message.delete()
-      ..where((tbl) => tbl.content.equals(kind))
-      ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(after.millisecondsSinceEpoch)))
-      ..where((tbl) => tbl.id.isNotValue(id))
-      ..go();
-  }
-
-  // Delete a message from the client with an id
+  /// Delete a message from the client with an id
   void deleteMessageFromClient(String conversation, String id) async {
-    // Get the message from the database on the client
-    final data = await (db.message.select()
-          ..where((tbl) => tbl.id.equals(id))
-          ..where((tbl) => tbl.conversationId.equals(conversation)))
-        .getSingleOrNull();
-    if (data == null) {
-      return;
-    }
-
     // Check if message is in the selected conversation
-    if (currentConversation.value?.id == data.conversationId) {
+    if (currentConversation.value?.id == conversation) {
       messages.removeWhere((element) => element.id == id);
     }
-
-    // Delete from the client database
-    db.message.deleteWhere((tbl) => tbl.id.equals(id));
   }
 
+  /// Store the message in the cache if it is the current selected conversation.
+  ///
+  /// Also handles system messages.
   void storeMessage(Message message) async {
     // Update message reading
     Get.find<ConversationController>().updateMessageRead(
@@ -136,15 +108,6 @@ class MessageController extends GetxController {
     if (currentConversation.value?.id == message.conversation) {
       if (message.sender != currentConversation.value?.token.id) {
         overwriteRead(currentConversation.value!);
-      }
-
-      // Check if message with this id already exists
-      final msg = await (db.message.select()
-            ..where((tbl) => tbl.id.equals(message.id))
-            ..where((tbl) => tbl.conversationId.equals(message.conversation)))
-          .getSingleOrNull();
-      if (msg != null) {
-        return;
       }
 
       // Check if it is a system message and if it should be rendered or not
@@ -162,16 +125,6 @@ class MessageController extends GetxController {
       }
     }
 
-    // Store message in database
-    sendLog(message.type);
-    if (message.type == MessageType.system) {
-      if (SystemMessages.messages[message.content]?.store == true) {
-        db.into(db.message).insertOnConflictUpdate(message.entity(!SystemMessages.messages[message.content]!.render));
-      }
-    } else {
-      db.into(db.message).insertOnConflictUpdate(message.entity(false));
-    }
-
     // Handle system messages
     if (message.type == MessageType.system) {
       SystemMessages.messages[message.content]?.handle(message);
@@ -179,7 +132,6 @@ class MessageController extends GetxController {
   }
 
   //* Scroll
-  static const messageLimit = 10;
   static const newLoadOffset = 200;
   bool topReached = false;
   late AutoScrollController controller;
@@ -187,20 +139,7 @@ class MessageController extends GetxController {
   void addMessageToBottom(Message message, {bool animation = true}) async {
     // Check if there are more messages after the current messages (just in case)
     if (messages.isNotEmpty) {
-      final availableMessage = await (db.select(db.message)
-            ..limit(1)
-            ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-            ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id))
-            ..where((tbl) => tbl.system.equals(false))
-            ..where((tbl) => tbl.id.isNotValue(message.id))
-            ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(messages.first.createdAt.millisecondsSinceEpoch))))
-          .getSingleOrNull();
-
-      // If there is a message before this one at the bottom, don't render
-      if (availableMessage != null) {
-        sendLog("OLDER MESSAGE, ignoring");
-        return;
-      }
+      // TODO: Replace with something
     }
 
     // Initialize all message data
@@ -237,7 +176,7 @@ class MessageController extends GetxController {
     controller.addListener(() => checkCurrentScrollHeight());
   }
 
-  // Run on every scroll to check if new messages should be loaded
+  /// Runs on every scroll to check if new messages should be loaded
   void checkCurrentScrollHeight() async {
     // Get.height is in there because there is a little bit of buffer above
     if (controller.position.pixels > controller.position.maxScrollExtent - Get.height / 2 - newLoadOffset && !topReached) {
@@ -251,46 +190,51 @@ class MessageController extends GetxController {
     }
   }
 
-  // Loading state for new messages (at top or bottom)
+  /// Loading state for new messages (at top or bottom)
   bool loading = false;
 
-  /// Load "messageLimit" new messages at the top (returns whether top has been reached, second is whether it was still loading)
-  Future<(bool, bool)> loadNewMessagesTop() async {
-    if (loading || messages.isEmpty) {
+  /// Load new messages from the server for the top of the scroll feed.
+  ///
+  /// The `first boolean` tells you whether or not the top has been reached.
+  /// The `second boolean` tells you whether or not it was still loading or an error happend.
+  Future<(bool, bool)> loadNewMessagesTop({int? date}) async {
+    if (loading || (messages.isEmpty && date == null)) {
       return (false, true);
     }
     loading = true;
-    final finalMessage = messages.last;
+    date ??= messages.last.createdAt.millisecondsSinceEpoch;
 
-    // Get the the "messageLimit" newest messages, that aren't system messages (like delete or react)
-    final loadedMessages = await (db.select(db.message)
-          ..limit(messageLimit)
-          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-          ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id))
-          ..where((tbl) => tbl.system.equals(false))
-          ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(finalMessage.createdAt.millisecondsSinceEpoch))))
-        .get();
+    // Load the messages from the server using the list_before endpoint
+    final conversation = currentConversation.value!;
+    final json = await postNodeJSON("/conversations/message/list_before", {
+      "token_id": conversation.token.id,
+      "token": conversation.token.token,
+      "before": date,
+    });
 
-    // Add them all to a list (adding them one by one would cause one giant state update since we use async code here)
-    final newMessages = <Message>[];
-    for (var msg in loadedMessages) {
-      final message = Message.fromMessageData(msg);
-      await message.initAttachments();
-      newMessages.add(message);
+    // Check if there was an error
+    if (!json["success"]) {
+      showErrorPopup("error", json["error"]);
+      return (false, false);
     }
-    loading = false;
 
-    // If there are no new messages, the top has been reached
-    if (newMessages.isEmpty) {
+    // Check if the top has been reached
+    if (json["messages"] == null || json["messages"].isEmpty) {
       return (true, false);
     }
 
-    // If there are new messages, the top has not been reached
-    messages.addAll(newMessages);
+    // Unpack the messages in an isolate (in a separate thread yk)
+    final loadedMessages = await _processMessages(conversation, json["messages"]);
+    messages.addAll(loadedMessages);
+
+    loading = false;
     return (false, false);
   }
 
-  /// Load "messageLimit" new messages at the bottom
+  /// Load new messages at the bottom of the scroll feed from the server.
+  ///
+  /// Returns whether or not it was successful.
+  /// Will open an error dialog in case something goes wrong on the server.
   Future<bool> loadNewMessagesBottom() async {
     if (loading || messages.isEmpty) {
       sendLog("loading or sth");
@@ -301,39 +245,80 @@ class MessageController extends GetxController {
 
     sendLog(messages.first.createdAt.toIso8601String());
 
-    // Get the the "messageLimit" newest messages, that aren't system messages (like delete or react)
-    final loadedMessages = await (db.select(db.message)
-          ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id))
-          ..where((tbl) => tbl.system.equals(false))
-          ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(firstMessage.createdAt.millisecondsSinceEpoch)))
-          ..orderBy([(u) => OrderingTerm.asc(u.createdAt)])
-          ..limit(messageLimit))
-        .get();
+    // Load messages from the server
+    final conversation = currentConversation.value!;
+    final json = await postNodeJSON("/conversations/message/list_after", {
+      "token_id": conversation.token.id,
+      "token": conversation.token.token,
+      "after": firstMessage.createdAt.millisecondsSinceEpoch,
+    });
 
-    // Sort the messages to prevent weird bugs
-    loadedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    // Add them all to a list (adding them one by one would cause one giant state update since we use async code here)
-    final newMessages = <Message>[];
-    for (var msg in loadedMessages) {
-      final message = Message.fromMessageData(msg);
-      await message.initAttachments();
-      message.heightCallback = true; // To prevent the viewport from scrolling up
-      newMessages.add(message);
-    }
-    loading = false;
-
-    if (newMessages.isEmpty) {
+    // Check if there was an error
+    if (!json["success"]) {
+      showErrorPopup("error", json["error"]);
       return false;
     }
 
-    // Add them all to the bottom
-    messages.insertAll(0, newMessages);
+    // Check if the top has been reached
+    if (json["messages"].isEmpty) {
+      return false;
+    }
 
+    // Process the messages
+    final loadedMessages = await _processMessages(conversation, json["messages"]);
+    for (var message in loadedMessages) {
+      message.heightCallback = true;
+    }
+    loadedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Sort to prevent weird order
+    messages.insertAll(0, loadedMessages);
+
+    loading = false;
     return true;
   }
 
-  /// Scroll to a message (not animated or anything sadly)
+  /// Process a message payload from the server in an isolate.
+  ///
+  /// All the json decoding and decryption is running in one isolate, only the verification of
+  /// the signature is ran in the main isolate due to constraints with libsodium.
+  ///
+  /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
+  Future<List<Message>> _processMessages(Conversation conversation, List<dynamic> json) async {
+    // Unpack the messages in an isolate (in a separate thread yk)
+    final copy = Conversation.copyWithoutKey(conversation);
+    final loadedMessages = await sodiumLib.runIsolated(
+      (sodium, keys, pairs) async {
+        // Process all messages
+        final list = <(Message, SymmetricSequencedInfo?)>[];
+        for (var msgJson in json) {
+          list.add(Message.fromJson(
+            msgJson,
+            conversation: copy,
+            key: keys[0],
+            sodium: sodium,
+          ));
+        }
+
+        // Return the list to the main isolate
+        return list;
+      },
+      secureKeys: [conversation.key],
+    );
+
+    // Init the attachments on all messages and verify signatures
+    for (var (msg, info) in loadedMessages) {
+      if (info != null) {
+        msg.verifySignature(info);
+      }
+      await msg.initAttachments();
+    }
+
+    return loadedMessages.map((tuple) => tuple.$1).toList();
+  }
+
+  /// Scroll to a message (only animated when message is loaded in cache).
+  ///
+  /// Loads the message from the server if it is not in the cache and refreshes
+  /// the complete feed in that case.
   Future<bool> scrollToMessage(String id) async {
     // Check if message is already on screen
     var message = messages.firstWhereOrNull((msg) => msg.id == id);
@@ -356,16 +341,12 @@ class MessageController extends GetxController {
     }
 
     // If message is not on screen, load it dynamically from the database
-    final messageDatabase = await (db.message.select()
-          ..where((tbl) => tbl.id.equals(id))
-          ..where((tbl) => tbl.conversationId.equals(currentConversation.value!.id)))
-        .getSingleOrNull();
-    if (messageDatabase == null) {
+    message = await Message.loadFromServer(currentConversation.value!, id);
+    if (message == null) {
       return false;
     }
 
-    message = Message.fromMessageData(messageDatabase);
-    await message.initAttachments();
+    // Add the message to the feed and remove all the others
     messages.clear();
     messages.add(message);
 
@@ -377,6 +358,7 @@ class MessageController extends GetxController {
       });
     };
 
+    // Load the messages below
     await loadNewMessagesBottom();
 
     return true;
@@ -412,13 +394,7 @@ class Message {
   Future<bool> initAttachments() async {
     //* Load answer
     if (answer != "") {
-      final message = await (db.message.select()
-            ..where((tbl) => tbl.id.equals(answer))
-            ..where((tbl) => tbl.conversationId.equals(conversation)))
-          .getSingleOrNull();
-      if (message != null) {
-        answerMessage = Message.fromMessageData(message);
-      }
+      // TODO: Actually load the answer from the server
     } else {
       answerMessage = null;
     }
@@ -500,29 +476,85 @@ class Message {
     this.verified.value = verified;
   }
 
-  factory Message.fromJson(Map<String, dynamic> json) {
+  /// Load a message from the server.
+  ///
+  /// Uses a different isolate (than the main one) to unpack the message.
+  static Future<Message?> loadFromServer(Conversation conversation, String messageId, {init = true}) async {
+    // Get the message from the server
+    final json = await postNodeJSON("/conversations/message/get", {
+      "token_id": conversation.token.id,
+      "token": conversation.token.token,
+      "message": messageId,
+    });
+
+    // Check if there is an error
+    if (!json["success"]) {
+      sendLog("error fetching message $messageId: ${json["error"]}");
+      return null;
+    }
+
+    // Parse message and init attachments (if desired)
+    final message = await Message.unpackInIsolate(conversation, json["message"]);
+    if (init) {
+      await message.initAttachments();
+    }
+
+    return message;
+  }
+
+  /// Unpack a message json in an isolate
+  ///
+  /// Also verifies the signature (but that happens in the main isolate).
+  ///
+  /// For the future also: TODO: Unpack the signature in a different isolate
+  static Future<Message> unpackInIsolate(Conversation conversation, Map<String, dynamic> json) async {
+    // Run an isolate to parse the message
+    final copy = Conversation.copyWithoutKey(conversation);
+    final (message, info) = await sodiumLib.runIsolated(
+      (sodium, keys, pairs) {
+        return Message.fromJson(
+          json,
+          sodium: sodium,
+          key: keys[0],
+          conversation: copy,
+        );
+      },
+      secureKeys: [conversation.key],
+    );
+
+    // Verify the signature
+    if (info != null) {
+      message.verifySignature(info);
+    }
+
+    return message;
+  }
+
+  /// Load a message from json (from the server) and get the corresponding [SymmetricSequencedInfo] (only if no system message).
+  ///
+  /// **Doesn't verify the signature**
+  static (Message, SymmetricSequencedInfo?) fromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
     // Convert to message
-    final account = Get.find<ConversationController>().conversations[json["conversation"]]!.members[json["sender"]]?.account ?? "removed";
+    final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[json["sender"]]?.account ?? "removed";
     var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account, DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"],
         json["edited"], false);
 
     // Decrypt content
-    final conversation = Get.find<ConversationController>().conversations[json["conversation"]]!;
+    conversation = conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!;
     if (message.sender == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();
       sendLog("SYSTEM MESSAGE");
-      return message;
+      return (message, null);
     }
 
     // Check signature
-    final info = SymmetricSequencedInfo.extract(message.content, conversation.key);
+    final info = SymmetricSequencedInfo.extract(message.content, key ?? conversation.key, sodium);
     message.content = info.text;
     message.loadContent();
-    message.verifySignature(info);
 
-    return message;
+    return (message, info);
   }
 
   /// Loads the content from the message (signature, type, content)
@@ -543,7 +575,7 @@ class Message {
   }
 
   /// Verifies the signature of the message
-  void verifySignature(SymmetricSequencedInfo info) async {
+  void verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
     final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
     sendLog("${conversation.members} | ${this.sender}");
     final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
@@ -552,41 +584,7 @@ class Message {
       verified.value = false;
       return;
     }
-    verified.value = info.verifySignature(sender.signatureKey);
-    db.message.insertOnConflictUpdate(entity(false));
-  }
-
-  Message.fromMessageData(MessageData messageData)
-      : id = messageData.id,
-        type = MessageType.values[messageData.type],
-        content = messageData.content,
-        answer = messageData.answer,
-        attachments = List<String>.from(jsonDecode(messageData.attachments)),
-        certificate = messageData.certificate,
-        sender = messageData.sender,
-        senderAccount = messageData.senderAccount,
-        createdAt = DateTime.fromMillisecondsSinceEpoch(messageData.createdAt.toInt()),
-        conversation = messageData.conversationId,
-        edited = messageData.edited {
-    verified.value = messageData.verified;
-  }
-
-  MessageData entity(bool system) {
-    return MessageData(
-      id: id,
-      type: type.index,
-      content: content,
-      answer: answer,
-      attachments: jsonEncode(attachments),
-      certificate: certificate,
-      sender: sender,
-      senderAccount: senderAccount,
-      createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
-      conversationId: conversation,
-      edited: edited,
-      verified: verified.value,
-      system: system,
-    );
+    verified.value = info.verifySignature(sender.signatureKey, sodium);
   }
 
   Map<String, dynamic> toJson() {
@@ -600,9 +598,6 @@ class Message {
       if (attachments[i].startsWith("a:")) {
         attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), conv.key))["id"];
       }
-    }
-    if (SystemMessages.messages[content]?.store == true) {
-      db.message.insertOnConflictUpdate(entity(!SystemMessages.messages[content]!.render));
     }
   }
 

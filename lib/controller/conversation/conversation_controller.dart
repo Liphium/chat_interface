@@ -8,7 +8,7 @@ import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/database/conversation/conversation.dart' as model;
+import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
@@ -110,7 +110,8 @@ class ConversationController extends GetxController {
     }
   }
 
-  void finishedLoading(Map<String, dynamic> readStates, List<dynamic> deleted, {bool overwriteReads = true}) async {
+  /// Called when a subscription is finished to make sure conversations are properly sorted and up to date
+  void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, {bool overwriteReads = true}) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
     for (var conversation in conversations.values) {
@@ -120,12 +121,16 @@ class ConversationController extends GetxController {
         continue;
       }
 
+      // Get conversation info
+      final info = (conversationInfo[conversation.id] ?? {}) as Map<String, dynamic>;
+      final lastRead = (info["r"] ?? 0) as int;
+      conversation.notificationCount.value = (info["n"] ?? 0) as int;
+
       if (overwriteReads) {
-        conversation.readAt.value = readStates[conversation.id] ?? 0;
-      } else if (readStates[conversation.id] != null) {
-        conversation.readAt.value = readStates[conversation.id];
+        conversation.readAt.value = lastRead;
+      } else if (lastRead != 0) {
+        conversation.readAt.value = lastRead;
       }
-      conversation.fetchNotificationCount();
     }
 
     loaded.value = true;
@@ -190,18 +195,29 @@ class Conversation {
           data.updatedAt.toInt(),
         );
 
-  void addMember(Member member) {
-    members[member.tokenId] = member;
+  /// Copy a conversation without the `key`.
+  ///
+  /// If the key was actually used it would just thrown an error for
+  /// being completely invalid.
+  factory Conversation.copyWithoutKey(Conversation conversation) {
+    final conv = Conversation(
+      conversation.id,
+      conversation.vaultId,
+      conversation.type,
+      conversation.token,
+      conversation.container,
+      "",
+      conversation.updatedAt.value,
+    );
+
+    // Copy all the members
+    conv.members.addAll(conversation.members);
+
+    return conv;
   }
 
-  Future<bool> fetchNotificationCount() async {
-    final count = await db.customSelect(
-      "SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?",
-      variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))],
-      readsFrom: {db.message},
-    ).getSingle();
-    notificationCount.value += (count.data["c"] ?? 0) as int;
-    return true;
+  void addMember(Member member) {
+    members[member.tokenId] = member;
   }
 
   bool get isGroup => type == model.ConversationType.group;
@@ -281,7 +297,6 @@ class Conversation {
     }
 
     db.conversation.deleteWhere((tbl) => tbl.id.equals(id));
-    db.message.deleteWhere((tbl) => tbl.conversationId.equals(id));
     db.member.deleteWhere((tbl) => tbl.conversationId.equals(id));
     Get.find<MessageController>().unselectConversation(id: id);
     Get.find<ConversationController>().removeConversation(id);

@@ -103,7 +103,6 @@ Future<String?> refreshVault() async {
   // Delete all old conversations from the database
   db.conversation.deleteWhere((tbl) => tbl.id.isNotIn(ids));
   db.member.deleteWhere((tbl) => tbl.conversationId.isNotIn(ids));
-  db.message.deleteWhere((tbl) => tbl.conversationId.isNotIn(ids));
 
   return null;
 }

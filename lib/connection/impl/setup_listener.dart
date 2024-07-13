@@ -3,10 +3,8 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 import '../../util/logging_framework.dart';
@@ -63,24 +61,16 @@ String generateStatusData(String status) {
 }
 
 void _sub(String status, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
-  // Get last message received
-  final lastMessage = await (db.message.select()
-        ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
-        ..limit(1))
-      .getSingleOrNull();
-  final lastFetch = lastMessage?.createdAt.toInt() ?? 0;
-
   connector.sendAction(
       Message("conv_sub", <String, dynamic>{
         "tokens": tokens,
         "status": status,
-        "date": lastFetch,
       }), handler: (event) {
     if (!event.data["success"]) {
       sendLog("ERROR WHILE SUBSCRIBING: ${event.data["message"]}");
       return;
     }
     Get.find<StatusController>().statusLoading.value = false;
-    Get.find<ConversationController>().finishedLoading(event.data["read"], deletions ? (event.data["missing"] ?? []) : [], overwriteReads: startup);
+    Get.find<ConversationController>().finishedLoading(event.data["info"], deletions ? (event.data["missing"] ?? []) : [], overwriteReads: startup);
   });
 }
