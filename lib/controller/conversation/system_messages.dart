@@ -11,10 +11,6 @@ class SystemMessages {
     // Format: [prevRole, newRole, memberId, senderId]
     "group.rank_change": SystemMessage(
       Icons.shield,
-      handler: (msg) {
-        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        conversation.fetchMembers(msg.createdAt);
-      },
       translation: (msg) {
         final friendController = Get.find<FriendController>();
         return "chat.rank_change.${msg.attachments[0]}->${msg.attachments[1]}".trParams({
@@ -28,7 +24,6 @@ class SystemMessages {
     // Format: [memberId]
     "group.token_change": SystemMessage(
       Icons.vpn_key,
-      handler: (msg) => {},
       translation: (msg) {
         return "chat.token_change".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
@@ -40,10 +35,6 @@ class SystemMessages {
     // Format: [memberId]
     "group.member_join": SystemMessage(
       Icons.arrow_forward,
-      handler: (msg) {
-        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        conversation.fetchMembers(msg.createdAt);
-      },
       translation: (msg) {
         return "chat.member_join".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
@@ -55,7 +46,6 @@ class SystemMessages {
     // Format: [invitorId, memberId]
     "group.member_invite": SystemMessage(
       Icons.waving_hand,
-      handler: (msg) {},
       translation: (msg) {
         return "chat.member_invite".trParams({
           "invitor": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
@@ -68,10 +58,6 @@ class SystemMessages {
     // Format: [memberId]
     "group.member_leave": SystemMessage(
       Icons.arrow_back,
-      handler: (msg) {
-        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        conversation.fetchMembers(msg.createdAt);
-      },
       translation: (msg) {
         return "chat.member_leave".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
@@ -83,10 +69,6 @@ class SystemMessages {
     // Format: [issuerId, memberId]
     "group.member_kick": SystemMessage(
       Icons.arrow_back,
-      handler: (msg) {
-        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        conversation.fetchMembers(msg.createdAt);
-      },
       translation: (msg) {
         return "chat.kick".trParams({
           "issuer": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
@@ -99,10 +81,6 @@ class SystemMessages {
     // Format: [memberId]
     "group.new_admin": SystemMessage(
       Icons.shield,
-      handler: (msg) {
-        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        conversation.fetchMembers(msg.createdAt);
-      },
       translation: (msg) {
         return "chat.new_admin".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
@@ -144,14 +122,13 @@ class SystemMessages {
 class SystemMessage {
   final IconData icon;
   final bool render;
-  final bool store;
   final String Function(Message) translation;
-  final Function(Message) handler;
+  final Function(Message)? handler;
 
-  SystemMessage(this.icon, {required this.handler, required this.translation, this.render = true, this.store = true});
+  SystemMessage(this.icon, {this.handler, required this.translation, this.render = true});
 
   void handle(Message message) {
     message.decryptSystemMessageAttachments();
-    handler.call(message);
+    handler?.call(message);
   }
 }

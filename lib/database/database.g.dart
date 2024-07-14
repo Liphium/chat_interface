@@ -41,6 +41,12 @@ class $ConversationTable extends Conversation
   late final GeneratedColumn<String> key = GeneratedColumn<String>(
       'key', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _lastVersionMeta =
+      const VerificationMeta('lastVersion');
+  @override
+  late final GeneratedColumn<BigInt> lastVersion = GeneratedColumn<BigInt>(
+      'last_version', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
@@ -54,7 +60,7 @@ class $ConversationTable extends Conversation
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, vaultId, type, data, token, key, updatedAt, readAt];
+      [id, vaultId, type, data, token, key, lastVersion, updatedAt, readAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -95,6 +101,14 @@ class $ConversationTable extends Conversation
     } else if (isInserting) {
       context.missing(_keyMeta);
     }
+    if (data.containsKey('last_version')) {
+      context.handle(
+          _lastVersionMeta,
+          lastVersion.isAcceptableOrUnknown(
+              data['last_version']!, _lastVersionMeta));
+    } else if (isInserting) {
+      context.missing(_lastVersionMeta);
+    }
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
@@ -129,6 +143,8 @@ class $ConversationTable extends Conversation
           .read(DriftSqlType.string, data['${effectivePrefix}token'])!,
       key: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      lastVersion: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}last_version'])!,
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.bigInt, data['${effectivePrefix}updated_at'])!,
       readAt: attachedDatabase.typeMapping
@@ -153,6 +169,7 @@ class ConversationData extends DataClass
   final String data;
   final String token;
   final String key;
+  final BigInt lastVersion;
   final BigInt updatedAt;
   final BigInt readAt;
   const ConversationData(
@@ -162,6 +179,7 @@ class ConversationData extends DataClass
       required this.data,
       required this.token,
       required this.key,
+      required this.lastVersion,
       required this.updatedAt,
       required this.readAt});
   @override
@@ -176,6 +194,7 @@ class ConversationData extends DataClass
     map['data'] = Variable<String>(data);
     map['token'] = Variable<String>(token);
     map['key'] = Variable<String>(key);
+    map['last_version'] = Variable<BigInt>(lastVersion);
     map['updated_at'] = Variable<BigInt>(updatedAt);
     map['read_at'] = Variable<BigInt>(readAt);
     return map;
@@ -189,6 +208,7 @@ class ConversationData extends DataClass
       data: Value(data),
       token: Value(token),
       key: Value(key),
+      lastVersion: Value(lastVersion),
       updatedAt: Value(updatedAt),
       readAt: Value(readAt),
     );
@@ -205,6 +225,7 @@ class ConversationData extends DataClass
       data: serializer.fromJson<String>(json['data']),
       token: serializer.fromJson<String>(json['token']),
       key: serializer.fromJson<String>(json['key']),
+      lastVersion: serializer.fromJson<BigInt>(json['lastVersion']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
       readAt: serializer.fromJson<BigInt>(json['readAt']),
     );
@@ -220,6 +241,7 @@ class ConversationData extends DataClass
       'data': serializer.toJson<String>(data),
       'token': serializer.toJson<String>(token),
       'key': serializer.toJson<String>(key),
+      'lastVersion': serializer.toJson<BigInt>(lastVersion),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
       'readAt': serializer.toJson<BigInt>(readAt),
     };
@@ -232,6 +254,7 @@ class ConversationData extends DataClass
           String? data,
           String? token,
           String? key,
+          BigInt? lastVersion,
           BigInt? updatedAt,
           BigInt? readAt}) =>
       ConversationData(
@@ -241,6 +264,7 @@ class ConversationData extends DataClass
         data: data ?? this.data,
         token: token ?? this.token,
         key: key ?? this.key,
+        lastVersion: lastVersion ?? this.lastVersion,
         updatedAt: updatedAt ?? this.updatedAt,
         readAt: readAt ?? this.readAt,
       );
@@ -253,6 +277,7 @@ class ConversationData extends DataClass
           ..write('data: $data, ')
           ..write('token: $token, ')
           ..write('key: $key, ')
+          ..write('lastVersion: $lastVersion, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('readAt: $readAt')
           ..write(')'))
@@ -260,8 +285,8 @@ class ConversationData extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, vaultId, type, data, token, key, updatedAt, readAt);
+  int get hashCode => Object.hash(
+      id, vaultId, type, data, token, key, lastVersion, updatedAt, readAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -272,6 +297,7 @@ class ConversationData extends DataClass
           other.data == this.data &&
           other.token == this.token &&
           other.key == this.key &&
+          other.lastVersion == this.lastVersion &&
           other.updatedAt == this.updatedAt &&
           other.readAt == this.readAt);
 }
@@ -283,6 +309,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<String> data;
   final Value<String> token;
   final Value<String> key;
+  final Value<BigInt> lastVersion;
   final Value<BigInt> updatedAt;
   final Value<BigInt> readAt;
   final Value<int> rowid;
@@ -293,6 +320,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     this.data = const Value.absent(),
     this.token = const Value.absent(),
     this.key = const Value.absent(),
+    this.lastVersion = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.readAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -304,6 +332,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     required String data,
     required String token,
     required String key,
+    required BigInt lastVersion,
     required BigInt updatedAt,
     required BigInt readAt,
     this.rowid = const Value.absent(),
@@ -313,6 +342,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
         data = Value(data),
         token = Value(token),
         key = Value(key),
+        lastVersion = Value(lastVersion),
         updatedAt = Value(updatedAt),
         readAt = Value(readAt);
   static Insertable<ConversationData> custom({
@@ -322,6 +352,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     Expression<String>? data,
     Expression<String>? token,
     Expression<String>? key,
+    Expression<BigInt>? lastVersion,
     Expression<BigInt>? updatedAt,
     Expression<BigInt>? readAt,
     Expression<int>? rowid,
@@ -333,6 +364,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       if (data != null) 'data': data,
       if (token != null) 'token': token,
       if (key != null) 'key': key,
+      if (lastVersion != null) 'last_version': lastVersion,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (readAt != null) 'read_at': readAt,
       if (rowid != null) 'rowid': rowid,
@@ -346,6 +378,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       Value<String>? data,
       Value<String>? token,
       Value<String>? key,
+      Value<BigInt>? lastVersion,
       Value<BigInt>? updatedAt,
       Value<BigInt>? readAt,
       Value<int>? rowid}) {
@@ -356,6 +389,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       data: data ?? this.data,
       token: token ?? this.token,
       key: key ?? this.key,
+      lastVersion: lastVersion ?? this.lastVersion,
       updatedAt: updatedAt ?? this.updatedAt,
       readAt: readAt ?? this.readAt,
       rowid: rowid ?? this.rowid,
@@ -384,6 +418,9 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     if (key.present) {
       map['key'] = Variable<String>(key.value);
     }
+    if (lastVersion.present) {
+      map['last_version'] = Variable<BigInt>(lastVersion.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<BigInt>(updatedAt.value);
     }
@@ -405,6 +442,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
           ..write('data: $data, ')
           ..write('token: $token, ')
           ..write('key: $key, ')
+          ..write('lastVersion: $lastVersion, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('readAt: $readAt, ')
           ..write('rowid: $rowid')
@@ -2537,6 +2575,7 @@ typedef $$ConversationTableInsertCompanionBuilder = ConversationCompanion
   required String data,
   required String token,
   required String key,
+  required BigInt lastVersion,
   required BigInt updatedAt,
   required BigInt readAt,
   Value<int> rowid,
@@ -2549,6 +2588,7 @@ typedef $$ConversationTableUpdateCompanionBuilder = ConversationCompanion
   Value<String> data,
   Value<String> token,
   Value<String> key,
+  Value<BigInt> lastVersion,
   Value<BigInt> updatedAt,
   Value<BigInt> readAt,
   Value<int> rowid,
@@ -2580,6 +2620,7 @@ class $$ConversationTableTableManager extends RootTableManager<
             Value<String> data = const Value.absent(),
             Value<String> token = const Value.absent(),
             Value<String> key = const Value.absent(),
+            Value<BigInt> lastVersion = const Value.absent(),
             Value<BigInt> updatedAt = const Value.absent(),
             Value<BigInt> readAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2591,6 +2632,7 @@ class $$ConversationTableTableManager extends RootTableManager<
             data: data,
             token: token,
             key: key,
+            lastVersion: lastVersion,
             updatedAt: updatedAt,
             readAt: readAt,
             rowid: rowid,
@@ -2602,6 +2644,7 @@ class $$ConversationTableTableManager extends RootTableManager<
             required String data,
             required String token,
             required String key,
+            required BigInt lastVersion,
             required BigInt updatedAt,
             required BigInt readAt,
             Value<int> rowid = const Value.absent(),
@@ -2613,6 +2656,7 @@ class $$ConversationTableTableManager extends RootTableManager<
             data: data,
             token: token,
             key: key,
+            lastVersion: lastVersion,
             updatedAt: updatedAt,
             readAt: readAt,
             rowid: rowid,
@@ -2667,6 +2711,11 @@ class $$ConversationTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
+  ColumnFilters<BigInt> get lastVersion => $state.composableBuilder(
+      column: $state.table.lastVersion,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   ColumnFilters<BigInt> get updatedAt => $state.composableBuilder(
       column: $state.table.updatedAt,
       builder: (column, joinBuilders) =>
@@ -2708,6 +2757,11 @@ class $$ConversationTableOrderingComposer
 
   ColumnOrderings<String> get key => $state.composableBuilder(
       column: $state.table.key,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<BigInt> get lastVersion => $state.composableBuilder(
+      column: $state.table.lastVersion,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 

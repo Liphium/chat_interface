@@ -84,25 +84,28 @@ class _MessageFeedState extends State<MessageFeed> {
                                   controller.checkCurrentScrollHeight();
                                 });
 
-                                return ListView.builder(
-                                  itemCount: controller.messages.length + 2,
-                                  reverse: true,
-                                  controller: _scrollController,
-                                  addAutomaticKeepAlives: false,
-                                  addRepaintBoundaries: false,
-                                  physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                                  itemBuilder: (context, index) {
-                                    if (isMobileMode()) {
-                                      return BubblesMobileRenderer(
+                                return ScrollConfiguration(
+                                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                  child: ListView.builder(
+                                    itemCount: controller.messages.length + 2,
+                                    reverse: true,
+                                    controller: _scrollController,
+                                    addAutomaticKeepAlives: false,
+                                    addRepaintBoundaries: false,
+                                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                    itemBuilder: (context, index) {
+                                      if (isMobileMode()) {
+                                        return BubblesMobileRenderer(
+                                          index: index,
+                                          controller: _scrollController,
+                                        );
+                                      }
+                                      return BubblesRenderer(
                                         index: index,
                                         controller: _scrollController,
                                       );
-                                    }
-                                    return BubblesRenderer(
-                                      index: index,
-                                      controller: _scrollController,
-                                    );
-                                  },
+                                    },
+                                  ),
                                 );
                               },
                             ),

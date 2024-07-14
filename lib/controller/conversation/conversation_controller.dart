@@ -54,13 +54,7 @@ class ConversationController extends GetxController {
     add(conversation, loadMembers: false);
 
     // Insert into database
-    conversation.save(fetchMembers: false);
-
-    // Get all the members of the conversation
-    var res = await conversation.fetchMembers(DateTime.fromMillisecondsSinceEpoch(0));
-    if (!res) {
-      return res;
-    }
+    conversation.save(saveMembers: false);
 
     // Subscribe to conversation
     subscribeToConversation(Get.find<StatusController>().statusJson(), conversation.token);
@@ -124,7 +118,13 @@ class ConversationController extends GetxController {
       // Get conversation info
       final info = (conversationInfo[conversation.id] ?? {}) as Map<String, dynamic>;
       final lastRead = (info["r"] ?? 0) as int;
+      final version = (info["v"] ?? 0) as int;
       conversation.notificationCount.value = (info["n"] ?? 0) as int;
+
+      // Check if the current version of the conversation is up to date
+      if (conversation.lastVersion != version) {
+        await conversation.fetchData(version);
+      }
 
       if (overwriteReads) {
         conversation.readAt.value = lastRead;
@@ -154,7 +154,8 @@ class Conversation {
   String vaultId;
   final model.ConversationType type;
   final ConversationToken token;
-  final ConversationContainer container;
+  ConversationContainer container;
+  int lastVersion = 0;
   final updatedAt = 0.obs;
   final readAt = 0.obs;
   final notificationCount = 0.obs;
@@ -170,7 +171,7 @@ class Conversation {
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, int updatedAt) {
+  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
@@ -183,6 +184,7 @@ class Conversation {
           ConversationContainer.fromJson(json["data"]),
           json["key"],
           json["update"] ?? DateTime.now().millisecondsSinceEpoch,
+          0, // This shouldn't matter, just makes sure the data is fetched
         );
   Conversation.fromData(ConversationData data)
       : this(
@@ -193,6 +195,7 @@ class Conversation {
           ConversationContainer.fromJson(jsonDecode(data.data)),
           data.key,
           data.updatedAt.toInt(),
+          data.lastVersion.toInt(),
         );
 
   /// Copy a conversation without the `key`.
@@ -208,6 +211,7 @@ class Conversation {
       conversation.container,
       "",
       conversation.updatedAt.value,
+      conversation.lastVersion,
     );
 
     // Copy all the members
@@ -264,6 +268,7 @@ class Conversation {
       key: packageSymmetricKey(key),
       data: jsonEncode(container.toJson()),
       updatedAt: BigInt.from(updatedAt.value),
+      lastVersion: BigInt.from(lastVersion),
       readAt: BigInt.from(readAt.value));
   String toJson() => jsonEncode(<String, dynamic>{
         "id": id,
@@ -302,37 +307,33 @@ class Conversation {
     Get.find<ConversationController>().removeConversation(id);
   }
 
-  void save({fetchMembers = true}) {
+  /// Save the entire conversation to the local database.
+  ///
+  /// By default members are also overwritten. Can be disabled by setting `saveMembers` to `false`.
+  void save({saveMembers = true}) {
     db.conversation.insertOnConflictUpdate(entity);
-    if (fetchMembers) {
+    if (saveMembers) {
       for (var member in members.values) {
         db.member.insertOnConflictUpdate(member.toData(id));
       }
     }
   }
 
-  DateTime? lastMemberFetch; // Makes sure we only do it once when multiple methods call it
-
-  // Re-fetch members of conversation (and save to database)
-  Future<bool> fetchMembers(DateTime message) async {
-    if (membersLoading.value) {
+  /// Fetch all data about a conversation from the server and update it in the local database.
+  ///
+  /// Also compares the current version with the new version that was sent and doesn't refresh
+  /// in case it's not nessecary. Can be disabled by setting `refreshAnyway` to `false`.
+  Future<bool> fetchData(int newVersion, {refreshAnyway = false}) async {
+    if (membersLoading.value || (newVersion <= lastVersion && !refreshAnyway)) {
       return false;
     }
 
-    if (lastMemberFetch != null) {
-      // Just making sure, not sure if this is actually needed
-      if (message.isBefore(lastMemberFetch!)) {
-        return false;
-      }
-    }
-
+    // Get the data from the server
     membersLoading.value = true;
-    final json = await postNodeJSON("/conversations/tokens", {
+    final json = await postNodeJSON("/conversations/data", {
       "id": token.id,
       "token": token.token,
     });
-
-    sendLog("REFETCH");
 
     if (!json["success"]) {
       sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING");
@@ -340,6 +341,14 @@ class Conversation {
       return false;
     }
 
+    // Update to the latest version
+    lastVersion = json["version"];
+
+    // Update the container
+    container = ConversationContainer.decrypt(json["data"], key);
+    containerSub.value = container;
+
+    // Update the members
     final members = <String, Member>{};
     for (var memberData in json["members"]) {
       sendLog(memberData);
@@ -347,17 +356,18 @@ class Conversation {
       members[memberData["id"]] = Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"]));
     }
 
+    // Load the members into the database
     for (var currentMember in this.members.values) {
       if (!members.containsKey(currentMember.tokenId)) {
         db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId));
       }
     }
 
+    // Set the members and save the conversation
     this.members.value = members;
     membersLoading.value = false;
     save();
 
-    lastMemberFetch = DateTime.now();
     return true;
   }
 }

@@ -215,11 +215,13 @@ class MessageController extends GetxController {
     // Check if there was an error
     if (!json["success"]) {
       showErrorPopup("error", json["error"]);
+      loading = false;
       return (false, false);
     }
 
     // Check if the top has been reached
     if (json["messages"] == null || json["messages"].isEmpty) {
+      loading = false;
       return (true, false);
     }
 
@@ -256,11 +258,13 @@ class MessageController extends GetxController {
     // Check if there was an error
     if (!json["success"]) {
       showErrorPopup("error", json["error"]);
+      loading = false;
       return false;
     }
 
     // Check if the top has been reached
     if (json["messages"].isEmpty) {
+      loading = false;
       return false;
     }
 
@@ -290,12 +294,19 @@ class MessageController extends GetxController {
         // Process all messages
         final list = <(Message, SymmetricSequencedInfo?)>[];
         for (var msgJson in json) {
-          list.add(Message.fromJson(
+          final (message, info) = Message.fromJson(
             msgJson,
             conversation: copy,
             key: keys[0],
             sodium: sodium,
-          ));
+          );
+
+          // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
+          if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
+            continue;
+          }
+
+          list.add((message, info));
         }
 
         // Return the list to the main isolate
@@ -394,7 +405,8 @@ class Message {
   Future<bool> initAttachments() async {
     //* Load answer
     if (answer != "") {
-      // TODO: Actually load the answer from the server
+      final message = await Message.loadFromServer(Get.find<ConversationController>().conversations[conversation]!, answer, init: false);
+      answerMessage = message;
     } else {
       answerMessage = null;
     }

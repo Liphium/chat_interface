@@ -242,6 +242,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
       convToken,
       container,
       packageSymmetricKey(key),
+      0,
       DateTime.now().millisecondsSinceEpoch,
     ),
     members,

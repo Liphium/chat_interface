@@ -47,7 +47,7 @@ const directMessagePrefix = "DM_";
 Future<bool> openDirectMessage(Friend friend) async {
   final conversation = Get.find<ConversationController>().conversations.values.firstWhere(
         (element) => element.members.length == 2 && element.members.values.any((element) => element.account == friend.id),
-        orElse: () => Conversation("", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer(""), "", 0),
+        orElse: () => Conversation("", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer(""), "", 0, 0),
       );
   if (conversation.id != "") {
     Get.find<MessageController>().selectConversation(conversation);
@@ -93,8 +93,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   }
 
   // Create the conversation
-  final body =
-      await postNodeJSON("/conversations/open", <String, dynamic>{"accountData": ownMemberContainer, "members": memberContainers.values.toList(), "data": encryptedData});
+  final body = await postNodeJSON("/conversations/open", <String, dynamic>{"accountData": ownMemberContainer, "members": memberContainers.values.toList(), "data": encryptedData});
   if (!body["success"]) {
     showErrorPopup("error".tr, "error.unknown".tr);
     return false;
@@ -104,8 +103,8 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   final conversationController = Get.find<ConversationController>();
 
   final packagedKey = packageSymmetricKey(conversationKey);
-  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
-      conversationContainer, packagedKey, DateTime.now().millisecondsSinceEpoch);
+  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]), conversationContainer, packagedKey, 0,
+      DateTime.now().millisecondsSinceEpoch);
   final members = <Member>[];
   for (var friend in friends) {
     final token = ConversationToken.fromJson(body["tokens"][hashSha(memberContainers[friend.id]!)]);
