@@ -117,7 +117,7 @@ class SystemMessages {
       Icons.update,
       translation: (msg) {
         return "chat.edit_data".trParams({
-          "issuer": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
       },
       handler: (msg) {
