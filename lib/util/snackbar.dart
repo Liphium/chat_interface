@@ -44,10 +44,6 @@ void showMessage(SnackbarType type, String message) {
 
 /// Automatically translated
 void showErrorPopup(String title, String message) {
-  if (Get.isDialogOpen ?? false) {
-    sendLog("couldn't open error dialog for $title: $message");
-    return;
-  }
   Get.dialog(ErrorWindow(title: title.tr, error: translateError(message)));
 }
 

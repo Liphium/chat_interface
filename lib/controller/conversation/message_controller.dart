@@ -306,6 +306,11 @@ class MessageController extends GetxController {
             continue;
           }
 
+          // Decrypt system message attachments
+          if (message.type == MessageType.system) {
+            message.decryptSystemMessageAttachments(copy, keys[0], sodium);
+          }
+
           list.add((message, info));
         }
 
@@ -524,12 +529,21 @@ class Message {
     final copy = Conversation.copyWithoutKey(conversation);
     final (message, info) = await sodiumLib.runIsolated(
       (sodium, keys, pairs) {
-        return Message.fromJson(
+        // Unpack the actual message
+        final (msg, info) = Message.fromJson(
           json,
           sodium: sodium,
           key: keys[0],
           conversation: copy,
         );
+
+        // Unpack the system message attachments in case needed
+        if (msg.type == MessageType.system) {
+          msg.decryptSystemMessageAttachments(copy, keys[0], sodium);
+        }
+
+        // Return it to the main isolate
+        return (msg, info);
       },
       secureKeys: [conversation.key],
     );
@@ -604,11 +618,11 @@ class Message {
   }
 
   /// Decrypts the account ids of a system message
-  void decryptSystemMessageAttachments() {
-    final conv = Get.find<ConversationController>().conversations[conversation]!;
+  void decryptSystemMessageAttachments([Conversation? conv, SecureKey? key, Sodium? sodium]) {
+    conv ??= Get.find<ConversationController>().conversations[conversation]!;
     for (var i = 0; i < attachments.length; i++) {
       if (attachments[i].startsWith("a:")) {
-        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), conv.key))["id"];
+        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), key ?? conv.key, sodium))["id"];
       }
     }
   }

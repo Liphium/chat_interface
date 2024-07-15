@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -36,6 +37,7 @@ class SystemMessages {
     "group.member_join": SystemMessage(
       Icons.arrow_forward,
       translation: (msg) {
+        sendLog(msg.attachments[0]);
         return "chat.member_join".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
@@ -128,7 +130,6 @@ class SystemMessage {
   SystemMessage(this.icon, {this.handler, required this.translation, this.render = true});
 
   void handle(Message message) {
-    message.decryptSystemMessageAttachments();
     handler?.call(message);
   }
 }

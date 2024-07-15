@@ -116,7 +116,7 @@ class ConversationController extends GetxController {
       }
 
       // Get conversation info
-      final info = (conversationInfo[conversation.id] ?? {}) as Map<String, dynamic>;
+      final info = (conversationInfo[conversation.id] ?? {}) as Map<dynamic, dynamic>;
       final lastRead = (info["r"] ?? 0) as int;
       final version = (info["v"] ?? 0) as int;
       conversation.notificationCount.value = (info["n"] ?? 0) as int;
