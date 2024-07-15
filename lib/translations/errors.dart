@@ -39,6 +39,7 @@ class ErrorTranslations extends Translations {
           'file.unsafe': 'The provider of this file (@domain) isn\'t trusted.',
           'chat.add_file': 'Attach a file',
           'message.delete_error': 'Couldn\'t delete message. Please try again later.',
+          'group.data_too_long': 'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
 
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',

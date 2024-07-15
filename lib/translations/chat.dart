@@ -83,6 +83,7 @@ class ChatPageTranslations extends Translations {
           'chat.new_admin': '@name is now an Admin because the original Admin left the conversation.',
           'chat.member_invite': '@invitor invited @name to join the group.',
           'chat.kick': '@issuer removed @name from the group.',
+          'conv.edit_data': '@name updated the conversation.',
 
           // Message menu
           'message.info': 'Info',
@@ -100,6 +101,7 @@ class ChatPageTranslations extends Translations {
           'message.empty': 'An empty message.',
 
           // Conversation info
+          'conversation.info.version': 'Conversation version: @version',
           'conversation.info.id': 'Conversation ID: @id',
           'conversation.info.read': 'Read at @clock on @date',
           'conversation.info.update': 'Updated at @clock on @date',

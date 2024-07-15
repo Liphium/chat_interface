@@ -155,7 +155,7 @@ class Conversation {
   final model.ConversationType type;
   final ConversationToken token;
   ConversationContainer container;
-  int lastVersion = 0;
+  int lastVersion;
   final updatedAt = 0.obs;
   final readAt = 0.obs;
   final notificationCount = 0.obs;
@@ -194,8 +194,8 @@ class Conversation {
           ConversationToken.fromJson(jsonDecode(data.token)),
           ConversationContainer.fromJson(jsonDecode(data.data)),
           data.key,
-          data.updatedAt.toInt(),
           data.lastVersion.toInt(),
+          data.updatedAt.toInt(),
         );
 
   /// Copy a conversation without the `key`.
@@ -336,7 +336,7 @@ class Conversation {
     });
 
     if (!json["success"]) {
-      sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING");
+      sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING ${json["error"]}");
       // TODO: Add to some sort of error collection
       return false;
     }

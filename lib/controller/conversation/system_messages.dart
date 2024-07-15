@@ -19,6 +19,9 @@ class SystemMessages {
           "sender": friendController.getFriend(msg.attachments[3]).name, // NZJNP232RS5g
         });
       },
+      handler: (msg) {
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+      },
     ),
 
     // Called when a member generates a new conversation token
@@ -29,6 +32,9 @@ class SystemMessages {
         return "chat.token_change".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
+      },
+      handler: (msg) {
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
       },
     ),
 
@@ -42,6 +48,9 @@ class SystemMessages {
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
       },
+      handler: (msg) {
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+      },
     ),
 
     // Called when a member invites a new member to the group
@@ -54,6 +63,9 @@ class SystemMessages {
           "name": Get.find<FriendController>().getFriend(msg.attachments[1]).name,
         });
       },
+      handler: (msg) {
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+      },
     ),
 
     // Called when a member leaves the conversation
@@ -64,6 +76,9 @@ class SystemMessages {
         return "chat.member_leave".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
+      },
+      handler: (msg) {
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
       },
     ),
 
@@ -77,6 +92,9 @@ class SystemMessages {
           "name": Get.find<FriendController>().getFriend(msg.attachments[1]).name,
         });
       },
+      handler: (msg) {
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+      },
     ),
 
     // Called when a member is promoted to admin after the only admin in a group leaves
@@ -87,6 +105,23 @@ class SystemMessages {
         return "chat.new_admin".trParams({
           "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
         });
+      },
+      handler: (msg) {
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+      },
+    ),
+
+    // Called when someone changes something about the conversation
+    // Format: [accountId]
+    "conv.edited": SystemMessage(
+      Icons.update,
+      translation: (msg) {
+        return "chat.edit_data".trParams({
+          "issuer": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+        });
+      },
+      handler: (msg) {
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
       },
     ),
 

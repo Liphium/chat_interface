@@ -201,7 +201,7 @@ class AttachmentController extends GetxController {
     // Delete oldest files
     files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
     for (final file in files) {
-      final size = file.statSync().size;
+      final size = (await file.stat()).size;
       await file.delete();
       cacheSize -= size;
       if (cacheSize < maxSize) {
