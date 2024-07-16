@@ -12,7 +12,7 @@ class TabletopDecks {
   static Future<List<TabletopDeck>?> listDecks() async {
     final json = await postAuthorizedJSON("/account/vault/list", {
       "after": 0,
-      "tag": Constants.deckTag,
+      "tag": Constants.vaultDeckTag,
     });
 
     if (!json["success"]) {
@@ -66,7 +66,7 @@ class TabletopDeck {
     if (vaultId != null) {
       return updateVault(vaultId!, payload);
     }
-    final id = await addToVault(Constants.deckTag, payload);
+    final id = await addToVault(Constants.vaultDeckTag, payload);
     if (id == null) {
       return false;
     }

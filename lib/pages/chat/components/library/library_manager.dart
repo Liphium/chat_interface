@@ -5,9 +5,23 @@ import 'dart:io';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 
 class LibraryManager {
+  /// Remove a library entry from the library
+  static Future<bool> removeEntryFromLibrary(LibraryEntryData data) async {
+    return true;
+  }
+
+  /// Add a library entry to the library
+  static Future<bool> addEntryToLibrary(LibraryEntryData entry) async {
+    await db.libraryEntry.insertOne(entry);
+    return true;
+  }
+
+  /// Convert an attachment container (for example on a message, although all uploaded files use this format)
+  /// into a library entry
   static Future<LibraryEntryData?> getFromContainer(AttachmentContainer container) async {
     switch (container.attachmentType) {
       // For normal downloaded files
@@ -40,6 +54,7 @@ class LibraryManager {
     return null;
   }
 
+  /// Calculates the dimensions of a flutter image widget.
   static Future<Size> _calculateImageDimension(Image image) {
     Completer<Size> completer = Completer();
     final stream = image.image.resolve(const ImageConfiguration());

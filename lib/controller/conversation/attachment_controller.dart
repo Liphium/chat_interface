@@ -23,7 +23,7 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false, popups = true, String? fileName}) async {
+  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, String tag, {popups = true, String? fileName}) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
@@ -33,7 +33,7 @@ class AttachmentController extends GetxController {
     final formData = dio_rs.FormData.fromMap({
       "file": dio_rs.MultipartFile.fromBytes(encrypted, filename: name),
       "name": name,
-      "favorite": favorite ? "true" : "false",
+      "tag": tag,
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
       "extension": path.basename(data.file.path).split(".").last
     });

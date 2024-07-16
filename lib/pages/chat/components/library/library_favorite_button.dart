@@ -36,27 +36,6 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
     }
   }
 
-  void toggleFavoriteOnServer() async {
-    if (widget.container.attachmentType != AttachmentContainerType.file) {
-      return;
-    }
-    if (bookmarked.value) {
-      final json = await postAuthorizedJSON("/account/files/favorite", {
-        "id": widget.container.id,
-      });
-      if (!json["success"]) {
-        sendLog("FAILED TO FAVORITE ON SERVER: ${json["error"]}");
-      }
-    } else {
-      final json = await postAuthorizedJSON("/account/files/unfavorite", {
-        "id": widget.container.id,
-      });
-      if (!json["success"]) {
-        sendLog("FAILED TO UNFAVORITE ON SERVER: ${json["error"]}");
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -82,7 +61,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                     focusColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     splashColor: Colors.transparent,
-                    overlayColor: const MaterialStatePropertyAll(Colors.transparent),
+                    overlayColor: const WidgetStatePropertyAll(Colors.transparent),
                     onTap: () async {
                       final entry = await LibraryManager.getFromContainer(widget.container);
                       if (entry == null) {
@@ -92,12 +71,10 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                       if (bookmarked.value) {
                         await db.libraryEntry.deleteWhere((tbl) => tbl.data.equals(entry.data));
                         bookmarked.value = false;
-                        toggleFavoriteOnServer();
                         return;
                       }
                       await db.libraryEntry.insertOne(entry);
                       bookmarked.value = true;
-                      toggleFavoriteOnServer();
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(elementSpacing),

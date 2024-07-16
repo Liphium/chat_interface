@@ -33,6 +33,9 @@ class ErrorTranslations extends Translations {
           'request.not.found.text': "You sure this is your friend? Maybe you just met them in your dreams?",
 
           // Chat
+          'conversations.error': 'Conversation error',
+          'conversations.amount': 'You have reached the maximum amount of @amount conversations. Please delete old ones to create more.',
+          'conversations.name.length': 'The conversation name you specified is longer than allowed. Please use less than @length characters.',
           'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
           'file.not_uploaded': 'File not found.',
           'file.too_large': 'The maximum file size is @1MB.',

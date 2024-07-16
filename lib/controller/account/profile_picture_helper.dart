@@ -11,6 +11,7 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
@@ -95,7 +96,7 @@ class ProfileHelper {
   /// Upload a profile picture to the server and set it as the current profile picture
   static Future<bool> uploadProfilePicture(File file, String originalName) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, fileName: originalName);
+    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, Constants.fileAppDataTag);
     if (response.container == null) {
       showErrorPopup("error", response.message);
       return false;

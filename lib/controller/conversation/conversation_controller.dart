@@ -75,7 +75,7 @@ class ConversationController extends GetxController {
     }
 
     // Add to vault
-    final vaultId = await addToVault(Constants.conversationTag, conversation.toJson());
+    final vaultId = await addToVault(Constants.vaultConversationTag, conversation.toJson());
     if (vaultId == null) {
       // TODO: refresh the vault or something
       sendLog("COULDNT STORE IN VAULT; SOMETHING WENT WRONG");

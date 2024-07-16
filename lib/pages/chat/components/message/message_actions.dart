@@ -67,7 +67,7 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
   // Upload files
   final attachments = <String>[];
   for (var file in files) {
-    final res = await Get.find<AttachmentController>().uploadFile(file, StorageType.temporary);
+    final res = await Get.find<AttachmentController>().uploadFile(file, StorageType.temporary, Constants.fileAttachmentTag);
     if (res.container == null) {
       showErrorPopup("error", res.message);
       callback.call();

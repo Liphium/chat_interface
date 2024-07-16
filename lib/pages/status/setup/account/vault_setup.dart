@@ -56,7 +56,7 @@ Future<String?> refreshVault() async {
   // Load conversations
   final json = await postAuthorizedJSON("/account/vault/list", <String, dynamic>{
     "after": 0, // Unix
-    "tag": Constants.conversationTag,
+    "tag": Constants.vaultConversationTag,
   });
   if (!json["success"]) {
     return json["error"];

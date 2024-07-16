@@ -1,3 +1,5 @@
+import 'package:chat_interface/main.dart';
+
 //* These will be loaded from the server (in the future)
 final Map<String, dynamic> specialConstants = <String, dynamic>{
   "max_conversation_amount": 500,
@@ -8,8 +10,14 @@ final Map<String, dynamic> specialConstants = <String, dynamic>{
 //* These are just normal constants
 class Constants {
   // Vault
-  static const String conversationTag = "c";
-  static const String deckTag = "d";
+  static const String vaultConversationTag = "$appTag:conversation";
+  static const String vaultDeckTag = "$appTag:deck";
+  static const String vaultLibrary = "$appTag:lib";
+
+  // Files
+  static const String fileAttachmentTag = "$appTag:attachment";
+  static const String fileDeckTag = "$appTag:deck";
+  static const String fileAppDataTag = "$appTag:app_data";
 
   // Errors
   static const String unknownError = "error.unknown";
