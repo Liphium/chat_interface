@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -41,6 +43,7 @@ class VaultEntry {
   final String account;
   final String payload;
   final int updatedAt;
+  bool error = false;
 
   VaultEntry(this.id, this.tag, this.account, this.payload, this.updatedAt);
   VaultEntry.fromJson(Map<String, dynamic> json)
@@ -65,21 +68,21 @@ Future<String?> refreshVault() async {
   sendLog("loading..");
   sendLog(json["entries"].length);
 
+  // Run decryption and decoding in a separate isolate
   final (conversations, ids) = await sodiumLib.runIsolated((sodium, keys, pairs) {
     var list = <Conversation>[];
     var ids = <String>[];
-    final keyPair = pairs[0];
     for (var unparsedEntry in json["entries"]) {
       final entry = VaultEntry.fromJson(unparsedEntry);
-      final payload = decryptAsymmetricAnonymous(keyPair.publicKey, keyPair.secretKey, entry.payload, sodium);
-      final decoded = jsonDecode(payload);
+      final decrypted = decryptSymmetric(entry.payload, keys[0]);
+      final decoded = jsonDecode(decrypted);
       final conv = Conversation.fromJson(decoded, entry.id);
       list.add(conv);
       ids.add(conv.id);
     }
 
     return (list, ids);
-  }, keyPairs: [asymmetricKeyPair]);
+  }, secureKeys: [vaultKey]);
 
   // Delete all old conversations in the cache
   final messageController = Get.find<MessageController>();

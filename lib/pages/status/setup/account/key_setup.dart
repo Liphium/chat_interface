@@ -7,6 +7,7 @@ import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
+import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
@@ -21,6 +22,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 
 import '../setup_manager.dart';
 
+late SecureKey vaultKey;
 late SecureKey profileKey;
 late KeyPair asymmetricKeyPair;
 late KeyPair signatureKeyPair;
@@ -43,17 +45,30 @@ class KeySetup extends Setup {
       final packagedPriv = packagePrivateKey(pair.secretKey);
       final packagedPub = packagePublicKey(pair.publicKey);
       final genProfileKey = randomSymmetricKey();
+      final genVaultKey = randomSymmetricKey();
 
       // Set public key on the server
-      var res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{"key": packagedPub});
+      var res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{
+        "key": packagedPub,
+      });
       if (!res["success"]) {
         return const ErrorPage(title: "key.error");
       }
-      res = await postAuthorizedJSON("/account/keys/profile/set", <String, dynamic>{"key": encryptAsymmetricAnonymous(pair.publicKey, packageSymmetricKey(genProfileKey))});
+      res = await postAuthorizedJSON("/account/keys/profile/set", <String, dynamic>{
+        "key": ServerStoredInfo(packageSymmetricKey(genProfileKey)).transform(ownKeyPair: pair),
+      });
       if (!res["success"]) {
         return const ErrorPage(title: "key.error");
       }
-      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{"key": packagedSignaturePub});
+      res = await postAuthorizedJSON("/account/keys/vault/set", <String, dynamic>{
+        "key": ServerStoredInfo(packageSymmetricKey(genVaultKey)).transform(ownKeyPair: pair),
+      });
+      if (!res["success"]) {
+        return const ErrorPage(title: "key.error");
+      }
+      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{
+        "key": packagedSignaturePub,
+      });
       if (!res["success"]) {
         return const ErrorPage(title: "key.error");
       }
@@ -82,13 +97,19 @@ class KeySetup extends Setup {
     }
 
     // Grab profile key from server
-    final json = await postAuthorizedJSON("/account/keys/profile/get", <String, dynamic>{});
+    final json = await postAuthorizedJSON("/account/keys/encrypted", <String, dynamic>{});
     if (!json["success"]) {
-      return const ErrorPage(title: "key.error");
+      return ErrorPage(title: json["error"]);
     }
 
     asymmetricKeyPair = toKeyPair(pubBody["key"], privateKey.value);
-    profileKey = unpackageSymmetricKey(decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, json["key"]));
+    final vaultInfo = ServerStoredInfo.untransform(json["vault"]);
+    final profileInfo = ServerStoredInfo.untransform(json["profile"]);
+    if (profileInfo.error || vaultInfo.error) {
+      return const ErrorPage(title: "keys.invalid");
+    }
+    profileKey = unpackageSymmetricKey(profileInfo.text);
+    vaultKey = unpackageSymmetricKey(vaultInfo.text);
 
     // Grab signature key from client database
     final signaturePrivateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("signature_private_key"))).getSingleOrNull();
@@ -199,8 +220,7 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                   textAlign: TextAlign.center,
                 ),
                 verticalSpacing(sectionSpacing),
-                Text("If you are logging in for the first time on this device or changed your keys, this is completely normal. You have a couple of options here.",
-                    style: Get.textTheme.bodyMedium),
+                Text("If you are logging in for the first time on this device or changed your keys, this is completely normal. You have a couple of options here.", style: Get.textTheme.bodyMedium),
                 verticalSpacing(sectionSpacing),
                 Text(
                   "1. Get from another device",
@@ -208,8 +228,7 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                   textAlign: TextAlign.center,
                 ),
                 verticalSpacing(defaultSpacing),
-                Text("Ask another device that is currently logged into your account to send you the keys. Don't worry, we'll encrypt them in transfer.",
-                    style: Get.textTheme.bodyMedium),
+                Text("Ask another device that is currently logged into your account to send you the keys. Don't worry, we'll encrypt them in transfer.", style: Get.textTheme.bodyMedium),
                 verticalSpacing(defaultSpacing),
                 FJElevatedLoadingButton(
                   loading: false.obs,

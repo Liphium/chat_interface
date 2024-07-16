@@ -16,6 +16,7 @@ class ErrorTranslations extends Translations {
           'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
           'new.version': 'A new version is available, please update the app.',
           'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
+          'keys.invalid': 'Invalid keys found. This means that the server could\'ve been hacked or someone is trolling you.',
           'already.deleted': 'This object was already deleted.',
           'no.permission': 'You don\'t have permission to do that.',
           'spaces.connection_error': 'Something went wrong with the spaces connection. Please try again later.',

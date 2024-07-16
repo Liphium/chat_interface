@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -87,8 +88,8 @@ Future<String?> refreshFriendsVault() async {
 
   // Parse the JSON (in different isolate)
   final res = await sodiumLib.runIsolated(
-    (sodium, keys, pairs) => _parseFriends(json, sodium, pairs[0]),
-    keyPairs: [asymmetricKeyPair],
+    (sodium, keys, pairs) => _parseFriends(json, sodium, keys[0]),
+    secureKeys: [vaultKey],
   );
 
   // Push requests
@@ -121,12 +122,12 @@ Future<String?> refreshFriendsVault() async {
   return null;
 }
 
-Future<_FriendsListResponse> _parseFriends(Map<String, dynamic> json, Sodium sodium, KeyPair pair) async {
+Future<_FriendsListResponse> _parseFriends(Map<String, dynamic> json, Sodium sodium, SecureKey key) async {
   final friends = <Friend>[];
   final requests = <Request>[];
   final requestsSent = <Request>[];
   for (var friend in json["friends"]) {
-    final decrypted = decryptAsymmetricAnonymous(pair.publicKey, pair.secretKey, friend["friend"], sodium);
+    final decrypted = decryptSymmetric(friend["friend"], key, sodium);
     final data = jsonDecode(decrypted);
 
     // Check if request or friend

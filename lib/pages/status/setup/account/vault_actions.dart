@@ -14,7 +14,7 @@ Future<String?> removeFromVault(String id) async {
 
 /// Add a new entry to the vault (payload is encrypted with the public key of the account in the function)
 Future<String?> addToVault(String tag, String payload) async {
-  final encryptedPayload = encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, payload);
+  final encryptedPayload = encryptSymmetric(payload, vaultKey);
 
   final json = await postAuthorizedJSON("/account/vault/add", <String, dynamic>{
     "tag": tag,
@@ -29,7 +29,7 @@ Future<String?> addToVault(String tag, String payload) async {
 
 /// Update an entry in the vault (payload is encrypted with the public key of the account in the function)
 Future<bool> updateVault(String id, String payload) async {
-  final encryptedPayload = encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, payload);
+  final encryptedPayload = encryptSymmetric(payload, vaultKey);
 
   final json = await postAuthorizedJSON("/account/vault/update", <String, dynamic>{
     "entry": id,

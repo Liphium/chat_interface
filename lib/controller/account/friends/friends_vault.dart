@@ -4,7 +4,7 @@ class FriendsVault {
   /// Store friend in vault (returns id of the friend in the vault if successful)
   static Future<String?> store(String data, {errorPopup = false, prefix = "", lastPacket = 0}) async {
     final hash = hashSha(data);
-    final payload = encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, data);
+    final payload = encryptSymmetric(data, vaultKey);
 
     final json = await postAuthorizedJSON("/account/friends/add", <String, dynamic>{
       "hash": hash,

@@ -10,7 +10,7 @@ final Map<String, dynamic> specialConstants = <String, dynamic>{
 //* These are just normal constants
 class Constants {
   // Vault
-  static const String vaultConversationTag = "$appTag:conversation";
+  static const String vaultConversationTag = "$appTag:conv";
   static const String vaultDeckTag = "$appTag:deck";
   static const String vaultLibrary = "$appTag:lib";
 

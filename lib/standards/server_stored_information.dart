@@ -14,13 +14,15 @@ class ServerStoredInfo {
   ServerStoredInfo(this.text, {this.error = false});
 
   /// Decrypt stored stored info with own public and private key
-  factory ServerStoredInfo.untransform(String transformed) {
-    final result = decryptAsymmetricAuth(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, transformed);
+  factory ServerStoredInfo.untransform(String transformed, {Sodium? sodium, KeyPair? ownKeyPair}) {
+    final result = decryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, transformed, sodium);
     return ServerStoredInfo(result.message, error: !result.success);
   }
 
   /// Get the server stored info in encrypted form with the own public and private key
-  String transform() => encryptAsymmetricAuth(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, text);
+  String transform({Sodium? sodium, KeyPair? ownKeyPair}) {
+    return encryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, text, sodium);
+  }
 }
 
 /// A helper class to encrypt a text using asymmetric sodium and sign it (with a sequence number, can also be the time) to prevent replay attacks
