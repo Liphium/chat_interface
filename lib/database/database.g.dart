@@ -268,6 +268,21 @@ class ConversationData extends DataClass
         updatedAt: updatedAt ?? this.updatedAt,
         readAt: readAt ?? this.readAt,
       );
+  ConversationData copyWithCompanion(ConversationCompanion data) {
+    return ConversationData(
+      id: data.id.present ? data.id.value : this.id,
+      vaultId: data.vaultId.present ? data.vaultId.value : this.vaultId,
+      type: data.type.present ? data.type.value : this.type,
+      data: data.data.present ? data.data.value : this.data,
+      token: data.token.present ? data.token.value : this.token,
+      key: data.key.present ? data.key.value : this.key,
+      lastVersion:
+          data.lastVersion.present ? data.lastVersion.value : this.lastVersion,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      readAt: data.readAt.present ? data.readAt.value : this.readAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('ConversationData(')
@@ -605,6 +620,17 @@ class MemberData extends DataClass implements Insertable<MemberData> {
         accountId: accountId ?? this.accountId,
         roleId: roleId ?? this.roleId,
       );
+  MemberData copyWithCompanion(MemberCompanion data) {
+    return MemberData(
+      id: data.id.present ? data.id.value : this.id,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      roleId: data.roleId.present ? data.roleId.value : this.roleId,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('MemberData(')
@@ -816,6 +842,13 @@ class SettingData extends DataClass implements Insertable<SettingData> {
         key: key ?? this.key,
         value: value ?? this.value,
       );
+  SettingData copyWithCompanion(SettingCompanion data) {
+    return SettingData(
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('SettingData(')
@@ -1092,6 +1125,18 @@ class FriendData extends DataClass implements Insertable<FriendData> {
         keys: keys ?? this.keys,
         updatedAt: updatedAt ?? this.updatedAt,
       );
+  FriendData copyWithCompanion(FriendCompanion data) {
+    return FriendData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      displayName:
+          data.displayName.present ? data.displayName.value : this.displayName,
+      vaultId: data.vaultId.present ? data.vaultId.value : this.vaultId,
+      keys: data.keys.present ? data.keys.value : this.keys,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('FriendData(')
@@ -1451,6 +1496,19 @@ class RequestData extends DataClass implements Insertable<RequestData> {
         keys: keys ?? this.keys,
         updatedAt: updatedAt ?? this.updatedAt,
       );
+  RequestData copyWithCompanion(RequestCompanion data) {
+    return RequestData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      displayName:
+          data.displayName.present ? data.displayName.value : this.displayName,
+      self: data.self.present ? data.self.value : this.self,
+      vaultId: data.vaultId.present ? data.vaultId.value : this.vaultId,
+      keys: data.keys.present ? data.keys.value : this.keys,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('RequestData(')
@@ -1754,6 +1812,16 @@ class UnknownProfileData extends DataClass
         displayName: displayName ?? this.displayName,
         keys: keys ?? this.keys,
       );
+  UnknownProfileData copyWithCompanion(UnknownProfileCompanion data) {
+    return UnknownProfileData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      displayName:
+          data.displayName.present ? data.displayName.value : this.displayName,
+      keys: data.keys.present ? data.keys.value : this.keys,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('UnknownProfileData(')
@@ -1989,6 +2057,16 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
         pictureContainer: pictureContainer ?? this.pictureContainer,
         data: data ?? this.data,
       );
+  ProfileData copyWithCompanion(ProfileCompanion data) {
+    return ProfileData(
+      id: data.id.present ? data.id.value : this.id,
+      pictureContainer: data.pictureContainer.present
+          ? data.pictureContainer.value
+          : this.pictureContainer,
+      data: data.data.present ? data.data.value : this.data,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('ProfileData(')
@@ -2169,6 +2247,12 @@ class TrustedLinkData extends DataClass implements Insertable<TrustedLinkData> {
   TrustedLinkData copyWith({String? domain}) => TrustedLinkData(
         domain: domain ?? this.domain,
       );
+  TrustedLinkData copyWithCompanion(TrustedLinkCompanion data) {
+    return TrustedLinkData(
+      domain: data.domain.present ? data.domain.value : this.domain,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('TrustedLinkData(')
@@ -2412,6 +2496,16 @@ class LibraryEntryData extends DataClass
         width: width ?? this.width,
         height: height ?? this.height,
       );
+  LibraryEntryData copyWithCompanion(LibraryEntryCompanion data) {
+    return LibraryEntryData(
+      type: data.type.present ? data.type.value : this.type,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      data: data.data.present ? data.data.value : this.data,
+      width: data.width.present ? data.width.value : this.width,
+      height: data.height.present ? data.height.value : this.height,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('LibraryEntryData(')
@@ -2540,7 +2634,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
 
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
-  _$DatabaseManager get managers => _$DatabaseManager(this);
+  $DatabaseManager get managers => $DatabaseManager(this);
   late final $ConversationTable conversation = $ConversationTable(this);
   late final $MemberTable member = $MemberTable(this);
   late final $SettingTable setting = $SettingTable(this);
@@ -2567,7 +2661,7 @@ abstract class _$Database extends GeneratedDatabase {
       ];
 }
 
-typedef $$ConversationTableInsertCompanionBuilder = ConversationCompanion
+typedef $$ConversationTableCreateCompanionBuilder = ConversationCompanion
     Function({
   required String id,
   required String vaultId,
@@ -2600,8 +2694,7 @@ class $$ConversationTableTableManager extends RootTableManager<
     ConversationData,
     $$ConversationTableFilterComposer,
     $$ConversationTableOrderingComposer,
-    $$ConversationTableProcessedTableManager,
-    $$ConversationTableInsertCompanionBuilder,
+    $$ConversationTableCreateCompanionBuilder,
     $$ConversationTableUpdateCompanionBuilder> {
   $$ConversationTableTableManager(_$Database db, $ConversationTable table)
       : super(TableManagerState(
@@ -2611,9 +2704,7 @@ class $$ConversationTableTableManager extends RootTableManager<
               $$ConversationTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$ConversationTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$ConversationTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> vaultId = const Value.absent(),
             Value<ConversationType> type = const Value.absent(),
@@ -2637,7 +2728,7 @@ class $$ConversationTableTableManager extends RootTableManager<
             readAt: readAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String id,
             required String vaultId,
             required ConversationType type,
@@ -2662,18 +2753,6 @@ class $$ConversationTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$ConversationTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $ConversationTable,
-    ConversationData,
-    $$ConversationTableFilterComposer,
-    $$ConversationTableOrderingComposer,
-    $$ConversationTableProcessedTableManager,
-    $$ConversationTableInsertCompanionBuilder,
-    $$ConversationTableUpdateCompanionBuilder> {
-  $$ConversationTableProcessedTableManager(super.$state);
 }
 
 class $$ConversationTableFilterComposer
@@ -2776,7 +2855,7 @@ class $$ConversationTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$MemberTableInsertCompanionBuilder = MemberCompanion Function({
+typedef $$MemberTableCreateCompanionBuilder = MemberCompanion Function({
   required String id,
   Value<String?> conversationId,
   required String accountId,
@@ -2797,8 +2876,7 @@ class $$MemberTableTableManager extends RootTableManager<
     MemberData,
     $$MemberTableFilterComposer,
     $$MemberTableOrderingComposer,
-    $$MemberTableProcessedTableManager,
-    $$MemberTableInsertCompanionBuilder,
+    $$MemberTableCreateCompanionBuilder,
     $$MemberTableUpdateCompanionBuilder> {
   $$MemberTableTableManager(_$Database db, $MemberTable table)
       : super(TableManagerState(
@@ -2808,8 +2886,7 @@ class $$MemberTableTableManager extends RootTableManager<
               $$MemberTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$MemberTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $$MemberTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String?> conversationId = const Value.absent(),
             Value<String> accountId = const Value.absent(),
@@ -2823,7 +2900,7 @@ class $$MemberTableTableManager extends RootTableManager<
             roleId: roleId,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String id,
             Value<String?> conversationId = const Value.absent(),
             required String accountId,
@@ -2838,18 +2915,6 @@ class $$MemberTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$MemberTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $MemberTable,
-    MemberData,
-    $$MemberTableFilterComposer,
-    $$MemberTableOrderingComposer,
-    $$MemberTableProcessedTableManager,
-    $$MemberTableInsertCompanionBuilder,
-    $$MemberTableUpdateCompanionBuilder> {
-  $$MemberTableProcessedTableManager(super.$state);
 }
 
 class $$MemberTableFilterComposer
@@ -2900,7 +2965,7 @@ class $$MemberTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$SettingTableInsertCompanionBuilder = SettingCompanion Function({
+typedef $$SettingTableCreateCompanionBuilder = SettingCompanion Function({
   required String key,
   required String value,
   Value<int> rowid,
@@ -2917,8 +2982,7 @@ class $$SettingTableTableManager extends RootTableManager<
     SettingData,
     $$SettingTableFilterComposer,
     $$SettingTableOrderingComposer,
-    $$SettingTableProcessedTableManager,
-    $$SettingTableInsertCompanionBuilder,
+    $$SettingTableCreateCompanionBuilder,
     $$SettingTableUpdateCompanionBuilder> {
   $$SettingTableTableManager(_$Database db, $SettingTable table)
       : super(TableManagerState(
@@ -2928,8 +2992,7 @@ class $$SettingTableTableManager extends RootTableManager<
               $$SettingTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$SettingTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $$SettingTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> key = const Value.absent(),
             Value<String> value = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2939,7 +3002,7 @@ class $$SettingTableTableManager extends RootTableManager<
             value: value,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String key,
             required String value,
             Value<int> rowid = const Value.absent(),
@@ -2950,18 +3013,6 @@ class $$SettingTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$SettingTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $SettingTable,
-    SettingData,
-    $$SettingTableFilterComposer,
-    $$SettingTableOrderingComposer,
-    $$SettingTableProcessedTableManager,
-    $$SettingTableInsertCompanionBuilder,
-    $$SettingTableUpdateCompanionBuilder> {
-  $$SettingTableProcessedTableManager(super.$state);
 }
 
 class $$SettingTableFilterComposer
@@ -2992,7 +3043,7 @@ class $$SettingTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$FriendTableInsertCompanionBuilder = FriendCompanion Function({
+typedef $$FriendTableCreateCompanionBuilder = FriendCompanion Function({
   required String id,
   required String name,
   required String displayName,
@@ -3017,8 +3068,7 @@ class $$FriendTableTableManager extends RootTableManager<
     FriendData,
     $$FriendTableFilterComposer,
     $$FriendTableOrderingComposer,
-    $$FriendTableProcessedTableManager,
-    $$FriendTableInsertCompanionBuilder,
+    $$FriendTableCreateCompanionBuilder,
     $$FriendTableUpdateCompanionBuilder> {
   $$FriendTableTableManager(_$Database db, $FriendTable table)
       : super(TableManagerState(
@@ -3028,8 +3078,7 @@ class $$FriendTableTableManager extends RootTableManager<
               $$FriendTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$FriendTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $$FriendTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> displayName = const Value.absent(),
@@ -3047,7 +3096,7 @@ class $$FriendTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String id,
             required String name,
             required String displayName,
@@ -3066,18 +3115,6 @@ class $$FriendTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$FriendTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $FriendTable,
-    FriendData,
-    $$FriendTableFilterComposer,
-    $$FriendTableOrderingComposer,
-    $$FriendTableProcessedTableManager,
-    $$FriendTableInsertCompanionBuilder,
-    $$FriendTableUpdateCompanionBuilder> {
-  $$FriendTableProcessedTableManager(super.$state);
 }
 
 class $$FriendTableFilterComposer
@@ -3148,7 +3185,7 @@ class $$FriendTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$RequestTableInsertCompanionBuilder = RequestCompanion Function({
+typedef $$RequestTableCreateCompanionBuilder = RequestCompanion Function({
   required String id,
   required String name,
   required String displayName,
@@ -3175,8 +3212,7 @@ class $$RequestTableTableManager extends RootTableManager<
     RequestData,
     $$RequestTableFilterComposer,
     $$RequestTableOrderingComposer,
-    $$RequestTableProcessedTableManager,
-    $$RequestTableInsertCompanionBuilder,
+    $$RequestTableCreateCompanionBuilder,
     $$RequestTableUpdateCompanionBuilder> {
   $$RequestTableTableManager(_$Database db, $RequestTable table)
       : super(TableManagerState(
@@ -3186,8 +3222,7 @@ class $$RequestTableTableManager extends RootTableManager<
               $$RequestTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$RequestTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $$RequestTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> displayName = const Value.absent(),
@@ -3207,7 +3242,7 @@ class $$RequestTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String id,
             required String name,
             required String displayName,
@@ -3228,18 +3263,6 @@ class $$RequestTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$RequestTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $RequestTable,
-    RequestData,
-    $$RequestTableFilterComposer,
-    $$RequestTableOrderingComposer,
-    $$RequestTableProcessedTableManager,
-    $$RequestTableInsertCompanionBuilder,
-    $$RequestTableUpdateCompanionBuilder> {
-  $$RequestTableProcessedTableManager(super.$state);
 }
 
 class $$RequestTableFilterComposer
@@ -3320,7 +3343,7 @@ class $$RequestTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$UnknownProfileTableInsertCompanionBuilder = UnknownProfileCompanion
+typedef $$UnknownProfileTableCreateCompanionBuilder = UnknownProfileCompanion
     Function({
   required String id,
   required String name,
@@ -3343,8 +3366,7 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
     UnknownProfileData,
     $$UnknownProfileTableFilterComposer,
     $$UnknownProfileTableOrderingComposer,
-    $$UnknownProfileTableProcessedTableManager,
-    $$UnknownProfileTableInsertCompanionBuilder,
+    $$UnknownProfileTableCreateCompanionBuilder,
     $$UnknownProfileTableUpdateCompanionBuilder> {
   $$UnknownProfileTableTableManager(_$Database db, $UnknownProfileTable table)
       : super(TableManagerState(
@@ -3354,9 +3376,7 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
               $$UnknownProfileTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$UnknownProfileTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$UnknownProfileTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> displayName = const Value.absent(),
@@ -3370,7 +3390,7 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
             keys: keys,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String id,
             required String name,
             required String displayName,
@@ -3385,18 +3405,6 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$UnknownProfileTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $UnknownProfileTable,
-    UnknownProfileData,
-    $$UnknownProfileTableFilterComposer,
-    $$UnknownProfileTableOrderingComposer,
-    $$UnknownProfileTableProcessedTableManager,
-    $$UnknownProfileTableInsertCompanionBuilder,
-    $$UnknownProfileTableUpdateCompanionBuilder> {
-  $$UnknownProfileTableProcessedTableManager(super.$state);
 }
 
 class $$UnknownProfileTableFilterComposer
@@ -3447,7 +3455,7 @@ class $$UnknownProfileTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$ProfileTableInsertCompanionBuilder = ProfileCompanion Function({
+typedef $$ProfileTableCreateCompanionBuilder = ProfileCompanion Function({
   required String id,
   required String pictureContainer,
   required String data,
@@ -3466,8 +3474,7 @@ class $$ProfileTableTableManager extends RootTableManager<
     ProfileData,
     $$ProfileTableFilterComposer,
     $$ProfileTableOrderingComposer,
-    $$ProfileTableProcessedTableManager,
-    $$ProfileTableInsertCompanionBuilder,
+    $$ProfileTableCreateCompanionBuilder,
     $$ProfileTableUpdateCompanionBuilder> {
   $$ProfileTableTableManager(_$Database db, $ProfileTable table)
       : super(TableManagerState(
@@ -3477,8 +3484,7 @@ class $$ProfileTableTableManager extends RootTableManager<
               $$ProfileTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$ProfileTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $$ProfileTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> pictureContainer = const Value.absent(),
             Value<String> data = const Value.absent(),
@@ -3490,7 +3496,7 @@ class $$ProfileTableTableManager extends RootTableManager<
             data: data,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String id,
             required String pictureContainer,
             required String data,
@@ -3503,18 +3509,6 @@ class $$ProfileTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$ProfileTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $ProfileTable,
-    ProfileData,
-    $$ProfileTableFilterComposer,
-    $$ProfileTableOrderingComposer,
-    $$ProfileTableProcessedTableManager,
-    $$ProfileTableInsertCompanionBuilder,
-    $$ProfileTableUpdateCompanionBuilder> {
-  $$ProfileTableProcessedTableManager(super.$state);
 }
 
 class $$ProfileTableFilterComposer
@@ -3555,7 +3549,7 @@ class $$ProfileTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$TrustedLinkTableInsertCompanionBuilder = TrustedLinkCompanion
+typedef $$TrustedLinkTableCreateCompanionBuilder = TrustedLinkCompanion
     Function({
   required String domain,
   Value<int> rowid,
@@ -3572,8 +3566,7 @@ class $$TrustedLinkTableTableManager extends RootTableManager<
     TrustedLinkData,
     $$TrustedLinkTableFilterComposer,
     $$TrustedLinkTableOrderingComposer,
-    $$TrustedLinkTableProcessedTableManager,
-    $$TrustedLinkTableInsertCompanionBuilder,
+    $$TrustedLinkTableCreateCompanionBuilder,
     $$TrustedLinkTableUpdateCompanionBuilder> {
   $$TrustedLinkTableTableManager(_$Database db, $TrustedLinkTable table)
       : super(TableManagerState(
@@ -3583,9 +3576,7 @@ class $$TrustedLinkTableTableManager extends RootTableManager<
               $$TrustedLinkTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$TrustedLinkTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$TrustedLinkTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> domain = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -3593,7 +3584,7 @@ class $$TrustedLinkTableTableManager extends RootTableManager<
             domain: domain,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String domain,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -3602,18 +3593,6 @@ class $$TrustedLinkTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$TrustedLinkTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $TrustedLinkTable,
-    TrustedLinkData,
-    $$TrustedLinkTableFilterComposer,
-    $$TrustedLinkTableOrderingComposer,
-    $$TrustedLinkTableProcessedTableManager,
-    $$TrustedLinkTableInsertCompanionBuilder,
-    $$TrustedLinkTableUpdateCompanionBuilder> {
-  $$TrustedLinkTableProcessedTableManager(super.$state);
 }
 
 class $$TrustedLinkTableFilterComposer
@@ -3634,7 +3613,7 @@ class $$TrustedLinkTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$LibraryEntryTableInsertCompanionBuilder = LibraryEntryCompanion
+typedef $$LibraryEntryTableCreateCompanionBuilder = LibraryEntryCompanion
     Function({
   required LibraryEntryType type,
   required BigInt createdAt,
@@ -3659,8 +3638,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
     LibraryEntryData,
     $$LibraryEntryTableFilterComposer,
     $$LibraryEntryTableOrderingComposer,
-    $$LibraryEntryTableProcessedTableManager,
-    $$LibraryEntryTableInsertCompanionBuilder,
+    $$LibraryEntryTableCreateCompanionBuilder,
     $$LibraryEntryTableUpdateCompanionBuilder> {
   $$LibraryEntryTableTableManager(_$Database db, $LibraryEntryTable table)
       : super(TableManagerState(
@@ -3670,9 +3648,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
               $$LibraryEntryTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$LibraryEntryTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$LibraryEntryTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<LibraryEntryType> type = const Value.absent(),
             Value<BigInt> createdAt = const Value.absent(),
             Value<String> data = const Value.absent(),
@@ -3688,7 +3664,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             height: height,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required LibraryEntryType type,
             required BigInt createdAt,
             required String data,
@@ -3705,18 +3681,6 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$LibraryEntryTableProcessedTableManager extends ProcessedTableManager<
-    _$Database,
-    $LibraryEntryTable,
-    LibraryEntryData,
-    $$LibraryEntryTableFilterComposer,
-    $$LibraryEntryTableOrderingComposer,
-    $$LibraryEntryTableProcessedTableManager,
-    $$LibraryEntryTableInsertCompanionBuilder,
-    $$LibraryEntryTableUpdateCompanionBuilder> {
-  $$LibraryEntryTableProcessedTableManager(super.$state);
 }
 
 class $$LibraryEntryTableFilterComposer
@@ -3779,9 +3743,9 @@ class $$LibraryEntryTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-class _$DatabaseManager {
+class $DatabaseManager {
   final _$Database _db;
-  _$DatabaseManager(this._db);
+  $DatabaseManager(this._db);
   $$ConversationTableTableManager get conversation =>
       $$ConversationTableTableManager(_db, _db.conversation);
   $$MemberTableTableManager get member =>

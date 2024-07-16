@@ -14,11 +14,10 @@ class ProfileSetup extends Setup {
   @override
   Future<Widget?> load() async {
     // Check if the user has logged in already
-    var profiles = await (db.select(db.setting)..where((tbl) => tbl.key.equals("profile"))).get();
-    if (profiles.isEmpty) return const LoginPage();
+    final profile = await (db.select(db.setting)..where((tbl) => tbl.key.equals("tokens"))).getSingleOrNull();
+    if (profile == null) return const LoginPage();
 
     // Load tokens from profile
-    var profile = profiles.first;
     loadTokensFromPayload(jsonDecode(profile.value));
 
     // Get the session id from the JWT token
@@ -33,7 +32,7 @@ class ProfileSetup extends Setup {
     // Set new token (if refreshed)
     if (body["success"]) {
       loadTokensFromPayload(body);
-      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "profile", value: tokensToPayload()));
+      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "tokens", value: tokensToPayload()));
     } else {
       // Check if the session is not verified
       if (body["error"] == "session.not_verified") {

@@ -122,8 +122,10 @@ class ConversationController extends GetxController {
       conversation.notificationCount.value = (info["n"] ?? 0) as int;
 
       // Check if the current version of the conversation is up to date
+      sendLog("version ${conversation.id} client: ${conversation.lastVersion}, server: $version");
       if (conversation.lastVersion != version) {
-        await conversation.fetchData(version);
+        sendLog("conversation version updated");
+        await conversation.fetchData();
       }
 
       if (overwriteReads) {
@@ -323,8 +325,8 @@ class Conversation {
   ///
   /// Also compares the current version with the new version that was sent and doesn't refresh
   /// in case it's not nessecary. Can be disabled by setting `refreshAnyway` to `false`.
-  Future<bool> fetchData(int newVersion, {refreshAnyway = false}) async {
-    if (membersLoading.value || (newVersion <= lastVersion && !refreshAnyway)) {
+  Future<bool> fetchData() async {
+    if (membersLoading.value) {
       return false;
     }
 
@@ -342,6 +344,7 @@ class Conversation {
     }
 
     // Update to the latest version
+    sendLog("PULLED VERSION ${json["version"]}");
     lastVersion = json["version"];
 
     // Update the container

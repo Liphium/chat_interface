@@ -37,7 +37,7 @@ class ConversationMembers extends StatelessWidget {
               ),
               LoadingIconButton(
                 loading: conversation.membersLoading,
-                onTap: () => conversation.fetchData(0, refreshAnyway: true),
+                onTap: () => conversation.fetchData(),
                 icon: Icons.refresh,
               ),
             ],

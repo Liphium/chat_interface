@@ -217,9 +217,6 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"id": token["id"], "token": token["token"]});
   if (!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
-    Future.delayed(500.ms, () async {
-      await refreshVault();
-    });
     return true;
   }
   token["token"] = json["token"]; // Set new token (from activation request)

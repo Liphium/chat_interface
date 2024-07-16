@@ -20,7 +20,7 @@ class SystemMessages {
         });
       },
       handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
       },
     ),
 
@@ -34,7 +34,7 @@ class SystemMessages {
         });
       },
       handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
       },
     ),
 
@@ -49,7 +49,7 @@ class SystemMessages {
         });
       },
       handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
       },
     ),
 
@@ -64,7 +64,7 @@ class SystemMessages {
         });
       },
       handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
       },
     ),
 
@@ -78,7 +78,7 @@ class SystemMessages {
         });
       },
       handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
       },
     ),
 
@@ -93,7 +93,7 @@ class SystemMessages {
         });
       },
       handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
       },
     ),
 
@@ -107,7 +107,7 @@ class SystemMessages {
         });
       },
       handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
       },
     ),
 
@@ -121,7 +121,7 @@ class SystemMessages {
         });
       },
       handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData(0, refreshAnyway: true);
+        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
       },
     ),
 
