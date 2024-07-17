@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
 import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
@@ -44,6 +45,7 @@ class FriendController extends GetxController {
       sendLog("refreshing all vaults");
       await refreshFriendsVault();
       await refreshVault();
+      LibraryManager.refreshEntries();
     });
     return true;
   }

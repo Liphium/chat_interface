@@ -15,6 +15,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 part 'vault_actions.dart';
 
@@ -52,6 +53,8 @@ class VaultEntry {
         account = json["account"],
         payload = json["payload"],
         updatedAt = json["updated_at"];
+
+  decryptedPayload([SecureKey? key, Sodium? sodium]) => decryptSymmetric(payload, key ?? vaultKey, sodium);
 }
 
 // Returns an error string (null if successful)
@@ -74,7 +77,7 @@ Future<String?> refreshVault() async {
     var ids = <String>[];
     for (var unparsedEntry in json["entries"]) {
       final entry = VaultEntry.fromJson(unparsedEntry);
-      final decrypted = decryptSymmetric(entry.payload, keys[0]);
+      final decrypted = decryptSymmetric(entry.payload, keys[0], sodium);
       final decoded = jsonDecode(decrypted);
       final conv = Conversation.fromJson(decoded, entry.id);
       list.add(conv);

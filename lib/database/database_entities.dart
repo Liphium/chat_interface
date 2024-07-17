@@ -43,11 +43,15 @@ class Friend extends Table {
 }
 
 class LibraryEntry extends Table {
+  TextColumn get id => text()();
   IntColumn get type => intEnum<LibraryEntryType>()();
   Int64Column get createdAt => int64()();
   TextColumn get data => text()();
   IntColumn get width => integer()();
   IntColumn get height => integer()();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
 }
 
 enum LibraryEntryType {

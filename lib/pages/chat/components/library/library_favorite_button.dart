@@ -63,6 +63,8 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                     splashColor: Colors.transparent,
                     overlayColor: const WidgetStatePropertyAll(Colors.transparent),
                     onTap: () async {
+                      // TODO: Reimplement
+                      /*
                       final entry = await LibraryManager.getFromContainer(widget.container);
                       if (entry == null) {
                         return;
@@ -75,6 +77,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                       }
                       await db.libraryEntry.insertOne(entry);
                       bookmarked.value = true;
+                      */
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(elementSpacing),

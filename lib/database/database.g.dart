@@ -2325,6 +2325,11 @@ class $LibraryEntryTable extends LibraryEntry
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $LibraryEntryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<LibraryEntryType, int> type =
@@ -2353,7 +2358,8 @@ class $LibraryEntryTable extends LibraryEntry
       'height', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [type, createdAt, data, width, height];
+  List<GeneratedColumn> get $columns =>
+      [id, type, createdAt, data, width, height];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2364,6 +2370,11 @@ class $LibraryEntryTable extends LibraryEntry
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
     context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -2393,11 +2404,13 @@ class $LibraryEntryTable extends LibraryEntry
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   LibraryEntryData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return LibraryEntryData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       type: $LibraryEntryTable.$convertertype.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
@@ -2423,13 +2436,15 @@ class $LibraryEntryTable extends LibraryEntry
 
 class LibraryEntryData extends DataClass
     implements Insertable<LibraryEntryData> {
+  final String id;
   final LibraryEntryType type;
   final BigInt createdAt;
   final String data;
   final int width;
   final int height;
   const LibraryEntryData(
-      {required this.type,
+      {required this.id,
+      required this.type,
       required this.createdAt,
       required this.data,
       required this.width,
@@ -2437,6 +2452,7 @@ class LibraryEntryData extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
     {
       map['type'] =
           Variable<int>($LibraryEntryTable.$convertertype.toSql(type));
@@ -2450,6 +2466,7 @@ class LibraryEntryData extends DataClass
 
   LibraryEntryCompanion toCompanion(bool nullToAbsent) {
     return LibraryEntryCompanion(
+      id: Value(id),
       type: Value(type),
       createdAt: Value(createdAt),
       data: Value(data),
@@ -2462,6 +2479,7 @@ class LibraryEntryData extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LibraryEntryData(
+      id: serializer.fromJson<String>(json['id']),
       type: $LibraryEntryTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
@@ -2474,6 +2492,7 @@ class LibraryEntryData extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
       'type': serializer
           .toJson<int>($LibraryEntryTable.$convertertype.toJson(type)),
       'createdAt': serializer.toJson<BigInt>(createdAt),
@@ -2484,12 +2503,14 @@ class LibraryEntryData extends DataClass
   }
 
   LibraryEntryData copyWith(
-          {LibraryEntryType? type,
+          {String? id,
+          LibraryEntryType? type,
           BigInt? createdAt,
           String? data,
           int? width,
           int? height}) =>
       LibraryEntryData(
+        id: id ?? this.id,
         type: type ?? this.type,
         createdAt: createdAt ?? this.createdAt,
         data: data ?? this.data,
@@ -2498,6 +2519,7 @@ class LibraryEntryData extends DataClass
       );
   LibraryEntryData copyWithCompanion(LibraryEntryCompanion data) {
     return LibraryEntryData(
+      id: data.id.present ? data.id.value : this.id,
       type: data.type.present ? data.type.value : this.type,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       data: data.data.present ? data.data.value : this.data,
@@ -2509,6 +2531,7 @@ class LibraryEntryData extends DataClass
   @override
   String toString() {
     return (StringBuffer('LibraryEntryData(')
+          ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('createdAt: $createdAt, ')
           ..write('data: $data, ')
@@ -2519,11 +2542,12 @@ class LibraryEntryData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(type, createdAt, data, width, height);
+  int get hashCode => Object.hash(id, type, createdAt, data, width, height);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LibraryEntryData &&
+          other.id == this.id &&
           other.type == this.type &&
           other.createdAt == this.createdAt &&
           other.data == this.data &&
@@ -2532,6 +2556,7 @@ class LibraryEntryData extends DataClass
 }
 
 class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
+  final Value<String> id;
   final Value<LibraryEntryType> type;
   final Value<BigInt> createdAt;
   final Value<String> data;
@@ -2539,6 +2564,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   final Value<int> height;
   final Value<int> rowid;
   const LibraryEntryCompanion({
+    this.id = const Value.absent(),
     this.type = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.data = const Value.absent(),
@@ -2547,18 +2573,21 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     this.rowid = const Value.absent(),
   });
   LibraryEntryCompanion.insert({
+    required String id,
     required LibraryEntryType type,
     required BigInt createdAt,
     required String data,
     required int width,
     required int height,
     this.rowid = const Value.absent(),
-  })  : type = Value(type),
+  })  : id = Value(id),
+        type = Value(type),
         createdAt = Value(createdAt),
         data = Value(data),
         width = Value(width),
         height = Value(height);
   static Insertable<LibraryEntryData> custom({
+    Expression<String>? id,
     Expression<int>? type,
     Expression<BigInt>? createdAt,
     Expression<String>? data,
@@ -2567,6 +2596,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
+      if (id != null) 'id': id,
       if (type != null) 'type': type,
       if (createdAt != null) 'created_at': createdAt,
       if (data != null) 'data': data,
@@ -2577,13 +2607,15 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   }
 
   LibraryEntryCompanion copyWith(
-      {Value<LibraryEntryType>? type,
+      {Value<String>? id,
+      Value<LibraryEntryType>? type,
       Value<BigInt>? createdAt,
       Value<String>? data,
       Value<int>? width,
       Value<int>? height,
       Value<int>? rowid}) {
     return LibraryEntryCompanion(
+      id: id ?? this.id,
       type: type ?? this.type,
       createdAt: createdAt ?? this.createdAt,
       data: data ?? this.data,
@@ -2596,6 +2628,9 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
     if (type.present) {
       map['type'] =
           Variable<int>($LibraryEntryTable.$convertertype.toSql(type.value));
@@ -2621,6 +2656,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   @override
   String toString() {
     return (StringBuffer('LibraryEntryCompanion(')
+          ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('createdAt: $createdAt, ')
           ..write('data: $data, ')
@@ -3615,6 +3651,7 @@ class $$TrustedLinkTableOrderingComposer
 
 typedef $$LibraryEntryTableCreateCompanionBuilder = LibraryEntryCompanion
     Function({
+  required String id,
   required LibraryEntryType type,
   required BigInt createdAt,
   required String data,
@@ -3624,6 +3661,7 @@ typedef $$LibraryEntryTableCreateCompanionBuilder = LibraryEntryCompanion
 });
 typedef $$LibraryEntryTableUpdateCompanionBuilder = LibraryEntryCompanion
     Function({
+  Value<String> id,
   Value<LibraryEntryType> type,
   Value<BigInt> createdAt,
   Value<String> data,
@@ -3649,6 +3687,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
           orderingComposer:
               $$LibraryEntryTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
             Value<LibraryEntryType> type = const Value.absent(),
             Value<BigInt> createdAt = const Value.absent(),
             Value<String> data = const Value.absent(),
@@ -3657,6 +3696,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             Value<int> rowid = const Value.absent(),
           }) =>
               LibraryEntryCompanion(
+            id: id,
             type: type,
             createdAt: createdAt,
             data: data,
@@ -3665,6 +3705,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           createCompanionCallback: ({
+            required String id,
             required LibraryEntryType type,
             required BigInt createdAt,
             required String data,
@@ -3673,6 +3714,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             Value<int> rowid = const Value.absent(),
           }) =>
               LibraryEntryCompanion.insert(
+            id: id,
             type: type,
             createdAt: createdAt,
             data: data,
@@ -3686,6 +3728,11 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
 class $$LibraryEntryTableFilterComposer
     extends FilterComposer<_$Database, $LibraryEntryTable> {
   $$LibraryEntryTableFilterComposer(super.$state);
+  ColumnFilters<String> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   ColumnWithTypeConverterFilters<LibraryEntryType, LibraryEntryType, int>
       get type => $state.composableBuilder(
           column: $state.table.type,
@@ -3717,6 +3764,11 @@ class $$LibraryEntryTableFilterComposer
 class $$LibraryEntryTableOrderingComposer
     extends OrderingComposer<_$Database, $LibraryEntryTable> {
   $$LibraryEntryTableOrderingComposer(super.$state);
+  ColumnOrderings<String> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
   ColumnOrderings<int> get type => $state.composableBuilder(
       column: $state.table.type,
       builder: (column, joinBuilders) =>

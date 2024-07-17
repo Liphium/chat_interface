@@ -12,7 +12,7 @@ class Constants {
   // Vault
   static const String vaultConversationTag = "$appTag:conv";
   static const String vaultDeckTag = "$appTag:deck";
-  static const String vaultLibrary = "$appTag:lib";
+  static const String vaultLibraryTag = "$appTag:lib";
 
   // Files
   static const String fileAttachmentTag = "$appTag:attachment";

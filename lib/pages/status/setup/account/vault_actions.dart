@@ -12,7 +12,9 @@ Future<String?> removeFromVault(String id) async {
   return null;
 }
 
-/// Add a new entry to the vault (payload is encrypted with the public key of the account in the function)
+/// Add a new entry to the vault (payload is encrypted with the public key of the account in the function).
+///
+/// Returns the vault id in case the request was successful.
 Future<String?> addToVault(String tag, String payload) async {
   final encryptedPayload = encryptSymmetric(payload, vaultKey);
 

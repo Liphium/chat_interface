@@ -38,7 +38,7 @@ class TabletopDeck {
 
   factory TabletopDeck.decrypt(StorageType usecase, Map<String, dynamic> json) {
     final entry = VaultEntry.fromJson(json);
-    final decrypted = jsonDecode(decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, entry.payload));
+    final decrypted = jsonDecode(entry.decryptedPayload());
     final deck = TabletopDeck(
       decrypted['name'],
       vaultId: entry.id,

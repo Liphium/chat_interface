@@ -209,8 +209,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
                   return Obx(() {
                     final search = _search.value;
-                    if (search.isNotEmpty &&
-                        !(friend.name.toLowerCase().contains(search.toLowerCase()) || friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
+                    if (search.isNotEmpty && !(friend.name.toLowerCase().contains(search.toLowerCase()) || friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
                       return const SizedBox();
                     }
 
@@ -266,7 +265,17 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                   child: Obx(
                     () => Animate(
                       effects: [
-                        ExpandEffect(axis: Axis.vertical, duration: 250.ms, curve: Curves.ease, alignment: Alignment.center),
+                        ExpandEffect(
+                          alignment: Alignment.topCenter,
+                          duration: 250.ms,
+                          curve: Curves.ease,
+                          axis: Axis.vertical,
+                        ),
+                        FadeEffect(
+                          begin: 0,
+                          end: 1,
+                          duration: 250.ms,
+                        ),
                       ],
                       target: _length.value > 1 ? 1 : 0,
                       child: Padding(
