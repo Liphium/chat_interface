@@ -1,14 +1,13 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
-import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -33,6 +32,7 @@ class VaultSetup extends Setup {
 
     // Refresh the vault
     await refreshVault();
+    await LibraryManager.refreshEntries();
 
     return null;
   }
@@ -54,7 +54,7 @@ class VaultEntry {
         payload = json["payload"],
         updatedAt = json["updated_at"];
 
-  decryptedPayload([SecureKey? key, Sodium? sodium]) => decryptSymmetric(payload, key ?? vaultKey, sodium);
+  String decryptedPayload([SecureKey? key, Sodium? sodium]) => decryptSymmetric(payload, key ?? vaultKey, sodium);
 }
 
 // Returns an error string (null if successful)

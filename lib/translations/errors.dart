@@ -14,6 +14,7 @@ class ErrorTranslations extends Translations {
           'mail.error': 'There was an error with our mail servers. Please try again later or contact your administrator.',
           'app.error': 'There was an error with the app. Please report this to the developers.',
           'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
+          'not.found': 'This wasn\'t found. Maybe it has already been deleted?',
           'new.version': 'A new version is available, please update the app.',
           'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
           'keys.invalid': 'Invalid keys found. This means that the server could\'ve been hacked or someone is trolling you.',

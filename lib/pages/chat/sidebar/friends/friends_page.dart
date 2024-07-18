@@ -106,7 +106,12 @@ class _FriendsPageState extends State<FriendsPage> {
                                 curve: Curves.easeInOut,
                                 duration: 250.ms,
                                 axis: Axis.vertical,
-                              )
+                              ),
+                              FadeEffect(
+                                end: 0,
+                                begin: 1,
+                                duration: 250.ms,
+                              ),
                             ],
                             target: revealSuccess.value ? 1.0 : 0.0,
                             child: SuccessContainer(text: "request.sent".tr),
@@ -123,7 +128,12 @@ class _FriendsPageState extends State<FriendsPage> {
                                   curve: Curves.easeInOut,
                                   duration: 250.ms,
                                   axis: Axis.vertical,
-                                )
+                                ),
+                                FadeEffect(
+                                  end: 1,
+                                  begin: 0,
+                                  duration: 250.ms,
+                                ),
                               ],
                               target: found ? 0.0 : 1.0,
                               child: Padding(
@@ -145,7 +155,12 @@ class _FriendsPageState extends State<FriendsPage> {
                                 curve: Curves.easeInOut,
                                 duration: 250.ms,
                                 axis: Axis.vertical,
-                              )
+                              ),
+                              FadeEffect(
+                                end: 0,
+                                begin: 1,
+                                duration: 250.ms,
+                              ),
                             ],
                             target: query.value.isEmpty ? 0.0 : 1.0,
                             child: Visibility(
@@ -190,7 +205,12 @@ class _FriendsPageState extends State<FriendsPage> {
                                 curve: Curves.easeInOut,
                                 duration: 250.ms,
                                 axis: Axis.vertical,
-                              )
+                              ),
+                              FadeEffect(
+                                end: 0,
+                                begin: 1,
+                                duration: 250.ms,
+                              ),
                             ],
                             target: query.value.isEmpty ? 0.0 : 1.0,
                             child: Visibility(
@@ -265,8 +285,14 @@ class _FriendsPageState extends State<FriendsPage> {
                                               ReverseExpandEffect(
                                                 curve: Curves.easeInOut,
                                                 duration: 250.ms,
+                                                alignment: Alignment.bottomCenter,
                                                 axis: Axis.vertical,
-                                              )
+                                              ),
+                                              FadeEffect(
+                                                end: 0,
+                                                begin: 1,
+                                                duration: 250.ms,
+                                              ),
                                             ],
                                             target: visible ? 0.0 : 1.0,
                                             child: Padding(

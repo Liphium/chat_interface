@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -81,14 +82,17 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
               );
             }
 
-            return Material(
-              color: Get.theme.colorScheme.primaryContainer,
-              child: InkWell(
-                onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.image.filePath))),
-                child: Image.file(
-                  File(widget.image.filePath),
-                  width: width,
-                  height: height,
+            return LibraryFavoriteButton(
+              container: widget.image,
+              child: Material(
+                color: Get.theme.colorScheme.primaryContainer,
+                child: InkWell(
+                  onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.image.filePath))),
+                  child: Image.file(
+                    File(widget.image.filePath),
+                    width: width,
+                    height: height,
+                  ),
                 ),
               ),
             );

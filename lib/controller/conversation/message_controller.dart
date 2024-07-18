@@ -135,15 +135,18 @@ class MessageController extends GetxController {
   static const newLoadOffset = 200;
   bool topReached = false;
   late AutoScrollController controller;
+  final waitingMessages = <String>[]; // To prevent messages from being sent twice due to a race condition
 
   void addMessageToBottom(Message message, {bool animation = true}) async {
-    // Check if there are more messages after the current messages (just in case)
-    if (messages.isNotEmpty) {
-      // TODO: Replace with something
+    // Check if there are any messages with similar ids to prevent adding the same message again
+    if (waitingMessages.any((msg) => msg == message.id)) {
+      return;
     }
+    waitingMessages.add(message.id);
 
     // Initialize all message data
     await message.initAttachments();
+    waitingMessages.remove(message.id); // Remove after cause then it is added
 
     // Only load the message, if scrolled near enough to the bottom
     if (controller.position.pixels <= newLoadOffset) {
@@ -524,29 +527,10 @@ class Message {
   /// Also verifies the signature (but that happens in the main isolate).
   ///
   /// For the future also: TODO: Unpack the signature in a different isolate
-  static Future<Message> unpackInIsolate(Conversation conversation, Map<String, dynamic> json) async {
+  static Future<Message> unpackInIsolate(Conversation conv, Map<String, dynamic> json) async {
     // Run an isolate to parse the message
-    final copy = Conversation.copyWithoutKey(conversation);
-    final (message, info) = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) {
-        // Unpack the actual message
-        final (msg, info) = Message.fromJson(
-          json,
-          sodium: sodium,
-          key: keys[0],
-          conversation: copy,
-        );
-
-        // Unpack the system message attachments in case needed
-        if (msg.type == MessageType.system) {
-          msg.decryptSystemMessageAttachments(copy, keys[0], sodium);
-        }
-
-        // Return it to the main isolate
-        return (msg, info);
-      },
-      secureKeys: [conversation.key],
-    );
+    final copy = Conversation.copyWithoutKey(conv);
+    final (message, info) = await _extractMessageIsolate(json, copy, conv.key);
 
     // Verify the signature
     if (info != null) {
@@ -554,6 +538,29 @@ class Message {
     }
 
     return message;
+  }
+
+  static Future<(Message, SymmetricSequencedInfo?)> _extractMessageIsolate(Map<String, dynamic> json, Conversation copied, SecureKey key) {
+    return sodiumLib.runIsolated(
+      (sodium, keys, pairs) {
+        // Unpack the actual message
+        final (msg, info) = Message.fromJson(
+          json,
+          sodium: sodium,
+          key: keys[0],
+          conversation: copied,
+        );
+
+        // Unpack the system message attachments in case needed
+        if (msg.type == MessageType.system) {
+          msg.decryptSystemMessageAttachments(copied, keys[0], sodium);
+        }
+
+        // Return it to the main isolate
+        return (msg, info);
+      },
+      secureKeys: [key],
+    );
   }
 
   /// Load a message from json (from the server) and get the corresponding [SymmetricSequencedInfo] (only if no system message).
@@ -566,7 +573,7 @@ class Message {
         json["edited"], false);
 
     // Decrypt content
-    conversation = conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!;
+    conversation ??= Get.find<ConversationController>().conversations[json["conversation"]]!;
     if (message.sender == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;

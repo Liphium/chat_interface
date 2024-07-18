@@ -35,7 +35,7 @@ class LibraryManager {
         final ids = <String>[];
         for (var entryJson in json["entries"]) {
           final entry = VaultEntry.fromJson(entryJson);
-          final libraryEntry = LibraryEntry.fromJson(entry.decryptedPayload(keys[0], sodium));
+          final libraryEntry = LibraryEntry.fromJson(entry.id, jsonDecode(entry.decryptedPayload(keys[0], sodium)));
           list.add(libraryEntry);
           ids.add(entry.id);
         }
@@ -45,13 +45,13 @@ class LibraryManager {
       secureKeys: [vaultKey],
     );
 
+    // Delete all library entries that aren't in the local database anymore
+    await db.libraryEntry.deleteWhere((tbl) => tbl.id.isNotIn(ids));
+
     // Check if there are any
     if (parsed.isEmpty || ids.isEmpty) {
       return null;
     }
-
-    // Delete all library entries that aren't in the local database anymore
-    await db.libraryEntry.deleteWhere((tbl) => tbl.id.isNotIn(ids));
 
     // Add all of them to the database
     for (var entry in parsed) {
@@ -181,7 +181,6 @@ class LibraryEntry {
   /// Convert a LibraryEntry to a JSON map
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'type': type.index,
       'data': data,
       'created_at': createdAt.millisecondsSinceEpoch,
@@ -191,9 +190,9 @@ class LibraryEntry {
   }
 
   /// Create a LibraryEntry from a JSON map
-  factory LibraryEntry.fromJson(Map<String, dynamic> json) {
+  factory LibraryEntry.fromJson(String id, Map<String, dynamic> json) {
     return LibraryEntry(
-      json['id'],
+      id,
       LibraryEntryType.values[json['type']],
       json['data'],
       DateTime.fromMillisecondsSinceEpoch(json['created_at']),
