@@ -19,7 +19,7 @@ class SuccessContainer extends StatelessWidget {
         children: [
           Icon(Icons.check, color: Get.theme.colorScheme.secondary),
           horizontalSpacing(sectionSpacing),
-          Text(text, style: Get.theme.textTheme.labelLarge),
+          Flexible(child: Text(text, style: Get.theme.textTheme.labelLarge)),
         ],
       ),
     );

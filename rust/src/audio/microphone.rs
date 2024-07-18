@@ -36,27 +36,22 @@ pub fn stop() {
 }
 
 fn pcm_to_db(pcm: f32) -> f32 {
-    if pcm <= 0.0 {
-        return -100.0;
-    }
-    20.0 * pcm.log10()
+    20.0 * pcm.abs().log10()
 }
 
 pub fn record() {
     thread::spawn(move || {
         // Get a cpal host
-        let mut host = cpal::default_host(); // Current host on computer
-        #[cfg(target_os = "linux")]
-        {
-            host = cpal::host_from_id(cpal::HostId::Jack).unwrap();
-        }
+        let host = cpal::default_host(); // Current host on computer
 
         // Get input device (using new API)
         let mut device = host
             .default_input_device()
             .expect("no input device available"); // Current device
         for d in host.input_devices().expect("Couldn't get input devices") {
+            logger::send_log(logger::TAG_AUDIO, d.name().unwrap().as_str());
             if d.name().unwrap() == super::get_input_device() {
+                logger::send_log(logger::TAG_AUDIO, "Found device!");
                 device = d;
                 break;
             }
@@ -93,9 +88,10 @@ pub fn record() {
 
                 let mut avg = 0.0;
                 for sample in samples.iter() {
-                    avg += *sample;
+                    avg += sample * sample;
                 }
                 avg = avg / samples.len() as f32;
+                avg = avg.sqrt();
                 avg = pcm_to_db(avg);
 
                 let mut options = super::get_options();

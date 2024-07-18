@@ -36,16 +36,18 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
 
     if (Get.find<FriendController>().friends.length == 1) {
       return SlidingWindowBase(
+        title: [
+          Text("chat.space.add".tr, style: theme.textTheme.titleMedium),
+        ],
         position: ContextMenuData(widget.position, true, true),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("no.friends".tr, style: theme.textTheme.bodyMedium),
             verticalSpacing(defaultSpacing),
             FJElevatedButton(
               onTap: () {
                 Get.back();
-                Get.dialog(const FriendsPage());
+                showModal(const FriendsPage());
               },
               child: Center(
                 child: Text("open.friends".tr, style: theme.textTheme.labelLarge),
@@ -57,12 +59,13 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
     }
 
     return SlidingWindowBase(
+      title: [
+        Text("chat.space.add".tr, style: theme.textTheme.titleMedium),
+      ],
       position: ContextMenuData(widget.position, true, true),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Create a space".tr, style: theme.textTheme.titleMedium),
-          verticalSpacing(sectionSpacing),
           /*
           verticalSpacing(sectionSpacing),
           Obx(

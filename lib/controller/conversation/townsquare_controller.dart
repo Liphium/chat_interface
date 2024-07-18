@@ -3,7 +3,7 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart' as msg;
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:get/get.dart';

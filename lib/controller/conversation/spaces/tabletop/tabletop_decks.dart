@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/web.dart';
 
@@ -12,7 +12,7 @@ class TabletopDecks {
   static Future<List<TabletopDeck>?> listDecks() async {
     final json = await postAuthorizedJSON("/account/vault/list", {
       "after": 0,
-      "tag": Constants.deckTag,
+      "tag": Constants.vaultDeckTag,
     });
 
     if (!json["success"]) {
@@ -38,10 +38,7 @@ class TabletopDeck {
 
   factory TabletopDeck.decrypt(StorageType usecase, Map<String, dynamic> json) {
     final entry = VaultEntry.fromJson(json);
-    final decrypted = jsonDecode(decryptAsymmetricAnonymous(
-        asymmetricKeyPair.publicKey,
-        asymmetricKeyPair.secretKey,
-        entry.payload));
+    final decrypted = jsonDecode(entry.decryptedPayload());
     final deck = TabletopDeck(
       decrypted['name'],
       vaultId: entry.id,
@@ -69,7 +66,7 @@ class TabletopDeck {
     if (vaultId != null) {
       return updateVault(vaultId!, payload);
     }
-    final id = await addToVault(Constants.deckTag, payload);
+    final id = await addToVault(Constants.vaultDeckTag, payload);
     if (id == null) {
       return false;
     }
@@ -81,9 +78,7 @@ class TabletopDeck {
   void loadCards(StorageType usecase) async {
     final controller = Get.find<AttachmentController>();
     for (var card in encodedCards) {
-      final type = await AttachmentController.checkLocations(
-          card['id'], usecase,
-          types: [StorageType.permanent, StorageType.cache]);
+      final type = await AttachmentController.checkLocations(card['id'], usecase, types: [StorageType.permanent, StorageType.cache]);
       final container = AttachmentContainer.fromJson(type, card);
       amounts[container.id] = card['amount'] ?? 1;
       await controller.downloadAttachment(container);

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -29,46 +30,112 @@ class WindowBase extends StatelessWidget {
 class DialogBase extends StatelessWidget {
   final Widget child;
   final double maxWidth;
+  final bool showTitleDesktop;
+  final List<Widget> title;
 
-  const DialogBase({super.key, required this.child, this.maxWidth = 400});
+  const DialogBase({
+    super.key,
+    required this.child,
+    this.maxWidth = 400,
+    this.title = const [],
+    this.showTitleDesktop = true,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Return without animation on mobile
+    if (isMobileMode()) {
+      return Material(
+        color: Get.theme.colorScheme.onInverseSurface,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(defaultSpacing),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(elementSpacing),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        LoadingIconButton(
+                          onTap: () => Get.back(),
+                          color: Get.theme.colorScheme.onPrimary,
+                          padding: 0,
+                          iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
+                          extra: defaultSpacing,
+                          icon: Icons.arrow_back,
+                        ),
+                        horizontalSpacing(defaultSpacing),
+                        ...title,
+                      ],
+                    ),
+                  ),
+                  verticalSpacing(defaultSpacing),
+                  child,
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final random = math.Random();
     final randomOffset = random.nextDouble() * 5 + 8;
     final randomHz = random.nextDouble() * 0.5 + 2;
 
     return Center(
       child: Animate(
-          effects: [
-            ScaleEffect(
-              delay: 100.ms,
-              duration: 500.ms,
-              begin: const Offset(0, 0),
-              end: const Offset(1, 1),
-              alignment: Alignment.center,
-              curve: const ElasticOutCurve(0.8),
+        effects: [
+          ScaleEffect(
+            delay: 100.ms,
+            duration: 500.ms,
+            begin: const Offset(0, 0),
+            end: const Offset(1, 1),
+            alignment: Alignment.center,
+            curve: const ElasticOutCurve(0.8),
+          ),
+          ShakeEffect(
+            delay: 100.ms,
+            duration: 400.ms,
+            hz: randomHz,
+            offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+            rotation: 0,
+            curve: Curves.decelerate,
+          ),
+          FadeEffect(
+            delay: 100.ms,
+            duration: 250.ms,
+            curve: Curves.easeOut,
+          )
+        ],
+        target: 1,
+        child: Material(
+          elevation: 2.0,
+          color: Get.theme.colorScheme.onInverseSurface,
+          borderRadius: BorderRadius.circular(dialogBorderRadius),
+          child: Container(
+            width: maxWidth,
+            padding: const EdgeInsets.all(dialogPadding),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showTitleDesktop && title.isNotEmpty)
+                  Row(
+                    children: [
+                      ...title,
+                    ],
+                  ),
+                if (showTitleDesktop && title.isNotEmpty) verticalSpacing(defaultSpacing),
+                child,
+              ],
             ),
-            ShakeEffect(
-                delay: 100.ms,
-                duration: 400.ms,
-                hz: randomHz,
-                offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
-                rotation: 0,
-                curve: Curves.decelerate),
-            FadeEffect(
-              delay: 100.ms,
-              duration: 250.ms,
-              curve: Curves.easeOut,
-            )
-          ],
-          target: 1,
-          child: Material(
-            elevation: 2.0,
-            color: Get.theme.colorScheme.onInverseSurface,
-            borderRadius: BorderRadius.circular(dialogBorderRadius),
-            child: Container(width: maxWidth, padding: const EdgeInsets.all(dialogPadding), child: child),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -77,10 +144,12 @@ class SlidingWindowBase extends StatelessWidget {
   final ContextMenuData position;
   final bool lessPadding;
   final Widget child;
+  final List<Widget> title;
   final double maxSize;
 
   const SlidingWindowBase({
     super.key,
+    required this.title,
     required this.position,
     this.lessPadding = false,
     required this.child,
@@ -89,6 +158,51 @@ class SlidingWindowBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Return without animation on mobile
+    if (isMobileMode()) {
+      return Material(
+        color: Get.theme.colorScheme.onInverseSurface,
+        child: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: defaultSpacing,
+                left: defaultSpacing,
+                top: defaultSpacing,
+                bottom: Get.mediaQuery.padding.bottom != 0 && GetPlatform.isMobile ? Get.mediaQuery.padding.bottom : defaultSpacing,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(elementSpacing),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        LoadingIconButton(
+                          onTap: () => Get.back(),
+                          color: Get.theme.colorScheme.onPrimary,
+                          padding: 0,
+                          iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
+                          extra: defaultSpacing,
+                          icon: Icons.arrow_back,
+                        ),
+                        horizontalSpacing(defaultSpacing),
+                        ...title,
+                      ],
+                    ),
+                  ),
+                  verticalSpacing(defaultSpacing),
+                  child,
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final random = math.Random();
     final randomOffset = random.nextDouble() * 3 + 2;
     final randomHz = random.nextDouble() * 1 + 1.5;
@@ -120,7 +234,16 @@ class SlidingWindowBase extends StatelessWidget {
                 borderRadius: BorderRadius.circular(dialogBorderRadius),
                 child: Padding(
                   padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
-                  child: child,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: title,
+                      ),
+                      if (title.isNotEmpty) verticalSpacing(defaultSpacing),
+                      child,
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -139,7 +262,7 @@ class ContextMenuData {
   const ContextMenuData(this.start, this.fromTop, this.fromLeft);
 
   // Compute the position of the context menu based on a widget it should be next to
-  factory ContextMenuData.fromKey(GlobalKey key, {above = false, right = false}) {
+  factory ContextMenuData.fromKey(GlobalKey key, {above = false, right = false, below = false}) {
     final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
     var position = renderBox.localToGlobal(Offset.zero);
     final widgetDimensions = renderBox.size;
@@ -149,25 +272,30 @@ class ContextMenuData {
     final bool fromTop;
     if (position.dy > screenDimensions.height / 2) {
       fromTop = false;
-      position = above
-          ? Offset(position.dx, screenDimensions.height - position.dy + defaultSpacing)
-          : Offset(position.dx, screenDimensions.height - position.dy - widgetDimensions.height);
+      if (above) {
+        position = Offset(position.dx, screenDimensions.height - position.dy + defaultSpacing);
+      } else {
+        position = Offset(position.dx, screenDimensions.height - position.dy - widgetDimensions.height);
+      }
     } else {
       fromTop = true;
+      if (below) {
+        position = Offset(position.dx, position.dy + widgetDimensions.height + defaultSpacing);
+      }
     }
 
     // Calculate x position
     final bool fromLeft;
     if (position.dx > screenDimensions.width - 350 || right) {
       fromLeft = false;
-      if (above) {
+      if (above || below) {
         position = Offset(screenDimensions.width - position.dx - widgetDimensions.width, position.dy);
       } else {
         position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
       }
     } else {
       fromLeft = true;
-      position = above ? Offset(position.dx, position.dy) : Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
+      position = above || below ? Offset(position.dx, position.dy) : Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
     }
     sendLog(fromLeft);
 

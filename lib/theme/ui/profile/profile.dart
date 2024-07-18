@@ -104,6 +104,7 @@ class _ProfileState extends State<Profile> {
     //* Context menu
     if (widget.position != null) {
       return SlidingWindowBase(
+        title: const [],
         lessPadding: true,
         position: ContextMenuData(widget.position!, true, widget.leftAligned),
         maxSize: widget.size.toDouble(),
@@ -111,6 +112,7 @@ class _ProfileState extends State<Profile> {
       );
     } else {
       return DialogBase(
+        title: const [],
         maxWidth: widget.size.toDouble(),
         child: buildProfile(),
       );
@@ -126,13 +128,21 @@ class _ProfileState extends State<Profile> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             //* Profile info
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                UserAvatar(id: widget.friend.id, size: 40),
-                horizontalSpacing(defaultSpacing),
-                Text(widget.friend.displayName.value.text, style: Get.theme.textTheme.titleMedium),
-              ],
+            Flexible(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  UserAvatar(id: widget.friend.id, size: 40),
+                  horizontalSpacing(defaultSpacing),
+                  Flexible(
+                    child: Text(
+                      widget.friend.displayName.value.text,
+                      overflow: TextOverflow.ellipsis,
+                      style: Get.theme.textTheme.titleMedium,
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             //* Call button
@@ -143,9 +153,13 @@ class _ProfileState extends State<Profile> {
             )
           ],
         ),
-        Text(
-          widget.friend.status.value,
-          style: Get.theme.textTheme.bodyMedium,
+        Obx(
+          () => widget.friend.status.value != ""
+              ? Text(
+                  widget.friend.status.value,
+                  style: Get.theme.textTheme.bodyMedium,
+                )
+              : const SizedBox(),
         ),
         verticalSpacing(defaultSpacing),
         ListView.builder(

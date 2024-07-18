@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -85,94 +86,97 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     SettingController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
-    return Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-      //* Device selection
-      Text("video.camera.device".tr, style: theme.textTheme.labelLarge),
-      verticalSpacing(defaultSpacing),
+    return SettingsPageBase(
+      label: "camera",
+      child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        //* Device selection
+        Text("video.camera.device".tr, style: theme.textTheme.labelLarge),
+        verticalSpacing(defaultSpacing),
 
-      RepaintBoundary(
-        child: Obx(
-          () => Column(
-            children: List.generate(_cameras.length, (index) {
-              final current = _cameras[index].label;
+        RepaintBoundary(
+          child: Obx(
+            () => Column(
+              children: List.generate(_cameras.length, (index) {
+                final current = _cameras[index].label;
 
-              final first = index == 0;
-              final last = index == _cameras.length - 1;
+                final first = index == 0;
+                final last = index == _cameras.length - 1;
 
-              final radius = BorderRadius.vertical(
-                top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
-                bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
-              );
+                final radius = BorderRadius.vertical(
+                  top: first ? const Radius.circular(defaultSpacing) : Radius.zero,
+                  bottom: last ? const Radius.circular(defaultSpacing) : Radius.zero,
+                );
 
-              return Padding(
-                padding: EdgeInsets.only(top: index == 0 ? 0 : elementSpacing),
-                child: Obx(
-                  () => Material(
-                    color: controller.settings[VideoSettings.camera]!.getWhenValue("def", _cameras[0].label) == current
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onInverseSurface,
-                    borderRadius: radius,
-                    child: InkWell(
+                return Padding(
+                  padding: EdgeInsets.only(top: index == 0 ? 0 : elementSpacing),
+                  child: Obx(
+                    () => Material(
+                      color: controller.settings[VideoSettings.camera]!.getWhenValue("def", _cameras[0].label) == current
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onInverseSurface,
                       borderRadius: radius,
-                      onTap: () async {
-                        controller.settings[VideoSettings.camera]!.setValue(current);
+                      child: InkWell(
+                        borderRadius: radius,
+                        onTap: () async {
+                          controller.settings[VideoSettings.camera]!.setValue(current);
 
-                        // Refresh camera preview
-                        if (_cameraTrack.value != null) {
-                          _startPreview(_cameras[index].label);
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(defaultSpacing),
-                        child: Row(
-                          children: [
-                            //* Icon
-                            Icon(Icons.camera_alt, color: theme.colorScheme.onPrimary),
+                          // Refresh camera preview
+                          if (_cameraTrack.value != null) {
+                            _startPreview(_cameras[index].label);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(defaultSpacing),
+                          child: Row(
+                            children: [
+                              //* Icon
+                              Icon(Icons.camera_alt, color: theme.colorScheme.onPrimary),
 
-                            horizontalSpacing(defaultSpacing * 0.5),
+                              horizontalSpacing(defaultSpacing * 0.5),
 
-                            //* Label
-                            Text(_cameras[index].label, style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface)),
-                          ],
+                              //* Label
+                              Text(_cameras[index].label, style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface)),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ),
-      ),
 
-      verticalSpacing(sectionSpacing),
-      Text("video.camera.preview".tr, style: theme.textTheme.labelLarge),
-      verticalSpacing(defaultSpacing),
+        verticalSpacing(sectionSpacing),
+        Text("video.camera.preview".tr, style: theme.textTheme.labelLarge),
+        verticalSpacing(defaultSpacing),
 
-      //* Preview
-      AspectRatio(
-        aspectRatio: 16 / 5,
-        child: Material(
-          color: theme.colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(defaultSpacing),
-          child: Obx(
-            () => _cameraTrack.value == null
-                ? Center(
-                    child: FJElevatedButton(
-                    shadow: true,
-                    onTap: () async {
-                      // Create new track
-                      _startPreview(controller.settings["video.camera"]!.getWhenValue("def", _cameras[0].label));
-                    },
-                    child: Text("video.camera.preview.start".tr, style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface)),
-                  ))
-                : VideoTrackRenderer(
-                    _cameraTrack.value!,
-                    fit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-                  ),
+        //* Preview
+        AspectRatio(
+          aspectRatio: 16 / 5,
+          child: Material(
+            color: theme.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(defaultSpacing),
+            child: Obx(
+              () => _cameraTrack.value == null
+                  ? Center(
+                      child: FJElevatedButton(
+                      shadow: true,
+                      onTap: () async {
+                        // Create new track
+                        _startPreview(controller.settings["video.camera"]!.getWhenValue("def", _cameras[0].label));
+                      },
+                      child: Text("video.camera.preview.start".tr, style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface)),
+                    ))
+                  : VideoTrackRenderer(
+                      _cameraTrack.value!,
+                      fit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                    ),
+            ),
           ),
-        ),
-      )
-    ]);
+        )
+      ]),
+    );
   }
 }

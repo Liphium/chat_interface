@@ -4,7 +4,7 @@ class FriendsVault {
   /// Store friend in vault (returns id of the friend in the vault if successful)
   static Future<String?> store(String data, {errorPopup = false, prefix = "", lastPacket = 0}) async {
     final hash = hashSha(data);
-    final payload = encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, data);
+    final payload = encryptSymmetric(data, vaultKey);
 
     final json = await postAuthorizedJSON("/account/friends/add", <String, dynamic>{
       "hash": hash,
@@ -13,10 +13,9 @@ class FriendsVault {
       "send_date": encryptDate(DateTime.fromMillisecondsSinceEpoch(0)),
     });
 
-    sendLog(json);
     if (!json["success"]) {
       if (errorPopup) {
-        showErrorPopup("$prefix.${json["error"]}", "$prefix.${json["error"]}.text");
+        showErrorPopup("$prefix.${json["error"]}", "$prefix.${json["error"]}");
       }
       return null;
     }
@@ -76,7 +75,7 @@ class FriendsVault {
 
 /// Class for storing all keys for a friend
 class KeyStorage {
-  SecureKey profileKey;
+  late String profileKeyPacked;
   String storedActionKey;
   Uint8List publicKey;
   Uint8List signatureKey;
@@ -84,16 +83,26 @@ class KeyStorage {
   KeyStorage.empty()
       : publicKey = Uint8List(0),
         signatureKey = Uint8List(0),
-        profileKey = randomSymmetricKey(),
+        profileKeyPacked = "unbreathable_was_here_but_2024",
         storedActionKey = "unbreathable_was_here";
-  KeyStorage(this.publicKey, this.signatureKey, this.profileKey, this.storedActionKey);
+  KeyStorage(this.publicKey, this.signatureKey, SecureKey profileKey, this.storedActionKey) {
+    profileKeyPacked = packageSymmetricKey(profileKey);
+    unpackedProfileKey = profileKey;
+  }
   KeyStorage.fromJson(Map<String, dynamic> json)
       : publicKey = unpackagePublicKey(json["pub"]),
-        profileKey = unpackageSymmetricKey(json["pf"]),
+        profileKeyPacked = json["pf"] ?? "",
         signatureKey = unpackagePublicKey(json["sg"]),
         storedActionKey = json["sa"] ?? "";
 
   Map<String, dynamic> toJson() {
-    return {"pub": packagePublicKey(publicKey), "pf": packageSymmetricKey(profileKey), "sg": packagePublicKey(signatureKey), "sa": storedActionKey};
+    return {"pub": packagePublicKey(publicKey), "pf": profileKeyPacked, "sg": packagePublicKey(signatureKey), "sa": storedActionKey};
+  }
+
+  // Just so we don't break the API anywhere yk
+  SecureKey? unpackedProfileKey;
+  SecureKey get profileKey {
+    unpackedProfileKey ??= unpackageSymmetricKey(profileKeyPacked);
+    return unpackedProfileKey!;
   }
 }

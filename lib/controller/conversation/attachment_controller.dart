@@ -4,12 +4,12 @@ import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/database/accounts/trusted_links.dart';
+import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +23,7 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, {favorite = false, popups = true, String? fileName}) async {
+  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, String tag, {popups = true, String? fileName}) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
@@ -33,12 +33,11 @@ class AttachmentController extends GetxController {
     final formData = dio_rs.FormData.fromMap({
       "file": dio_rs.MultipartFile.fromBytes(encrypted, filename: name),
       "name": name,
-      "favorite": favorite ? "true" : "false",
+      "tag": tag,
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
       "extension": path.basename(data.file.path).split(".").last
     });
 
-    sendLog(server("/account/files/upload").toString());
     final res = await dio.post(
       server("/account/files/upload").toString(),
       data: formData,
@@ -202,7 +201,7 @@ class AttachmentController extends GetxController {
     // Delete oldest files
     files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
     for (final file in files) {
-      final size = file.statSync().size;
+      final size = (await file.stat()).size;
       await file.delete();
       cacheSize -= size;
       if (cacheSize < maxSize) {

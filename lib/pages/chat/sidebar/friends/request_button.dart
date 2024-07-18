@@ -50,7 +50,7 @@ class _RequestButtonState extends State<RequestButton> {
 
     return Material(
       borderRadius: BorderRadius.circular(defaultSpacing),
-      color: Get.theme.colorScheme.onInverseSurface,
+      color: Get.theme.colorScheme.inverseSurface,
       child: InkWell(
         borderRadius: BorderRadius.circular(defaultSpacing),
 

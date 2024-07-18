@@ -3,46 +3,36 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 import '../../util/logging_framework.dart';
 
 void setupSetupListeners() {
   //* New status
-  connector.listen("setup_st", (event) {
+  connector.listen("setup", (event) {
     final data = event.data["data"]! as String;
     final controller = Get.find<StatusController>();
 
-    if (data == "-" || data == "") {
-      controller.status.value = "-";
+    if (data == "" || data == "-") {
+      controller.status.value = "";
       controller.type.value = statusOnline;
-      subscribeToConversations(controller.statusJson(), controller.generateFriendId());
+      subscribeToConversations(controller.statusJson());
       return;
     }
 
     // Decrypt status with profile key
-    sendLog(data);
-    final args = data.split(":");
-    final decrypted = decryptSymmetric(args[1], profileKey);
-    controller.fromStatusJson(decrypted);
+    controller.fromStatusJson(decryptSymmetric(data, profileKey));
 
-    subscribeToConversations(controller.statusJson(), controller.generateFriendId());
+    subscribeToConversations(controller.statusJson());
   }, afterSetup: true);
-
-  //* Setup finished
-  connector.listen("setup_fin", (event) {
-    sendLog("Setup finished");
-  });
 }
 
 // status is going to be encrypted in this function
-Future<bool> subscribeToConversations(String status, String friendId) async {
+Future<bool> subscribeToConversations(String status) async {
   // Encrypt status with profile key
-  status = generateStatusData(status, friendId);
+  status = generateStatusData(status);
 
   // Subscribe to all conversations
   final tokens = <Map<String, dynamic>>[];
@@ -55,9 +45,9 @@ Future<bool> subscribeToConversations(String status, String friendId) async {
   return true;
 }
 
-void subscribeToConversation(String status, String friendId, ConversationToken token, {deletions = true}) {
+void subscribeToConversation(String status, ConversationToken token, {deletions = true}) {
   // Encrypt status with profile key
-  status = generateStatusData(status, friendId);
+  status = generateStatusData(status);
 
   // Subscribe to all conversations
   final tokens = <Map<String, dynamic>>[token.toMap()];
@@ -66,32 +56,21 @@ void subscribeToConversation(String status, String friendId, ConversationToken t
   _sub(status, tokens, startup: false, deletions: deletions);
 }
 
-String generateStatusData(String status, String friendId) {
-  status = encryptSymmetric(status, profileKey);
-  status = "$friendId:$status";
-
-  return status;
+String generateStatusData(String status) {
+  return encryptSymmetric(status, profileKey);
 }
 
 void _sub(String status, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
-  // Get last message received
-  final lastMessage = await (db.message.select()
-        ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
-        ..limit(1))
-      .getSingleOrNull();
-  final lastFetch = lastMessage?.createdAt.toInt() ?? 0;
-
   connector.sendAction(
       Message("conv_sub", <String, dynamic>{
         "tokens": tokens,
         "status": status,
-        "date": lastFetch,
       }), handler: (event) {
     if (!event.data["success"]) {
       sendLog("ERROR WHILE SUBSCRIBING: ${event.data["message"]}");
       return;
     }
     Get.find<StatusController>().statusLoading.value = false;
-    Get.find<ConversationController>().finishedLoading(event.data["read"], deletions ? (event.data["missing"] ?? []) : [], overwriteReads: startup);
+    Get.find<ConversationController>().finishedLoading(event.data["info"], deletions ? (event.data["missing"] ?? []) : [], overwriteReads: startup);
   });
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
@@ -10,10 +9,10 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
@@ -38,7 +37,7 @@ class StatusController extends GetxController {
 
   // Status message
   final statusLoading = true.obs;
-  final status = '-'.obs; // "-" = status disabled
+  final status = ''.obs;
   final type = 1.obs;
 
   // Shared content by friends
@@ -48,9 +47,6 @@ class StatusController extends GetxController {
   final ownContainer = Rx<ShareContainer?>(null);
 
   void setName(String value) => name.value = value;
-  void setId(String value) {
-    StatusController.ownAccountId = value;
-  }
 
   String statusJson() => jsonEncode(<String, dynamic>{
         "s": status.value,
@@ -58,26 +54,23 @@ class StatusController extends GetxController {
       });
 
   String newStatusJson(String status, int type) => jsonEncode(<String, dynamic>{
-        "s": status,
+        "s": base64Encode(utf8.encode(status)),
         "t": type,
       });
 
   void fromStatusJson(String json) {
+    sendLog("received $json");
     final data = jsonDecode(json);
     try {
       status.value = utf8.decode(base64Decode(data["s"]));
     } catch (e) {
-      status.value = "-";
+      status.value = "";
     }
     type.value = data["t"];
   }
 
-  String generateFriendId() {
-    return hashSha(ownAccountId + name.value + storedActionKey);
-  }
-
   String statusPacket(String statusJson) {
-    return "${generateFriendId()}:${encryptSymmetric(statusJson, profileKey)}";
+    return encryptSymmetric(statusJson, profileKey);
   }
 
   String sharedContentPacket() {
@@ -88,7 +81,7 @@ class StatusController extends GetxController {
   }
 
   Future<bool> share(ShareContainer container) async {
-    if (ownContainer.value != null) return false;
+    if (ownContainer.value != null) return false; // TODO: Potentially remove
     ownContainer.value = container;
     await setStatus();
     return true;
@@ -105,10 +98,6 @@ class StatusController extends GetxController {
   Future<bool> setStatus({String? message, int? type, Function()? success}) async {
     if (statusLoading.value) return false;
     statusLoading.value = true;
-    if (message != null) {
-      message = base64Encode(utf8.encode(message));
-    }
-
     final tokens = <Map<String, dynamic>>[];
     for (var conversation in Get.find<ConversationController>().conversations.values) {
       if (conversation.members.length == 2) {
@@ -125,7 +114,7 @@ class StatusController extends GetxController {
       statusLoading.value = false;
       success?.call();
       if (event.data["success"] == true) {
-        if (message != null) status.value = utf8.decode(base64Decode(message));
+        if (message != null) status.value = message;
         if (type != null) this.type.value = type;
         Get.find<TownsquareController>().updateEnabledState();
       }
@@ -154,10 +143,6 @@ class StatusController extends GetxController {
     // Go back to login
     setupManager.restart();
   }
-}
-
-String friendId(Friend friend) {
-  return hashSha(friend.id + friend.name + friend.keyStorage.storedActionKey);
 }
 
 enum ShareType { space }

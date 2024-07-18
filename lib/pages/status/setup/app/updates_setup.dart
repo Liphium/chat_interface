@@ -17,7 +17,7 @@ class UpdateSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    if (!checkVersion) {
+    if (!checkVersion || isDebug) {
       return null;
     }
 
@@ -32,23 +32,68 @@ class UpdateSetup extends Setup {
     }
 
     // Check current version
-    final entries = await location.list().toList();
-    if (entries.isEmpty) {
+    final entities = await location.list().toList();
+    if (entities.isEmpty) {
       // Update
-      sendLog("update required");
-      return ShouldUpdateSetupPage(data: release);
-    }
-    final currentName = path.basename(entries[0].path);
-    sendLog(currentName);
-
-    if (release.version != currentName) {
-      // Update
-      sendLog("should update");
-      return ShouldUpdateSetupPage(data: release, prev: currentName);
+      sendLog("install required");
+      return _updatePage(release);
     }
 
-    return null;
+    // Delete any leftover stuff
+    bool downloadFile = false;
+    if (entities.length >= 2) {
+      for (var entity in entities) {
+        final name = path.basename(entity.path);
+        if (name.endsWith(".zip")) {
+          downloadFile = true;
+        }
+      }
+    }
+
+    // Find the current version
+    bool found = false;
+    int versionsFound = 0;
+    for (var entity in entities) {
+      final name = path.basename(entity.path);
+      final type = await FileSystemEntity.type(entity.path);
+      if (type == FileSystemEntityType.directory) {
+        versionsFound++;
+      }
+      if (name == release.version) {
+        found = true;
+      }
+    }
+
+    // Check if installation is needed
+    if (versionsFound > 1 || downloadFile) {
+      return _installPage(release);
+    }
+
+    if (found) {
+      return null;
+    }
+    return _updatePage(release);
   }
+}
+
+Widget _updatePage(ReleaseData data) {
+  return ShouldUpdateSetupPage(
+    title: "Updating..",
+    callback: (value, data) {
+      updateApp(value, data);
+    },
+    data: data,
+  );
+}
+
+Widget _installPage(ReleaseData data) {
+  return ShouldUpdateSetupPage(
+    title: "Installing..",
+    callback: (value, data) {
+      installApp(value, data);
+    },
+    data: data,
+  );
 }
 
 class ReleaseData {
@@ -59,6 +104,87 @@ class ReleaseData {
   ReleaseData(this.version, this.body, this.downloadUrl);
 }
 
+/// Install the current version of the app
+void installApp(RxString status, ReleaseData data) async {
+  String step = "admin";
+  try {
+    // Run with admin privilege on windows
+    if (Platform.isWindows && !executableArguments.contains("--update")) {
+      restartProcessAsAdmin();
+      await Future.delayed(3.seconds);
+      exit(0);
+    }
+
+    // Wait for the other process to exit (potentially)
+    status.value = "Preparing..";
+    await Future.delayed(const Duration(seconds: 5));
+
+    // Get the path for the general support folder
+    final location = await getApplicationSupportDirectory();
+
+    // Delete older versions
+    status.value = "Cleaning up..";
+    step = "del old versions";
+    final versionsDir = Directory(path.join(location.path, "versions"));
+    for (var version in (await versionsDir.list().toList())) {
+      final type = await FileSystemEntity.type(version.path);
+      if (type == FileSystemEntityType.directory) {
+        if (path.basename(version.path) != data.version) {
+          step = "del ${path.basename(version.path)}";
+          // Try to delete, otherwise return an error
+          await version.delete(recursive: true);
+        }
+      }
+
+      // Delete the download.zip file (and any others cause doesn't matter)
+      if (version.path.endsWith(".zip")) {
+        await version.delete();
+      }
+    }
+
+    // Create an application shortcut (for the start menu)
+    status.value = "Adding app..";
+    step = "add to start";
+    if (GetPlatform.isWindows) {
+      final shortcutPath = path.join("C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "Liphium.lnk");
+      final shortcutFile = File(shortcutPath);
+      if (await shortcutFile.exists()) {
+        step = "delete current";
+        await shortcutFile.delete();
+      }
+
+      // Execute a powershell command to create a shortcut (dart doesn't have support for this..)
+      step = "execute powershell command";
+      final powerShellCommand = '''
+        \$targetPath = "${path.join(location.path, "versions", data.version, "chat_interface.exe")}"
+        \$shortcutPath = "$shortcutPath"
+        \$wshShell = New-Object -ComObject WScript.Shell
+        \$shortcut = \$wshShell.CreateShortcut(\$shortcutPath)
+        \$shortcut.TargetPath = \$targetPath
+        \$shortcut.Save()
+        ''';
+
+      final result = await Process.run(
+        'powershell',
+        ['-Command', powerShellCommand],
+      );
+
+      if (result.exitCode != 0) {
+        status.value = "Shortcut couldn't be created (${result.exitCode})";
+      }
+    } else if (GetPlatform.isLinux) {
+      // TODO: Make compatible with Linux
+    }
+
+    // Restart the setup
+    await Future.delayed(const Duration(seconds: 3));
+    setupManager.restart();
+  } catch (e) {
+    status.value = "Error during installation ($step): $e";
+  }
+}
+
+/// Get the release data for a project from GitHub
 Future<ReleaseData?> fetchReleaseDataFor(String owner, String repo) async {
   final res = await dio.get("https://api.github.com/repos/$owner/$repo/releases/latest", options: Options(validateStatus: (s) => true));
   if (res.statusCode != 200) {
@@ -68,8 +194,6 @@ Future<ReleaseData?> fetchReleaseDataFor(String owner, String repo) async {
   var searchTerm = "linux.zip";
   if (Platform.isWindows) {
     searchTerm = "windows.zip";
-  } else if (Platform.isMacOS) {
-    searchTerm = "macos.zip";
   }
 
   for (var asset in res.data["assets"]) {
@@ -82,76 +206,81 @@ Future<ReleaseData?> fetchReleaseDataFor(String owner, String repo) async {
   return null;
 }
 
-Future<bool> updateApp(RxString status, ReleaseData data, {String? prev}) async {
+/// Download and extract the executable as well as add it to the versions folder
+Future<bool> updateApp(RxString status, ReleaseData data) async {
   try {
+    // Run with admin privilege on windows
     if (Platform.isWindows && !executableArguments.contains("--update")) {
       status.value = "Re-running with admin privilege..";
-      restartProcessAsAdmin(status);
-      await Future.delayed(3.seconds);
+      await restartProcessAsAdmin();
       exit(0);
     }
 
+    // Wait quickly
+    status.value = "Preparing..";
+    await Future.delayed(const Duration(seconds: 5));
+
+    // Get the path for the versions folder
     var location = await getApplicationSupportDirectory();
     location = Directory(path.join(location.path, "versions"));
 
+    // Download the version
     final res = await dio.download(
       data.downloadUrl,
       path.join(location.path, "download.zip"),
       onReceiveProgress: (count, total) {
-        status.value = "Downloading ${((count / total) * 100.0).toStringAsFixed(0)}%..";
+        status.value = "Downloading ${((count / total) * 100.0).toStringAsFixed(1)}%..";
       },
       options: Options(
         validateStatus: (status) => true,
       ),
     );
 
+    // Check if download was successful
     if (res.statusCode != 200) {
       status.value = "Couldn't download from GitHub";
       return false;
     }
 
+    // Extract the downloaded archive into the versions folder
     status.value = "Extracting..";
     final dir = await Directory(path.join(location.path, data.version)).create();
     await extractFileToDisk(path.join(location.path, "download.zip"), dir.path, asyncWrite: true);
 
-    status.value = "Deleting old files..";
-    if (prev != null) {
-      await Directory(path.join(location.path, prev)).delete(recursive: true);
-    }
-    await File(path.join(location.path, "download.zip")).delete();
+    // Restart the app
+    status.value = "Restarting..";
 
-    final linkDir = path.join(getDesktopDirectory().path, "Liphium");
-    final link = Link(linkDir);
-    if (link.existsSync()) {
-      await File(linkDir).delete();
-    }
-    if (Platform.isWindows) {
-      await link.create(path.join(location.path, data.version, "chat_interface.exe"));
-    } else if (Platform.isMacOS) {
-      await link.create(path.join(location.path, data.version, "chat_interface.dmg"));
-    } else if (Platform.isLinux) {
-      await link.create(path.join(location.path, data.version, "chat_interface"));
-      Process.run("chmod", ["+x", path.join(location.path, data.version, "chat_interface")]);
-      status.value = "Since you are on Linux, you might have to give the executable we just downloaded for you some permissions.";
-      await Future.delayed(30.seconds);
+    if (GetPlatform.isWindows) {
+      // Search for the executable
+      final directory = Directory(path.join(location.path, data.version));
+      final entities = await directory.list().toList();
+      late final FileSystemEntity executable;
+      for (var entity in entities) {
+        if (path.basename(entity.path).endsWith(".exe")) {
+          executable = entity;
+        }
+      }
+
+      sendLog("restarting with path: ${executable.path}");
+      await restartProcessAsAdmin(path: executable.path);
+    } else if (GetPlatform.isLinux) {
+      // TODO: Fix the linux updater
     }
 
-    status.value =
-        "Update completed, thanks for your patience! There should be a Desktop shortcut, just click that to restart Liphium and you'll hopefully not be downloading an update again.";
-    return true;
+    exit(0);
   } catch (e) {
     status.value = "There was an error during the update: $e";
     return false;
   }
 }
 
-void restartProcessAsAdmin(RxString status) async {
+Future<bool> restartProcessAsAdmin({String? path}) async {
   sendLog(Platform.resolvedExecutable);
-  final result = await Process.run(
+  await Process.run(
     'powershell',
-    ['Start-Process "${Platform.resolvedExecutable}" -ArgumentList "--update" -Verb RunAs'],
+    ['Start-Process "${path ?? Platform.resolvedExecutable}" -ArgumentList "--update" -Verb RunAs'],
   );
-  status.value = result.exitCode.toString() + result.stdout.toString() + result.stderr.toString();
+  return true;
 }
 
 Directory getDesktopDirectory() {
@@ -173,10 +302,16 @@ Directory getDesktopDirectory() {
 }
 
 class ShouldUpdateSetupPage extends StatefulWidget {
-  final String? prev;
+  final String title;
+  final Function(RxString, ReleaseData data) callback;
   final ReleaseData data;
 
-  const ShouldUpdateSetupPage({super.key, required this.data, this.prev});
+  const ShouldUpdateSetupPage({
+    super.key,
+    required this.title,
+    required this.callback,
+    required this.data,
+  });
 
   @override
   State<ShouldUpdateSetupPage> createState() => _ShouldUpdateSetupPageState();
@@ -186,10 +321,10 @@ class _ShouldUpdateSetupPageState extends State<ShouldUpdateSetupPage> {
   @override
   void initState() {
     super.initState();
-    updateApp(status, widget.data, prev: widget.prev);
+    widget.callback.call(_status, widget.data);
   }
 
-  final status = "While you wait, you might as well go touch some grass.".obs;
+  final _status = "".obs;
 
   @override
   Widget build(BuildContext context) {
@@ -205,9 +340,12 @@ class _ShouldUpdateSetupPageState extends State<ShouldUpdateSetupPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Updating..", style: Get.theme.textTheme.headlineMedium),
+                const SizedBox(width: 1000),
+                Text(widget.title, style: Get.theme.textTheme.headlineMedium),
                 verticalSpacing(sectionSpacing),
-                Obx(() => Text(status.value, style: Get.theme.textTheme.labelLarge)),
+                Obx(
+                  () => Text(_status.value, style: Get.theme.textTheme.labelLarge),
+                ),
               ],
             ),
           ),

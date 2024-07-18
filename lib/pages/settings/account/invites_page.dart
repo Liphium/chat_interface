@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -67,102 +68,103 @@ class _InvitesPageState extends State<InvitesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (loading.value) {
-        return Padding(padding: const EdgeInsets.all(defaultSpacing), child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
-      }
+    return SettingsPageBase(
+      label: "invites",
+      child: Obx(() {
+        if (loading.value) {
+          return Padding(padding: const EdgeInsets.all(defaultSpacing), child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
+        }
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          //* Profile picture
-          verticalSpacing(defaultSpacing),
-          Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
-          verticalSpacing(defaultSpacing),
-          Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),
-          verticalSpacing(defaultSpacing),
-          FJElevatedLoadingButtonCustom(
-            loading: generateLoading,
-            onTap: () => generateNewInvite(),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.mail_lock, color: Get.theme.colorScheme.onPrimary),
-                horizontalSpacing(defaultSpacing),
-                Text("settings.invites.generate".tr, style: Get.theme.textTheme.labelLarge),
-              ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
+            verticalSpacing(defaultSpacing),
+            Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),
+            verticalSpacing(defaultSpacing),
+            FJElevatedLoadingButtonCustom(
+              loading: generateLoading,
+              onTap: () => generateNewInvite(),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.mail_lock, color: Get.theme.colorScheme.onPrimary),
+                  horizontalSpacing(defaultSpacing),
+                  Text("settings.invites.generate".tr, style: Get.theme.textTheme.labelLarge),
+                ],
+              ),
             ),
-          ),
-          verticalSpacing(sectionSpacing),
+            verticalSpacing(sectionSpacing),
 
-          //* Profile picture
-          Text("settings.invites.history".tr, style: Get.theme.textTheme.labelLarge),
-          verticalSpacing(defaultSpacing),
-          Text("settings.invites.history.description".tr, style: Get.theme.textTheme.bodyMedium),
-          verticalSpacing(defaultSpacing),
-          Obx(() {
-            if (invites.isEmpty) {
-              return Text("settings.invites.history.empty".tr, style: Get.theme.textTheme.labelMedium);
-            }
+            //* Profile picture
+            Text("settings.invites.history".tr, style: Get.theme.textTheme.labelLarge),
+            verticalSpacing(defaultSpacing),
+            Text("settings.invites.history.description".tr, style: Get.theme.textTheme.bodyMedium),
+            verticalSpacing(defaultSpacing),
+            Obx(() {
+              if (invites.isEmpty) {
+                return Text("settings.invites.history.empty".tr, style: Get.theme.textTheme.labelMedium);
+              }
 
-            return Column(
-              children: [
-                for (final invite in invites)
-                  Animate(
-                    effects: [
-                      ExpandEffect(
-                        alignment: Alignment.center,
-                        duration: 250.ms,
-                        curve: scaleAnimationCurve,
-                        axis: Axis.vertical,
-                      ),
-                    ],
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: elementSpacing),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          color: Get.theme.colorScheme.primaryContainer,
+              return Column(
+                children: [
+                  for (final invite in invites)
+                    Animate(
+                      effects: [
+                        ExpandEffect(
+                          alignment: Alignment.center,
+                          duration: 250.ms,
+                          curve: scaleAnimationCurve,
+                          axis: Axis.vertical,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Obx(
-                              () => MouseRegion(
-                                onEnter: (_) => hovering.value = invite,
-                                onExit: (_) => hovering.value = "",
-                                child: Animate(
-                                  effects: [
-                                    BlurEffect(
-                                      end: const Offset(5, 5),
-                                      duration: 100.ms,
-                                    )
-                                  ],
-                                  onInit: (controller) {
-                                    controller.value = 1.0;
-                                  },
-                                  target: invite == hovering.value ? 0.0 : 1.0,
-                                  child: Text(invite, style: Get.theme.textTheme.labelMedium),
+                      ],
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: elementSpacing),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            color: Get.theme.colorScheme.primaryContainer,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Obx(
+                                () => MouseRegion(
+                                  onEnter: (_) => hovering.value = invite,
+                                  onExit: (_) => hovering.value = "",
+                                  child: Animate(
+                                    effects: [
+                                      BlurEffect(
+                                        end: const Offset(5, 5),
+                                        duration: 100.ms,
+                                      )
+                                    ],
+                                    onInit: (controller) {
+                                      controller.value = 1.0;
+                                    },
+                                    target: invite == hovering.value ? 0.0 : 1.0,
+                                    child: Text(invite, style: Get.theme.textTheme.labelMedium),
+                                  ),
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                Clipboard.setData(ClipboardData(text: invite));
-                              },
-                              icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary),
-                            )
-                          ],
+                              IconButton(
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(text: invite));
+                                },
+                                icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            );
-          }),
-        ],
-      );
-    });
+                ],
+              );
+            }),
+          ],
+        );
+      }),
+    );
   }
 }

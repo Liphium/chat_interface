@@ -7,7 +7,8 @@ import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
@@ -51,36 +52,39 @@ class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        //* Tabs
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SidebarButton(
-            onTap: () => _selected.value = "settings.tabletop.general",
-            radius: const BorderRadius.only(
-              bottomLeft: Radius.circular(defaultSpacing),
+    return SettingsPageBase(
+      label: "tabletop",
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //* Tabs
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SidebarButton(
+              onTap: () => _selected.value = "settings.tabletop.general",
+              radius: const BorderRadius.only(
+                bottomLeft: Radius.circular(defaultSpacing),
+              ),
+              label: "settings.tabletop.general",
+              selected: _selected,
             ),
-            label: "settings.tabletop.general",
-            selected: _selected,
-          ),
-          horizontalSpacing(elementSpacing),
-          SidebarButton(
-            onTap: () => _selected.value = "settings.tabletop.decks",
-            radius: const BorderRadius.only(
-              topRight: Radius.circular(defaultSpacing),
-            ),
-            label: "settings.tabletop.decks",
-            selected: _selected,
-          )
-        ]),
+            horizontalSpacing(elementSpacing),
+            SidebarButton(
+              onTap: () => _selected.value = "settings.tabletop.decks",
+              radius: const BorderRadius.only(
+                topRight: Radius.circular(defaultSpacing),
+              ),
+              label: "settings.tabletop.decks",
+              selected: _selected,
+            )
+          ]),
 
-        verticalSpacing(sectionSpacing),
+          verticalSpacing(sectionSpacing),
 
-        //* Current tab
-        Obx(() => _tabs[_selected.value]!)
-      ],
+          //* Current tab
+          Obx(() => _tabs[_selected.value]!)
+        ],
+      ),
     );
   }
 }
@@ -616,7 +620,7 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     final controller = Get.find<AttachmentController>();
     _current.value = 0;
     for (var file in widget.files) {
-      final response = await controller.uploadFile(UploadData(File(file.path)), StorageType.permanent, favorite: true);
+      final response = await controller.uploadFile(UploadData(File(file.path)), StorageType.permanent, Constants.fileDeckTag);
       if (response.container == null) {
         Get.back(result: finished);
         showErrorPopup("error", response.message);

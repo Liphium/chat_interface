@@ -14,14 +14,17 @@ class ErrorTranslations extends Translations {
           'mail.error': 'There was an error with our mail servers. Please try again later or contact your administrator.',
           'app.error': 'There was an error with the app. Please report this to the developers.',
           'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
+          'not.found': 'This wasn\'t found. Maybe it has already been deleted?',
           'new.version': 'A new version is available, please update the app.',
           'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
+          'keys.invalid': 'Invalid keys found. This means that the server could\'ve been hacked or someone is trolling you.',
           'already.deleted': 'This object was already deleted.',
           'no.permission': 'You don\'t have permission to do that.',
           'spaces.connection_error': 'Something went wrong with the spaces connection. Please try again later.',
           'invalid.method': 'This is incorrect. Please try again.',
           'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
           'password.incorrect': 'Your password is incorrect. Please try again.',
+          'protocol.error': 'The server you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that server to update to the latest version.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',
@@ -32,12 +35,16 @@ class ErrorTranslations extends Translations {
           'request.not.found.text': "You sure this is your friend? Maybe you just met them in your dreams?",
 
           // Chat
+          'conversations.error': 'Conversation error',
+          'conversations.amount': 'You have reached the maximum amount of @amount conversations. Please delete old ones to create more.',
+          'conversations.name.length': 'The conversation name you specified is longer than allowed. Please use less than @length characters.',
           'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
           'file.not_uploaded': 'File not found.',
           'file.too_large': 'The maximum file size is @1MB.',
           'file.unsafe': 'The provider of this file (@domain) isn\'t trusted.',
           'chat.add_file': 'Attach a file',
           'message.delete_error': 'Couldn\'t delete message. Please try again later.',
+          'group.data_too_long': 'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
 
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',

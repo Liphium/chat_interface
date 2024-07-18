@@ -4,7 +4,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class ServerStoredInfo {
@@ -14,13 +14,15 @@ class ServerStoredInfo {
   ServerStoredInfo(this.text, {this.error = false});
 
   /// Decrypt stored stored info with own public and private key
-  factory ServerStoredInfo.untransform(String transformed) {
-    final result = decryptAsymmetricAuth(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, transformed);
+  factory ServerStoredInfo.untransform(String transformed, {Sodium? sodium, KeyPair? ownKeyPair}) {
+    final result = decryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, transformed, sodium);
     return ServerStoredInfo(result.message, error: !result.success);
   }
 
   /// Get the server stored info in encrypted form with the own public and private key
-  String transform() => encryptAsymmetricAuth(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, text);
+  String transform({Sodium? sodium, KeyPair? ownKeyPair}) {
+    return encryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, text, sodium);
+  }
 }
 
 /// A helper class to encrypt a text using asymmetric sodium and sign it (with a sequence number, can also be the time) to prevent replay attacks
@@ -90,7 +92,7 @@ class SymmetricSequencedInfo {
   String finish(SecureKey key) => "$seq:$signature:${encryptSymmetric(text, key)}";
 
   /// Untransform time encrypted info using the secret key
-  factory SymmetricSequencedInfo.extract(String transformed, SecureKey key) {
+  factory SymmetricSequencedInfo.extract(String transformed, SecureKey key, [Sodium? sodium]) {
     final args = transformed.split(":");
 
     // Check if the thing is in the correct format (somewhat)
@@ -106,13 +108,13 @@ class SymmetricSequencedInfo {
 
     // Get all the rest
     final signature = args[1];
-    final decryptedText = decryptSymmetric(args[2], key);
+    final decryptedText = decryptSymmetric(args[2], key, sodium);
     return SymmetricSequencedInfo(seq, signature, decryptedText);
   }
 
   /// Verifies the signature of the sequenced info
-  bool verifySignature(Uint8List signaturePub) {
+  bool verifySignature(Uint8List signaturePub, [Sodium? sodium]) {
     final computedSignature = hashSha(text + seq.toString());
-    return checkSignature(signature, signaturePub, computedSignature);
+    return checkSignature(signature, signaturePub, computedSignature, sodium);
   }
 }

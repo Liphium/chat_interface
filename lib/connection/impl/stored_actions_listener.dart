@@ -9,9 +9,9 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
-import 'package:chat_interface/database/conversation/conversation.dart' as model;
+import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/web.dart';
@@ -144,12 +144,14 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 
   // Check if the current account already sent this account a friend request (-> add friend)
   final id = resJson["account"];
-  var request = Get.find<RequestController>().requestsSent.firstWhere((element) => element.id == id, orElse: () => Request.mock("hi"));
+  final requestController = Get.find<RequestController>();
+  var request = requestController.requestsSent[id];
 
-  if (request.id != "hi") {
+  if (request != null) {
     // This request doesn't have the right key storage yet
     request.keyStorage.publicKey = publicKey;
-    request.keyStorage.profileKey = unpackageSymmetricKey(json["pf"]);
+    request.keyStorage.profileKeyPacked = json["pf"];
+    request.keyStorage.unpackedProfileKey = unpackageSymmetricKey(json["pf"]);
     request.keyStorage.storedActionKey = json["sa"];
 
     // Add friend
@@ -160,7 +162,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   }
 
   // Check if the request is already in the list
-  if (Get.find<RequestController>().requests.any((element) => element.id == id)) {
+  if (requestController.requests[id] != null) {
     sendLog("invalid friend request: already in list");
     return true;
   }
@@ -211,15 +213,10 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   }
 
   // Check the signature
-
   final token = jsonDecode(actionJson["token"]);
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"id": token["id"], "token": token["token"]});
   if (!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
-    // TODO: Could also mean it has been activated on another device
-    Future.delayed(500.ms, () async {
-      await refreshVault();
-    });
     return true;
   }
   token["token"] = json["token"]; // Set new token (from activation request)
@@ -241,13 +238,14 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
       model.ConversationType.values[json["type"]],
       convToken,
       container,
-      key,
+      packageSymmetricKey(key),
+      0,
       DateTime.now().millisecondsSinceEpoch,
     ),
     members,
   );
   final statusController = Get.find<StatusController>();
-  subscribeToConversation(statusController.statusJson(), statusController.generateFriendId(), convToken, deletions: false);
+  subscribeToConversation(statusController.statusJson(), convToken, deletions: false);
 
   return true;
 }

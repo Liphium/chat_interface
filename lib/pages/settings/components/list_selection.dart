@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,7 +41,9 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
           child: Obx(
             () => Material(
-              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
+              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index
+                  ? Get.theme.colorScheme.primary
+                  : Get.theme.colorScheme.onInverseSurface,
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,
@@ -57,31 +59,47 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
                     children: [
                       Icon(widget.items[index].icon, color: Get.theme.colorScheme.onPrimary),
                       horizontalSpacing(defaultSpacing),
-                      Text(
-                        widget.items[index].label.tr,
-                        style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.onSurface),
+                      Flexible(
+                        child: Text(
+                          widget.items[index].label.tr,
+                          style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.onSurface),
+                        ),
                       ),
                       horizontalSpacing(defaultSpacing),
-                      widget.items[index].experimental
-                          ? Container(
-                              decoration: BoxDecoration(
-                                color: Get.theme.colorScheme.error.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(defaultSpacing),
-                              ),
-                              padding: const EdgeInsets.all(elementSpacing),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.science, color: Get.theme.colorScheme.error),
-                                  horizontalSpacing(elementSpacing),
-                                  Text(
+                      if (widget.items[index].experimental)
+                        LayoutBuilder(builder: (context, constraints) {
+                          if (isMobileMode()) {
+                            return Tooltip(
+                              message: "settings.experimental".tr,
+                              child: Icon(Icons.science, color: Get.theme.colorScheme.error),
+                            );
+                          }
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Get.theme.colorScheme.error.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                            ),
+                            padding: const EdgeInsets.all(elementSpacing),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.science, color: Get.theme.colorScheme.error),
+                                horizontalSpacing(elementSpacing),
+                                Flexible(
+                                  child: Text(
                                     "settings.experimental".tr,
                                     style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
+                                    overflow: TextOverflow.clip,
                                   ),
-                                  horizontalSpacing(elementSpacing)
-                                ],
-                              ),
-                            )
-                          : const SizedBox.shrink(),
+                                ),
+                                horizontalSpacing(elementSpacing)
+                              ],
+                            ),
+                          );
+                        })
+                      else
+                        const SizedBox.shrink(),
                     ],
                   ),
                 ),

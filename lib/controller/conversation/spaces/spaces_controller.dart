@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
@@ -13,12 +12,11 @@ import 'package:chat_interface/controller/conversation/spaces/game_hub_controlle
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
-import 'package:chat_interface/pages/chat/chat_page.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/spaces/gamemode/spaces_game_hub.dart';
-import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -40,9 +38,6 @@ class SpacesController extends GetxController {
   //* Game mode
   final playMode = false.obs;
   final gameShelf = false.obs;
-  AudioPlayer? audioPlayer;
-
-  final loopSource = AssetSource("music/arcade_loop.wav");
 
   //* Space information
   static String? currentDomain;
@@ -98,36 +93,15 @@ class SpacesController extends GetxController {
     return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
   }
 
-  StreamSubscription<void>? _sub;
-
   void switchToPlayMode() {
     playMode.value = !playMode.value;
     if (playMode.value) {
       Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
       hideSidebar.value = true;
-      if (Get.find<SettingController>().settings[SpacesSettings.gameMusic]!.getValue()) {
-        playMusic();
-      }
     } else {
-      stopMusic();
       hideSidebar.value = false;
-      Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+      Get.offAll(getChatPage(), transition: Transition.fadeIn);
     }
-  }
-
-  void playMusic() {
-    audioPlayer = AudioPlayer();
-    _sub = audioPlayer!.onSeekComplete.listen((event) {
-      audioPlayer!.setReleaseMode(ReleaseMode.loop);
-      audioPlayer!.play(loopSource, volume: 0.01, mode: PlayerMode.mediaPlayer);
-    });
-    audioPlayer!.play(AssetSource("music/arcade_full.wav"), volume: 0.01);
-  }
-
-  void stopMusic() {
-    _sub?.cancel();
-    audioPlayer?.dispose();
-    audioPlayer = null;
   }
 
   void openShelf() {
@@ -175,8 +149,8 @@ class SpacesController extends GetxController {
       if (!event.data["success"]) {
         if (event.data["message"] == "already.in.space") {
           showConfirmPopup(ConfirmWindow(
-            title: "Spaces",
-            text: "Do you really want to leave the current space?",
+            title: "spaces".tr,
+            text: "chat.space.leave".tr,
             onDecline: () => {},
             onConfirm: () {
               connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) {
@@ -185,7 +159,7 @@ class SpacesController extends GetxController {
                     return _openNotAvailable();
                   }
                   return showErrorPopup("How?",
-                      "I don't understand this world anymore. I'm sorry. It seems like this feature is currently pretty broken for you, tell the admins about it and we'll fix it sometime, yk like never?");
+                      "I don't understand this world anymore. I'm sorry. It seems like this feature is currently pretty broken for you, tell the developers about it and we'll fix it sometime, yk like never?");
                 }
 
                 // Try joining again
@@ -259,7 +233,13 @@ class SpacesController extends GetxController {
         );
         await keyProvider.setKey(base64Encode(key!.extractBytes()));
         Get.find<SpaceMemberController>().onLivekitConnected();
-        await api.startTalkingEngine();
+        if (!configDisableRust) {
+          await api.startTalkingEngine();
+        }
+
+        // Open the screen
+        Get.find<MessageController>().unselectConversation();
+        Get.find<MessageController>().openTab(OpenTabType.space);
 
         connected.value = true;
         inSpace.value = true;
@@ -272,7 +252,9 @@ class SpacesController extends GetxController {
   void leaveCall({error = false}) async {
     inSpace.value = false;
     connected.value = false;
-    await api.stop();
+    if (!configDisableRust) {
+      await api.stop();
+    }
     id.value = "";
     spaceConnector.disconnect();
     livekitRoom?.disconnect();
@@ -285,7 +267,8 @@ class SpacesController extends GetxController {
     Get.find<TabletopController>().disconnect(leave: false);
 
     if (!error) {
-      Get.offAll(const ChatPage(), transition: Transition.fadeIn);
+      Get.offAll(getChatPage(), transition: Transition.fadeIn);
+      Get.find<MessageController>().openTab(OpenTabType.conversation);
     }
   }
 

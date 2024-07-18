@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
@@ -42,8 +44,18 @@ class SpaceMemberController extends GetxController {
       }
       membersFound.add(clientId);
       if (this.members[clientId] == null) {
-        this.members[clientId] = SpaceMember(Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)),
-            clientId, member["muted"], member["deafened"]);
+        this.members[clientId] = SpaceMember(
+            Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)), clientId, member["muted"], member["deafened"]);
+
+        // See if there is already a participant with that id in the call
+        if (SpacesController.livekitRoom != null) {
+          for (var participant in SpacesController.livekitRoom!.remoteParticipants.values) {
+            if (participant.identity == clientId) {
+              this.members[clientId]!.joinVoice(participant);
+              break;
+            }
+          }
+        }
       }
     }
 
@@ -56,7 +68,9 @@ class SpaceMemberController extends GetxController {
     this.key = key;
 
     sub = api.createActionStream().listen((event) async {
+      sendLog("hi");
       if (members[ownId] == null) {
+        sendLog("own member not there");
         return;
       }
       switch (event.action) {
@@ -68,18 +82,26 @@ class SpaceMemberController extends GetxController {
           if (members[ownId]!.participant.value != null) {
             final participant = members[ownId]!.participant.value! as LocalParticipant;
             if (participant.audioTrackPublications.isEmpty) {
+              sendLog("starting track");
               final controller = Get.find<SettingController>();
-              await participant.setMicrophoneEnabled(
+              final selected = Get.find<SettingController>().settings[AudioSettings.microphone]!.getOr("def");
+              final track = await participant.setMicrophoneEnabled(
                 true,
                 audioCaptureOptions: AudioCaptureOptions(
+                  deviceId: await Get.find<PublicationController>().getMicrophone(selected),
                   echoCancellation: controller.settings[AudioSettings.echoCancellation]!.getValue(),
                   autoGainControl: controller.settings[AudioSettings.autoGainControl]!.getValue(),
                   noiseSuppression: controller.settings[AudioSettings.noiseSuppression]!.getValue(),
                   highPassFilter: controller.settings[AudioSettings.highPassFilter]!.getValue(),
                   typingNoiseDetection: controller.settings[AudioSettings.typingNoiseDetection]!.getValue(),
+                  stopAudioCaptureOnMute: false,
                 ),
               );
+              if (track == null) {
+                sendLog("failed to create");
+              }
             } else if (participant.audioTrackPublications.isNotEmpty) {
+              sendLog("unmuting track");
               await participant.audioTrackPublications.first.unmute();
             }
           }
@@ -89,6 +111,7 @@ class SpaceMemberController extends GetxController {
           if (members[ownId]!.participant.value != null) {
             final participant = members[ownId]!.participant.value! as LocalParticipant;
             if (participant.audioTrackPublications.isNotEmpty) {
+              sendLog("muting track");
               await participant.audioTrackPublications.first.mute();
             }
           }
@@ -131,7 +154,9 @@ class SpaceMemberController extends GetxController {
   void onDisconnect() {
     membersLoading.value = true;
     members.clear();
-    sub!.cancel();
+    if (!configDisableRust) {
+      sub!.cancel();
+    }
   }
 
   bool isLocalDeafened() {
@@ -157,6 +182,7 @@ class SpaceMember {
 
   void joinVoice(Participant participant) {
     this.participant.value = participant;
+    sendLog("participant #${participant.identity} detected");
 
     participant.createListener()
       ..on<TrackPublishedEvent>((event) async {
@@ -193,6 +219,7 @@ class SpaceMember {
       }
       for (var pub in participant.trackPublications.values) {
         if (!pub.isScreenShare) {
+          sendLog("subbing to audio");
           pub.subscribe();
         }
       }

@@ -10,7 +10,11 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
+import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
+import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -25,13 +29,30 @@ part 'friends_vault.dart';
 
 class FriendController extends GetxController {
   final friends = <String, Friend>{}.obs;
-  final friendIdLookup = <String, Friend>{};
+  Timer? _timer; // Timer to refresh the friends vault every 5 minutes
 
   Future<bool> loadFriends() async {
     for (FriendData data in await db.friend.select().get()) {
       friends[data.id] = Friend.fromEntity(data);
     }
+
+    // Start timer to refresh the vault every couple of seconds (for multi-device synchronization)
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+      if (!SetupManager.setupFinished) {
+        return;
+      }
+      sendLog("refreshing all vaults");
+      await refreshFriendsVault();
+      await refreshVault();
+      LibraryManager.refreshEntries();
+    });
     return true;
+  }
+
+  /// Cancels the timer (should be called when reloading)
+  void onReload() {
+    _timer?.cancel();
   }
 
   void addSelf() {
@@ -54,16 +75,19 @@ class FriendController extends GetxController {
     final friendsVault = await FriendsVault.remove(request.vaultId);
     if (!friendsVault) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
-      sendLog("ADDING REGARDLESS");
       return false;
     }
 
     // Add friend to vault
-    final id = await FriendsVault.store(request.friend.toStoredPayload(), lastPacket: request.updatedAt);
-    sendLog("STORING IN FRIENDS VAULT");
+    final id = await FriendsVault.store(
+      request.friend.toStoredPayload(),
+      lastPacket: request.updatedAt,
+      errorPopup: true,
+      prefix: "friend",
+    );
 
+    // Don't add if something failed
     if (id == null) {
-      add(request.friend); // probably already in the vault (from other device)
       return false;
     }
 
@@ -75,12 +99,11 @@ class FriendController extends GetxController {
   }
 
   void add(Friend friend) {
-    sendLog("registered friend ${friend.id}");
+    sendLog("ADDED ${friend.name}");
     friends[friend.id] = friend;
     if (friend.id != StatusController.ownAccountId) {
       db.friend.insertOnConflictUpdate(friend.entity());
     }
-    friendIdLookup[friendId(friend)] = friend;
   }
 
   Future<bool> remove(Friend friend, {removal = true}) async {
@@ -102,7 +125,7 @@ class Friend {
   String name;
   String vaultId;
   KeyStorage keyStorage;
-  bool unknown = false;
+  bool unknown;
   Timer? _timer;
   int updatedAt;
 
@@ -120,7 +143,7 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, UTFString displayName, this.vaultId, this.keyStorage, this.updatedAt) {
+  Friend(this.id, this.name, UTFString displayName, this.vaultId, this.keyStorage, this.updatedAt, {this.unknown = false}) {
     this.displayName.value = displayName;
   }
 
@@ -144,7 +167,8 @@ class Friend {
 
   /// Used for unknown accounts where only an id is known
   factory Friend.unknown(String id) {
-    final friend = Friend(id, "lph-$id", UTFString("lph-$id"), "", KeyStorage.empty(), 0);
+    final shownId = id.substring(0, 5);
+    final friend = Friend(id, "lph-$shownId", UTFString("lph-$shownId"), "", KeyStorage.empty(), 0);
     friend.unknown = true;
     return friend;
   }
@@ -163,7 +187,14 @@ class Friend {
 
   /// Convert a json to a friend (used for friends vault)
   factory Friend.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
-    return Friend(json["id"], json["name"], UTFString.untransform(json["dname"]), "", KeyStorage.fromJson(json), updatedAt);
+    return Friend(
+      json["id"],
+      json["name"],
+      UTFString.untransform(json["dname"]),
+      "",
+      KeyStorage.fromJson(json),
+      updatedAt,
+    );
   }
 
   // Convert to a stored payload for the friends vault
@@ -193,7 +224,7 @@ class Friend {
 
   // Update in database
   Future<bool> update() async {
-    if (id == StatusController.ownAccountId) {
+    if (id == StatusController.ownAccountId || unknown) {
       return false;
     }
     await FriendsVault.remove(vaultId);
@@ -209,7 +240,7 @@ class Friend {
   }
 
   //* Status
-  final status = "-".obs;
+  final status = "".obs;
   bool answerStatus = true;
   final statusType = 0.obs;
 
@@ -219,21 +250,24 @@ class Friend {
     try {
       status.value = utf8.decode(base64Decode(data["s"]));
     } catch (e) {
-      status.value = "-";
+      status.value = "";
     }
     statusType.value = data["t"];
 
-    _timer?.cancel();
-    _timer = Timer(const Duration(minutes: 2), () {
-      setOffline();
-      answerStatus = true;
-      _timer = null;
-    });
+    if (id != StatusController.ownAccountId) {
+      _timer?.cancel();
+      _timer = Timer(const Duration(minutes: 2), () {
+        setOffline();
+        answerStatus = true;
+        _timer = null;
+      });
+    }
   }
 
   void setOffline() {
-    status.value = "-";
+    status.value = "";
     statusType.value = 0;
+    Get.find<StatusController>().sharedContent.remove(id);
   }
 
   //* Profile picture
@@ -244,25 +278,37 @@ class Friend {
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Update the profile picture of this friend
-  void updateProfilePicture(AttachmentContainer picture) async {
-    // Update database
-    db.profile.insertOnConflictUpdate(ProfileData(
-      id: id,
-      pictureContainer: jsonEncode(picture.toJson()),
-      data: "",
-    ));
+  void updateProfilePicture(AttachmentContainer? picture) async {
+    if (picture == null) {
+      // Delete the profile picture if it is null
+      db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: "", data: ""));
 
-    profilePicture = picture;
-    profilePictureImage.value = await ProfileHelper.loadImage(picture.filePath);
+      // Update the friend as well
+      profilePicture = null;
+      profilePictureImage.value = null;
+      profilePictureDataNull = true;
+    } else {
+      // Set a new profile picture if it is valid
+      db.profile.insertOnConflictUpdate(ProfileData(
+        id: id,
+        pictureContainer: jsonEncode(picture.toJson()),
+        data: "",
+      ));
+
+      // Update in the local cache (for this friend)
+      profilePicture = picture;
+      profilePictureImage.value = await ProfileHelper.loadImage(picture.filePath);
+    }
   }
 
   /// Load the profile picture of this friend
   void loadProfilePicture() async {
+    if (unknown) {
+      return;
+    }
     profilePictureUsages++;
 
-    sendLog(DateTime.now().difference(lastProfilePictureUpdate));
-    if (DateTime.now().difference(lastProfilePictureUpdate).inSeconds >= 1) {
-      sendLog("refresh");
+    if (DateTime.now().difference(lastProfilePictureUpdate).inSeconds >= 60) {
       lastProfilePictureUpdate = DateTime.now();
 
       final result = await ProfileHelper.downloadProfilePicture(this);
@@ -277,7 +323,6 @@ class Friend {
     // Load the image
     final data = await ProfileHelper.getProfileDataLocal(id);
     if (data == null) {
-      sendLog("NOTHING FOUND");
       profilePictureDataNull = true; // To prevent this thing from constantly loading again
       return;
     }
@@ -287,7 +332,6 @@ class Friend {
     final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
     profilePicture = AttachmentContainer.fromJson(type, json);
     profilePictureImage.value = await ProfileHelper.loadImage(profilePicture!.filePath);
-    sendLog("LOADED!!");
   }
 
   void disposeProfilePicture() {

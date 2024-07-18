@@ -108,6 +108,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
     if (friendController.friends.length == 1) {
       return SlidingWindowBase(
+        title: [
+          Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
+        ],
         position: widget.position,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +120,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
             FJElevatedButton(
               onTap: () {
                 Get.back();
-                Get.dialog(const FriendsPage());
+                showModal(const FriendsPage());
               },
               child: Center(
                 child: Text("open.friends".tr, style: theme.textTheme.labelLarge),
@@ -130,16 +133,14 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
     return SlidingWindowBase(
       position: widget.position,
+      title: [
+        Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
+        const Spacer(),
+        Obx(() => Text("${_members.length}/100", style: Get.theme.textTheme.bodyLarge)),
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [Text(widget.title.tr, style: theme.textTheme.titleMedium), Obx(() => Text("${_members.length}/100", style: theme.textTheme.bodyMedium))],
-          ),
-          verticalSpacing(defaultSpacing),
-
           //* Input
           Container(
             decoration: BoxDecoration(
@@ -208,8 +209,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
                   return Obx(() {
                     final search = _search.value;
-                    if (search.isNotEmpty &&
-                        !(friend.name.toLowerCase().contains(search.toLowerCase()) || friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
+                    if (search.isNotEmpty && !(friend.name.toLowerCase().contains(search.toLowerCase()) || friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
                       return const SizedBox();
                     }
 
@@ -265,7 +265,17 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                   child: Obx(
                     () => Animate(
                       effects: [
-                        ExpandEffect(axis: Axis.vertical, duration: 250.ms, curve: Curves.ease, alignment: Alignment.center),
+                        ExpandEffect(
+                          alignment: Alignment.topCenter,
+                          duration: 250.ms,
+                          curve: Curves.ease,
+                          axis: Axis.vertical,
+                        ),
+                        FadeEffect(
+                          begin: 0,
+                          end: 1,
+                          duration: 250.ms,
+                        ),
                       ],
                       target: _length.value > 1 ? 1 : 0,
                       child: Padding(

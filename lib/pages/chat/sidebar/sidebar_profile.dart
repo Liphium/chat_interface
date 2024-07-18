@@ -3,15 +3,15 @@ import 'package:chat_interface/controller/conversation/spaces/publication_contro
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
-import 'package:chat_interface/pages/settings/settings_page.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_info_window.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/own_profile.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class SidebarProfile extends StatefulWidget {
@@ -22,198 +22,234 @@ class SidebarProfile extends StatefulWidget {
 }
 
 class _SidebarProfileState extends State<SidebarProfile> {
+  final GlobalKey _profileKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
-    StatusController controller = Get.find();
+    final controller = Get.find<SpacesController>();
+    final statusController = Get.find<StatusController>();
     ThemeData theme = Theme.of(context);
 
     return Container(
       color: theme.colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(defaultSpacing),
-        child: LayoutBuilder(builder: (context, constraints) {
-          return SizedBox(
-            width: constraints.maxWidth,
-            child: Column(
-              children: [
-                //* Spaces status
-                GetX<SpacesController>(builder: (controller) {
-                  if (!controller.inSpace.value) {
-                    return const SizedBox.shrink();
-                  }
-                  final shown = Get.find<MessageController>().selectedConversation.value.id == "0";
+      child: SafeArea(
+        bottom: true,
+        top: false,
+        right: true,
+        left: true,
+        child: Padding(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: LayoutBuilder(builder: (context, constraints) {
+            return SizedBox(
+              width: constraints.maxWidth,
+              child: Column(
+                children: [
+                  Obx(() {
+                    if (!controller.inSpace.value) {
+                      // Render an embed letting the user know he's in a call on another device
+                      if (statusController.ownContainer.value != null && statusController.ownContainer.value is SpaceConnectionContainer) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                          child: Row(
+                            children: [
+                              Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+                              horizontalSpacing(defaultSpacing),
+                              Text("spaces.sharing_other_device".tr, style: Get.theme.textTheme.bodyMedium),
+                              const Spacer(),
+                              LoadingIconButton(
+                                onTap: () => Get.find<SpacesController>().join(statusController.ownContainer.value! as SpaceConnectionContainer),
+                                icon: Icons.login,
+                                extra: defaultSpacing,
+                                iconSize: 25,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ],
+                          ),
+                        );
+                      }
 
-                  return Column(
-                    children: [
-                      Material(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
-                        child: InkWell(
-                          onTap: () => Get.find<MessageController>().unselectConversation(),
-                          splashColor: theme.hoverColor,
-                          hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
+                      return const SizedBox.shrink();
+                    }
+                    final shown = Get.find<MessageController>().currentConversation.value == null;
+
+                    return Column(
+                      children: [
+                        Material(
                           borderRadius: BorderRadius.circular(defaultSpacing),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
-                            child: Row(
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
-                                  ],
-                                ),
-                                horizontalSpacing(defaultSpacing),
-                                const Spacer(),
-                                GetX<PublicationController>(
-                                  builder: (controller) {
-                                    return LoadingIconButton(
-                                      loading: controller.muteLoading,
-                                      onTap: () => controller.setMuted(!controller.muted.value),
-                                      icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-                                      extra: defaultSpacing,
-                                      iconSize: 25,
-                                      color: theme.colorScheme.onSurface,
-                                    );
-                                  },
-                                ),
-                                GetX<PublicationController>(
-                                  builder: (controller) {
-                                    return LoadingIconButton(
-                                      loading: controller.deafenLoading,
-                                      onTap: () => controller.setDeafened(!controller.deafened.value),
-                                      icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-                                      extra: defaultSpacing,
-                                      iconSize: 25,
-                                      color: theme.colorScheme.onSurface,
-                                    );
-                                  },
-                                ),
-                                LoadingIconButton(
-                                  padding: 0,
-                                  extra: 10,
-                                  iconSize: 25,
-                                  onTap: () => Get.dialog(const SpaceInfoWindow()),
-                                  icon: Icons.info,
-                                ),
-                              ],
+                          color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
+                          child: InkWell(
+                            onTap: () {
+                              final controller = Get.find<MessageController>();
+                              controller.unselectConversation();
+                              controller.currentOpenType.value = OpenTabType.space;
+                            },
+                            splashColor: theme.hoverColor,
+                            hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                              child: Row(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+                                    ],
+                                  ),
+                                  horizontalSpacing(defaultSpacing),
+                                  const Spacer(),
+                                  GetX<PublicationController>(
+                                    builder: (controller) {
+                                      return LoadingIconButton(
+                                        loading: controller.muteLoading,
+                                        onTap: () => controller.setMuted(!controller.muted.value),
+                                        icon: controller.muted.value ? Icons.mic_off : Icons.mic,
+                                        extra: defaultSpacing,
+                                        iconSize: 25,
+                                        color: theme.colorScheme.onSurface,
+                                      );
+                                    },
+                                  ),
+                                  GetX<PublicationController>(
+                                    builder: (controller) {
+                                      return LoadingIconButton(
+                                        loading: controller.deafenLoading,
+                                        onTap: () => controller.setDeafened(!controller.deafened.value),
+                                        icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+                                        extra: defaultSpacing,
+                                        iconSize: 25,
+                                        color: theme.colorScheme.onSurface,
+                                      );
+                                    },
+                                  ),
+                                  LoadingIconButton(
+                                    padding: 0,
+                                    extra: 10,
+                                    iconSize: 25,
+                                    onTap: () => Get.dialog(const SpaceInfoWindow()),
+                                    icon: Icons.info,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      verticalSpacing(defaultSpacing),
-                    ],
-                  );
-                }),
+                        verticalSpacing(defaultSpacing),
+                      ],
+                    );
+                  }),
 
-                //* Actual profile
-                Material(
-                  borderRadius: BorderRadius.circular(defaultSpacing),
-                  color: theme.colorScheme.primaryContainer,
-                  child: InkWell(
-                    onTap: () => Get.dialog(const OwnProfile(position: Offset(defaultSpacing, 60))),
-                    splashColor: theme.hoverColor.withAlpha(10),
+                  //* Actual profile
+                  Material(
+                    key: _profileKey,
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    hoverColor: theme.colorScheme.inverseSurface,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                              child: Row(
-                            children: [
-                              UserAvatar(id: StatusController.ownAccountId, size: 40),
-                              horizontalSpacing(defaultSpacing * 0.75),
-                              Expanded(
-                                child: Obx(
-                                  () => Visibility(
-                                    visible: !controller.statusLoading.value,
-                                    replacement: const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(defaultSpacing),
-                                        child: SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 4.0,
+                    color: theme.colorScheme.primaryContainer,
+                    child: InkWell(
+                      onTap: () => showModal(OwnProfile(position: ContextMenuData.fromKey(_profileKey, above: true))),
+                      splashColor: theme.hoverColor.withAlpha(10),
+                      borderRadius: BorderRadius.circular(defaultSpacing),
+                      hoverColor: theme.colorScheme.inverseSurface,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                                child: Row(
+                              children: [
+                                UserAvatar(id: StatusController.ownAccountId, size: 40),
+                                horizontalSpacing(defaultSpacing * 0.75),
+                                Expanded(
+                                  child: Obx(
+                                    () => Visibility(
+                                      visible: !statusController.statusLoading.value,
+                                      replacement: Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(defaultSpacing),
+                                          child: SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 3.0,
+                                              color: Get.theme.colorScheme.onPrimary,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        //* Profile name and status type
-                                        Row(
-                                          children: [
-                                            Flexible(
-                                              child: Obx(
-                                                () => Text(
-                                                  controller.displayName.value.text,
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: theme.textTheme.titleMedium,
-                                                  textHeightBehavior: noTextHeight,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          //* Profile name and status type
+                                          Row(
+                                            children: [
+                                              Flexible(
+                                                child: Obx(
+                                                  () => Text(
+                                                    statusController.displayName.value.text,
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: theme.textTheme.titleMedium,
+                                                    textHeightBehavior: noTextHeight,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            horizontalSpacing(defaultSpacing),
-                                            Obx(
-                                              () => StatusRenderer(status: controller.type.value, text: false),
-                                            )
-                                          ],
-                                        ),
-
-                                        //* Status message
-                                        Obx(
-                                          () => Visibility(
-                                            visible: controller.status.value != "-",
-                                            child: Column(
-                                              children: [
-                                                verticalSpacing(defaultSpacing * 0.25),
-
-                                                //* Status message
-                                                Text(
-                                                  controller.status.value,
-                                                  style: theme.textTheme.bodySmall,
-                                                  textHeightBehavior: noTextHeight,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ],
-                                            ),
+                                              horizontalSpacing(defaultSpacing),
+                                              Obx(
+                                                () => StatusRenderer(status: statusController.type.value, text: false),
+                                              )
+                                            ],
                                           ),
-                                        )
-                                      ],
+
+                                          //* Status message
+                                          Obx(
+                                            () => Visibility(
+                                              visible: statusController.status.value != "",
+                                              child: Column(
+                                                children: [
+                                                  verticalSpacing(defaultSpacing * 0.25),
+
+                                                  //* Status message
+                                                  Text(
+                                                    statusController.status.value,
+                                                    style: theme.textTheme.bodySmall,
+                                                    textHeightBehavior: noTextHeight,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ),
+                                )
+                              ],
+                            )),
+                            horizontalSpacing(defaultSpacing),
+                            Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () => showModal(const FriendsPage()),
+                                  icon: const Icon(Icons.group, color: Colors.white),
                                 ),
-                              )
-                            ],
-                          )),
-                          horizontalSpacing(defaultSpacing),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () => Get.dialog(const FriendsPage()),
-                                icon: const Icon(Icons.group, color: Colors.white),
-                              ),
-                              horizontalSpacing(defaultSpacing * 0.5),
-                              IconButton(
-                                onPressed: () => Get.to(const SettingsPage(), duration: 300.ms, transition: Transition.fade, curve: Curves.easeInOut),
-                                icon: const Icon(Icons.settings, color: Colors.white),
-                              ),
-                            ],
-                          )
-                        ],
+                                horizontalSpacing(defaultSpacing * 0.5),
+                                IconButton(
+                                  onPressed: () => SettingController.openSettingsPage(),
+                                  icon: const Icon(Icons.settings, color: Colors.white),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        }),
+                ],
+              ),
+            );
+          }),
+        ),
       ),
     );
   }

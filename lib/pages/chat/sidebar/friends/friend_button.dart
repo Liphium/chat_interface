@@ -20,7 +20,7 @@ class _FriendButtonState extends State<FriendButton> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Get.theme.colorScheme.onInverseSurface,
+      color: Get.theme.colorScheme.inverseSurface,
       borderRadius: BorderRadius.circular(10),
       child: MouseRegion(
         onHover: (event) => widget.position.value = event.position,
@@ -30,7 +30,7 @@ class _FriendButtonState extends State<FriendButton> {
           splashColor: Theme.of(context).hoverColor,
 
           //* Show profile
-          onTap: () => Get.dialog(Profile(position: widget.position.value, friend: widget.friend)),
+          onTap: () => showModal(Profile(position: widget.position.value, friend: widget.friend)),
 
           //* Friend info
           child: Padding(
@@ -50,8 +50,10 @@ class _FriendButtonState extends State<FriendButton> {
                   return IconButton(
                     icon: Icon(Icons.add_call, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: () {
-                      final conversation =
-                          Get.find<ConversationController>().conversations.values.where((element) => !element.isGroup && element.members.containsKey(widget.friend.id));
+                      final conversation = Get.find<ConversationController>()
+                          .conversations
+                          .values
+                          .where((element) => !element.isGroup && element.members.containsKey(widget.friend.id));
                       if (conversation.isNotEmpty) {
                         Get.find<SpacesController>().inviteToCall(conversation.first.id);
                         Get.back();

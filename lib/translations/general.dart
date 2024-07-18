@@ -18,6 +18,7 @@ class GeneralTranslations extends Translations {
           'no': 'No',
           'change': 'Change',
           'save': 'Save',
+          'view': 'View',
           'delete': 'Delete',
           'cancel': 'Cancel',
           'remove': 'Remove',
@@ -43,6 +44,8 @@ class GeneralTranslations extends Translations {
           'no.friends': 'You have no friends yet. If you want to add some, you can do that in the friends page.',
           'open.friends': 'Open friends page',
           'reset': 'Reset',
+          'app.settings': 'App settings',
+          'spaces': 'Spaces',
 
           // Placeholder
           'placeholder.domain': 'example.com',
@@ -52,6 +55,7 @@ class GeneralTranslations extends Translations {
           'time.yesterday': 'Yesterday',
           'time.today': 'Today',
           'time': '@day/@month/@year',
+          'general_time': '@day/@month/@year @hour:@minute',
 
           // Log out thing
           'log_out': 'Log out',

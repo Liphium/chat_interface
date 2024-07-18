@@ -20,7 +20,7 @@ class ServerSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    final server = await (db.select(db.setting)..where((tbl) => tbl.key.equals("server"))).getSingleOrNull();
+    final server = await (db.select(db.setting)..where((tbl) => tbl.key.equals("server_url"))).getSingleOrNull();
 
     if (server == null) {
       return const ServerSelectorPage();
@@ -65,6 +65,7 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
                 Text(
                   "${'setup.choose.server'.tr}.",
                   style: Get.textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
                 ),
                 verticalSpacing(sectionSpacing),
                 FJTextField(
@@ -133,7 +134,7 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
 
     // Set the path in the app and update it in the database
     basePath = "$path/$apiVersion";
-    db.into(db.setting).insertOnConflictUpdate(SettingCompanion.insert(key: "server", value: path));
+    db.into(db.setting).insertOnConflictUpdate(SettingCompanion.insert(key: "server_url", value: path));
     isHttps = path.startsWith("https://");
     if (widget.nextPage != null) {
       Get.find<TransitionController>().modelTransition(widget.nextPage);

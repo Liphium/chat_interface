@@ -59,8 +59,6 @@ class _UserAvatarState extends State<UserAvatar> {
             );
           }
 
-          sendLog(friend.name);
-
           return ClipOval(
             child: Container(
               color: Get.theme.colorScheme.primaryContainer,
@@ -110,14 +108,14 @@ class UserRenderer extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(friend.displayName.value.text, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium),
+                  Flexible(child: Text(friend.displayName.value.text, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium)),
                   horizontalSpacing(defaultSpacing),
                   Obx(() => StatusRenderer(status: own ? statusController!.type.value : friend!.statusType.value)),
                 ],
               ),
               Obx(
                 () => Visibility(
-                  visible: own ? statusController!.status.value != "-" : friend!.status.value != "-",
+                  visible: own ? statusController!.status.value != "" : friend!.status.value != "",
                   child: Text(
                     own ? statusController!.status.value : friend!.status.value,
                     style: Get.theme.textTheme.bodySmall,

@@ -21,10 +21,9 @@ class _ConversationAddWindowState extends State<ConversationInfoWindow> {
 
   @override
   Widget build(BuildContext context) {
-    sendLog(widget.conversation.readAt.value);
-    sendLog(widget.conversation.updatedAt.value);
     final readDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.readAt.value.toInt());
     final updateDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.updatedAt.value.toInt());
+    sendLog(widget.conversation.lastVersion);
 
     return DialogBase(
       child: Column(
@@ -71,6 +70,13 @@ class _ConversationAddWindowState extends State<ConversationInfoWindow> {
           Text(
             "conversation.info.members".trParams({
               "count": widget.conversation.members.length.toString(),
+            }),
+            style: Get.textTheme.bodyMedium,
+          ),
+          verticalSpacing(elementSpacing),
+          Text(
+            "conversation.info.version".trParams({
+              "version": widget.conversation.lastVersion.toString(),
             }),
             style: Get.textTheme.bodyMedium,
           ),

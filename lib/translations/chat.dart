@@ -26,18 +26,19 @@ class ChatPageTranslations extends Translations {
 
           // Friends
           'friends': 'Friends',
-          'friends.placeholder': 'Search friends (type name to add)',
+          'friends.placeholder': 'Search friends',
           'friends.remove': 'Remove friend',
           'friend.removed': 'You removed this person.',
           'friends.add': 'Add friend',
+          'friends.add.desc': 'To add your friend, we\'ll need his username. Please provide that below.',
+          'friends.add.button': 'Send friend request',
+          'friends.name_placeholder': 'some_guy',
           'friends.message': 'Start direct message',
           'friends.invite_to_space': 'Invite to current space',
-          'friends.requests_sent': 'Requests sent',
           'friends.requests': 'Requests',
+          'friends.requests_sent': 'Sent requests',
           'request.sent': 'Request successfully sent!',
-          'friends.empty': 'Seems like you don\'t have any friends with that name.',
-          'friends.send_request': 'Now just press \'Enter\' whenever you\'re done typing. And we\'ll find your friend for you.',
-          'friends.example': 'If you want to add someone, just provide their username.',
+          'friends.empty': 'Seems like you don\'t have any friends with that name. You can add friends by clicking the icon on the right inside of the input field.',
           'request.confirm.title': 'Confirm request',
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
@@ -57,7 +58,7 @@ class ChatPageTranslations extends Translations {
           'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
           'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
           'conversations.add': 'Add a member',
-          'conversations.add.create': 'Create new conversation',
+          'conversations.add.create': 'New conversation',
           'choose.members': 'Choose more than one member to create a group chat.',
 
           // Conversation members
@@ -82,6 +83,7 @@ class ChatPageTranslations extends Translations {
           'chat.new_admin': '@name is now an Admin because the original Admin left the conversation.',
           'chat.member_invite': '@invitor invited @name to join the group.',
           'chat.kick': '@issuer removed @name from the group.',
+          'conv.edit_data': '@name updated the conversation.',
 
           // Message menu
           'message.info': 'Info',
@@ -99,6 +101,7 @@ class ChatPageTranslations extends Translations {
           'message.empty': 'An empty message.',
 
           // Conversation info
+          'conversation.info.version': 'Conversation version: @version',
           'conversation.info.id': 'Conversation ID: @id',
           'conversation.info.read': 'Read at @clock on @date',
           'conversation.info.update': 'Updated at @clock on @date',
@@ -130,11 +133,13 @@ class ChatPageTranslations extends Translations {
           'library.empty': 'It\'s pretty empty in here. You can add stuff to it by favoriting images or GIFs in conversations.',
 
           // Spaces
+          'chat.space.add': 'New space',
           'join.space': 'Join Space',
           'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
           'chat.space_invite': 'Space invitation',
           'chat.space.not_found': 'This space already ended.',
           'chat.space.loading': 'Loading space..',
+          'chat.space.leave': 'Do you really want to leave your current space?',
           'tabletop.general.smooth_scrolling': 'Smooth scrolling',
 
           // Townsquare

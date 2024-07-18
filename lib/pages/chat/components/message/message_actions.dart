@@ -23,7 +23,11 @@ class AnswerData {
         if (content == "" && attachments.isEmpty) {
           content = "message.empty".tr;
         } else if (content == "" && attachments.isNotEmpty) {
-          content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+          if (attachments.first.isURL) {
+            content = attachments.first;
+          } else {
+            content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+          }
         }
         return content;
       case MessageType.call:
@@ -63,7 +67,7 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
   // Upload files
   final attachments = <String>[];
   for (var file in files) {
-    final res = await Get.find<AttachmentController>().uploadFile(file, StorageType.temporary);
+    final res = await Get.find<AttachmentController>().uploadFile(file, StorageType.temporary, Constants.fileAttachmentTag);
     if (res.container == null) {
       showErrorPopup("error", res.message);
       callback.call();
@@ -155,5 +159,6 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   }
 
   // Store message
-  Get.find<MessageController>().storeMessage(Message.fromJson(json["message"]));
+  final msg = await Message.unpackInIsolate(conversation, json["message"]);
+  Get.find<MessageController>().storeMessage(msg);
 }

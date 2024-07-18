@@ -9,8 +9,9 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
@@ -48,6 +49,8 @@ class ProfileHelper {
 
     // Check if there is a profile picture
     if (json["profile"]["picture"] == null) {
+      // Remove the current profile picture
+      friend.updateProfilePicture(null);
       return null;
     }
 
@@ -68,12 +71,9 @@ class ProfileHelper {
       return null;
     }
 
+    // Delete the old profile picture file (in case it exists)
     if (oldProfile != null && oldPath != null) {
-      // Check if there is an attachment in any message using the file from the old profile picture
-      final messages = await (db.message.select()..where((tbl) => tbl.attachments.contains(oldPictureId!))).get();
-      if (messages.isEmpty) {
-        await File(oldPath).delete();
-      }
+      await File(oldPath).delete();
     }
 
     // Download the file
@@ -96,7 +96,7 @@ class ProfileHelper {
   /// Upload a profile picture to the server and set it as the current profile picture
   static Future<bool> uploadProfilePicture(File file, String originalName) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, fileName: originalName);
+    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, Constants.fileAppDataTag);
     if (response.container == null) {
       showErrorPopup("error", response.message);
       return false;
@@ -108,14 +108,27 @@ class ProfileHelper {
       "data": "", // Potentially something to be useful in the future again
       "container": encryptSymmetric(jsonEncode(response.container!.toJson()), profileKey),
     });
-
     if (!json["success"]) {
       showErrorPopup("error", "profile_picture.not_set");
       return false;
     }
+
+    // Set in local database
     Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!);
 
-    // TODO: Update for other devices
+    return true;
+  }
+
+  static Future<bool> deleteProfilePicture() async {
+    // Update the profile picture
+    final json = await postAuthorizedJSON("/account/profile/remove_picture", {});
+    if (!json["success"]) {
+      showErrorPopup("error", json["error"]);
+      return false;
+    }
+
+    // Set in local database
+    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(null);
     return true;
   }
 

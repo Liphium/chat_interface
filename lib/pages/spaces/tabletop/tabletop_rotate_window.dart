@@ -22,6 +22,7 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
     final tableController = Get.find<TabletopController>();
 
     return SlidingWindowBase(
+      title: const [], // Only for mobile (sort of)
       position: widget.data,
       child: Column(
         mainAxisSize: MainAxisSize.min,

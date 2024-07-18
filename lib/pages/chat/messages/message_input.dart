@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
@@ -27,7 +26,9 @@ import '../../../util/vertical_spacing.dart';
 import 'package:path/path.dart' as path;
 
 class MessageInput extends StatefulWidget {
-  const MessageInput({super.key});
+  final Conversation conversation;
+
+  const MessageInput({super.key, required this.conversation});
 
   @override
   State<MessageInput> createState() => _MessageInputState();
@@ -56,9 +57,7 @@ class _MessageInputState extends State<MessageInput> {
 
     // Clear message input when conversation changes
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _sub = Get.find<MessageController>().selectedConversation.listenAndPump((conversation) {
-        loadDraft(conversation.id);
-      });
+      loadDraft(widget.conversation.id);
     });
 
     _message.addListener(() {
@@ -153,10 +152,8 @@ class _MessageInputState extends State<MessageInput> {
             return;
           }
 
-          final controller = Get.find<MessageController>();
           if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
-            sendTextMessage(
-                loading, controller.selectedConversation.value.id, _message.text, [], MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
+            sendTextMessage(loading, widget.conversation.id, _message.text, [], MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
             return;
           }
 
@@ -164,7 +161,7 @@ class _MessageInputState extends State<MessageInput> {
             return;
           }
 
-          sendTextMessageWithFiles(loading, controller.selectedConversation.value.id, _message.text, MessageSendHelper.currentDraft.value!.files,
+          sendTextMessageWithFiles(loading, widget.conversation.id, _message.text, MessageSendHelper.currentDraft.value!.files,
               MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
           return null;
         },
@@ -215,8 +212,9 @@ class _MessageInputState extends State<MessageInput> {
     };
 
     // Build actual widget
+    final padding = isMobileMode() ? defaultSpacing : sectionSpacing;
     return Padding(
-      padding: const EdgeInsets.only(right: sectionSpacing, left: sectionSpacing, bottom: sectionSpacing),
+      padding: EdgeInsets.only(right: padding, left: padding, bottom: padding),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -413,23 +411,9 @@ class _MessageInputState extends State<MessageInput> {
                             ),
                           ),
                         ),
-                        // IconButton(
-                        //   key: _emojiKey,
-                        //   onPressed: () async {
-                        //     final result = await Get.dialog(EmojiWindow(data: ContextMenuData.fromKey(_emojiKey, above: true, right: true)));
-                        //     _inputFocus.requestFocus();
-                        //     if (result == null) {
-                        //       return;
-                        //     }
-                        //     replaceSelection(result);
-                        //   },
-                        //   icon: const Icon(Icons.emoji_emotions),
-                        //   color: theme.colorScheme.tertiary,
-                        // ),
-                        // horizontalSpacing(elementSpacing),
                         IconButton(
                           key: _libraryKey,
-                          onPressed: () => Get.dialog(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
+                          onPressed: () => showModal(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),

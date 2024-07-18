@@ -8,10 +8,10 @@ import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/database/conversation/conversation.dart' as model;
+import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
-import 'package:chat_interface/pages/status/setup/encryption/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -30,11 +30,14 @@ class ConversationController extends GetxController {
   final conversations = <String, Conversation>{};
   int newConvs = 0;
 
-  Future<bool> add(Conversation conversation) async {
+  /// Add a conversation to the cache
+  Future<bool> add(Conversation conversation, {loadMembers = true}) async {
+    // Insert into cache
     _insertToOrder(conversation.id);
     conversations[conversation.id] = conversation;
 
-    if (conversation.members.isEmpty) {
+    // Load members from the database
+    if (conversation.members.isEmpty && loadMembers) {
       final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
 
       for (var member in members) {
@@ -45,6 +48,21 @@ class ConversationController extends GetxController {
     return true;
   }
 
+  /// Add a new conversation and refresh members (also subscribes)
+  Future<bool> addFromVault(Conversation conversation) async {
+    // Insert it into cache
+    add(conversation, loadMembers: false);
+
+    // Insert into database
+    conversation.save(saveMembers: false);
+
+    // Subscribe to conversation
+    subscribeToConversation(Get.find<StatusController>().statusJson(), conversation.token);
+
+    return true;
+  }
+
+  /// Add a conversation to the cache and local database (after created)
   Future<bool> addCreated(Conversation conversation, List<Member> members, {Member? admin}) async {
     conversations[conversation.id] = conversation;
     _insertToOrder(conversation.id);
@@ -57,7 +75,7 @@ class ConversationController extends GetxController {
     }
 
     // Add to vault
-    final vaultId = await addToVault(Constants.conversationTag, conversation.toJson());
+    final vaultId = await addToVault(Constants.vaultConversationTag, conversation.toJson());
     if (vaultId == null) {
       // TODO: refresh the vault or something
       sendLog("COULDNT STORE IN VAULT; SOMETHING WENT WRONG");
@@ -76,8 +94,7 @@ class ConversationController extends GetxController {
   }
 
   void updateMessageRead(String conversation, {bool increment = true, required int messageSendTime}) {
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation)))
-        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
 
     // Swap in the map
     _insertToOrder(conversation);
@@ -87,7 +104,8 @@ class ConversationController extends GetxController {
     }
   }
 
-  void finishedLoading(Map<String, dynamic> readStates, List<dynamic> deleted, {bool overwriteReads = true}) async {
+  /// Called when a subscription is finished to make sure conversations are properly sorted and up to date
+  void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, {bool overwriteReads = true}) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
     for (var conversation in conversations.values) {
@@ -97,12 +115,24 @@ class ConversationController extends GetxController {
         continue;
       }
 
-      if (overwriteReads) {
-        conversation.readAt.value = readStates[conversation.id] ?? 0;
-      } else if (readStates[conversation.id] != null) {
-        conversation.readAt.value = readStates[conversation.id];
+      // Get conversation info
+      final info = (conversationInfo[conversation.id] ?? {}) as Map<dynamic, dynamic>;
+      final lastRead = (info["r"] ?? 0) as int;
+      final version = (info["v"] ?? 0) as int;
+      conversation.notificationCount.value = (info["n"] ?? 0) as int;
+
+      // Check if the current version of the conversation is up to date
+      sendLog("version ${conversation.id} client: ${conversation.lastVersion}, server: $version");
+      if (conversation.lastVersion != version) {
+        sendLog("conversation version updated");
+        await conversation.fetchData();
       }
-      conversation.fetchNotificationCount();
+
+      if (overwriteReads) {
+        conversation.readAt.value = lastRead;
+      } else if (lastRead != 0) {
+        conversation.readAt.value = lastRead;
+      }
     }
 
     loaded.value = true;
@@ -126,17 +156,24 @@ class Conversation {
   String vaultId;
   final model.ConversationType type;
   final ConversationToken token;
-  final ConversationContainer container;
+  ConversationContainer container;
+  int lastVersion;
   final updatedAt = 0.obs;
   final readAt = 0.obs;
   final notificationCount = 0.obs;
   final containerSub = ConversationContainer("").obs; // Data subscription
-  SecureKey key;
+  String packedKey;
+  SecureKey? _cachedKey;
+
+  get key {
+    _cachedKey ??= unpackageSymmetricKey(packedKey);
+    return _cachedKey;
+  }
 
   final membersLoading = false.obs;
   final members = <String, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.key, int updatedAt) {
+  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
@@ -147,8 +184,9 @@ class Conversation {
           model.ConversationType.values[json["type"]],
           ConversationToken.fromJson(json["token"]),
           ConversationContainer.fromJson(json["data"]),
-          unpackageSymmetricKey(json["key"]),
+          json["key"],
           json["update"] ?? DateTime.now().millisecondsSinceEpoch,
+          0, // This shouldn't matter, just makes sure the data is fetched
         );
   Conversation.fromData(ConversationData data)
       : this(
@@ -157,26 +195,40 @@ class Conversation {
           data.type,
           ConversationToken.fromJson(jsonDecode(data.token)),
           ConversationContainer.fromJson(jsonDecode(data.data)),
-          unpackageSymmetricKey(data.key),
+          data.key,
+          data.lastVersion.toInt(),
           data.updatedAt.toInt(),
         );
+
+  /// Copy a conversation without the `key`.
+  ///
+  /// If the key was actually used it would just thrown an error for
+  /// being completely invalid.
+  factory Conversation.copyWithoutKey(Conversation conversation) {
+    final conv = Conversation(
+      conversation.id,
+      conversation.vaultId,
+      conversation.type,
+      conversation.token,
+      conversation.container,
+      "",
+      conversation.updatedAt.value,
+      conversation.lastVersion,
+    );
+
+    // Copy all the members
+    conv.members.addAll(conversation.members);
+
+    return conv;
+  }
 
   void addMember(Member member) {
     members[member.tokenId] = member;
   }
 
-  Future<bool> fetchNotificationCount() async {
-    final count = await db.customSelect(
-      "SELECT COUNT(*) AS c FROM message WHERE conversation_id = ? AND created_at > ?",
-      variables: [drift.Variable.withString(id), drift.Variable.withBigInt(BigInt.from(readAt.value))],
-      readsFrom: {db.message},
-    ).getSingle();
-    notificationCount.value += (count.data["c"] ?? 0) as int;
-    return true;
-  }
-
   bool get isGroup => type == model.ConversationType.group;
 
+  /// Only works for direct messages
   String get dmName {
     final member = members.values.firstWhere(
       (element) => element.account != StatusController.ownAccountId,
@@ -190,11 +242,23 @@ class Conversation {
     return friend.displayName.value.text;
   }
 
+  /// Only works for direct messages
+  Friend get otherMember {
+    final member = members.values.firstWhere(
+      (element) => element.account != StatusController.ownAccountId,
+      orElse: () => Member(
+        StatusController.ownAccountId,
+        StatusController.ownAccountId,
+        MemberRole.user,
+      ),
+    );
+    return Get.find<FriendController>().friends[member.account] ?? Friend.unknown(container.name);
+  }
+
   bool get borked =>
       !isGroup &&
       Get.find<FriendController>().friends[members.values
-              .firstWhere((element) => element.account != StatusController.ownAccountId,
-                  orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
+              .firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
               .account] ==
           null;
 
@@ -204,14 +268,14 @@ class Conversation {
       type: type,
       token: token.toJson(),
       key: packageSymmetricKey(key),
-      data: container.toJson(),
+      data: jsonEncode(container.toJson()),
       updatedAt: BigInt.from(updatedAt.value),
+      lastVersion: BigInt.from(lastVersion),
       readAt: BigInt.from(readAt.value));
   String toJson() => jsonEncode(<String, dynamic>{
         "id": id,
-        "vault_id": vaultId,
         "type": type.index,
-        "token": token.toJson(),
+        "token": token.toMap(),
         "key": packageSymmetricKey(key),
         "update": updatedAt.value.toInt(),
         "data": container.toJson(),
@@ -240,48 +304,54 @@ class Conversation {
     }
 
     db.conversation.deleteWhere((tbl) => tbl.id.equals(id));
-    db.message.deleteWhere((tbl) => tbl.conversationId.equals(id));
     db.member.deleteWhere((tbl) => tbl.conversationId.equals(id));
     Get.find<MessageController>().unselectConversation(id: id);
     Get.find<ConversationController>().removeConversation(id);
   }
 
-  void save() {
+  /// Save the entire conversation to the local database.
+  ///
+  /// By default members are also overwritten. Can be disabled by setting `saveMembers` to `false`.
+  void save({saveMembers = true}) {
     db.conversation.insertOnConflictUpdate(entity);
-    for (var member in members.values) {
-      db.member.insertOnConflictUpdate(member.toData(id));
+    if (saveMembers) {
+      for (var member in members.values) {
+        db.member.insertOnConflictUpdate(member.toData(id));
+      }
     }
   }
 
-  DateTime? lastMemberFetch; // Makes sure we only do it once when multiple methods call it
-
-  // Re-fetch members of conversation (and save to database)
-  void fetchMembers(DateTime message) async {
+  /// Fetch all data about a conversation from the server and update it in the local database.
+  ///
+  /// Also compares the current version with the new version that was sent and doesn't refresh
+  /// in case it's not nessecary. Can be disabled by setting `refreshAnyway` to `false`.
+  Future<bool> fetchData() async {
     if (membersLoading.value) {
-      return;
+      return false;
     }
 
-    if (lastMemberFetch != null) {
-      // Just making sure, not sure if this is actually needed
-      if (message.isBefore(lastMemberFetch!)) {
-        return;
-      }
-    }
-
+    // Get the data from the server
     membersLoading.value = true;
-    final json = await postNodeJSON("/conversations/tokens", {
+    final json = await postNodeJSON("/conversations/data", {
       "id": token.id,
       "token": token.token,
     });
 
-    sendLog("REFETCH");
-
     if (!json["success"]) {
-      sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING");
+      sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING ${json["error"]}");
       // TODO: Add to some sort of error collection
-      return;
+      return false;
     }
 
+    // Update to the latest version
+    sendLog("PULLED VERSION ${json["version"]}");
+    lastVersion = json["version"];
+
+    // Update the container
+    container = ConversationContainer.decrypt(json["data"], key);
+    containerSub.value = container;
+
+    // Update the members
     final members = <String, Member>{};
     for (var memberData in json["members"]) {
       sendLog(memberData);
@@ -289,16 +359,18 @@ class Conversation {
       members[memberData["id"]] = Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"]));
     }
 
+    // Load the members into the database
     for (var currentMember in this.members.values) {
       if (!members.containsKey(currentMember.tokenId)) {
         db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId));
       }
     }
 
+    // Set the members and save the conversation
     this.members.value = members;
     membersLoading.value = false;
     save();
 
-    lastMemberFetch = DateTime.now();
+    return true;
   }
 }

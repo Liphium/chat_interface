@@ -2,10 +2,11 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
@@ -61,6 +62,34 @@ class PublicationController extends GetxController {
       }
       _refreshState();
     }
+  }
+
+  /// Set a new microphone
+  void refreshMicrophone(String deviceName) async {
+    if (SpacesController.livekitRoom == null) {
+      return;
+    }
+    String? deviceId = await getMicrophone(deviceName);
+
+    // Check if there is one
+    if (deviceId == null) {
+      sendLog("couldn't find microphone to refresh to");
+      return;
+    }
+    SpacesController.livekitRoom!.localParticipant!.audioTrackPublications.first.track!.setDeviceId(deviceId);
+  }
+
+  /// Get the device id from a microphone
+  Future<String?> getMicrophone(String deviceName) async {
+    String? deviceId;
+    final list = await Hardware.instance.enumerateDevices(type: "audioinput");
+    for (var device in list) {
+      if (device.label == deviceName) {
+        deviceId = device.deviceId;
+      }
+    }
+
+    return deviceId;
   }
 
   void _refreshState() async {
@@ -134,8 +163,10 @@ class PublicationController extends GetxController {
     deafened.value = false;
 
     // Set settings
-    await api.setTalkingAmplitude(amplitude: settingController.settings[AudioSettings.microphoneSensitivity]!.getOr(0.0));
-    await api.setInputDevice(id: settingController.settings[AudioSettings.microphone]!.getValue());
+    if (!configDisableRust) {
+      await api.setTalkingAmplitude(amplitude: settingController.settings[AudioSettings.microphoneSensitivity]!.getOr(0.0));
+      await api.setInputDevice(id: settingController.settings[AudioSettings.microphone]!.getValue());
+    }
     _connected = true;
 
     // Set mute

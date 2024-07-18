@@ -2,7 +2,8 @@ import 'package:chat_interface/pages/settings/components/bool_selection_small.da
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:chat_interface/pages/settings/data/settings_manager.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -48,87 +49,90 @@ class FileSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        //* Auto download types
-        Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelLarge),
-        verticalSpacing(defaultSpacing),
+    return SettingsPageBase(
+      label: "files",
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //* Auto download types
+          Text("settings.file.auto_download.types".tr, style: Get.theme.textTheme.labelLarge),
+          verticalSpacing(defaultSpacing),
 
-        const BoolSettingSmall(settingName: FileSettings.autoDownloadImages),
-        const BoolSettingSmall(settingName: FileSettings.autoDownloadVideos),
-        const BoolSettingSmall(settingName: FileSettings.autoDownloadAudio),
-        verticalSpacing(sectionSpacing),
+          const BoolSettingSmall(settingName: FileSettings.autoDownloadImages),
+          const BoolSettingSmall(settingName: FileSettings.autoDownloadVideos),
+          const BoolSettingSmall(settingName: FileSettings.autoDownloadAudio),
+          verticalSpacing(sectionSpacing),
 
-        //* Max file size
-        Text("settings.file.max_size".tr, style: Get.theme.textTheme.labelLarge),
-        verticalSpacing(defaultSpacing),
+          //* Max file size
+          Text("settings.file.max_size".tr, style: Get.theme.textTheme.labelLarge),
+          verticalSpacing(defaultSpacing),
 
-        const DoubleSelectionSetting(
-          settingName: FileSettings.maxFileSize,
-          description: "settings.file.max_size.description",
-          min: 1.0,
-          max: 10.0,
-          unit: "settings.file.mb",
-        ),
-        verticalSpacing(sectionSpacing),
+          const DoubleSelectionSetting(
+            settingName: FileSettings.maxFileSize,
+            description: "settings.file.max_size.description",
+            min: 1.0,
+            max: 10.0,
+            unit: "settings.file.mb",
+          ),
+          verticalSpacing(sectionSpacing),
 
-        //* File cache size
-        Text("settings.file.cache".tr, style: Get.theme.textTheme.labelLarge),
-        verticalSpacing(defaultSpacing),
-        Text("settings.file.cache.description".tr, style: Get.theme.textTheme.bodyMedium),
-        verticalSpacing(defaultSpacing),
+          //* File cache size
+          Text("settings.file.cache".tr, style: Get.theme.textTheme.labelLarge),
+          verticalSpacing(defaultSpacing),
+          Text("settings.file.cache.description".tr, style: Get.theme.textTheme.bodyMedium),
+          verticalSpacing(defaultSpacing),
 
-        ListSelectionSetting(
-          settingName: FileSettings.fileCacheType,
-          items: FileSettings.fileCacheTypes,
-        ),
+          ListSelectionSetting(
+            settingName: FileSettings.fileCacheType,
+            items: FileSettings.fileCacheTypes,
+          ),
 
-        Obx(
-          () => Visibility(
-            visible: Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue() == 1,
-            child: const DoubleSelectionSetting(
-              settingName: FileSettings.maxCacheSize,
-              description: "",
-              min: 100.0,
-              max: 3000.0,
-              unit: "settings.file.mb",
+          Obx(
+            () => Visibility(
+              visible: Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue() == 1,
+              child: const DoubleSelectionSetting(
+                settingName: FileSettings.maxCacheSize,
+                description: "",
+                min: 100.0,
+                max: 3000.0,
+                unit: "settings.file.mb",
+              ),
             ),
           ),
-        ),
-        verticalSpacing(sectionSpacing),
+          verticalSpacing(sectionSpacing),
 
-        //* File cache size
-        Row(
-          children: [
-            Text("settings.file.live_share".tr, style: Get.theme.textTheme.labelLarge),
-            horizontalSpacing(defaultSpacing),
-            Container(
-              decoration: BoxDecoration(
-                color: Get.theme.colorScheme.error.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(defaultSpacing),
+          //* File cache size
+          Row(
+            children: [
+              Text("settings.file.live_share".tr, style: Get.theme.textTheme.labelLarge),
+              horizontalSpacing(defaultSpacing),
+              Container(
+                decoration: BoxDecoration(
+                  color: Get.theme.colorScheme.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(defaultSpacing),
+                ),
+                padding: const EdgeInsets.all(elementSpacing),
+                child: Row(
+                  children: [
+                    Icon(Icons.science, color: Get.theme.colorScheme.error),
+                    horizontalSpacing(elementSpacing),
+                    Text(
+                      "settings.experimental".tr,
+                      style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
+                    ),
+                    horizontalSpacing(elementSpacing)
+                  ],
+                ),
               ),
-              padding: const EdgeInsets.all(elementSpacing),
-              child: Row(
-                children: [
-                  Icon(Icons.science, color: Get.theme.colorScheme.error),
-                  horizontalSpacing(elementSpacing),
-                  Text(
-                    "settings.experimental".tr,
-                    style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
-                  ),
-                  horizontalSpacing(elementSpacing)
-                ],
-              ),
-            ),
-          ],
-        ),
-        verticalSpacing(defaultSpacing),
-        Text("settings.file.live_share.description".tr, style: Get.theme.textTheme.bodyMedium),
-        verticalSpacing(defaultSpacing),
+            ],
+          ),
+          verticalSpacing(defaultSpacing),
+          Text("settings.file.live_share.description".tr, style: Get.theme.textTheme.bodyMedium),
+          verticalSpacing(defaultSpacing),
 
-        const BoolSettingSmall(settingName: FileSettings.liveShareExperiment),
-      ],
+          const BoolSettingSmall(settingName: FileSettings.liveShareExperiment),
+        ],
+      ),
     );
   }
 }

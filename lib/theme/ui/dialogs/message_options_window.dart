@@ -40,6 +40,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
       lessPadding: true,
       position: widget.data,
       maxSize: 250,
+      title: const [],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -79,7 +80,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             label: "message.profile".tr,
             onTap: () {
               Get.back();
-              Get.dialog(Profile(friend: friend ?? Friend.unknown(widget.message.senderAccount)));
+              showModal(Profile(friend: friend ?? Friend.unknown(widget.message.senderAccount)));
             },
             loading: false.obs,
           ),

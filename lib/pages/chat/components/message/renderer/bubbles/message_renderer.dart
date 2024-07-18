@@ -5,7 +5,6 @@ import 'package:chat_interface/pages/chat/components/message/renderer/attachment
 import 'package:chat_interface/pages/chat/components/message/renderer/image_attachment_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
-import 'package:chat_interface/theme/ui/dialogs/message_render_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -41,9 +40,9 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
 
     return RepaintBoundary(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(
           vertical: elementSpacing,
-          horizontal: sectionSpacing,
+          horizontal: isMobileMode() ? defaultSpacing : sectionSpacing,
         ),
         child: Row(
           textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
@@ -58,7 +57,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                 message: sender.displayName.value.text,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(100),
-                  onTap: () => Get.dialog(Profile(friend: sender)),
+                  onTap: () => showModal(Profile(friend: sender)),
                   child: UserAvatar(id: sender.id, size: 34),
                 ),
               ),
@@ -75,7 +74,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                   Flexible(
                     child: LayoutBuilder(builder: (context, constraints) {
                       return ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: (Get.width - 350) * 0.5),
+                        constraints: BoxConstraints(maxWidth: isMobileMode() ? Get.width * 0.75 : (Get.width - 350) * 0.5),
                         child: Column(
                           crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                           children: [
@@ -102,7 +101,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                           color: widget.self ? theme.colorScheme.onPrimary.withOpacity(0.2) : theme.colorScheme.inverseSurface,
                                           child: InkWell(
                                             borderRadius: BorderRadius.circular(defaultSpacing),
-                                            onTap: () => Get.dialog(MessageRenderWindow(message: widget.message.answerMessage!)),
+                                            onTap: () => Get.find<MessageController>().scrollToMessage(widget.message.answer),
                                             child: Padding(
                                               padding: const EdgeInsets.all(elementSpacing),
                                               child: Row(
@@ -121,8 +120,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                                   horizontalSpacing(elementSpacing),
                                                   Flexible(
                                                     child: Text(
-                                                      AnswerData.answerContent(widget.message.answerMessage!.type, widget.message.answerMessage!.content,
-                                                          widget.message.answerMessage!.attachments),
+                                                      AnswerData.answerContent(widget.message.answerMessage!.type, widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
                                                       style: Get.theme.textTheme.labelMedium,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,
@@ -142,6 +140,36 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                       text: widget.message.content,
                                       baseStyle: theme.textTheme.labelLarge!,
                                     ),
+
+                                    //* Mobile timestamp and verified indicator
+                                    if (isMobileMode())
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: elementSpacing),
+                                            child: SelectionContainer.disabled(
+                                              child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                                            ),
+                                          ),
+                                          Obx(() {
+                                            final verified = widget.message.verified.value;
+                                            return Visibility(
+                                              visible: !verified,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(left: elementSpacing),
+                                                child: Tooltip(
+                                                  message: "chat.not.signed".tr,
+                                                  child: const Icon(
+                                                    Icons.warning_rounded,
+                                                    color: Colors.amber,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          })
+                                        ],
+                                      ),
                                   ],
                                 ),
                               ),
@@ -180,32 +208,38 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                     }),
                   ),
 
-                  horizontalSpacing(defaultSpacing),
+                  //* Desktop timestamp
+                  if (!isMobileMode()) horizontalSpacing(defaultSpacing),
 
-                  //* Timestamp
-                  Padding(
-                    padding: const EdgeInsets.only(top: defaultSpacing),
-                    child: SelectionContainer.disabled(
-                      child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
-                    ),
-                  ),
-
-                  horizontalSpacing(defaultSpacing),
-
-                  //* Verified indicator
-                  Obx(() {
-                    final verified = widget.message.verified.value;
-                    return Visibility(
-                      visible: !verified,
-                      child: Tooltip(
-                        message: "chat.not.signed".tr,
-                        child: const Icon(
-                          Icons.warning_rounded,
-                          color: Colors.amber,
-                        ),
+                  if (!isMobileMode())
+                    Padding(
+                      padding: const EdgeInsets.only(top: defaultSpacing),
+                      child: SelectionContainer.disabled(
+                        child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
                       ),
-                    );
-                  })
+                    ),
+
+                  //* Desktop verified indicator
+                  if (!isMobileMode()) horizontalSpacing(defaultSpacing),
+
+                  //* Desktop verified indicator
+                  if (!isMobileMode())
+                    Obx(() {
+                      final verified = widget.message.verified.value;
+                      return Visibility(
+                        visible: !verified,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: elementSpacing),
+                          child: Tooltip(
+                            message: "chat.not.signed".tr,
+                            child: const Icon(
+                              Icons.warning_rounded,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ),
+                      );
+                    })
                 ],
               ),
             )

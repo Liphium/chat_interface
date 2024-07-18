@@ -4,6 +4,7 @@ import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -14,13 +15,19 @@ import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 
+// Configuration constants
+const appTag = "liphium_chat";
+const protocolVersion = 1;
+
 final dio = Dio();
 late final Sodium sodiumLib;
-const appId = 1;
 bool isHttps = true;
-const bool isDebug = true; // TODO: Set to false before release
-const bool checkVersion = true; // TODO: Set to true in release builds
 const bool driftLogger = true;
+
+// Build level settings
+const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
+const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
+const bool configDisableRust = bool.fromEnvironment("DISABLE_RUST", defaultValue: false);
 
 // Authentication types
 enum AuthType {
@@ -52,7 +59,11 @@ var executableArguments = <String>[];
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
+  if (!kIsWeb) {
+    if (!GetPlatform.isMobile) {
+      await windowManager.ensureInitialized();
+    }
+  }
   executableArguments = args;
   sendLog("Current save directory: ${(await getApplicationSupportDirectory()).path}");
 
@@ -63,9 +74,11 @@ void main(List<String> args) async {
   await RustLib.init();
 
   // Initialize logging from the native side
-  api.createLogStream().listen((event) {
-    sendLog("FROM RUST: ${event.tag} | ${event.msg}");
-  });
+  if (configDisableRust) {
+    api.createLogStream().listen((event) {
+      sendLog("FROM RUST: ${event.tag} | ${event.msg}");
+    });
+  }
 
   // Wait for it to be finished
   await Future.delayed(100.ms);
@@ -78,15 +91,13 @@ void main(List<String> args) async {
   // Initialize controllers
   initializeControllers();
 
-  await windowManager.waitUntilReadyToShow(
-    const WindowOptions(
-      minimumSize: Size(800, 500),
-      fullScreen: false,
-    ),
-    () async {
-      await windowManager.show();
-    },
-  );
+  if (!GetPlatform.isMobile) {
+    await windowManager.setMinimumSize(const Size(300, 500));
+    await windowManager.setTitle("Liphium");
+    if (!isDebug) {
+      await windowManager.setAlignment(Alignment.center);
+    }
+  }
 
   runApp(const ChatApp());
 }

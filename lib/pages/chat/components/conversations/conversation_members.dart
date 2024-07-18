@@ -1,7 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -18,7 +17,6 @@ class ConversationMembers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ownRole = conversation.members[conversation.token.id]!.role;
-    final controller = Get.find<MessageController>();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: defaultSpacing),
@@ -30,12 +28,16 @@ class ConversationMembers extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
-                child: Obx(() =>
-                    Text('chat.members'.trParams({"count": controller.selectedConversation.value.members.length.toString()}), style: Theme.of(context).textTheme.titleMedium)),
+                child: Obx(
+                  () => Text(
+                    'chat.members'.trParams({"count": conversation.members.length.toString()}),
+                    style: Get.theme.textTheme.titleMedium,
+                  ),
+                ),
               ),
               LoadingIconButton(
                 loading: conversation.membersLoading,
-                onTap: () => conversation.fetchMembers(DateTime.now()),
+                onTap: () => conversation.fetchData(),
                 icon: Icons.refresh,
               ),
             ],
@@ -46,10 +48,10 @@ class ConversationMembers extends StatelessWidget {
             child: Obx(
               () => ListView.builder(
                 shrinkWrap: true,
-                itemCount: controller.selectedConversation.value.members.length,
+                itemCount: conversation.members.length,
                 itemBuilder: (context, index) {
                   final GlobalKey listKey = GlobalKey();
-                  final member = controller.selectedConversation.value.members.values.elementAt(index);
+                  final member = conversation.members.values.elementAt(index);
                   return Padding(
                     key: listKey,
                     padding: const EdgeInsets.only(bottom: elementSpacing),
@@ -70,11 +72,9 @@ class ConversationMembers extends StatelessWidget {
                                   return [
                                         //* Promotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
-                                          ProfileAction(
-                                              icon: Icons.add_moderator, label: "chat.make_moderator".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id))
+                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_moderator".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id))
                                         else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
-                                          ProfileAction(
-                                              icon: Icons.add_moderator, label: "chat.make_admin".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id)),
+                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_admin".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id)),
 
                                         //* Demotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
@@ -114,7 +114,11 @@ class ConversationMembers extends StatelessWidget {
                           padding: const EdgeInsets.all(elementSpacing),
                           child: Row(
                             children: [
-                              Expanded(child: UserRenderer(id: member.account)),
+                              Expanded(
+                                child: UserRenderer(
+                                  id: member.account,
+                                ),
+                              ),
                               horizontalSpacing(elementSpacing),
                               if (member.role != MemberRole.user)
                                 Padding(

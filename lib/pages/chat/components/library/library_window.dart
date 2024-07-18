@@ -1,4 +1,4 @@
-import 'package:chat_interface/database/accounts/library_entry.dart';
+import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/pages/chat/components/library/library_tab.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -26,6 +26,7 @@ class _LibraryWindowState extends State<LibraryWindow> {
   @override
   Widget build(BuildContext context) {
     return SlidingWindowBase(
+      title: const [],
       maxSize: 500,
       position: widget.data,
       child: Column(

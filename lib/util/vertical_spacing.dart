@@ -23,6 +23,18 @@ String getRandomString(int length) {
   return String.fromCharCodes(List.generate(length, (index) => chars.codeUnitAt(random.nextInt(chars.length))));
 }
 
+bool isMobileMode() {
+  return Get.width < 800 || Get.height < 500;
+}
+
+Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) {
+  if (isMobileMode()) {
+    return Get.to<T>(widget);
+  } else {
+    return Get.dialog(widget);
+  }
+}
+
 const defaultSpacing = 8.0;
 const elementSpacing = defaultSpacing * 0.5;
 const elementSpacing2 = elementSpacing * 1.5;
@@ -41,12 +53,23 @@ String formatDay(DateTime time) {
   } else if (time.day == now.day - 1) {
     return "time.yesterday".tr;
   } else {
-    return "time".trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+    return "time"
+        .trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
   }
 }
 
 String formatMessageTime(DateTime time) {
   return "message.time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0")});
+}
+
+String formatGeneralTime(DateTime time) {
+  return "general_time".trParams({
+    "day": time.day.toString().padLeft(2, "0"),
+    "month": time.month.toString().padLeft(2, "0"),
+    "year": time.year.toString(),
+    "hour": time.hour.toString().padLeft(2, "0"),
+    "minute": time.minute.toString().padLeft(2, "0"),
+  });
 }
 
 class ExpandEffect extends CustomEffect {

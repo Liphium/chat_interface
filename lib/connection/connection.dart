@@ -10,7 +10,6 @@ import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/status/setup/fetch/fetch_finish_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -37,8 +36,11 @@ class Connector {
   RSAPublicKey? nodePublicKey;
   Uint8List? aesKey;
   String? aesBase64;
+  String? url;
 
   Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
+    this.url = url;
+
     // Generate an AES key for the connection
     aesKey = randomAESKey();
     aesBase64 = base64Encode(aesKey!);
@@ -93,7 +95,7 @@ class Connector {
         Event event = Event.fromJson(String.fromCharCodes(msg));
         if (_handlers[event.name] == null) return;
 
-        if (_afterSetup[event.name] == true && !setupFinished) {
+        if (_afterSetup[event.name] == true && !SetupManager.setupFinished) {
           _afterSetupQueue.add(event);
           return;
         }
