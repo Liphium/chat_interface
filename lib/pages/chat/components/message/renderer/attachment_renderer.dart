@@ -35,6 +35,22 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
     super.initState();
     if (widget.container.attachmentType == AttachmentContainerType.remoteImage && widget.message != null && (widget.message?.heightCallback ?? false)) {
       _networkImage = Image.network(
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null || loadingProgress.expectedTotalBytes == null) {
+            return const SizedBox(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(),
+            );
+          }
+          return SizedBox(
+            width: 60,
+            height: 60,
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes! / loadingProgress.cumulativeBytesLoaded,
+            ),
+          );
+        },
         widget.container.url,
         fit: BoxFit.cover,
       );
@@ -54,6 +70,22 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       stream.addListener(listener);
     } else if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
       _networkImage = Image.network(
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null || loadingProgress.expectedTotalBytes == null) {
+            return child;
+          }
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                color: Get.theme.colorScheme.onPrimary,
+                value: loadingProgress.expectedTotalBytes! / loadingProgress.cumulativeBytesLoaded,
+              ),
+            ),
+          );
+        },
         widget.container.url,
         fit: BoxFit.cover,
       );
