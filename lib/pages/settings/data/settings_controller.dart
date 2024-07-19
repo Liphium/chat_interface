@@ -1,6 +1,7 @@
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
+import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
@@ -43,6 +44,7 @@ class SettingController extends GetxController {
     TrustedLinkSettings.registerSettings(this);
     ChatSettings.registerSettings(this);
     DataSettings.registerSettings(this);
+    LogSettings.registerSettings(this);
 
     // Add app settings (not in settings page)
     addSetting(Setting<bool>(AppSettings.showGroupMembers, true));

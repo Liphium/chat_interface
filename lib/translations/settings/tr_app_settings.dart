@@ -74,6 +74,10 @@ class AppSettingsTranslations extends Translations {
           'video.camera.device': 'Select a camera',
           'video.camera.preview': 'Camera preview',
           'video.camera.preview.start': 'Start camera preview',
+
+          // Logging settings
+          'logging.amount.desc': 'Amount of logs to keep in the history',
+          'logging.launch': 'Open log folder',
         },
       };
 }

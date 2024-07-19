@@ -177,10 +177,8 @@ class MessageController extends GetxController {
 
   void newScrollController(AutoScrollController newController) {
     if (controller != null) {
-      sendLog("removing old listener");
       controller!.removeListener(checkCurrentScrollHeight);
     }
-    sendLog("new scroll controller");
     controller = newController;
     controller!.addListener(checkCurrentScrollHeight);
   }
@@ -195,7 +193,6 @@ class MessageController extends GetxController {
         this.topReached = topReached;
       }
     } else if (controller!.position.pixels <= newLoadOffset) {
-      sendLog("load bottom");
       loadNewMessagesBottom();
     }
   }
@@ -208,7 +205,6 @@ class MessageController extends GetxController {
   /// The `first boolean` tells you whether or not the top has been reached.
   /// The `second boolean` tells you whether or not it was still loading or an error happend.
   Future<(bool, bool)> loadNewMessagesTop({int? date}) async {
-    sendLog("loading top");
     if (loading || (messages.isEmpty && date == null)) {
       return (false, true);
     }
@@ -250,7 +246,6 @@ class MessageController extends GetxController {
   /// Will open an error dialog in case something goes wrong on the server.
   Future<bool> loadNewMessagesBottom() async {
     if (loading || messages.isEmpty) {
-      sendLog("loading or sth");
       return false;
     }
     loading = true; // We'll use the same loading as above to make sure this doesn't break anything

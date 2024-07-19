@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
+import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
@@ -58,6 +61,32 @@ final list = <String>[].obs;
 var executableArguments = <String>[];
 
 void main(List<String> args) async {
+  // Handle errors from flutter
+  final originalFunction = FlutterError.onError!;
+  FlutterError.onError = (details) {
+    LogManager.addError(details.exception, details.stack);
+    originalFunction(details);
+  };
+
+  // Run everything in a zone for error collection
+  runZonedGuarded(
+    () async {
+      initApp(args);
+    },
+    (error, stack) {
+      LogManager.addError(error, stack);
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (self, parent, zone, line) async {
+        await LogManager.addLog(line);
+        parent.print(zone, line);
+      },
+    ),
+  );
+}
+
+/// App init function, start Liphium Chat
+void initApp(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) {
     if (!GetPlatform.isMobile) {
@@ -98,7 +127,6 @@ void main(List<String> args) async {
       await windowManager.setAlignment(Alignment.center);
     }
   }
-
   runApp(const ChatApp());
 }
 
