@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -16,11 +17,11 @@ import 'package:chat_interface/pages/chat/components/conversations/message_bar.d
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -73,45 +74,92 @@ class _MessageFeedState extends State<MessageFeed> {
                     children: [
                       //* Message list
                       Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200),
-                            child: Obx(
-                              () {
-                                if (!controller.loaded.value) {
-                                  return const SizedBox();
-                                }
-
-                                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                  controller.checkCurrentScrollHeight();
-                                });
-
-                                return ScrollConfiguration(
-                                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                  child: ListView.builder(
-                                    itemCount: controller.messages.length + 2,
-                                    reverse: true,
-                                    controller: _scrollController,
-                                    addAutomaticKeepAlives: false,
-                                    addRepaintBoundaries: false,
-                                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                                    itemBuilder: (context, index) {
-                                      if (isMobileMode()) {
-                                        return BubblesMobileRenderer(
-                                          index: index,
-                                          controller: _scrollController,
-                                        );
-                                      }
-                                      return BubblesRenderer(
-                                        index: index,
-                                        controller: _scrollController,
-                                      );
-                                    },
+                        child: Stack(
+                          children: [
+                            //* Animated loading indicator
+                            Align(
+                              alignment: Alignment.topCenter,
+                              child: Obx(
+                                () => Animate(
+                                  effects: [
+                                    FadeEffect(
+                                      curve: Curves.ease,
+                                      duration: 250.ms,
+                                    ),
+                                  ],
+                                  target: controller.newMessagesLoading.value ? 1 : 0,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(defaultSpacing),
+                                    child: Material(
+                                      elevation: 3.0,
+                                      color: Get.theme.colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(defaultSpacing),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(defaultSpacing),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(
+                                              width: Get.textTheme.labelMedium!.fontSize! * 1.5,
+                                              height: Get.textTheme.labelMedium!.fontSize! * 1.5,
+                                              child: CircularProgressIndicator(
+                                                color: Get.theme.colorScheme.onPrimary,
+                                                strokeWidth: 3,
+                                              ),
+                                            ),
+                                            horizontalSpacing(defaultSpacing),
+                                            Text("loading".tr, style: Get.textTheme.labelMedium),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                          ),
+
+                            //* Messages
+                            Center(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200),
+                                child: Obx(
+                                  () {
+                                    if (!controller.loaded.value) {
+                                      return const SizedBox();
+                                    }
+
+                                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                      controller.checkCurrentScrollHeight();
+                                    });
+
+                                    return ScrollConfiguration(
+                                      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                      child: ListView.builder(
+                                        itemCount: controller.messages.length + 2,
+                                        reverse: true,
+                                        controller: _scrollController,
+                                        addAutomaticKeepAlives: false,
+                                        addRepaintBoundaries: false,
+                                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                        itemBuilder: (context, index) {
+                                          if (isMobileMode()) {
+                                            return BubblesMobileRenderer(
+                                              index: index,
+                                              controller: _scrollController,
+                                            );
+                                          }
+                                          return BubblesRenderer(
+                                            index: index,
+                                            controller: _scrollController,
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 

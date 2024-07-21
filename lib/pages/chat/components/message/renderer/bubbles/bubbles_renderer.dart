@@ -70,7 +70,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
       );
     }
 
-    // Just for spacing above the input
+    // Just for spacing above the input and a loading indicator
     if (widget.index == 0 && widget.message == null) {
       return verticalSpacing(defaultSpacing);
     }

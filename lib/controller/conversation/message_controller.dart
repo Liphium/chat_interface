@@ -199,6 +199,9 @@ class MessageController extends GetxController {
   /// Loading state for new messages (at top or bottom)
   final newMessagesLoading = false.obs;
 
+  /// Whether or not the messages are loading at the top (for showing a loading indicator)
+  bool messagesLoadingTop = false;
+
   /// Load new messages from the server for the top of the scroll feed.
   ///
   /// The `first boolean` tells you whether or not the top has been reached.
@@ -207,6 +210,7 @@ class MessageController extends GetxController {
     if (newMessagesLoading.value || (messages.isEmpty && date == null)) {
       return (false, true);
     }
+    messagesLoadingTop = true;
     newMessagesLoading.value = true;
     date ??= messages.last.createdAt.millisecondsSinceEpoch;
 
@@ -247,6 +251,7 @@ class MessageController extends GetxController {
     if (newMessagesLoading.value || messages.isEmpty) {
       return false;
     }
+    messagesLoadingTop = false;
     newMessagesLoading.value = true; // We'll use the same loading as above to make sure this doesn't break anything
     final firstMessage = messages.first;
 
