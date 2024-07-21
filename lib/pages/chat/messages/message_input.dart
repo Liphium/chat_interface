@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:mime/mime.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
@@ -161,8 +160,8 @@ class _MessageInputState extends State<MessageInput> {
             return;
           }
 
-          sendTextMessageWithFiles(loading, widget.conversation.id, _message.text, MessageSendHelper.currentDraft.value!.files,
-              MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
+          sendTextMessageWithFiles(
+              loading, widget.conversation.id, _message.text, MessageSendHelper.currentDraft.value!.files, MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
           return null;
         },
       ),
@@ -170,35 +169,29 @@ class _MessageInputState extends State<MessageInput> {
       // For support to paste files
       PasteIntent: CallbackAction<PasteIntent>(
         onInvoke: (PasteIntent intent) async {
-          final image = await Pasteboard.image;
+          final files = await Pasteboard.files();
+          final image = await Pasteboard.image; // Assumption is that this will always return a png
           final data = await Clipboard.getData(Clipboard.kTextPlain);
 
           // When nothing is copied
-          if (data == null && image == null) {
+          if (data == null && image == null && files.isEmpty) {
+            return;
+          }
+
+          // Check if files are in the clipboard
+          if (files.isNotEmpty) {
+            for (var path in files) {
+              await MessageSendHelper.addFile(File(path));
+            }
             return;
           }
 
           // Check if an image is copied
           if (image != null) {
-            sendLog("image");
             final tempPath = await getTemporaryDirectory();
 
-            // Get the mime type of the image
-            final mimeType = lookupMimeType("", headerBytes: image);
-            if (mimeType == null) {
-              sendLog("no mime type");
-              return;
-            }
-
-            // Get the file extension of the image
-            final args = mimeType.split("/");
-            if (args[0] != "image") {
-              sendLog("$mimeType isn't an image type");
-              return;
-            }
-
             // Save the file
-            final tempFile = File(path.join(tempPath.path, "pasted_image_${getRandomString(5)}.${args[1]}"));
+            final tempFile = File(path.join(tempPath.path, "pasted_image_${getRandomString(5)}.png"));
             await tempFile.writeAsBytes(image, flush: true);
             MessageSendHelper.currentDraft.value!.files.add(UploadData(tempFile));
             return;
@@ -356,19 +349,14 @@ class _MessageInputState extends State<MessageInput> {
                         IconButton(
                           onPressed: () async {
                             if (MessageSendHelper.currentDraft.value!.files.length == 5) {
+                              showErrorPopup("error", "file.too_many");
                               return;
                             }
-
                             final result = await openFile();
                             if (result == null) {
                               return;
                             }
-                            final size = await result.length();
-                            if (size > 10 * 1000 * 1000) {
-                              showErrorPopup("error".tr, "file.too_large".tr);
-                              return;
-                            }
-                            MessageSendHelper.currentDraft.value!.files.add(UploadData(File(result.path)));
+                            MessageSendHelper.addFile(File(result.path));
                           },
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,

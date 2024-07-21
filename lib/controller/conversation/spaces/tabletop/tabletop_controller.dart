@@ -45,6 +45,36 @@ class TabletopController extends GetxController {
   double canvasZoom = 0.5;
   final canvasRotation = 0.0.obs;
 
+  /// Reset the entire state of the controller (on every call start)
+  void resetControllerState() {
+    loading.value = false;
+    enabled.value = false;
+
+    dropMode = false;
+
+    heldObject = null;
+    hoveringObjects.clear();
+    inventory.clear();
+    objects.clear();
+    cursors.clear();
+
+    _ticker?.cancel();
+    _ticker = null;
+
+    _lastMousePos = null;
+    inventoryHoverIndex = -1;
+
+    mousePos = const Offset(0, 0);
+    mousePosUnmodified = const Offset(0, 0);
+    globalCanvasPosition = const Offset(0, 0);
+
+    hints.clear();
+
+    canvasOffset = const Offset(0, 0);
+    canvasZoom = 0.5;
+    canvasRotation.value = 0.0;
+  }
+
   /// Join the tabletop session
   void connect() {
     if (enabled.value || loading.value) {
@@ -121,6 +151,7 @@ class TabletopController extends GetxController {
           enabled.value = false;
         },
       );
+      resetControllerState();
     } else {
       enabled.value = false;
     }

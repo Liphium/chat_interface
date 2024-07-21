@@ -241,6 +241,9 @@ class SpacesController extends GetxController {
         Get.find<MessageController>().unselectConversation();
         Get.find<MessageController>().openTab(OpenTabType.space);
 
+        // Reset everything on the table
+        Get.find<TabletopController>().resetControllerState();
+
         connected.value = true;
         inSpace.value = true;
         spaceLoading.value = false;
