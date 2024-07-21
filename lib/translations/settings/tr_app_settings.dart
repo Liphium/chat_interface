@@ -69,6 +69,8 @@ class AppSettingsTranslations extends Translations {
           'tabletop.general.framerate': 'Framerate',
           'tabletop.general.framerate.description': 'The framerate at which the table is rendered. This should be roughly equivalent to the refresh rate of your monitor.',
           'tabletop.general.framerate.unit': 'Hz',
+          'tabletop.general.color': 'The color of your cursor',
+          'tabletop.general.color.description': 'This will be the color everyone sees when you are selecting something or moving your cursor.',
 
           // Camera settings
           'video.camera.device': 'Select a camera',

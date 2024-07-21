@@ -14,6 +14,7 @@ class DoubleSelectionSetting extends StatefulWidget {
   final double max;
   final bool rounded;
   final String unit;
+  final Function(double)? onChange;
 
   const DoubleSelectionSetting({
     super.key,
@@ -23,6 +24,7 @@ class DoubleSelectionSetting extends StatefulWidget {
     required this.max,
     this.unit = "",
     this.rounded = false,
+    this.onChange,
   });
 
   @override
@@ -66,6 +68,7 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
                     } else {
                       current.value = value;
                     }
+                    widget.onChange?.call(current.value);
                   },
                   onChangeEnd: (value) {
                     if (widget.rounded) {

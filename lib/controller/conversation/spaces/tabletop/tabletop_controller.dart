@@ -9,6 +9,8 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_text.dart';
+import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/foundation.dart';
@@ -90,7 +92,9 @@ class TabletopController extends GetxController {
     mousePosUnmodified = const Offset(0, 0);
 
     spaceConnector.sendAction(
-      Message("table_join", <String, dynamic>{}),
+      Message("table_join", <String, dynamic>{
+        "color": Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue() as double,
+      }),
       handler: (event) {
         sendLog("hello world");
         loading.value = false;
@@ -158,13 +162,13 @@ class TabletopController extends GetxController {
   }
 
   /// Update the cursor position of other people
-  void updateCursor(String id, Offset position) {
+  void updateCursor(String id, Offset position, double hue) {
     if (id == SpaceMemberController.ownId) {
       return;
     }
 
     if (cursors[id] == null) {
-      cursors[id] = TabletopCursor(id, position);
+      cursors[id] = TabletopCursor(id, position, TabletopSettings.getCursorColor(hue: hue));
     } else {
       cursors[id]!.move(position);
     }

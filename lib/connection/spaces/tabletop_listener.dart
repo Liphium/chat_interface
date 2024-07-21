@@ -43,6 +43,7 @@ void setupTabletopListeners() {
     controller.updateCursor(
       event.data["c"],
       Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
+      (event.data["col"] as num).toDouble(),
     );
   });
 
