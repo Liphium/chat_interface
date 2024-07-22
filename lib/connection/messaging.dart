@@ -23,7 +23,7 @@ class Event {
 /// A message is sent to the server to perform an action.
 class Message {
   /// Action to perform
-  final String action;
+  String action;
 
   /// Data of the action
   final Map<String, dynamic> data;

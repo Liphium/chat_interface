@@ -117,11 +117,19 @@ class TabletopController extends GetxController {
   void _handleTableTick() {
     // Send the location of the held object
     if (heldObject != null && !dropMode) {
-      spaceConnector.sendAction(Message("tobj_move", <String, dynamic>{
-        "id": heldObject!.id,
-        "x": heldObject!.location.dx,
-        "y": heldObject!.location.dy,
-      }));
+      spaceConnector.sendAction(
+        Message("tobj_move", <String, dynamic>{
+          "id": heldObject!.id,
+          "x": heldObject!.location.dx,
+          "y": heldObject!.location.dy,
+        }),
+        handler: (event) {
+          if (!event.data["success"]) {
+            heldObject = null;
+            // TODO: Expand more on this
+          }
+        },
+      );
     }
 
     // Send mouse position if available
@@ -244,6 +252,7 @@ enum TableObjectType {
 abstract class TableObject {
   TableObject(this.id, this.location, this.size, this.type);
 
+  Function()? dataCallback;
   String id;
   TableObjectType type;
 
@@ -362,17 +371,65 @@ abstract class TableObject {
   }
 
   /// Start a modification process (data)
-  void modify(Function() callback) {
+  Future<bool> select() {
+    final completer = Completer<bool>();
+
     spaceConnector.sendAction(
         Message("tobj_select", <String, dynamic>{
           "id": id,
         }), handler: (event) {
       if (!event.data["success"]) {
+        showErrorPopup("error", event.data["message"]);
         sendLog("can't modify rn");
+        completer.complete(false);
         return;
       }
-      callback();
+      completer.complete(true);
     });
+
+    return completer.future;
+  }
+
+  /// Start a modification process (data)
+  Future<bool> unselect() {
+    final completer = Completer<bool>();
+
+    spaceConnector.sendAction(
+      Message("tobj_unselect", <String, dynamic>{
+        "id": id,
+      }),
+      handler: (event) {
+        if (!event.data["success"]) {
+          sendLog("can't modify rn");
+          completer.complete(false);
+          return;
+        }
+        completer.complete(true);
+      },
+    );
+
+    return completer.future;
+  }
+
+  /// Wait until the data can be modified
+  void queue(Function() callback) {
+    spaceConnector.sendAction(
+      Message("tobj_mqueue", {
+        "id": id,
+      }),
+      handler: (event) {
+        if (!event.data["success"]) {
+          showErrorPopup("error", event.data["message"]);
+          return;
+        }
+
+        if (event.data["direct"]) {
+          callback();
+        } else {
+          dataCallback = callback;
+        }
+      },
+    );
   }
 
   /// Update the data of the object

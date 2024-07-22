@@ -80,4 +80,13 @@ void setupTabletopListeners() {
     sendLog(event.data["w"]);
     object.size = Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble());
   });
+
+  spaceConnector.listen("tobj_mqueue_allowed", (event) {
+    final object = controller.objects[event.data["id"]];
+    if (object == null) {
+      sendLog("object not found, modification can't be done");
+      return;
+    }
+    object.dataCallback?.call();
+  });
 }

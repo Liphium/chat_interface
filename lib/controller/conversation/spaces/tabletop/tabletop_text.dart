@@ -148,7 +148,7 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> {
             onTap: () {
               Get.back();
               if (widget.object != null) {
-                widget.object!.modify(() {
+                widget.object!.queue(() {
                   widget.object!.text = _textController.text;
                   widget.object!.fontSize = fontSize.value;
                   widget.object!.evaluateSize();
