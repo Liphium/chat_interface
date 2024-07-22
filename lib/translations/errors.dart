@@ -56,6 +56,12 @@ class ErrorTranslations extends Translations {
           'password.mismatch': 'The passwords don\'t match.',
 
           // Game
+          'tabletop.not_found': 'The table wasn\'t found for some reason, maybe try rejoining the Space?',
+          'tabletop.already_joined': 'You are already in tabletop. You can\'t join again.',
+          'tabletop.couldnt_create': 'There was an issue during the table creation. Please report this to the developers.',
+          'tabletop.object_not_found': 'This object doesn\'t exist anymore, maybe it has already been deleted?',
+          'tabletop.object_already_held': 'This is object is already being held by someone else. Please try to modify it again later.',
+          'tabletop.object_not_in_queue': 'You didn\'t ask to modify this object before the actual modification. This is an issue with the app, please contact the developers.',
           'tabletop.invalid_action': 'You can\'t do that right now. Please try again later.',
           'no.start': 'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
         },

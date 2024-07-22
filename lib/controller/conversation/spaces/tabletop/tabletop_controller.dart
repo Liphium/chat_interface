@@ -24,7 +24,11 @@ class TabletopController extends GetxController {
   /// If true, the next click will drop the held object and add it to the table
   bool dropMode = false;
 
+  /// Currently held object
   TableObject? heldObject;
+  Offset? originalHeldObjectPosition;
+  bool cancelledHolding = false;
+
   List<TableObject> hoveringObjects = [];
   final inventory = <CardObject>[].obs;
   final objects = <String, TableObject>{}.obs;
@@ -234,6 +238,49 @@ class TabletopController extends GetxController {
     dropMode = true;
     heldObject = object;
   }
+
+  /// Start holding an object in tabletop
+  void startHoldingObject(TableObject object) async {
+    // Check if it is a card from the inventory that should be dropped
+    if (object is CardObject && object.inventory) {
+      dropMode = true;
+      object.inventory = false;
+      inventory.remove(object);
+    } else {
+      dropMode = false;
+    }
+
+    // Set all the variables to start the object holding
+    originalHeldObjectPosition = object.location;
+    heldObject = object;
+    cancelledHolding = false;
+
+    // Send an event to notify the server of the selection (only when not in drop mode)
+    if (!dropMode) {
+      final success = await object.select();
+      if (!success) {
+        showErrorPopup("error", "tabletop.object_already_held");
+        stopHoldingObject(error: true);
+      }
+    }
+  }
+
+  /// Cancels the holding of an object and makes sure it's cancelled
+  void stopHoldingObject({required bool error}) {
+    if (heldObject == null) return;
+
+    // Notify the server of the unselection when there was no error
+    if (!error) {
+      heldObject!.unselect();
+    } else {
+      // Reset the position in case it was an error
+      heldObject!.location = originalHeldObjectPosition!;
+      cancelledHolding = true;
+    }
+
+    // Make sure the object is no longer held
+    heldObject = null;
+  }
 }
 
 enum TableObjectType {
@@ -259,6 +306,7 @@ abstract class TableObject {
   Size size;
 
   /// The top left location of the object on the table
+  String? dataBeforeQueue;
   DateTime? _lastMove;
   Offset? _lastLocation;
   Offset location;
@@ -412,6 +460,7 @@ abstract class TableObject {
 
   /// Wait until the data can be modified
   void queue(Function() callback) {
+    dataBeforeQueue = getData();
     spaceConnector.sendAction(
       Message("tobj_mqueue", {
         "id": id,
@@ -433,7 +482,6 @@ abstract class TableObject {
 
   /// Update the data of the object
   void updateData() {
-    sendLog(size.width);
     spaceConnector.sendAction(
       Message("tobj_modify", <String, dynamic>{
         "id": id,
@@ -441,6 +489,20 @@ abstract class TableObject {
         "width": size.width,
         "height": size.height,
       }),
+      handler: (event) {
+        // Reset data in case the modification wasn't successful
+        if (!event.data["success"]) {
+          if (dataBeforeQueue != null) {
+            sendLog("NO ROLLBACK STATE FOR OBJECT");
+            return;
+          }
+
+          handleData(dataBeforeQueue!);
+        }
+
+        // Reset it
+        dataBeforeQueue = null;
+      },
     );
   }
 }
