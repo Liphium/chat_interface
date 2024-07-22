@@ -81,6 +81,7 @@ void setupTabletopListeners() {
     object.size = Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble());
   });
 
+  // Listen for when edits are allowed
   spaceConnector.listen("tobj_mqueue_allowed", (event) {
     final object = controller.objects[event.data["id"]];
     if (object == null) {

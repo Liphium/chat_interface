@@ -42,7 +42,7 @@ class TabletopSettings {
   static Color getCursorColor({double? hue}) {
     final themeHSL = HSLColor.fromColor(Get.theme.colorScheme.onPrimary);
     hue ??= Get.find<SettingController>().settings[cursorHue]!.getValue();
-    return HSLColor.fromAHSL(1.0, hue!, themeHSL.saturation, themeHSL.lightness).toColor();
+    return HSLColor.fromAHSL(1.0, hue! * 360, themeHSL.saturation, themeHSL.lightness).toColor();
   }
 }
 

@@ -126,7 +126,6 @@ class TabletopController extends GetxController {
         handler: (event) {
           if (!event.data["success"]) {
             heldObject = null;
-            // TODO: Expand more on this
           }
         },
       );

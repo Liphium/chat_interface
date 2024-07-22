@@ -97,12 +97,39 @@ class Connector {
 
         // Decode the message
         Event event = Event.fromJson(String.fromCharCodes(msg));
-        if (_handlers[event.name] == null) return;
 
+        // Check if it is a response
+        if (event.name.startsWith("res:")) {
+          // Check if the event is valid
+          final args = event.name.split(":");
+          if (args.length != 2) {
+            sendLog("response isn't valid");
+            return;
+          }
+
+          // Check if there is a responder
+          if (_responders[args[1]] == null) {
+            return;
+          }
+
+          // Call the responder
+          _responders[args[1]]?.call(event);
+          return;
+        }
+
+        // Check if there is a handler
+        if (_handlers[event.name] == null) {
+          sendLog("no event handler for ${event.name}");
+          return;
+        }
+
+        // Add it to the after setup queue (in case it is an after setup handler)
         if (_afterSetup[event.name] == true && !SetupManager.setupFinished) {
           _afterSetupQueue.add(event);
           return;
         }
+
+        // Call the handler
         _handlers[event.name]!(event);
       },
       cancelOnError: false,
