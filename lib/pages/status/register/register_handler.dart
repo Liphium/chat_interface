@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class RegisterHandler {
+  static String? registrationEmail;
   static String? registrationToken;
 
   static void goToRegistration([String? email]) {
@@ -16,7 +17,7 @@ class RegisterHandler {
     if (registrationToken != null) {
       // Get step from registration token
       final json = jsonDecode(String.fromCharCodes(base64Decode(registrationToken!.split(".")[1])));
-      final step = json["step"];
+      final step = json["s"];
       if (step == 1) {
         page = const RegisterCodePage();
       } else {
@@ -30,6 +31,7 @@ class RegisterHandler {
   /// Start the registration process (returns an error or null if successful)
   static Future<String?> startRegister(RxBool loading, String email, String invite) async {
     loading.value = true;
+    registrationEmail = email;
 
     // Send a start request to the server
     final json = await postJSON("/auth/register/start", {

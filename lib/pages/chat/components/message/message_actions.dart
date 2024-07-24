@@ -4,8 +4,39 @@ class MessageSendHelper {
   static final currentDraft = Rx<MessageDraft?>(null);
   static final drafts = <String, MessageDraft>{}; // ConversationId, Message draft
 
+  /// Add a reply to the current message draft
   static void addReplyToCurrentDraft(Message message) {
     currentDraft.value?.answer.value = AnswerData(message.id, message.senderAccount, message.content, message.attachments);
+  }
+
+  /// Add a file to the current message draft
+  static Future<bool> addFile(File file) async {
+    if (currentDraft.value == null) {
+      return false;
+    }
+
+    // Check if there are already too many attachments
+    if (MessageSendHelper.currentDraft.value!.files.length >= 5) {
+      showErrorPopup("error".tr, "file.too_many".tr);
+      return false;
+    }
+
+    // Check if the file size is valid
+    final size = await file.length();
+    if (size > specialConstants[Constants.specialConstantMaxFileSize]! * 1000 * 1000) {
+      showErrorPopup(
+        "error",
+        "file.too_large".trParams({
+          "1": specialConstants[Constants.specialConstantMaxFileSize].toString(),
+        }),
+      );
+      return false;
+    }
+
+    // Attach the file
+    MessageSendHelper.currentDraft.value?.files.add(UploadData(file));
+
+    return true;
   }
 }
 

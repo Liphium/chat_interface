@@ -1,14 +1,21 @@
 import 'package:chat_interface/main.dart';
 
 //* These will be loaded from the server (in the future)
-final Map<String, dynamic> specialConstants = <String, dynamic>{
-  "max_conversation_amount": 500,
-  "max_conversation_name_length": 50,
-  "max_conversation_members": 100,
+final Map<String, int> specialConstants = <String, int>{
+  Constants.specialConstantMaxFileSize: 10, // in MB
+  Constants.specialConstantMaxConversationAmount: 500,
+  Constants.specialConstantMaxConversationNameLength: 50,
+  Constants.specialConstantMaxConversationMembers: 100,
 };
 
 //* These are just normal constants
 class Constants {
+  // Special constants
+  static const String specialConstantMaxFileSize = "max_file_size";
+  static const String specialConstantMaxConversationAmount = "max_conversation_amount";
+  static const String specialConstantMaxConversationNameLength = "max_conversation_name_length";
+  static const String specialConstantMaxConversationMembers = "max_conversation_members";
+
   // Vault
   static const String vaultConversationTag = "$appTag:conv";
   static const String vaultDeckTag = "$appTag:deck";

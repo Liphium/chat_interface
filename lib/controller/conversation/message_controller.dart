@@ -56,6 +56,7 @@ class MessageController extends GetxController {
     currentOpenType.value = OpenTabType.conversation;
     Get.find<TownsquareController>().close();
     loaded.value = false;
+    topReached = false;
     if (isMobileMode()) {
       Get.to(ConversationPage(conversation: conversation));
     }
@@ -134,7 +135,7 @@ class MessageController extends GetxController {
   //* Scroll
   static const newLoadOffset = 200;
   bool topReached = false;
-  late AutoScrollController controller;
+  AutoScrollController? controller;
   final waitingMessages = <String>[]; // To prevent messages from being sent twice due to a race condition
 
   void addMessageToBottom(Message message, {bool animation = true}) async {
@@ -149,8 +150,8 @@ class MessageController extends GetxController {
     waitingMessages.remove(message.id); // Remove after cause then it is added
 
     // Only load the message, if scrolled near enough to the bottom
-    if (controller.position.pixels <= newLoadOffset) {
-      if (controller.position.pixels == 0) {
+    if (controller!.position.pixels <= newLoadOffset) {
+      if (controller!.position.pixels == 0) {
         message.playAnimation = true;
         messages.insert(0, message);
         return;
@@ -165,46 +166,52 @@ class MessageController extends GetxController {
   void messageHeightCallback(Message message, double height) {
     message.canScroll.value = true;
     message.currentHeight = height;
-    controller.jumpTo(controller.position.pixels + height);
+    controller!.jumpTo(controller!.position.pixels + height);
   }
 
   void messageHeightChange(Message message, double extraHeight) {
     if (message.heightKey != null) {
-      controller.jumpTo(controller.position.pixels + extraHeight);
+      controller!.jumpTo(controller!.position.pixels + extraHeight);
     }
   }
 
   void newScrollController(AutoScrollController newController) {
+    if (controller != null) {
+      controller!.removeListener(checkCurrentScrollHeight);
+    }
     controller = newController;
-    controller.addListener(() => checkCurrentScrollHeight());
+    controller!.addListener(checkCurrentScrollHeight);
   }
 
   /// Runs on every scroll to check if new messages should be loaded
   void checkCurrentScrollHeight() async {
     // Get.height is in there because there is a little bit of buffer above
-    if (controller.position.pixels > controller.position.maxScrollExtent - Get.height / 2 - newLoadOffset && !topReached) {
+    if (controller!.position.pixels > controller!.position.maxScrollExtent - Get.height / 2 - newLoadOffset && !topReached) {
       var (topReached, error) = await loadNewMessagesTop();
       if (!error) {
         this.topReached = topReached;
       }
-    } else if (controller.position.pixels <= newLoadOffset) {
-      sendLog("load bottom");
+    } else if (controller!.position.pixels <= newLoadOffset) {
       loadNewMessagesBottom();
     }
   }
 
   /// Loading state for new messages (at top or bottom)
-  bool loading = false;
+  final newMessagesLoading = false.obs;
+
+  /// Whether or not the messages are loading at the top (for showing a loading indicator)
+  bool messagesLoadingTop = false;
 
   /// Load new messages from the server for the top of the scroll feed.
   ///
   /// The `first boolean` tells you whether or not the top has been reached.
   /// The `second boolean` tells you whether or not it was still loading or an error happend.
   Future<(bool, bool)> loadNewMessagesTop({int? date}) async {
-    if (loading || (messages.isEmpty && date == null)) {
+    if (newMessagesLoading.value || (messages.isEmpty && date == null)) {
       return (false, true);
     }
-    loading = true;
+    messagesLoadingTop = true;
+    newMessagesLoading.value = true;
     date ??= messages.last.createdAt.millisecondsSinceEpoch;
 
     // Load the messages from the server using the list_before endpoint
@@ -218,13 +225,13 @@ class MessageController extends GetxController {
     // Check if there was an error
     if (!json["success"]) {
       showErrorPopup("error", json["error"]);
-      loading = false;
+      newMessagesLoading.value = false;
       return (false, false);
     }
 
     // Check if the top has been reached
     if (json["messages"] == null || json["messages"].isEmpty) {
-      loading = false;
+      newMessagesLoading.value = false;
       return (true, false);
     }
 
@@ -232,7 +239,7 @@ class MessageController extends GetxController {
     final loadedMessages = await _processMessages(conversation, json["messages"]);
     messages.addAll(loadedMessages);
 
-    loading = false;
+    newMessagesLoading.value = false;
     return (false, false);
   }
 
@@ -241,14 +248,12 @@ class MessageController extends GetxController {
   /// Returns whether or not it was successful.
   /// Will open an error dialog in case something goes wrong on the server.
   Future<bool> loadNewMessagesBottom() async {
-    if (loading || messages.isEmpty) {
-      sendLog("loading or sth");
+    if (newMessagesLoading.value || messages.isEmpty) {
       return false;
     }
-    loading = true; // We'll use the same loading as above to make sure this doesn't break anything
+    messagesLoadingTop = false;
+    newMessagesLoading.value = true; // We'll use the same loading as above to make sure this doesn't break anything
     final firstMessage = messages.first;
-
-    sendLog(messages.first.createdAt.toIso8601String());
 
     // Load messages from the server
     final conversation = currentConversation.value!;
@@ -261,13 +266,13 @@ class MessageController extends GetxController {
     // Check if there was an error
     if (!json["success"]) {
       showErrorPopup("error", json["error"]);
-      loading = false;
+      newMessagesLoading.value = false;
       return false;
     }
 
     // Check if the top has been reached
     if (json["messages"].isEmpty) {
-      loading = false;
+      newMessagesLoading.value = false;
       return false;
     }
 
@@ -279,7 +284,7 @@ class MessageController extends GetxController {
     loadedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Sort to prevent weird order
     messages.insertAll(0, loadedMessages);
 
-    loading = false;
+    newMessagesLoading.value = false;
     return true;
   }
 
@@ -342,7 +347,7 @@ class MessageController extends GetxController {
     // Check if message is already on screen
     var message = messages.firstWhereOrNull((msg) => msg.id == id);
     if (message != null) {
-      controller.scrollToIndex(messages.indexOf(message) + 1);
+      controller!.scrollToIndex(messages.indexOf(message) + 1);
       if (message.highlightAnimation == null) {
         // If the message is not yet rendered do it through a callback
         message.highlightCallback = () {

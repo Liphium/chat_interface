@@ -6,6 +6,7 @@ class GeneralTranslations extends Translations {
         //* English US
         'en_US': {
           // Actions
+          'loading': 'Loading..',
           'success': 'Success',
           'create': 'Create',
           'ok': 'Okay',

@@ -108,7 +108,7 @@ class DeckObject extends TableObject {
     if (order.isEmpty) {
       return;
     }
-    modify(() async {
+    queue(() async {
       final cardId = order.removeAt(0);
       final container = cards[cardId]!;
 
@@ -128,14 +128,14 @@ class DeckObject extends TableObject {
 
   /// Shuffle the deck
   void shuffle() {
-    modify(() {
+    queue(() {
       order.shuffle();
       updateData();
     });
   }
 
   void addCard(CardObject obj) {
-    modify(() {
+    queue(() {
       cards[obj.container.id] = obj.container;
       order.add(obj.container.id);
       obj.sendRemove();
@@ -153,7 +153,7 @@ class DeckObject extends TableObject {
           if (order.isEmpty) {
             return;
           }
-          modify(() async {
+          queue(() async {
             final cardId = order.removeAt(0);
             final container = cards[cardId]!;
             final obj = await CardObject.downloadCard(container, controller.mousePos);

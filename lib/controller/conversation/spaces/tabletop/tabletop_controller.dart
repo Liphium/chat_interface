@@ -9,6 +9,8 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_text.dart';
+import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:flutter/foundation.dart';
@@ -22,7 +24,11 @@ class TabletopController extends GetxController {
   /// If true, the next click will drop the held object and add it to the table
   bool dropMode = false;
 
+  /// Currently held object
   TableObject? heldObject;
+  Offset? originalHeldObjectPosition;
+  bool cancelledHolding = false;
+
   List<TableObject> hoveringObjects = [];
   final inventory = <CardObject>[].obs;
   final objects = <String, TableObject>{}.obs;
@@ -45,6 +51,36 @@ class TabletopController extends GetxController {
   double canvasZoom = 0.5;
   final canvasRotation = 0.0.obs;
 
+  /// Reset the entire state of the controller (on every call start)
+  void resetControllerState() {
+    loading.value = false;
+    enabled.value = false;
+
+    dropMode = false;
+
+    heldObject = null;
+    hoveringObjects.clear();
+    inventory.clear();
+    objects.clear();
+    cursors.clear();
+
+    _ticker?.cancel();
+    _ticker = null;
+
+    _lastMousePos = null;
+    inventoryHoverIndex = -1;
+
+    mousePos = const Offset(0, 0);
+    mousePosUnmodified = const Offset(0, 0);
+    globalCanvasPosition = const Offset(0, 0);
+
+    hints.clear();
+
+    canvasOffset = const Offset(0, 0);
+    canvasZoom = 0.5;
+    canvasRotation.value = 0.0;
+  }
+
   /// Join the tabletop session
   void connect() {
     if (enabled.value || loading.value) {
@@ -60,7 +96,9 @@ class TabletopController extends GetxController {
     mousePosUnmodified = const Offset(0, 0);
 
     spaceConnector.sendAction(
-      Message("table_join", <String, dynamic>{}),
+      Message("table_join", <String, dynamic>{
+        "color": Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue() as double,
+      }),
       handler: (event) {
         sendLog("hello world");
         loading.value = false;
@@ -83,11 +121,18 @@ class TabletopController extends GetxController {
   void _handleTableTick() {
     // Send the location of the held object
     if (heldObject != null && !dropMode) {
-      spaceConnector.sendAction(Message("tobj_move", <String, dynamic>{
-        "id": heldObject!.id,
-        "x": heldObject!.location.dx,
-        "y": heldObject!.location.dy,
-      }));
+      spaceConnector.sendAction(
+        Message("tobj_move", <String, dynamic>{
+          "id": heldObject!.id,
+          "x": heldObject!.location.dx,
+          "y": heldObject!.location.dy,
+        }),
+        handler: (event) {
+          if (!event.data["success"]) {
+            heldObject = null;
+          }
+        },
+      );
     }
 
     // Send mouse position if available
@@ -121,19 +166,20 @@ class TabletopController extends GetxController {
           enabled.value = false;
         },
       );
+      resetControllerState();
     } else {
       enabled.value = false;
     }
   }
 
   /// Update the cursor position of other people
-  void updateCursor(String id, Offset position) {
+  void updateCursor(String id, Offset position, double hue) {
     if (id == SpaceMemberController.ownId) {
       return;
     }
 
     if (cursors[id] == null) {
-      cursors[id] = TabletopCursor(id, position);
+      cursors[id] = TabletopCursor(id, position, TabletopSettings.getCursorColor(hue: hue));
     } else {
       cursors[id]!.move(position);
     }
@@ -192,6 +238,49 @@ class TabletopController extends GetxController {
     dropMode = true;
     heldObject = object;
   }
+
+  /// Start holding an object in tabletop
+  void startHoldingObject(TableObject object) async {
+    // Check if it is a card from the inventory that should be dropped
+    if (object is CardObject && object.inventory) {
+      dropMode = true;
+      object.inventory = false;
+      inventory.remove(object);
+    } else {
+      dropMode = false;
+    }
+
+    // Set all the variables to start the object holding
+    originalHeldObjectPosition = object.location;
+    heldObject = object;
+    cancelledHolding = false;
+
+    // Send an event to notify the server of the selection (only when not in drop mode)
+    if (!dropMode) {
+      final success = await object.select();
+      if (!success) {
+        showErrorPopup("error", "tabletop.object_already_held");
+        stopHoldingObject(error: true);
+      }
+    }
+  }
+
+  /// Cancels the holding of an object and makes sure it's cancelled
+  void stopHoldingObject({required bool error}) {
+    if (heldObject == null) return;
+
+    // Notify the server of the unselection when there was no error
+    if (!error) {
+      heldObject!.unselect();
+    } else {
+      // Reset the position in case it was an error
+      heldObject!.location = originalHeldObjectPosition!;
+      cancelledHolding = true;
+    }
+
+    // Make sure the object is no longer held
+    heldObject = null;
+  }
 }
 
 enum TableObjectType {
@@ -209,6 +298,7 @@ enum TableObjectType {
 abstract class TableObject {
   TableObject(this.id, this.location, this.size, this.type);
 
+  Function()? dataCallback;
   String id;
   TableObjectType type;
 
@@ -216,6 +306,7 @@ abstract class TableObject {
   Size size;
 
   /// The top left location of the object on the table
+  String? dataBeforeQueue;
   DateTime? _lastMove;
   Offset? _lastLocation;
   Offset location;
@@ -327,22 +418,70 @@ abstract class TableObject {
   }
 
   /// Start a modification process (data)
-  void modify(Function() callback) {
+  Future<bool> select() {
+    final completer = Completer<bool>();
+
     spaceConnector.sendAction(
         Message("tobj_select", <String, dynamic>{
           "id": id,
         }), handler: (event) {
       if (!event.data["success"]) {
+        showErrorPopup("error", event.data["message"]);
         sendLog("can't modify rn");
+        completer.complete(false);
         return;
       }
-      callback();
+      completer.complete(true);
     });
+
+    return completer.future;
+  }
+
+  /// Start a modification process (data)
+  Future<bool> unselect() {
+    final completer = Completer<bool>();
+
+    spaceConnector.sendAction(
+      Message("tobj_unselect", <String, dynamic>{
+        "id": id,
+      }),
+      handler: (event) {
+        if (!event.data["success"]) {
+          sendLog("can't modify rn");
+          completer.complete(false);
+          return;
+        }
+        completer.complete(true);
+      },
+    );
+
+    return completer.future;
+  }
+
+  /// Wait until the data can be modified
+  void queue(Function() callback) {
+    dataBeforeQueue = getData();
+    spaceConnector.sendAction(
+      Message("tobj_mqueue", {
+        "id": id,
+      }),
+      handler: (event) {
+        if (!event.data["success"]) {
+          showErrorPopup("error", event.data["message"]);
+          return;
+        }
+
+        if (event.data["direct"]) {
+          callback();
+        } else {
+          dataCallback = callback;
+        }
+      },
+    );
   }
 
   /// Update the data of the object
   void updateData() {
-    sendLog(size.width);
     spaceConnector.sendAction(
       Message("tobj_modify", <String, dynamic>{
         "id": id,
@@ -350,6 +489,20 @@ abstract class TableObject {
         "width": size.width,
         "height": size.height,
       }),
+      handler: (event) {
+        // Reset data in case the modification wasn't successful
+        if (!event.data["success"]) {
+          if (dataBeforeQueue != null) {
+            sendLog("NO ROLLBACK STATE FOR OBJECT");
+            return;
+          }
+
+          handleData(dataBeforeQueue!);
+        }
+
+        // Reset it
+        dataBeforeQueue = null;
+      },
     );
   }
 }

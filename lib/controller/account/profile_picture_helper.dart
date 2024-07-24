@@ -57,10 +57,12 @@ class ProfileHelper {
     String? oldPictureId;
     String? oldPath;
     if (oldProfile != null) {
-      oldPictureId = jsonDecode(oldProfile.pictureContainer)["id"];
-      oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
-      if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
-        return null; // Nothing changed
+      if (oldProfile.pictureContainer != "") {
+        oldPictureId = jsonDecode(oldProfile.pictureContainer)["id"];
+        oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
+        if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
+          return null; // Nothing changed
+        }
       }
     }
 

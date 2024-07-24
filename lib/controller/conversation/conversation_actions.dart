@@ -64,7 +64,7 @@ Future<bool> openGroupConversation(List<Friend> friends, String name) {
 
 // Open conversation with a group of friends
 Future<bool> _openConversation(List<Friend> friends, String name) async {
-  if (Get.find<ConversationController>().conversations.length >= specialConstants["max_conversation_amount"]) {
+  if (Get.find<ConversationController>().conversations.length >= specialConstants["max_conversation_amount"]!) {
     showErrorPopup("conversations.error".tr, "conversations.amount".trParams({"amount": specialConstants["max_conversation_amount"].toString()}));
     return false;
   }
@@ -80,15 +80,13 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   final conversationContainer = ConversationContainer(name);
   final encryptedData = conversationContainer.encrypted(conversationKey);
 
-  sendLog("${name.length} | $name | ${specialConstants["max_conversation_name_length"]}");
-
-  if (name.length > specialConstants["max_conversation_name_length"]) {
-    showErrorPopup("conversations.error".tr, "conversations.name.length".trParams({"length": specialConstants["max_conversation_name_length"].toString()}));
+  if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]!) {
+    showErrorPopup("conversations.error".tr, "conversations.name.length".trParams({"length": specialConstants[Constants.specialConstantMaxConversationNameLength].toString()}));
     return false;
   }
 
-  if (friends.length > specialConstants["max_conversation_members"]) {
-    showErrorPopup("conversations.error".tr, "conversations.members.size".trParams({"size": specialConstants["max_conversation_members"].toString()}));
+  if (friends.length > specialConstants[Constants.specialConstantMaxConversationMembers]!) {
+    showErrorPopup("conversations.error".tr, "conversations.members.size".trParams({"size": specialConstants[Constants.specialConstantMaxConversationMembers].toString()}));
     return false;
   }
 

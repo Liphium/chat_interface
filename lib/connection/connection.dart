@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:chat_interface/connection/encryption/aes.dart';
@@ -12,6 +13,7 @@ import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
@@ -28,7 +30,6 @@ String nodeDomain = "";
 class Connector {
   late WebSocketChannel connection;
   final _handlers = <String, Function(Event)>{};
-  final _waiters = <String, Function()>{};
   final _afterSetup = <String, bool>{};
   final _afterSetupQueue = <Event>[];
   bool initialized = false;
@@ -37,6 +38,9 @@ class Connector {
   Uint8List? aesKey;
   String? aesBase64;
   String? url;
+
+  // For handling responses
+  final _responders = <String, Function(Event)>{};
 
   Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
     this.url = url;
@@ -89,20 +93,44 @@ class Connector {
               "This is most likely due to another client being in the same network, connected over the same port as you are. We can't do anything about this and this will not occur in production.");
           e.printError();
           return;
-        } // xcLwjQiuEIWkj04su0pK6uFwoEJ4y6mhEWoHNPF2d4w= xcLwjQiuEIWkj04su0pK6uFwoEJ4y6mhEWoHNPF2d4w=
+        }
 
         // Decode the message
         Event event = Event.fromJson(String.fromCharCodes(msg));
-        if (_handlers[event.name] == null) return;
 
+        // Check if it is a response
+        if (event.name.startsWith("res:")) {
+          // Check if the event is valid
+          final args = event.name.split(":");
+          if (args.length != 2) {
+            sendLog("response isn't valid");
+            return;
+          }
+
+          // Check if there is a responder
+          if (_responders[args[1]] == null) {
+            return;
+          }
+
+          // Call the responder
+          _responders[args[1]]?.call(event);
+          return;
+        }
+
+        // Check if there is a handler
+        if (_handlers[event.name] == null) {
+          sendLog("no event handler for ${event.name}");
+          return;
+        }
+
+        // Add it to the after setup queue (in case it is an after setup handler)
         if (_afterSetup[event.name] == true && !SetupManager.setupFinished) {
           _afterSetupQueue.add(event);
           return;
         }
-        _handlers[event.name]!(event);
 
-        _waiters[event.name]?.call();
-        _waiters.remove(event.name);
+        // Call the handler
+        _handlers[event.name]!(event);
       },
       cancelOnError: false,
       onDone: () {
@@ -145,6 +173,12 @@ class Connector {
   ///
   /// [afterSetup] specifies whether the handler should be called after the setup is finished.
   void listen(String event, Function(Event) handler, {afterSetup = false}) {
+    // Make sure no handler is registered for the claimed action "res" (for handling responses)
+    if (event == "res") {
+      sendLog("You can't register an event handler for 'res'. This is already used by the system to handle responses.");
+      exit(1);
+    }
+
     _handlers[event] = handler;
     _afterSetup[event] = afterSetup;
   }
@@ -153,27 +187,28 @@ class Connector {
   ///
   /// Optionally, you can specify a [handler] to handle the response (this will be called multiple times if there are multiple responses).
   /// Optionally, you can specify a [waiter] to wait for the response.
-  void sendAction(Message message, {Function(Event)? handler, Function()? waiter}) {
+  void sendAction(Message message, {Function(Event)? handler}) {
     if (!_connected) {
       sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${message.action}");
       return;
     }
-    //sendLog("SENDING ACTION: ${message.action}");
+
+    // Generate a valid response id
+    var responseId = getRandomString(5);
+    while (_responders.containsKey(responseId)) {
+      responseId = getRandomString(5);
+    }
 
     // Register the handler and waiter
     if (handler != null) {
-      _handlers[message.action] = handler;
+      _responders[responseId] = handler;
     }
-    if (waiter != null) {
-      _waiters[message.action] = waiter;
-    }
+
+    // Add responseId to action
+    message.action = "${message.action}:$responseId";
 
     // Send and encrypt the message (using AES key)
     connection.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
-  }
-
-  void wait(String action, Function() waiter) {
-    _waiters[action] = waiter;
   }
 }
 

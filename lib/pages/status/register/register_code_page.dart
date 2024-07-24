@@ -51,7 +51,7 @@ class _RegisterPageState extends State<RegisterCodePage> {
                 verticalSpacing(defaultSpacing),
                 Text(
                   "register.email_validation".trParams({
-                    "email": "test@gmail.com",
+                    "email": RegisterHandler.registrationEmail ?? "no-email-provided@liphium.app",
                   }),
                   textAlign: TextAlign.left,
                   style: theme.textTheme.bodyMedium,

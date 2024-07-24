@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
@@ -12,6 +14,7 @@ import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -24,13 +27,22 @@ import 'package:get/get.dart';
 
 class TabletopSettings {
   static const String framerate = "tabletop.framerate";
+  static const String cursorHue = "tabletop.cursor_hue";
 
   // Experimental settings
   static const String smoothDragging = "tabletop.smooth_dragging";
 
   static void addSettings(SettingController controller) {
     controller.settings[framerate] = Setting<double>(framerate, 60.0);
+    controller.settings[cursorHue] = Setting<double>(cursorHue, Random().nextDouble());
+
     controller.settings[smoothDragging] = Setting<bool>(smoothDragging, false);
+  }
+
+  static Color getCursorColor({double? hue}) {
+    final themeHSL = HSLColor.fromColor(Get.theme.colorScheme.onPrimary);
+    hue ??= Get.find<SettingController>().settings[cursorHue]!.getValue();
+    return HSLColor.fromAHSL(1.0, hue! * 360, themeHSL.saturation, themeHSL.lightness).toColor();
   }
 }
 
@@ -97,12 +109,22 @@ class TabletopGeneralTab extends StatefulWidget {
 }
 
 class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
+  /// The hue of the cursor (for updating the preview)
+  final _cursorHue = 0.0.obs;
+
+  @override
+  void initState() {
+    _cursorHue.value = Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeHSL = HSLColor.fromColor(Get.theme.colorScheme.onPrimary);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        //* Auto download types
+        //* Framerate of the table
         Text("tabletop.general.framerate".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
         DoubleSelectionSetting(
@@ -114,12 +136,70 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
           rounded: true,
         ),
         verticalSpacing(sectionSpacing),
+
+        //* The color of the cursor on tabletop
+        Text("tabletop.general.color".tr, style: Get.theme.textTheme.labelLarge),
+        verticalSpacing(defaultSpacing),
+        Text("tabletop.general.color.description".tr, style: Get.theme.textTheme.bodyMedium),
+        verticalSpacing(defaultSpacing),
         Row(
           children: [
-            Text("tabletop.general.smooth_scrolling".tr, style: Get.theme.textTheme.labelLarge),
-            horizontalSpacing(defaultSpacing),
+            SizedBox(
+              width: 45,
+              height: 45,
+              child: Stack(
+                children: [
+                  Obx(
+                    () => Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: TabletopSettings.getCursorColor(hue: _cursorHue.value),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: UserAvatar(
+                      id: StatusController.ownAccountId,
+                      size: 40,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Obx(
+                      () => Padding(
+                        padding: const EdgeInsets.all(0.0),
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: TabletopSettings.getCursorColor(hue: _cursorHue.value),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            horizontalSpacing(sectionSpacing),
+            Expanded(
+              child: DoubleSelectionSetting(
+                settingName: TabletopSettings.cursorHue,
+                description: "",
+                min: 0.0,
+                max: 1.0,
+                onChange: (val) {
+                  _cursorHue.value = val;
+                },
+              ),
+            ),
           ],
         ),
+        verticalSpacing(sectionSpacing),
       ],
     );
   }

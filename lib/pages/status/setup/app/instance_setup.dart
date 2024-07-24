@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
@@ -49,6 +50,9 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
   final file = File(path.join(dbFolder, '$name.db'));
   db = Database(NativeDatabase.createInBackground(file, logStatements: driftLogger));
   currentInstance = name;
+
+  // Enable loggin for the current instance
+  LogManager.enableLogging();
 
   sendLog("going on");
 

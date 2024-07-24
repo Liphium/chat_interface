@@ -28,9 +28,7 @@ class _ConversationPageState extends State<ConversationPage> {
       },
       child: Scaffold(
         backgroundColor: theme.colorScheme.inverseSurface,
-        body: SelectionArea(
-          child: MessageFeed(conversation: widget.conversation),
-        ),
+        body: MessageFeed(conversation: widget.conversation),
       ),
     );
   }

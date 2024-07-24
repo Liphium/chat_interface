@@ -42,7 +42,7 @@ class ConversationAddWindow extends StatefulWidget {
       return "choose.members".tr;
     }
 
-    if (friends.length > specialConstants["max_conversation_members"]) {
+    if (friends.length > specialConstants[Constants.specialConstantMaxConversationMembers]!) {
       return "choose.members".tr;
     }
 
@@ -54,7 +54,7 @@ class ConversationAddWindow extends StatefulWidget {
       return "enter.name".tr;
     }
 
-    if (name.length > specialConstants["max_conversation_name_length"] && friends.length > 1) {
+    if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]! && friends.length > 1) {
       return "too.long".trParams({"limit": specialConstants["max_conversation_name_length"].toString()});
     }
 

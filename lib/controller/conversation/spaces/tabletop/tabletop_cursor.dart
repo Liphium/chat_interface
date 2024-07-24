@@ -7,8 +7,9 @@ class TabletopCursor {
   DateTime? _lastMove;
   Offset? _lastLocation;
   Offset location;
+  Color color;
 
-  TabletopCursor(this.clientId, this.location);
+  TabletopCursor(this.clientId, this.location, this.color);
 
   Offset interpolatedLocation(DateTime now) {
     if (_lastMove == null || _lastLocation == null) {
@@ -32,7 +33,7 @@ class TabletopCursor {
     }
 
     final paint = Paint()
-      ..color = Colors.blue
+      ..color = color
       ..style = PaintingStyle.fill;
     canvas.drawCircle(interpolatedLocation(DateTime.now()), 10, paint);
   }

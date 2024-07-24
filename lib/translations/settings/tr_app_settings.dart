@@ -69,11 +69,17 @@ class AppSettingsTranslations extends Translations {
           'tabletop.general.framerate': 'Framerate',
           'tabletop.general.framerate.description': 'The framerate at which the table is rendered. This should be roughly equivalent to the refresh rate of your monitor.',
           'tabletop.general.framerate.unit': 'Hz',
+          'tabletop.general.color': 'The color of your cursor',
+          'tabletop.general.color.description': 'This will be the color everyone sees when you are selecting something or moving your cursor.',
 
           // Camera settings
           'video.camera.device': 'Select a camera',
           'video.camera.preview': 'Camera preview',
           'video.camera.preview.start': 'Start camera preview',
+
+          // Logging settings
+          'logging.amount.desc': 'Amount of logs to keep in the history',
+          'logging.launch': 'Open log folder',
         },
       };
 }

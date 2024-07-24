@@ -43,6 +43,7 @@ void setupTabletopListeners() {
     controller.updateCursor(
       event.data["c"],
       Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
+      (event.data["col"] as num).toDouble(),
     );
   });
 
@@ -78,5 +79,15 @@ void setupTabletopListeners() {
     object.decryptData(event.data["data"]);
     sendLog(event.data["w"]);
     object.size = Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble());
+  });
+
+  // Listen for when edits are allowed
+  spaceConnector.listen("tobj_mqueue_allowed", (event) {
+    final object = controller.objects[event.data["id"]];
+    if (object == null) {
+      sendLog("object not found, modification can't be done");
+      return;
+    }
+    object.dataCallback?.call();
   });
 }

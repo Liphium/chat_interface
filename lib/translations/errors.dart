@@ -41,6 +41,7 @@ class ErrorTranslations extends Translations {
           'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
           'file.not_uploaded': 'File not found.',
           'file.too_large': 'The maximum file size is @1MB.',
+          'file.too_many': 'You can\'t attach more than 5 files to a message.',
           'file.unsafe': 'The provider of this file (@domain) isn\'t trusted.',
           'chat.add_file': 'Attach a file',
           'message.delete_error': 'Couldn\'t delete message. Please try again later.',
@@ -55,6 +56,12 @@ class ErrorTranslations extends Translations {
           'password.mismatch': 'The passwords don\'t match.',
 
           // Game
+          'tabletop.not_found': 'The table wasn\'t found for some reason, maybe try rejoining the Space?',
+          'tabletop.already_joined': 'You are already in tabletop. You can\'t join again.',
+          'tabletop.couldnt_create': 'There was an issue during the table creation. Please report this to the developers.',
+          'tabletop.object_not_found': 'This object doesn\'t exist anymore, maybe it has already been deleted?',
+          'tabletop.object_already_held': 'This is object is already being held by someone else. Please try to modify it again later.',
+          'tabletop.object_not_in_queue': 'You didn\'t ask to modify this object before the actual modification. This is an issue with the app, please contact the developers.',
           'tabletop.invalid_action': 'You can\'t do that right now. Please try again later.',
           'no.start': 'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
         },
