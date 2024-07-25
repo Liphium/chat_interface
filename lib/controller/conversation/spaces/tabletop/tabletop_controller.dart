@@ -493,16 +493,16 @@ abstract class TableObject {
       handler: (event) {
         // Reset data in case the modification wasn't successful
         if (!event.data["success"]) {
-          if (dataBeforeQueue != null) {
+          if (dataBeforeQueue == null) {
             sendLog("NO ROLLBACK STATE FOR OBJECT");
             return;
           }
 
           sendLog("modification of $id wasn't possible: ${event.data["message"]}");
           handleData(dataBeforeQueue!);
-          completer.complete(true);
-        } else {
           completer.complete(false);
+        } else {
+          completer.complete(true);
         }
 
         // Reset it

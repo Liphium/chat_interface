@@ -29,6 +29,7 @@ class GeneralSettingsTranslations extends Translations {
           'settings.requests': 'Friend requests',
           'settings.encryption': 'Encryption',
           'settings.spaces': 'Spaces',
+          'settings.spaces.desc': 'All about our calling system (Spaces).',
           'settings.tabletop': 'Tabletop',
           'settings.tabletop.desc': 'Smooth scrolling and more.',
           'settings.chat': 'Chat',

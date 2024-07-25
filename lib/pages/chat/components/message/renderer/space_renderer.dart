@@ -54,10 +54,15 @@ class _SpaceRendererState extends State<SpaceRenderer> {
 
   void loadState() async {
     _info.value = await widget.container.getInfo(timer: widget.pollNewData);
-    _sub = widget.container.info.listen((p0) {
-      _info.value = p0;
+    _sub = widget.container.info.listen((info) {
+      if (widget.container.cancelled) {
+        _loading.value = false;
+      }
+      _info.value = info;
     });
-    _loading.value = false;
+    if (_info.value!.exists || _info.value!.error || !widget.pollNewData) {
+      _loading.value = false;
+    }
   }
 
   @override

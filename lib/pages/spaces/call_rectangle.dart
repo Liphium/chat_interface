@@ -149,100 +149,97 @@ class _CallRectangleState extends State<CallRectangle> {
   Widget buildControls(SpacesController controller) {
     return Center(
       heightFactor: 1,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Padding(
-          padding: const EdgeInsets.only(
-            right: sectionSpacing,
-            left: sectionSpacing,
-            bottom: sectionSpacing,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Obx(
-                () => LoadingIconButton(
-                  background: true,
-                  loading: false.obs,
-                  onTap: () {
-                    if (controller.playMode.value) {
-                      showConfirmPopup(ConfirmWindow(
-                          title: 'spaces.play_mode.leave',
-                          text: 'spaces.play_mode.leave.text',
-                          onConfirm: () {
-                            Get.back();
-                            Timer(300.ms, () {
-                              controller.switchToPlayMode();
-                            });
-                          },
-                          onDecline: () {
-                            Get.back();
-                          }));
-                      return;
-                    }
-                    controller.hideSidebar.toggle();
-                    if (controller.hideSidebar.value) {
-                      Get.offAll(const CallPage(), transition: Transition.fadeIn);
-                    } else {
-                      Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
-                    }
-                  },
-                  icon: controller.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back_rounded,
-                  iconSize: 30,
-                ),
-              ),
-              horizontalSpacing(sectionSpacing),
-              const CallControls(),
-              horizontalSpacing(sectionSpacing),
-              Obx(
-                () {
-                  if (Get.find<TabletopController>().enabled.value) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: defaultSpacing),
-                      child: LoadingIconButton(
-                        key: tabletopKey,
-                        loading: false.obs,
-                        background: true,
-                        onTap: () {
-                          Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+      child: Padding(
+        padding: const EdgeInsets.only(
+          right: sectionSpacing,
+          left: sectionSpacing,
+          bottom: sectionSpacing,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Obx(
+              () => LoadingIconButton(
+                background: true,
+                loading: false.obs,
+                onTap: () {
+                  if (controller.playMode.value) {
+                    showConfirmPopup(ConfirmWindow(
+                        title: 'spaces.play_mode.leave',
+                        text: 'spaces.play_mode.leave.text',
+                        onConfirm: () {
+                          Get.back();
+                          Timer(300.ms, () {
+                            controller.switchToPlayMode();
+                          });
                         },
-                        icon: Icons.crop_rotate,
-                        iconSize: 30,
-                      ),
-                    );
+                        onDecline: () {
+                          Get.back();
+                        }));
+                    return;
                   }
-
-                  if (controller.cinemaWidget.value != null) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: defaultSpacing),
-                      child: LoadingIconButton(
-                        tooltip: "spaces.toggle_people".tr,
-                        loading: false.obs,
-                        background: true,
-                        onTap: () => controller.hideOverlay.toggle(),
-                        icon: controller.hideOverlay.value ? Icons.visibility_off : Icons.visibility,
-                        iconSize: 30,
-                      ),
-                    );
+                  controller.hideSidebar.toggle();
+                  if (controller.hideSidebar.value) {
+                    Get.offAll(const CallPage(), transition: Transition.fadeIn);
+                  } else {
+                    Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
                   }
-
-                  return const SizedBox.shrink();
                 },
+                icon: controller.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back_rounded,
+                iconSize: 30,
               ),
-              Obx(
-                () {
-                  return LoadingIconButton(
-                    loading: false.obs,
-                    background: true,
-                    onTap: () => controller.toggleFullScreen(),
-                    icon: controller.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
-                    iconSize: 30,
+            ),
+            const Spacer(),
+            const CallControls(),
+            const Spacer(),
+            Obx(
+              () {
+                if (Get.find<TabletopController>().enabled.value) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: defaultSpacing),
+                    child: LoadingIconButton(
+                      key: tabletopKey,
+                      loading: false.obs,
+                      background: true,
+                      onTap: () {
+                        Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+                      },
+                      icon: Icons.crop_rotate,
+                      iconSize: 30,
+                    ),
                   );
-                },
-              ),
-            ],
-          ),
+                }
+
+                if (controller.cinemaWidget.value != null) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: defaultSpacing),
+                    child: LoadingIconButton(
+                      tooltip: "spaces.toggle_people".tr,
+                      loading: false.obs,
+                      background: true,
+                      onTap: () => controller.hideOverlay.toggle(),
+                      icon: controller.hideOverlay.value ? Icons.visibility_off : Icons.visibility,
+                      iconSize: 30,
+                    ),
+                  );
+                }
+
+                return const SizedBox.shrink();
+              },
+            ),
+            Obx(
+              () {
+                return LoadingIconButton(
+                  loading: false.obs,
+                  background: true,
+                  onTap: () => controller.toggleFullScreen(),
+                  icon: controller.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
+                  iconSize: 30,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

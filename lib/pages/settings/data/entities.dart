@@ -6,6 +6,7 @@ import 'package:chat_interface/pages/settings/account/invites_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
+import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/app/video_settings.dart';
@@ -31,6 +32,7 @@ enum SettingLabel {
     SettingCategory("files", Icons.folder, FileSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false),
     SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false),
+    SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage(), mobile: false),
     //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("language", Icons.public, LanguageSettingsPage()),
     SettingCategory("logging", Icons.insights, LogSettingsPage()),

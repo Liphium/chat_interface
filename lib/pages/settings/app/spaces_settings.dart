@@ -5,10 +5,10 @@ import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:flutter/material.dart';
 
 class SpacesSettings {
-  static const String gameMusic = "game.music";
+  static const String ringOnInvite = "spaces.ring_invite";
 
   static void addSpacesSettings(SettingController controller) {
-    controller.settings[SpacesSettings.gameMusic] = Setting<bool>(SpacesSettings.gameMusic, true);
+    controller.settings[ringOnInvite] = Setting(ringOnInvite, true);
   }
 }
 
@@ -20,7 +20,7 @@ class SpacesSettingsPage extends StatelessWidget {
     return const SettingsPageBase(
       label: "spaces",
       child: Column(
-        children: [BoolSettingSmall(settingName: SpacesSettings.gameMusic)],
+        children: [BoolSettingSmall(settingName: SpacesSettings.ringOnInvite)],
       ),
     );
   }

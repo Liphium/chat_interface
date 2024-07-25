@@ -140,8 +140,17 @@ class DeckObject extends TableObject {
 
   void addCard(CardObject obj) {
     queue(() async {
+      // Add teh card to the local deck
       cards[obj.container.id] = obj.container;
       order.add(obj.container.id);
+
+      // Update the deck on the server
+      final valid = await modifyData();
+      if (!valid) {
+        return;
+      }
+
+      // Remove the card from the table
       obj.sendRemove();
     });
   }

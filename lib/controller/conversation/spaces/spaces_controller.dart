@@ -286,11 +286,13 @@ class SpacesController extends GetxController {
 
 class SpaceInfo {
   late bool exists;
+  bool error = false;
   late DateTime start;
   final List<Friend> friends = [];
   late final List<String> members;
 
   SpaceInfo(this.start, this.members) {
+    error = false;
     exists = true;
     final controller = Get.find<FriendController>();
     for (var member in members) {
@@ -311,8 +313,9 @@ class SpaceInfo {
     }
   }
 
-  SpaceInfo.notLoaded() {
+  SpaceInfo.notLoaded({bool wasError = false}) {
     exists = false;
+    error = wasError;
     members = [];
   }
 }
@@ -323,7 +326,9 @@ class SpaceConnectionContainer extends ShareContainer {
   final SecureKey key; // Symmetric key
 
   final info = Rx<SpaceInfo?>(null);
+  int errorCount = 0;
   Timer? _timer;
+  bool get cancelled => _timer == null;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
   SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
@@ -352,12 +357,12 @@ class SpaceConnectionContainer extends ShareContainer {
         body: jsonEncode({"room": roomId}),
       );
     } catch (e) {
-      return SpaceInfo.notLoaded();
+      return SpaceInfo.notLoaded(wasError: true);
     }
 
     // Return a not loaded state if the request wasn't successful
     if (req.statusCode != 200) {
-      return SpaceInfo.notLoaded();
+      return SpaceInfo.notLoaded(wasError: true);
     }
 
     // Parse the json
@@ -365,11 +370,16 @@ class SpaceConnectionContainer extends ShareContainer {
 
     // Start a periodic timer to refresh info (if desired)
     if (timer && _timer == null) {
-      _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
-        final info = await getInfo();
-        if (info.exists) {
-          this.info.value = info;
+      _timer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+        final newInfo = await getInfo();
+        if (!newInfo.exists) {
+          errorCount++;
+          if (errorCount > 2) {
+            _timer?.cancel();
+            _timer = null;
+          }
         }
+        info.value = newInfo;
       });
     }
 

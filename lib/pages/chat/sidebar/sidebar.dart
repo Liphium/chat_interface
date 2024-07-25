@@ -118,8 +118,7 @@ class _SidebarState extends State<Sidebar> {
 
                                       //* Open conversation add window
                                       showModal(ConversationAddWindow(
-                                        position:
-                                            ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
+                                        position: ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
                                       ));
                                     },
                                     icon: Icon(Icons.chat_bubble, color: theme.colorScheme.onPrimary),
@@ -259,10 +258,8 @@ class _SidebarState extends State<Sidebar> {
 
                             Friend? friend;
                             if (!conversation.isGroup) {
-                              String id = conversation.members.values
-                                  .firstWhere((element) => element.account != StatusController.ownAccountId,
-                                      orElse: () => Member("-", "-", MemberRole.user))
-                                  .account;
+                              String id =
+                                  conversation.members.values.firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member("-", "-", MemberRole.user)).account;
                               if (id == "-") {
                                 friend = Friend.me();
                               } else {
@@ -298,9 +295,7 @@ class _SidebarState extends State<Sidebar> {
                                       child: Obx(
                                         () => Material(
                                           borderRadius: BorderRadius.circular(defaultSpacing),
-                                          color: messageController.currentConversation.value == conversation && !isMobileMode()
-                                              ? theme.colorScheme.primary
-                                              : Colors.transparent,
+                                          color: messageController.currentConversation.value == conversation && !isMobileMode() ? theme.colorScheme.primary : Colors.transparent,
                                           child: InkWell(
                                             borderRadius: BorderRadius.circular(defaultSpacing),
                                             hoverColor: theme.colorScheme.primary.withAlpha(150),
@@ -350,9 +345,7 @@ class _SidebarState extends State<Sidebar> {
                                                                 if (conversation.isGroup) {
                                                                   return Text(
                                                                     conversation.containerSub.value.name,
-                                                                    style: messageController.currentConversation.value == conversation
-                                                                        ? theme.textTheme.labelMedium
-                                                                        : theme.textTheme.bodyMedium,
+                                                                    style: messageController.currentConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                                     textHeightBehavior: noTextHeight,
                                                                   );
                                                                 }
@@ -362,9 +355,7 @@ class _SidebarState extends State<Sidebar> {
                                                                     Flexible(
                                                                       child: Text(
                                                                         friend != null ? conversation.dmName : conversation.containerSub.value.name,
-                                                                        style: messageController.currentConversation.value == conversation
-                                                                            ? theme.textTheme.labelMedium
-                                                                            : theme.textTheme.bodyMedium,
+                                                                        style: messageController.currentConversation.value == conversation ? theme.textTheme.labelMedium : theme.textTheme.bodyMedium,
                                                                         maxLines: 1,
                                                                         overflow: TextOverflow.ellipsis,
                                                                         textHeightBehavior: noTextHeight,
@@ -387,8 +378,7 @@ class _SidebarState extends State<Sidebar> {
                                                               conversation.isGroup
                                                                   ? Text(
                                                                       //* Conversation status message
-                                                                      "chat.members".trParams(
-                                                                          <String, String>{'count': conversation.members.length.toString()}),
+                                                                      "chat.members".trParams(<String, String>{'count': conversation.members.length.toString()}),
 
                                                                       style: theme.textTheme.bodySmall,
                                                                       maxLines: 1,
@@ -407,8 +397,7 @@ class _SidebarState extends State<Sidebar> {
                                                                         )
                                                                       : Obx(
                                                                           () => Visibility(
-                                                                            visible: friend!.status.value != "" &&
-                                                                                friend.statusType.value != statusOffline,
+                                                                            visible: friend!.status.value != "" && friend.statusType.value != statusOffline,
                                                                             child: Text(
                                                                               friend.status.value,
                                                                               style: theme.textTheme.bodySmall,
@@ -448,8 +437,7 @@ class _SidebarState extends State<Sidebar> {
                                                           ),
                                                           child: Padding(
                                                             padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
-                                                            child: Center(
-                                                                child: Text(min(notifications, 99).toString(), style: theme.textTheme.labelSmall)),
+                                                            child: Center(child: Text(min(notifications, 99).toString(), style: theme.textTheme.labelSmall)),
                                                           ),
                                                         ),
                                                       );
