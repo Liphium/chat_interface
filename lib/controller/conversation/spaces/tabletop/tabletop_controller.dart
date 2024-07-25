@@ -481,7 +481,8 @@ abstract class TableObject {
   }
 
   /// Update the data of the object
-  void updateData() {
+  Future<bool> modifyData() {
+    final completer = Completer<bool>();
     spaceConnector.sendAction(
       Message("tobj_modify", <String, dynamic>{
         "id": id,
@@ -497,13 +498,18 @@ abstract class TableObject {
             return;
           }
 
+          sendLog("modification of $id wasn't possible: ${event.data["message"]}");
           handleData(dataBeforeQueue!);
+          completer.complete(true);
+        } else {
+          completer.complete(false);
         }
 
         // Reset it
         dataBeforeQueue = null;
       },
     );
+    return completer.future;
   }
 }
 

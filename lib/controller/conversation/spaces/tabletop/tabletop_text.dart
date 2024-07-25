@@ -152,7 +152,7 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> {
                   widget.object!.text = _textController.text;
                   widget.object!.fontSize = fontSize.value;
                   widget.object!.evaluateSize();
-                  widget.object!.updateData();
+                  widget.object!.modifyData();
                 });
                 return;
               }

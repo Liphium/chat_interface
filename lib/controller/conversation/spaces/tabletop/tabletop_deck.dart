@@ -117,7 +117,11 @@ class DeckObject extends TableObject {
         cards.remove(cardId);
       }
 
-      updateData();
+      // Update the data on the server
+      final valid = await modifyData();
+      if (!valid) {
+        return;
+      }
 
       // Prepare the card and add it to the drop mode
       final card = await CardObject.downloadCard(container, controller.mousePos);
@@ -128,18 +132,17 @@ class DeckObject extends TableObject {
 
   /// Shuffle the deck
   void shuffle() {
-    queue(() {
+    queue(() async {
       order.shuffle();
-      updateData();
+      modifyData();
     });
   }
 
   void addCard(CardObject obj) {
-    queue(() {
+    queue(() async {
       cards[obj.container.id] = obj.container;
       order.add(obj.container.id);
       obj.sendRemove();
-      updateData();
     });
   }
 
@@ -157,7 +160,8 @@ class DeckObject extends TableObject {
             final cardId = order.removeAt(0);
             final container = cards[cardId]!;
             final obj = await CardObject.downloadCard(container, controller.mousePos);
-            updateData();
+            final result = await modifyData();
+            if (!result) return;
             if (obj == null) return;
             obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
             obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
