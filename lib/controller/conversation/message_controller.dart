@@ -5,8 +5,11 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
@@ -129,6 +132,19 @@ class MessageController extends GetxController {
     // Handle system messages
     if (message.type == MessageType.system) {
       SystemMessages.messages[message.content]?.handle(message);
+    }
+
+    // On call message type, ring using the message
+    if (message.type == MessageType.call && message.senderAccount != StatusController.ownAccountId) {
+      // Get the conversation for the ring
+      final conversation = Get.find<ConversationController>().conversations[message.conversation];
+      if (conversation == null) {
+        return;
+      }
+
+      // Decode the message and stuff
+      final container = SpaceConnectionContainer.fromJson(jsonDecode(message.content));
+      RingingManager.startRinging(conversation, container);
     }
   }
 

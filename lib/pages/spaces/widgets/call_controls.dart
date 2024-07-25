@@ -38,60 +38,57 @@ class _CallControlsState extends State<CallControls> {
       mainAxisSize: MainAxisSize.min,
       children: [
         //* Microphone button
-        CallButtonBorder(
-          child: GetX<PublicationController>(
-            builder: (controller) {
-              return LoadingIconButton(
-                padding: defaultSpacing + elementSpacing,
-                loading: controller.muteLoading,
-                onTap: () => controller.setMuted(!controller.muted.value),
-                icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-                iconSize: 35,
-                color: theme.colorScheme.onSurface,
-              );
-            },
-          ),
+        GetX<PublicationController>(
+          builder: (controller) {
+            return LoadingIconButton(
+              background: true,
+              padding: defaultSpacing,
+              loading: controller.muteLoading,
+              onTap: () => controller.setMuted(!controller.muted.value),
+              icon: controller.muted.value ? Icons.mic_off : Icons.mic,
+              iconSize: 28,
+              color: theme.colorScheme.onSurface,
+            );
+          },
         ),
 
         horizontalSpacing(defaultSpacing),
 
         //* Audio output
-        CallButtonBorder(
-          child: GetX<PublicationController>(
-            builder: (controller) {
-              return LoadingIconButton(
-                padding: defaultSpacing + elementSpacing,
-                loading: controller.deafenLoading,
-                onTap: () => controller.setDeafened(!controller.deafened.value),
-                icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-                iconSize: 35,
-                color: theme.colorScheme.onSurface,
-              );
-            },
-          ),
+        GetX<PublicationController>(
+          builder: (controller) {
+            return LoadingIconButton(
+              background: true,
+              padding: defaultSpacing,
+              loading: controller.deafenLoading,
+              onTap: () => controller.setDeafened(!controller.deafened.value),
+              icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
+              iconSize: 28,
+              color: theme.colorScheme.onSurface,
+            );
+          },
         ),
 
         horizontalSpacing(defaultSpacing),
 
         //* Camera
-        CallButtonBorder(
-          child: GetX<PublicationController>(
-            builder: (controller) {
-              return LoadingIconButton(
-                padding: defaultSpacing + elementSpacing,
-                loading: controller.videoLoading,
-                onTap: () => controller.setVideoEnabled(!controller.videoEnabled.value),
-                icon: controller.videoEnabled.value ? Icons.videocam : Icons.videocam_off,
-                iconSize: 35,
-                color: theme.colorScheme.onSurface,
-              );
-            },
-          ),
+        GetX<PublicationController>(
+          builder: (controller) {
+            return LoadingIconButton(
+              background: true,
+              padding: defaultSpacing,
+              loading: controller.videoLoading,
+              onTap: () => controller.setVideoEnabled(!controller.videoEnabled.value),
+              icon: controller.videoEnabled.value ? Icons.videocam : Icons.videocam_off,
+              iconSize: 28,
+              color: theme.colorScheme.onSurface,
+            );
+          },
         ),
 
         /*
         horizontalSpacing(defaultSpacing),
-
+    
         // Screenshare
         CallButtonBorder(
           child: GetX<PublicationController>(
@@ -124,55 +121,35 @@ class _CallControlsState extends State<CallControls> {
 
         //* Table mode
         Obx(
-          () => CallButtonBorder(
-            child: LoadingIconButton(
-              padding: defaultSpacing + elementSpacing,
-              loading: tableController.loading,
-              onTap: () {
-                if (tableController.enabled.value) {
-                  tableController.disconnect();
-                } else {
-                  tableController.connect();
-                }
-              },
-              icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
-              iconSize: 35,
-            ),
+          () => LoadingIconButton(
+            background: true,
+            padding: defaultSpacing,
+            loading: tableController.loading,
+            onTap: () {
+              if (tableController.enabled.value) {
+                tableController.disconnect();
+              } else {
+                tableController.connect();
+              }
+            },
+            icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
+            iconSize: 28,
           ),
         ),
 
         horizontalSpacing(defaultSpacing),
 
         //* End call button
-        CallButtonBorder(
-          child: LoadingIconButton(
-            padding: defaultSpacing + elementSpacing,
-            loading: false.obs,
-            onTap: () => Get.find<SpacesController>().leaveCall(),
-            icon: Icons.call_end,
-            color: theme.colorScheme.error,
-            iconSize: 35,
-          ),
+        LoadingIconButton(
+          background: true,
+          padding: defaultSpacing,
+          loading: false.obs,
+          onTap: () => Get.find<SpacesController>().leaveCall(),
+          icon: Icons.call_end,
+          color: theme.colorScheme.error,
+          iconSize: 28,
         )
       ],
-    );
-  }
-}
-
-class CallButtonBorder extends StatelessWidget {
-  final bool gradient;
-  final Widget child;
-
-  const CallButtonBorder({super.key, required this.child, this.gradient = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: gradient ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
-      ),
-      child: child,
     );
   }
 }

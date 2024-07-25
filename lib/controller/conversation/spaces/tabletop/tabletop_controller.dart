@@ -481,7 +481,8 @@ abstract class TableObject {
   }
 
   /// Update the data of the object
-  void updateData() {
+  Future<bool> modifyData() {
+    final completer = Completer<bool>();
     spaceConnector.sendAction(
       Message("tobj_modify", <String, dynamic>{
         "id": id,
@@ -492,18 +493,23 @@ abstract class TableObject {
       handler: (event) {
         // Reset data in case the modification wasn't successful
         if (!event.data["success"]) {
-          if (dataBeforeQueue != null) {
+          if (dataBeforeQueue == null) {
             sendLog("NO ROLLBACK STATE FOR OBJECT");
             return;
           }
 
+          sendLog("modification of $id wasn't possible: ${event.data["message"]}");
           handleData(dataBeforeQueue!);
+          completer.complete(false);
+        } else {
+          completer.complete(true);
         }
 
         // Reset it
         dataBeforeQueue = null;
       },
     );
+    return completer.future;
   }
 }
 

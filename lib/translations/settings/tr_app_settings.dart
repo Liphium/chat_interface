@@ -80,6 +80,9 @@ class AppSettingsTranslations extends Translations {
           // Logging settings
           'logging.amount.desc': 'Amount of logs to keep in the history',
           'logging.launch': 'Open log folder',
+
+          // Spaces
+          'spaces.ring_invite': 'Play a ring sound when being invited to a Space',
         },
       };
 }

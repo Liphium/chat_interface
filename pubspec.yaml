@@ -43,6 +43,8 @@ dependencies:
   screenshot: '>=3.0.0 <4.0.0'
   pasteboard: ^0.2.0
   scroll_to_index: ^3.0.1
+  just_audio: ^0.9.39
+  just_audio_windows: ^0.2.1
 
 dev_dependencies:
   flutter_test:

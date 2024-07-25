@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 
 class TextObject extends TableObject {
   static const fontSizeMultiplier = 2;
-  double fontSize = 0;
+  final fontSize = AnimatedDouble(0);
   String text = "";
 
   TextObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.text);
@@ -19,14 +19,14 @@ class TextObject extends TableObject {
   factory TextObject.createFromText(Offset location, String text, double fontSize) {
     final obj = TextObject("", location, const Size(0, 0));
     obj.text = text;
-    obj.fontSize = fontSize;
+    obj.fontSize.setRealValue(fontSize);
     obj.evaluateSize();
     return obj;
   }
 
   @override
   void render(Canvas canvas, Offset location, TabletopController controller) {
-    final realFontSize = fontSize * fontSizeMultiplier;
+    final realFontSize = fontSize.value(DateTime.now()) * fontSizeMultiplier;
     var textSpan = TextSpan(
       text: text,
       style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: realFontSize),
@@ -50,21 +50,21 @@ class TextObject extends TableObject {
   void handleData(String data) async {
     final json = jsonDecode(data);
     text = json["text"];
-    fontSize = json["size"];
+    fontSize.setValue(json["size"]);
   }
 
   @override
   String getData() {
     return jsonEncode({
       "text": text,
-      "size": fontSize,
+      "size": fontSize.realValue,
     });
   }
 
   void evaluateSize() {
     var textSpan = TextSpan(
       text: text,
-      style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: fontSize.toDouble() * fontSizeMultiplier),
+      style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: fontSize.realValue * fontSizeMultiplier),
     );
     final textPainter = TextPainter(
       text: textSpan,
@@ -113,7 +113,7 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> {
   void initState() {
     _textController.text = widget.object?.text ?? "";
     _text.value = widget.object?.text ?? "";
-    fontSize.value = widget.object?.fontSize ?? 16;
+    fontSize.value = widget.object?.fontSize.realValue ?? 16;
     super.initState();
   }
 
@@ -150,9 +150,9 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> {
               if (widget.object != null) {
                 widget.object!.queue(() {
                   widget.object!.text = _textController.text;
-                  widget.object!.fontSize = fontSize.value;
+                  widget.object!.fontSize.setValue(fontSize.value);
                   widget.object!.evaluateSize();
-                  widget.object!.updateData();
+                  widget.object!.modifyData();
                 });
                 return;
               }

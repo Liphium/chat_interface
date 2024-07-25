@@ -114,6 +114,7 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                       child: SpaceRenderer(
                         container: container,
                         clickable: true,
+                        pollNewData: true,
                       ),
                     ),
                   ],
