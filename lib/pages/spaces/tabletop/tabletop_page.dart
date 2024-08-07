@@ -97,15 +97,18 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
             updater.value;
             return Listener(
               onPointerHover: (event) {
-                if (!tableController.dropMode) {
-                  tableController.heldObject = null;
-                }
                 tableController.mousePosUnmodified = event.localPosition;
                 tableController.mousePos = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
               },
               onPointerDown: (event) {
                 if (event.buttons == 2) {
                   if (tableController.hoveringObjects.isNotEmpty) {
+                    // Make sure the object isn't a card in the inventory
+                    final obj = tableController.hoveringObjects.first;
+                    if (obj is CardObject && obj.inventory) {
+                      return;
+                    }
+
                     final screenWidth = Get.mediaQuery.size.width;
                     final screenHeight = Get.mediaQuery.size.height;
 
@@ -117,7 +120,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                     Get.dialog(ObjectContextMenu(
                       data: ContextMenuData.fromPosition(globalPos),
-                      object: tableController.hoveringObjects.first,
+                      object: obj,
                     ));
                     moved = true;
                     return;
@@ -176,25 +179,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 sendLog(tableController.inventoryHoverIndex);
 
                 final obj = tableController.heldObject;
-                if (obj != null && tableController.dropMode) {
-                  tableController.dropMode = false;
-                  final x = tableController.mousePos.dx - obj.size.width / 2;
-                  final y = tableController.mousePos.dy - obj.size.height / 2;
-                  obj.location = Offset(x, y);
-                  bool add = true;
-                  if (obj is CardObject) {
-                    if (tableController.inventoryHoverIndex != -1) {
-                      obj.intoInventory(tableController, index: tableController.inventoryHoverIndex);
-                      add = false;
-                    } else {
-                      obj.inventory = false;
-                      obj.positionOverwrite = false;
-                    }
-                  }
-                  if (add) {
-                    obj.sendAdd();
-                  }
-                } else if (!tableController.dropMode && obj != null && obj is CardObject) {
+                if (obj != null && obj is CardObject) {
                   if (tableController.inventoryHoverIndex != -1) {
                     obj.intoInventory(tableController, index: tableController.inventoryHoverIndex);
                   } else if (tableController.hoveringObjects.any((element) => element is DeckObject)) {

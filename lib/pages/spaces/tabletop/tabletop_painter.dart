@@ -60,7 +60,7 @@ class TabletopPainter extends CustomPainter {
     controller.hoveringObjects = controller.raycast(mousePosition);
 
     for (var object in controller.objects.values) {
-      if (controller.hoveringObjects.contains(object) || controller.heldObject == object) {
+      if (controller.hoveringObjects.contains(object)) {
         continue;
       }
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
@@ -73,17 +73,6 @@ class TabletopPainter extends CustomPainter {
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
       object.hoverRotation(-rotation);
       drawObject(canvas, location, object, now);
-    }
-
-    // Render held object in drop mode
-    if (controller.dropMode && controller.heldObject != null) {
-      final obj = controller.heldObject!;
-      final x = mousePosition.dx - obj.size.width / 2;
-      final y = mousePosition.dy - obj.size.height / 2;
-      drawObject(canvas, Offset(x, y), obj, now);
-    } else if (!controller.dropMode && controller.heldObject != null) {
-      final location = controller.heldObject!.location;
-      drawObject(canvas, location, controller.heldObject!, now);
     }
 
     // Render cursors
@@ -165,7 +154,7 @@ class TabletopPainter extends CustomPainter {
           -(x + width / 2) * ((scale - 1) / scale),
           -(y + height / 2) * ((scale - 1) / scale),
         );
-        canvas.clipRRect(RRect.fromRectAndRadius(rect, const Radius.circular(sectionSpacing * 2)));
+        canvas.clipRRect(RRect.fromRectAndRadius(rect, const Radius.circular(sectionSpacing)));
         canvas.drawImageRect(
           object.image!,
           imageRect,

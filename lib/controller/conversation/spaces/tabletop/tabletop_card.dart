@@ -109,12 +109,12 @@ class CardObject extends TableObject {
       final paint = Paint()..color = Colors.white;
 
       // Show that the card is about to be dropped
-      if (controller.heldObject == this && controller.hoveringObjects.any((element) => element is DeckObject) && !controller.dropMode) {
+      if (controller.heldObject == this && controller.hoveringObjects.any((element) => element is DeckObject)) {
         paint.color = Colors.white.withOpacity(0.5);
       }
 
       final imageRect = Rect.fromLTWH(location.dx, location.dy, size.width, size.height);
-      canvas.clipRRect(RRect.fromRectAndRadius(imageRect, const Radius.circular(sectionSpacing * 4)));
+      canvas.clipRRect(RRect.fromRectAndRadius(imageRect, const Radius.circular(sectionSpacing * 2)));
       if (image == null) {
         canvas.drawRect(
           imageRect,

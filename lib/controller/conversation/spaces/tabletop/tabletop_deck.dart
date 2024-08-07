@@ -135,33 +135,24 @@ class DeckObject extends TableObject {
 
   @override
   void runAction(TabletopController controller) {
-    drawCard(controller);
+    drawCardIntoInventory(controller);
   }
 
-  /// Draw a card from the deck
-  void drawCard(TabletopController controller) async {
+  /// Draw a card from the deck into the inventory
+  void drawCardIntoInventory(TabletopController controller) async {
     if (order.isEmpty) {
       return;
     }
     queue(() async {
       final cardId = order.removeAt(0);
       final container = cards[cardId]!;
-
-      // Remove the card details if it isn't in the deck anymore
-      if (!order.contains(cardId)) {
-        cards.remove(cardId);
-      }
-
-      // Update the data on the server
-      final valid = await modifyData();
-      if (!valid) {
-        return;
-      }
-
-      // Prepare the card and add it to the drop mode
-      final card = await CardObject.downloadCard(container, controller.mousePos);
-      if (card == null) return;
-      controller.dropObject(card);
+      final obj = await CardObject.downloadCard(container, controller.mousePos);
+      final result = await modifyData();
+      if (!result) return;
+      if (obj == null) return;
+      obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
+      obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
+      controller.inventory.add(obj);
     });
   }
 
@@ -193,26 +184,6 @@ class DeckObject extends TableObject {
   @override
   List<ContextMenuAction> getContextMenuAdditions() {
     return [
-      ContextMenuAction(
-        icon: Icons.login,
-        label: 'Draw into inventory',
-        onTap: (controller) async {
-          if (order.isEmpty) {
-            return;
-          }
-          queue(() async {
-            final cardId = order.removeAt(0);
-            final container = cards[cardId]!;
-            final obj = await CardObject.downloadCard(container, controller.mousePos);
-            final result = await modifyData();
-            if (!result) return;
-            if (obj == null) return;
-            obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
-            obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
-            controller.inventory.add(obj);
-          });
-        },
-      ),
       ContextMenuAction(
         icon: Icons.shuffle,
         label: 'Shuffle',
