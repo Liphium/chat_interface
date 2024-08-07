@@ -169,7 +169,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
               //* Handle when a mouse button is no longer pressed
               onPointerUp: (event) {
-                if (tableController.hoveringObjects.isNotEmpty && !moved && event.buttons == 0) {
+                if (tableController.hoveringObjects.isNotEmpty && !moved && tableController.heldObject == null && event.buttons == 0) {
                   tableController.hoveringObjects.first.runAction(tableController);
                   return;
                 }

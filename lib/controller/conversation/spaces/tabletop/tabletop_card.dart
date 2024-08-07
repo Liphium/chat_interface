@@ -31,7 +31,7 @@ class CardObject extends TableObject {
 
     // Make size fit with canvas standards (900x900 in this case)
     final size = Size(container.width!.toDouble(), container.height!.toDouble());
-    final normalized = normalizeSize(size, 900);
+    final normalized = normalizeSize(size, cardNormalizer);
     final obj = CardObject(
       id,
       location,
@@ -57,6 +57,8 @@ class CardObject extends TableObject {
     return obj;
   }
 
+  static const double cardNormalizer = 900;
+
   /// Function to make sure images don't get too big
   static Size normalizeSize(Size size, double targetSize) {
     if (size.width > size.height) {
@@ -68,6 +70,30 @@ class CardObject extends TableObject {
     }
 
     return size;
+  }
+
+  /// Renders the decorations for flipped cards
+  static void renderFlippedDecorations(Canvas canvas, Rect card) {
+    const padding = sectionSpacing * 2;
+    const spacing = sectionSpacing * 2;
+    const size = 75.0;
+    final cornerPaint = Paint()..color = Get.theme.colorScheme.onPrimary;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.top + padding, size, size), const Radius.circular(spacing)),
+      cornerPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.bottom - size - padding, size, size), const Radius.circular(spacing)),
+      cornerPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(card.right - size - padding, card.top + padding, size, size), const Radius.circular(spacing)),
+      cornerPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(card.right - size - padding, card.bottom - size - padding, size, size), const Radius.circular(spacing)),
+      cornerPaint,
+    );
   }
 
   @override

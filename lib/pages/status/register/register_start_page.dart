@@ -111,7 +111,7 @@ class _RegisterPageState extends State<RegisterStartPage> {
                         }
 
                         // Send registration start request
-                        final error = await RegisterHandler.startRegister(_loading, _emailController.text, _inviteController.text);
+                        final error = await RegisterHandler.startRegister(_loading, _emailController.text.trim(), _inviteController.text.trim());
                         if (error != null) {
                           _errorText.value = error.tr;
                           return;
@@ -127,9 +127,8 @@ class _RegisterPageState extends State<RegisterStartPage> {
                       child: TextButton(
                         style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
-                          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered)
-                              ? theme.colorScheme.primary.withOpacity(0.3)
-                              : theme.colorScheme.primary.withOpacity(0)),
+                          backgroundColor:
+                              WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
                         ),
                         onPressed: () => Get.find<TransitionController>().modelTransition(LoginPage(email: _emailController.text)),
                         child: Text('register.login'.tr),

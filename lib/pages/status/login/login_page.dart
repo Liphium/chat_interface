@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                           return;
                         }
 
-                        loginStart(_emailController.text, success: () async {
+                        loginStart(_emailController.text.trim(), success: () async {
                           _loading.value = false;
                         }, failure: (msg) {
                           _errorText.value = msg.tr;
@@ -108,9 +108,8 @@ class _LoginPageState extends State<LoginPage> {
                       child: TextButton(
                         style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
-                          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered)
-                              ? theme.colorScheme.primary.withOpacity(0.3)
-                              : theme.colorScheme.primary.withOpacity(0)),
+                          backgroundColor:
+                              WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
                         ),
                         onPressed: () => RegisterHandler.goToRegistration(_emailController.text),
                         child: Text('login.no_account'.tr),

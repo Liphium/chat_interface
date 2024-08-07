@@ -19,6 +19,10 @@ class DeckObject extends TableObject {
   /// to send all the card data to the server twice if a card is in there twice)
   final order = <String>[];
 
+  // The width and height of the current top card
+  final width = AnimatedDouble(500);
+  final height = AnimatedDouble(500);
+
   DeckObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.deck);
 
   factory DeckObject.createFromDeck(Offset location, TabletopDeck deck) {
@@ -29,37 +33,50 @@ class DeckObject extends TableObject {
         obj.order.add(card.id);
       }
     }
+    obj.setWidthAndHeight(replace: true);
+    obj.size = Size(obj.width.realValue, obj.height.realValue);
+
     return obj;
   }
 
   @override
   void render(Canvas canvas, Offset location, TabletopController controller) {
     // Draw a stack
-    canvas.drawRRect(
-      RRect.fromLTRBR(
-        location.dx,
-        location.dy + 50,
-        location.dx + size.width - 50,
-        location.dy + 50 + size.height - 50,
-        const Radius.circular(sectionSpacing * 2),
-      ),
-      Paint()..color = Get.theme.colorScheme.tertiary,
-    );
-    final rect = RRect.fromLTRBR(
-      location.dx + 50,
+    final now = DateTime.now();
+    final currentWidth = width.value(now);
+    final currentHeight = height.value(now);
+    final cardRect = RRect.fromLTRBR(
+      location.dx,
       location.dy,
-      location.dx + 50 + size.width - 50,
-      location.dy + size.height - 50,
+      location.dx + currentWidth,
+      location.dy + currentHeight,
+      const Radius.circular(sectionSpacing * 2),
+    );
+    canvas.drawRRect(
+      cardRect,
+      Paint()..color = Get.theme.colorScheme.primaryContainer,
+    );
+
+    // Draw the flipped icon on the card
+    CardObject.renderFlippedDecorations(canvas, cardRect.outerRect);
+
+    // Draw the counter
+    const counterSize = 200;
+    final rect = RRect.fromLTRBR(
+      location.dx + currentWidth / 2 - counterSize / 2,
+      location.dy + currentHeight / 2 - counterSize / 2,
+      location.dx + currentWidth / 2 + counterSize / 2,
+      location.dy + currentHeight / 2 + counterSize / 2,
       const Radius.circular(sectionSpacing * 2),
     );
     canvas.drawRRect(
       rect,
-      Paint()..color = Get.theme.colorScheme.onPrimary,
+      Paint()..color = Get.theme.colorScheme.inverseSurface,
     );
     var textSpan = TextSpan(
       text: order.length.toString(),
       style: TextStyle(
-        color: Get.theme.colorScheme.primary,
+        color: Get.theme.colorScheme.onPrimary,
         fontSize: 100,
         fontFamily: "Roboto Mono",
         fontWeight: FontWeight.bold,
@@ -84,6 +101,23 @@ class DeckObject extends TableObject {
       cards[card["id"]] = AttachmentContainer.fromJson(type, card);
     }
     order.addAll((json["order"] as List<dynamic>).cast<String>());
+    setWidthAndHeight(replace: false);
+  }
+
+  /// Refresh the current top card and set width and height of it
+  void setWidthAndHeight({bool replace = false}) {
+    final top = order.firstOrNull;
+    if (top != null) {
+      final card = cards[top]!;
+      final newSize = CardObject.normalizeSize(Size(card.width!.toDouble(), card.height!.toDouble()), CardObject.cardNormalizer);
+      if (replace) {
+        width.setRealValue(newSize.width);
+        height.setRealValue(newSize.height);
+      } else {
+        width.setValue(newSize.width);
+        height.setValue(newSize.height);
+      }
+    }
   }
 
   @override
