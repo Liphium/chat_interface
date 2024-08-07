@@ -24,6 +24,7 @@ class SpacesTranslations extends Translations {
           'tabletop.object.text': 'Text',
           'tabletop.object.text.create': 'Create text object',
           'tabletop.object.text.placeholder': 'Enter text here',
+          'tabletop.object.deck.incompatible': 'This deck is incompatible with the newest version of the standard. Please create it again and try again.',
         },
 
         //* German

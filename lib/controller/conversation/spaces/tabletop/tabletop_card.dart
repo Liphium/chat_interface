@@ -24,18 +24,13 @@ class CardObject extends TableObject {
   CardObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.card);
 
   static Future<CardObject?> downloadCard(AttachmentContainer container, Offset location, {String id = ""}) async {
-    // Download the file
-    final download = await Get.find<AttachmentController>().downloadAttachment(container);
-    if (!download) {
+    // Check if the container fits the new standard
+    if (container.width == null || container.height == null) {
       return null;
     }
 
-    // Grab resolution from it
-    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container.filePath).readAsBytes());
-    final descriptor = await ui.ImageDescriptor.encoded(buffer);
-    final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
-
-    // Make size fit with canvas standards (700x700 in this case)
+    // Make size fit with canvas standards (900x900 in this case)
+    final size = Size(container.width!.toDouble(), container.height!.toDouble());
     final normalized = normalizeSize(size, 900);
     final obj = CardObject(
       id,
@@ -43,12 +38,21 @@ class CardObject extends TableObject {
       normalized,
     );
     obj.container = container;
-
-    // Set image
-    final codec = await descriptor.instantiateCodec();
-    obj.downloaded = true;
-    obj.image = (await codec.getNextFrame()).image;
     obj.imageSize = size;
+
+    // Download the file
+    Get.find<AttachmentController>().downloadAttachment(container).then((success) async {
+      if (success) {
+        // Get the actual image and add it to the object
+        final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container.filePath).readAsBytes());
+        final descriptor = await ui.ImageDescriptor.encoded(buffer);
+        final codec = await descriptor.instantiateCodec();
+        obj.image = (await codec.getNextFrame()).image;
+        obj.downloaded = true;
+      } else {
+        obj.error = true;
+      }
+    });
 
     return obj;
   }
@@ -85,12 +89,19 @@ class CardObject extends TableObject {
 
       final imageRect = Rect.fromLTWH(location.dx, location.dy, size.width, size.height);
       canvas.clipRRect(RRect.fromRectAndRadius(imageRect, const Radius.circular(sectionSpacing * 4)));
-      canvas.drawImageRect(
-        image!,
-        Rect.fromLTWH(0, 0, size.width * (imageSize!.width / size.width), size.height * (imageSize!.height / size.height)),
-        imageRect,
-        paint,
-      );
+      if (image == null) {
+        canvas.drawRect(
+          imageRect,
+          Paint()..color = Colors.red,
+        );
+      } else {
+        canvas.drawImageRect(
+          image!,
+          Rect.fromLTWH(0, 0, size.width * (imageSize!.width / size.width), size.height * (imageSize!.height / size.height)),
+          imageRect,
+          paint,
+        );
+      }
       return;
     }
 

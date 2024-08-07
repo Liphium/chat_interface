@@ -64,7 +64,7 @@ void setupTabletopListeners() {
   // Listen for rotations
   spaceConnector.listen("tobj_rotated", (event) {
     final object = controller.objects[event.data["id"]];
-    if (object == null || object == controller.heldObject) {
+    if (object == null) {
       return;
     }
     object.rotate((event.data["r"] as num).toDouble());

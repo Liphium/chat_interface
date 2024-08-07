@@ -28,6 +28,28 @@ class TabletopPainter extends CustomPainter {
     canvas.drawRect(rect, background);
     canvas.clipRect(rect);
 
+    // Draw a grid
+    /*
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.rotate(rotation);
+    canvas.translate(-size.width / 2, -size.height / 2);
+    final paint = Paint()
+      ..color = Get.theme.colorScheme.primaryContainer
+      ..strokeWidth = 1.0;
+
+    final gridSize = 100.0 * scale;
+
+    for (double x = (offset.dx * scale % gridSize) - gridSize; x < size.width; x += gridSize) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    for (double y = (offset.dy * scale % gridSize) - gridSize; y < size.height; y += gridSize) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+    canvas.restore();
+    */
+
     // Rotate and stuff
     canvas.save();
     canvas.rotate(rotation);
@@ -43,13 +65,13 @@ class TabletopPainter extends CustomPainter {
       }
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
       object.scale.setValue(1.0);
-      object.rotation.setValue(0);
+      object.unhoverRotation();
       drawObject(canvas, location, object, now);
     }
 
     for (var object in controller.hoveringObjects) {
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
-      object.rotation.setValue(-rotation);
+      object.hoverRotation(-rotation);
       drawObject(canvas, location, object, now);
     }
 

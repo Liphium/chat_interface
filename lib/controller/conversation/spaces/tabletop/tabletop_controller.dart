@@ -336,25 +336,40 @@ abstract class TableObject {
     this.location = location;
   }
 
-  double lastRotation = 0;
+  double lastRotation = -1;
   void rotate(double rot) {
-    lastRotation = rot;
+    sendLog(lastRotation);
+    if (lastRotation == -1) {
+      rotation.setValue(rot);
+    } else {
+      lastRotation = rot;
+    }
   }
 
   void newRotation(double rot) {
-    spaceConnector.sendAction(Message("tobj_rotate", <String, dynamic>{
-      "id": id,
-      "r": rot,
-    }));
+    // TODO: handle error when rotation fails
+    queue(() async {
+      spaceConnector.sendAction(Message("tobj_rotate", <String, dynamic>{
+        "id": id,
+        "r": rot,
+      }));
+    });
   }
 
+  /// Called every frame when the object is hovered
   void hoverRotation(double rot) {
-    lastRotation = rotation.realValue;
+    if (lastRotation == -1) {
+      lastRotation = rotation.realValue;
+    }
     rotation.setValue(rot);
   }
 
+  /// Called every frame when the object is no longer hovered
   void unhoverRotation() {
-    rotation.setValue(lastRotation);
+    if (lastRotation != -1) {
+      rotation.setValue(lastRotation);
+      lastRotation = -1;
+    }
   }
 
   /// DONT OVERWRITE THIS METHOD

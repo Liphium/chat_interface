@@ -61,6 +61,7 @@ class LogManager {
       return;
     }
     error.printError(info: "error", logFunction: _errorLogFunction);
+    trace?.printError(info: "stack", logFunction: _errorLogFunction);
   }
 
   /// Custom log function copied from GetUtils.printFunction to write things to the file too

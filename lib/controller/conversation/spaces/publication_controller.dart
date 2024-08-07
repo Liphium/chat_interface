@@ -56,6 +56,10 @@ class PublicationController extends GetxController {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isMuted.value = newMuted;
       controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      if (controller.members[SpaceMemberController.ownId] == null) {
+        sendLog("local participant is null, this needs further investigation");
+        return;
+      }
       final participant = controller.members[SpaceMemberController.ownId]!.participant.value as LocalParticipant;
       if (newMuted) {
         participant.audioTrackPublications.firstOrNull?.mute();
