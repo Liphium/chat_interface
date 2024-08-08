@@ -103,12 +103,6 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               onPointerDown: (event) {
                 if (event.buttons == 2) {
                   if (tableController.hoveringObjects.isNotEmpty) {
-                    // Make sure the object isn't a card in the inventory
-                    final obj = tableController.hoveringObjects.first;
-                    if (obj is CardObject && obj.inventory) {
-                      return;
-                    }
-
                     final screenWidth = Get.mediaQuery.size.width;
                     final screenHeight = Get.mediaQuery.size.height;
 
@@ -120,7 +114,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                     Get.dialog(ObjectContextMenu(
                       data: ContextMenuData.fromPosition(globalPos),
-                      object: obj,
+                      object: tableController.hoveringObjects.first,
                     ));
                     moved = true;
                     return;

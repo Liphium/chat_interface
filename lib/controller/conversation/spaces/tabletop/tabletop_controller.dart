@@ -496,8 +496,15 @@ abstract class TableObject {
     return completer.future;
   }
 
+  // Boolean to make sure the object is not modified
+  bool currentlyModifying = false;
+
   /// Wait until the data can be modified
   void queue(Function() callback) {
+    if (currentlyModifying) {
+      return;
+    }
+    currentlyModifying = true;
     dataBeforeQueue = getData();
     spaceConnector.sendAction(
       Message("tobj_mqueue", {
@@ -529,6 +536,7 @@ abstract class TableObject {
         "height": size.height,
       }),
       handler: (event) {
+        currentlyModifying = false;
         // Reset data in case the modification wasn't successful
         if (!event.data["success"]) {
           if (dataBeforeQueue == null) {
@@ -557,6 +565,7 @@ class ContextMenuAction {
   final String label;
   final Color? color;
   final Color? iconColor;
+  final bool goBack;
   final Function(TabletopController) onTap;
 
   const ContextMenuAction({
@@ -564,6 +573,7 @@ class ContextMenuAction {
     required this.label,
     required this.onTap,
     this.category = false,
+    this.goBack = true,
     this.color,
     this.iconColor,
   });
@@ -573,12 +583,13 @@ class AnimatedDouble {
   static const animationDuration = 250;
   static const curve = Curves.ease;
 
+  final int duration;
   DateTime _start = DateTime.now();
 
   double lastValue = 0;
   late double _value;
 
-  AnimatedDouble(double value, {double from = 0.0}) {
+  AnimatedDouble(double value, {double from = 0.0, this.duration = animationDuration}) {
     _value = from;
     setValue(value, from: from);
   }
@@ -598,7 +609,7 @@ class AnimatedDouble {
   // Get an interpolated value
   double value(DateTime now) {
     final timeDifference = now.millisecondsSinceEpoch - _start.millisecondsSinceEpoch;
-    return lastValue + (_value - lastValue) * curve.transform(clampDouble(timeDifference / animationDuration, 0, 1));
+    return lastValue + (_value - lastValue) * curve.transform(clampDouble(timeDifference / duration, 0, 1));
   }
 
   get realValue => _value;

@@ -146,6 +146,9 @@ class TabletopPainter extends CustomPainter {
         object.positionOverwrite = true;
         object.positionX.setValue(calcX);
         object.positionY.setValue(calcY);
+        object.renderCard(canvas, Offset(x, y), controller, rect, true);
+
+        /*
         final imageRect = Rect.fromLTWH(0, 0, object.imageSize!.width, object.imageSize!.height);
         final scale = object.scale.value(now);
         canvas.save();
@@ -163,6 +166,7 @@ class TabletopPainter extends CustomPainter {
         );
 
         canvas.restore();
+        */
         counterWidth -= width + defaultSpacing;
       }
     }

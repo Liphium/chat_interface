@@ -97,6 +97,12 @@ class _LoginPageState extends State<LoginPage> {
                         loginStart(_emailController.text.trim(), success: () async {
                           _loading.value = false;
                         }, failure: (msg) {
+                          if (msg == "email.invalid") {
+                            if (!reminded) {
+                              _reminderText.value = 'login.register_reminder'.tr;
+                              reminded = true;
+                            }
+                          }
                           _errorText.value = msg.tr;
                           _loading.value = false;
                         });

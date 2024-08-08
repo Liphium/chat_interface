@@ -117,6 +117,7 @@ class DeckObject extends TableObject {
         width.setValue(newSize.width);
         height.setValue(newSize.height);
       }
+      size = newSize;
     }
   }
 
@@ -147,6 +148,7 @@ class DeckObject extends TableObject {
       final cardId = order.removeAt(0);
       final container = cards[cardId]!;
       final obj = await CardObject.downloadCard(container, controller.mousePos);
+      setWidthAndHeight();
       final result = await modifyData();
       if (!result) return;
       if (obj == null) return;

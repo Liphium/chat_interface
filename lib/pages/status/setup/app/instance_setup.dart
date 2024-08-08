@@ -132,6 +132,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                                 const Spacer(),
                                 IconButton(
                                   onPressed: () async {
+                                    sendLog("deleting");
                                     await File(instance.path).delete();
                                     setupManager.restart();
                                   },

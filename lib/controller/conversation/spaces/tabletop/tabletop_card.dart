@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -20,6 +21,8 @@ class CardObject extends TableObject {
   bool inventory = false;
   ui.Image? image;
   Size? imageSize;
+  bool flipped = false;
+  final flipAnimation = AnimatedDouble(0, duration: 750);
 
   CardObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.card);
 
@@ -73,31 +76,36 @@ class CardObject extends TableObject {
   }
 
   /// Renders the decorations for flipped cards
-  static void renderFlippedDecorations(Canvas canvas, Rect card) {
-    const padding = sectionSpacing * 2;
-    const spacing = sectionSpacing * 2;
-    const size = 75.0;
+  static void renderFlippedDecorations(Canvas canvas, Rect card, {bool ui = false}) {
+    final padding = ui ? sectionSpacing : sectionSpacing * 2;
+    final spacing = ui ? defaultSpacing + defaultSpacing / 2 : sectionSpacing * 2;
+    final size = ui ? 30.0 : 75.0;
     final cornerPaint = Paint()..color = Get.theme.colorScheme.onPrimary;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.top + padding, size, size), const Radius.circular(spacing)),
+      RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.top + padding, size, size), Radius.circular(spacing)),
       cornerPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.bottom - size - padding, size, size), const Radius.circular(spacing)),
+      RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.bottom - size - padding, size, size), Radius.circular(spacing)),
       cornerPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(card.right - size - padding, card.top + padding, size, size), const Radius.circular(spacing)),
+      RRect.fromRectAndRadius(Rect.fromLTWH(card.right - size - padding, card.top + padding, size, size), Radius.circular(spacing)),
       cornerPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(card.right - size - padding, card.bottom - size - padding, size, size), const Radius.circular(spacing)),
+      RRect.fromRectAndRadius(Rect.fromLTWH(card.right - size - padding, card.bottom - size - padding, size, size), Radius.circular(spacing)),
       cornerPaint,
     );
   }
 
   @override
   void render(Canvas canvas, Offset location, TabletopController controller) {
+    final imageRect = Rect.fromLTWH(location.dx, location.dy, size.width, size.height);
+    renderCard(canvas, location, controller, imageRect, false);
+  }
+
+  void renderCard(Canvas canvas, Offset location, TabletopController controller, Rect imageRect, bool ui) {
     if (error) {
       final paint = Paint()..color = Colors.red;
       canvas.drawRect(Rect.fromLTWH(location.dx, location.dy, size.width, size.height), paint);
@@ -113,20 +121,44 @@ class CardObject extends TableObject {
         paint.color = Colors.white.withOpacity(0.5);
       }
 
-      final imageRect = Rect.fromLTWH(location.dx, location.dy, size.width, size.height);
-      canvas.clipRRect(RRect.fromRectAndRadius(imageRect, const Radius.circular(sectionSpacing * 2)));
       if (image == null) {
+        canvas.clipRRect(RRect.fromRectAndRadius(imageRect, Radius.circular(ui ? sectionSpacing : sectionSpacing * 2)));
         canvas.drawRect(
           imageRect,
           Paint()..color = Colors.red,
         );
       } else {
-        canvas.drawImageRect(
-          image!,
-          Rect.fromLTWH(0, 0, size.width * (imageSize!.width / size.width), size.height * (imageSize!.height / size.height)),
-          imageRect,
-          paint,
-        );
+        // Rotation for the flip animation
+        canvas.save();
+        final focalX = location.dx + imageRect.width / 2;
+        final focalY = location.dy + imageRect.height / 2;
+        canvas.translate(focalX, focalY);
+        final currentFlip = flipAnimation.value(DateTime.now());
+        final Matrix4 matrix = Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // perspective
+          ..rotateY(math.pi * currentFlip);
+        canvas.transform(matrix.storage);
+        canvas.translate(-focalX, -focalY);
+
+        canvas.clipRRect(RRect.fromRectAndRadius(imageRect, Radius.circular(ui ? sectionSpacing : sectionSpacing * 2)));
+
+        // Check if the animation says it's flipped or not
+        if (currentFlip > 0.5) {
+          canvas.drawRect(
+            imageRect,
+            Paint()..color = Get.theme.colorScheme.primaryContainer,
+          );
+          renderFlippedDecorations(canvas, imageRect, ui: ui);
+        } else {
+          canvas.drawImageRect(
+            image!,
+            Rect.fromLTWH(0, 0, size.width * (imageSize!.width / size.width), size.height * (imageSize!.height / size.height)),
+            imageRect,
+            paint,
+          );
+        }
+
+        canvas.restore();
       }
       return;
     }
@@ -140,6 +172,8 @@ class CardObject extends TableObject {
     sendLog("handling data");
     // Download attached container
     final json = jsonDecode(data);
+    flipped = json["flip"] ?? false;
+    flipAnimation.setValue(flipped ? 1 : 0);
     final type = await AttachmentController.checkLocations(json["id"], StorageType.cache);
     container = AttachmentContainer.fromJson(type, jsonDecode(data));
     final download = await Get.find<AttachmentController>().downloadAttachment(container);
@@ -160,24 +194,58 @@ class CardObject extends TableObject {
 
   @override
   String getData() {
-    return jsonEncode(container.toJson());
+    final json = container.toJson();
+    json["flip"] = flipped;
+    return jsonEncode(json);
   }
 
   @override
   void runAction(TabletopController controller) {
     if (inventory) {
-      Get.dialog(ImagePreviewWindow(file: File(container.filePath)));
+      flipped = !flipped;
+      flipAnimation.setValue(flipped ? 0 : 1);
+    } else {
+      queue(() async {
+        flipped = !flipped;
+        final result = await modifyData();
+        if (!result) {
+          sendLog("something went wrong");
+        }
+      });
     }
   }
 
   @override
   List<ContextMenuAction> getContextMenuAdditions() {
     return [
+      if (!inventory)
+        ContextMenuAction(
+          icon: Icons.login,
+          label: 'Put into inventory',
+          onTap: (controller) {
+            intoInventory(controller);
+          },
+        ),
       ContextMenuAction(
-        icon: Icons.login,
-        label: 'Put into inventory',
+        icon: Icons.fullscreen,
+        goBack: false,
+        label: 'View in image viewer',
         onTap: (controller) {
-          intoInventory(controller);
+          sendLog("viewing..");
+          Get.back();
+          Get.dialog(ImagePreviewWindow(file: File(container.filePath)));
+        },
+      ),
+    ];
+  }
+
+  List<ContextMenuAction> getInventoryContextMenuAdditions() {
+    return [
+      ContextMenuAction(
+        icon: Icons.fullscreen,
+        label: 'View in image viewer',
+        onTap: (controller) {
+          Get.dialog(ImagePreviewWindow(file: File(container.filePath)));
         },
       ),
     ];
