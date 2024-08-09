@@ -120,11 +120,16 @@ class ChatPageTranslations extends Translations {
           'file.gigabytes': '@count GB',
 
           // Live share
-          'chat.liveshare': 'Share any file',
-          'chat.liveshare_request': 'Request to share file',
-          'chat.liveshare.not_found': 'The request has expired.',
-          'chat.liveshare.creation_failed': 'Failed to create a live share request. Maybe you already have one active?',
-          'chat.liveshare.not_send_self': 'You cannot accept your own request.',
+          'chat.zapshare': 'Share any file',
+          'chat.zapshare_request': 'Request to share file',
+          'chat.zapshare.not_found': 'The request has expired.',
+          'chat.zapshare.creation_failed': 'Failed to create a live share request. Maybe you already have one active?',
+          'chat.zapshare.not_send_self': 'You cannot accept your own request.',
+          'chat.zapshare.waiting': 'Waiting..',
+          'chat.zapshare.finishing': 'Finishing up..',
+          'chat.zapshare.compressing': 'Compressing..',
+          'chat.zapshare.uploading': 'Uploading..',
+          'chat.zapshare.downloading': 'Downloading..',
 
           // Library
           'library.all': 'Everything',

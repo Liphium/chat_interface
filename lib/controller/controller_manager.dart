@@ -3,7 +3,7 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/live_share_controller.dart';
+import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
@@ -32,7 +32,7 @@ void initializeControllers() {
   Get.put(RequestController());
   Get.put(FriendController());
   Get.put(WritingController());
-  Get.put(LiveShareController());
+  Get.put(ZapShareController());
 
   // App controls
   Get.put(StatusController());

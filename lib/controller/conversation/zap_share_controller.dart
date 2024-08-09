@@ -3,47 +3,77 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart' as msg;
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/pages/chat/components/conversations/zap_share_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:dio/dio.dart' as d;
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:open_app_file/open_app_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
+import 'package:path/path.dart' as path;
 
-class LiveShareController extends GetxController {
+class ZapShareController extends GetxController {
   // Current transaction
   final currentReceiver = Rx<String?>(null);
   final currentConversation = Rx<String?>(null);
-  final loading = false.obs;
+  final waiting = false.obs;
+  final step = "loading".tr.obs;
   final progress = 0.0.obs;
   bool uploading = false;
+  final currentPart = 0.obs;
   int endPart = 0;
   String? transactionId;
   String? transactionToken;
   String? uploadToken;
   String? filePath;
   Directory? chunksDir;
+  SecureKey? key;
   StreamSubscription<Uint8List>? partSubscription;
 
   static const chunkSize = 512 * 1024;
 
   bool isRunning() {
-    return currentReceiver.value != null && currentConversation.value != null;
+    return currentReceiver.value != null || currentConversation.value != null || waiting.value;
+  }
+
+  void resetControllerState() {
+    step.value = "loading".tr;
+    currentReceiver.value = null;
+    currentConversation.value = null;
+    waiting.value = false;
+    progress.value = 0.0;
+    currentPart.value = 0;
+    uploading = false;
+    endPart = 0;
+    transactionId = null;
+    transactionToken = null;
+    uploadToken = null;
+    filePath = null;
+    chunksDir = null;
+    key = null;
+
+    // Cancel the partSubscription if it exists and set it to null
+    partSubscription?.cancel();
+    partSubscription = null;
   }
 
   void cancel() {
-    if (currentReceiver.value == null || currentConversation.value == null) {
+    if (!isRunning()) {
       return;
     }
     if (uploading) {
@@ -53,34 +83,81 @@ class LiveShareController extends GetxController {
     } else {
       partSubscription?.cancel();
     }
+    onTransactionEnd();
+    resetControllerState();
+  }
+
+  /// Open the window for zap share for a conversation
+  void openWindow(Conversation conversation, ContextMenuData data) async {
+    // If Zap Share is already doing something, show a menu
+    if (isRunning()) {
+      Get.dialog(ZapShareWindow(data: data, conversation: conversation));
+      return;
+    }
+
+    // Grab files
+    final files = await openFiles();
+    if (files.isEmpty) {
+      return;
+    }
+
+    // Start the transaction
+    newTransaction(conversation.otherMember.id, conversation.id, files);
   }
 
   //* Everything about sending starts here
 
-  void newTransaction(String friendId, String conversationId, XFile shared) async {
-    if (currentReceiver.value != null || currentConversation.value != null || loading.value) {
+  void newTransaction(String friendId, String conversationId, List<XFile> files) async {
+    if (isRunning()) {
       sendLog("Already in a transaction");
       return;
     }
-    loading.value = true;
+    resetControllerState();
+    step.value = "preparing".tr;
+    waiting.value = true;
     uploading = true;
     sending = 0;
 
     // Generate chunks dir
     var tempDir = await getTemporaryDirectory();
-    tempDir = Directory("${tempDir.path}/liphium");
+    tempDir = Directory(path.join(tempDir.path, "liphium"));
     await tempDir.create();
-    chunksDir = await tempDir.createTemp("liveshare");
+    chunksDir = await tempDir.createTemp("zapzap");
     await chunksDir!.create();
     sendLog(chunksDir!.path);
 
-    final file = File(shared.path);
-    filePath = shared.path;
+    // If there are more files than one, put them into an archive
+    step.value = "chat.zapshare.compressing".tr;
+    File file;
+    if (files.length > 1) {
+      // TODO: Have this in an isolate, when https://github.com/brendan-duncan/archive/issues/349 gets an answer (or turn this into rust code)
+
+      // Start the encoder
+      final outFile = path.join(chunksDir!.path, "zapped_files.zip");
+      final encoder = ZipFileEncoder();
+      encoder.createWithBuffer(OutputFileStream(outFile));
+
+      // Add all files to the archive
+      for (var file in files) {
+        await encoder.addFile(File(file.path));
+      }
+
+      // Run all the compression in an isolate
+      await encoder.close();
+      file = File(outFile);
+    } else {
+      file = File(files[0].path);
+    }
+
+    // Start uploading the file
+    filePath = file.path;
+    final fileName = path.basename(file.path);
     final fileSize = await file.length();
     endPart = (fileSize.toDouble() / chunkSize.toDouble()).ceil();
+    step.value = "chat.zapshare.waiting".tr;
     connector.sendAction(
       Message("create_transaction", <String, dynamic>{
-        "name": shared.name,
+        "name": fileName,
         "size": fileSize,
       }),
       handler: (event) {
@@ -95,9 +172,10 @@ class LiveShareController extends GetxController {
         transactionId = event.data["id"];
         transactionToken = event.data["token"];
         uploadToken = event.data["upload_token"];
+        sendLog("waiting now..");
 
         // Send live share message
-        final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, shared.name, randomSymmetricKey());
+        final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, fileName, randomSymmetricKey());
         sendActualMessage(false.obs, conversationId, msg.MessageType.liveshare, [], container.toJson(), "", () => {});
       },
     );
@@ -107,8 +185,14 @@ class LiveShareController extends GetxController {
 
   /// Called for every file part sending event (only when sending)
   void sendFilePart(Event event) async {
-    loading.value = false;
+    if (!isRunning()) {
+      sendLog("why would the server ask for parts when zap share isn't even running :smug:");
+      return;
+    }
+    waiting.value = false;
+    step.value = "chat.zapshare.uploading".tr;
     final start = event.data["start"] as int;
+    currentPart.value = start;
     //final end = event.data["end"] as int;
     if (sending >= start) {
       return;
@@ -127,7 +211,11 @@ class LiveShareController extends GetxController {
 
     // Send the chunk once done
     stream.listen(
-      (event) => writeStream.add(event),
+      (bytes) {
+        // Encrypt the bytes using the key
+        final encrypted = encryptSymmetricBytes(Uint8List.fromList(bytes), key!);
+        writeStream.add(encrypted);
+      },
       cancelOnError: true,
       onError: (e) => sendLog(e),
       onDone: () async {
@@ -164,7 +252,7 @@ class LiveShareController extends GetxController {
 
   /// Called when a transaction is ended (only when sending)
   void onTransactionEnd() async {
-    loading.value = false;
+    waiting.value = false;
     uploading = false;
     progress.value = 0.0;
     sending = 0;
@@ -182,7 +270,7 @@ class LiveShareController extends GetxController {
 
   /// Join a transaction with a given ID and token + start listening for parts
   void joinTransaction(String conversation, String friendId, LiveshareInviteContainer container) async {
-    if (currentReceiver.value != null || currentConversation.value != null || loading.value) {
+    if (isRunning()) {
       sendLog("Already in a transaction");
       return;
     }
@@ -190,7 +278,9 @@ class LiveShareController extends GetxController {
       showErrorPopup("error", "chat.liveshare.not_send_self");
       return;
     }
+    resetControllerState();
     uploading = false;
+    step.value = "preparing".tr;
 
     // Get info about the file
     final json = await postAny(
@@ -203,6 +293,7 @@ class LiveShareController extends GetxController {
     }
     endPart = (json["size"].toDouble() / chunkSize.toDouble()).ceil();
 
+    key = container.key;
     currentConversation.value = conversation;
     currentReceiver.value = friendId;
 
@@ -240,6 +331,7 @@ class LiveShareController extends GetxController {
     bool receivedInfo = false;
 
     // Listen for new parts
+    step.value = "chat.zapshare.downloading".tr;
     Timer? downloadTimer;
     partSubscription = body.stream.listen(
       (event) async {
@@ -300,6 +392,7 @@ class LiveShareController extends GetxController {
 
             sendLog("downloaded chunk $currentChunk");
             downloading = false;
+            currentPart.value = currentChunk;
 
             // Check if new chunk can be downloaded right away
             if (currentChunk < maxChunk) {
@@ -374,6 +467,7 @@ class LiveShareController extends GetxController {
   }
 
   Future<bool> _stitchFileTogether(String fileName, Directory dir) async {
+    step.value = "chat.zapshare.finishing".tr;
     final downloads = await getDownloadsDirectory();
     final file = File("${downloads!.path}/$fileName");
 
@@ -385,7 +479,12 @@ class LiveShareController extends GetxController {
         break;
       }
 
-      await file.writeAsBytes(await chunk.readAsBytes(), mode: currentIndex == 1 ? FileMode.write : FileMode.append);
+      // Decrypt the current chunk
+      final bytes = await chunk.readAsBytes();
+      final decrypted = decryptSymmetricBytes(bytes, key!);
+
+      // Add the chunk to the file and delete the chunk
+      await file.writeAsBytes(decrypted, mode: currentIndex == 1 ? FileMode.write : FileMode.append);
       chunk.delete();
 
       currentIndex++;

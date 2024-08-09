@@ -1,19 +1,17 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/live_share_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
+import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
+import 'package:chat_interface/pages/chat/components/conversations/zap_share_window.dart';
 import 'package:chat_interface/pages/chat/conversation_info_page.dart';
-import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,12 +25,12 @@ class MessageBar extends StatefulWidget {
 }
 
 class _MessageBarState extends State<MessageBar> {
-  final GlobalKey _infoKey = GlobalKey();
+  final GlobalKey _infoKey = GlobalKey(), _zapShareKey = GlobalKey();
   final callLoading = false.obs;
 
   @override
   Widget build(BuildContext context) {
-    final liveShareController = Get.find<LiveShareController>();
+    final zapShareController = Get.find<ZapShareController>();
     final controller = Get.find<SettingController>();
 
     if (widget.conversation.borked) {
@@ -92,21 +90,14 @@ class _MessageBarState extends State<MessageBar> {
             //* Conversation actions
             Row(
               children: [
-                //* Live share
-                if (widget.conversation.type == model.ConversationType.directMessage && controller.settings[FileSettings.liveShareExperiment]!.getValue())
+                //* Zap share
+                if (widget.conversation.type == model.ConversationType.directMessage)
                   Stack(
+                    key: _zapShareKey,
                     children: [
                       IconButton(
                         onPressed: () async {
-                          if (liveShareController.isRunning()) {
-                            liveShareController.cancel();
-                            return;
-                          }
-                          final result = await openFile();
-                          if (result == null) {
-                            return;
-                          }
-                          liveShareController.newTransaction(widget.conversation.dmName, widget.conversation.id, result);
+                          zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
                         },
                         icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                         tooltip: "chat.liveshare".tr,
@@ -119,7 +110,7 @@ class _MessageBarState extends State<MessageBar> {
                             padding: const EdgeInsets.all(2.0),
                             child: Obx(
                               () => CircularProgressIndicator(
-                                value: liveShareController.loading.value ? null : liveShareController.progress.value,
+                                value: zapShareController.waiting.value ? null : zapShareController.progress.value,
                                 strokeWidth: 3,
                                 valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                               ),

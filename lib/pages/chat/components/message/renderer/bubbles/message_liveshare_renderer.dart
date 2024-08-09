@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/live_share_controller.dart';
+import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -79,7 +79,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
   @override
   Widget build(BuildContext context) {
     Friend sender = widget.sender ?? Friend.system();
-    final controller = Get.find<LiveShareController>();
+    final controller = Get.find<ZapShareController>();
     container = LiveshareInviteContainer.fromJson(widget.message.content);
 
     return RepaintBoundary(
@@ -207,7 +207,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                             return Visibility(
                               visible: available.value && !widget.self,
                               child: IconButton(
-                                onPressed: () => Get.find<LiveShareController>().joinTransaction(widget.message.conversation, widget.message.senderAccount, container!),
+                                onPressed: () => Get.find<ZapShareController>().joinTransaction(widget.message.conversation, widget.message.senderAccount, container!),
                                 icon: const Icon(Icons.check),
                               ),
                             );

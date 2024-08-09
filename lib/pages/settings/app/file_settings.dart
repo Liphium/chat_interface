@@ -19,8 +19,6 @@ class FileSettings {
   static const String fileCacheType = "files.cache_type";
   static const String maxCacheSize = "files.max_cache_size"; // MB
 
-  static const String liveShareExperiment = "files.live_share.experiment";
-
   static var fileCacheTypes = [
     SelectableItem("settings.file.cache_type.unlimited".tr, Icons.all_inclusive),
     SelectableItem("settings.file.cache_type.size".tr, Icons.filter_alt),
@@ -40,7 +38,6 @@ class FileSettings {
     controller.settings[maxFileSize] = Setting<double>(maxFileSize, 5.0);
     controller.settings[maxCacheSize] = Setting<double>(maxCacheSize, 500.0);
     controller.settings[fileCacheType] = Setting<int>(fileCacheType, 0);
-    controller.settings[liveShareExperiment] = Setting<bool>(liveShareExperiment, false);
   }
 }
 
@@ -100,37 +97,6 @@ class FileSettingsPage extends StatelessWidget {
             ),
           ),
           verticalSpacing(sectionSpacing),
-
-          //* File cache size
-          Row(
-            children: [
-              Text("settings.file.live_share".tr, style: Get.theme.textTheme.labelLarge),
-              horizontalSpacing(defaultSpacing),
-              Container(
-                decoration: BoxDecoration(
-                  color: Get.theme.colorScheme.error.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(defaultSpacing),
-                ),
-                padding: const EdgeInsets.all(elementSpacing),
-                child: Row(
-                  children: [
-                    Icon(Icons.science, color: Get.theme.colorScheme.error),
-                    horizontalSpacing(elementSpacing),
-                    Text(
-                      "settings.experimental".tr,
-                      style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
-                    ),
-                    horizontalSpacing(elementSpacing)
-                  ],
-                ),
-              ),
-            ],
-          ),
-          verticalSpacing(defaultSpacing),
-          Text("settings.file.live_share.description".tr, style: Get.theme.textTheme.bodyMedium),
-          verticalSpacing(defaultSpacing),
-
-          const BoolSettingSmall(settingName: FileSettings.liveShareExperiment),
         ],
       ),
     );
