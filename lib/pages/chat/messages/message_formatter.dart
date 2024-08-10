@@ -10,8 +10,8 @@ class MessageFormatter {
 
   List<TextSpan> _parseWithEmojis(String text, TextStyle style) {
     final emojiStyle = style.copyWith(
-      fontFamily: "Emoji",
-    );
+        /* fontFamily: "Emoji", */
+        );
 
     var current = TextSpan(style: style);
     var textSpans = <TextSpan>[];

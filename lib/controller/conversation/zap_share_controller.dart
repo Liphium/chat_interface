@@ -55,7 +55,7 @@ class ZapShareController extends GetxController {
     step.value = "loading".tr;
     currentReceiver.value = null;
     currentConversation.value = null;
-    waiting.value = false;
+    //waiting.value = false;
     progress.value = 0.0;
     currentPart.value = 0;
     uploading = false;
@@ -65,7 +65,6 @@ class ZapShareController extends GetxController {
     uploadToken = null;
     filePath = null;
     chunksDir = null;
-    key = null;
 
     // Cancel the partSubscription if it exists and set it to null
     partSubscription?.cancel();
@@ -84,7 +83,6 @@ class ZapShareController extends GetxController {
       partSubscription?.cancel();
     }
     onTransactionEnd();
-    resetControllerState();
   }
 
   /// Open the window for zap share for a conversation
@@ -149,6 +147,9 @@ class ZapShareController extends GetxController {
       file = File(files[0].path);
     }
 
+    // Intialize the encryption key
+    key = randomSymmetricKey();
+
     // Start uploading the file
     filePath = file.path;
     final fileName = path.basename(file.path);
@@ -163,7 +164,7 @@ class ZapShareController extends GetxController {
       handler: (event) {
         if (!event.data["success"]) {
           sendLog("creating transaction failed");
-          showErrorPopup("error".tr, "liveshare.create_failed".tr);
+          showErrorPopup("error".tr, "zapshare.create_failed".tr);
           return;
         }
 
@@ -175,7 +176,7 @@ class ZapShareController extends GetxController {
         sendLog("waiting now..");
 
         // Send live share message
-        final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, fileName, randomSymmetricKey());
+        final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, fileName, key!);
         sendActualMessage(false.obs, conversationId, msg.MessageType.liveshare, [], container.toJson(), "", () => {});
       },
     );
@@ -189,7 +190,7 @@ class ZapShareController extends GetxController {
       sendLog("why would the server ask for parts when zap share isn't even running :smug:");
       return;
     }
-    waiting.value = false;
+    //waiting.value = false;
     step.value = "chat.zapshare.uploading".tr;
     final start = event.data["start"] as int;
     currentPart.value = start;
@@ -207,21 +208,21 @@ class ZapShareController extends GetxController {
     final stream = file.openRead((start - 1) * chunkSize, start * chunkSize);
     final chunkFile = File("${chunksDir!.path}/chunk_$start");
     await chunkFile.create();
-    final writeStream = chunkFile.openWrite();
+    final toEncrypt = <int>[];
 
     // Send the chunk once done
     stream.listen(
       (bytes) {
-        // Encrypt the bytes using the key
-        final encrypted = encryptSymmetricBytes(Uint8List.fromList(bytes), key!);
-        writeStream.add(encrypted);
+        toEncrypt.addAll(bytes);
       },
       cancelOnError: true,
       onError: (e) => sendLog(e),
       onDone: () async {
-        // Save chunk to file
-        await writeStream.flush();
-        await writeStream.close();
+        sendLog("writing..");
+        // Encrypt all the bytes and write them to the chunk file
+        final encrypted = encryptSymmetricBytes(Uint8List.fromList(toEncrypt), key!);
+        await chunkFile.writeAsBytes(encrypted.toList());
+        sendLog(await chunkFile.length());
 
         // Send chunk
         final formData = d.FormData.fromMap({
@@ -264,6 +265,7 @@ class ZapShareController extends GetxController {
     uploadToken = null;
     await chunksDir?.delete(recursive: true);
     chunksDir = null;
+    resetControllerState();
   }
 
   //* Everything about receiving starts here
@@ -275,7 +277,7 @@ class ZapShareController extends GetxController {
       return;
     }
     if (friendId == StatusController.ownAccountId) {
-      showErrorPopup("error", "chat.liveshare.not_send_self");
+      showErrorPopup("error", "chat.zapshare.not_send_self");
       return;
     }
     resetControllerState();
@@ -288,11 +290,12 @@ class ZapShareController extends GetxController {
       {"id": container.id, "token": container.token},
     );
     if (!json["success"]) {
-      showErrorPopup("error", "chat.liveshare.not_found");
+      showErrorPopup("error", "chat.zapshare.not_found");
       return;
     }
     endPart = (json["size"].toDouble() / chunkSize.toDouble()).ceil();
 
+    sendLog(base64Encode(container.key.extractBytes()));
     key = container.key;
     currentConversation.value = conversation;
     currentReceiver.value = friendId;
@@ -317,7 +320,7 @@ class ZapShareController extends GetxController {
 
     // Create receiving directory
     var tempDir = await getTemporaryDirectory();
-    tempDir = Directory("${tempDir.path}/liphium");
+    tempDir = Directory(path.join(tempDir.path, "liphium"));
     await tempDir.create();
     final receiveDir = await tempDir.createTemp("liveshare-recv");
     await receiveDir.create();
@@ -335,6 +338,7 @@ class ZapShareController extends GetxController {
     Timer? downloadTimer;
     partSubscription = body.stream.listen(
       (event) async {
+        sendLog("hi hi");
         // Parse the server sent event (Format: data: <data>\n\n)
         final packet = String.fromCharCodes(event);
         final data = packet.substring(6).trim();

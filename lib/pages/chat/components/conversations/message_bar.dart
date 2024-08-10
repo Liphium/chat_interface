@@ -100,7 +100,7 @@ class _MessageBarState extends State<MessageBar> {
                           zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
                         },
                         icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
-                        tooltip: "chat.liveshare".tr,
+                        tooltip: "chat.zapshare".tr,
                       ),
                       IgnorePointer(
                         child: SizedBox(

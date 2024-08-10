@@ -123,7 +123,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                             children: [
                               Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                               horizontalSpacing(elementSpacing),
-                              Text("chat.liveshare_request".tr, style: Get.theme.textTheme.labelLarge),
+                              Text("chat.zapshare_request".tr, style: Get.theme.textTheme.labelLarge),
                             ],
                           ),
                         ),
@@ -181,7 +181,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                                 Flexible(
                                   child: Obx(
                                     () => Text(
-                                      available.value ? formatFileSize(size.value) : 'chat.liveshare.not_found'.tr,
+                                      available.value ? formatFileSize(size.value) : 'chat.zapshare.not_found'.tr,
                                       style: Get.theme.textTheme.bodyMedium,
                                     ),
                                   ),

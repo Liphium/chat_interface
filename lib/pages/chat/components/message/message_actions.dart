@@ -64,7 +64,7 @@ class AnswerData {
       case MessageType.call:
         return "chat.space_invite".tr;
       case MessageType.liveshare:
-        return "chat.liveshare_request".tr;
+        return "chat.zapshare_request".tr;
       case MessageType.system:
         return "under.dev".tr;
     }

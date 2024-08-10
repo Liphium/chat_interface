@@ -298,7 +298,7 @@ class _MessageInputState extends State<MessageInput> {
                                         },
                                         child: Text(
                                           emoji.emoji,
-                                          style: Get.theme.textTheme.titleLarge!.copyWith(fontFamily: "Emoji", fontSize: 30),
+                                          style: Get.theme.textTheme.titleLarge!.copyWith(/* fontFamily: "Emoji", */ fontSize: 30),
                                         ),
                                       ),
                                     ),
