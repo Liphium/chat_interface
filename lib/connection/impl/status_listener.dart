@@ -53,6 +53,7 @@ void setupStatusListener() {
 }
 
 Friend? handleStatus(Event event) {
+  sendLog(event.data.toString());
   final convId = event.data["c"] as String;
   final owner = event.data["o"] as String;
   final message = event.data["st"] as String;
@@ -63,7 +64,6 @@ Friend? handleStatus(Event event) {
   if (owner == StatusController.ownAccountId) {
     controller.friends[owner]!.loadStatus(message);
     statusController.fromStatusJson(decryptSymmetric(message, profileKey));
-
     // Load own shared content
     final (container, shouldUpdate) = _dataToContainer(statusController.ownContainer.value, event.data["d"], profileKey);
     if (shouldUpdate) {
