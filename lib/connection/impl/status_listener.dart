@@ -53,7 +53,6 @@ void setupStatusListener() {
 }
 
 Friend? handleStatus(Event event) {
-  sendLog(event.data.toString());
   final convId = event.data["c"] as String;
   final owner = event.data["o"] as String;
   final message = event.data["st"] as String;
