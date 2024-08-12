@@ -62,6 +62,7 @@ class _ZapShareWindowState extends State<ZapShareWindow> {
               const Spacer(),
               Obx(
                 () => CircularProgressIndicator(
+                  backgroundColor: Get.theme.colorScheme.primary,
                   value: controller.waiting.value ? null : controller.progress.value,
                   valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                 ),

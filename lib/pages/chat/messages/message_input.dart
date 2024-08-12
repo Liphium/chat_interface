@@ -12,6 +12,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -41,6 +42,9 @@ class _MessageInputState extends State<MessageInput> {
   final GlobalKey _libraryKey = GlobalKey();
   // final GlobalKey _emojiKey = GlobalKey();
   final _emojiSuggestions = <Emoji>[].obs;
+
+  // For a little hack to prevent the answers from disappearing instantly
+  String? _previousAccount;
 
   @override
   void dispose() {
@@ -127,7 +131,7 @@ class _MessageInputState extends State<MessageInput> {
           _emojiSuggestions.clear();
           _inputFocus.requestFocus();
           // Change the selection to the calculated offset
-          final newOffset = cursorPos - query.length + 2;
+          final newOffset = cursorPos - query.length + 3;
           _message.selection = _message.selection.copyWith(
             baseOffset: newOffset,
             extentOffset: newOffset,
@@ -223,24 +227,29 @@ class _MessageInputState extends State<MessageInput> {
                   vertical: elementSpacing,
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //* Reply preview
                     Obx(
                       () {
                         final answer = MessageSendHelper.currentDraft.value?.answer.value;
-
-                        if (MessageSendHelper.currentDraft.value == null || answer == null) {
-                          return const SizedBox();
+                        if (answer != null) {
+                          _previousAccount = answer.senderAccount;
                         }
+
                         return Animate(
                           effects: [
                             ExpandEffect(
-                              duration: 250.ms,
+                              duration: 300.ms,
                               curve: Curves.easeInOut,
                               axis: Axis.vertical,
+                              alignment: Alignment.center,
+                            ),
+                            FadeEffect(
+                              duration: 300.ms,
                             )
                           ],
-                          target: 1,
+                          target: MessageSendHelper.currentDraft.value == null || answer == null ? 0 : 1,
                           child: Padding(
                             padding: const EdgeInsets.all(elementSpacing),
                             child: Row(
@@ -250,7 +259,7 @@ class _MessageInputState extends State<MessageInput> {
                                 Expanded(
                                   child: Text(
                                     "message.reply.text".trParams({
-                                      "name": Get.find<FriendController>().friends[answer.senderAccount]?.name ?? Friend.unknown(answer.senderAccount).name,
+                                      "name": _previousAccount == null ? "tf" : Get.find<FriendController>().friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
                                     }),
                                     style: theme.textTheme.labelMedium,
                                     maxLines: 1,
@@ -281,30 +290,36 @@ class _MessageInputState extends State<MessageInput> {
                         }
                         return Padding(
                           padding: const EdgeInsets.all(elementSpacing),
-                          child: Row(
-                            children: [
-                              for (var emoji in _emojiSuggestions)
-                                Padding(
-                                  padding: const EdgeInsets.only(right: elementSpacing),
-                                  child: Tooltip(
-                                    key: ValueKey(emoji.shortName),
-                                    exitDuration: 0.ms,
-                                    message: ":${emoji.shortName}:",
-                                    child: Center(
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(1000),
-                                        onTap: () {
-                                          doEmojiSuggestion(emoji.emoji);
-                                        },
-                                        child: Text(
-                                          emoji.emoji,
-                                          style: Get.theme.textTheme.titleLarge!.copyWith(/* fontFamily: "Emoji", */ fontSize: 30),
+                          child: ScrollConfiguration(
+                            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  for (var emoji in _emojiSuggestions)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: elementSpacing),
+                                      child: Tooltip(
+                                        key: ValueKey(emoji.shortName),
+                                        exitDuration: 0.ms,
+                                        message: ":${emoji.shortName}:",
+                                        child: Center(
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(1000),
+                                            onTap: () {
+                                              doEmojiSuggestion(emoji.emoji);
+                                            },
+                                            child: Text(
+                                              emoji.emoji,
+                                              style: Get.theme.textTheme.titleLarge!.copyWith(/* fontFamily: "Emoji", */ fontSize: 30),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                            ],
+                                ],
+                              ),
+                            ),
                           ),
                         );
                       },
