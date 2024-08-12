@@ -43,6 +43,7 @@ class ZapShareController extends GetxController {
   String? filePath;
   Directory? chunksDir;
   SecureKey? key;
+  Timer? zapper;
   StreamSubscription<Uint8List>? partSubscription;
 
   static const chunkSize = 512 * 1024;
@@ -55,7 +56,6 @@ class ZapShareController extends GetxController {
     step.value = "loading".tr;
     currentReceiver.value = null;
     currentConversation.value = null;
-    //waiting.value = false;
     progress.value = 0.0;
     currentPart.value = 0;
     uploading = false;
@@ -64,7 +64,6 @@ class ZapShareController extends GetxController {
     transactionToken = null;
     uploadToken = null;
     filePath = null;
-    chunksDir = null;
 
     // Cancel the partSubscription if it exists and set it to null
     partSubscription?.cancel();
@@ -173,7 +172,6 @@ class ZapShareController extends GetxController {
         transactionId = event.data["id"];
         transactionToken = event.data["token"];
         uploadToken = event.data["upload_token"];
-        sendLog("waiting now..");
 
         // Send live share message
         final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, fileName, key!);
@@ -182,35 +180,80 @@ class ZapShareController extends GetxController {
     );
   }
 
-  int sending = 0;
+  // For the zapper to know what to download
+  int currentlySending = 0;
+  int currentEndPart = 0;
 
-  /// Called for every file part sending event (only when sending)
-  void sendFilePart(Event event) async {
+  /// Zap deamon
+  void _startZapper(int start, int end) {
+    if (zapper != null) {
+      return;
+    }
+    waiting.value = false;
+    step.value = "chat.zapshare.uploading".tr;
+
+    // Set the current variables
+    currentlySending = start - 1;
+    currentEndPart = end;
+    bool uploaded = true;
+    int tries = 0;
+
+    // Start a new periodic timer (no while true loop cause it's not needed, a fast timer will be enough)
+    zapper = Timer.periodic(10.ms, (timer) async {
+      // Cancel if the thing isn't running anymore
+      if (!isRunning()) {
+        timer.cancel();
+      }
+
+      // Cancel if it took to many tries to upload the current part
+      if (tries > 5) {
+        timer.cancel();
+        cancel();
+        return;
+      }
+
+      // Check if new parts can be sent
+      if (currentlySending >= currentEndPart || !uploaded) {
+        return;
+      }
+
+      // Update all the variables to send the new part
+      currentlySending++;
+      progress.value = currentlySending / endPart;
+      currentPart.value = currentlySending;
+
+      // Send a new part
+      uploaded = false;
+      final success = await _sendActualFilePart(currentlySending);
+      if (!success) {
+        // Retry in case of an error and wait a little bit
+        currentlySending--;
+        showErrorPopup("error", "server.error");
+        tries++;
+        await Future.delayed(2000.ms);
+      } else {
+        tries = 0;
+      }
+      uploaded = true;
+    });
+  }
+
+  /// Upload the actual file part to the server
+  Future<bool> _sendActualFilePart(int chunk) async {
     if (!isRunning()) {
       sendLog("why would the server ask for parts when zap share isn't even running :smug:");
-      return;
+      return false;
     }
-    //waiting.value = false;
-    step.value = "chat.zapshare.uploading".tr;
-    final start = event.data["start"] as int;
-    currentPart.value = start;
-    //final end = event.data["end"] as int;
-    if (sending >= start) {
-      return;
-    }
-    final prevSending = sending;
-    sending = start;
-    progress.value = start / endPart;
-
-    final file = File(filePath!);
 
     // Read the original file and extract one chunk
-    final stream = file.openRead((start - 1) * chunkSize, start * chunkSize);
-    final chunkFile = File("${chunksDir!.path}/chunk_$start");
+    final file = File(filePath!);
+    final stream = file.openRead((chunk - 1) * chunkSize, chunk * chunkSize);
+    final chunkFile = File("${chunksDir!.path}/chunk_$chunk");
     await chunkFile.create();
     final toEncrypt = <int>[];
 
     // Send the chunk once done
+    final completer = Completer<bool>();
     stream.listen(
       (bytes) {
         toEncrypt.addAll(bytes);
@@ -218,11 +261,9 @@ class ZapShareController extends GetxController {
       cancelOnError: true,
       onError: (e) => sendLog(e),
       onDone: () async {
-        sendLog("writing..");
         // Encrypt all the bytes and write them to the chunk file
         final encrypted = encryptSymmetricBytes(Uint8List.fromList(toEncrypt), key!);
         await chunkFile.writeAsBytes(encrypted.toList());
-        sendLog(await chunkFile.length());
 
         // Send chunk
         final formData = d.FormData.fromMap({
@@ -234,21 +275,58 @@ class ZapShareController extends GetxController {
           nodePath("/auth/liveshare/upload"),
           data: formData,
           options: d.Options(
-            validateStatus: (status) => status != 404,
+            validateStatus: (status) => true,
             headers: {
               authorizationHeader: authorizationValue(),
             },
           ),
         );
-        if (res.statusCode != 200) {
-          sending = prevSending;
-          sendLog("Failed to send chunk $start");
+
+        // Could've been stopped at this point
+        if (!isRunning()) {
+          completer.complete(true);
           return;
         }
 
-        sendLog("sent chunk $start");
+        if (res.statusCode != 200) {
+          showErrorPopup("error", "server.error");
+          sendLog("Failed to send chunk $chunk");
+          completer.complete(false);
+          return;
+        }
+
+        final json = jsonDecode(res.data);
+        if (!json["success"]) {
+          showErrorPopup("error", json["error"]);
+          completer.complete(false);
+          return;
+        }
+
+        completer.complete(true);
       },
     );
+
+    return completer.future;
+  }
+
+  int sending = 0;
+
+  /// Called for every file part sending request by the server
+  void onFilePartRequest(Event event) async {
+    if (!isRunning()) {
+      sendLog("why would the server ask for parts when zap share isn't even running :smug:");
+      return;
+    }
+
+    // Get the data from the event
+    final start = event.data["start"] as int;
+    final end = event.data["end"] as int;
+
+    // Update the end (cause the zapper won't anymore cause it's already started)
+    currentEndPart = end;
+
+    // Start the zapper (in case it isn't started yet)
+    _startZapper(start, end);
   }
 
   /// Called when a transaction is ended (only when sending)
@@ -262,9 +340,18 @@ class ZapShareController extends GetxController {
     transactionId = null;
     transactionToken = null;
     filePath = null;
+    zapper?.cancel();
+    zapper = null;
     uploadToken = null;
-    await chunksDir?.delete(recursive: true);
-    chunksDir = null;
+    Timer.periodic(2000.ms, (timer) async {
+      try {
+        await chunksDir?.delete(recursive: true);
+        chunksDir = null;
+        timer.cancel();
+      } catch (e) {
+        sendLog("couldn't delete chunk directory: $e");
+      }
+    });
     resetControllerState();
   }
 
@@ -348,14 +435,12 @@ class ZapShareController extends GetxController {
           return;
         }
 
-        sendLog("can now download until $data");
-
         maxChunk = int.parse(data);
         if (currentChunk == 0) {
           currentChunk = maxChunk;
 
           // Start a timer for downloading the parts
-          downloadTimer = Timer.periodic(20.ms, (timer) async {
+          downloadTimer = Timer.periodic(10.ms, (timer) async {
             if (downloading) return;
             if (completed) {
               timer.cancel();
@@ -385,16 +470,16 @@ class ZapShareController extends GetxController {
               "${receiveDir.path}/chunk_$currentChunk",
               data: formData,
               options: d.Options(
-                validateStatus: (status) => status != 404,
+                validateStatus: (status) => true,
               ),
             );
 
             if (res.statusCode != 200) {
               sendLog("ERROR DOWNLOADING CHUNK $currentChunk");
+              showErrorPopup("error", "server.error");
               return;
             }
 
-            sendLog("downloaded chunk $currentChunk");
             downloading = false;
             currentPart.value = currentChunk;
 
@@ -414,12 +499,12 @@ class ZapShareController extends GetxController {
               callback: (complete) async {
                 completed = complete;
                 if (completed) {
+                  sendLog("download completed, stitching..");
                   await _stitchFileTogether(container.fileName, receiveDir);
                   await receiveDir.delete(recursive: true);
                   OpenAppFile.open((await getDownloadsDirectory())!.path);
                   partSubscription?.cancel();
                 }
-                sendLog("is completed: $complete");
               },
               onError: () => sendLog("error"),
             );
@@ -453,7 +538,7 @@ class ZapShareController extends GetxController {
         "receiver": receiverId,
       }),
       options: d.Options(
-        validateStatus: (status) => status != 404,
+        validateStatus: (status) => true,
       ),
     );
 

@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 void setupLiveshareListening() {
   connector.listen("transaction_send_part", (event) {
-    Get.find<ZapShareController>().sendFilePart(event);
+    Get.find<ZapShareController>().onFilePartRequest(event);
   });
 
   connector.listen("transaction_end", (event) {

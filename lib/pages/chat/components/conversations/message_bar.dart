@@ -4,7 +4,6 @@ import 'package:chat_interface/controller/conversation/zap_share_controller.dart
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
-import 'package:chat_interface/pages/chat/components/conversations/zap_share_window.dart';
 import 'package:chat_interface/pages/chat/conversation_info_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
@@ -110,7 +109,7 @@ class _MessageBarState extends State<MessageBar> {
                             padding: const EdgeInsets.all(2.0),
                             child: Obx(
                               () => CircularProgressIndicator(
-                                value: zapShareController.waiting.value ? null : zapShareController.progress.value,
+                                value: zapShareController.waiting.value ? null : zapShareController.progress.value.clamp(0, 1),
                                 strokeWidth: 3,
                                 valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                               ),
