@@ -251,7 +251,6 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                       //* Desktop verified indicator
                       if (!isMobileMode()) horizontalSpacing(defaultSpacing),
 
-                      //* Desktop verified indicator
                       if (!isMobileMode())
                         Obx(() {
                           final verified = widget.message.verified.value;

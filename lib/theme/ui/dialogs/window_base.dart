@@ -262,7 +262,7 @@ class ContextMenuData {
   const ContextMenuData(this.start, this.fromTop, this.fromLeft);
 
   // Compute the position of the context menu based on a widget it should be next to
-  factory ContextMenuData.fromKey(GlobalKey key, {above = false, right = false, below = false}) {
+  factory ContextMenuData.fromKey(GlobalKey key, {bool above = false, bool right = false, bool below = false}) {
     final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
     var position = renderBox.localToGlobal(Offset.zero);
     final widgetDimensions = renderBox.size;

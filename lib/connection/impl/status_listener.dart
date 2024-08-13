@@ -63,7 +63,6 @@ Friend? handleStatus(Event event) {
   if (owner == StatusController.ownAccountId) {
     controller.friends[owner]!.loadStatus(message);
     statusController.fromStatusJson(decryptSymmetric(message, profileKey));
-
     // Load own shared content
     final (container, shouldUpdate) = _dataToContainer(statusController.ownContainer.value, event.data["d"], profileKey);
     if (shouldUpdate) {

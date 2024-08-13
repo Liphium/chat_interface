@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   file_selector_windows
+  flutter_secure_storage_windows
   flutter_webrtc
   just_audio_windows
   livekit_client

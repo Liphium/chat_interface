@@ -28,6 +28,28 @@ class TabletopPainter extends CustomPainter {
     canvas.drawRect(rect, background);
     canvas.clipRect(rect);
 
+    // Draw a grid
+    /*
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.rotate(rotation);
+    canvas.translate(-size.width / 2, -size.height / 2);
+    final paint = Paint()
+      ..color = Get.theme.colorScheme.primaryContainer
+      ..strokeWidth = 1.0;
+
+    final gridSize = 100.0 * scale;
+
+    for (double x = (offset.dx * scale % gridSize) - gridSize; x < size.width; x += gridSize) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    for (double y = (offset.dy * scale % gridSize) - gridSize; y < size.height; y += gridSize) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+    canvas.restore();
+    */
+
     // Rotate and stuff
     canvas.save();
     canvas.rotate(rotation);
@@ -38,30 +60,19 @@ class TabletopPainter extends CustomPainter {
     controller.hoveringObjects = controller.raycast(mousePosition);
 
     for (var object in controller.objects.values) {
-      if (controller.hoveringObjects.contains(object) || controller.heldObject == object) {
+      if (controller.hoveringObjects.contains(object)) {
         continue;
       }
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
       object.scale.setValue(1.0);
-      object.rotation.setValue(0);
+      object.unhoverRotation();
       drawObject(canvas, location, object, now);
     }
 
     for (var object in controller.hoveringObjects) {
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
-      object.rotation.setValue(-rotation);
+      object.hoverRotation(-rotation);
       drawObject(canvas, location, object, now);
-    }
-
-    // Render held object in drop mode
-    if (controller.dropMode && controller.heldObject != null) {
-      final obj = controller.heldObject!;
-      final x = mousePosition.dx - obj.size.width / 2;
-      final y = mousePosition.dy - obj.size.height / 2;
-      drawObject(canvas, Offset(x, y), obj, now);
-    } else if (!controller.dropMode && controller.heldObject != null) {
-      final location = controller.heldObject!.location;
-      drawObject(canvas, location, controller.heldObject!, now);
     }
 
     // Render cursors
@@ -135,6 +146,9 @@ class TabletopPainter extends CustomPainter {
         object.positionOverwrite = true;
         object.positionX.setValue(calcX);
         object.positionY.setValue(calcY);
+        object.renderCard(canvas, Offset(x, y), controller, rect, true);
+
+        /*
         final imageRect = Rect.fromLTWH(0, 0, object.imageSize!.width, object.imageSize!.height);
         final scale = object.scale.value(now);
         canvas.save();
@@ -143,7 +157,7 @@ class TabletopPainter extends CustomPainter {
           -(x + width / 2) * ((scale - 1) / scale),
           -(y + height / 2) * ((scale - 1) / scale),
         );
-        canvas.clipRRect(RRect.fromRectAndRadius(rect, const Radius.circular(sectionSpacing * 2)));
+        canvas.clipRRect(RRect.fromRectAndRadius(rect, const Radius.circular(sectionSpacing)));
         canvas.drawImageRect(
           object.image!,
           imageRect,
@@ -152,6 +166,7 @@ class TabletopPainter extends CustomPainter {
         );
 
         canvas.restore();
+        */
         counterWidth -= width + defaultSpacing;
       }
     }

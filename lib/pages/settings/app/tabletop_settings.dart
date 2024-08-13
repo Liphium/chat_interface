@@ -19,6 +19,7 @@ import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
@@ -120,7 +121,6 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
 
   @override
   Widget build(BuildContext context) {
-    final themeHSL = HSLColor.fromColor(Get.theme.colorScheme.onPrimary);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -615,7 +615,10 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                                 borderRadius: BorderRadius.circular(defaultSpacing),
                               ),
                               child: IconButton(
-                                onPressed: () => Get.dialog(ImagePreviewWindow(file: file)),
+                                onPressed: () {
+                                  sendLog(card.width);
+                                  Get.dialog(ImagePreviewWindow(file: file));
+                                },
                                 icon: const Icon(Icons.launch),
                               ),
                             ),
@@ -700,12 +703,16 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     final controller = Get.find<AttachmentController>();
     _current.value = 0;
     for (var file in widget.files) {
+      // Upload the card to the server
       final response = await controller.uploadFile(UploadData(File(file.path)), StorageType.permanent, Constants.fileDeckTag);
       if (response.container == null) {
         Get.back(result: finished);
         showErrorPopup("error", response.message);
         return;
       }
+
+      // Precalculate the width and height of the card (part of the new standard)
+      await response.container!.precalculateWidthAndHeight();
       finished.add(response.container!);
       _current.value++;
     }

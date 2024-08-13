@@ -104,6 +104,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     switch (message.type) {
       case MessageType.text:
         renderer = BubblesMessageRenderer(
+          key: ValueKey(message.id),
           message: message,
           accountId: message.senderAccount,
           self: self,
@@ -113,6 +114,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
       case MessageType.call:
         renderer = BubblesSpaceMessageRenderer(
+          key: ValueKey(message.id),
           message: message,
           self: self,
           last: last,
@@ -121,6 +123,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
       case MessageType.liveshare:
         renderer = BubblesLiveshareMessageRenderer(
+          key: ValueKey(message.id),
           message: message,
           self: self,
           last: last,
@@ -129,6 +132,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
       case MessageType.system:
         renderer = BubblesSystemMessageRenderer(
+          key: ValueKey(message.id),
           message: message,
           accountId: message.senderAccount,
         );
@@ -140,7 +144,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     message.highlightCallback = null;
     final messageWidget = AutoScrollTag(
       index: widget.index,
-      key: ValueKey(message.id),
+      key: ValueKey("${message.id}-tag"),
       controller: widget.controller,
       child: SizedBox(
         key: _heightKey,

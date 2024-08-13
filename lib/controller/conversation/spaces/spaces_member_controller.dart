@@ -68,7 +68,6 @@ class SpaceMemberController extends GetxController {
     this.key = key;
 
     sub = api.createActionStream().listen((event) async {
-      sendLog("hi");
       if (members[ownId] == null) {
         sendLog("own member not there");
         return;

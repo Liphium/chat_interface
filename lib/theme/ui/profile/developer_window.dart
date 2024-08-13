@@ -31,7 +31,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           Text("Instance domain: ${connector.url ?? "Not connected"}", style: Get.textTheme.bodyMedium),
           verticalSpacing(elementSpacing),
           Text("Current account: ${StatusController.ownAccountId}", style: Get.textTheme.bodyMedium),
-          verticalSpacing(elementSpacing),
+          verticalSpacing(defaultSpacing),
           ProfileButton(
             icon: Icons.delete,
             label: "Delete all conversations (local)",

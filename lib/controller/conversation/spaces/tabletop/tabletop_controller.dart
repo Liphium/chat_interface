@@ -21,11 +21,9 @@ class TabletopController extends GetxController {
   final loading = false.obs;
   final enabled = false.obs;
 
-  /// If true, the next click will drop the held object and add it to the table
-  bool dropMode = false;
-
   /// Currently held object
   TableObject? heldObject;
+  bool movingAllowed = false;
   Offset? originalHeldObjectPosition;
   bool cancelledHolding = false;
 
@@ -56,9 +54,8 @@ class TabletopController extends GetxController {
     loading.value = false;
     enabled.value = false;
 
-    dropMode = false;
-
     heldObject = null;
+    movingAllowed = true;
     hoveringObjects.clear();
     inventory.clear();
     objects.clear();
@@ -120,19 +117,22 @@ class TabletopController extends GetxController {
   /// Called every tick
   void _handleTableTick() {
     // Send the location of the held object
-    if (heldObject != null && !dropMode) {
-      spaceConnector.sendAction(
-        Message("tobj_move", <String, dynamic>{
-          "id": heldObject!.id,
-          "x": heldObject!.location.dx,
-          "y": heldObject!.location.dy,
-        }),
-        handler: (event) {
-          if (!event.data["success"]) {
-            heldObject = null;
-          }
-        },
-      );
+    if (heldObject != null) {
+      if (movingAllowed) {
+        spaceConnector.sendAction(
+          Message("tobj_move", <String, dynamic>{
+            "id": heldObject!.id,
+            "x": heldObject!.location.dx,
+            "y": heldObject!.location.dy,
+          }),
+          handler: (event) {
+            if (!event.data["success"]) {
+              sendLog("movement not successful");
+              stopHoldingObject(error: true);
+            }
+          },
+        );
+      }
     }
 
     // Send mouse position if available
@@ -229,40 +229,55 @@ class TabletopController extends GetxController {
     return objects;
   }
 
-  void holdObject(TableObject object) {
-    dropMode = false;
-    heldObject = object;
-  }
-
-  void dropObject(TableObject object) {
-    dropMode = true;
-    heldObject = object;
-  }
-
-  /// Start holding an object in tabletop
+  /// Start holding an object in tabletop (also drops objects in case they don't exist)
   void startHoldingObject(TableObject object) async {
     // Check if it is a card from the inventory that should be dropped
+    var currentlyExists = false;
     if (object is CardObject && object.inventory) {
-      dropMode = true;
+      currentlyExists = false;
       object.inventory = false;
+      object.positionOverwrite = false;
       inventory.remove(object);
     } else {
-      dropMode = false;
+      currentlyExists = objects.containsKey(object.id);
     }
 
     // Set all the variables to start the object holding
     originalHeldObjectPosition = object.location;
     heldObject = object;
     cancelledHolding = false;
+    movingAllowed = false;
 
-    // Send an event to notify the server of the selection (only when not in drop mode)
-    if (!dropMode) {
-      final success = await object.select();
-      if (!success) {
-        showErrorPopup("error", "tabletop.object_already_held");
-        stopHoldingObject(error: true);
+    // add the object to the table if it doesn't exist
+    if (!currentlyExists) {
+      // Give it a start location
+      final x = mousePos.dx - object.size.width / 2;
+      final y = mousePos.dy - object.size.height / 2;
+      object.location = Offset(x, y);
+
+      // Add the object to the table
+      final result = await object.sendAdd();
+      if (!result) {
+        sendLog("FAILED TO ADD");
+        // Delete the object and make sure it's gone
+        if (heldObject == object) {
+          heldObject = null;
+        }
+        objects.remove(object.id);
+        return;
       }
     }
+
+    // Select the object
+    final success = await object.select();
+    if (!success) {
+      showErrorPopup("error", "tabletop.object_already_held");
+      stopHoldingObject(error: true);
+      return;
+    }
+
+    // Allow dragging of the object
+    movingAllowed = true;
   }
 
   /// Cancels the holding of an object and makes sure it's cancelled
@@ -273,6 +288,7 @@ class TabletopController extends GetxController {
     if (!error) {
       heldObject!.unselect();
     } else {
+      sendLog("error and lagback");
       // Reset the position in case it was an error
       heldObject!.location = originalHeldObjectPosition!;
       cancelledHolding = true;
@@ -280,6 +296,7 @@ class TabletopController extends GetxController {
 
     // Make sure the object is no longer held
     heldObject = null;
+    movingAllowed = false;
   }
 }
 
@@ -336,25 +353,40 @@ abstract class TableObject {
     this.location = location;
   }
 
-  double lastRotation = 0;
+  double lastRotation = -1;
   void rotate(double rot) {
-    lastRotation = rot;
+    sendLog(lastRotation);
+    if (lastRotation == -1) {
+      rotation.setValue(rot);
+    } else {
+      lastRotation = rot;
+    }
   }
 
   void newRotation(double rot) {
-    spaceConnector.sendAction(Message("tobj_rotate", <String, dynamic>{
-      "id": id,
-      "r": rot,
-    }));
+    // TODO: handle error when rotation fails
+    queue(() async {
+      spaceConnector.sendAction(Message("tobj_rotate", <String, dynamic>{
+        "id": id,
+        "r": rot,
+      }));
+    });
   }
 
+  /// Called every frame when the object is hovered
   void hoverRotation(double rot) {
-    lastRotation = rotation.realValue;
+    if (lastRotation == -1) {
+      lastRotation = rotation.realValue;
+    }
     rotation.setValue(rot);
   }
 
+  /// Called every frame when the object is no longer hovered
   void unhoverRotation() {
-    rotation.setValue(lastRotation);
+    if (lastRotation != -1) {
+      rotation.setValue(lastRotation);
+      lastRotation = -1;
+    }
   }
 
   /// DONT OVERWRITE THIS METHOD
@@ -386,7 +418,9 @@ abstract class TableObject {
   }
 
   /// Add a new object
-  void sendAdd() {
+  Future<bool> sendAdd() {
+    final completer = Completer<bool>();
+
     // Send to the server
     spaceConnector.sendAction(
       Message("tobj_create", <String, dynamic>{
@@ -401,13 +435,17 @@ abstract class TableObject {
       handler: (event) {
         if (!event.data["success"]) {
           sendLog("SOMETHING WENT WRONG");
+          completer.complete(false);
           return;
         }
         id = event.data["id"];
         sendLog("ADDING $id to table");
         Get.find<TabletopController>().addObject(this);
+        completer.complete(true);
       },
     );
+
+    return completer.future;
   }
 
   /// Remove an object
@@ -458,8 +496,15 @@ abstract class TableObject {
     return completer.future;
   }
 
+  // Boolean to make sure the object is not modified
+  bool currentlyModifying = false;
+
   /// Wait until the data can be modified
   void queue(Function() callback) {
+    if (currentlyModifying) {
+      return;
+    }
+    currentlyModifying = true;
     dataBeforeQueue = getData();
     spaceConnector.sendAction(
       Message("tobj_mqueue", {
@@ -491,6 +536,7 @@ abstract class TableObject {
         "height": size.height,
       }),
       handler: (event) {
+        currentlyModifying = false;
         // Reset data in case the modification wasn't successful
         if (!event.data["success"]) {
           if (dataBeforeQueue == null) {
@@ -519,6 +565,7 @@ class ContextMenuAction {
   final String label;
   final Color? color;
   final Color? iconColor;
+  final bool goBack;
   final Function(TabletopController) onTap;
 
   const ContextMenuAction({
@@ -526,6 +573,7 @@ class ContextMenuAction {
     required this.label,
     required this.onTap,
     this.category = false,
+    this.goBack = true,
     this.color,
     this.iconColor,
   });
@@ -535,12 +583,13 @@ class AnimatedDouble {
   static const animationDuration = 250;
   static const curve = Curves.ease;
 
+  final int duration;
   DateTime _start = DateTime.now();
 
   double lastValue = 0;
   late double _value;
 
-  AnimatedDouble(double value, {double from = 0.0}) {
+  AnimatedDouble(double value, {double from = 0.0, this.duration = animationDuration}) {
     _value = from;
     setValue(value, from: from);
   }
@@ -560,7 +609,7 @@ class AnimatedDouble {
   // Get an interpolated value
   double value(DateTime now) {
     final timeDifference = now.millisecondsSinceEpoch - _start.millisecondsSinceEpoch;
-    return lastValue + (_value - lastValue) * curve.transform(clampDouble(timeDifference / animationDuration, 0, 1));
+    return lastValue + (_value - lastValue) * curve.transform(clampDouble(timeDifference / duration, 0, 1));
   }
 
   get realValue => _value;

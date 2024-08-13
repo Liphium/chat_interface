@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/login/login_page.dart';
 import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +14,11 @@ class ProfileSetup extends Setup {
   @override
   Future<Widget?> load() async {
     // Check if the user has logged in already
-    final profile = await (db.select(db.setting)..where((tbl) => tbl.key.equals("tokens"))).getSingleOrNull();
+    final profile = await retrieveEncryptedValue("tokens");
     if (profile == null) return const LoginPage();
 
     // Load tokens from profile
-    loadTokensFromPayload(jsonDecode(profile.value));
+    loadTokensFromPayload(jsonDecode(profile));
 
     // Get the session id from the JWT token
     String session = getSessionFromJWT(sessionToken);
@@ -32,7 +32,7 @@ class ProfileSetup extends Setup {
     // Set new token (if refreshed)
     if (body["success"]) {
       loadTokensFromPayload(body);
-      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "tokens", value: tokensToPayload()));
+      await setEncryptedValue("tokens", tokensToPayload());
     } else {
       // Check if the session is not verified
       if (body["error"] == "session.not_verified") {

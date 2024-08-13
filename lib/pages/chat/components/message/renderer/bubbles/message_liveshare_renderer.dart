@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/live_share_controller.dart';
+import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -79,7 +79,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
   @override
   Widget build(BuildContext context) {
     Friend sender = widget.sender ?? Friend.system();
-    final controller = Get.find<LiveShareController>();
+    final controller = Get.find<ZapShareController>();
     container = LiveshareInviteContainer.fromJson(widget.message.content);
 
     return RepaintBoundary(
@@ -123,7 +123,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                             children: [
                               Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                               horizontalSpacing(elementSpacing),
-                              Text("chat.liveshare_request".tr, style: Get.theme.textTheme.labelLarge),
+                              Text("chat.zapshare_request".tr, style: Get.theme.textTheme.labelLarge),
                             ],
                           ),
                         ),
@@ -181,7 +181,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                                 Flexible(
                                   child: Obx(
                                     () => Text(
-                                      available.value ? formatFileSize(size.value) : 'chat.liveshare.not_found'.tr,
+                                      available.value ? formatFileSize(size.value) : 'chat.zapshare.not_found'.tr,
                                       style: Get.theme.textTheme.bodyMedium,
                                     ),
                                   ),
@@ -207,7 +207,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                             return Visibility(
                               visible: available.value && !widget.self,
                               child: IconButton(
-                                onPressed: () => Get.find<LiveShareController>().joinTransaction(widget.message.conversation, widget.message.senderAccount, container!),
+                                onPressed: () => Get.find<ZapShareController>().joinTransaction(widget.message.conversation, widget.message.senderAccount, container!),
                                 icon: const Icon(Icons.check),
                               ),
                             );

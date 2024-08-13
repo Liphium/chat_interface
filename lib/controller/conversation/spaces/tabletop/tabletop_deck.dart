@@ -6,6 +6,7 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,6 +19,10 @@ class DeckObject extends TableObject {
   /// to send all the card data to the server twice if a card is in there twice)
   final order = <String>[];
 
+  // The width and height of the current top card
+  final width = AnimatedDouble(500);
+  final height = AnimatedDouble(500);
+
   DeckObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.deck);
 
   factory DeckObject.createFromDeck(Offset location, TabletopDeck deck) {
@@ -28,37 +33,50 @@ class DeckObject extends TableObject {
         obj.order.add(card.id);
       }
     }
+    obj.setWidthAndHeight(replace: true);
+    obj.size = Size(obj.width.realValue, obj.height.realValue);
+
     return obj;
   }
 
   @override
   void render(Canvas canvas, Offset location, TabletopController controller) {
     // Draw a stack
-    canvas.drawRRect(
-      RRect.fromLTRBR(
-        location.dx,
-        location.dy + 50,
-        location.dx + size.width - 50,
-        location.dy + 50 + size.height - 50,
-        const Radius.circular(sectionSpacing * 2),
-      ),
-      Paint()..color = Get.theme.colorScheme.tertiary,
-    );
-    final rect = RRect.fromLTRBR(
-      location.dx + 50,
+    final now = DateTime.now();
+    final currentWidth = width.value(now);
+    final currentHeight = height.value(now);
+    final cardRect = RRect.fromLTRBR(
+      location.dx,
       location.dy,
-      location.dx + 50 + size.width - 50,
-      location.dy + size.height - 50,
+      location.dx + currentWidth,
+      location.dy + currentHeight,
+      const Radius.circular(sectionSpacing * 2),
+    );
+    canvas.drawRRect(
+      cardRect,
+      Paint()..color = Get.theme.colorScheme.primaryContainer,
+    );
+
+    // Draw the flipped icon on the card
+    CardObject.renderFlippedDecorations(canvas, cardRect.outerRect);
+
+    // Draw the counter
+    const counterSize = 200;
+    final rect = RRect.fromLTRBR(
+      location.dx + currentWidth / 2 - counterSize / 2,
+      location.dy + currentHeight / 2 - counterSize / 2,
+      location.dx + currentWidth / 2 + counterSize / 2,
+      location.dy + currentHeight / 2 + counterSize / 2,
       const Radius.circular(sectionSpacing * 2),
     );
     canvas.drawRRect(
       rect,
-      Paint()..color = Get.theme.colorScheme.onPrimary,
+      Paint()..color = Get.theme.colorScheme.inverseSurface,
     );
     var textSpan = TextSpan(
       text: order.length.toString(),
       style: TextStyle(
-        color: Get.theme.colorScheme.primary,
+        color: Get.theme.colorScheme.onPrimary,
         fontSize: 100,
         fontFamily: "Roboto Mono",
         fontWeight: FontWeight.bold,
@@ -83,6 +101,24 @@ class DeckObject extends TableObject {
       cards[card["id"]] = AttachmentContainer.fromJson(type, card);
     }
     order.addAll((json["order"] as List<dynamic>).cast<String>());
+    setWidthAndHeight(replace: false);
+  }
+
+  /// Refresh the current top card and set width and height of it
+  void setWidthAndHeight({bool replace = false}) {
+    final top = order.firstOrNull;
+    if (top != null) {
+      final card = cards[top]!;
+      final newSize = CardObject.normalizeSize(Size(card.width!.toDouble(), card.height!.toDouble()), CardObject.cardNormalizer);
+      if (replace) {
+        width.setRealValue(newSize.width);
+        height.setRealValue(newSize.height);
+      } else {
+        width.setValue(newSize.width);
+        height.setValue(newSize.height);
+      }
+      size = newSize;
+    }
   }
 
   @override
@@ -100,33 +136,25 @@ class DeckObject extends TableObject {
 
   @override
   void runAction(TabletopController controller) {
-    drawCard(controller);
+    drawCardIntoInventory(controller);
   }
 
-  /// Draw a card from the deck
-  void drawCard(TabletopController controller) async {
+  /// Draw a card from the deck into the inventory
+  void drawCardIntoInventory(TabletopController controller) async {
     if (order.isEmpty) {
       return;
     }
     queue(() async {
       final cardId = order.removeAt(0);
       final container = cards[cardId]!;
-
-      // Remove the card details if it isn't in the deck anymore
-      if (!order.contains(cardId)) {
-        cards.remove(cardId);
-      }
-
-      // Update the data on the server
-      final valid = await modifyData();
-      if (!valid) {
-        return;
-      }
-
-      // Prepare the card and add it to the drop mode
-      final card = await CardObject.downloadCard(container, controller.mousePos);
-      if (card == null) return;
-      controller.dropObject(card);
+      final obj = await CardObject.downloadCard(container, controller.mousePos);
+      setWidthAndHeight();
+      final result = await modifyData();
+      if (!result) return;
+      if (obj == null) return;
+      obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
+      obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
+      controller.inventory.add(obj);
     });
   }
 
@@ -158,26 +186,6 @@ class DeckObject extends TableObject {
   @override
   List<ContextMenuAction> getContextMenuAdditions() {
     return [
-      ContextMenuAction(
-        icon: Icons.login,
-        label: 'Draw into inventory',
-        onTap: (controller) async {
-          if (order.isEmpty) {
-            return;
-          }
-          queue(() async {
-            final cardId = order.removeAt(0);
-            final container = cards[cardId]!;
-            final obj = await CardObject.downloadCard(container, controller.mousePos);
-            final result = await modifyData();
-            if (!result) return;
-            if (obj == null) return;
-            obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
-            obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
-            controller.inventory.add(obj);
-          });
-        },
-      ),
       ContextMenuAction(
         icon: Icons.shuffle,
         label: 'Shuffle',
@@ -264,6 +272,10 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     child: InkWell(
                       onTap: () {
+                        if (deck.cards.any((card) => card.width == null || card.height == null)) {
+                          showErrorPopup("error", "tabletop.object.deck.incompatible");
+                          return;
+                        }
                         final object = DeckObject.createFromDeck(widget.location, deck);
                         Get.back(result: object);
                       },

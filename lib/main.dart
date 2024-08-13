@@ -68,21 +68,26 @@ void main(List<String> args) async {
     originalFunction(details);
   };
 
-  // Run everything in a zone for error collection
-  runZonedGuarded(
-    () async {
-      initApp(args);
-    },
-    (error, stack) {
-      LogManager.addError(error, stack);
-    },
-    zoneSpecification: ZoneSpecification(
-      print: (self, parent, zone, line) async {
-        await LogManager.addLog(line);
-        parent.print(zone, line);
+  if (isDebug) {
+    // In Debug mode, this stuff will be printed to the console anyway
+    initApp(args);
+  } else {
+    // Run everything in a zone for error collection
+    runZonedGuarded(
+      () async {
+        initApp(args);
       },
-    ),
-  );
+      (error, stack) {
+        LogManager.addError(error, stack);
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (self, parent, zone, line) async {
+          await LogManager.addLog(line);
+          parent.print(zone, line);
+        },
+      ),
+    );
+  }
 }
 
 /// App init function, start Liphium Chat
