@@ -229,6 +229,10 @@ class SpacesController extends GetxController {
             e2eeOptions: E2EEOptions(
               keyProvider: keyProvider,
             ),
+            defaultAudioPublishOptions: const AudioPublishOptions(
+              dtx: false,
+              audioBitrate: AudioPreset.musicHighQualityStereo,
+            ),
           ),
         );
         await keyProvider.setKey(base64Encode(key!.extractBytes()));
