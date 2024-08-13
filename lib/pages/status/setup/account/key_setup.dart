@@ -7,6 +7,7 @@ import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
+import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
@@ -34,7 +35,7 @@ class KeySetup extends Setup {
   Future<Widget?> load() async {
     // Get keys from the server
     final pubBody = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});
-    var privateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("private_key"))).getSingleOrNull();
+    var privateKey = await retrieveEncryptedValue("private_key");
 
     if (!pubBody["success"]) {
       final signatureKeyPair = generateSignatureKeyPair();
@@ -74,13 +75,14 @@ class KeySetup extends Setup {
       }
 
       // Insert private key into the database
-      privateKey = SettingData(key: "private_key", value: packagedPriv);
-      await db.into(db.setting).insertOnConflictUpdate(privateKey);
-      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "public_key", value: packagedPub));
+      privateKey = packagedPriv;
+      await setEncryptedValue("private_key", packagedPriv);
+      await setEncryptedValue("public_key", packagedPub);
       pubBody["key"] = packagedPub;
-      final signaturePrivateKey = SettingData(key: "signature_private_key", value: packagedSignaturePriv);
-      await db.into(db.setting).insertOnConflictUpdate(signaturePrivateKey);
-      await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "signature_public_key", value: packagedSignaturePub));
+
+      // Set the signature keys
+      await setEncryptedValue("signature_private_key", packagedSignaturePriv);
+      await setEncryptedValue("signature_public_key", packagedSignaturePub);
     } else {
       if (privateKey == null) {
         return await KeySetup.openKeySynchronization();
@@ -88,11 +90,11 @@ class KeySetup extends Setup {
     }
 
     // Check if the public keys match
-    var publicKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("public_key"))).getSingleOrNull();
+    var publicKey = await retrieveEncryptedValue("public_key");
     if (publicKey == null) {
       return const ErrorPage(title: "server.error");
     }
-    if (pubBody["key"] != publicKey.value) {
+    if (pubBody["key"] != publicKey) {
       return await KeySetup.openKeySynchronization();
     }
 
@@ -102,7 +104,7 @@ class KeySetup extends Setup {
       return ErrorPage(title: json["error"]);
     }
 
-    asymmetricKeyPair = toKeyPair(pubBody["key"], privateKey.value);
+    asymmetricKeyPair = toKeyPair(pubBody["key"], privateKey);
     final vaultInfo = ServerStoredInfo.untransform(json["vault"]);
     final profileInfo = ServerStoredInfo.untransform(json["profile"]);
     if (profileInfo.error || vaultInfo.error) {
@@ -112,13 +114,13 @@ class KeySetup extends Setup {
     vaultKey = unpackageSymmetricKey(vaultInfo.text);
 
     // Grab signature key from client database
-    final signaturePrivateKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("signature_private_key"))).getSingleOrNull();
-    final signaturePublicKey = await (db.select(db.setting)..where((tbl) => tbl.key.equals("signature_public_key"))).getSingleOrNull();
+    final signaturePrivateKey = await retrieveEncryptedValue("signature_private_key");
+    final signaturePublicKey = await retrieveEncryptedValue("signature_public_key");
     if (signaturePrivateKey == null || signaturePublicKey == null) {
       return const ErrorPage(title: "key.error");
     }
 
-    signatureKeyPair = toKeyPair(signaturePublicKey.value, signaturePrivateKey.value);
+    signatureKeyPair = toKeyPair(signaturePublicKey, signaturePrivateKey);
 
     return null;
   }
@@ -136,11 +138,11 @@ class KeySetup extends Setup {
       signature = getRandomString(6);
 
       // Insert all the values
-      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_pub", value: packagePublicKey(encryptionKeyPair.publicKey)));
-      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_priv", value: packagePrivateKey(encryptionKeyPair.secretKey)));
-      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_sig_pub", value: packagePublicKey(signatureKeyPair.publicKey)));
-      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_sig_priv", value: packagePrivateKey(signatureKeyPair.secretKey)));
-      db.setting.insertOnConflictUpdate(SettingData(key: "key_sync_sig", value: signature));
+      await setEncryptedValue("key_sync_pub", packagePublicKey(encryptionKeyPair.publicKey));
+      await setEncryptedValue("key_sync_priv", packagePrivateKey(encryptionKeyPair.secretKey));
+      await setEncryptedValue("key_sync_sig_pub", packagePublicKey(signatureKeyPair.publicKey));
+      await setEncryptedValue("key_sync_sig_priv", packagePrivateKey(signatureKeyPair.secretKey));
+      await setEncryptedValue("key_sync_sig", signature);
     } else {
       // Load the key pair and signature
       final syncPriv = await (db.setting.select()..where((t) => t.key.equals("key_sync_priv"))).getSingle();
@@ -298,10 +300,10 @@ class _KeyCodePageState extends State<KeyCodePage> {
       if (json["payload"] != null && json["payload"] != "") {
         final payload = decryptAsymmetricAnonymous(widget.encryptionKeyPair.publicKey, widget.encryptionKeyPair.secretKey, json["payload"]);
         final jsonPayload = jsonDecode(payload);
-        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "public_key", value: jsonPayload["pub"]));
-        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "private_key", value: jsonPayload["priv"]));
-        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "signature_public_key", value: jsonPayload["sig_pub"]));
-        await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "signature_private_key", value: jsonPayload["sig_priv"]));
+        await setEncryptedValue("public_key", jsonPayload["pub"]);
+        await setEncryptedValue("private_key", jsonPayload["priv"]);
+        await setEncryptedValue("signature_public_key", jsonPayload["sig_pub"]);
+        await setEncryptedValue("signature_private_key", jsonPayload["sig_priv"]);
         setupManager.restart();
       }
     });
