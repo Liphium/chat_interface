@@ -49,6 +49,7 @@ class GeneralTranslations extends Translations {
           'reset': 'Reset',
           'app.settings': 'App settings',
           'spaces': 'Spaces',
+          'page_switcher': 'Page @count/@max',
 
           // Placeholder
           'placeholder.domain': 'example.com',

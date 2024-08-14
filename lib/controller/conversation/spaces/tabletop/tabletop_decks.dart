@@ -75,12 +75,22 @@ class TabletopDeck {
   /// usecase is the type of storage to use for the cards (for downloaded ones it should be "cache" for example)
   void loadCards(StorageType usecase) async {
     final controller = Get.find<AttachmentController>();
+    bool removed = false;
     for (var card in encodedCards) {
       final type = await AttachmentController.checkLocations(card['id'], usecase, types: [StorageType.permanent, StorageType.cache]);
       final container = AttachmentContainer.fromJson(type, card);
       amounts[container.id] = card['amount'] ?? 1;
-      await controller.downloadAttachment(container);
+      final result = await controller.downloadAttachment(container);
+      if (!result || container.error.value) {
+        removed = true;
+        continue;
+      }
       cards.add(container);
+    }
+
+    // Save the deck in case cards have been removed because they don't exist anymore
+    if (removed) {
+      save();
     }
     encodedCards.clear();
   }

@@ -42,6 +42,11 @@ class AppSettingsTranslations extends Translations {
               'The file cache stores all files that have been automatically downloaded. This includes profile pictures and all other data you\'ve selected above. When it is full old files will automatically be deleted. You can select the size with the slider below or make it unlimited.',
           'settings.file.cache_type.unlimited': 'Unlimited',
           'settings.file.cache_type.size': 'Size',
+          'settings.file.cache.open_cache': 'Open cache folder',
+          'settings.file.cache.open_files': 'Open file folder',
+          'settings.file.uploaded.title': 'Uploaded files (@count)',
+          'settings.file.uploaded.description': 'You are currently using @current out of your available @max.',
+          'settings.file.uploaded.none': 'No uploaded files. Try to send messages or create a deck to upload files.',
           'settings.file.mb': 'MB',
           'settings.file.live_share': 'Live Share',
           'settings.file.live_share.description':
