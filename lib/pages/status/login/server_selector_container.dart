@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
+import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';

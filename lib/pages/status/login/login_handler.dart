@@ -1,6 +1,7 @@
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/login/login_choose_page.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/web.dart';
@@ -41,7 +42,7 @@ void loginStep(String token, String secret, AuthType type, {Function()? success,
 
   if (body.containsKey("refresh_token")) {
     loadTokensFromPayload(body);
-    await db.into(db.setting).insertOnConflictUpdate(SettingData(key: "tokens", value: tokensToPayload()));
+    await setEncryptedValue("tokens", tokensToPayload());
     success?.call();
     setupManager.next(open: true);
     return;

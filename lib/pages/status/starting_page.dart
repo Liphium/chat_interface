@@ -44,8 +44,8 @@ class _StartingPageState extends State<StartingPage> {
                 children: [
                   LinearProgressIndicator(
                     minHeight: 10,
-                    color: Get.theme.colorScheme.primary,
-                    backgroundColor: Get.theme.colorScheme.primaryContainer,
+                    color: Get.theme.colorScheme.onPrimary,
+                    backgroundColor: Get.theme.colorScheme.primary,
                   ),
                   //verticalSpacing(defaultSpacing),
                   //Obx(() => Text(setupManager.message.value.tr, style: Get.textTheme.labelLarge, )),

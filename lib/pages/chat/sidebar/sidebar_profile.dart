@@ -1,6 +1,10 @@
+import 'dart:math';
+
+import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -154,84 +158,154 @@ class _SidebarProfileState extends State<SidebarProfile> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                                child: Row(
-                              children: [
-                                UserAvatar(id: StatusController.ownAccountId, size: 40),
-                                horizontalSpacing(defaultSpacing * 0.75),
-                                Expanded(
-                                  child: Obx(
-                                    () => Visibility(
-                                      visible: !statusController.statusLoading.value,
-                                      replacement: Center(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(defaultSpacing),
-                                          child: SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 3.0,
-                                              color: Get.theme.colorScheme.onPrimary,
-                                            ),
-                                          ),
-                                        ),
+                            Obx(() {
+                              // Check if the thing is loading
+                              if (Get.find<ConnectionController>().loading.value) {
+                                return Row(
+                                  children: [
+                                    horizontalSpacing(defaultSpacing),
+                                    SizedBox(
+                                      width: 30,
+                                      height: 30,
+                                      child: CircularProgressIndicator(
+                                        color: Get.theme.colorScheme.onPrimary,
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          //* Profile name and status type
-                                          Row(
-                                            children: [
-                                              Flexible(
-                                                child: Obx(
-                                                  () => Text(
-                                                    statusController.displayName.value.text,
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: theme.textTheme.titleMedium,
-                                                    textHeightBehavior: noTextHeight,
-                                                  ),
+                                    ),
+                                    horizontalSpacing(defaultSpacing),
+                                    Text("loading".tr, style: Get.textTheme.labelLarge),
+                                  ],
+                                );
+                              }
+
+                              // Check if the thing is connected
+                              if (!Get.find<ConnectionController>().connected.value) {
+                                return Row(
+                                  children: [
+                                    horizontalSpacing(defaultSpacing),
+                                    Icon(
+                                      Icons.cloud_off,
+                                      color: Get.theme.colorScheme.onPrimary,
+                                    ),
+                                    horizontalSpacing(defaultSpacing),
+                                    Text("offline".tr, style: Get.textTheme.labelLarge),
+                                  ],
+                                );
+                              }
+
+                              return Expanded(
+                                child: Row(
+                                  children: [
+                                    UserAvatar(id: StatusController.ownAccountId, size: 40),
+                                    horizontalSpacing(defaultSpacing),
+                                    Expanded(
+                                      child: Obx(
+                                        () => Visibility(
+                                          visible: !statusController.statusLoading.value,
+                                          replacement: Center(
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(defaultSpacing),
+                                              child: SizedBox(
+                                                height: 20,
+                                                width: 20,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 3.0,
+                                                  color: Get.theme.colorScheme.onPrimary,
                                                 ),
                                               ),
-                                              horizontalSpacing(defaultSpacing),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              //* Profile name and status type
+                                              Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: Obx(
+                                                      () => Text(
+                                                        statusController.displayName.value.text,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: theme.textTheme.titleMedium,
+                                                        textHeightBehavior: noTextHeight,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  horizontalSpacing(defaultSpacing),
+                                                  Obx(
+                                                    () => StatusRenderer(status: statusController.type.value, text: false),
+                                                  )
+                                                ],
+                                              ),
+
+                                              //* Status message
                                               Obx(
-                                                () => StatusRenderer(status: statusController.type.value, text: false),
+                                                () => Visibility(
+                                                  visible: statusController.status.value != "",
+                                                  child: Column(
+                                                    children: [
+                                                      verticalSpacing(defaultSpacing * 0.25),
+
+                                                      //* Status message
+                                                      Text(
+                                                        statusController.status.value,
+                                                        style: theme.textTheme.bodySmall,
+                                                        textHeightBehavior: noTextHeight,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
                                               )
                                             ],
                                           ),
-
-                                          //* Status message
-                                          Obx(
-                                            () => Visibility(
-                                              visible: statusController.status.value != "",
-                                              child: Column(
-                                                children: [
-                                                  verticalSpacing(defaultSpacing * 0.25),
-
-                                                  //* Status message
-                                                  Text(
-                                                    statusController.status.value,
-                                                    style: theme.textTheme.bodySmall,
-                                                    textHeightBehavior: noTextHeight,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            )),
+                                    )
+                                  ],
+                                ),
+                              );
+                            }),
                             horizontalSpacing(defaultSpacing),
                             Row(
                               children: [
-                                IconButton(
-                                  onPressed: () => showModal(const FriendsPage()),
-                                  icon: const Icon(Icons.group, color: Colors.white),
+                                SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: Stack(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () => showModal(const FriendsPage()),
+                                        icon: const Icon(Icons.group, color: Colors.white),
+                                      ),
+                                      Obx(() {
+                                        final controller = Get.find<RequestController>();
+                                        if (controller.requests.isEmpty) {
+                                          return const SizedBox();
+                                        }
+                                        final amount = controller.requests.length;
+
+                                        return Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: Container(
+                                            width: 20,
+                                            height: 20,
+                                            decoration: BoxDecoration(
+                                              color: Get.theme.colorScheme.error,
+                                              borderRadius: BorderRadius.circular(100),
+                                            ),
+                                            padding: const EdgeInsets.only(bottom: elementSpacing),
+                                            child: Center(
+                                              child: Text(
+                                                min(amount, 9).toString(),
+                                                style: Get.textTheme.labelSmall!.copyWith(fontSize: 12),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                  ),
                                 ),
                                 horizontalSpacing(defaultSpacing * 0.5),
                                 IconButton(

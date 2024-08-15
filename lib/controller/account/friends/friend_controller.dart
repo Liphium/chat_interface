@@ -11,9 +11,9 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
-import 'package:chat_interface/pages/status/setup/account/friends_setup.dart';
-import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
-import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
+import 'package:chat_interface/controller/current/steps/friends_setup.dart';
+import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/controller/current/steps/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
@@ -328,6 +328,12 @@ class Friend {
     }
     profilePictureDataNull = false;
 
+    // Check if there is a profile picture
+    if (data.pictureContainer == "") {
+      return;
+    }
+
+    // Load the profile picture
     final json = jsonDecode(data.pictureContainer);
     final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
     profilePicture = AttachmentContainer.fromJson(type, json);

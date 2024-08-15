@@ -6,9 +6,11 @@ import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
+import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
@@ -55,12 +57,22 @@ class _SidebarState extends State<Sidebar> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Show error from the connection
+              SafeArea(
+                bottom: false,
+                child: AnimatedErrorContainer(
+                  padding: const EdgeInsets.only(
+                    bottom: defaultSpacing,
+                    right: defaultSpacing,
+                    left: defaultSpacing,
+                  ),
+                  message: Get.find<ConnectionController>().error,
+                ),
+              ),
+
               //* Search field
               SafeArea(
                 bottom: false,
-                top: true,
-                right: true,
-                left: true,
                 child: SizedBox(
                   height: 48,
                   child: Padding(

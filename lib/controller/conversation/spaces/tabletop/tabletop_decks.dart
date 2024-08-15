@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:chat_interface/pages/status/setup/account/vault_setup.dart';
+import 'package:chat_interface/controller/current/steps/vault_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/web.dart';
 

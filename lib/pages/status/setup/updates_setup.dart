@@ -178,7 +178,7 @@ void installApp(RxString status, ReleaseData data) async {
 
     // Restart the setup
     await Future.delayed(const Duration(seconds: 3));
-    setupManager.restart();
+    setupManager.retry();
   } catch (e) {
     status.value = "Error during installation ($step): $e";
   }

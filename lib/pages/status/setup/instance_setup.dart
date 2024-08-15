@@ -15,10 +15,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:sodium_libs/sodium_libs.dart';
 
-import '../../../../database/database.dart';
-import '../../../../main.dart';
-import '../../../../util/vertical_spacing.dart';
-import '../setup_manager.dart';
+import '../../../database/database.dart';
+import '../../../main.dart';
+import '../../../util/vertical_spacing.dart';
+import 'setup_manager.dart';
 
 const secureStorage = FlutterSecureStorage(
   aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -59,6 +59,14 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
   // Get the path to the instance
   final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
   final file = File(path.join(dbFolder, '$name.db'));
+
+  // Clear the temp directory for zap share
+  final folder = path.join((await getTemporaryDirectory()).path, "liphium");
+  try {
+    await File(folder).delete(recursive: true);
+  } catch (e) {
+    sendLog("seems like the cache folder is already deleted");
+  }
 
   // Open the encrypted database (code was taken from the drift encrypted example)
   db = Database(NativeDatabase.createInBackground(
@@ -216,7 +224,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                                   onPressed: () async {
                                     sendLog("deleting");
                                     await File(instance.path).delete();
-                                    setupManager.restart();
+                                    setupManager.retry();
                                   },
                                   icon: const Icon(Icons.delete),
                                 ),
