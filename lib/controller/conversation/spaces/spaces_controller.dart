@@ -217,25 +217,25 @@ class SpacesController extends GetxController {
         }
 
         // Connect to new voice chat
-        livekitRoom = Room();
         final keyProvider = await BaseKeyProvider.create();
+        await keyProvider.setKey(base64Encode(key!.extractBytes()));
+        livekitRoom = Room(
+          roomOptions: RoomOptions(
+            e2eeOptions: E2EEOptions(
+              keyProvider: keyProvider,
+            ),
+            defaultAudioPublishOptions: const AudioPublishOptions(
+              audioBitrate: 128000,
+            ),
+          ),
+        );
         await livekitRoom!.connect(
           event.data["url"],
           event.data["token"],
           connectOptions: const ConnectOptions(
             autoSubscribe: false,
           ),
-          roomOptions: RoomOptions(
-            e2eeOptions: E2EEOptions(
-              keyProvider: keyProvider,
-            ),
-            defaultAudioPublishOptions: const AudioPublishOptions(
-              dtx: false,
-              audioBitrate: AudioPreset.musicHighQualityStereo,
-            ),
-          ),
         );
-        await keyProvider.setKey(base64Encode(key!.extractBytes()));
         Get.find<SpaceMemberController>().onLivekitConnected();
         if (!configDisableRust) {
           await api.startTalkingEngine();

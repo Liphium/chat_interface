@@ -83,11 +83,12 @@ class SpaceMemberController extends GetxController {
             if (participant.audioTrackPublications.isEmpty) {
               sendLog("starting track");
               final controller = Get.find<SettingController>();
-              final selected = Get.find<SettingController>().settings[AudioSettings.microphone]!.getOr("def");
+              final selected = controller.settings[AudioSettings.microphone]!.getOr("def");
+              final device = await Get.find<PublicationController>().getMicrophone(selected);
               final track = await participant.setMicrophoneEnabled(
                 true,
                 audioCaptureOptions: AudioCaptureOptions(
-                  deviceId: await Get.find<PublicationController>().getMicrophone(selected),
+                  deviceId: device,
                   echoCancellation: controller.settings[AudioSettings.echoCancellation]!.getValue(),
                   autoGainControl: controller.settings[AudioSettings.autoGainControl]!.getValue(),
                   noiseSuppression: controller.settings[AudioSettings.noiseSuppression]!.getValue(),
