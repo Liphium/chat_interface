@@ -86,6 +86,7 @@ String decryptAsymmetricAnonymous(Uint8List publicKey, SecureKey secretKey, Stri
     ));
   } catch (e) {
     sendLog("WARNING: couldn't decrypt message");
+    return "";
   }
   return decrypted;
 }

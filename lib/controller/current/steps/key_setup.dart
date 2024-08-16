@@ -6,16 +6,15 @@ import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
-import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -141,7 +140,7 @@ class KeySetup extends ConnectionStep {
     // Check if there is a keypair already in there
     late final String signature;
     late final KeyPair encryptionKeyPair, signatureKeyPair;
-    final syncPub = await (db.setting.select()..where((t) => t.key.equals("key_sync_pub"))).getSingleOrNull();
+    final syncPub = await retrieveEncryptedValue("key_sync_pub");
     if (syncPub == null) {
       // Generate the key pairs for key sync exchange
       encryptionKeyPair = generateAsymmetricKeyPair();
@@ -156,16 +155,16 @@ class KeySetup extends ConnectionStep {
       await setEncryptedValue("key_sync_sig", signature);
     } else {
       // Load the key pair and signature
-      final syncPriv = await (db.setting.select()..where((t) => t.key.equals("key_sync_priv"))).getSingle();
-      encryptionKeyPair = toKeyPair(syncPub.value, syncPriv.value);
+      final syncPriv = (await retrieveEncryptedValue("key_sync_priv"))!;
+      encryptionKeyPair = toKeyPair(syncPub, syncPriv);
 
       // Get the signature key pair
-      final syncSigPub = await (db.setting.select()..where((t) => t.key.equals("key_sync_sig_pub"))).getSingle();
-      final syncSigPriv = await (db.setting.select()..where((t) => t.key.equals("key_sync_sig_priv"))).getSingle();
-      signatureKeyPair = toKeyPair(syncSigPub.value, syncSigPriv.value);
+      final syncSigPub = (await retrieveEncryptedValue("key_sync_sig_pub"))!;
+      final syncSigPriv = (await retrieveEncryptedValue("key_sync_sig_priv"))!;
+      signatureKeyPair = toKeyPair(syncSigPub, syncSigPriv);
 
       // Get the signature
-      signature = (await (db.setting.select()..where((t) => t.key.equals("key_sync_sig"))).getSingle()).value;
+      signature = (await retrieveEncryptedValue("key_sync_sig"))!;
     }
 
     // Ask the server whether the request already exists
@@ -263,7 +262,7 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                     return;
                   }
 
-                  Get.find<TransitionController>().modelTransition(KeyCodePage(
+                  Get.find<TransitionController>().dialogTransition(KeyCodePage(
                     encryptionKeyPair: widget.encryptionKeyPair,
                     signatureKeyPair: widget.signatureKeyPair,
                     signature: widget.signature,
@@ -315,6 +314,10 @@ class _KeyCodePageState extends State<KeyCodePage> {
       // Add all the keys to the database if there is a payload
       if (json["payload"] != null && json["payload"] != "") {
         final payload = decryptAsymmetricAnonymous(widget.encryptionKeyPair.publicKey, widget.encryptionKeyPair.secretKey, json["payload"]);
+        if (payload == "") {
+          sendLog("couldn't decrypt message ${json["payload"]}");
+          return;
+        }
         final jsonPayload = jsonDecode(payload);
         await setEncryptedValue("public_key", jsonPayload["pub"]);
         await setEncryptedValue("private_key", jsonPayload["priv"]);

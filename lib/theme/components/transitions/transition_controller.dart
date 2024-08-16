@@ -18,6 +18,14 @@ class TransitionController extends GetxController {
     transitionTo(page, (page) => Get.offAll(page, transition: Transition.fade));
   }
 
+  void dialogTransition(dynamic page) {
+    Get.back();
+    Get.dialog(
+      page,
+      barrierDismissible: false,
+    );
+  }
+
   void transitionTo(dynamic page, Function(dynamic) goTo) {
     // Reset the state
     currentTimer?.cancel();

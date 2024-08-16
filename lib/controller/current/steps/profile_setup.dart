@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:drift/drift.dart';
 
 class ProfileSetup extends ConnectionStep {
   ProfileSetup() : super('loading.profile');
@@ -49,19 +51,16 @@ class ProfileSetup extends ConnectionStep {
 
       // Check if the status code isn't 200 (set by the _postTCP method)
       if (body["code"] != null && body["code"] != 200) {
-        return SetupResponse(retryConnection: true);
-      }
-
-      // Check if there was an issue on the server
-      if (body["error"] == "server.error") {
         return SetupResponse(error: "server.error");
       }
 
-      // Check if the server's protocol isn't compatable
-      if (body["error"] == "protocol.error") {
-        return SetupResponse(error: "protocol.error");
+      // Check if the account data is invalid (make sure to delete everything)
+      if (body["error"] == "not.valid") {
+        await db.setting.deleteWhere((tbl) => tbl.key.equals("tokens"));
+        return SetupResponse(restart: true);
       }
 
+      // Just return the error
       return SetupResponse(error: body["error"]);
     }
 

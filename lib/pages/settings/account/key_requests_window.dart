@@ -143,7 +143,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
     for (var request in json["requests"]) {
       final keyRequest = KeyRequest.fromJson(request);
       if (keyRequest.payload != "") {
-        return;
+        continue;
       }
       if (!requests.any((element) => keyRequest.session == element.session)) {
         requests.add(keyRequest);
