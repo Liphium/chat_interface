@@ -21,7 +21,6 @@ class SettingsSetup extends Setup {
     }
 
     // Set current language
-    sendLog("settings: ${controller.settings[LanguageSettings.language]!.getValue()}");
     Get.updateLocale(LanguageSettings.languages[controller.settings[LanguageSettings.language]!.getValue()].locale);
 
     // Changes the color theme
@@ -37,6 +36,8 @@ class SettingsSetup extends Setup {
       }
       index--;
     }
+
+    sendLog("hi hi");
 
     return null;
   }

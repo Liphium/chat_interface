@@ -4,7 +4,7 @@ import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
-import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

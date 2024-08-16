@@ -7,8 +7,8 @@ import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
-import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
-import 'package:chat_interface/pages/status/setup/account/stored_actions_setup.dart';
+import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/controller/current/steps/stored_actions_setup.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
@@ -143,7 +143,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
     for (var request in json["requests"]) {
       final keyRequest = KeyRequest.fromJson(request);
       if (keyRequest.payload != "") {
-        return;
+        continue;
       }
       if (!requests.any((element) => keyRequest.session == element.session)) {
         requests.add(keyRequest);
@@ -314,8 +314,7 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> {
             label: "key_requests.code.button".tr,
             onTap: () {
               // Verify the code
-              if (!checkSignature(widget.request.signature, widget.request.signaturePub,
-                  hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)))) {
+              if (!checkSignature(widget.request.signature, widget.request.signaturePub, hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)))) {
                 _error.value = "key_requests.code.error".tr; // JEeSqn
                 return;
               }

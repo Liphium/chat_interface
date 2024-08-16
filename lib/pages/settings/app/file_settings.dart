@@ -1,12 +1,18 @@
+import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/settings/app/server_file_viewer.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
+import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:open_app_file/open_app_file.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class FileSettings {
   // Auto download
@@ -77,7 +83,7 @@ class FileSettingsPage extends StatelessWidget {
           Text("settings.file.cache".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
           Text("settings.file.cache.description".tr, style: Get.theme.textTheme.bodyMedium),
-          verticalSpacing(defaultSpacing),
+          verticalSpacing(defaultSpacing + elementSpacing),
 
           ListSelectionSetting(
             settingName: FileSettings.fileCacheType,
@@ -96,7 +102,44 @@ class FileSettingsPage extends StatelessWidget {
               ),
             ),
           ),
-          verticalSpacing(sectionSpacing),
+          verticalSpacing(defaultSpacing),
+          Wrap(
+            spacing: defaultSpacing,
+            children: [
+              FJElevatedButton(
+                onTap: () async {
+                  final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_${StatusController.ownAccountId}");
+                  OpenAppFile.open(cacheFolder);
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
+                    horizontalSpacing(defaultSpacing),
+                    Text("settings.file.cache.open_cache".tr, style: Get.textTheme.labelLarge),
+                  ],
+                ),
+              ),
+              FJElevatedButton(
+                onTap: () async {
+                  final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_${StatusController.ownAccountId}");
+                  OpenAppFile.open(fileFolder);
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
+                    horizontalSpacing(defaultSpacing),
+                    Text("settings.file.cache.open_files".tr, style: Get.textTheme.labelLarge),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          verticalSpacing(sectionSpacing + defaultSpacing),
+
+          //* Uploaded files
+          const ServerFileViewer(),
         ],
       ),
     );

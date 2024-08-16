@@ -305,7 +305,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
               final deck = _decks[index];
               return Container(
                 decoration: BoxDecoration(
-                  color: Get.theme.colorScheme.primaryContainer,
+                  color: Get.theme.colorScheme.onInverseSurface,
                   borderRadius: BorderRadius.circular(defaultSpacing),
                 ),
                 margin: const EdgeInsets.only(bottom: defaultSpacing),

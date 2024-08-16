@@ -9,17 +9,29 @@ class TransitionController extends GetxController {
 
   Timer? currentTimer;
 
+  void cancelAll() {
+    transition.value = false;
+    currentTimer?.cancel();
+  }
+
   void modelTransition(dynamic page) {
     transitionTo(page, (page) => Get.offAll(page, transition: Transition.fade));
   }
 
-  void transitionTo(dynamic page, Function(dynamic) goTo) {
-    if (currentTimer != null) {
-      currentTimer!.cancel();
-    }
+  void dialogTransition(dynamic page) {
+    Get.back();
+    Get.dialog(
+      page,
+      barrierDismissible: false,
+    );
+  }
 
+  void transitionTo(dynamic page, Function(dynamic) goTo) {
+    // Reset the state
+    currentTimer?.cancel();
     transition.value = true;
 
+    // Start a timer to give the hero element time to fade out
     currentTimer = Timer(transitionDuration, () {
       goTo(page);
 

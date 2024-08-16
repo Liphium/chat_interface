@@ -1,7 +1,7 @@
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/app/instance_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

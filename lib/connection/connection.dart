@@ -10,9 +10,11 @@ import 'package:chat_interface/connection/impl/messages/message_listener.dart';
 import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
@@ -28,7 +30,7 @@ int nodeId = 0;
 String nodeDomain = "";
 
 class Connector {
-  late WebSocketChannel connection;
+  WebSocketChannel? connection;
   final _handlers = <String, Function(Event)>{};
   final _afterSetup = <String, bool>{};
   final _afterSetupQueue = <Event>[];
@@ -44,6 +46,8 @@ class Connector {
 
   Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
     this.url = url;
+
+    sendLog("hi connector");
 
     // Generate an AES key for the connection
     aesKey = randomAESKey();
@@ -74,7 +78,7 @@ class Connector {
     }
     _connected = true;
 
-    connection.stream.listen(
+    connection!.stream.listen(
       (encrypted) {
         if (encrypted is! Uint8List) {
           sendLog("RECEIVED INVALID MESSAGE: $encrypted");
@@ -97,6 +101,8 @@ class Connector {
 
         // Decode the message
         Event event = Event.fromJson(String.fromCharCodes(msg));
+
+        sendLog("received ${event.name}");
 
         // Check if it is a response
         if (event.name.startsWith("res:")) {
@@ -124,7 +130,7 @@ class Connector {
         }
 
         // Add it to the after setup queue (in case it is an after setup handler)
-        if (_afterSetup[event.name] == true && !SetupManager.setupFinished) {
+        if (_afterSetup[event.name] == true && !SetupManager.setupFinished && !Get.find<ConnectionController>().connected.value) {
           _afterSetupQueue.add(event);
           return;
         }
@@ -139,10 +145,9 @@ class Connector {
           onDone(false);
         }
         if (restart) {
-          sendLog("restarting..");
-          initialized = false;
-          setupManager.restart();
+          Get.find<ConnectionController>().connectionStopped();
         }
+        initialized = false;
       },
       onError: (e) {
         sendLog("ERROR: $e");
@@ -156,7 +161,8 @@ class Connector {
   }
 
   void disconnect() {
-    connection.sink.close();
+    _connected = false;
+    connection?.sink.close();
   }
 
   void runAfterSetupQueue() {
@@ -189,6 +195,7 @@ class Connector {
   /// Optionally, you can specify a [waiter] to wait for the response.
   void sendAction(Message message, {Function(Event)? handler}) {
     if (!_connected) {
+      showErrorPopup("error", "error.network");
       sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${message.action}");
       return;
     }
@@ -208,7 +215,7 @@ class Connector {
     message.action = "${message.action}:$responseId";
 
     // Send and encrypt the message (using AES key)
-    connection.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
+    connection?.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
   }
 }
 

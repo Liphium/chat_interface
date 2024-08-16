@@ -3,25 +3,23 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/status/error/error_page.dart';
-import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
-import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:sodium_libs/sodium_libs_sumo.dart';
 
-class FriendsSetup extends Setup {
-  FriendsSetup() : super("loading.friends", false);
+class FriendsSetup extends ConnectionStep {
+  FriendsSetup() : super("loading.friends");
 
   @override
-  Future<Widget?> load() async {
+  Future<SetupResponse> load() async {
     // Load requests and friends from database
     await Get.find<RequestController>().loadRequests();
     await Get.find<FriendController>().loadFriends();
@@ -29,13 +27,13 @@ class FriendsSetup extends Setup {
     // Refresh from server vault
     final error = await refreshFriendsVault();
     if (error != null) {
-      return ErrorPage(title: error);
+      return SetupResponse(error: error);
     }
 
     // Add own account so status and stuff can be tracked there
     Get.find<FriendController>().addSelf();
 
-    return null;
+    return SetupResponse();
   }
 }
 

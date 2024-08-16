@@ -31,7 +31,7 @@ class _ErrorPageState extends State<ErrorPage> {
       (timer) {
         if (_start <= 0) {
           timer.cancel();
-          setupManager.restart();
+          setupManager.retry();
         } else {
           _start -= duration / 1000;
           _progress.value = _start / 30;
@@ -95,7 +95,7 @@ class _ErrorPageState extends State<ErrorPage> {
                 ),
                 verticalSpacing(defaultSpacing),
                 FJElevatedButton(
-                  onTap: () => setupManager.restart(),
+                  onTap: () => setupManager.retry(),
                   child: Center(child: Text('retry'.tr, style: Get.textTheme.labelLarge)),
                 ),
               ],

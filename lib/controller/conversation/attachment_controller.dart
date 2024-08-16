@@ -9,8 +9,9 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/settings/app/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/pages/status/setup/account/key_setup.dart';
+import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -100,6 +101,11 @@ class AttachmentController extends GetxController {
 
     final localFile = await findLocalFile(container);
     if (localFile != null && !retry) {
+      // Check if there was an error already
+      if (localFile.error.value) {
+        return false;
+      }
+
       sendLog("already exists ${container.name} ${container.id}");
       return true;
     }
@@ -169,17 +175,28 @@ class AttachmentController extends GetxController {
   }
 
   /// Delete a file
-  Future<bool> deleteFile(AttachmentContainer container) async {
-    final file = File(container.filePath);
-    await file.delete();
-    attachments.remove(container.id);
+  Future<bool> deleteFile(AttachmentContainer container, {popup = false}) {
+    return deleteFileFromPath(container.id, container.filePath, popup: popup);
+  }
+
+  /// Delete a file based on a path and an id
+  Future<bool> deleteFileFromPath(String id, String? path, {popup = false}) async {
+    if (path != null) {
+      final file = File(path);
+      await file.delete();
+    }
+    attachments.remove(id);
 
     // Delete from server
     final json = await postAuthorizedJSON("/account/files/delete", {
-      "id": container.id,
+      "id": id,
     });
     if (!json["success"]) {
-      sendLog("Failed to delete file from server ${container.id} ${json["error"]}");
+      if (popup) {
+        showErrorPopup("error", json["error"]);
+      }
+      sendLog("Failed to delete file from server $id ${json["error"]}");
+      return false;
     }
 
     return true;

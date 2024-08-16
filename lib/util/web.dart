@@ -4,7 +4,7 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/status/setup/app/server_setup.dart';
+import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart' as d;
 import 'package:get/get.dart' as g;
@@ -60,7 +60,7 @@ Future<String?> grabServerPublicKey({String defaultError = "server.error"}) asyn
   try {
     res = await post(server("/pub"));
   } catch (e) {
-    return defaultError;
+    return "error.network";
   }
   if (res.statusCode != 200) {
     return defaultError;

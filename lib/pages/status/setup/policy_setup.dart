@@ -12,8 +12,8 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../util/vertical_spacing.dart';
-import '../setup_manager.dart';
+import '../../../util/vertical_spacing.dart';
+import 'setup_manager.dart';
 
 const agreeFile = ".agreements";
 

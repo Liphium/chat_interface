@@ -185,7 +185,7 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
       message = "server.error";
     }
 
-    showMessage(SnackbarType.error, message.tr);
+    showErrorPopup("error", message);
     return;
   }
 

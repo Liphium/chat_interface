@@ -15,8 +15,8 @@ class SystemMessages {
       translation: (msg) {
         final friendController = Get.find<FriendController>();
         return "chat.rank_change.${msg.attachments[0]}->${msg.attachments[1]}".trParams({
-          "name": friendController.getFriend(msg.attachments[2]).name,
-          "sender": friendController.getFriend(msg.attachments[3]).name, // NZJNP232RS5g
+          "name": friendController.getFriend(msg.attachments[2]).displayName.value.text,
+          "sender": friendController.getFriend(msg.attachments[3]).displayName.value.text, // NZJNP232RS5g
         });
       },
       handler: (msg) {
@@ -30,7 +30,7 @@ class SystemMessages {
       Icons.vpn_key,
       translation: (msg) {
         return "chat.token_change".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -45,7 +45,7 @@ class SystemMessages {
       translation: (msg) {
         sendLog(msg.attachments[0]);
         return "chat.member_join".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -59,8 +59,8 @@ class SystemMessages {
       Icons.waving_hand,
       translation: (msg) {
         return "chat.member_invite".trParams({
-          "invitor": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
-          "name": Get.find<FriendController>().getFriend(msg.attachments[1]).name,
+          "invitor": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[1]).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -74,7 +74,7 @@ class SystemMessages {
       Icons.arrow_back,
       translation: (msg) {
         return "chat.member_leave".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -88,8 +88,8 @@ class SystemMessages {
       Icons.arrow_back,
       translation: (msg) {
         return "chat.kick".trParams({
-          "issuer": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
-          "name": Get.find<FriendController>().getFriend(msg.attachments[1]).name,
+          "issuer": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[1]).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -103,7 +103,7 @@ class SystemMessages {
       Icons.shield,
       translation: (msg) {
         return "chat.new_admin".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -117,7 +117,7 @@ class SystemMessages {
       Icons.update,
       translation: (msg) {
         return "chat.edit_data".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).name,
+          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
         });
       },
       handler: (msg) {
