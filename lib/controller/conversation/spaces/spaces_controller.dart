@@ -224,6 +224,7 @@ class SpacesController extends GetxController {
             e2eeOptions: E2EEOptions(
               keyProvider: keyProvider,
             ),
+            adaptiveStream: true,
             defaultAudioPublishOptions: const AudioPublishOptions(
               audioBitrate: 128000,
             ),

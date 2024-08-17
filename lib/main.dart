@@ -20,7 +20,7 @@ import 'app.dart';
 
 // Configuration constants
 const appTag = "liphium_chat";
-const protocolVersion = 3;
+const protocolVersion = 4;
 
 final dio = Dio();
 late final Sodium sodiumLib;

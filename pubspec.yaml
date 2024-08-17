@@ -40,10 +40,10 @@ dependencies:
   window_manager: ">=0.3.8 <1.0.0"
   permission_handler: ">=11.3.1 <12.0.0"
   screenshot: ">=3.0.0 <4.0.0"
-  pasteboard: ^0.2.0
-  scroll_to_index: ^3.0.1
-  just_audio: ^0.9.39
-  just_audio_windows: ^0.2.1
+  pasteboard: ">=0.2.0 <1.0.0"
+  scroll_to_index: ">=3.0.1 <4.0.0"
+  just_audio: ">=0.9.39 <1.0.0"
+  just_audio_windows: ">=0.2.1 <1.0.0"
   flutter_secure_storage: ">=9.2.2 <10.0.0"
   sqlite3_flutter_libs: ">=0.5.24 <1.0.0"
 

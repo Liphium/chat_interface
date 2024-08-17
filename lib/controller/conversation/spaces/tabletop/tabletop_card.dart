@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
@@ -134,9 +135,11 @@ class CardObject extends TableObject {
         final focalY = location.dy + imageRect.height / 2;
         canvas.translate(focalX, focalY);
         final currentFlip = flipAnimation.value(DateTime.now());
+
         final Matrix4 matrix = Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // perspective
+          ..setEntry(3, 2, 0) // perspective
           ..rotateY(math.pi * currentFlip);
+
         canvas.transform(matrix.storage);
         canvas.translate(-focalX, -focalY);
 
@@ -174,6 +177,13 @@ class CardObject extends TableObject {
     final json = jsonDecode(data);
     flipped = json["flip"] ?? false;
     flipAnimation.setValue(flipped ? 1 : 0);
+
+    // Check if it's the same object and ignore to prevent flickering
+    if (container.id == json["id"]) {
+      return;
+    }
+
+    // Download the new image
     final type = await AttachmentController.checkLocations(json["id"], StorageType.cache);
     container = AttachmentContainer.fromJson(type, jsonDecode(data));
     final download = await Get.find<AttachmentController>().downloadAttachment(container);
@@ -201,6 +211,7 @@ class CardObject extends TableObject {
 
   @override
   void runAction(TabletopController controller) {
+    sendLog("run action");
     if (inventory) {
       flipped = !flipped;
       flipAnimation.setValue(flipped ? 0 : 1);
