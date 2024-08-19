@@ -5,7 +5,6 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
@@ -83,11 +82,12 @@ class SpaceMemberController extends GetxController {
             if (participant.audioTrackPublications.isEmpty) {
               sendLog("starting track");
               final controller = Get.find<SettingController>();
-              final selected = Get.find<SettingController>().settings[AudioSettings.microphone]!.getOr("def");
+              final selected = controller.settings[AudioSettings.microphone]!.getOr("def");
+              final device = await Get.find<PublicationController>().getMicrophone(selected);
               final track = await participant.setMicrophoneEnabled(
                 true,
                 audioCaptureOptions: AudioCaptureOptions(
-                  deviceId: await Get.find<PublicationController>().getMicrophone(selected),
+                  deviceId: device,
                   echoCancellation: controller.settings[AudioSettings.echoCancellation]!.getValue(),
                   autoGainControl: controller.settings[AudioSettings.autoGainControl]!.getValue(),
                   noiseSuppression: controller.settings[AudioSettings.noiseSuppression]!.getValue(),
@@ -119,7 +119,7 @@ class SpaceMemberController extends GetxController {
     });
   }
 
-  void onLivekitConnected() {
+  void onLivekitConnected() async {
     SpacesController.livekitRoom!.createListener()
       ..on<ParticipantConnectedEvent>((event) {
         if (event.participant.identity == StatusController.ownAccountId) {
@@ -148,14 +148,23 @@ class SpaceMemberController extends GetxController {
         }
       }
     }
+
+    // Set mute
+    final controller = Get.find<SettingController>();
+    final startMuted = controller.settings[AudioSettings.startMuted]!.getValue() as bool;
+    Get.find<PublicationController>().setMuted(startMuted);
+
+    final devices = await Hardware.instance.enumerateDevices();
+    final outputDevice = devices.firstWhereOrNull((element) => element.label == controller.settings[AudioSettings.output]!.getValue());
+    if (outputDevice != null) {
+      SpacesController.livekitRoom?.setAudioOutputDevice(outputDevice);
+    }
   }
 
   void onDisconnect() {
     membersLoading.value = true;
     members.clear();
-    if (!configDisableRust) {
-      sub!.cancel();
-    }
+    sub?.cancel();
   }
 
   bool isLocalDeafened() {

@@ -172,17 +172,6 @@ class PublicationController extends GetxController {
       await api.setInputDevice(id: settingController.settings[AudioSettings.microphone]!.getValue());
     }
     _connected = true;
-
-    // Set mute
-    final startMuted = settingController.settings[AudioSettings.startMuted]!.getValue() as bool;
-    await Future.delayed(500.milliseconds);
-    setMuted(startMuted);
-
-    final devices = await Hardware.instance.enumerateDevices();
-    final outputDevice = devices.firstWhereOrNull((element) => element.label == settingController.settings[AudioSettings.output]!.getValue());
-    if (outputDevice != null) {
-      SpacesController.livekitRoom?.setAudioOutputDevice(outputDevice);
-    }
   }
 
   void disconnect() {

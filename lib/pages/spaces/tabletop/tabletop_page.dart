@@ -153,6 +153,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     } else {
                       moved = true;
 
+                      sendLog("hiii");
+
                       // Start holding the object
                       tableController.startHoldingObject(tableController.hoveringObjects.last);
                     }

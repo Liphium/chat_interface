@@ -42,7 +42,8 @@ class Connector {
   String? url;
 
   // For handling responses
-  final _responders = <String, Function(Event)>{};
+  final _responders = <String, Function(Event)?>{};
+  final _responseTo = <String, String>{};
 
   Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
     this.url = url;
@@ -102,24 +103,30 @@ class Connector {
         // Decode the message
         Event event = Event.fromJson(String.fromCharCodes(msg));
 
-        sendLog("received ${event.name}");
-
         // Check if it is a response
         if (event.name.startsWith("res:")) {
           // Check if the event is valid
           final args = event.name.split(":");
-          if (args.length != 2) {
+          if (args.length != 3) {
             sendLog("response isn't valid");
             return;
           }
 
-          // Check if there is a responder
-          if (_responders[args[1]] == null) {
-            return;
+          // Get all the variables from the format (res:action:answerId)
+          final action = args[1];
+          final answerId = args[2];
+
+          // Check if the event is different
+          if (action != _responseTo[answerId]) {
+            sendLog("wrong response to ${_responseTo[answerId]}, received $action instead");
           }
 
-          // Call the responder
-          _responders[args[1]]?.call(event);
+          // If there is a responder call it
+          if (_responders[answerId] != null) {
+            _responders[answerId]!.call(event);
+          }
+          _responders.remove(answerId);
+          _responseTo.remove(answerId);
           return;
         }
 
@@ -207,12 +214,13 @@ class Connector {
     }
 
     // Register the handler and waiter
-    if (handler != null) {
-      _responders[responseId] = handler;
-    }
+    _responders[responseId] = handler;
+    _responseTo[responseId] = message.action;
 
     // Add responseId to action
     message.action = "${message.action}:$responseId";
+
+    sendLog("sent action ${message.action}");
 
     // Send and encrypt the message (using AES key)
     connection?.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));

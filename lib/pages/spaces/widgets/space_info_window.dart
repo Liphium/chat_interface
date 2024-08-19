@@ -58,7 +58,9 @@ class SpaceInfoWindow extends StatelessWidget {
                   children: [
                     Text(track.name, style: Get.theme.textTheme.bodyMedium),
                     horizontalSpacing(defaultSpacing),
-                    Text("muted: ${track.muted}", style: Get.theme.textTheme.bodyMedium),
+                    Text("${track.muted}", style: Get.theme.textTheme.bodyMedium),
+                    horizontalSpacing(defaultSpacing),
+                    Text("rate: ${(track.track!.currentBitrate as double).toStringAsFixed(2)}", style: Get.theme.textTheme.bodyMedium),
                     horizontalSpacing(defaultSpacing),
                     Text(track.sid, style: Get.theme.textTheme.bodyMedium),
                   ],
