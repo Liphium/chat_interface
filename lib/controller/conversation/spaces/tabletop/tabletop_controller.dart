@@ -9,7 +9,7 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_text.dart';
-import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';

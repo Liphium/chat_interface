@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
-import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';

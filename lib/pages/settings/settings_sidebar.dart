@@ -16,88 +16,115 @@ class SettingsSidebar extends StatelessWidget {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: sidebarWidth),
       child: Padding(
-        padding: GetPlatform.isMobile && !isMobileMode() ? const EdgeInsets.only(left: defaultSpacing) : const EdgeInsets.all(defaultSpacing),
-        child: ListView.builder(
-          itemCount: SettingLabel.values.length + 1,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return FJElevatedButton(
-                onTap: () => Get.back(),
-                child: Row(
-                  children: [
-                    Icon(Icons.arrow_back, color: Get.theme.colorScheme.onPrimary),
-                    horizontalSpacing(defaultSpacing * 0.5),
-                    Text("back".tr, style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Get.theme.colorScheme.onSurface)),
-                  ],
-                ),
-              );
-            }
+        padding: const EdgeInsets.only(
+          top: defaultSpacing * 1.5,
+          bottom: defaultSpacing * 1.5,
+          right: defaultSpacing,
+          left: defaultSpacing * 1.5,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Get.theme.colorScheme.onInverseSurface,
+            borderRadius: BorderRadius.circular(sectionSpacing),
+          ),
+          child: SingleChildScrollView(
+            child: ListView.builder(
+              itemCount: SettingLabel.values.length + 1,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                      top: sectionSpacing,
+                      right: sectionSpacing,
+                      left: sectionSpacing,
+                    ),
+                    child: FJElevatedButton(
+                      onTap: () => Get.back(),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: elementSpacing * 0.5),
+                        child: Row(
+                          children: [
+                            Icon(Icons.arrow_back, color: Get.theme.colorScheme.onPrimary),
+                            horizontalSpacing(defaultSpacing),
+                            Text("Back", style: Get.textTheme.labelLarge),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                final current = SettingLabel.values[index - 1];
 
-            final current = SettingLabel.values[index - 1];
-
-            //* Sidebar buttons
-            return Padding(
-              padding: const EdgeInsets.only(top: defaultSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  verticalSpacing(sectionSpacing),
-                  Text(current.label.tr, style: Theme.of(context).textTheme.titleLarge),
-                  verticalSpacing(defaultSpacing * 0.5),
-                  Column(
+                //* Sidebar buttons
+                return Padding(
+                  padding: EdgeInsets.only(
+                    right: sectionSpacing,
+                    left: sectionSpacing,
+                    bottom: index == SettingLabel.values.length ? sectionSpacing : 0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: current.categories.map((element) {
-                      if (!element.mobile && GetPlatform.isMobile) {
-                        return const SizedBox();
-                      }
+                    children: [
+                      verticalSpacing(sectionSpacing),
+                      Text(current.label.tr, style: Theme.of(context).textTheme.titleLarge),
+                      verticalSpacing(defaultSpacing * 0.5),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: current.categories.map((element) {
+                          if (!element.mobile && GetPlatform.isMobile) {
+                            return const SizedBox();
+                          }
 
-                      return Padding(
-                        padding: const EdgeInsets.only(top: defaultSpacing),
-                        child: Material(
-                          color: currentCategory == element.label ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          child: InkWell(
-                            onTap: () {
-                              if (category != null) {
-                                category!.value = element;
-                              } else {
-                                Get.to(
-                                  element.widget,
-                                  transition: Transition.fadeIn,
-                                );
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(defaultSpacing),
-                            child: Padding(
-                              padding: const EdgeInsets.all(defaultSpacing),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    element.icon,
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
+                          return Padding(
+                            padding: const EdgeInsets.only(top: defaultSpacing),
+                            child: Material(
+                              color: currentCategory == element.label ? Get.theme.colorScheme.primary : Get.theme.colorScheme.inverseSurface,
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              child: InkWell(
+                                onTap: () {
+                                  if (category != null) {
+                                    category!.value = element;
+                                  } else {
+                                    Get.to(
+                                      element.widget,
+                                      transition: Transition.fadeIn,
+                                    );
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(defaultSpacing),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(defaultSpacing),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        element.icon,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
+                                      ),
+                                      horizontalSpacing(defaultSpacing),
+                                      Expanded(
+                                        child: Text(
+                                          "settings.${element.label}".tr,
+                                          style: Theme.of(context).textTheme.labelLarge!,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  horizontalSpacing(defaultSpacing),
-                                  Expanded(
-                                    child: Text(
-                                      "settings.${element.label}".tr,
-                                      style: Theme.of(context).textTheme.labelLarge!,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  )
-                ],
-              ),
-            );
-          },
+                          );
+                        }).toList(),
+                      )
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

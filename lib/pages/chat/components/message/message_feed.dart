@@ -10,7 +10,7 @@ import 'package:chat_interface/pages/chat/components/conversations/conversation_
 import 'package:chat_interface/pages/chat/components/conversations/message_bar_mobile.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_mobile_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
-import 'package:chat_interface/pages/settings/app/file_settings.dart';
+import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';

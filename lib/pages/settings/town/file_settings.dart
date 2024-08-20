@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/settings/app/server_file_viewer.dart';
+import 'package:chat_interface/pages/settings/town/server_file_viewer.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';

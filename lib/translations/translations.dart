@@ -5,6 +5,7 @@ import 'package:chat_interface/translations/settings/tr_account_settings.dart';
 import 'package:chat_interface/translations/settings/tr_app_settings.dart';
 import 'package:chat_interface/translations/settings/tr_appearance_settings.dart';
 import 'package:chat_interface/translations/settings/tr_general_settings.dart';
+import 'package:chat_interface/translations/settings/tr_town_settings.dart';
 import 'package:chat_interface/translations/setup.dart';
 import 'package:chat_interface/translations/spaces.dart';
 import 'package:get/get.dart';
@@ -24,6 +25,7 @@ class MainTranslations extends Translations {
       AccountSettingsTranslations(),
       AppSettingsTranslations(),
       AppearanceSettingsTranslations(),
+      TownSettingTranslations(),
     ];
     final newTranslations = <String, Map<String, String>>{};
 
