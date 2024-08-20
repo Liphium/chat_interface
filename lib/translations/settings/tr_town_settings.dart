@@ -6,8 +6,12 @@ class TownSettingTranslations extends Translations {
         //* English US
         'en_US': {
           // Town management
-          'settings.town.own_town': 'Connected town',
+          'settings.town.info': 'Town info',
+          'settings.town.own_town': 'Info about your own town',
           'settings.town.own_town.desc': 'Connected to @domain on version @version (protocol version: @protocol)',
+          'settings.town.address': 'Your address',
+          'settings.town.address.desc': 'This address can be used to add you as a friend by people outside of your town.',
+          'settings.town.address.copied': 'Your address has been copied. Anyone can use it add you as a friend.',
 
           // Tabletop settings
           'settings.tabletop.decks': 'Decks',

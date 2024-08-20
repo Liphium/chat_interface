@@ -13,6 +13,7 @@ class GeneralTranslations extends Translations {
           'create': 'Create',
           'ok': 'Okay',
           'edit': 'Edit',
+          'copy': 'Copy',
           'retry': 'Retry',
           'back': 'Back',
           'no.got': 'No, you got me',

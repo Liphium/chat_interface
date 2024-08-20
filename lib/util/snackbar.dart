@@ -8,6 +8,11 @@ void showErrorPopup(String title, String message) {
   Get.dialog(ErrorWindow(title: title.tr, error: translateError(message)));
 }
 
+/// Automatically translated
+void showSuccessPopup(String title, String message) {
+  Get.dialog(ErrorWindow(title: title.tr, error: message.tr));
+}
+
 Future<bool> showConfirmPopup(ConfirmWindow window) async {
   final result = await Get.dialog<bool>(window);
   if (result == null) {

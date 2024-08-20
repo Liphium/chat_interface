@@ -37,6 +37,8 @@ String nodeProtocol() {
 String basePath = 'http://localhost:3000';
 RSAPublicKey? serverPublicKey;
 
+Map<String, RSAPublicKey> serverPublicKeys = <String, RSAPublicKey>{};
+
 String nodePath(String path) {
   return "${nodeProtocol()}$nodeDomain$path";
 }
@@ -45,20 +47,26 @@ String authorizationValue() {
   return "Bearer $sessionToken";
 }
 
-String serverPath(String path, {String? instance}) {
-  path = path.startsWith("/") ? path : "/$path";
-  return "${instance == null ? basePath : "$instance/$apiVersion"}$path";
+/// Get the path to your own server
+String ownServer(String path) {
+  return '$basePath/$apiVersion$path';
 }
 
-Uri server(String path) {
-  return Uri.parse('$basePath$path');
+/// Get the path from any server
+String serverPath(String server, String path) {
+  path = path.startsWith("/") ? path : "/$path";
+  if (!server.startsWith("http://") && !server.startsWith("https://")) {
+    server = "https://$server";
+  }
+  return "$server/$apiVersion$path";
 }
 
 /// Grab the public key from the server
 Future<String?> grabServerPublicKey({String defaultError = "server.error"}) async {
   final Response res;
   try {
-    res = await post(server("/pub"));
+    sendLog(ownServer("/pub"));
+    res = await post(Uri.parse(ownServer("/pub")));
   } catch (e) {
     return "error.network";
   }
@@ -79,17 +87,53 @@ Future<String?> grabServerPublicKey({String defaultError = "server.error"}) asyn
   return null;
 }
 
+/// Grab the public key from the server
+Future<String?> grabServerPublicURL(String server, {String defaultError = "server.error"}) async {
+  final Response res;
+  try {
+    res = await post(Uri.parse(serverPath(server, "/pub")));
+  } catch (e) {
+    return "error.network";
+  }
+  if (res.statusCode != 200) {
+    return defaultError;
+  }
+
+  final json = jsonDecode(res.body);
+
+  // Check the protocol version
+  if (json["protocol_version"] != protocolVersion) {
+    return "protocol.error";
+  }
+
+  serverPublicKeys[server] = unpackageRSAPublicKey(json['pub']);
+  sendLog("RETRIEVED SERVER PUBLIC KEY FROM $server");
+
+  return null;
+}
+
 /// Post request to node-backend (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) async {
-  if (serverPublicKey == null) {
-    final error = await grabServerPublicKey(defaultError: defaultError);
-    if (error != null) {
-      sendLog("there was an issue with getting the server public key");
-      return <String, dynamic>{"success": false, "error": error};
+Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) {
+  return postAddress(basePath, path, body, defaultError: defaultError, token: token);
+}
+
+/// Post request to any server (with Through Cloudflare Protection)
+Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) async {
+  // Try to get the server public key
+  if (serverPublicKeys[server] == null) {
+    sendLog("grabbing key for $server");
+    final result = await grabServerPublicURL(server);
+    if (result != null) {
+      return {
+        "success": false,
+        "error": result,
+      };
     }
   }
 
-  return _postTCP(serverPublicKey!, server(path).toString(), body, defaultError: defaultError, token: token);
+  // Do the request
+  sendLog(serverPath(server, path).toString());
+  return _postTCP(serverPublicKeys[server]!, serverPath(server, path).toString(), body, defaultError: defaultError, token: token);
 }
 
 /// Post request to any server (with Through Cloudflare Protection)

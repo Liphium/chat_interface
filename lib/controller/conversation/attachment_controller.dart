@@ -40,7 +40,7 @@ class AttachmentController extends GetxController {
     });
 
     final res = await dio.post(
-      server("/account/files/upload").toString(),
+      ownServer("/account/files/upload"),
       data: formData,
       options: dio_rs.Options(
         headers: {
@@ -145,7 +145,7 @@ class AttachmentController extends GetxController {
 
     // Download and show progress
     final res = await dio.download(
-      serverPath("/account/files/download/${container.id}", instance: container.url),
+      serverPath(container.url, "/account/files/download/${container.id}").toString(),
       container.filePath,
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;

@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
 import 'package:chat_interface/controller/current/steps/friends_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
@@ -128,6 +129,18 @@ class Friend {
   bool unknown;
   Timer? _timer;
   int updatedAt;
+
+  /// The address of the guy on the Liphium network
+  String get address {
+    if (id.contains("@")) {
+      return id;
+    }
+    var path = TrustedLinkHelper.extractDomain(basePath);
+    if (basePath.startsWith("http://")) {
+      path = "http://$path";
+    }
+    return "$id@$path";
+  }
 
   // Display name of the friend
   final displayName = UTFString("").obs;

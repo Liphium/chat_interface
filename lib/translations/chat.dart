@@ -30,9 +30,10 @@ class ChatPageTranslations extends Translations {
           'friends.remove': 'Remove friend',
           'friend.removed': 'You removed this person.',
           'friends.add': 'Add friend',
-          'friends.add.desc': 'To add your friend, we\'ll need his username. Please provide that below.',
+          'friends.add.desc':
+              'To add someone as a friend from your town, provide their username.\nTo add a friend outside of your town you\'ll need their address. It can be obtained by clicking the "Copy" button in Settings > Town > Address.',
           'friends.add.button': 'Send friend request',
-          'friends.name_placeholder': 'some_guy',
+          'friends.name_placeholder': 'some_guy or id@town',
           'friends.message': 'Start direct message',
           'friends.invite_to_space': 'Invite to current space',
           'friends.requests': 'Requests',

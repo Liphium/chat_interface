@@ -12,7 +12,6 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -394,6 +393,7 @@ class _MessageInputState extends State<MessageInput> {
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'chat.message'.tr,
+                                  hintStyle: theme.textTheme.bodyLarge,
                                 ),
                                 inputFormatters: [
                                   LengthLimitingTextInputFormatter(1000),

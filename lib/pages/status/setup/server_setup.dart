@@ -25,7 +25,7 @@ class ServerSetup extends Setup {
     if (server == null) {
       return const ServerSelectorPage();
     } else {
-      basePath = "${server.value}/$apiVersion";
+      basePath = server.value;
       isHttps = server.value.startsWith("https://");
       return null;
     }
@@ -133,7 +133,7 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
     path = formatPath(path); // Make sure the path is valid
 
     // Set the path in the app and update it in the database
-    basePath = "$path/$apiVersion";
+    basePath = path;
     db.into(db.setting).insertOnConflictUpdate(SettingCompanion.insert(key: "server_url", value: path));
     isHttps = path.startsWith("https://");
     if (widget.nextPage != null) {

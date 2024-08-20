@@ -92,6 +92,7 @@ class _FJTextFieldState extends State<FJTextField> {
                       isDense: true,
                       hintText: widget.hintText,
                       labelStyle: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
+                      hintStyle: widget.small ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge,
                       errorText: widget.errorText,
                       border: InputBorder.none,
                       counterText: "",
