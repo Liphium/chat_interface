@@ -1,16 +1,16 @@
 part of 'conversation_controller.dart';
 
 class MemberContainer {
-  late final String id;
+  late final LPHAddress id;
 
   MemberContainer(this.id);
-  MemberContainer.fromJson(Map<String, dynamic> json) : id = json["id"];
+  MemberContainer.fromJson(Map<String, dynamic> json) : id = LPHAddress.from(json["id"]);
 
   MemberContainer.decrypt(String cipherText, SecureKey key) {
     final json = jsonDecode(decryptSymmetric(cipherText, key));
     id = json["id"];
   }
-  String encrypted(SecureKey key) => encryptSymmetric(jsonEncode(<String, dynamic>{"id": id}), key);
+  String encrypted(SecureKey key) => encryptSymmetric(jsonEncode(<String, dynamic>{"id": id.encode()}), key);
 }
 
 class ConversationToken {
@@ -46,7 +46,7 @@ const directMessagePrefix = "DM_";
 // Wrapper for consistent DM and Group conversation handling
 Future<bool> openDirectMessage(Friend friend) async {
   final conversation = Get.find<ConversationController>().conversations.values.firstWhere(
-        (element) => element.members.length == 2 && element.members.values.any((element) => element.account == friend.id),
+        (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
         orElse: () => Conversation("", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer(""), "", 0, 0),
       );
   if (conversation.id != "") {
@@ -54,8 +54,8 @@ Future<bool> openDirectMessage(Friend friend) async {
     return true;
   }
 
-  sendLog(directMessagePrefix + friend.id);
-  return _openConversation([friend], directMessagePrefix + friend.id);
+  sendLog(directMessagePrefix + friend.id.encode());
+  return _openConversation([friend], directMessagePrefix + friend.id.id);
 }
 
 Future<bool> openGroupConversation(List<Friend> friends, String name) {
@@ -71,8 +71,8 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
 
   // Prepare the conversation
   final conversationKey = randomSymmetricKey();
-  final ownMemberContainer = MemberContainer(StatusController.ownAccountId).encrypted(conversationKey);
-  final memberContainers = <String, String>{};
+  final ownMemberContainer = MemberContainer(StatusController.ownAddress).encrypted(conversationKey);
+  final memberContainers = <LPHAddress, String>{};
   for (final friend in friends) {
     final container = MemberContainer(friend.id);
     memberContainers[friend.id] = container.encrypted(conversationKey);
@@ -81,17 +81,20 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   final encryptedData = conversationContainer.encrypted(conversationKey);
 
   if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]!) {
-    showErrorPopup("conversations.error".tr, "conversations.name.length".trParams({"length": specialConstants[Constants.specialConstantMaxConversationNameLength].toString()}));
+    showErrorPopup("conversations.error".tr,
+        "conversations.name.length".trParams({"length": specialConstants[Constants.specialConstantMaxConversationNameLength].toString()}));
     return false;
   }
 
   if (friends.length > specialConstants[Constants.specialConstantMaxConversationMembers]!) {
-    showErrorPopup("conversations.error".tr, "conversations.members.size".trParams({"size": specialConstants[Constants.specialConstantMaxConversationMembers].toString()}));
+    showErrorPopup("conversations.error".tr,
+        "conversations.members.size".trParams({"size": specialConstants[Constants.specialConstantMaxConversationMembers].toString()}));
     return false;
   }
 
   // Create the conversation
-  final body = await postNodeJSON("/conversations/open", <String, dynamic>{"accountData": ownMemberContainer, "members": memberContainers.values.toList(), "data": encryptedData});
+  final body = await postNodeJSON("/conversations/open",
+      <String, dynamic>{"accountData": ownMemberContainer, "members": memberContainers.values.toList(), "data": encryptedData});
   if (!body["success"]) {
     showErrorPopup("error".tr, "error.unknown".tr);
     return false;
@@ -101,8 +104,8 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   final conversationController = Get.find<ConversationController>();
 
   final packagedKey = packageSymmetricKey(conversationKey);
-  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]), conversationContainer, packagedKey, 0,
-      DateTime.now().millisecondsSinceEpoch);
+  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]],
+      ConversationToken.fromJson(body["admin_token"]), conversationContainer, packagedKey, 0, DateTime.now().millisecondsSinceEpoch);
   final members = <Member>[];
   for (var friend in friends) {
     final token = ConversationToken.fromJson(body["tokens"][hashSha(memberContainers[friend.id]!)]);
@@ -111,7 +114,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   }
 
   final statusController = Get.find<StatusController>();
-  await conversationController.addCreated(conversation, members, admin: Member(conversation.token.id, StatusController.ownAccountId, MemberRole.admin));
+  await conversationController.addCreated(conversation, members, admin: Member(conversation.token.id, StatusController.ownAddress, MemberRole.admin));
   subscribeToConversation(statusController.statusJson(), conversation.token, deletions: false);
 
   return true;
@@ -131,7 +134,8 @@ Future<bool> addToConversation(Conversation conv, Friend friend) async {
     return false;
   }
 
-  final result = await sendAuthenticatedStoredAction(friend, _conversationPayload(conv.id, ConversationToken.fromJson(json), packageSymmetricKey(conv.key), friend));
+  final result = await sendAuthenticatedStoredAction(
+      friend, _conversationPayload(conv.id, ConversationToken.fromJson(json), packageSymmetricKey(conv.key), friend));
   return result;
 }
 

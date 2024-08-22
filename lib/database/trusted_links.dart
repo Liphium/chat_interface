@@ -26,7 +26,7 @@ class TrustedLinkHelper {
     _trustModeSetting = controller.settings[TrustedLinkSettings.trustMode]!;
   }
 
-  /// Show a confirm popup to confirm the user wants to add a new domain
+  /// Show a confirm popup to confirm the user wants to add a new domain (returns whether the domain was trusted)
   static Future<bool> askToAdd(String url) async {
     // Exclude own instance
     final domain = extractDomain(url);
@@ -54,6 +54,16 @@ class TrustedLinkHelper {
     }
 
     return result;
+  }
+
+  /// Ask for addition when the link is not trusted (returns whether trusted or not)
+  static Future<bool> askToAddIfNotAdded(String url) async {
+    if (await isLinkTrusted(url)) {
+      return true;
+    }
+
+    // Ask to add
+    return await askToAdd(url);
   }
 
   /// Returns wether it was added

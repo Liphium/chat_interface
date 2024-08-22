@@ -8,6 +8,7 @@ import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -168,14 +169,15 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       if (friendController.friends.isNotEmpty) {
                         final member = friendController.friends.values.firstWhere(
                           (element) =>
-                              (element.name.toLowerCase().contains(value.toLowerCase()) || element.displayName.value.text.toLowerCase().contains(value.toLowerCase())) &&
-                              element.id != StatusController.ownAccountId,
-                          orElse: () => Friend.unknown("-"),
+                              (element.name.toLowerCase().contains(value.toLowerCase()) ||
+                                  element.displayName.value.text.toLowerCase().contains(value.toLowerCase())) &&
+                              element.id != StatusController.ownAddress,
+                          orElse: () => Friend.unknown(LPHAddress.error()),
                         );
-                        if (member.id != "-") {
+                        if (member.id.id != "-") {
                           if (_members.contains(member)) {
                             _members.remove(member);
-                          } else if (member.id != StatusController.ownAccountId) {
+                          } else if (member.id != StatusController.ownAddress) {
                             _members.add(member);
                           }
                         }
@@ -209,7 +211,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
                   return Obx(() {
                     final search = _search.value;
-                    if (search.isNotEmpty && !(friend.name.toLowerCase().contains(search.toLowerCase()) || friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
+                    if (search.isNotEmpty &&
+                        !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
+                            friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
                       return const SizedBox();
                     }
 

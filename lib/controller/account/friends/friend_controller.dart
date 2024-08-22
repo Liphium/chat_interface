@@ -10,7 +10,6 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
 import 'package:chat_interface/controller/current/steps/friends_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
@@ -29,12 +28,12 @@ import 'package:sodium_libs/sodium_libs.dart';
 part 'friends_vault.dart';
 
 class FriendController extends GetxController {
-  final friends = <String, Friend>{}.obs;
+  final friends = <LPHAddress, Friend>{}.obs;
   Timer? _timer; // Timer to refresh the friends vault every 5 minutes
 
   Future<bool> loadFriends() async {
     for (FriendData data in await db.friend.select().get()) {
-      friends[data.id] = Friend.fromEntity(data);
+      friends[LPHAddress.from(data.id)] = Friend.fromEntity(data);
     }
 
     // Start timer to refresh the vault every couple of seconds (for multi-device synchronization)
@@ -57,7 +56,7 @@ class FriendController extends GetxController {
   }
 
   void addSelf() {
-    friends[StatusController.ownAccountId] = Friend.me();
+    friends[StatusController.ownAddress] = Friend.me();
   }
 
   void reset() {
@@ -102,7 +101,7 @@ class FriendController extends GetxController {
   void add(Friend friend) {
     sendLog("ADDED ${friend.name}");
     friends[friend.id] = friend;
-    if (friend.id != StatusController.ownAccountId) {
+    if (friend.id != StatusController.ownAddress) {
       db.friend.insertOnConflictUpdate(friend.entity());
     }
   }
@@ -111,18 +110,18 @@ class FriendController extends GetxController {
     if (removal) {
       friends.remove(friend.id);
     }
-    await db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id));
+    await db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id.encode()));
     return true;
   }
 
-  Friend getFriend(String account) {
-    if (StatusController.ownAccountId == account) return Friend.me();
-    return friends[account] ?? Friend.unknown(account);
+  Friend getFriend(LPHAddress address) {
+    if (StatusController.ownAddress == address) return Friend.me();
+    return friends[address] ?? Friend.unknown(address);
   }
 }
 
 class Friend {
-  String id;
+  LPHAddress id;
   String name;
   String vaultId;
   KeyStorage keyStorage;
@@ -130,23 +129,11 @@ class Friend {
   Timer? _timer;
   int updatedAt;
 
-  /// The address of the guy on the Liphium network
-  String get address {
-    if (id.contains("@")) {
-      return id;
-    }
-    var path = TrustedLinkHelper.extractDomain(basePath);
-    if (basePath.startsWith("http://")) {
-      path = "http://$path";
-    }
-    return "$id@$path";
-  }
-
   // Display name of the friend
   final displayName = UTFString("").obs;
 
   void updateDisplayName(UTFString displayName) {
-    if (id == StatusController.ownAccountId) {
+    if (id.id == StatusController.ownAccountId && id.server == basePath) {
       return;
     }
     this.displayName.value = displayName;
@@ -162,14 +149,14 @@ class Friend {
 
   /// The friend for a system component (used in system messages for members)
   factory Friend.system() {
-    return Friend("system", "system", UTFString("system"), "", KeyStorage.empty(), 0);
+    return Friend(LPHAddress(basePath, "system"), "system", UTFString("system"), "", KeyStorage.empty(), 0);
   }
 
   /// Own account as a friend (used to make implementations simpler)
   factory Friend.me([StatusController? controller]) {
     controller ??= Get.find<StatusController>();
     return Friend(
-      StatusController.ownAccountId,
+      StatusController.ownAddress,
       controller.name.value,
       controller.displayName.value,
       "",
@@ -179,9 +166,9 @@ class Friend {
   }
 
   /// Used for unknown accounts where only an id is known
-  factory Friend.unknown(String id) {
-    final shownId = id.substring(0, 5);
-    final friend = Friend(id, "lph-$shownId", UTFString("lph-$shownId"), "", KeyStorage.empty(), 0);
+  factory Friend.unknown(LPHAddress address) {
+    final shownId = address.id.substring(0, 5);
+    final friend = Friend(address, "lph-$shownId", UTFString("lph-$shownId"), "", KeyStorage.empty(), 0);
     friend.unknown = true;
     return friend;
   }
@@ -189,7 +176,7 @@ class Friend {
   /// Convert the database entity to the actual type
   factory Friend.fromEntity(FriendData data) {
     return Friend(
-      data.id,
+      LPHAddress.from(data.id),
       data.name,
       UTFString.untransform(data.displayName),
       data.vaultId,
@@ -201,7 +188,7 @@ class Friend {
   /// Convert a json to a friend (used for friends vault)
   factory Friend.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
     return Friend(
-      json["id"],
+      LPHAddress.from(json["id"]),
       json["name"],
       UTFString.untransform(json["dname"]),
       "",
@@ -214,7 +201,7 @@ class Friend {
   String toStoredPayload() {
     final reqPayload = <String, dynamic>{
       "rq": false, // If it is a request or not (requests are stored in the same place)
-      "id": id,
+      "id": id.encode(),
       "name": name,
       "dname": displayName.value.transform(),
     };
@@ -227,7 +214,7 @@ class Friend {
   bool canBeDeleted() => vaultId != "";
 
   FriendData entity() => FriendData(
-        id: id,
+        id: id.encode(),
         name: name,
         displayName: displayName.value.transform(),
         vaultId: vaultId,
@@ -237,13 +224,12 @@ class Friend {
 
   // Update in database
   Future<bool> update() async {
-    if (id == StatusController.ownAccountId || unknown) {
+    if (id == StatusController.ownAddress || unknown) {
       return false;
     }
     await FriendsVault.remove(vaultId);
     final result = await FriendsVault.store(toStoredPayload());
     if (result == null) {
-      // TODO: Log somewhere
       sendLog("FRIEND CONFLICT: Couldn't update in vault!");
       return true;
     }
@@ -267,7 +253,7 @@ class Friend {
     }
     statusType.value = data["t"];
 
-    if (id != StatusController.ownAccountId) {
+    if (id != StatusController.ownAddress) {
       _timer?.cancel();
       _timer = Timer(const Duration(minutes: 2), () {
         setOffline();
@@ -294,7 +280,7 @@ class Friend {
   void updateProfilePicture(AttachmentContainer? picture) async {
     if (picture == null) {
       // Delete the profile picture if it is null
-      db.profile.insertOnConflictUpdate(ProfileData(id: id, pictureContainer: "", data: ""));
+      db.profile.insertOnConflictUpdate(ProfileData(id: id.encode(), pictureContainer: "", data: ""));
 
       // Update the friend as well
       profilePicture = null;
@@ -303,7 +289,7 @@ class Friend {
     } else {
       // Set a new profile picture if it is valid
       db.profile.insertOnConflictUpdate(ProfileData(
-        id: id,
+        id: id.encode(),
         pictureContainer: jsonEncode(picture.toJson()),
         data: "",
       ));
@@ -334,7 +320,7 @@ class Friend {
     if (profilePictureImage.value != null || profilePictureDataNull) return;
 
     // Load the image
-    final data = await ProfileHelper.getProfileDataLocal(id);
+    final data = await ProfileHelper.getProfileDataLocal(id.encode());
     if (data == null) {
       profilePictureDataNull = true; // To prevent this thing from constantly loading again
       return;
@@ -368,7 +354,7 @@ class Friend {
     loading.value = true;
 
     await FriendsVault.remove(vaultId);
-    db.friend.deleteWhere((tbl) => tbl.id.equals(id));
+    db.friend.deleteWhere((tbl) => tbl.id.equals(id.encode()));
     Get.find<FriendController>().friends.remove(id);
 
     loading.value = false;

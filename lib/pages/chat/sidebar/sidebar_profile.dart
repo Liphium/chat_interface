@@ -195,7 +195,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                               return Expanded(
                                 child: Row(
                                   children: [
-                                    UserAvatar(id: StatusController.ownAccountId, size: 40),
+                                    UserAvatar(id: StatusController.ownAddress, size: 40),
                                     horizontalSpacing(defaultSpacing),
                                     Expanded(
                                       child: Obx(

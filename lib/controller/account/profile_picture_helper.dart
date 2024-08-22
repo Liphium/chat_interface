@@ -24,7 +24,7 @@ class ProfileHelper {
   /// Returns the file ID associated with the profile picture.
   static Future<String?> downloadProfilePicture(Friend friend) async {
     // Get old profile picture
-    final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id))).getSingleOrNull();
+    final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id.encode()))).getSingleOrNull();
 
     final json = await postAuthorizedJSON("/account/profile/get", <String, dynamic>{
       "id": friend.id,
@@ -86,7 +86,7 @@ class ProfileHelper {
 
     // Delete old profile
     if (oldProfile != null) {
-      await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id))).go();
+      await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id.encode()))).go();
     }
 
     // Save the profile picture data
@@ -116,7 +116,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!);
+    Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
 
     return true;
   }
@@ -130,7 +130,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(null);
+    Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(null);
     return true;
   }
 

@@ -31,19 +31,21 @@ Future<bool> sendAuthenticatedStoredAction(Friend friend, Map<String, dynamic> p
   return true;
 }
 
-Future<bool> sendStoredAction(String account, Uint8List publicKey, String payload) async {
+/// Send a stored action to someone using their address (returns null when successful)
+Future<String?> sendStoredAction(LPHAddress address, Uint8List publicKey, String payload) async {
   // Send stored action
-  final json = await postAuthorizedJSON("/account/stored_actions/send", <String, dynamic>{
-    "account": account,
+  final json = await postAddress(address.server, "/account/stored_actions/send", <String, dynamic>{
+    "account": address.id,
     "payload": createPayload(payload, publicKey),
   });
 
+  // Make sure the request was successful
   if (!json["success"]) {
     sendLog("couldn't send stored action: ${json["error"]}");
-    return false;
+    return json["error"];
   }
 
-  return true;
+  return null;
 }
 
 String createPayload(String payload, Uint8List publicKey) {

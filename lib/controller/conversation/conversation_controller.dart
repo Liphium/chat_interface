@@ -94,7 +94,8 @@ class ConversationController extends GetxController {
   }
 
   void updateMessageRead(String conversation, {bool increment = true, required int messageSendTime}) {
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation)))
+        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
 
     // Swap in the map
     _insertToOrder(conversation);
@@ -231,35 +232,36 @@ class Conversation {
   /// Only works for direct messages
   String get dmName {
     final member = members.values.firstWhere(
-      (element) => element.account != StatusController.ownAccountId,
+      (element) => element.address != StatusController.ownAddress,
       orElse: () => Member(
-        StatusController.ownAccountId,
-        StatusController.ownAccountId,
+        "-",
+        LPHAddress("-", "-"),
         MemberRole.user,
       ),
     );
-    final friend = Get.find<FriendController>().friends[member.account] ?? Friend.unknown(container.name);
-    return friend.displayName.value.text;
+    return Get.find<FriendController>().friends[member.address]?.displayName.value.text ?? container.name;
   }
 
   /// Only works for direct messages
   Friend get otherMember {
     final member = members.values.firstWhere(
-      (element) => element.account != StatusController.ownAccountId,
+      (element) => element.address != StatusController.ownAddress,
       orElse: () => Member(
-        StatusController.ownAccountId,
-        StatusController.ownAccountId,
+        "-",
+        LPHAddress("-", "-"),
         MemberRole.user,
       ),
     );
-    return Get.find<FriendController>().friends[member.account] ?? Friend.unknown(container.name);
+    return Get.find<FriendController>().friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
   }
 
+  /// Check if a conversation is broken (borked)
   bool get borked =>
       !isGroup &&
       Get.find<FriendController>().friends[members.values
-              .firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
-              .account] ==
+              .firstWhere((element) => element.address != StatusController.ownAddress,
+                  orElse: () => Member("-", LPHAddress("-", "-"), MemberRole.user))
+              .address] ==
           null;
 
   ConversationData get entity => ConversationData(

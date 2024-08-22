@@ -1,4 +1,3 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -6,13 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BubblesSystemMessageRenderer extends StatefulWidget {
-  final String accountId;
   final Message message;
   final bool self;
   final bool last;
-  final Friend? sender;
 
-  const BubblesSystemMessageRenderer({super.key, required this.message, required this.accountId, this.self = false, this.last = false, this.sender});
+  const BubblesSystemMessageRenderer({super.key, required this.message, this.self = false, this.last = false});
 
   @override
   State<BubblesSystemMessageRenderer> createState() => _MessageRendererState();

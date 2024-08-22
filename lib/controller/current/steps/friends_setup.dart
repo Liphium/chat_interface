@@ -43,10 +43,10 @@ class _FriendsListResponse {
   final List<Friend> friends;
 
   // Strings lists for later processing
-  final List<String> friendIds = <String>[];
-  final List<String> allRequestIds = <String>[];
-  final List<String> requestIds = <String>[];
-  final List<String> requestSentIds = <String>[];
+  final List<LPHAddress> friendIds = <LPHAddress>[];
+  final List<LPHAddress> allRequestIds = <LPHAddress>[];
+  final List<LPHAddress> requestIds = <LPHAddress>[];
+  final List<LPHAddress> requestSentIds = <LPHAddress>[];
 
   _FriendsListResponse(this.requests, this.requestsSent, this.friends) {
     for (var friend in friends) {
@@ -103,7 +103,7 @@ Future<String?> refreshFriendsVault() async {
       controller.addSentRequest(request);
     }
   }
-  db.request.deleteWhere((t) => t.id.isNotIn(res.allRequestIds)); // Remove the other ones that aren't there
+  db.request.deleteWhere((t) => t.id.isNotIn(res.allRequestIds.map((e) => e.encode()))); // Remove the other ones that aren't there
 
   // Push friends
   final friendController = Get.find<FriendController>();
@@ -113,7 +113,7 @@ Future<String?> refreshFriendsVault() async {
       friendController.add(friend);
     }
   }
-  db.friend.deleteWhere((t) => t.id.isNotIn(res.friendIds)); // Remove the other ones that aren't there
+  db.friend.deleteWhere((t) => t.id.isNotIn(res.friendIds.map((e) => e.encode()))); // Remove the other ones that aren't there
 
   friendsVaultRefreshing.value = false;
   return null;

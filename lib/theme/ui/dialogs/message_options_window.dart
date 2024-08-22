@@ -34,7 +34,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final friend = Get.find<FriendController>().friends[widget.message.senderAccount];
+    final friend = Get.find<FriendController>().friends[widget.message.senderAddress];
 
     return SlidingWindowBase(
       lessPadding: true,
@@ -80,7 +80,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             label: "message.profile".tr,
             onTap: () {
               Get.back();
-              showModal(Profile(friend: friend ?? Friend.unknown(widget.message.senderAccount)));
+              showModal(Profile(friend: friend ?? Friend.unknown(widget.message.senderAddress)));
             },
             loading: false.obs,
           ),

@@ -13,12 +13,14 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 class StatusController extends GetxController {
   static String ownAccountId = "";
   static List<String> permissions = [];
+  static LPHAddress get ownAddress => LPHAddress(basePath, ownAccountId);
 
   Timer? _timer;
   StatusController() {
@@ -41,7 +43,7 @@ class StatusController extends GetxController {
   final type = 1.obs;
 
   // Shared content by friends
-  final sharedContent = RxMap<String, ShareContainer>();
+  final sharedContent = RxMap<LPHAddress, ShareContainer>();
 
   // Current shared content (by this account)
   final ownContainer = Rx<ShareContainer?>(null);

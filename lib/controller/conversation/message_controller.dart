@@ -135,7 +135,7 @@ class MessageController extends GetxController {
     }
 
     // On call message type, ring using the message
-    if (message.type == MessageType.call && message.senderAccount != StatusController.ownAccountId) {
+    if (message.type == MessageType.call && message.senderAddress != StatusController.ownAddress) {
       // Get the conversation for the ring
       final conversation = Get.find<ConversationController>().conversations[message.conversation];
       if (conversation == null) {
@@ -414,7 +414,7 @@ class Message {
   String answer;
   final String certificate;
   final String sender;
-  final String senderAccount;
+  final LPHAddress senderAddress;
   final DateTime createdAt;
   final String conversation;
   final bool edited;
@@ -508,7 +508,7 @@ class Message {
     this.attachments,
     this.certificate,
     this.sender,
-    this.senderAccount,
+    this.senderAddress,
     this.createdAt,
     this.conversation,
     this.edited,
@@ -589,9 +589,10 @@ class Message {
   /// **Doesn't verify the signature**
   static (Message, SymmetricSequencedInfo?) fromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
     // Convert to message
-    final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[json["sender"]]?.account ?? "removed";
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account, DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"],
-        json["edited"], false);
+    final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[json["sender"]]?.address ??
+        LPHAddress("-", "removed".tr);
+    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account,
+        DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"], json["edited"], false);
 
     // Decrypt content
     conversation ??= Get.find<ConversationController>().conversations[json["conversation"]]!;
@@ -632,7 +633,7 @@ class Message {
   void verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
     final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
     sendLog("${conversation.members} | ${this.sender}");
-    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
+    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.address);
     if (sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;

@@ -207,7 +207,8 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                             return Visibility(
                               visible: available.value && !widget.self,
                               child: IconButton(
-                                onPressed: () => Get.find<ZapShareController>().joinTransaction(widget.message.conversation, widget.message.senderAccount, container!),
+                                onPressed: () => Get.find<ZapShareController>()
+                                    .joinTransaction(widget.message.conversation, widget.message.senderAddress, container!),
                                 icon: const Icon(Icons.check),
                               ),
                             );

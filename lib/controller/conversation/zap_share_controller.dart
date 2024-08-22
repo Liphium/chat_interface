@@ -29,7 +29,7 @@ import 'package:path/path.dart' as path;
 
 class ZapShareController extends GetxController {
   // Current transaction
-  final currentReceiver = Rx<String?>(null);
+  final currentReceiver = Rx<LPHAddress?>(null);
   final currentConversation = Rx<String?>(null);
   final waiting = false.obs;
   final step = "loading".tr.obs;
@@ -104,7 +104,7 @@ class ZapShareController extends GetxController {
 
   //* Everything about sending starts here
 
-  void newTransaction(String friendId, String conversationId, List<XFile> files) async {
+  void newTransaction(LPHAddress friend, String conversationId, List<XFile> files) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
@@ -167,7 +167,7 @@ class ZapShareController extends GetxController {
           return;
         }
 
-        currentReceiver.value = friendId;
+        currentReceiver.value = friend;
         currentConversation.value = conversationId;
         transactionId = event.data["id"];
         transactionToken = event.data["token"];
@@ -358,12 +358,12 @@ class ZapShareController extends GetxController {
   //* Everything about receiving starts here
 
   /// Join a transaction with a given ID and token + start listening for parts
-  void joinTransaction(String conversation, String friendId, LiveshareInviteContainer container) async {
+  void joinTransaction(String conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
     }
-    if (friendId == StatusController.ownAccountId) {
+    if (friendAddress == StatusController.ownAddress) {
       showErrorPopup("error", "chat.zapshare.not_send_self");
       return;
     }
@@ -385,7 +385,7 @@ class ZapShareController extends GetxController {
     sendLog(base64Encode(container.key.extractBytes()));
     key = container.key;
     currentConversation.value = conversation;
-    currentReceiver.value = friendId;
+    currentReceiver.value = friendAddress;
 
     // Subscribe to byte stream
     final formData = d.FormData.fromMap({

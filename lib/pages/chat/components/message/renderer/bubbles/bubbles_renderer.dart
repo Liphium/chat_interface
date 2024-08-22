@@ -84,10 +84,10 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     }
 
     if (message.type == MessageType.system) {
-      return BubblesSystemMessageRenderer(message: message, accountId: MessageController.systemSender);
+      return BubblesSystemMessageRenderer(message: message);
     }
-    final sender = friendController.friends[message.senderAccount];
-    final self = message.senderAccount == StatusController.ownAccountId;
+    final sender = friendController.friends[message.senderAddress];
+    final self = message.senderAddress == StatusController.ownAddress;
 
     bool last = false;
     bool newHeading = false;
@@ -106,7 +106,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         renderer = BubblesMessageRenderer(
           key: ValueKey(message.id),
           message: message,
-          accountId: message.senderAccount,
+          senderAddress: message.senderAddress,
           self: self,
           last: last,
           sender: self ? Friend.me() : sender,
@@ -134,7 +134,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         renderer = BubblesSystemMessageRenderer(
           key: ValueKey(message.id),
           message: message,
-          accountId: message.senderAccount,
         );
     }
 

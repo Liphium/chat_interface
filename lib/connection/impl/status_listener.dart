@@ -11,6 +11,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -28,7 +29,7 @@ void setupStatusListener() {
 
     // Get dm with friend
     final dm = Get.find<ConversationController>().conversations.values.firstWhere(
-          (element) => element.members.length == 2 && element.members.values.any((element) => element.account == friend.id),
+          (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
         );
 
     connector.sendAction(Message("st_res", <String, dynamic>{
@@ -81,14 +82,17 @@ Friend? handleStatus(Event event) {
   }
 
   // Get the account id of the person sending the status packet
-  final member = conversation.members.values.firstWhere((mem) => mem.tokenId == owner, orElse: () => Member("", "", MemberRole.user));
+  final member = conversation.members.values.firstWhere(
+    (mem) => mem.tokenId == owner,
+    orElse: () => Member("", LPHAddress("-", "-"), MemberRole.user),
+  );
   if (member.tokenId == "") {
     sendLog("member $owner not found in conversation $convId (status packet)");
     return null;
   }
-  final friend = controller.friends[member.account];
+  final friend = controller.friends[member.address];
   if (friend == null) {
-    sendLog("account ${member.account} isn't a friend (status packet)");
+    sendLog("account ${member.address.toString()} isn't a friend (status packet)");
     return null;
   }
 

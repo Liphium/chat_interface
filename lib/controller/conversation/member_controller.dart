@@ -21,26 +21,26 @@ class MemberController extends GetxController {
 
 class Member {
   final String tokenId; // Token id
-  final String account; // Account id
+  final LPHAddress address; // Account id
   final MemberRole role;
 
-  Member(this.tokenId, this.account, this.role);
-  Member.unknown(this.account)
+  Member(this.tokenId, this.address, this.role);
+  Member.unknown(this.address)
       : tokenId = "",
         role = MemberRole.user;
   Member.fromJson(Map<String, dynamic> json)
       : tokenId = json['id'],
-        account = json['account'],
+        address = LPHAddress.from(json['address']),
         role = MemberRole.fromValue(json['role']);
 
-  Member.fromData(MemberData data) : this(data.id, data.accountId, MemberRole.fromValue(data.roleId));
+  Member.fromData(MemberData data) : this(data.id, LPHAddress.from(data.accountId), MemberRole.fromValue(data.roleId));
 
-  MemberData toData(String conversation) => MemberData(id: tokenId, accountId: account, roleId: role.value, conversationId: conversation);
+  MemberData toData(String conversation) => MemberData(id: tokenId, accountId: address.encode(), roleId: role.value, conversationId: conversation);
 
   Friend getFriend([FriendController? controller]) {
-    if (StatusController.ownAccountId == account) return Friend.me();
+    if (StatusController.ownAddress == address) return Friend.me();
     controller ??= Get.find<FriendController>();
-    return controller.friends[account] ?? Friend.unknown(account);
+    return controller.friends[address] ?? Friend.unknown(address);
   }
 
   Future<bool> promote(String conversationId) async {

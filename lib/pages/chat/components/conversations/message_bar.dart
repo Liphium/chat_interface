@@ -204,7 +204,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
           // Get all friends in conversation
           var initial = <Friend>[];
           for (var member in widget.conversation.members.values) {
-            if (member.account == StatusController.ownAccountId) {
+            if (member.address == StatusController.ownAddress) {
               continue;
             }
             final friend = member.getFriend();
@@ -241,7 +241,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
           ));
         } else {
           // Get the friend and open the window
-          final friend = widget.conversation.members.values.firstWhere((element) => element.account != StatusController.ownAccountId).getFriend();
+          final friend = widget.conversation.members.values.firstWhere((element) => element.address != StatusController.ownAddress).getFriend();
           if (friend.unknown) {
             return;
           }

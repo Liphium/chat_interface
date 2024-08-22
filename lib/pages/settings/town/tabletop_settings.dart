@@ -162,7 +162,7 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
                   Align(
                     alignment: Alignment.center,
                     child: UserAvatar(
-                      id: StatusController.ownAccountId,
+                      id: StatusController.ownAddress,
                       size: 40,
                     ),
                   ),

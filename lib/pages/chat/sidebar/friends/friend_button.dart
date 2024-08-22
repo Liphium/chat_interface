@@ -66,7 +66,7 @@ class _FriendButtonState extends State<FriendButton> {
                   icon: Icon(Icons.call, color: Theme.of(context).colorScheme.onPrimary),
                   onPressed: () {
                     final conversation = Get.find<ConversationController>().conversations.values.where(
-                          (element) => !element.isGroup && element.members.values.any((m) => m.account == widget.friend.id),
+                          (element) => !element.isGroup && element.members.values.any((m) => m.address == widget.friend.id),
                         );
                     if (conversation.isNotEmpty) {
                       Get.find<SpacesController>().createAndConnect(conversation.first.id);

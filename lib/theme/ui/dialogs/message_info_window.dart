@@ -23,7 +23,7 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
   @override
   Widget build(BuildContext context) {
     final conversationToken = Get.find<ConversationController>().conversations[widget.message.conversation]!.members[widget.message.sender] ??
-        Member("removed".tr, widget.message.senderAccount, MemberRole.user);
+        Member("removed".tr, widget.message.senderAddress, MemberRole.user);
 
     return DialogBase(
       child: Column(
@@ -32,7 +32,7 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
         children: [
           Text(
             "message.info.text".trParams({
-              "account": conversationToken.account,
+              "account": conversationToken.address.encode(),
               "token": conversationToken.tokenId,
               "hour": widget.message.createdAt.hour.toString(),
               "minute": widget.message.createdAt.minute.toString(),

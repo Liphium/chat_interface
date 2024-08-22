@@ -6,7 +6,7 @@ class MessageSendHelper {
 
   /// Add a reply to the current message draft
   static void addReplyToCurrentDraft(Message message) {
-    currentDraft.value?.answer.value = AnswerData(message.id, message.senderAccount, message.content, message.attachments);
+    currentDraft.value?.answer.value = AnswerData(message.id, message.senderAddress, message.content, message.attachments);
   }
 
   /// Add a file to the current message draft
@@ -42,11 +42,11 @@ class MessageSendHelper {
 
 class AnswerData {
   final String id;
-  final String senderAccount;
+  final LPHAddress senderAddress;
   final String content;
   final List<String> attachments;
 
-  AnswerData(this.id, this.senderAccount, this.content, this.attachments);
+  AnswerData(this.id, this.senderAddress, this.content, this.attachments);
 
   static String answerContent(MessageType type, String content, List<String> attachments, {FriendController? controller}) {
     switch (type) {
@@ -89,7 +89,8 @@ class UploadData {
 }
 
 /// Send a text message with files attached (files will be uploaded)
-void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<UploadData> files, String answer, Function() callback) async {
+void sendTextMessageWithFiles(
+    RxBool loading, String conversationId, String message, List<UploadData> files, String answer, Function() callback) async {
   if (loading.value) {
     return;
   }
@@ -149,7 +150,8 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), answer, callback);
 }
 
-void sendActualMessage(RxBool loading, String conversationId, MessageType type, List<String> attachments, String message, String answer, Function() callback) async {
+void sendActualMessage(
+    RxBool loading, String conversationId, MessageType type, List<String> attachments, String message, String answer, Function() callback) async {
   if (message.isEmpty && attachments.isEmpty) {
     callback.call();
     return;

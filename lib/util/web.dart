@@ -52,6 +52,33 @@ String ownServer(String path) {
   return '$basePath/$apiVersion$path';
 }
 
+/// Class to deal with addresses for users
+class LPHAddress {
+  final String server;
+  final String id;
+
+  LPHAddress(this.server, this.id);
+
+  /// Returns an address with both server and id being "-" when an error happens
+  factory LPHAddress.from(String address) {
+    final args = address.split("@");
+    if (args.length != 2) {
+      return LPHAddress("-", "-");
+    }
+    return LPHAddress(args[1], args[0]);
+  }
+
+  /// Special constructor just for errors
+  LPHAddress.error([String replacer = "-"]) : this(replacer, replacer);
+
+  String encode() => "$id@$server";
+
+  @override
+  String toString() {
+    return encode();
+  }
+}
+
 /// Get the path from any server
 String serverPath(String server, String path) {
   path = path.startsWith("/") ? path : "/$path";
@@ -118,7 +145,8 @@ Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {S
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) async {
+Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body,
+    {String defaultError = "server.error", String? token}) async {
   // Try to get the server public key
   if (serverPublicKeys[server] == null) {
     sendLog("grabbing key for $server");
@@ -137,7 +165,8 @@ Future<Map<String, dynamic>> postAddress(String server, String path, Map<String,
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) async {
+Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, dynamic> body,
+    {String defaultError = "server.error", String? token}) async {
   final aesKey = randomAESKey();
   final aesBase64 = base64Encode(aesKey);
   Response? res;

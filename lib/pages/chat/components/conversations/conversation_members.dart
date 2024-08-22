@@ -60,21 +60,29 @@ class ConversationMembers extends StatelessWidget {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         onTap: () {
-                          final friend = Get.find<FriendController>().friends[member.account];
-                          if (StatusController.ownAccountId != member.account) {
+                          final friend = Get.find<FriendController>().friends[member.address];
+                          if (StatusController.ownAddress != member.address) {
                             final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                             Get.dialog(
                               Profile(
                                 position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
-                                friend: friend ?? Friend.unknown(member.account),
+                                friend: friend ?? Friend.unknown(member.address),
                                 size: box.size.width.toInt(),
                                 actions: (friend) {
                                   return [
                                         //* Promotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
-                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_moderator".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id))
+                                          ProfileAction(
+                                              icon: Icons.add_moderator,
+                                              label: "chat.make_moderator".tr,
+                                              loading: false.obs,
+                                              onTap: (f, l) => member.promote(conversation.id))
                                         else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
-                                          ProfileAction(icon: Icons.add_moderator, label: "chat.make_admin".tr, loading: false.obs, onTap: (f, l) => member.promote(conversation.id)),
+                                          ProfileAction(
+                                              icon: Icons.add_moderator,
+                                              label: "chat.make_admin".tr,
+                                              loading: false.obs,
+                                              onTap: (f, l) => member.promote(conversation.id)),
 
                                         //* Demotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
@@ -116,7 +124,7 @@ class ConversationMembers extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: UserRenderer(
-                                  id: member.account,
+                                  id: member.address,
                                 ),
                               ),
                               horizontalSpacing(elementSpacing),

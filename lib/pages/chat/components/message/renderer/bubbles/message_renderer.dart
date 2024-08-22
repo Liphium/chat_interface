@@ -10,11 +10,12 @@ import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BubblesMessageRenderer extends StatefulWidget {
-  final String accountId;
+  final LPHAddress senderAddress;
   final Message message;
   final bool self;
   final bool last;
@@ -23,7 +24,7 @@ class BubblesMessageRenderer extends StatefulWidget {
   const BubblesMessageRenderer({
     super.key,
     required this.message,
-    required this.accountId,
+    required this.senderAddress,
     this.self = false,
     this.last = false,
     this.sender,
@@ -39,7 +40,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    Friend sender = widget.sender ?? Friend.unknown(widget.accountId);
+    Friend sender = widget.sender ?? Friend.unknown(widget.senderAddress);
     ThemeData theme = Theme.of(context);
 
     return RepaintBoundary(
@@ -63,7 +64,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
             // Open the context menu
             Get.dialog(MessageOptionsWindow(
               data: menuData,
-              self: widget.message.senderAccount == StatusController.ownAccountId,
+              self: widget.message.senderAddress == StatusController.ownAccountId,
               message: widget.message,
             ));
           },
@@ -135,7 +136,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                                   child: Row(
                                                     mainAxisSize: MainAxisSize.min,
                                                     children: [
-                                                      UserAvatar(id: widget.message.answerMessage!.senderAccount, size: 30),
+                                                      UserAvatar(id: widget.message.answerMessage!.senderAddress, size: 30),
                                                       horizontalSpacing(elementSpacing),
                                                       if (widget.message.answerMessage!.type == MessageType.call)
                                                         Icon(Icons.public, color: theme.colorScheme.onPrimary)
@@ -148,8 +149,8 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                                       horizontalSpacing(elementSpacing),
                                                       Flexible(
                                                         child: Text(
-                                                          AnswerData.answerContent(
-                                                              widget.message.answerMessage!.type, widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
+                                                          AnswerData.answerContent(widget.message.answerMessage!.type,
+                                                              widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
                                                           style: Get.theme.textTheme.labelMedium,
                                                           overflow: TextOverflow.ellipsis,
                                                           maxLines: 1,

@@ -84,11 +84,7 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
                 ),
                 FJElevatedButton(
                   onTap: () async {
-                    var path = TrustedLinkHelper.extractDomain(basePath);
-                    if (basePath.startsWith("http://")) {
-                      path = "http://$path";
-                    }
-                    await Clipboard.setData(ClipboardData(text: "${StatusController.ownAccountId}@$path"));
+                    await Clipboard.setData(ClipboardData(text: StatusController.ownAddress.encode()));
                     showSuccessPopup("success", "settings.town.address.copied");
                   },
                   child: Text(
