@@ -63,6 +63,7 @@ class LPHAddress {
   factory LPHAddress.from(String address) {
     final args = address.split("@");
     if (args.length != 2) {
+      sendLog("ERROR UNPACKING ADDRESS: $address");
       return LPHAddress("-", "-");
     }
     return LPHAddress(args[1], args[0]);
@@ -73,10 +74,20 @@ class LPHAddress {
 
   String encode() => "$id@$server";
 
+  /// So it works properly with JSON
   @override
   String toString() {
     return encode();
   }
+
+  // Needed for hashCode to work
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is LPHAddress && runtimeType == other.runtimeType && server == other.server && id == other.id;
+
+  // So it works properly with HashMaps
+  @override
+  int get hashCode => server.hashCode ^ id.hashCode;
 }
 
 /// Get the path from any server
@@ -92,7 +103,6 @@ String serverPath(String server, String path) {
 Future<String?> grabServerPublicKey({String defaultError = "server.error"}) async {
   final Response res;
   try {
-    sendLog(ownServer("/pub"));
     res = await post(Uri.parse(ownServer("/pub")));
   } catch (e) {
     return "error.network";
@@ -149,7 +159,6 @@ Future<Map<String, dynamic>> postAddress(String server, String path, Map<String,
     {String defaultError = "server.error", String? token}) async {
   // Try to get the server public key
   if (serverPublicKeys[server] == null) {
-    sendLog("grabbing key for $server");
     final result = await grabServerPublicURL(server);
     if (result != null) {
       return {
@@ -160,7 +169,6 @@ Future<Map<String, dynamic>> postAddress(String server, String path, Map<String,
   }
 
   // Do the request
-  sendLog(serverPath(server, path).toString());
   return _postTCP(serverPublicKeys[server]!, serverPath(server, path).toString(), body, defaultError: defaultError, token: token);
 }
 

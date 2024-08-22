@@ -103,7 +103,7 @@ void initApp(List<String> args) async {
 
   // Initialize sodium
   await initSodium();
-  print(packageSymmetricKey(randomSymmetricKey()));
+  sendLog(packageSymmetricKey(randomSymmetricKey()));
 
   await RustLib.init();
 

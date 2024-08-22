@@ -1,5 +1,4 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';

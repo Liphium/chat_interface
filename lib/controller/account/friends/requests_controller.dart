@@ -74,7 +74,7 @@ void newFriendRequest(String name, Function(String) success) async {
   requestsLoading.value = true;
 
   final controller = Get.find<StatusController>();
-  if (name == controller.name.value) {
+  if (name == controller.name.value || LPHAddress.from(name) == StatusController.ownAddress) {
     showErrorPopup("request.self", "request.self.text");
     requestsLoading.value = false;
     return;
@@ -106,7 +106,7 @@ void newFriendRequest(String name, Function(String) success) async {
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(controller, name, profile!.displayName!, profile.id, profile.publicKey, profile.signatureKey, success);
+      sendFriendRequest(controller, profile!.name!, profile.displayName!, profile.id, profile.publicKey, profile.signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -135,10 +135,12 @@ void sendFriendRequest(
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
-    "ad": StatusController.ownAddress,
+    "ad": StatusController.ownAddress.encode(),
     "name": controller.name.value,
     "dname": controller.displayName.value.transform(),
     "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, name),
+    "pub": packagePublicKey(asymmetricKeyPair.publicKey),
+    "sg": packagePublicKey(signatureKeyPair.publicKey),
     "pf": packageSymmetricKey(profileKey),
     "sa": storedActionKey,
   });
@@ -153,7 +155,7 @@ void sendFriendRequest(
 
   // Accept friend request if there is one from the other user
   final requestController = Get.find<RequestController>();
-  final requestSent = requestController.requests[address.encode()];
+  final requestSent = requestController.requests[address];
   if (requestSent != null) {
     requestController.deleteRequest(requestSent);
     await Get.find<FriendController>().addFromRequest(requestSent);
@@ -210,7 +212,7 @@ class Request {
   /// Get a request from a stored payload in the database
   factory Request.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
     return Request(
-      json["id"],
+      LPHAddress.from(json["id"]),
       json["name"],
       UTFString.untransform(json["display_name"]),
       "",

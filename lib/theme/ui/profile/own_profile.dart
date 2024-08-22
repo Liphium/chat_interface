@@ -1,4 +1,3 @@
-import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
@@ -153,7 +152,9 @@ class _ProfileState extends State<OwnProfile> {
                               Icon(icon, size: 13.0, color: color),
                               horizontalSpacing(defaultSpacing),
                               Text("status.${index.toString()}".tr,
-                                  style: theme.textTheme.bodyMedium!.copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface), textHeightBehavior: noTextHeight),
+                                  style:
+                                      theme.textTheme.bodyMedium!.copyWith(color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface),
+                                  textHeightBehavior: noTextHeight),
                             ],
                           ),
                         ),

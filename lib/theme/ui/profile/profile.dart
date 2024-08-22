@@ -6,6 +6,7 @@ import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -68,7 +69,8 @@ class ProfileAction {
   final Color? iconColor;
   final Function(Friend, RxBool) onTap;
 
-  const ProfileAction({required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
+  const ProfileAction(
+      {required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
 }
 
 class Profile extends StatefulWidget {
@@ -141,6 +143,16 @@ class _ProfileState extends State<Profile> {
                       style: Get.theme.textTheme.titleMedium,
                     ),
                   ),
+                  if (widget.friend.id.server != basePath)
+                    Padding(
+                      padding: const EdgeInsets.only(left: defaultSpacing),
+                      child: Tooltip(
+                        message: "friends.different_town".trParams({
+                          "town": widget.friend.id.server,
+                        }),
+                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                      ),
+                    ),
                 ],
               ),
             ),

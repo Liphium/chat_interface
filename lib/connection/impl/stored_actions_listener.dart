@@ -121,17 +121,16 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     sendLog("WARNING: couldn't delete stored action");
   }
 
-  // Get friend by name (only works on current server)
-  final resJson = await postAuthorizedJSON("/account/stored_actions/details", {"username": json["name"]});
-
-  if (!resJson["success"]) {
-    sendLog("invalid friend request: ${json["error"]}");
+  // Get the address from the friend request
+  final address = LPHAddress.from(json["ad"]);
+  if (address.id == "-") {
+    sendLog("ERROR: couldn't handle friend request due to invalid address");
     return true;
   }
 
-  // Check "signature"
-  final publicKey = unpackagePublicKey(resJson["key"]);
-  final signatureKey = unpackagePublicKey(resJson["sg"]);
+  // Check the signature and stuff
+  final publicKey = unpackagePublicKey(json["pub"]);
+  final signaturePub = unpackagePublicKey(json["sg"]);
   final statusController = Get.find<StatusController>();
   final signedMessage = statusController.name.value;
   final result = decryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, json["s"]);
@@ -141,9 +140,8 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   }
 
   // Check if the current account already sent this account a friend request (-> add friend)
-  final id = resJson["account"];
   final requestController = Get.find<RequestController>();
-  var request = requestController.requestsSent[id];
+  var request = requestController.requestsSent[address];
 
   if (request != null) {
     // This request doesn't have the right key storage yet
@@ -160,13 +158,13 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   }
 
   // Check if the request is already in the list
-  if (requestController.requests[id] != null) {
+  if (requestController.requests[address] != null) {
     sendLog("invalid friend request: already in list");
     return true;
   }
 
   // Check if the guy is already a friend
-  if (Get.find<FriendController>().friends.values.any((element) => element.id == id)) {
+  if (Get.find<FriendController>().friends.values.any((element) => element.id == address)) {
     sendLog("invalid friend request: already a friend");
     return true;
   }
@@ -174,11 +172,11 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   // Add friend request to vault
   final profileKey = unpackageSymmetricKey(json["pf"]);
   request = Request(
-    id,
+    address,
     json["name"],
     UTFString.untransform(json["dname"]),
     "",
-    KeyStorage(publicKey, signatureKey, profileKey, json["sa"]),
+    KeyStorage(publicKey, signaturePub, profileKey, json["sa"]),
     DateTime.now().millisecondsSinceEpoch,
   );
 

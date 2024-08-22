@@ -158,6 +158,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: 'search'.tr,
+                      hintStyle: Get.textTheme.bodyLarge,
                     ),
                     cursorColor: theme.colorScheme.onPrimary,
                     style: theme.textTheme.labelLarge,
@@ -205,7 +206,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 itemBuilder: (context, index) {
                   Friend friend = friendController.friends.values.elementAt(index);
 
-                  if (friend.id == StatusController.ownAccountId) {
+                  if (friend.id == StatusController.ownAddress) {
                     return const SizedBox();
                   }
 

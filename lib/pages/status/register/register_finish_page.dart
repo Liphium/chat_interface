@@ -156,9 +156,10 @@ class _RegisterPageState extends State<RegisterFinishPage> {
                     horizontalSpacing(defaultSpacing),
                     TextButton(
                       style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all(theme.colorScheme.onPrimary),
-                        backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) => states.contains(MaterialState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
+                        foregroundColor: WidgetStateProperty.all(theme.colorScheme.onPrimary),
+                        backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered)
+                            ? theme.colorScheme.primary.withOpacity(0.3)
+                            : theme.colorScheme.primary.withOpacity(0)),
                       ),
                       onPressed: () => Get.find<TransitionController>().modelTransition(const LoginPage()),
                       child: Text('register.login'.tr),

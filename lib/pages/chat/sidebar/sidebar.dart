@@ -102,6 +102,7 @@ class _SidebarState extends State<Sidebar> {
                                         fillColor: theme.colorScheme.onPrimary,
                                         hoverColor: theme.colorScheme.onPrimary,
                                         hintText: "conversations.placeholder".tr,
+                                        hintStyle: Get.textTheme.bodyMedium,
                                       ),
                                       onChanged: (value) {
                                         query.value = value;

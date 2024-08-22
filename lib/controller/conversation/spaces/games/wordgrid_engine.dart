@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/games/wordgrid_widget.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 
 class WordgridEngine extends Engine {
@@ -7,7 +8,7 @@ class WordgridEngine extends Engine {
 
   @override
   void receiveEvent(String event, dynamic data) {
-    print("Received event $event with data $data");
+    sendLog("Received event $event with data $data");
   }
 
   @override

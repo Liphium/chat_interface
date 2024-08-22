@@ -66,6 +66,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             iconColor: Get.theme.colorScheme.onPrimary,
                             fillColor: Get.theme.colorScheme.onPrimary,
                             hoverColor: Get.theme.colorScheme.onPrimary,
+                            hintStyle: Get.textTheme.bodyMedium,
                             hintText: "friends.placeholder".tr,
                           ),
                           onChanged: (value) {
@@ -120,8 +121,9 @@ class _FriendsPageState extends State<FriendsPage> {
 
                         Obx(() {
                           final found = friendController.friends.values.any((friend) =>
-                              (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) || friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
-                              friend.id != StatusController.ownAccountId);
+                              (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
+                                  friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
+                              friend.id != StatusController.ownAddress);
                           return Animate(
                               effects: [
                                 ExpandEffect(
@@ -271,7 +273,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                     itemBuilder: (context, index) {
                                       final friend = friendController.friends.values.elementAt(index);
 
-                                      if (friend.unknown || friend.id == StatusController.ownAccountId) {
+                                      if (friend.unknown || friend.id == StatusController.ownAddress) {
                                         return const SizedBox();
                                       }
                                       return Obx(

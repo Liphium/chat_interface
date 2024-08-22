@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
@@ -25,6 +26,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:drift/drift.dart' as drift;
 
 class TabletopSettings {
   static const String framerate = "tabletop.framerate";
@@ -35,9 +37,17 @@ class TabletopSettings {
 
   static void addSettings(SettingController controller) {
     controller.settings[framerate] = Setting<double>(framerate, 60.0);
-    controller.settings[cursorHue] = Setting<double>(cursorHue, Random().nextDouble());
+    controller.settings[cursorHue] = Setting<double>(cursorHue, 0.0);
 
     controller.settings[smoothDragging] = Setting<bool>(smoothDragging, false);
+  }
+
+  /// Initialize the cursor hue to make sure it's actually randomized by default
+  static void initSettings() async {
+    final val = await (db.setting.select()..where((tbl) => tbl.key.equals(cursorHue))).getSingleOrNull();
+    if (val == null) {
+      Get.find<SettingController>().settings[cursorHue]!.setValue(Random().nextDouble());
+    }
   }
 
   static Color getCursorColor({double? hue}) {

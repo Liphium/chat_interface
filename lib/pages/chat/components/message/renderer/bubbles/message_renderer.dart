@@ -64,7 +64,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
             // Open the context menu
             Get.dialog(MessageOptionsWindow(
               data: menuData,
-              self: widget.message.senderAddress == StatusController.ownAccountId,
+              self: widget.message.senderAddress == StatusController.ownAddress,
               message: widget.message,
             ));
           },

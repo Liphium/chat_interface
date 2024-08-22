@@ -107,7 +107,7 @@ Future<String?> refreshFriendsVault() async {
 
   // Push friends
   final friendController = Get.find<FriendController>();
-  friendController.friends.removeWhere((id, fr) => !res.friendIds.contains(id) && id != StatusController.ownAccountId);
+  friendController.friends.removeWhere((id, fr) => !res.friendIds.contains(id) && id != StatusController.ownAddress);
   for (var friend in res.friends) {
     if (friendController.friends[friend.id] == null) {
       friendController.add(friend);

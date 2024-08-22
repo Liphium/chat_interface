@@ -69,8 +69,8 @@ ColorFactory buildColorFactoryFromSettings() {
     backgroundMode = controller.settings[ThemeSettings.backgroundMode]!.getValue() as int;
   }
 
-  return ColorFactory(
-      primHue, secHue, sat, themeMode == -1 ? ThemeSettings.baseLuminosityDark : ThemeSettings.baseLuminosityLight, themeMode, ThemeSettings.luminosityJumps, backgroundMode);
+  return ColorFactory(primHue, secHue, sat, themeMode == -1 ? ThemeSettings.baseLuminosityDark : ThemeSettings.baseLuminosityLight, themeMode,
+      ThemeSettings.luminosityJumps, backgroundMode);
 }
 
 ThemeData getThemeData() {
@@ -108,7 +108,7 @@ ThemeData getThemeData() {
           errorContainer: factory.customHueContainer(0.0),
 
           // Unused
-          onSecondary: Color(0xFFbababa),
+          onSecondary: const Color(0xFFbababa),
 
           // Unimportant font colors
           surface: factory.getUnimportantFontColor(),

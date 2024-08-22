@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,8 +40,21 @@ class _FriendButtonState extends State<FriendButton> {
               Row(
                 children: [
                   Icon(Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
-                  const SizedBox(width: 10),
-                  Text(widget.friend.displayName.value.text, style: Get.theme.textTheme.labelMedium),
+                  horizontalSpacing(defaultSpacing),
+                  Text(
+                    widget.friend.displayName.value.text,
+                    style: Get.theme.textTheme.labelMedium,
+                  ),
+                  if (widget.friend.id.server != basePath)
+                    Padding(
+                      padding: const EdgeInsets.only(left: defaultSpacing),
+                      child: Tooltip(
+                        message: "friends.different_town".trParams({
+                          "town": widget.friend.id.server,
+                        }),
+                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                      ),
+                    ),
                 ],
               ),
 
@@ -53,7 +67,7 @@ class _FriendButtonState extends State<FriendButton> {
                       final conversation = Get.find<ConversationController>()
                           .conversations
                           .values
-                          .where((element) => !element.isGroup && element.members.containsKey(widget.friend.id));
+                          .where((element) => !element.isGroup && element.members.values.any((mem) => mem.address == widget.friend.id));
                       if (conversation.isNotEmpty) {
                         Get.find<SpacesController>().inviteToCall(conversation.first.id);
                         Get.back();

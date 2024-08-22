@@ -56,6 +56,7 @@ class FriendController extends GetxController {
   }
 
   void addSelf() {
+    sendLog("adding self as ${StatusController.ownAddress.encode()}");
     friends[StatusController.ownAddress] = Friend.me();
   }
 

@@ -138,7 +138,8 @@ class SpacesController extends GetxController {
   }
 
   void _openNotAvailable() {
-    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
+    showErrorPopup("Spaces",
+        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
   }
 
   void join(SpaceConnectionContainer container) {
@@ -294,7 +295,7 @@ class SpaceInfo {
   bool error = false;
   late DateTime start;
   final List<Friend> friends = [];
-  late final List<String> members;
+  late final List<LPHAddress> members;
 
   SpaceInfo(this.start, this.members) {
     error = false;
@@ -308,7 +309,7 @@ class SpaceInfo {
 
   SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
     start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
-    members = List<String>.from(json["members"].map((e) => decryptSymmetric(e, container.key)));
+    members = List<LPHAddress>.from(json["members"].map((e) => LPHAddress.from(decryptSymmetric(e, container.key))));
     exists = true;
 
     final controller = Get.find<FriendController>();
@@ -336,7 +337,8 @@ class SpaceConnectionContainer extends ShareContainer {
   bool get cancelled => _timer == null;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
+      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {

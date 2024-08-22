@@ -18,7 +18,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 void setupStatusListener() {
   // Handle friend status change
   connector.listen("acc_st", (event) {
-    final friend = handleStatus(event);
+    final friend = handleStatus(event, false);
     if (friend == null) return;
     if (!friend.answerStatus) return;
     friend.answerStatus = false;
@@ -43,26 +43,24 @@ void setupStatusListener() {
   // Don't send back when it's an answer
   connector.listen("acc_st:a", (event) {
     sendLog("received status answer");
-    handleStatus(event);
+    handleStatus(event, false);
   }, afterSetup: true);
 
   // Receive status changes from other devices
   connector.listen("acc_st:o", (event) {
     sendLog("received status change from other device");
-    handleStatus(event);
+    handleStatus(event, true);
   }, afterSetup: true);
 }
 
-Friend? handleStatus(Event event) {
-  final convId = event.data["c"] as String;
-  final owner = event.data["o"] as String;
+Friend? handleStatus(Event event, bool own) {
   final message = event.data["st"] as String;
-  final controller = Get.find<FriendController>();
 
-  // Load own status (if it's sent by the same account)
+  // Load own status when the packet specifies it
   final statusController = Get.find<StatusController>();
-  if (owner == StatusController.ownAccountId) {
-    controller.friends[owner]!.loadStatus(message);
+  final controller = Get.find<FriendController>();
+  if (own) {
+    controller.friends[StatusController.ownAddress]!.loadStatus(message);
     statusController.fromStatusJson(decryptSymmetric(message, profileKey));
     // Load own shared content
     final (container, shouldUpdate) = _dataToContainer(statusController.ownContainer.value, event.data["d"], profileKey);
@@ -72,6 +70,10 @@ Friend? handleStatus(Event event) {
 
     return null;
   }
+
+  // Get all the parameters for the actual status event
+  final convId = event.data["c"] as String;
+  final owner = event.data["o"] as String;
 
   // Get conversation from the status packet
   final convController = Get.find<ConversationController>();

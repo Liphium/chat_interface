@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -63,8 +64,18 @@ class _RequestButtonState extends State<RequestButton> {
               Row(
                 children: [
                   Icon(Icons.email, size: 30, color: Theme.of(context).colorScheme.onPrimary),
-                  const SizedBox(width: 10),
+                  horizontalSpacing(defaultSpacing),
                   Text(widget.request.displayName.text, style: Get.theme.textTheme.titleMedium),
+                  if (widget.request.id.server != basePath)
+                    Padding(
+                      padding: const EdgeInsets.only(left: defaultSpacing),
+                      child: Tooltip(
+                        message: "friends.different_town".trParams({
+                          "town": widget.request.id.server,
+                        }),
+                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                      ),
+                    ),
                 ],
               ),
 
