@@ -11,6 +11,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/web.dart';
@@ -50,7 +51,8 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
 
     // Parse the json and get the sender
     final json = jsonDecode(extracted.text);
-    final sender = Get.find<FriendController>().friends[json["s"]];
+    final address = LPHAddress.from(json["s"]);
+    final sender = Get.find<FriendController>().friends[address];
     if (sender == null) {
       sendLog("ERROR: sender of authenticated stored action isn't a friend");
       return false;
@@ -202,7 +204,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   }
 
   sendLog("opening conversation with ${actionJson["s"]}");
-  final friend = Get.find<FriendController>().friends[actionJson["s"]];
+  final friend = Get.find<FriendController>().friends[LPHAddress.from(actionJson["s"])];
   if (friend == null) {
     sendLog("invalid conversation opening: friend doesn't exist");
     return true;

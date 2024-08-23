@@ -8,7 +8,7 @@ class MemberContainer {
 
   MemberContainer.decrypt(String cipherText, SecureKey key) {
     final json = jsonDecode(decryptSymmetric(cipherText, key));
-    id = json["id"];
+    id = LPHAddress.from(json["id"]);
   }
   String encrypted(SecureKey key) => encryptSymmetric(jsonEncode(<String, dynamic>{"id": id.encode()}), key);
 }
@@ -54,7 +54,6 @@ Future<bool> openDirectMessage(Friend friend) async {
     return true;
   }
 
-  sendLog(directMessagePrefix + friend.id.encode());
   return _openConversation([friend], directMessagePrefix + friend.id.id);
 }
 

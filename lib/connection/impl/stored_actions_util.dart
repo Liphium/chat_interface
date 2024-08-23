@@ -13,11 +13,17 @@ Future<bool> deleteStoredAction(String id) async {
 
 Future<bool> sendAuthenticatedStoredAction(Friend friend, Map<String, dynamic> payload) async {
   // Set the sender
-  payload["s"] = StatusController.ownAccountId;
+  payload["s"] = StatusController.ownAddress.encode();
+
+  // Make sure the server is trusted
+  if (!await TrustedLinkHelper.askToAddIfNotAdded(friend.id.server)) {
+    sendLog("COULDN'T SEND STORED ACTION: domain not trusted");
+    return false;
+  }
 
   // Send stored action
-  final json = await postJSON("/account/stored_actions/send_auth", <String, dynamic>{
-    "account": friend.id,
+  final json = await postAddress(friend.id.server, "/account/stored_actions/send_auth", <String, dynamic>{
+    "account": friend.id.id,
     // actual data (safe from replay attacks thanks to sequence numbers)
     "payload": AsymmetricSequencedInfo.builder(jsonEncode(payload), DateTime.now().millisecondsSinceEpoch).finish(friend.keyStorage.publicKey),
     "key": friend.keyStorage.storedActionKey,
