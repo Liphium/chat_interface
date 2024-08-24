@@ -82,7 +82,7 @@ class _MessageInputState extends State<MessageInput> {
     });
   }
 
-  void loadDraft(String conversation) {
+  void loadDraft(LPHAddress conversation) {
     if (MessageSendHelper.currentDraft.value != null) {
       MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] = MessageSendHelper.currentDraft.value!;
     }

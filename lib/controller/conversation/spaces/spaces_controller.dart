@@ -81,11 +81,11 @@ class SpacesController extends GetxController {
     });
   }
 
-  void createAndConnect(String conversationId) {
+  void createAndConnect(LPHAddress conversationId) {
     _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, [], container.toInviteJson(), "", () => {}));
   }
 
-  void inviteToCall(String conversationId) {
+  void inviteToCall(LPHAddress conversationId) {
     sendActualMessage(spaceLoading, conversationId, MessageType.call, [], getContainer().toInviteJson(), "", () => {});
   }
 

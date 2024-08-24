@@ -26,8 +26,8 @@ part 'conversation_actions.dart';
 
 class ConversationController extends GetxController {
   final loaded = false.obs;
-  final order = <String>[].obs; // List of conversation IDs in order of last updated
-  final conversations = <String, Conversation>{};
+  final order = <LPHAddress>[].obs; // List of conversation IDs in order of last updated
+  final conversations = <LPHAddress, Conversation>{};
   int newConvs = 0;
 
   /// Add a conversation to the cache
@@ -38,7 +38,7 @@ class ConversationController extends GetxController {
 
     // Load members from the database
     if (conversation.members.isEmpty && loadMembers) {
-      final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
+      final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id.encode()))).get();
 
       for (var member in members) {
         conversation.addMember(Member.fromData(member));
@@ -93,8 +93,8 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  void updateMessageRead(String conversation, {bool increment = true, required int messageSendTime}) {
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation)))
+  void updateMessageRead(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
+    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode())))
         .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
 
     // Swap in the map
@@ -117,7 +117,7 @@ class ConversationController extends GetxController {
       }
 
       // Get conversation info
-      final info = (conversationInfo[conversation.id] ?? {}) as Map<dynamic, dynamic>;
+      final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
       final lastRead = (info["r"] ?? 0) as int;
       final version = (info["v"] ?? 0) as int;
       conversation.notificationCount.value = (info["n"] ?? 0) as int;
@@ -139,21 +139,21 @@ class ConversationController extends GetxController {
     loaded.value = true;
   }
 
-  void _insertToOrder(String id) {
+  void _insertToOrder(LPHAddress id) {
     if (order.contains(id)) {
       order.remove(id);
     }
     order.insert(0, id);
   }
 
-  void removeConversation(String id) {
+  void removeConversation(LPHAddress id) {
     conversations.remove(id);
     order.remove(id);
   }
 }
 
 class Conversation {
-  final String id;
+  final LPHAddress id;
   String vaultId;
   final model.ConversationType type;
   final ConversationToken token;
@@ -180,7 +180,7 @@ class Conversation {
   }
   Conversation.fromJson(Map<String, dynamic> json, String vaultId)
       : this(
-          json["id"],
+          LPHAddress.from(json["id"]),
           vaultId,
           model.ConversationType.values[json["type"]],
           ConversationToken.fromJson(json["token"]),
@@ -191,7 +191,7 @@ class Conversation {
         );
   Conversation.fromData(ConversationData data)
       : this(
-          data.id,
+          LPHAddress.from(data.id),
           data.vaultId,
           data.type,
           ConversationToken.fromJson(jsonDecode(data.token)),
@@ -265,7 +265,7 @@ class Conversation {
           null;
 
   ConversationData get entity => ConversationData(
-      id: id,
+      id: id.encode(),
       vaultId: vaultId,
       type: type,
       token: token.toJson(),
@@ -275,7 +275,7 @@ class Conversation {
       lastVersion: BigInt.from(lastVersion),
       readAt: BigInt.from(readAt.value));
   String toJson() => jsonEncode(<String, dynamic>{
-        "id": id,
+        "id": id.encode(),
         "type": type.index,
         "token": token.toMap(),
         "key": packageSymmetricKey(key),
@@ -305,8 +305,8 @@ class Conversation {
       }
     }
 
-    db.conversation.deleteWhere((tbl) => tbl.id.equals(id));
-    db.member.deleteWhere((tbl) => tbl.conversationId.equals(id));
+    db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
+    db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
     Get.find<MessageController>().unselectConversation(id: id);
     Get.find<ConversationController>().removeConversation(id);
   }

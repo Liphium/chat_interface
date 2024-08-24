@@ -2,7 +2,7 @@ part of 'message_feed.dart';
 
 class MessageSendHelper {
   static final currentDraft = Rx<MessageDraft?>(null);
-  static final drafts = <String, MessageDraft>{}; // ConversationId, Message draft
+  static final drafts = <LPHAddress, MessageDraft>{}; // ConversationId -> Message draft
 
   /// Add a reply to the current message draft
   static void addReplyToCurrentDraft(Message message) {
@@ -72,7 +72,7 @@ class AnswerData {
 }
 
 class MessageDraft {
-  final String conversationId;
+  final LPHAddress conversationId;
   final answer = Rx<AnswerData?>(null);
   String message;
   final files = <UploadData>[].obs;
@@ -90,7 +90,13 @@ class UploadData {
 
 /// Send a text message with files attached (files will be uploaded)
 void sendTextMessageWithFiles(
-    RxBool loading, String conversationId, String message, List<UploadData> files, String answer, Function() callback) async {
+  RxBool loading,
+  LPHAddress conversationId,
+  String message,
+  List<UploadData> files,
+  String answer,
+  Function() callback,
+) async {
   if (loading.value) {
     return;
   }
@@ -114,7 +120,14 @@ void sendTextMessageWithFiles(
 }
 
 /// Send a text message with attachments
-void sendTextMessage(RxBool loading, String conversationId, String message, List<String> attachments, String answer, Function() callback) async {
+void sendTextMessage(
+  RxBool loading,
+  LPHAddress conversationId,
+  String message,
+  List<String> attachments,
+  String answer,
+  Function() callback,
+) async {
   if (loading.value) {
     return;
   }
@@ -151,7 +164,14 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
 }
 
 void sendActualMessage(
-    RxBool loading, String conversationId, MessageType type, List<String> attachments, String message, String answer, Function() callback) async {
+  RxBool loading,
+  LPHAddress conversationId,
+  MessageType type,
+  List<String> attachments,
+  String message,
+  String answer,
+  Function() callback,
+) async {
   if (message.isEmpty && attachments.isEmpty) {
     callback.call();
     return;

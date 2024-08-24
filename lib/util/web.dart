@@ -72,6 +72,7 @@ class LPHAddress {
   /// Special constructor just for errors
   LPHAddress.error([String replacer = "-"]) : this(replacer, replacer);
 
+  bool isError() => id == "-" || server == "-";
   String encode() => "$id@$server";
 
   /// So it works properly with JSON

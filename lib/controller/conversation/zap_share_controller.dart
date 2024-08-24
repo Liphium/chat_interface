@@ -30,7 +30,7 @@ import 'package:path/path.dart' as path;
 class ZapShareController extends GetxController {
   // Current transaction
   final currentReceiver = Rx<LPHAddress?>(null);
-  final currentConversation = Rx<String?>(null);
+  final currentConversation = Rx<LPHAddress?>(null);
   final waiting = false.obs;
   final step = "loading".tr.obs;
   final progress = 0.0.obs;
@@ -104,7 +104,7 @@ class ZapShareController extends GetxController {
 
   //* Everything about sending starts here
 
-  void newTransaction(LPHAddress friend, String conversationId, List<XFile> files) async {
+  void newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
@@ -358,7 +358,7 @@ class ZapShareController extends GetxController {
   //* Everything about receiving starts here
 
   /// Join a transaction with a given ID and token + start listening for parts
-  void joinTransaction(String conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
+  void joinTransaction(LPHAddress conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;

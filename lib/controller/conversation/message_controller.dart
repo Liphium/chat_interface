@@ -43,7 +43,7 @@ class MessageController extends GetxController {
   final messages = <Message>[].obs;
 
   /// Unselect a conversation (when id is set, the current conversation will only be closed if it has that id)
-  void unselectConversation({String? id}) {
+  void unselectConversation({LPHAddress? id}) {
     if (id != null && currentConversation.value?.id != id) {
       return;
     }
@@ -90,7 +90,7 @@ class MessageController extends GetxController {
   }
 
   /// Delete a message from the client with an id
-  void deleteMessageFromClient(String conversation, String id) async {
+  void deleteMessageFromClient(LPHAddress conversation, String id) async {
     // Check if message is in the selected conversation
     if (currentConversation.value?.id == conversation) {
       messages.removeWhere((element) => element.id == id);
@@ -416,7 +416,7 @@ class Message {
   final String sender;
   final LPHAddress senderAddress;
   final DateTime createdAt;
-  final String conversation;
+  final LPHAddress conversation;
   final bool edited;
 
   Function()? highlightCallback;

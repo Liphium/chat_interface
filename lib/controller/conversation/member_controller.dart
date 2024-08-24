@@ -35,7 +35,8 @@ class Member {
 
   Member.fromData(MemberData data) : this(data.id, LPHAddress.from(data.accountId), MemberRole.fromValue(data.roleId));
 
-  MemberData toData(String conversation) => MemberData(id: tokenId, accountId: address.encode(), roleId: role.value, conversationId: conversation);
+  MemberData toData(LPHAddress conversation) =>
+      MemberData(id: tokenId, accountId: address.encode(), roleId: role.value, conversationId: conversation.encode());
 
   Friend getFriend([FriendController? controller]) {
     if (StatusController.ownAddress == address) return Friend.me();
@@ -43,7 +44,7 @@ class Member {
     return controller.friends[address] ?? Friend.unknown(address);
   }
 
-  Future<bool> promote(String conversationId) async {
+  Future<bool> promote(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/promote_token", {
       "id": conversation.token.id,
@@ -58,7 +59,7 @@ class Member {
     return true;
   }
 
-  Future<bool> demote(String conversationId) async {
+  Future<bool> demote(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/demote_token", {
       "id": conversation.token.id,
@@ -73,7 +74,7 @@ class Member {
     return true;
   }
 
-  Future<bool> remove(String conversationId) async {
+  Future<bool> remove(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/kick_member", {
       "id": conversation.token.id,

@@ -73,7 +73,7 @@ Future<String?> refreshVault() async {
   // Run decryption and decoding in a separate isolate
   final (conversations, ids) = await sodiumLib.runIsolated((sodium, keys, pairs) {
     var list = <Conversation>[];
-    var ids = <String>[];
+    var ids = <LPHAddress>[];
     for (var unparsedEntry in json["entries"]) {
       final entry = VaultEntry.fromJson(unparsedEntry);
       final decrypted = decryptSymmetric(entry.payload, keys[0], sodium);
@@ -106,8 +106,9 @@ Future<String?> refreshVault() async {
   }
 
   // Delete all old conversations from the database
-  db.conversation.deleteWhere((tbl) => tbl.id.isNotIn(ids));
-  db.member.deleteWhere((tbl) => tbl.conversationId.isNotIn(ids));
+  final stringIds = ids.map((id) => id.encode());
+  db.conversation.deleteWhere((tbl) => tbl.id.isNotIn(stringIds));
+  db.member.deleteWhere((tbl) => tbl.conversationId.isNotIn(stringIds));
 
   return null;
 }

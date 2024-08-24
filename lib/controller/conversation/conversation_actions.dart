@@ -47,9 +47,10 @@ const directMessagePrefix = "DM_";
 Future<bool> openDirectMessage(Friend friend) async {
   final conversation = Get.find<ConversationController>().conversations.values.firstWhere(
         (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
-        orElse: () => Conversation("", "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer(""), "", 0, 0),
+        orElse: () => Conversation(
+            LPHAddress.error(), "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer(""), "", 0, 0),
       );
-  if (conversation.id != "") {
+  if (conversation.id.isError()) {
     Get.find<MessageController>().selectConversation(conversation);
     return true;
   }
@@ -92,8 +93,11 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   }
 
   // Create the conversation
-  final body = await postNodeJSON("/conversations/open",
-      <String, dynamic>{"accountData": ownMemberContainer, "members": memberContainers.values.toList(), "data": encryptedData});
+  final body = await postNodeJSON("/conversations/open", <String, dynamic>{
+    "accountData": ownMemberContainer,
+    "members": memberContainers.values.toList(),
+    "data": encryptedData,
+  });
   if (!body["success"]) {
     showErrorPopup("error".tr, "error.unknown".tr);
     return false;
@@ -138,10 +142,10 @@ Future<bool> addToConversation(Conversation conv, Friend friend) async {
   return result;
 }
 
-Map<String, dynamic> _conversationPayload(String id, ConversationToken token, String packagedKey, Friend friend) {
+Map<String, dynamic> _conversationPayload(LPHAddress id, ConversationToken token, String packagedKey, Friend friend) {
   final signature = signMessage(signatureKeyPair.secretKey, "$id${friend.id}");
   return authenticatedStoredAction("conv", {
-    "id": id,
+    "id": id.encode(),
     "sg": signature,
     "token": token.toJson(),
     "key": packagedKey,
