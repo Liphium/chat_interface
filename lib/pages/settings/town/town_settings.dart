@@ -94,7 +94,7 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
               ],
             ),
           ),
-          verticalSpacing(defaultSpacing),
+          verticalSpacing(sectionSpacing),
         ],
       ),
     );

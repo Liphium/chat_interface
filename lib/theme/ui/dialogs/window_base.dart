@@ -120,18 +120,20 @@ class DialogBase extends StatelessWidget {
           child: Container(
             width: maxWidth,
             padding: const EdgeInsets.all(dialogPadding),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (showTitleDesktop && title.isNotEmpty)
-                  Row(
-                    children: [
-                      ...title,
-                    ],
-                  ),
-                if (showTitleDesktop && title.isNotEmpty) verticalSpacing(defaultSpacing),
-                child,
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (showTitleDesktop && title.isNotEmpty)
+                    Row(
+                      children: [
+                        ...title,
+                      ],
+                    ),
+                  if (showTitleDesktop && title.isNotEmpty) verticalSpacing(defaultSpacing),
+                  child,
+                ],
+              ),
             ),
           ),
         ),
