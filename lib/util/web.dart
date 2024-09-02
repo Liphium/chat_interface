@@ -92,19 +92,19 @@ class LPHAddress {
 }
 
 /// Get the path from any server
-String serverPath(String server, String path) {
+String serverPath(String server, String path, {bool noApiVersion = false}) {
   path = path.startsWith("/") ? path : "/$path";
   if (!server.startsWith("http://") && !server.startsWith("https://")) {
     server = "https://$server";
   }
-  return "$server/$apiVersion$path";
+  return noApiVersion ? "$server$path" : "$server/$apiVersion$path";
 }
 
 /// Grab the public key from the server
 Future<String?> grabServerPublicKey({String defaultError = "server.error"}) async {
   final Response res;
   try {
-    res = await post(Uri.parse(ownServer("/pub")));
+    res = await post(Uri.parse(serverPath(basePath, "/pub", noApiVersion: true)));
   } catch (e) {
     return "error.network";
   }
@@ -129,7 +129,7 @@ Future<String?> grabServerPublicKey({String defaultError = "server.error"}) asyn
 Future<String?> grabServerPublicURL(String server, {String defaultError = "server.error"}) async {
   final Response res;
   try {
-    res = await post(Uri.parse(serverPath(server, "/pub")));
+    res = await post(Uri.parse(serverPath(server, "/pub", noApiVersion: true)));
   } catch (e) {
     return "error.network";
   }
