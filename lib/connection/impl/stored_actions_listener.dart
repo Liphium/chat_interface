@@ -210,9 +210,9 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     return true;
   }
 
-  // Check the signature
+  // Activate the token from the request
   final token = jsonDecode(actionJson["token"]);
-  final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"id": token["id"], "token": token["token"]});
+  final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"token": token});
   if (!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
     return true;
@@ -224,14 +224,14 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   for (var memberData in json["members"]) {
     sendLog(memberData);
     final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-    members.add(Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"])));
+    members.add(Member(LPHAddress.from(memberData["id"]), memberContainer.id, MemberRole.fromValue(memberData["rank"])));
   }
 
   final container = ConversationContainer.decrypt(json["data"], key);
   final convToken = ConversationToken.fromJson(token);
   await Get.find<ConversationController>().addCreated(
     Conversation(
-      actionJson["id"],
+      LPHAddress.from(actionJson["id"]),
       "",
       model.ConversationType.values[json["type"]],
       convToken,

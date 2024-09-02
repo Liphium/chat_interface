@@ -109,6 +109,16 @@ class UserRenderer extends StatelessWidget {
               Row(
                 children: [
                   Flexible(child: Text(friend.displayName.value.text, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium)),
+                  if (friend.id.server != basePath)
+                    Padding(
+                      padding: const EdgeInsets.only(left: defaultSpacing),
+                      child: Tooltip(
+                        message: "friends.different_town".trParams({
+                          "town": friend.id.server,
+                        }),
+                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                      ),
+                    ),
                   horizontalSpacing(defaultSpacing),
                   Obx(() => StatusRenderer(status: own ? statusController!.type.value : friend!.statusType.value)),
                 ],

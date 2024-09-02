@@ -82,7 +82,7 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
                   loading: _loading,
                   onTap: () async {
                     _loading.value = true;
-                    final json = await postAny("${formatPath(_name.text)}/v1/pub", {}); // Send a request to get the public key (good test ig)
+                    final json = await postAny("${formatPath(_name.text)}/pub", {}); // Send a request to get the public key (good test ig)
                     _loading.value = false;
                     if (json["pub"] == null) {
                       _error.value = "server.not_found".tr;

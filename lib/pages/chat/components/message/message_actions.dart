@@ -192,11 +192,11 @@ void sendActualMessage(
 
   // Send message
   final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
-    "conversation": conversation.id,
-    "token_id": conversation.token.id,
-    "token": conversation.token.token,
-    "timestamp": stamp,
-    "data": info,
+    "token": conversation.token.toMap(),
+    "data": {
+      "timestamp": stamp,
+      "data": info,
+    }
   });
 
   callback.call();

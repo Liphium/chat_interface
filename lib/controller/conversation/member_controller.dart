@@ -20,23 +20,23 @@ class MemberController extends GetxController {
 }
 
 class Member {
-  final String tokenId; // Token id
+  final LPHAddress tokenId; // Token id
   final LPHAddress address; // Account id
   final MemberRole role;
 
   Member(this.tokenId, this.address, this.role);
   Member.unknown(this.address)
-      : tokenId = "",
+      : tokenId = LPHAddress.error(),
         role = MemberRole.user;
   Member.fromJson(Map<String, dynamic> json)
-      : tokenId = json['id'],
+      : tokenId = LPHAddress.from(json['id']),
         address = LPHAddress.from(json['address']),
         role = MemberRole.fromValue(json['role']);
 
-  Member.fromData(MemberData data) : this(data.id, LPHAddress.from(data.accountId), MemberRole.fromValue(data.roleId));
+  Member.fromData(MemberData data) : this(LPHAddress.from(data.id), LPHAddress.from(data.accountId), MemberRole.fromValue(data.roleId));
 
   MemberData toData(LPHAddress conversation) =>
-      MemberData(id: tokenId, accountId: address.encode(), roleId: role.value, conversationId: conversation.encode());
+      MemberData(id: tokenId.encode(), accountId: address.encode(), roleId: role.value, conversationId: conversation.encode());
 
   Friend getFriend([FriendController? controller]) {
     if (StatusController.ownAddress == address) return Friend.me();
@@ -47,9 +47,8 @@ class Member {
   Future<bool> promote(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/promote_token", {
-      "id": conversation.token.id,
-      "token": conversation.token.token,
-      "user": tokenId,
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
     });
 
     if (!json["success"]) {
@@ -62,9 +61,8 @@ class Member {
   Future<bool> demote(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/demote_token", {
-      "id": conversation.token.id,
-      "token": conversation.token.token,
-      "user": tokenId,
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
     });
 
     if (!json["success"]) {
@@ -77,9 +75,8 @@ class Member {
   Future<bool> remove(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/kick_member", {
-      "id": conversation.token.id,
-      "token": conversation.token.token,
-      "target": tokenId,
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
     });
 
     if (!json["success"]) {

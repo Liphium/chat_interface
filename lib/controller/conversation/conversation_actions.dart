@@ -14,16 +14,16 @@ class MemberContainer {
 }
 
 class ConversationToken {
-  final String id;
+  final LPHAddress id;
   final String token;
 
   ConversationToken(this.id, this.token);
   ConversationToken.fromJson(Map<String, dynamic> json)
-      : id = json["id"],
+      : id = LPHAddress.from(json["id"]),
         token = json["token"];
 
   String toJson() => jsonEncode(toMap());
-  Map<String, dynamic> toMap() => <String, dynamic>{"id": id, "token": token};
+  Map<String, dynamic> toMap() => <String, dynamic>{"id": id.encode(), "token": token};
 }
 
 class ConversationContainer {
@@ -47,10 +47,10 @@ const directMessagePrefix = "DM_";
 Future<bool> openDirectMessage(Friend friend) async {
   final conversation = Get.find<ConversationController>().conversations.values.firstWhere(
         (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
-        orElse: () => Conversation(
-            LPHAddress.error(), "", model.ConversationType.directMessage, ConversationToken("", ""), ConversationContainer(""), "", 0, 0),
+        orElse: () => Conversation(LPHAddress.error(), "", model.ConversationType.directMessage, ConversationToken(LPHAddress.error(), ""),
+            ConversationContainer(""), "", 0, 0),
       );
-  if (conversation.id.isError()) {
+  if (!conversation.id.isError()) {
     Get.find<MessageController>().selectConversation(conversation);
     return true;
   }
@@ -107,12 +107,13 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
   final conversationController = Get.find<ConversationController>();
 
   final packagedKey = packageSymmetricKey(conversationKey);
-  final conversation = Conversation(body["conversation"], "", model.ConversationType.values[body["type"]],
-      ConversationToken.fromJson(body["admin_token"]), conversationContainer, packagedKey, 0, DateTime.now().millisecondsSinceEpoch);
+  final convId = LPHAddress.from(body["conversation"]);
+  final conversation = Conversation(convId, "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
+      conversationContainer, packagedKey, 0, DateTime.now().millisecondsSinceEpoch);
   final members = <Member>[];
   for (var friend in friends) {
     final token = ConversationToken.fromJson(body["tokens"][hashSha(memberContainers[friend.id]!)]);
-    await sendAuthenticatedStoredAction(friend, _conversationPayload(body["conversation"], token, packagedKey, friend));
+    await sendAuthenticatedStoredAction(friend, _conversationPayload(convId, token, packagedKey, friend));
     members.add(Member(token.id, friend.id, MemberRole.user));
   }
 
@@ -128,8 +129,7 @@ Future<bool> _openConversation(List<Friend> friends, String name) async {
 Future<bool> addToConversation(Conversation conv, Friend friend) async {
   // Generate a new conversation token for the friend
   final json = await postNodeJSON("/conversations/generate_token", {
-    "id": conv.token.id,
-    "token": conv.token.token,
+    "token": conv.token.toMap(),
     "data": MemberContainer(friend.id).encrypted(conv.key),
   });
 

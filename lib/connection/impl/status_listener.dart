@@ -72,8 +72,8 @@ Friend? handleStatus(Event event, bool own) {
   }
 
   // Get all the parameters for the actual status event
-  final convId = event.data["c"] as String;
-  final owner = event.data["o"] as String;
+  final convId = LPHAddress.from(event.data["c"] as String);
+  final owner = LPHAddress.from(event.data["o"] as String);
 
   // Get conversation from the status packet
   final convController = Get.find<ConversationController>();
@@ -86,9 +86,9 @@ Friend? handleStatus(Event event, bool own) {
   // Get the account id of the person sending the status packet
   final member = conversation.members.values.firstWhere(
     (mem) => mem.tokenId == owner,
-    orElse: () => Member("", LPHAddress("-", "-"), MemberRole.user),
+    orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
   );
-  if (member.tokenId == "") {
+  if (member.tokenId.isError()) {
     sendLog("member $owner not found in conversation $convId (status packet)");
     return null;
   }

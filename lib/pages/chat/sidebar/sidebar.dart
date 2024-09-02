@@ -276,7 +276,7 @@ class _SidebarState extends State<Sidebar> {
                               LPHAddress id = conversation.members.values
                                   .firstWhere(
                                     (element) => element.address != StatusController.ownAddress,
-                                    orElse: () => Member("-", LPHAddress("-", "-"), MemberRole.user),
+                                    orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
                                   )
                                   .address;
                               if (id.id == "-") {
@@ -386,6 +386,26 @@ class _SidebarState extends State<Sidebar> {
                                                                         textHeightBehavior: noTextHeight,
                                                                       ),
                                                                     ),
+                                                                    if (conversation.id.server != basePath && friend == null)
+                                                                      Padding(
+                                                                        padding: const EdgeInsets.only(left: defaultSpacing),
+                                                                        child: Tooltip(
+                                                                          message: "conversations.different_town".trParams({
+                                                                            "town": conversation.id.server,
+                                                                          }),
+                                                                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                                                                        ),
+                                                                      ),
+                                                                    if (friend != null && friend.id.server != basePath)
+                                                                      Padding(
+                                                                        padding: const EdgeInsets.only(left: defaultSpacing),
+                                                                        child: Tooltip(
+                                                                          message: "friends.different_town".trParams({
+                                                                            "town": friend.id.server,
+                                                                          }),
+                                                                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                                                                        ),
+                                                                      ),
                                                                     horizontalSpacing(defaultSpacing),
                                                                     if (friend != null) StatusRenderer(status: friend.statusType.value),
                                                                   ],

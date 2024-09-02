@@ -35,7 +35,7 @@ enum OpenTabType {
 class MessageController extends GetxController {
   // Constants
   Message? hoveredMessage;
-  static String systemSender = "6969";
+  static LPHAddress systemSender = LPHAddress("liphium.com", "6969");
 
   final loaded = false.obs;
   final currentOpenType = OpenTabType.conversation.obs;
@@ -80,8 +80,7 @@ class MessageController extends GetxController {
   void overwriteRead(Conversation conversation) async {
     // Send new read state to the server
     final json = await postNodeJSON("/conversations/read", {
-      "id": conversation.token.id,
-      "token": conversation.token.token,
+      "token": conversation.token.toMap(),
     });
     if (json["success"]) {
       conversation.notificationCount.value = 0;
@@ -233,9 +232,8 @@ class MessageController extends GetxController {
     // Load the messages from the server using the list_before endpoint
     final conversation = currentConversation.value!;
     final json = await postNodeJSON("/conversations/message/list_before", {
-      "token_id": conversation.token.id,
-      "token": conversation.token.token,
-      "before": date,
+      "token": conversation.token.toMap(),
+      "data": date,
     });
 
     // Check if there was an error
@@ -274,9 +272,8 @@ class MessageController extends GetxController {
     // Load messages from the server
     final conversation = currentConversation.value!;
     final json = await postNodeJSON("/conversations/message/list_after", {
-      "token_id": conversation.token.id,
-      "token": conversation.token.token,
-      "after": firstMessage.createdAt.millisecondsSinceEpoch,
+      "token": conversation.token.toMap(),
+      "data": firstMessage.createdAt.millisecondsSinceEpoch,
     });
 
     // Check if there was an error
@@ -413,7 +410,7 @@ class Message {
   final verified = true.obs;
   String answer;
   final String certificate;
-  final String sender;
+  final LPHAddress sender;
   final LPHAddress senderAddress;
   final DateTime createdAt;
   final LPHAddress conversation;
@@ -523,9 +520,8 @@ class Message {
   static Future<Message?> loadFromServer(Conversation conversation, String messageId, {init = true}) async {
     // Get the message from the server
     final json = await postNodeJSON("/conversations/message/get", {
-      "token_id": conversation.token.id,
-      "token": conversation.token.token,
-      "message": messageId,
+      "token": conversation.token.toMap(),
+      "data": messageId,
     });
 
     // Check if there is an error
@@ -589,10 +585,11 @@ class Message {
   /// **Doesn't verify the signature**
   static (Message, SymmetricSequencedInfo?) fromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
     // Convert to message
-    final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[json["sender"]]?.address ??
+    final senderAddress = LPHAddress.from(json["sender"]);
+    final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[senderAddress]?.address ??
         LPHAddress("-", "removed".tr);
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account,
-        DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"], json["edited"], false);
+    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], senderAddress, account,
+        DateTime.fromMillisecondsSinceEpoch(json["creation"]), LPHAddress.from(json["conversation"]), json["edited"], false);
 
     // Decrypt content
     conversation ??= Get.find<ConversationController>().conversations[json["conversation"]]!;
@@ -668,9 +665,8 @@ class Message {
 
     // Send a request to the server
     final json = await postNodeJSON("/conversations/message/delete", {
-      "certificate": certificate,
-      "id": token.id,
-      "token": token.token,
+      "token": token.toMap(),
+      "data": certificate,
     });
     sendLog(json);
 

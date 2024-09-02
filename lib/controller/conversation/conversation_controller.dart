@@ -172,7 +172,7 @@ class Conversation {
   }
 
   final membersLoading = false.obs;
-  final members = <String, Member>{}.obs; // Token ID -> Member
+  final members = <LPHAddress, Member>{}.obs; // Token ID -> Member
 
   Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
     containerSub.value = container;
@@ -234,8 +234,8 @@ class Conversation {
     final member = members.values.firstWhere(
       (element) => element.address != StatusController.ownAddress,
       orElse: () => Member(
-        "-",
-        LPHAddress("-", "-"),
+        LPHAddress.error(),
+        LPHAddress.error(),
         MemberRole.user,
       ),
     );
@@ -247,8 +247,8 @@ class Conversation {
     final member = members.values.firstWhere(
       (element) => element.address != StatusController.ownAddress,
       orElse: () => Member(
-        "-",
-        LPHAddress("-", "-"),
+        LPHAddress.error(),
+        LPHAddress.error(),
         MemberRole.user,
       ),
     );
@@ -260,7 +260,7 @@ class Conversation {
       !isGroup &&
       Get.find<FriendController>().friends[members.values
               .firstWhere((element) => element.address != StatusController.ownAddress,
-                  orElse: () => Member("-", LPHAddress("-", "-"), MemberRole.user))
+                  orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user))
               .address] ==
           null;
 
@@ -294,8 +294,7 @@ class Conversation {
 
     if (request) {
       final json = await postNodeJSON("/conversations/leave", {
-        "id": token.id,
-        "token": token.token,
+        "token": token.toMap(),
       });
 
       if (!json["success"]) {
@@ -335,8 +334,7 @@ class Conversation {
     // Get the data from the server
     membersLoading.value = true;
     final json = await postNodeJSON("/conversations/data", {
-      "id": token.id,
-      "token": token.token,
+      "token": token.toMap(),
     });
 
     if (!json["success"]) {
@@ -354,17 +352,18 @@ class Conversation {
     containerSub.value = container;
 
     // Update the members
-    final members = <String, Member>{};
+    final members = <LPHAddress, Member>{};
     for (var memberData in json["members"]) {
       sendLog(memberData);
       final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-      members[memberData["id"]] = Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"]));
+      final address = LPHAddress.from(memberData["id"]);
+      members[address] = Member(address, memberContainer.id, MemberRole.fromValue(memberData["rank"]));
     }
 
     // Load the members into the database
     for (var currentMember in this.members.values) {
       if (!members.containsKey(currentMember.tokenId)) {
-        db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId));
+        db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
       }
     }
 

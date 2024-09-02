@@ -217,6 +217,12 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
     return <String, dynamic>{"success": false, "error": defaultError};
   }
 
+  // Check if the path is a conversations endpoint
+  if (path.contains("conversations/")) {
+    // Add an empty data property to the body if it's not already there
+    body["data"] ??= "";
+  }
+
   return _postTCP(connector.nodePublicKey!, "${nodeProtocol()}$nodeDomain$path", body, defaultError: defaultError, token: sessionToken);
 }
 
