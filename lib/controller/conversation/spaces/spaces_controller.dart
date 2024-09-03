@@ -13,10 +13,11 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_member_cont
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/spaces/gamemode/spaces_game_hub.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
@@ -34,10 +35,6 @@ class SpacesController extends GetxController {
   final spaceLoading = false.obs;
   final connected = false.obs;
   final start = DateTime.now().obs;
-
-  //* Game mode
-  final playMode = false.obs;
-  final gameShelf = false.obs;
 
   //* Space information
   static String? currentDomain;
@@ -91,21 +88,6 @@ class SpacesController extends GetxController {
 
   SpaceConnectionContainer getContainer() {
     return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
-  }
-
-  void switchToPlayMode() {
-    playMode.value = !playMode.value;
-    if (playMode.value) {
-      Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
-      hideSidebar.value = true;
-    } else {
-      hideSidebar.value = false;
-      Get.offAll(getChatPage(), transition: Transition.fadeIn);
-    }
-  }
-
-  void openShelf() {
-    gameShelf.value = !gameShelf.value;
   }
 
   void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {
@@ -206,8 +188,9 @@ class SpacesController extends GetxController {
     spaceConnector.sendAction(
       msg.Message(
         "setup",
-        <String, dynamic>{
-          "data": encryptSymmetric(StatusController.ownAccountId, key!),
+        {
+          "data": encryptSymmetric(StatusController.ownAddress.encode(), key!),
+          "color": Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue() as double,
         },
       ),
       handler: (event) async {

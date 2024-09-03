@@ -68,7 +68,7 @@ class StatusController extends GetxController {
     } catch (e) {
       status.value = "";
     }
-    type.value = data["t"];
+    type.value = data["t"] ?? 1;
   }
 
   String statusPacket(String statusJson) {

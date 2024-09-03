@@ -134,7 +134,7 @@ class Friend {
   final displayName = UTFString("").obs;
 
   void updateDisplayName(UTFString displayName) {
-    if (id.id == StatusController.ownAccountId && id.server == basePath) {
+    if (id == StatusController.ownAddress) {
       return;
     }
     this.displayName.value = displayName;
@@ -168,6 +168,7 @@ class Friend {
 
   /// Used for unknown accounts where only an id is known
   factory Friend.unknown(LPHAddress address) {
+    sendLog(address);
     final shownId = address.id.substring(0, 5);
     final friend = Friend(address, "lph-$shownId", UTFString("lph-$shownId"), "", KeyStorage.empty(), 0);
     friend.unknown = true;

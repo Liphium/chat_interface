@@ -146,7 +146,7 @@ class SystemMessages {
       render: false,
       handler: (msg) {
         final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        if (msg.attachments[0] == StatusController.ownAccountId) {
+        if (LPHAddress.from(msg.attachments[0]) == StatusController.ownAddress) {
           conversation.delete(popup: false, request: false);
         }
       },

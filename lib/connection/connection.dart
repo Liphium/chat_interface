@@ -220,8 +220,6 @@ class Connector {
     // Add responseId to action
     message.action = "${message.action}:$responseId";
 
-    sendLog("sent action ${message.action}");
-
     // Send and encrypt the message (using AES key)
     connection?.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
   }

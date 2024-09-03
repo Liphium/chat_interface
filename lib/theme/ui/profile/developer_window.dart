@@ -61,7 +61,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           verticalSpacing(elementSpacing),
           Text("Instance domain: ${connector.url ?? "Not connected"}", style: Get.textTheme.bodyMedium),
           verticalSpacing(elementSpacing),
-          Text("Current account: ${StatusController.ownAccountId}", style: Get.textTheme.bodyMedium),
+          Text("Current account: ${StatusController.ownAddress.encode()}", style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           ProfileButton(
             icon: Icons.delete,

@@ -31,6 +31,7 @@ class DialogBase extends StatelessWidget {
   final Widget child;
   final double maxWidth;
   final bool showTitleDesktop;
+  final bool mobilePage;
   final List<Widget> title;
 
   const DialogBase({
@@ -38,13 +39,14 @@ class DialogBase extends StatelessWidget {
     required this.child,
     this.maxWidth = 400,
     this.title = const [],
+    this.mobilePage = false,
     this.showTitleDesktop = true,
   });
 
   @override
   Widget build(BuildContext context) {
     // Return without animation on mobile
-    if (isMobileMode()) {
+    if (isMobileMode() && mobilePage) {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
         child: SafeArea(

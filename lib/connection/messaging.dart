@@ -26,7 +26,7 @@ class Message {
   String action;
 
   /// Data of the action
-  final Map<String, dynamic> data;
+  final dynamic data;
 
   Message(this.action, this.data);
   Message.fromMap(Map<String, dynamic> map) : this(map['action'], map['data']);
