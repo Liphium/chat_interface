@@ -57,7 +57,7 @@ class ConversationController extends GetxController {
     conversation.save(saveMembers: false);
 
     // Subscribe to conversation
-    subscribeToConversation(Get.find<StatusController>().statusJson(), conversation.token);
+    subscribeToConversation(conversation.token);
 
     return true;
   }
@@ -106,7 +106,7 @@ class ConversationController extends GetxController {
   }
 
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date
-  void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, {bool overwriteReads = true}) async {
+  void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, List<dynamic> error, {bool overwriteReads = true}) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
 
@@ -122,6 +122,11 @@ class ConversationController extends GetxController {
       final lastRead = (info["r"] ?? 0) as int;
       final version = (info["v"] ?? 0) as int;
       conversation.notificationCount.value = (info["n"] ?? 0) as int;
+
+      // Set an error if there is one
+      if (error.contains(conversation.id.server)) {
+        conversation.error.value = "other.server.error";
+      }
 
       // Check if the current version of the conversation is up to date
       sendLog("version ${conversation.id} client: ${conversation.lastVersion}, server: $version");
@@ -164,6 +169,7 @@ class Conversation {
   final readAt = 0.obs;
   final notificationCount = 0.obs;
   final containerSub = ConversationContainer("").obs; // Data subscription
+  final error = Rx<String?>(null);
   String packedKey;
   SecureKey? _cachedKey;
 

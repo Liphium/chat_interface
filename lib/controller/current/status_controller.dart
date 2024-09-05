@@ -4,10 +4,10 @@ import 'dart:io';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
@@ -71,8 +71,8 @@ class StatusController extends GetxController {
     type.value = data["t"] ?? 1;
   }
 
-  String statusPacket(String statusJson) {
-    return encryptSymmetric(statusJson, profileKey);
+  String statusPacket([String? newStatusJson]) {
+    return encryptSymmetric(newStatusJson ?? statusJson(), profileKey);
   }
 
   String sharedContentPacket() {
@@ -100,17 +100,11 @@ class StatusController extends GetxController {
   Future<bool> setStatus({String? message, int? type, Function()? success}) async {
     if (statusLoading.value) return false;
     statusLoading.value = true;
-    final tokens = <Map<String, dynamic>>[];
-    for (var conversation in Get.find<ConversationController>().conversations.values) {
-      if (conversation.members.length == 2) {
-        tokens.add(conversation.token.toMap());
-      }
-    }
 
+    // Validate the status to make sure everything is fine
     connector.sendAction(
-        Message("st_send", <String, dynamic>{
+        Message("st_validate", <String, dynamic>{
           "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
-          "tokens": tokens,
           "data": sharedContentPacket(),
         }), handler: (event) {
       statusLoading.value = false;
@@ -119,6 +113,9 @@ class StatusController extends GetxController {
         if (message != null) status.value = message;
         if (type != null) this.type.value = type;
         Get.find<TownsquareController>().updateEnabledState();
+
+        // Send the new status
+        subscribeToConversations(controller: this);
       }
     });
 

@@ -16,7 +16,6 @@ import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart' as material;
@@ -238,7 +237,7 @@ class MessageController extends GetxController {
 
     // Check if there was an error
     if (!json["success"]) {
-      showErrorPopup("error", json["error"]);
+      conversation.error.value = json["error"];
       newMessagesLoading.value = false;
       return (false, false);
     }
@@ -278,7 +277,7 @@ class MessageController extends GetxController {
 
     // Check if there was an error
     if (!json["success"]) {
-      showErrorPopup("error", json["error"]);
+      conversation.error.value = json["error"];
       newMessagesLoading.value = false;
       return false;
     }

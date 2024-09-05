@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:chat_interface/controller/current/steps/vault_setup.dart';
 import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';

@@ -9,6 +9,8 @@ class ErrorTranslations extends Translations {
           'server.not_found': 'The server couldn\'t be reached. Make sure you have the right domain.',
           'error.network': 'Seems like you are offline. Please try to check the connection of your device.',
           'server.error': 'Something went wrong on the server, please try again later.',
+          'other.server.error':
+              'It seems like the town this conversation is hosted on is currently down. Please try again later. We\'ll automatically try restoring a connection.',
           'server.error.code': 'Something went wrong on the server, please try again later. Status code: @code',
           'friends.error': 'There was an error while loading your friends. Please try again later or contact your administrator.',
           'node.error': 'The chat server didn\'t respond, please try again later.',
@@ -25,13 +27,15 @@ class ErrorTranslations extends Translations {
           'invalid.method': 'This is incorrect. Please try again.',
           'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
           'password.incorrect': 'Your password is incorrect. Please try again.',
-          'protocol.error': 'The server you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that server to update to the latest version.',
+          'protocol.error':
+              'The server you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that server to update to the latest version.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',
           'request.self.text': "I know you're lonely, but you can't be your own friend. Sorry.",
           'requests.already.exists': 'Already sent',
-          'requests.already.exists.text': "I know you want to be this person's friend, but you already sent them a request. So please chill a little bit.",
+          'requests.already.exists.text':
+              "I know you want to be this person's friend, but you already sent them a request. So please chill a little bit.",
           'request.not.found': 'User not found',
           'request.not.found.text': "You sure this is your friend? Maybe you just met them in your dreams?",
 
@@ -46,7 +50,8 @@ class ErrorTranslations extends Translations {
           'file.unsafe': 'The provider of this file (@domain) isn\'t trusted.',
           'chat.add_file': 'Attach a file',
           'message.delete_error': 'Couldn\'t delete message. Please try again later.',
-          'group.data_too_long': 'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
+          'group.data_too_long':
+              'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
 
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
@@ -62,9 +67,11 @@ class ErrorTranslations extends Translations {
           'tabletop.couldnt_create': 'There was an issue during the table creation. Please report this to the developers.',
           'tabletop.object_not_found': 'This object doesn\'t exist anymore, maybe it has already been deleted?',
           'tabletop.object_already_held': 'This is object is already being held by someone else. Please try to modify it again later.',
-          'tabletop.object_not_in_queue': 'You didn\'t ask to modify this object before the actual modification. This is an issue with the app, please contact the developers.',
+          'tabletop.object_not_in_queue':
+              'You didn\'t ask to modify this object before the actual modification. This is an issue with the app, please contact the developers.',
           'tabletop.invalid_action': 'You can\'t do that right now. Please try again later.',
-          'no.start': 'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
+          'no.start':
+              'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
         },
 
         //* German

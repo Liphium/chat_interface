@@ -50,6 +50,7 @@ class ChatPageTranslations extends Translations {
               'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
 
           // Conversations
+          'conversation.error': 'Conversation loading error',
           'conversations.different_town': 'Conversation takes place outside of your town (@town).',
           'conversations.placeholder': 'Search',
           'conversations.hidden': "Searching for something else? You can use '.' at the beginning of your query to search for hidden conversations.",

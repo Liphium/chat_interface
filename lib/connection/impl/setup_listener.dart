@@ -18,21 +18,21 @@ void setupSetupListeners() {
     if (data == "" || data == "-") {
       controller.status.value = "";
       controller.type.value = statusOnline;
-      subscribeToConversations(controller.statusJson());
+      subscribeToConversations();
       return;
     }
 
     // Decrypt status with profile key
     controller.fromStatusJson(decryptSymmetric(data, profileKey));
 
-    subscribeToConversations(controller.statusJson());
+    subscribeToConversations();
   }, afterSetup: true);
 }
 
 // status is going to be encrypted in this function
-Future<bool> subscribeToConversations(String status) async {
+Future<bool> subscribeToConversations({StatusController? controller}) async {
   // Encrypt status with profile key
-  status = generateStatusData(status);
+  controller ??= Get.find<StatusController>();
 
   // Subscribe to all conversations
   final tokens = <Map<String, dynamic>>[];
@@ -41,36 +41,42 @@ Future<bool> subscribeToConversations(String status) async {
   }
 
   // Subscribe
-  _sub(status, tokens, deletions: true);
+  _sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, deletions: true);
   return true;
 }
 
-void subscribeToConversation(String status, ConversationToken token, {deletions = true}) {
+void subscribeToConversation(ConversationToken token, {StatusController? controller, deletions = true}) {
   // Encrypt status with profile key
-  status = generateStatusData(status);
+  controller ??= Get.find<StatusController>();
 
   // Subscribe to all conversations
   final tokens = <Map<String, dynamic>>[token.toMap()];
 
   // Subscribe
-  _sub(status, tokens, startup: false, deletions: deletions);
+  _sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, startup: false, deletions: deletions);
 }
 
 String generateStatusData(String status) {
   return encryptSymmetric(status, profileKey);
 }
 
-void _sub(String status, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
+void _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
   connector.sendAction(
       Message("conv_sub", <String, dynamic>{
         "tokens": tokens,
         "status": status,
+        "data": statusData,
       }), handler: (event) {
     if (!event.data["success"]) {
       sendLog("ERROR WHILE SUBSCRIBING: ${event.data["message"]}");
       return;
     }
     Get.find<StatusController>().statusLoading.value = false;
-    Get.find<ConversationController>().finishedLoading(event.data["info"], deletions ? (event.data["missing"] ?? []) : [], overwriteReads: startup);
+    Get.find<ConversationController>().finishedLoading(
+      event.data["info"],
+      deletions ? (event.data["missing"] ?? []) : [],
+      event.data["errors"] ?? [],
+      overwriteReads: startup,
+    );
   });
 }

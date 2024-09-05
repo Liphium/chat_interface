@@ -78,7 +78,7 @@ class _CallRectangleState extends State<CallRectangle> {
                 },
               ),
 
-              //* People
+              //* Tab selector
               Align(
                 alignment: Alignment.topCenter,
                 child: Obx(
@@ -90,7 +90,7 @@ class _CallRectangleState extends State<CallRectangle> {
                         begin: 1.0,
                       )
                     ],
-                    target: hovered.value || controlsHovered.value ? 0 : 1,
+                    target: (hovered.value || controlsHovered.value) || controller.currentTab.value == SpaceTabType.table.index ? 0 : 1,
                     child: Container(
                       width: double.infinity,
                       // Create a gradient on this container from bottom to top
