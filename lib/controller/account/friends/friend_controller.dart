@@ -336,7 +336,7 @@ class Friend {
 
     // Load the profile picture
     final json = jsonDecode(data.pictureContainer);
-    final type = await AttachmentController.checkLocations(json["id"], StorageType.permanent);
+    final type = await AttachmentController.checkLocations(json["i"], StorageType.permanent);
     profilePicture = AttachmentContainer.fromJson(type, json);
     profilePictureImage.value = await ProfileHelper.loadImage(profilePicture!.filePath);
   }

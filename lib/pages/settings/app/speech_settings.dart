@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';

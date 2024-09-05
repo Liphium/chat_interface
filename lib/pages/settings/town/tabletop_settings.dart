@@ -15,6 +15,7 @@ import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -65,12 +66,12 @@ class TabletopSettingsPage extends StatefulWidget {
 }
 
 class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
-  final _selected = "settings.tabletop.general".obs;
+  final _selected = "settings.tabletop.general".tr.obs;
 
   // Tabs
   final _tabs = <String, Widget>{
-    "settings.tabletop.general": const TabletopGeneralTab(),
-    "settings.tabletop.decks": const TabletopDeckTab(),
+    "settings.tabletop.general".tr: const TabletopGeneralTab(),
+    "settings.tabletop.decks".tr: const TabletopDeckTab(),
   };
 
   @override
@@ -82,26 +83,12 @@ class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //* Tabs
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SidebarButton(
-              onTap: () => _selected.value = "settings.tabletop.general",
-              radius: const BorderRadius.only(
-                bottomLeft: Radius.circular(defaultSpacing),
-              ),
-              label: "settings.tabletop.general",
-              selected: _selected,
-            ),
-            horizontalSpacing(elementSpacing),
-            SidebarButton(
-              onTap: () => _selected.value = "settings.tabletop.decks",
-              radius: const BorderRadius.only(
-                topRight: Radius.circular(defaultSpacing),
-              ),
-              label: "settings.tabletop.decks",
-              selected: _selected,
-            )
-          ]),
-
+          LPHTabElement(
+            tabs: _tabs.keys.toList(),
+            onTabSwitch: (tab) {
+              _selected.value = tab;
+            },
+          ),
           verticalSpacing(sectionSpacing),
 
           //* Current tab
@@ -714,7 +701,12 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     _current.value = 0;
     for (var file in widget.files) {
       // Upload the card to the server
-      final response = await controller.uploadFile(UploadData(File(file.path)), StorageType.permanent, Constants.fileDeckTag);
+      final response = await controller.uploadFile(
+        UploadData(File(file.path)),
+        StorageType.permanent,
+        Constants.fileDeckTag,
+        containerNameNull: true,
+      );
       if (response.container == null) {
         Get.back(result: finished);
         showErrorPopup("error", response.message);

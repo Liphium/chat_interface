@@ -451,7 +451,7 @@ class Message {
           continue;
         }
         final json = jsonDecode(attachment);
-        final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
+        final type = await AttachmentController.checkLocations(json["i"], StorageType.temporary);
         final decoded = AttachmentContainer.fromJson(type, json);
         var container = await Get.find<AttachmentController>().findLocalFile(decoded);
         sendLog("FOUND: ${container?.filePath}");

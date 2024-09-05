@@ -36,7 +36,6 @@ class _CallControlsState extends State<CallControls> {
   Widget build(BuildContext context) {
     ThemeData theme = Get.theme;
     final controller = Get.find<SpacesController>();
-    final tableController = Get.find<TabletopController>();
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -121,37 +120,17 @@ class _CallControlsState extends State<CallControls> {
         ),
         */
 
-        horizontalSpacing(defaultSpacing),
-
-        //* Table mode
-        Obx(
-          () => LoadingIconButton(
-            background: true,
-            padding: defaultSpacing,
-            loading: tableController.loading,
-            onTap: () {
-              if (tableController.enabled.value) {
-                tableController.disconnect();
-              } else {
-                tableController.connect();
-              }
-            },
-            icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
-            iconSize: 28,
-          ),
-        ),
-
         //* Tabletop rotation button / Toggle people button
         Obx(
           () {
-            if (tableController.enabled.value) {
+            if (controller.currentTab.value == SpaceTabType.table.index) {
               return Padding(
                 padding: const EdgeInsets.only(left: defaultSpacing),
                 child: LoadingIconButton(
                   key: tabletopKey,
                   background: true,
                   padding: defaultSpacing,
-                  loading: false.obs,
+                  loading: Get.find<TabletopController>().loading,
                   onTap: () {
                     Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
                   },
@@ -161,9 +140,9 @@ class _CallControlsState extends State<CallControls> {
               );
             }
 
-            if (controller.cinemaWidget.value != null) {
+            if (controller.currentTab.value == SpaceTabType.cinema.index) {
               return Padding(
-                padding: const EdgeInsets.only(right: defaultSpacing),
+                padding: const EdgeInsets.only(left: defaultSpacing),
                 child: LoadingIconButton(
                   tooltip: "spaces.toggle_people".tr,
                   loading: false.obs,

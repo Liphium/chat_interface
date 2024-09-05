@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -8,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
-
-// TODO: This needs to get better big time
 
 class EmojiWindow extends StatefulWidget {
   final ContextMenuData data;
@@ -32,7 +29,7 @@ class _EmojiWindowState extends State<EmojiWindow> {
   @override
   void initState() {
     super.initState();
-    emojis.value = UnicodeEmojis.allEmojis.sublist(0, 100);
+    emojis.value = UnicodeEmojis.allEmojis;
   }
 
   @override
@@ -45,6 +42,8 @@ class _EmojiWindowState extends State<EmojiWindow> {
 
   @override
   Widget build(BuildContext context) {
+    final emojiTextStyle = Get.theme.textTheme.titleLarge!.copyWith(fontSize: 30);
+
     return SlidingWindowBase(
       title: const [],
       position: widget.data,
@@ -60,8 +59,12 @@ class _EmojiWindowState extends State<EmojiWindow> {
             hintText: "Search emojis",
             onChange: (value) {
               _currentSearch.value = value;
-              final search = UnicodeEmojis.search(value);
-              emojis.value = search.sublist(0, min(50, search.length));
+              if (value == "") {
+                emojis.value = UnicodeEmojis.allEmojis;
+              } else {
+                final search = UnicodeEmojis.search(value);
+                emojis.value = search;
+              }
             },
           ),
           ConstrainedBox(
@@ -80,25 +83,24 @@ class _EmojiWindowState extends State<EmojiWindow> {
                     ),
                     itemCount: emojis.length,
                     itemBuilder: (context, index) {
-                      if (index == emojis.length) {
-                        return null;
-                      }
                       final emoji = emojis[index];
-                      return Tooltip(
-                        key: ValueKey(emoji.shortName),
-                        waitDuration: 500.ms,
-                        exitDuration: 0.ms,
-                        message: ":${emoji.shortName}:",
-                        child: Center(
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(1000),
-                            onTap: () {
-                              Get.back(result: emoji.emoji);
-                              currentTimer?.cancel();
-                            },
-                            child: Text(
-                              emoji.emoji,
-                              style: Get.theme.textTheme.titleLarge!.copyWith(/* fontFamily: "Emoji", */ fontSize: 30),
+                      return RepaintBoundary(
+                        child: Tooltip(
+                          key: ValueKey(emoji.shortName),
+                          waitDuration: 500.ms,
+                          exitDuration: 0.ms,
+                          message: ":${emoji.shortName}:",
+                          child: Center(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(1000),
+                              onTap: () {
+                                Get.back(result: emoji.emoji);
+                                currentTimer?.cancel();
+                              },
+                              child: Text(
+                                emoji.emoji,
+                                style: emojiTextStyle,
+                              ),
                             ),
                           ),
                         ),

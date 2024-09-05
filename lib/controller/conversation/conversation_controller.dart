@@ -109,13 +109,14 @@ class ConversationController extends GetxController {
   void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, {bool overwriteReads = true}) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
-    for (var conversation in conversations.values) {
-      // Check if it was deleted
-      if (deleted.contains(conversation.token.id)) {
-        conversation.delete(request: false, popup: false);
-        continue;
-      }
 
+    // Delete all the conversations that should be deleted
+    conversations.removeWhere((ad, conv) {
+      return deleted.contains(conv.token.id);
+    });
+
+    // Update all the conversations
+    for (var conversation in conversations.values) {
       // Get conversation info
       final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
       final lastRead = (info["r"] ?? 0) as int;

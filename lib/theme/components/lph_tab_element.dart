@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LPHTabElement extends StatefulWidget {
+  final RxInt? selected;
   final List<String> tabs;
   final Function(String) onTabSwitch;
 
@@ -10,6 +11,7 @@ class LPHTabElement extends StatefulWidget {
     super.key,
     required this.tabs,
     required this.onTabSwitch,
+    this.selected,
   });
 
   @override
@@ -17,7 +19,7 @@ class LPHTabElement extends StatefulWidget {
 }
 
 class _LPHTabElementState extends State<LPHTabElement> {
-  final _selected = 0.obs;
+  RxInt _selected = 0.obs;
 
   // The width of all the text in the tabs
   final tabWidth = <int, double>{};
@@ -25,6 +27,7 @@ class _LPHTabElementState extends State<LPHTabElement> {
   @override
   void initState() {
     // Measure all the texts
+    _selected = widget.selected ?? 0.obs;
     int count = 0;
     for (var tab in widget.tabs) {
       final textPainter = TextPainter(
@@ -63,8 +66,8 @@ class _LPHTabElementState extends State<LPHTabElement> {
             }
 
             return AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOutCubicEmphasized,
               left: left,
               width: tabWidth[_selected.value],
               height: Get.textTheme.titleMedium!.fontSize! * 1.5 + elementSpacing * 2,
@@ -85,8 +88,10 @@ class _LPHTabElementState extends State<LPHTabElement> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () {
+                      if (_selected.value != index) {
+                        widget.onTabSwitch(widget.tabs[index]);
+                      }
                       _selected.value = index;
-                      widget.onTabSwitch(widget.tabs[index]);
                     },
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     child: Padding(

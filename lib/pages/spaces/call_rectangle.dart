@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
-import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/spaces/call_cinema.dart';
 import 'package:chat_interface/pages/spaces/call_grid.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
@@ -61,11 +59,11 @@ class _CallRectangleState extends State<CallRectangle> {
             children: [
               Obx(
                 () {
-                  if (Get.find<TabletopController>().enabled.value) {
+                  if (controller.currentTab.value == SpaceTabType.table.index) {
                     return const TabletopView();
                   }
 
-                  if (controller.cinemaWidget.value != null) {
+                  if (controller.currentTab.value == SpaceTabType.cinema.index && controller.cinemaWidget.value != null) {
                     return const CallCinemaView();
                   }
 
@@ -111,8 +109,23 @@ class _CallRectangleState extends State<CallRectangle> {
                         child: Center(
                           heightFactor: 1,
                           child: LPHTabElement(
-                            tabs: const ["Table", "People", "Cinema"],
-                            onTabSwitch: (tab) {},
+                            selected: Get.find<SpacesController>().currentTab,
+                            tabs: SpaceTabType.values.map((t) => t.name.tr).toList(),
+                            onTabSwitch: (tab) {
+                              // Get the type
+                              SpaceTabType? type;
+                              for (var t in SpaceTabType.values) {
+                                if (t.name.tr == tab) {
+                                  type = t;
+                                  break;
+                                }
+                              }
+
+                              // Switch to the new tab
+                              if (type != null) {
+                                Get.find<SpacesController>().switchToTab(type);
+                              }
+                            },
                           ),
                         ),
                       ),

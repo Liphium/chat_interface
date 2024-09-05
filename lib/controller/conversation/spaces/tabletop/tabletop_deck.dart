@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
@@ -6,6 +7,7 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -13,11 +15,11 @@ import 'package:get/get.dart';
 
 class DeckObject extends TableObject {
   /// Card ID -> Card data
-  final cards = <String, AttachmentContainer>{};
+  var cards = <String, AttachmentContainer>{};
 
   /// All card ids in the order they are in the deck (we separate this from the cards map so we don't have
   /// to send all the card data to the server twice if a card is in there twice)
-  final order = <String>[];
+  var order = <String>[];
 
   // The width and height of the current top card
   final width = AnimatedDouble(500);
@@ -87,20 +89,31 @@ class DeckObject extends TableObject {
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
-    textPainter.paint(canvas, Offset(rect.left + rect.width / 2 - textPainter.size.width / 2, rect.top + rect.height / 2 - textPainter.size.height / 2));
+    textPainter.paint(
+        canvas, Offset(rect.left + rect.width / 2 - textPainter.size.width / 2, rect.top + rect.height / 2 - textPainter.size.height / 2));
   }
 
   @override
   void handleData(String data) async {
+    sendLog(data);
     order.clear();
     cards.clear();
-    final json = jsonDecode(data);
+
+    // Unpack all the json in an isolate
+    final json = await Isolate.run(() async {
+      return jsonDecode(data);
+    });
+
+    order = (json["order"] as List<dynamic>).cast<String>();
+
+    // Go through all cards and unpack them (only works in main thread cause sodium)
     final cardMap = json["cards"] as Map<String, dynamic>;
     for (var card in cardMap.values) {
-      final type = await AttachmentController.checkLocations(card["id"], StorageType.cache);
-      cards[card["id"]] = AttachmentContainer.fromJson(type, card);
+      final type = await AttachmentController.checkLocations(card["i"], StorageType.cache);
+      cards[card["i"]] = AttachmentContainer.fromJson(type, card);
     }
-    order.addAll((json["order"] as List<dynamic>).cast<String>());
+
+    // Set the width and height from the order
     setWidthAndHeight(replace: false);
   }
 
@@ -145,8 +158,16 @@ class DeckObject extends TableObject {
       return;
     }
     queue(() async {
+      // Get the card and its container
       final cardId = order.removeAt(0);
       final container = cards[cardId]!;
+
+      // Remove the container of the card from the cards map in case it is no longer needed
+      if (!order.contains(cardId)) {
+        cards.remove(cardId);
+      }
+
+      // Download the card and do all the other magic required for this
       final obj = await CardObject.downloadCard(container, controller.mousePos);
       setWidthAndHeight();
       final result = await modifyData();
@@ -169,8 +190,8 @@ class DeckObject extends TableObject {
   void addCard(CardObject obj) {
     queue(() async {
       // Add teh card to the local deck
-      cards[obj.container.id] = obj.container;
-      order.add(obj.container.id);
+      cards[obj.container!.id] = obj.container!;
+      order.add(obj.container!.id);
 
       // Update the deck on the server
       final valid = await modifyData();

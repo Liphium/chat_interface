@@ -20,6 +20,7 @@ import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -132,8 +133,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                       controller.checkCurrentScrollHeight();
                                     });
 
-                                    return ScrollConfiguration(
-                                      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                    return FadingEdgeScrollView.fromScrollView(
                                       child: ListView.builder(
                                         itemCount: controller.messages.length + 2,
                                         reverse: true,

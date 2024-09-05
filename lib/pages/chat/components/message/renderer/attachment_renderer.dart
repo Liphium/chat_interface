@@ -33,7 +33,9 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
   @override
   void initState() {
     super.initState();
-    if (widget.container.attachmentType == AttachmentContainerType.remoteImage && widget.message != null && (widget.message?.heightCallback ?? false)) {
+    if (widget.container.attachmentType == AttachmentContainerType.remoteImage &&
+        widget.message != null &&
+        (widget.message?.heightCallback ?? false)) {
       _networkImage = Image.network(
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null || loadingProgress.expectedTotalBytes == null) {

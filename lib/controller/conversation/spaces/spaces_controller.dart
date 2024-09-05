@@ -35,6 +35,8 @@ class SpacesController extends GetxController {
   final spaceLoading = false.obs;
   final connected = false.obs;
   final start = DateTime.now().obs;
+  final currentTab = SpaceTabType.people.index.obs;
+  int _prevTab = SpaceTabType.people.index;
 
   //* Space information
   static String? currentDomain;
@@ -58,16 +60,48 @@ class SpacesController extends GetxController {
     }
   }
 
+  /// Switch to a tab programatically
+  void switchToTabAndChange(SpaceTabType type) {
+    currentTab.value = type.index;
+    switchToTab(type);
+  }
+
+  /// Event that is called after the tab switch was done through the selector
+  void switchToTab(SpaceTabType type) {
+    if (type.index == _prevTab) {
+      return;
+    }
+
+    // If the previous tab was the table, disconnect from the event stream
+    if (_prevTab == SpaceTabType.table.index) {
+      Get.find<TabletopController>().closeTableTab();
+    }
+
+    // If the current tab is a table tab, connect to the event stream
+    if (type == SpaceTabType.table) {
+      Get.find<TabletopController>().openTableTab();
+    }
+    _prevTab = currentTab.value;
+  }
+
   void cinemaMode(Widget widget) {
+    sendLog("cinema");
     if (cinemaWidget.value != null) {
       if (cinemaWidget.value == widget) {
-        cinemaWidget.value = null;
+        sendLog("already cinema");
+        if (currentTab.value == SpaceTabType.people.index) {
+          switchToTabAndChange(SpaceTabType.cinema);
+        } else {
+          switchToTabAndChange(SpaceTabType.people);
+        }
         return;
       }
       cinemaWidget.value = widget;
+      switchToTabAndChange(SpaceTabType.cinema);
       return;
     }
     cinemaWidget.value = widget;
+    switchToTabAndChange(SpaceTabType.cinema);
   }
 
   void createSpace(bool publish) {
@@ -171,6 +205,7 @@ class SpacesController extends GetxController {
       return;
     }
     currentDomain = appToken["domain"];
+    currentTab.value = SpaceTabType.people.index;
 
     // Setup all controllers
     Get.find<PublicationController>().onConnect();
@@ -256,7 +291,7 @@ class SpacesController extends GetxController {
     Get.find<SpaceMemberController>().onDisconnect();
     Get.find<PublicationController>().disconnect();
     Get.find<GameHubController>().leaveCall();
-    Get.find<TabletopController>().disconnect(leave: false);
+    Get.find<TabletopController>().resetControllerState();
 
     if (!error) {
       Get.offAll(getChatPage(), transition: Transition.fadeIn);
@@ -271,6 +306,16 @@ class SpacesController extends GetxController {
         livekitRoom!.localParticipant!.isScreenShareEnabled();
     sendLog("UPDATE VIDEO ${hasVideo.value}");
   }
+}
+
+enum SpaceTabType {
+  table("spaces.tab.table"),
+  people("spaces.tab.people"),
+  cinema("spaces.tab.cinema");
+
+  final String name;
+
+  const SpaceTabType(this.name);
 }
 
 class SpaceInfo {

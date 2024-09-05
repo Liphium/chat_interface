@@ -59,7 +59,7 @@ class _LibraryTabState extends State<LibraryTab> {
         newContainerList.add(AttachmentContainer.remoteImage(entry.data));
       } else {
         final json = jsonDecode(entry.data);
-        final type = await AttachmentController.getStorageTypeFor(json["id"]);
+        final type = await AttachmentController.getStorageTypeFor(json["i"]);
         if (type == null) {
           continue;
         }
@@ -127,7 +127,8 @@ class _LibraryTabState extends State<LibraryTab> {
                 if (controller.currentConversation.value == null) {
                   return;
                 }
-                sendActualMessage(false.obs, controller.currentConversation.value!.id, MessageType.text, [container.toAttachment()], "", "", () => {});
+                sendActualMessage(
+                    false.obs, controller.currentConversation.value!.id, MessageType.text, [container.toAttachment()], "", "", () => {});
                 Get.back();
               },
               child: ClipRRect(
