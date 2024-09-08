@@ -17,7 +17,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 
 void setupStatusListener() {
   // Handle friend status change
-  connector.listen("acc_st", (event) {
+  connector.listen("acc_st", (event) async {
     final friend = handleStatus(event, false);
     if (friend == null) return;
     if (!friend.answerStatus) return;
@@ -32,12 +32,13 @@ void setupStatusListener() {
           (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
         );
 
-    connector.sendAction(Message("st_res", <String, dynamic>{
-      "id": dm.token.id,
-      "token": dm.token.token,
-      "status": status,
-      "data": controller.sharedContentPacket(),
-    }));
+    await postNodeJSON("/conversations/answer_status", {
+      "token": dm.token.toMap(),
+      "data": {
+        "status": status,
+        "data": controller.sharedContentPacket(),
+      }
+    });
   }, afterSetup: true);
 
   // Don't send back when it's an answer
