@@ -122,6 +122,20 @@ class FileSettingsPage extends StatelessWidget {
               ),
               FJElevatedButton(
                 onTap: () async {
+                  final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_${StatusController.ownAccountId}");
+                  OpenAppFile.open(fileFolder);
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
+                    horizontalSpacing(defaultSpacing),
+                    Text("settings.file.cache.open_saved_files".tr, style: Get.textTheme.labelLarge),
+                  ],
+                ),
+              ),
+              FJElevatedButton(
+                onTap: () async {
                   final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_${StatusController.ownAccountId}");
                   OpenAppFile.open(fileFolder);
                 },

@@ -18,7 +18,6 @@ import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/web.dart';
@@ -133,11 +132,11 @@ class SpacesController extends GetxController {
 
     connector.sendAction(msg.Message("spc_start", <String, dynamic>{}), handler: (event) {
       if (!event.data["success"]) {
-        if (event.data["message"] == "server.error") {
-          spaceLoading.value = false;
-          return _openNotAvailable();
-        }
         spaceLoading.value = false;
+        sendLog(event.data);
+        if (event.data["message"] is String) {
+          return showErrorPopup("error", event.data["message"]);
+        }
         return showErrorPopup("error", "server.error");
       }
       final appToken = event.data["token"] as Map<String, dynamic>;
@@ -153,11 +152,6 @@ class SpacesController extends GetxController {
     });
   }
 
-  void _openNotAvailable() {
-    showErrorPopup("Spaces",
-        "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
-  }
-
   void join(SpaceConnectionContainer container) {
     connector.sendAction(
         msg.Message("spc_join", <String, dynamic>{
@@ -165,25 +159,21 @@ class SpacesController extends GetxController {
         }), handler: (event) {
       if (!event.data["success"]) {
         if (event.data["message"] == "already.in.space") {
-          showConfirmPopup(ConfirmWindow(
-            title: "spaces".tr,
-            text: "chat.space.leave".tr,
-            onDecline: () => {},
-            onConfirm: () {
-              connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) {
-                if (!event.data["success"]) {
-                  if (event.data["message"] == "server.error") {
-                    return _openNotAvailable();
-                  }
-                  return showErrorPopup("How?",
-                      "I don't understand this world anymore. I'm sorry. It seems like this feature is currently pretty broken for you, tell the developers about it and we'll fix it sometime, yk like never?");
-                }
+          // Leave the space immediately
+          connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) async {
+            if (!event.data["success"]) {
+              if (event.data["message"] is String) {
+                return showErrorPopup("error", event.data["message"]);
+              }
+              return showErrorPopup("error", "server.error");
+            }
 
-                // Try joining again
-                join(container);
-              });
-            },
-          ));
+            // Wait a little bit, in case a server abuses this as an infinite loop
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            // Try joining again
+            join(container);
+          });
           return;
         }
 

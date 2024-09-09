@@ -43,7 +43,7 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("settings.data.change_password.dialog".tr, style: Get.theme.textTheme.bodyMedium),
+          Text("settings.authentication.change_password.dialog".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
 
           // Current password

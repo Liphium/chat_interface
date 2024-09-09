@@ -51,7 +51,7 @@ class StatusController extends GetxController {
   void setName(String value) => name.value = value;
 
   String statusJson() => jsonEncode(<String, dynamic>{
-        "s": status.value,
+        "s": base64Encode(utf8.encode(status.value)),
         "t": type.value,
       });
 

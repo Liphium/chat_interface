@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/settings/account/authentication_settings.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/account/invites_page.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
@@ -21,9 +22,9 @@ enum SettingLabel {
   // Account settings (everything to do with the account and stored on the server)
   account("settings.tab.account", [
     SettingCategory("data", Icons.account_circle, DataSettingsPage()),
-    SettingCategory("invites", Icons.mail, InvitesPage(), displayTitle: false)
+    SettingCategory("invites", Icons.mail, InvitesPage(), displayTitle: false),
     //SettingCategory("profile", Icons.assignment, null),
-    //SettingCategory("security", Icons.security, null),
+    SettingCategory("authentication", Icons.security, AuthenticationSettingsPage()),
     //SettingCategory("devices", Icons.phone_android, null),
   ]),
 

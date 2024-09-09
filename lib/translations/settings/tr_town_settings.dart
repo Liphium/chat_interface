@@ -18,7 +18,8 @@ class TownSettingTranslations extends Translations {
           'settings.tabletop.decks.error':
               'An error occurred while loading your decks. This is probably something you\'ll need to report to us or it\'s just your connection. You can also try to see if there\'s a new version of the app available or try again later.',
           'settings.tabletop.decks.limit': 'Decks (@count/@limit)',
-          'decks.description': 'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
+          'decks.description':
+              'Decks allow you to instantly add a whole bunch of cards to a tabletop session. If you have a pack of cards you want to use often, create a deck for it!',
           'decks.create': 'Create a new deck',
           'decks.dialog.delete.title': 'Delete deck',
           'decks.dialog.delete': 'Are you sure you want to delete this deck? Think about all the cards you\'ll lose!',
@@ -26,13 +27,15 @@ class TownSettingTranslations extends Translations {
           'decks.dialog.name': 'First of all, please give your deck a nice name. You know, something actually good.',
           'decks.dialog.name.placeholder': 'Deck name',
           'decks.dialog.name.error': 'Please make the name for your deck longer than 3 characters.',
-          'decks.limit_reached': 'You have reached the maximum amount of decks you can create. Please delete one of your existing decks to create a new one.',
+          'decks.limit_reached':
+              'You have reached the maximum amount of decks you can create. Please delete one of your existing decks to create a new one.',
           'decks.cards': '@count cards',
           'decks.view_cards': 'View cards',
           'decks.cards.empty': 'This deck is empty. You can add cards to it by clicking the button above.',
           'settings.tabletop.general': 'General',
           'tabletop.general.framerate': 'Framerate',
-          'tabletop.general.framerate.description': 'The framerate at which the table is rendered. This should be roughly equivalent to the refresh rate of your monitor.',
+          'tabletop.general.framerate.description':
+              'The framerate at which the table is rendered. This should be roughly equivalent to the refresh rate of your monitor.',
           'tabletop.general.framerate.unit': 'Hz',
           'tabletop.general.color': 'The color of your cursor',
           'tabletop.general.color.description': 'This will be the color everyone sees when you are selecting something or moving your cursor.',
@@ -54,6 +57,7 @@ class TownSettingTranslations extends Translations {
           'settings.file.cache_type.size': 'Size',
           'settings.file.cache.open_cache': 'Open cache folder',
           'settings.file.cache.open_files': 'Open file folder',
+          'settings.file.cache.open_saved_files': 'Open save folder',
           'settings.file.uploaded.title': 'Uploaded files (@count)',
           'settings.file.uploaded.description': 'You are currently using @current out of your available @max.',
           'settings.file.uploaded.none': 'No uploaded files. Try to send messages or create a deck to upload files.',

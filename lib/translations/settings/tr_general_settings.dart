@@ -47,6 +47,8 @@ class GeneralSettingsTranslations extends Translations {
           'settings.experimental': 'Experimental',
           'settings.logging': 'Logging',
           'settings.logging.desc': 'The logs the app collects.',
+          'settings.authentication': 'Authentication',
+          'settings.authentication.desc': 'Setup multi-factor-authentication.',
 
           // Trusted links
           'links.warning':

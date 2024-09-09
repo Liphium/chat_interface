@@ -28,7 +28,8 @@ class ErrorTranslations extends Translations {
           'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
           'password.incorrect': 'Your password is incorrect. Please try again.',
           'protocol.error':
-              'The server you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that server to update to the latest version.',
+              'The town you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that town to update to the latest version.',
+          'spaces.not.setup': 'Spaces is not supported in your town. Please contact the owners of this town and ask them to set up Spaces.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',

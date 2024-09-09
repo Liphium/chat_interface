@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -25,17 +24,17 @@ void setupStatusListener() {
 
     // Send back status
     final controller = Get.find<StatusController>();
-    String status = generateStatusData(controller.statusJson());
 
     // Get dm with friend
     final dm = Get.find<ConversationController>().conversations.values.firstWhere(
           (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
         );
 
+    sendLog("sending status answer");
     await postNodeJSON("/conversations/answer_status", {
       "token": dm.token.toMap(),
       "data": {
-        "status": status,
+        "status": controller.statusPacket(),
         "data": controller.sharedContentPacket(),
       }
     });

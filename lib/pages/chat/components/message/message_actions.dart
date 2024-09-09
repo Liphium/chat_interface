@@ -202,12 +202,7 @@ void sendActualMessage(
   callback.call();
   if (!json["success"]) {
     loading.value = false;
-    String message = "conv_msg_create.${json["error"]}";
-    if (json["message"] == "server.error") {
-      message = "server.error";
-    }
-
-    showErrorPopup("error", message);
+    showErrorPopup("error", json["error"]);
     return;
   }
 

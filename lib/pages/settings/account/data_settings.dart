@@ -262,37 +262,6 @@ class DataSettingsPage extends StatelessWidget {
           ),
           verticalSpacing(defaultSpacing),
 
-          //* Password
-          Container(
-            decoration: BoxDecoration(
-              color: Get.theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(sectionSpacing),
-            ),
-            padding: const EdgeInsets.all(sectionSpacing),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("password".tr, style: Get.theme.textTheme.labelMedium),
-                      verticalSpacing(elementSpacing),
-                      Text("settings.data.password.description".tr, style: Get.theme.textTheme.bodyMedium),
-                    ],
-                  ),
-                ),
-                horizontalSpacing(defaultSpacing),
-                FJElevatedButton(
-                  smallCorners: true,
-                  onTap: () => showModal(const ChangePasswordWindow()),
-                  child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
-                ),
-              ],
-            ),
-          ),
-          verticalSpacing(sectionSpacing),
-
           /*
           / Email
           Container(

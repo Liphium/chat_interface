@@ -420,7 +420,7 @@ class _SidebarState extends State<Sidebar> {
                                                                     ? verticalSpacing(elementSpacing * 0.5)
                                                                     : Visibility(
                                                                         visible: conversation.isGroup || friend.status.value != "",
-                                                                        child: verticalSpacing(defaultSpacing * 0.25),
+                                                                        child: verticalSpacing(elementSpacing * 0.5),
                                                                       ),
 
                                                                 // Conversation description

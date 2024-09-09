@@ -56,10 +56,6 @@ void subscribeToConversation(ConversationToken token, {StatusController? control
   _sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, startup: false, deletions: deletions);
 }
 
-String generateStatusData(String status) {
-  return encryptSymmetric(status, profileKey);
-}
-
 void _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
   connector.sendAction(
       Message("conv_sub", <String, dynamic>{

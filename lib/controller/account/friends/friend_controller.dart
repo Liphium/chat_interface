@@ -248,9 +248,11 @@ class Friend {
   void loadStatus(String message) {
     message = decryptSymmetric(message, keyStorage.profileKey);
     final data = jsonDecode(message);
+    sendLog("received $data");
     try {
       status.value = utf8.decode(base64Decode(data["s"]));
     } catch (e) {
+      sendLog("no status");
       status.value = "";
     }
     statusType.value = data["t"];
