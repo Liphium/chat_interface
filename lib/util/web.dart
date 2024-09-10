@@ -187,7 +187,7 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
       headers: <String, String>{
         if (token != null) "Authorization": "Bearer $token",
         "Content-Type": "application/json",
-        "Locale": _localeString(g.Get.locale ?? g.Get.fallbackLocale ?? const Locale("en", "US")),
+        "Locale": localeString(g.Get.locale ?? g.Get.fallbackLocale ?? const Locale("en", "US")),
         "Auth-Tag": authTag,
       },
       body: encryptAES(jsonEncode(body).toCharArray().unsignedView(), aesBase64),
@@ -203,7 +203,7 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
   return jsonDecode(String.fromCharCodes(decryptAES(res.bodyBytes, aesBase64)));
 }
 
-String _localeString(Locale locale) {
+String localeString(Locale locale) {
   return "${locale.languageCode}_${locale.countryCode ?? "US"}";
 }
 

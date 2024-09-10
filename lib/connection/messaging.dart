@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'dart:ui';
+
+import 'package:chat_interface/util/web.dart';
+import 'package:get/get.dart';
 
 /// An event is sent from the server to the client when a [Message] was parsed by the server.
 class Event {
@@ -34,6 +38,7 @@ class Message {
 
   Map<String, dynamic> toMap() => {
         'action': action,
+        'lc': localeString(Get.locale ?? Get.fallbackLocale ?? const Locale("en", "US")),
         'data': data,
       };
 
