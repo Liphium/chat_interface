@@ -15,7 +15,7 @@ import 'package:chat_interface/pages/chat/components/conversations/zap_share_win
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:dio/dio.dart' as d;
 import 'package:file_selector/file_selector.dart';

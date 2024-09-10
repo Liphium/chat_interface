@@ -14,7 +14,7 @@ import 'package:chat_interface/theme/components/fj_textfield.dart';
 import 'package:chat_interface/theme/components/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -314,7 +314,8 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> {
             label: "key_requests.code.button".tr,
             onTap: () {
               // Verify the code
-              if (!checkSignature(widget.request.signature, widget.request.signaturePub, hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)))) {
+              if (!checkSignature(widget.request.signature, widget.request.signaturePub,
+                  hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)))) {
                 _error.value = "key_requests.code.error".tr; // JEeSqn
                 return;
               }

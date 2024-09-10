@@ -2,7 +2,7 @@ import 'package:chat_interface/main.dart';
 
 //* These will be loaded from the server (in the future)
 final Map<String, int> specialConstants = <String, int>{
-  Constants.specialConstantMaxFileSize: 10, // in MB
+  Constants.specialConstantMaxFileSize: 10 * 1024 * 1024, // in MB
   Constants.specialConstantMaxConversationAmount: 500,
   Constants.specialConstantMaxConversationNameLength: 50,
   Constants.specialConstantMaxConversationMembers: 100,

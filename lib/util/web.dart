@@ -7,6 +7,7 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart' as d;
+import 'package:flutter/material.dart';
 import 'package:get/get.dart' as g;
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
@@ -106,7 +107,7 @@ Future<String?> grabServerPublicKey({String defaultError = "server.error"}) asyn
   try {
     res = await post(Uri.parse(serverPath(basePath, "/pub", noApiVersion: true)));
   } catch (e) {
-    return "error.network";
+    return "error.network".tr;
   }
   if (res.statusCode != 200) {
     return defaultError;
@@ -116,7 +117,7 @@ Future<String?> grabServerPublicKey({String defaultError = "server.error"}) asyn
 
   // Check the protocol version
   if (json["protocol_version"] != protocolVersion) {
-    return "protocol.error";
+    return "protocol.error".tr;
   }
 
   serverPublicKey = unpackageRSAPublicKey(json['pub']);
@@ -186,19 +187,24 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
       headers: <String, String>{
         if (token != null) "Authorization": "Bearer $token",
         "Content-Type": "application/json",
+        "Locale": _localeString(g.Get.locale ?? g.Get.fallbackLocale ?? const Locale("en", "US")),
         "Auth-Tag": authTag,
       },
       body: encryptAES(jsonEncode(body).toCharArray().unsignedView(), aesBase64),
     );
   } catch (e) {
-    return <String, dynamic>{"success": false, "error": "error.network"};
+    return <String, dynamic>{"success": false, "error": "error.network".tr};
   }
 
   if (res.statusCode != 200) {
-    return <String, dynamic>{"success": false, "code": res.statusCode, "error": defaultError};
+    return <String, dynamic>{"success": false, "code": res.statusCode, "error": defaultError.tr};
   }
 
   return jsonDecode(String.fromCharCodes(decryptAES(res.bodyBytes, aesBase64)));
+}
+
+String _localeString(Locale locale) {
+  return "${locale.languageCode}_${locale.countryCode ?? "US"}";
 }
 
 // Post request to node-backend with any token (new)
@@ -214,7 +220,7 @@ Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic
 // Post request to chat-node with any token (node needs to be connected already) (new)
 Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
   if (connector.nodePublicKey == null) {
-    return <String, dynamic>{"success": false, "error": defaultError};
+    return <String, dynamic>{"success": false, "error": defaultError.tr};
   }
 
   // Check if the path is a conversations endpoint
@@ -277,18 +283,4 @@ Map<String, dynamic> authenticatedStoredAction(String name, Map<String, dynamic>
   prefixJson.addAll(payload);
 
   return prefixJson;
-}
-
-/// Translate an error with parameters (for example: file.not_uploaded:PARAMETER)
-String translateError(String error) {
-  final args = error.split(":");
-  if (args.length == 1) {
-    return error.tr;
-  }
-  final map = <String, String>{};
-  for (int i = 1; i < args.length; i++) {
-    sendLog(args[i]);
-    map[i.toString()] = args[i];
-  }
-  return args[0].trParams(map);
 }

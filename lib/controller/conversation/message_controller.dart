@@ -670,9 +670,6 @@ class Message {
     sendLog(json);
 
     if (!json["success"]) {
-      if (json["error"] == "server.error") {
-        return "message.delete_error";
-      }
       return json["error"];
     }
 

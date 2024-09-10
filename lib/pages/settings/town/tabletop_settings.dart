@@ -6,6 +6,7 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
@@ -21,7 +22,7 @@ import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -512,15 +513,20 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                   // Check files
                   for (var file in result) {
-                    if (await file.length() > 10 * 1000 * 1000) {
-                      showErrorPopup("error".tr, "file.too_large".tr);
+                    if (await file.length() > specialConstants[Constants.specialConstantMaxFileSize]!) {
+                      showErrorPopup(
+                        "error",
+                        "file.too_large".trParams({
+                          "1": formatFileSize(specialConstants[Constants.specialConstantMaxFileSize]!),
+                        }),
+                      );
                       return;
                     }
                   }
 
                   final response = await Get.dialog(CardsUploadWindow(files: result), barrierDismissible: false);
                   if (response.isEmpty) {
-                    showErrorPopup("error", "app.error");
+                    showErrorPopupTranslated("error", "app.error");
                     return;
                   }
 
@@ -534,7 +540,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                   final res = await widget.deck.save();
                   if (!res) {
-                    showErrorPopup("error", "server.error");
+                    showErrorPopupTranslated("error", "server.error");
                     return;
                   }
                 },

@@ -1,6 +1,6 @@
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +72,8 @@ class _InvitesPageState extends State<InvitesPage> {
       label: "invites",
       child: Obx(() {
         if (loading.value) {
-          return Padding(padding: const EdgeInsets.all(defaultSpacing), child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
+          return Padding(
+              padding: const EdgeInsets.all(defaultSpacing), child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
         }
 
         return Column(

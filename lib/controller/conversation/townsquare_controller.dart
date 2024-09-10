@@ -5,7 +5,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -18,8 +18,8 @@ class TownsquareController extends GetxController {
 
   void updateEnabledState() {
     final before = enabled.value;
-    enabled.value =
-        (Get.find<SettingController>().settings[DataSettings.socialFeatures]!.value.value ?? true) && Get.find<StatusController>().type.value != statusDoNotDisturb;
+    enabled.value = (Get.find<SettingController>().settings[DataSettings.socialFeatures]!.value.value ?? true) &&
+        Get.find<StatusController>().type.value != statusDoNotDisturb;
     if (before == enabled.value) {
       return;
     }

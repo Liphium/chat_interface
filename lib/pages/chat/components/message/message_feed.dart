@@ -17,7 +17,7 @@ import 'package:chat_interface/pages/chat/components/conversations/message_bar.d
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
@@ -74,7 +74,7 @@ class _MessageFeedState extends State<MessageFeed> {
                 ),
                 verticalSpacing(defaultSpacing),
                 Text(
-                  widget.conversation.error.value!.tr,
+                  widget.conversation.error.value!,
                   style: Get.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),

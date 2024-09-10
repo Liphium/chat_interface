@@ -14,7 +14,7 @@ import 'package:chat_interface/controller/current/steps/vault_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:get/get.dart';
@@ -125,7 +125,7 @@ class ConversationController extends GetxController {
 
       // Set an error if there is one
       if (error.contains(conversation.id.server)) {
-        conversation.error.value = "other.server.error";
+        conversation.error.value = "other.server.error".tr;
       }
 
       // Check if the current version of the conversation is up to date

@@ -12,7 +12,7 @@ import 'package:chat_interface/theme/components/fj_button.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -238,7 +238,9 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                 textAlign: TextAlign.center,
               ),
               verticalSpacing(sectionSpacing),
-              Text("If you are logging in for the first time on this device or changed your keys, this is completely normal. You have a couple of options here.", style: Get.textTheme.bodyMedium),
+              Text(
+                  "If you are logging in for the first time on this device or changed your keys, this is completely normal. You have a couple of options here.",
+                  style: Get.textTheme.bodyMedium),
               verticalSpacing(sectionSpacing),
               Text(
                 "1. Get from another device",
@@ -246,14 +248,16 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                 textAlign: TextAlign.center,
               ),
               verticalSpacing(defaultSpacing),
-              Text("Ask another device that is currently logged into your account to send you the keys. Don't worry, we'll encrypt them in transfer.", style: Get.textTheme.bodyMedium),
+              Text("Ask another device that is currently logged into your account to send you the keys. Don't worry, we'll encrypt them in transfer.",
+                  style: Get.textTheme.bodyMedium),
               verticalSpacing(defaultSpacing),
               FJElevatedLoadingButton(
                 loading: false.obs,
                 onTap: () async {
                   final json = await postJSON("/account/keys/requests/check", {
                     "token": refreshToken,
-                    "signature": signMessage(widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
+                    "signature": signMessage(
+                        widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
                     "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
                   });
 
