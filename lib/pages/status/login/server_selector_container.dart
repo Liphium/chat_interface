@@ -12,53 +12,27 @@ class ServerSelectorContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: "connecting_container",
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
-          color: Get.theme.colorScheme.onInverseSurface,
-        ),
-        width: 370,
+    return Material(
+      color: Get.theme.colorScheme.inverseSurface,
+      borderRadius: BorderRadius.circular(defaultSpacing),
+      child: InkWell(
+        onTap: () => Get.find<TransitionController>().modelTransition(ServerSelectorPage(nextPage: pageToGoBack.call())),
+        borderRadius: BorderRadius.circular(defaultSpacing),
         child: Padding(
-          padding: const EdgeInsets.all(sectionSpacing),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Row(
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
+              Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+              horizontalSpacing(defaultSpacing),
+              Expanded(
                 child: Text(
-                  "server.choose.server.connecting".tr,
-                  style: Get.theme.textTheme.bodyMedium,
+                  basePath.replaceAll("/v1", ""),
+                  style: Get.theme.textTheme.labelMedium,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              verticalSpacing(defaultSpacing),
-              Material(
-                color: Get.theme.colorScheme.inverseSurface,
-                borderRadius: BorderRadius.circular(defaultSpacing),
-                child: InkWell(
-                  onTap: () => Get.find<TransitionController>().modelTransition(ServerSelectorPage(nextPage: pageToGoBack.call())),
-                  borderRadius: BorderRadius.circular(defaultSpacing),
-                  child: Padding(
-                    padding: const EdgeInsets.all(defaultSpacing),
-                    child: Row(
-                      children: [
-                        Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
-                        horizontalSpacing(defaultSpacing),
-                        Expanded(
-                          child: Text(
-                            basePath.replaceAll("/v1", ""),
-                            style: Get.theme.textTheme.labelMedium,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        horizontalSpacing(defaultSpacing),
-                        Icon(Icons.edit, color: Get.theme.colorScheme.onPrimary),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              horizontalSpacing(defaultSpacing),
+              Icon(Icons.edit, color: Get.theme.colorScheme.onPrimary),
             ],
           ),
         ),

@@ -48,68 +48,55 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Get.theme.colorScheme.inverseSurface,
-      body: Center(
-        child: TransitionContainer(
-          tag: "login",
-          borderRadius: BorderRadius.circular(modelBorderRadius),
-          width: 370,
-          child: Padding(
-            padding: const EdgeInsets.all(modelPadding),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "${'setup.choose.server'.tr}.",
-                  style: Get.textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                verticalSpacing(sectionSpacing),
-                FJTextField(
-                  controller: _name,
-                  hintText: "placeholder.domain".tr,
-                ),
-                verticalSpacing(defaultSpacing),
-                AnimatedErrorContainer(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing),
-                  message: _error,
-                  expand: true,
-                ),
-                FJElevatedLoadingButton(
-                  loading: _loading,
-                  onTap: () async {
-                    _loading.value = true;
-                    final json = await postAny("${formatPath(_name.text)}/pub", {}); // Send a request to get the public key (good test ig)
-                    _loading.value = false;
-                    if (json["pub"] == null) {
-                      _error.value = "server.not_found".tr;
-                      return;
-                    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          "${'setup.choose.server'.tr}.",
+          style: Get.textTheme.headlineMedium,
+          textAlign: TextAlign.center,
+        ),
+        verticalSpacing(sectionSpacing),
+        FJTextField(
+          controller: _name,
+          hintText: "placeholder.domain".tr,
+        ),
+        verticalSpacing(defaultSpacing),
+        AnimatedErrorContainer(
+          padding: const EdgeInsets.only(bottom: defaultSpacing),
+          message: _error,
+          expand: true,
+        ),
+        FJElevatedLoadingButton(
+          loading: _loading,
+          onTap: () async {
+            _loading.value = true;
+            final json = await postAny("${formatPath(_name.text)}/pub", {}); // Send a request to get the public key (good test ig)
+            _loading.value = false;
+            if (json["pub"] == null) {
+              _error.value = "server.not_found".tr;
+              return;
+            }
 
-                    // Choose the server if valid
-                    chooseServer(_name.text);
-                  },
-                  label: "select".tr,
-                ),
-                if (widget.nextPage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: defaultSpacing),
-                    child: FJElevatedLoadingButton(
-                      loading: false.obs,
-                      onTap: () async {
-                        Get.find<TransitionController>().modelTransition(widget.nextPage);
-                      },
-                      label: "back".tr,
-                    ),
-                  ),
-              ],
+            // Choose the server if valid
+            chooseServer(_name.text);
+          },
+          label: "select".tr,
+        ),
+        if (widget.nextPage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: defaultSpacing),
+            child: FJElevatedLoadingButton(
+              loading: false.obs,
+              onTap: () async {
+                Get.find<TransitionController>().modelTransition(widget.nextPage);
+              },
+              label: "back".tr,
             ),
           ),
-        ),
-      ),
+      ],
     );
   }
 

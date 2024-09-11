@@ -38,98 +38,72 @@ class _LoginPageState extends State<LoginPage> {
     final ThemeData theme = Theme.of(context);
     _emailController.text = widget.email ?? "";
 
-    return Scaffold(
-      backgroundColor: theme.colorScheme.inverseSurface,
-      body: Center(
-        child: Column(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TransitionContainer(
-              tag: "login",
-              borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
-              color: theme.colorScheme.onInverseSurface,
-              width: 370,
-              child: Padding(
-                padding: const EdgeInsets.all(defaultSpacing * 2),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "${"input.email".tr}.",
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineMedium,
-                    ),
-                    verticalSpacing(sectionSpacing),
-                    AnimatedInfoContainer(
-                      padding: const EdgeInsets.only(bottom: defaultSpacing),
-                      message: _reminderText,
-                      expand: true,
-                    ),
-                    FJTextField(
-                      hintText: 'placeholder.email'.tr,
-                      controller: _emailController,
-                      maxLines: 1,
-                    ),
-                    verticalSpacing(defaultSpacing),
-                    AnimatedErrorContainer(
-                      padding: const EdgeInsets.only(bottom: defaultSpacing),
-                      message: _errorText,
-                      expand: true,
-                    ),
-                    FJElevatedLoadingButton(
-                      loading: _loading,
-                      onTap: () {
-                        if (_loading.value) return;
-                        _loading.value = true;
-                        _errorText.value = ''.tr;
-                        _reminderText.value = ''.tr;
-
-                        if (_emailController.text == '') {
-                          _errorText.value = 'email.invalid'.tr;
-                          if (!reminded) {
-                            _reminderText.value = 'login.register_reminder'.tr;
-                          }
-                          reminded = true;
-                          _loading.value = false;
-                          return;
-                        }
-
-                        loginStart(_emailController.text.trim(), success: () async {
-                          _loading.value = false;
-                        }, failure: (msg) {
-                          if (msg == "email.invalid") {
-                            if (!reminded) {
-                              _reminderText.value = 'login.register_reminder'.tr;
-                              reminded = true;
-                            }
-                          }
-                          _errorText.value = msg.tr;
-                          _loading.value = false;
-                        });
-                      },
-                      label: 'login.next'.tr,
-                    ),
-                    verticalSpacing(defaultSpacing),
-                    Center(
-                      child: TextButton(
-                        style: ButtonStyle(
-                          foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
-                          backgroundColor:
-                              WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.hovered) ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.primary.withOpacity(0)),
-                        ),
-                        onPressed: () => RegisterHandler.goToRegistration(_emailController.text),
-                        child: Text('login.no_account'.tr),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            Text(
+              "${"input.email".tr}.",
+              textAlign: TextAlign.center,
+              style: theme.textTheme.headlineMedium,
+            ),
+            verticalSpacing(sectionSpacing),
+            AnimatedInfoContainer(
+              padding: const EdgeInsets.only(bottom: defaultSpacing),
+              message: _reminderText,
+              expand: true,
+            ),
+            FJTextField(
+              hintText: 'placeholder.email'.tr,
+              controller: _emailController,
+              maxLines: 1,
             ),
             verticalSpacing(defaultSpacing),
-            ServerSelectorContainer(pageToGoBack: () => LoginPage(email: _emailController.text)),
+            AnimatedErrorContainer(
+              padding: const EdgeInsets.only(bottom: defaultSpacing),
+              message: _errorText,
+              expand: true,
+            ),
+            FJElevatedLoadingButton(
+              loading: _loading,
+              onTap: () {
+                if (_loading.value) return;
+                _loading.value = true;
+                _errorText.value = ''.tr;
+                _reminderText.value = ''.tr;
+
+                if (_emailController.text == '') {
+                  _errorText.value = 'email.invalid'.tr;
+                  if (!reminded) {
+                    _reminderText.value = 'login.register_reminder'.tr;
+                  }
+                  reminded = true;
+                  _loading.value = false;
+                  return;
+                }
+
+                loginStart(_emailController.text.trim(), success: () async {
+                  _loading.value = false;
+                }, failure: (msg) {
+                  if (msg == "email.invalid") {
+                    if (!reminded) {
+                      _reminderText.value = 'login.register_reminder'.tr;
+                      reminded = true;
+                    }
+                  }
+                  _errorText.value = msg.tr;
+                  _loading.value = false;
+                });
+              },
+              label: 'login.next'.tr,
+            ),
           ],
         ),
-      ),
+        verticalSpacing(defaultSpacing),
+        ServerSelectorContainer(pageToGoBack: () => LoginPage(email: _emailController.text)),
+      ],
     );
   }
 }

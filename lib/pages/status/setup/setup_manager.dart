@@ -2,6 +2,8 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/policy_setup.dart';
+import 'package:chat_interface/pages/status/setup/setup_page.dart';
+import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
 import 'package:chat_interface/pages/status/setup/tokens_setup.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/main.dart';
@@ -10,8 +12,6 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/settings_setup.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/pages/status/setup/updates_setup.dart';
-import 'package:chat_interface/pages/status/starting_page.dart';
-import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,6 +35,7 @@ class SetupManager {
   final _steps = <Setup>[];
   int current = -1;
   final message = 'setup.loading'.obs;
+  SmoothDialogController? controller;
 
   SetupManager() {
     // Initialize setup
@@ -56,7 +57,7 @@ class SetupManager {
       api.stop();
     }
     Get.find<FriendController>().onReload();
-    Get.find<TransitionController>().modelTransition(const StartingPage());
+    Get.offAll(const SetupPage());
     db.close();
   }
 
@@ -65,7 +66,11 @@ class SetupManager {
     setupFinished = false;
 
     if (open) {
-      Get.find<TransitionController>().modelTransition(const StartingPage());
+      if (controller != null) {
+        controller!.transitionTo(const SetupLoadingWidget());
+      } else {
+        Get.offAll(const SetupPage());
+      }
     }
 
     current++;
@@ -92,7 +97,7 @@ class SetupManager {
       }
 
       if (ready != null) {
-        Get.find<TransitionController>().modelTransition(ready);
+        controller!.transitionTo(ready);
         return;
       }
 
@@ -102,13 +107,13 @@ class SetupManager {
       // Finish the setup and go to the chat page
       setupFinished = true;
       sendLog("chatto");
-      Get.find<TransitionController>().cancelAll();
+      await controller!.transitionComplete!;
       Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
       Get.find<ConnectionController>().tryConnection();
     }
   }
 
   void error(String error) {
-    Get.find<TransitionController>().modelTransition(ErrorPage(title: error));
+    controller!.transitionTo(ErrorPage(title: error));
   }
 }
