@@ -7,7 +7,7 @@ import 'package:chat_interface/pages/spaces/call_grid.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/call_controls.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

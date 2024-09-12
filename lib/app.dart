@@ -9,10 +9,10 @@ class ChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetX<ThemeManager>(builder: (manager) {
+    return Obx(() {
       return GetMaterialApp(
         title: 'Liphium',
-        theme: manager.currentTheme.value,
+        theme: Get.find<ThemeManager>().currentTheme.value,
         translations: MainTranslations(),
         locale: Get.deviceLocale,
         fallbackLocale: const Locale("en", "US"),

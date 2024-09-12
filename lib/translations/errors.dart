@@ -6,6 +6,7 @@ class ErrorTranslations extends Translations {
         //* English US
         'en_US': {
           'error': 'Error',
+          'render.error': 'Elements of type @type aren\'t supported.',
           'server.not_found': 'The server couldn\'t be reached. Make sure you have the right domain.',
           'error.network': 'Seems like you are offline. Please try to check the connection of your device.',
           'server.error': 'Something went wrong on the server, please try again later.',

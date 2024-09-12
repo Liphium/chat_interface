@@ -1,6 +1,6 @@
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/login/login_step_page.dart';
-import 'package:chat_interface/theme/components/fj_option_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_option_button.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

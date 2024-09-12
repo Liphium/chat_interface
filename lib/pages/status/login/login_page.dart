@@ -1,8 +1,8 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/login/server_selector_container.dart';
 import 'package:chat_interface/pages/status/register/register_handler.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

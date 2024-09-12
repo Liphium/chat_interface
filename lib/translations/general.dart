@@ -9,6 +9,7 @@ class GeneralTranslations extends Translations {
           'offline': 'Offline',
           'loading': 'Loading..',
           'preparing': 'Preparing..',
+          'rendering': 'Rendering..',
           'success': 'Success',
           'create': 'Create',
           'ok': 'Okay',

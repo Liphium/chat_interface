@@ -1,6 +1,5 @@
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
-import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -41,14 +40,17 @@ class _SetupPageState extends State<SetupPage> {
 }
 
 class SetupLoadingWidget extends StatelessWidget {
-  const SetupLoadingWidget({super.key});
+  /// Automatically translated
+  final String text;
+
+  const SetupLoadingWidget({super.key, this.text = "loading"});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
         child: Center(
-          child: Text("loading".tr, style: Get.textTheme.headlineMedium),
+          child: Text(text.tr, style: Get.textTheme.headlineMedium),
         ),
       ),
     );

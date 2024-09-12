@@ -20,7 +20,7 @@ import 'package:pasteboard/pasteboard.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
 
-import '../../../theme/components/icon_button.dart';
+import '../../../theme/components/forms/icon_button.dart';
 import '../../../util/vertical_spacing.dart';
 
 import 'package:path/path.dart' as path;

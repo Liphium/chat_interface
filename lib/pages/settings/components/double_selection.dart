@@ -1,5 +1,5 @@
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/theme/components/fj_slider.dart';
+import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

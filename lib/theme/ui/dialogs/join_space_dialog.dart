@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -35,15 +35,13 @@ class _JoinSpaceDialogState extends State<JoinSpaceDialog> {
                   },
                   smallCorners: true,
                   child: Center(
-                    child:
-                        Text("yeah".tr, style: Get.theme.textTheme.labelMedium),
+                    child: Text("yeah".tr, style: Get.theme.textTheme.labelMedium),
                   )),
               FJElevatedButton(
                   onTap: () => Get.back(),
                   smallCorners: true,
                   child: Center(
-                    child: Text("no.got".tr,
-                        style: Get.theme.textTheme.labelMedium),
+                    child: Text("no.got".tr, style: Get.theme.textTheme.labelMedium),
                   ))
             ],
           )

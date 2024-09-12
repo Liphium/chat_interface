@@ -1,5 +1,5 @@
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';

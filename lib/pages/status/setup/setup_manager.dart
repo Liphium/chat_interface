@@ -57,7 +57,12 @@ class SetupManager {
       api.stop();
     }
     Get.find<FriendController>().onReload();
-    Get.offAll(const SetupPage());
+    if (controller == null) {
+      Get.offAll(const SetupPage());
+    } else {
+      controller!.transitionTo(const SetupLoadingWidget());
+      next(open: false);
+    }
     db.close();
   }
 

@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:chat_interface/pages/status/setup/setup_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -8,6 +12,9 @@ class SmoothDialogController {
   final widgetTwo = Rx<Widget?>(null);
   late AnimationController _one, _two;
   Future? transitionComplete;
+  var keyOne = Random().nextDouble();
+  var keyTwo = Random().nextDouble();
+  bool direction = true;
 
   SmoothDialogController(Widget child) {
     widgetTwo.value = child;
@@ -21,12 +28,20 @@ class SmoothDialogController {
   static const curve = Curves.easeInOutQuart;
   void transitionTo(Widget widget) async {
     await transitionComplete;
-    widgetOne.value = widgetTwo.value;
-    widgetTwo.value = widget;
-    _two.value = 0;
-    _two.animateTo(1, duration: 750.ms, curve: curve);
-    _one.value = 1;
-    _one.animateBack(0.0, duration: 750.ms, curve: curve);
+    direction = !direction;
+    if (direction) {
+      _two.value = 0;
+      _two.animateTo(1, duration: 750.ms, curve: curve);
+      _one.value = 1;
+      _one.animateBack(0.0, duration: 750.ms, curve: curve);
+      widgetTwo.value = widget;
+    } else {
+      _one.value = 0;
+      _one.animateTo(1, duration: 750.ms, curve: curve);
+      _two.value = 1;
+      _two.animateBack(0.0, duration: 750.ms, curve: curve);
+      widgetOne.value = widget;
+    }
     transitionComplete = Future.delayed(750.ms);
   }
 }
@@ -75,7 +90,6 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
               color: Get.theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(sectionSpacing),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: sectionSpacing),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -96,13 +110,14 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
                       end: Offset(1, 1),
                     ),
                   ],
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      verticalSpacing(sectionSpacing),
-                      Obx(() => widget.controller.widgetOne.value ?? const SizedBox()),
-                      verticalSpacing(sectionSpacing),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(sectionSpacing),
+                    child: Obx(
+                      () => SizedBox(
+                        key: ValueKey(widget.controller.keyOne),
+                        child: widget.controller.widgetOne.value ?? const SizedBox(),
+                      ),
+                    ),
                   ),
                 ),
                 Animate(
@@ -113,18 +128,23 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
                       axis: Axis.vertical,
                       alignment: Alignment.topCenter,
                     ),
+                    const BlurEffect(
+                      begin: Offset(5, 5),
+                      end: Offset(0, 0),
+                    ),
                     const ScaleEffect(
                       begin: Offset(0.5, 0.5),
                       end: Offset(1, 1),
                     ),
                   ],
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      verticalSpacing(sectionSpacing),
-                      Obx(() => widget.controller.widgetTwo.value!),
-                      verticalSpacing(sectionSpacing),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(sectionSpacing),
+                    child: Obx(
+                      () => SizedBox(
+                        key: ValueKey(widget.controller.keyTwo),
+                        child: widget.controller.widgetTwo.value!,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -133,5 +153,37 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
         ),
       ),
     );
+  }
+}
+
+class SmoothDialogTest extends StatefulWidget {
+  const SmoothDialogTest({super.key});
+
+  @override
+  State<SmoothDialogTest> createState() => _SmoothDialogTestState();
+}
+
+class _SmoothDialogTestState extends State<SmoothDialogTest> {
+  final controller = SmoothDialogController(const SetupLoadingWidget(text: "Welcome to this experiment!"));
+
+  @override
+  void initState() {
+    Timer.periodic(const Duration(milliseconds: 2000), (timer) {
+      controller.transitionTo(
+        Builder(
+          builder: (context) {
+            return SetupLoadingWidget(
+              text: "Hi ${Random().nextDouble().toStringAsFixed(2)}",
+            );
+          },
+        ),
+      );
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SmoothDialog(controller: controller);
   }
 }

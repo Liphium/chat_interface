@@ -1,5 +1,5 @@
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
-import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
