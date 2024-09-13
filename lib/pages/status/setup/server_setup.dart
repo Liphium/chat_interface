@@ -6,7 +6,6 @@ import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
-import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -33,9 +32,9 @@ class ServerSetup extends Setup {
 }
 
 class ServerSelectorPage extends StatefulWidget {
-  final Widget? nextPage;
+  final Function()? onSelected;
 
-  const ServerSelectorPage({super.key, this.nextPage});
+  const ServerSelectorPage({super.key, this.onSelected});
 
   @override
   State<ServerSelectorPage> createState() => _ServerSelectorPageState();
@@ -85,17 +84,6 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
           },
           label: "select".tr,
         ),
-        if (widget.nextPage != null)
-          Padding(
-            padding: const EdgeInsets.only(top: defaultSpacing),
-            child: FJElevatedLoadingButton(
-              loading: false.obs,
-              onTap: () async {
-                Get.find<TransitionController>().modelTransition(widget.nextPage);
-              },
-              label: "back".tr,
-            ),
-          ),
       ],
     );
   }
@@ -123,8 +111,8 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
     basePath = path;
     db.into(db.setting).insertOnConflictUpdate(SettingCompanion.insert(key: "server_url", value: path));
     isHttps = path.startsWith("https://");
-    if (widget.nextPage != null) {
-      Get.find<TransitionController>().modelTransition(widget.nextPage);
+    if (widget.onSelected != null) {
+      widget.onSelected!.call();
     } else {
       setupManager.next();
     }

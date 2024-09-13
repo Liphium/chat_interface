@@ -161,7 +161,14 @@ class _SSRRendererState extends State<SSRRenderer> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: widgets,
+      children: widgets +
+          [
+            if (widget.ssr.extra?[widget.path] != null)
+              Padding(
+                padding: const EdgeInsets.only(top: defaultSpacing),
+                child: widget.ssr.extra?[widget.path],
+              ),
+          ],
     );
   }
 }

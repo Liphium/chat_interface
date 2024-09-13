@@ -45,6 +45,15 @@ class SetupTranslations extends Translations {
           'login.no_account': 'Register an account',
           'input.password': 'Your password, please',
           'login.forgot': 'Reset your password',
+
+          // Key setup
+          'key.sync.title': 'Your keys aren\'t synchronized.',
+          'key.sync.desc':
+              'If you are logging in for the first time on this device or changed your keys, this is completely normal. You can ask another device to grab the keys from there, don\'t worry, we\'ll encrypt them in transfer.',
+          'key.sync.ask_device': 'Ask another device',
+          'key.code': 'Code: @code',
+          'key.code.desc':
+              'On any device where you are currently logged in, go to Settings > Data > Synchronization requests. Click on the correct request and then input the code above into the dialog that pops up. We\'ll check if you did automatically.',
         },
       };
 }

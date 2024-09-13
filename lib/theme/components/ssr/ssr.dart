@@ -17,6 +17,9 @@ class SSR {
   /// The function called for making a request to the server (called with the path and the SSR body)
   Future<Map<String, dynamic>> Function(String, Map<String, dynamic>) doRequest;
 
+  /// Extra widget that should be appended to the rest of the server-rendered UI (by path)
+  Map<String, Widget>? extra;
+
   // All data required for the UI
   final currentInputValues = <String, dynamic>{};
   String? currentToken;
@@ -26,7 +29,8 @@ class SSR {
   SSR({required this.startPath, required this.onSuccess, required this.onRender, this.doRequest = postJSON});
 
   /// Start the SSR flow (returns an error message or null if successful)
-  Future<String?> start() async {
+  Future<String?> start({Map<String, Widget>? extra}) async {
+    this.extra = extra;
     return next(startPath);
   }
 

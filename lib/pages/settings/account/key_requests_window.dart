@@ -179,7 +179,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
         children: [
           AnimatedErrorContainer(
             expand: true,
-            padding: const EdgeInsets.all(0),
+            padding: const EdgeInsets.only(bottom: defaultSpacing),
             message: error,
           ),
           Obx(() {
@@ -235,7 +235,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
                               LoadingIconButton(
                                 onTap: () async {
                                   final result = await Get.dialog(KeyRequestAcceptWindow(request: request));
-                                  if (result) {
+                                  if (result != null && result) {
                                     requests.remove(request);
                                   }
                                 },

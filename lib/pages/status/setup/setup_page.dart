@@ -48,11 +48,7 @@ class SetupLoadingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        child: Center(
-          child: Text(text.tr, style: Get.textTheme.headlineMedium),
-        ),
-      ),
+      child: Text(text.tr, style: Get.textTheme.headlineMedium),
     );
   }
 }

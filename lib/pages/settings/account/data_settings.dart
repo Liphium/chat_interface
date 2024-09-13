@@ -3,7 +3,6 @@ import 'package:chat_interface/controller/conversation/townsquare_controller.dar
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
-import 'package:chat_interface/pages/settings/account/change_password_window.dart';
 import 'package:chat_interface/pages/settings/account/log_out_window.dart';
 import 'package:chat_interface/pages/settings/account/key_requests_window.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';

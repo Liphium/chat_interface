@@ -169,7 +169,10 @@ class Friend {
   /// Used for unknown accounts where only an id is known
   factory Friend.unknown(LPHAddress address) {
     sendLog(address);
-    final shownId = address.id.substring(0, 5);
+    var shownId = "removed".tr;
+    if (address.id.length >= 5) {
+      shownId = address.id.substring(0, 5);
+    }
     final friend = Friend(address, "lph-$shownId", UTFString("lph-$shownId"), "", KeyStorage.empty(), 0);
     friend.unknown = true;
     return friend;
