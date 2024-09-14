@@ -6,6 +6,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SSRRenderer extends StatefulWidget {
   final SSR ssr;
@@ -24,7 +25,7 @@ class SSRRenderer extends StatefulWidget {
 }
 
 class _SSRRendererState extends State<SSRRenderer> {
-  final loading = false.obs;
+  final toDispose = <TextEditingController>[];
   var widgets = <Widget>[];
 
   @override
@@ -37,8 +38,10 @@ class _SSRRendererState extends State<SSRRenderer> {
           return _renderText(element, last);
         case "input":
           return _renderInput(element, last);
-        case "button":
+        case "submit":
           return _renderSubmitButton(element, last);
+        case "button":
+          return _renderButton(element, last);
       }
 
       return _renderError(element["type"], last);
@@ -81,11 +84,17 @@ class _SSRRendererState extends State<SSRRenderer> {
 
   /// Render an input field from the element json
   Widget _renderInput(Map<String, dynamic> json, bool last) {
+    // Create a new text editing controller to fill in a value
+    final controller = TextEditingController();
+    controller.text = json["value"] ?? "";
+    toDispose.add(controller); // Make sure the thing is disposed
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: last ? 0 : defaultSpacing,
       ),
       child: FJTextField(
+        controller: controller,
         obscureText: json["hidden"],
         hintText: json["placeholder"],
         onChange: (value) {
@@ -107,7 +116,7 @@ class _SSRRendererState extends State<SSRRenderer> {
             padding: const EdgeInsets.only(bottom: defaultSpacing),
             message: widget.ssr.error,
           ),
-          _renderButton(json, last),
+          _renderButton(json, true), // Last = true for no padding
           Obx(
             () => Animate(
               effects: [
@@ -121,7 +130,7 @@ class _SSRRendererState extends State<SSRRenderer> {
               child: widget.ssr.suggestButton != null
                   ? Padding(
                       padding: const EdgeInsets.only(top: defaultSpacing),
-                      child: _renderButton(widget.ssr.suggestButton!, true),
+                      child: _renderButton(widget.ssr.suggestButton!, true), // Last = true for no padding
                     )
                   : const SizedBox(),
             ),
@@ -133,15 +142,24 @@ class _SSRRendererState extends State<SSRRenderer> {
 
   /// Render a normal button using json (NOT A NORMAL ELEMENT)
   Widget _renderButton(Map<String, dynamic> json, bool last) {
-    return FJElevatedLoadingButton(
-      onTap: () async {
-        widget.ssr.error.value = "";
-        loading.value = true;
-        widget.ssr.error.value = await widget.ssr.next(json["path"]) ?? "";
-        loading.value = false;
-      },
-      label: json["label"],
-      loading: loading,
+    final loading = false.obs;
+    return Padding(
+      padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
+      child: FJElevatedLoadingButton(
+        onTap: () async {
+          if (json["link"] ?? false) {
+            await launchUrl(Uri.parse(json["path"] ?? ""));
+            return;
+          }
+
+          widget.ssr.error.value = "";
+          loading.value = true;
+          widget.ssr.error.value = await widget.ssr.next(json["path"]) ?? "";
+          loading.value = false;
+        },
+        label: json["label"],
+        loading: loading,
+      ),
     );
   }
 
@@ -155,6 +173,14 @@ class _SSRRendererState extends State<SSRRenderer> {
         }),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    for (var controller in toDispose) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 
   @override

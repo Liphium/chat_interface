@@ -1,5 +1,6 @@
 import 'package:chat_interface/theme/components/ssr/ssr_renderer.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -83,6 +84,9 @@ class SSR {
         return null;
       case "success":
         onSuccess.call(json["data"]);
+        return null;
+      case "popup":
+        showPopup(json["title"], json["content"]);
         return null;
       case "suggest":
         suggestButton = json["button"];
