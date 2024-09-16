@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
-import 'package:chat_interface/theme/components/transitions/transition_container.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:dio/dio.dart';
@@ -328,29 +327,16 @@ class _ShouldUpdateSetupPageState extends State<ShouldUpdateSetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Get.theme.colorScheme.inverseSurface,
-      body: Center(
-        child: TransitionContainer(
-          borderRadius: BorderRadius.circular(modelBorderRadius),
-          tag: "login",
-          width: 370,
-          child: Padding(
-            padding: const EdgeInsets.all(sectionSpacing),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(width: 1000),
-                Text(widget.title, style: Get.theme.textTheme.headlineMedium),
-                verticalSpacing(sectionSpacing),
-                Obx(
-                  () => Text(_status.value, style: Get.theme.textTheme.labelLarge),
-                ),
-              ],
-            ),
-          ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(width: 1000),
+        Text(widget.title, style: Get.theme.textTheme.headlineMedium),
+        verticalSpacing(sectionSpacing),
+        Obx(
+          () => Text(_status.value, style: Get.theme.textTheme.labelLarge),
         ),
-      ),
+      ],
     );
   }
 }

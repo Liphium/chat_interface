@@ -3,6 +3,7 @@ import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/ssr/ssr.dart';
+import 'package:chat_interface/theme/components/ssr/ssr_fetcher.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -43,6 +44,8 @@ class _SSRRendererState extends State<SSRRenderer> {
           return _renderSubmitButton(element, last);
         case "button":
           return _renderButton(element, last);
+        case "fetcher":
+          return _renderFetcher(element, last);
       }
 
       return _renderError(element["type"], last);
@@ -64,10 +67,17 @@ class _SSRRendererState extends State<SSRRenderer> {
         );
       case 1:
         return Padding(
-          padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
-          child: Text(
-            json["text"],
-            style: Get.textTheme.labelMedium,
+          padding: EdgeInsets.only(
+            top: defaultSpacing,
+            bottom: last ? 0 : defaultSpacing,
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              json["text"],
+              style: Get.textTheme.titleMedium,
+              textAlign: TextAlign.start,
+            ),
           ),
         );
       case 2:
@@ -120,6 +130,7 @@ class _SSRRendererState extends State<SSRRenderer> {
           AnimatedErrorContainer(
             padding: const EdgeInsets.only(bottom: defaultSpacing),
             message: widget.ssr.error,
+            expand: true,
           ),
           _renderButton(json, true), // Last = true for no padding
           Obx(
@@ -159,11 +170,26 @@ class _SSRRendererState extends State<SSRRenderer> {
 
           widget.ssr.error.value = "";
           loading.value = true;
+          await Future.delayed(250.ms);
+          widget.ssr.suggestButton = null;
           widget.ssr.error.value = await widget.ssr.next(json["path"]) ?? "";
           loading.value = false;
         },
         label: json["label"],
         loading: loading,
+      ),
+    );
+  }
+
+  /// Render a fetcher
+  Widget _renderFetcher(Map<String, dynamic> json, bool last) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
+      child: SSRFetcher(
+        label: json["label"] ?? "",
+        ssr: widget.ssr,
+        frequency: json["frequency"] ?? 5,
+        path: json["path"],
       ),
     );
   }
@@ -176,6 +202,7 @@ class _SSRRendererState extends State<SSRRenderer> {
         message: "render.error".trParams({
           "type": type,
         }),
+        expand: true,
       ),
     );
   }

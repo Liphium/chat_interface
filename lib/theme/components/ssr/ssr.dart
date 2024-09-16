@@ -57,7 +57,7 @@ class SSR {
       }
 
       // Handle the response in the SSR format
-      return _handleSSRResponse(path, json);
+      return handleSSRResponse(path, json);
     } else {
       // If there is no token yet, call without input values
       final json = await doRequest.call(path, currentInputValues);
@@ -66,16 +66,18 @@ class SSR {
       }
 
       // Handle the response in the SSR format
-      return _handleSSRResponse(path, json);
+      return handleSSRResponse(path, json);
     }
   }
 
   /// Handles the different SSR response types
-  Future<String?> _handleSSRResponse(String basePath, Map<String, dynamic> json, {int redirects = 0}) async {
+  Future<String?> handleSSRResponse(String basePath, Map<String, dynamic> json, {int redirects = 0}) async {
     switch (json["type"]) {
       case "redirect":
-        currentToken = json["token"];
-        sendLog("token is now $currentToken");
+        if (json["token"] != null) {
+          currentToken = json["token"];
+          sendLog("token is now $currentToken");
+        }
         currentInputValues.clear();
         return next(json["redirect"], redirects: redirects);
       case "render":
