@@ -13,6 +13,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class LibraryManager {
   /// Load all new entries from the server
@@ -112,14 +113,14 @@ class LibraryManager {
 
     // If the entry couldn't be added, show an error
     if (entry == null) {
-      showErrorPopup("error", "app.error");
+      showErrorPopup("error", "app.error".tr);
       return false;
     }
 
     // Add entry to server vault
     final id = await addToVault(Constants.vaultLibraryTag, jsonEncode(entry.toJson()));
     if (id == null) {
-      showErrorPopup("error", "server.error");
+      showErrorPopup("error", "server.error".tr);
       return false;
     }
 

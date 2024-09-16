@@ -84,7 +84,7 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
                 FJElevatedButton(
                   onTap: () async {
                     await Clipboard.setData(ClipboardData(text: StatusController.ownAddress.encode()));
-                    showSuccessPopup("success", "settings.town.address.copied");
+                    showSuccessPopup("success", "settings.town.address.copied".tr);
                   },
                   child: Text(
                     "copy".tr,

@@ -202,7 +202,7 @@ class Connector {
   /// Optionally, you can specify a [waiter] to wait for the response.
   void sendAction(Message message, {Function(Event)? handler}) {
     if (!_connected) {
-      showErrorPopup("error", "error.network");
+      showErrorPopup("error", "error.network".tr);
       sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${message.action}");
       return;
     }

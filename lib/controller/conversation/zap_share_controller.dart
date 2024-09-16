@@ -228,7 +228,7 @@ class ZapShareController extends GetxController {
       if (!success) {
         // Retry in case of an error and wait a little bit
         currentlySending--;
-        showErrorPopup("error", "server.error");
+        showErrorPopup("error", "server.error".tr);
         tries++;
         await Future.delayed(2000.ms);
       } else {
@@ -289,7 +289,7 @@ class ZapShareController extends GetxController {
         }
 
         if (res.statusCode != 200) {
-          showErrorPopup("error", "server.error");
+          showErrorPopup("error", "server.error".tr);
           sendLog("Failed to send chunk $chunk");
           completer.complete(false);
           return;
@@ -364,7 +364,7 @@ class ZapShareController extends GetxController {
       return;
     }
     if (friendAddress == StatusController.ownAddress) {
-      showErrorPopup("error", "chat.zapshare.not_send_self");
+      showErrorPopup("error", "chat.zapshare.not_send_self".tr);
       return;
     }
     resetControllerState();
@@ -377,7 +377,7 @@ class ZapShareController extends GetxController {
       {"id": container.id, "token": container.token},
     );
     if (!json["success"]) {
-      showErrorPopup("error", "chat.zapshare.not_found");
+      showErrorPopup("error", "chat.zapshare.not_found".tr);
       return;
     }
     endPart = (json["size"].toDouble() / chunkSize.toDouble()).ceil();
@@ -476,7 +476,7 @@ class ZapShareController extends GetxController {
 
             if (res.statusCode != 200) {
               sendLog("ERROR DOWNLOADING CHUNK $currentChunk");
-              showErrorPopup("error", "server.error");
+              showErrorPopup("error", "server.error".tr);
               return;
             }
 

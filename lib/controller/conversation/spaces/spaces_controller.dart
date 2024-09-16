@@ -125,7 +125,7 @@ class SpacesController extends GetxController {
 
   void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {
     if (connected.value) {
-      showErrorPopup("error", "already.calling");
+      showErrorPopup("error", "already.calling".tr);
       return;
     }
     spaceLoading.value = true;
@@ -137,7 +137,7 @@ class SpacesController extends GetxController {
         if (event.data["message"] is String) {
           return showErrorPopup("error", event.data["message"]);
         }
-        return showErrorPopup("error", "server.error");
+        return showErrorPopup("error", "server.error".tr);
       }
       final appToken = event.data["token"] as Map<String, dynamic>;
       final roomId = event.data["id"];
@@ -165,7 +165,7 @@ class SpacesController extends GetxController {
               if (event.data["message"] is String) {
                 return showErrorPopup("error", event.data["message"]);
               }
-              return showErrorPopup("error", "server.error");
+              return showErrorPopup("error", "server.error".tr);
             }
 
             // Wait a little bit, in case a server abuses this as an infinite loop
@@ -177,7 +177,7 @@ class SpacesController extends GetxController {
           return;
         }
 
-        return showErrorPopup("error", "server.error");
+        return showErrorPopup("error", "server.error".tr);
       }
 
       // Load information from space container
@@ -205,7 +205,7 @@ class SpacesController extends GetxController {
     final result = await createSpaceConnection(appToken["domain"], appToken["token"]);
     sendLog("COULD CONNECT TO SPACE NODE: $result");
     if (!result) {
-      showErrorPopup("error", "server.error");
+      showErrorPopup("error", "server.error".tr);
       spaceLoading.value = false;
       return;
     }
@@ -220,7 +220,7 @@ class SpacesController extends GetxController {
       ),
       handler: (event) async {
         if (!event.data["success"]) {
-          showErrorPopup("error", "server.error");
+          showErrorPopup("error", "server.error".tr);
           spaceLoading.value = false;
           return;
         }

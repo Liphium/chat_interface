@@ -30,7 +30,7 @@ class TownsquareController extends GetxController {
         Message("townsquare_join", {}),
         handler: (event) {
           if (!event.data["success"]) {
-            showErrorPopup("error", "townsquare.connection_error");
+            showErrorPopup("error", "townsquare.connection_error".tr);
             return;
           }
           connecting.value = false;

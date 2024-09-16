@@ -408,7 +408,6 @@ class Message {
   List<String> attachments;
   final verified = true.obs;
   String answer;
-  final String certificate;
   final LPHAddress sender;
   final LPHAddress senderAddress;
   final DateTime createdAt;
@@ -502,7 +501,6 @@ class Message {
     this.content,
     this.answer,
     this.attachments,
-    this.certificate,
     this.sender,
     this.senderAddress,
     this.createdAt,
@@ -587,7 +585,7 @@ class Message {
     final senderAddress = LPHAddress.from(json["sender"]);
     final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[senderAddress]?.address ??
         LPHAddress("-", "removed".tr);
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], senderAddress, account,
+    var message = Message(json["id"], MessageType.text, json["data"], "", [], senderAddress, account,
         DateTime.fromMillisecondsSinceEpoch(json["creation"]), LPHAddress.from(json["conversation"]), json["edited"], false);
 
     // Decrypt content
@@ -665,7 +663,7 @@ class Message {
     // Send a request to the server
     final json = await postNodeJSON("/conversations/message/delete", {
       "token": token.toMap(),
-      "data": certificate,
+      "data": id,
     });
     sendLog(json);
 

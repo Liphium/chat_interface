@@ -292,7 +292,7 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
                     child: InkWell(
                       onTap: () {
                         if (deck.cards.any((card) => card.width == null || card.height == null)) {
-                          showErrorPopup("error", "tabletop.object.deck.incompatible");
+                          showErrorPopup("error", "tabletop.object.deck.incompatible".tr);
                           return;
                         }
                         final object = DeckObject.createFromDeck(widget.location, deck);

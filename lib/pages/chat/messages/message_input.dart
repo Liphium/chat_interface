@@ -370,7 +370,7 @@ class _MessageInputState extends State<MessageInput> {
                         IconButton(
                           onPressed: () async {
                             if (MessageSendHelper.currentDraft.value!.files.length == 5) {
-                              showErrorPopup("error", "file.too_many");
+                              showErrorPopup("error", "file.too_many".tr);
                               return;
                             }
                             final result = await openFile();

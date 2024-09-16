@@ -181,7 +181,18 @@ void sendActualMessage(
   // Encrypt message with signature
   ConversationController controller = Get.find();
   final conversation = controller.conversations[conversationId]!;
-  final stamp = DateTime.now().millisecondsSinceEpoch;
+
+  // Grab a new timestamp from the server
+  var json = await postNodeJSON("/conversations/timestamp", {
+    "token": conversation.token.toMap(),
+  });
+  if (!json["success"]) {
+    showErrorPopup("error", json["error"]);
+    return;
+  }
+
+  // Use the timestamp from the json (to prevent desynchronization and stuff)
+  final stamp = (json["stamp"] as num).toInt();
   final content = jsonEncode(<String, dynamic>{
     "c": message,
     "t": type.index,
@@ -191,7 +202,7 @@ void sendActualMessage(
   final info = SymmetricSequencedInfo.builder(content, stamp).finish(conversation.key);
 
   // Send message
-  final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
+  json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
     "token": conversation.token.toMap(),
     "data": {
       "timestamp": stamp,

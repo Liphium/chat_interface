@@ -234,7 +234,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
               for (var friend in finalList) {
                 final res = await addToConversation(widget.conversation, friend);
                 if (!res) {
-                  showErrorPopup("error", "server.error");
+                  showErrorPopup("error", "server.error".tr);
                   return null;
                 }
               }

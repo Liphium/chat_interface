@@ -67,16 +67,6 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
-            icon: Icons.copy,
-            label: "message.info.copy_cert".tr,
-            onTap: () {
-              Clipboard.setData(ClipboardData(text: widget.message.certificate));
-              Get.back();
-            },
-            loading: false.obs,
-          ),
-          verticalSpacing(elementSpacing),
-          ProfileButton(
             color: Get.theme.colorScheme.onError,
             iconColor: Get.theme.colorScheme.error,
             icon: Icons.close,

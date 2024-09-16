@@ -75,7 +75,7 @@ void newFriendRequest(String name, Function(String) success) async {
 
   final controller = Get.find<StatusController>();
   if (name == controller.name.value || LPHAddress.from(name) == StatusController.ownAddress) {
-    showErrorPopup("request.self", "request.self.text");
+    showErrorPopup("request.self", "request.self.text".tr);
     requestsLoading.value = false;
     return;
   }
@@ -92,7 +92,7 @@ void newFriendRequest(String name, Function(String) success) async {
 
   // Check if the profile is valid
   if (profile == null) {
-    showErrorPopup("request.not.found", "request.not.found.text");
+    showErrorPopup("request.not.found", "request.not.found.text".tr);
     requestsLoading.value = false;
     return;
   }

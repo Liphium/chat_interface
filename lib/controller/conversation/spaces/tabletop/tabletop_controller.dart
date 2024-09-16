@@ -84,7 +84,7 @@ class TabletopController extends GetxController {
         loading.value = false;
 
         if (!event.data["success"]) {
-          showErrorPopup("error", "server.error");
+          showErrorPopup("error", "server.error".tr);
           return;
         }
         sendLog("success");
@@ -109,7 +109,7 @@ class TabletopController extends GetxController {
         loading.value = false;
 
         if (!event.data["success"]) {
-          showErrorPopup("error", "server.error");
+          showErrorPopup("error", "server.error".tr);
           return;
         }
       },
@@ -249,7 +249,7 @@ class TabletopController extends GetxController {
     // Select the object
     final success = await object.select();
     if (!success) {
-      showErrorPopup("error", "tabletop.object_already_held");
+      showErrorPopup("error", "tabletop.object_already_held".tr);
       stopHoldingObject(error: true);
       return;
     }

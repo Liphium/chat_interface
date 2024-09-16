@@ -102,7 +102,7 @@ class GameSession {
         }), handler: (event) {
       loading = false;
       if (!event.data["success"]) {
-        showErrorPopup("error".tr, event.data["message"].toString().tr);
+        showErrorPopup("error".tr, event.data["message"]);
       }
     });
   }

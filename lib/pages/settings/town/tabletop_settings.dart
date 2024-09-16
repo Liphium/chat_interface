@@ -270,7 +270,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
               FJElevatedButton(
                 onTap: () async {
                   if (_decks.length >= Constants.maxDecks) {
-                    showErrorPopup("error", "decks.limit_reached");
+                    showErrorPopup("error", "decks.limit_reached".tr);
                     return;
                   }
                   final result = await Get.dialog(const DeckCreationWindow());
@@ -526,7 +526,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                   final response = await Get.dialog(CardsUploadWindow(files: result), barrierDismissible: false);
                   if (response.isEmpty) {
-                    showErrorPopupTranslated("error", "app.error");
+                    showErrorPopupTranslated("error", "app.error".tr);
                     return;
                   }
 
@@ -540,7 +540,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                   final res = await widget.deck.save();
                   if (!res) {
-                    showErrorPopupTranslated("error", "server.error");
+                    showErrorPopupTranslated("error", "server.error".tr);
                     return;
                   }
                 },
@@ -601,7 +601,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                                   Get.find<AttachmentController>().deleteFile(card);
                                   final result = await widget.deck.save();
                                   if (!result) {
-                                    showErrorPopup("error", "server.error");
+                                    showErrorPopup("error", "server.error".tr);
                                   }
                                 },
                                 icon: const Icon(Icons.delete),

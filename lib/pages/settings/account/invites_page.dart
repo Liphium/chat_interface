@@ -58,7 +58,7 @@ class _InvitesPageState extends State<InvitesPage> {
       return;
     }
 
-    showErrorPopup("success", "settings.invites.generated");
+    showErrorPopup("success", "settings.invites.generated".tr);
     Clipboard.setData(ClipboardData(text: json["invite"]));
 
     count.value -= 1;

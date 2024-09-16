@@ -112,7 +112,7 @@ class ProfileHelper {
       "container": encryptSymmetric(jsonEncode(response.container!.toJson()), profileKey),
     });
     if (!json["success"]) {
-      showErrorPopup("error", "profile_picture.not_set");
+      showErrorPopup("error", "profile_picture.not_set".tr);
       return false;
     }
 
