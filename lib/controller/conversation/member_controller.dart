@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
@@ -33,10 +34,19 @@ class Member {
         address = LPHAddress.from(json['address']),
         role = MemberRole.fromValue(json['role']);
 
-  Member.fromData(MemberData data) : this(LPHAddress.from(data.id), LPHAddress.from(data.accountId), MemberRole.fromValue(data.roleId));
+  Member.fromData(MemberData data)
+      : this(
+          LPHAddress.from(data.id),
+          LPHAddress.from(fromDbEncrypted(data.accountId)),
+          MemberRole.fromValue(data.roleId),
+        );
 
-  MemberData toData(LPHAddress conversation) =>
-      MemberData(id: tokenId.encode(), accountId: address.encode(), roleId: role.value, conversationId: conversation.encode());
+  MemberData toData(LPHAddress conversation) => MemberData(
+        id: tokenId.encode(),
+        accountId: dbEncrypted(address.encode()),
+        roleId: role.value,
+        conversationId: conversation.encode(),
+      );
 
   Friend getFriend([FriendController? controller]) {
     if (StatusController.ownAddress == address) return Friend.me();

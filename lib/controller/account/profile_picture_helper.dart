@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -58,7 +59,7 @@ class ProfileHelper {
     String? oldPath;
     if (oldProfile != null) {
       if (oldProfile.pictureContainer != "") {
-        oldPictureId = jsonDecode(oldProfile.pictureContainer)["id"];
+        oldPictureId = jsonDecode(fromDbEncrypted(oldProfile.pictureContainer))["id"];
         oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
         if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
           return null; // Nothing changed

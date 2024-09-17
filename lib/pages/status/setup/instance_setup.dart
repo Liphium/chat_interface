@@ -47,6 +47,14 @@ class InstanceSetup extends Setup {
   }
 }
 
+String dbEncrypted(String data) {
+  return encryptSymmetric(data, databaseKey);
+}
+
+String fromDbEncrypted(String cipher) {
+  return decryptSymmetric(cipher, databaseKey);
+}
+
 late SecureKey databaseKey;
 String currentInstance = "";
 

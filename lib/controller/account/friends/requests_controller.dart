@@ -9,6 +9,7 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/friends_setup.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -205,10 +206,10 @@ class Request {
   factory Request.fromEntity(RequestData data) {
     return Request(
       LPHAddress.from(data.id),
-      data.name,
-      UTFString.untransform(data.displayName),
-      data.vaultId,
-      KeyStorage.fromJson(jsonDecode(data.keys)),
+      fromDbEncrypted(data.name),
+      UTFString.untransform(fromDbEncrypted(data.displayName)),
+      fromDbEncrypted(data.vaultId),
+      KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
       data.updatedAt.toInt(),
     );
   }
@@ -242,10 +243,10 @@ class Request {
   /// Convert a request object to the equivalent database object
   RequestData entity(bool self) => RequestData(
         id: id.encode(),
-        name: name,
-        displayName: displayName.transform(),
-        vaultId: vaultId,
-        keys: jsonEncode(keyStorage.toJson()),
+        name: dbEncrypted(name),
+        displayName: dbEncrypted(displayName.transform()),
+        vaultId: dbEncrypted(vaultId),
+        keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
         self: self,
         updatedAt: BigInt.from(updatedAt),
       );

@@ -6,11 +6,11 @@ import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
-import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const apiVersion = "v1";
 
@@ -53,11 +53,32 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "${'setup.choose.server'.tr}.",
+          "setup.choose.town".tr,
           style: Get.textTheme.headlineMedium,
           textAlign: TextAlign.center,
         ),
         verticalSpacing(sectionSpacing),
+        Text(
+          "setup.choose.town.desc".tr,
+          style: Get.textTheme.bodyMedium,
+        ),
+        verticalSpacing(defaultSpacing),
+        FJElevatedLoadingButton(
+          loading: false.obs,
+          onTap: () async {
+            launchUrl(Uri.parse("https://liphium.com/docs/concepts/towns"));
+          },
+          label: "learn_more".tr,
+        ),
+        verticalSpacing(sectionSpacing),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            "setup.choose.town.selector".tr,
+            style: Get.textTheme.titleMedium,
+          ),
+        ),
+        verticalSpacing(defaultSpacing),
         FJTextField(
           controller: _name,
           hintText: "placeholder.domain".tr,

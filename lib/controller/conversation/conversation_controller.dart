@@ -12,6 +12,7 @@ import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/vault_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -207,11 +208,11 @@ class Conversation {
   Conversation.fromData(ConversationData data)
       : this(
           LPHAddress.from(data.id),
-          data.vaultId,
+          fromDbEncrypted(data.vaultId),
           data.type,
-          ConversationToken.fromJson(jsonDecode(data.token)),
-          ConversationContainer.fromJson(jsonDecode(data.data)),
-          data.key,
+          ConversationToken.fromJson(jsonDecode(fromDbEncrypted(data.token))),
+          ConversationContainer.fromJson(jsonDecode(fromDbEncrypted(data.data))),
+          fromDbEncrypted(data.key),
           data.lastVersion.toInt(),
           data.updatedAt.toInt(),
         );
@@ -279,16 +280,20 @@ class Conversation {
               .address] ==
           null;
 
-  ConversationData get entity => ConversationData(
+  ConversationData get entity {
+    return ConversationData(
       id: id.encode(),
-      vaultId: vaultId,
+      vaultId: dbEncrypted(vaultId),
       type: type,
-      token: token.toJson(),
-      key: packageSymmetricKey(key),
-      data: jsonEncode(container.toJson()),
-      updatedAt: BigInt.from(updatedAt.value),
+      data: dbEncrypted(jsonEncode(container.toJson())),
+      token: dbEncrypted(token.toJson()),
+      key: dbEncrypted(packageSymmetricKey(key)),
       lastVersion: BigInt.from(lastVersion),
-      readAt: BigInt.from(readAt.value));
+      updatedAt: BigInt.from(updatedAt.value),
+      readAt: BigInt.from(readAt.value),
+    );
+  }
+
   String toJson() => jsonEncode(<String, dynamic>{
         "id": id.encode(),
         "type": type.index,

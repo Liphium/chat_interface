@@ -18,6 +18,7 @@ import 'package:chat_interface/pages/chat/components/library/library_manager.dar
 import 'package:chat_interface/controller/current/steps/friends_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/controller/current/steps/vault_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
@@ -204,10 +205,10 @@ class Friend {
   factory Friend.fromEntity(FriendData data) {
     return Friend(
       LPHAddress.from(data.id),
-      data.name,
-      UTFString.untransform(data.displayName),
-      data.vaultId,
-      KeyStorage.fromJson(jsonDecode(data.keys)),
+      fromDbEncrypted(data.name),
+      UTFString.untransform(fromDbEncrypted(data.displayName)),
+      fromDbEncrypted(data.vaultId),
+      KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
       data.updatedAt.toInt(),
     );
   }
@@ -242,10 +243,10 @@ class Friend {
 
   FriendData entity() => FriendData(
         id: id.encode(),
-        name: name,
-        displayName: displayName.value.transform(),
-        vaultId: vaultId,
-        keys: jsonEncode(keyStorage.toJson()),
+        name: dbEncrypted(name),
+        displayName: dbEncrypted(displayName.value.transform()),
+        vaultId: dbEncrypted(vaultId),
+        keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
         updatedAt: BigInt.from(updatedAt),
       );
 
@@ -309,7 +310,11 @@ class Friend {
   void updateProfilePicture(AttachmentContainer? picture) async {
     if (picture == null) {
       // Delete the profile picture if it is null
-      db.profile.insertOnConflictUpdate(ProfileData(id: id.encode(), pictureContainer: "", data: ""));
+      db.profile.insertOnConflictUpdate(ProfileData(
+        id: id.encode(),
+        pictureContainer: "",
+        data: "",
+      ));
 
       // Update the friend as well
       profilePicture = null;
@@ -319,7 +324,7 @@ class Friend {
       // Set a new profile picture if it is valid
       db.profile.insertOnConflictUpdate(ProfileData(
         id: id.encode(),
-        pictureContainer: jsonEncode(picture.toJson()),
+        pictureContainer: dbEncrypted(jsonEncode(picture.toJson())),
         data: "",
       ));
 
@@ -362,7 +367,7 @@ class Friend {
     }
 
     // Load the profile picture
-    final json = jsonDecode(data.pictureContainer);
+    final json = jsonDecode(fromDbEncrypted(data.pictureContainer));
     final type = await AttachmentController.checkLocations(json["i"], StorageType.permanent);
     profilePicture = AttachmentContainer.fromJson(type, json);
     profilePictureImage.value = await ProfileHelper.loadImage(profilePicture!.filePath);

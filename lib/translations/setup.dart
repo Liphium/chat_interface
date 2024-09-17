@@ -12,8 +12,10 @@ class SetupTranslations extends Translations {
           // General setup
           'setup.choose.instance': 'Choose an instance.',
           'setup.instance.name': 'Enter a new name',
-          'setup.choose.server': 'Choose a server',
-          'server.choose.server.connecting': 'Currently connecting to',
+          'setup.choose.town': 'Choose a town.',
+          'setup.choose.town.desc':
+              'A town is the place where you create your Liphium account. If you don\'t know any town, you\'re out of luck until more options are available. For now, you can click the link below to learn more.',
+          'setup.choose.town.selector': 'Enter the domain of your town',
           'setup.policy': 'Your privacy on Liphium.',
           'setup.policy.text':
               'By pressing \'Accept\', you acknowledge that you have carefully reviewed and accepted our Privacy Policy and Terms of Service which you can read by clicking on \'View agreements\' below, after which the \'Accept\' button will appear.',

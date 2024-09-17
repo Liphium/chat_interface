@@ -6,6 +6,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/database/trusted_links.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -103,8 +104,8 @@ class UnknownController extends GetxController {
 
 class UnknownAccount {
   final LPHAddress id;
-  final String? name;
-  final UTFString? displayName;
+  final String name;
+  final UTFString displayName;
 
   final Uint8List signatureKey;
   final Uint8List publicKey;
@@ -113,11 +114,11 @@ class UnknownAccount {
   UnknownAccount(this.id, this.name, this.displayName, this.signatureKey, this.publicKey);
 
   factory UnknownAccount.fromData(UnknownProfileData data) {
-    final keys = jsonDecode(data.keys);
+    final keys = jsonDecode(fromDbEncrypted(data.keys));
     return UnknownAccount(
       LPHAddress.from(data.id),
-      data.name == "" ? null : data.name,
-      data.displayName == "" ? null : UTFString.untransform(data.displayName),
+      fromDbEncrypted(data.name),
+      UTFString.untransform(fromDbEncrypted(data.displayName)),
       unpackagePublicKey(keys["sg"]),
       unpackagePublicKey(keys["pub"]),
     );
@@ -135,11 +136,11 @@ class UnknownAccount {
 
   UnknownProfileData toData() => UnknownProfileData(
         id: id.encode(),
-        name: name ?? "",
-        displayName: displayName?.transform() ?? "",
-        keys: jsonEncode({
+        name: dbEncrypted(name),
+        displayName: dbEncrypted(displayName.transform()),
+        keys: dbEncrypted(jsonEncode({
           "sg": packagePublicKey(signatureKey),
           "pub": packagePublicKey(publicKey),
-        }),
+        })),
       );
 }
