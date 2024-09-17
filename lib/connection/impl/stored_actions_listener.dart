@@ -89,9 +89,12 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
     switch (json["a"]) {
       // Handle conversation opening
       case "conv":
-        sendLog("handling friend request");
+        sendLog("handling conversation opening");
         await _handleConversationOpening(action["id"], json);
         break;
+      case "fr_rem":
+        sendLog("handling friend deletion");
+        await _handleFriendRemoval(action["id"], json);
     }
 
     return true;
@@ -245,4 +248,23 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   subscribeToConversation(convToken, deletions: false);
 
   return true;
+}
+
+//* Friend removal
+Future<bool> _handleFriendRemoval(String actionId, Map<String, dynamic> actionJson) async {
+  // Delete the action (it doesn't need to be handled twice)
+  final response = await deleteStoredAction(actionId);
+  if (!response) {
+    sendLog("WARNING: couldn't delete stored action");
+  }
+
+  sendLog("deleting friend ${actionJson["s"]}");
+  final friend = Get.find<FriendController>().friends[LPHAddress.from(actionJson["s"])];
+  if (friend == null) {
+    sendLog("invalid friend deletion: friend doesn't exist");
+    return true;
+  }
+
+  // Remove the friend without asking
+  return friend.remove(false.obs, removeAction: false);
 }

@@ -111,9 +111,17 @@ class ConversationController extends GetxController {
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
 
     // Delete all the conversations that should be deleted
-    conversations.removeWhere((ad, conv) {
-      return deleted.contains(conv.token.id);
-    });
+    var toRemove = <LPHAddress>[];
+    final controller = Get.find<ConversationController>();
+    for (var conversation in controller.conversations.values) {
+      if (deleted.contains(conversation.token.id.encode())) {
+        toRemove.add(conversation.id);
+      }
+    }
+    for (var key in toRemove) {
+      sendLog("deleting $key");
+      controller.conversations[key]!.delete(popup: false);
+    }
 
     // Update all the conversations
     for (var conversation in conversations.values) {
@@ -291,7 +299,7 @@ class Conversation {
       });
 
   // Delete conversation from vault and database
-  void delete({request = true, popup = true}) async {
+  void delete({bool request = true, bool popup = true}) async {
     final err = await removeFromVault(vaultId);
     if (err != null) {
       sendLog("Error deleting conversation from vault: $err");
@@ -307,7 +315,7 @@ class Conversation {
       if (!json["success"]) {
         sendLog("Error deleting conversation from vault: ${json["error"]}");
         if (popup) showErrorPopup("error".tr, "error.not_delete_conversation".tr);
-        return;
+        // Don't return here, should remove from the local vault regardless
       }
     }
 

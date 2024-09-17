@@ -5,11 +5,15 @@ import 'dart:ui' as ui;
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/database/database_entities.dart' as dbe;
 import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
 import 'package:chat_interface/controller/current/steps/friends_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
@@ -67,6 +71,24 @@ class FriendController extends GetxController {
   // Add friend (also sends data to server vault)
   Future<bool> addFromRequest(Request request) async {
     sendLog("adding friend from request ${request.friend.id}");
+
+    // Query the guy
+    final guy = await Get.find<UnknownController>().loadUnknownProfile(request.id);
+    if (guy == null) {
+      sendLog("friend request is invalid cause couldn't find sender");
+      return false;
+    }
+
+    // Check if the guy in the request has the same name and stuff (in base64 cause otherwise it doesn't work, thanks dart)
+    if (base64Encode(request.keyStorage.publicKey) != base64Encode(guy.publicKey) ||
+        base64Encode(guy.signatureKey) != base64Encode(request.keyStorage.signatureKey)) {
+      sendLog("friend request has invalid keys");
+      return false;
+    }
+
+    // Set name and display name from the server
+    request.displayName = guy.displayName!;
+    request.name = guy.name!;
 
     // Remove from requests controller
     Get.find<RequestController>().deleteSentRequest(request);
@@ -357,12 +379,30 @@ class Friend {
   }
 
   //* Remove friend
-  Future<bool> remove(RxBool loading) async {
+  Future<bool> remove(RxBool loading, {bool removeAction = true}) async {
     loading.value = true;
 
+    // Remove the friend from the friends vault and local storage
     await FriendsVault.remove(vaultId);
     db.friend.deleteWhere((tbl) => tbl.id.equals(id.encode()));
     Get.find<FriendController>().friends.remove(id);
+
+    if (removeAction) {
+      // Send the other guy a notice that he's been removed from your friends list
+      sendAuthenticatedStoredAction(this, authenticatedStoredAction("fr_rem", {}));
+    }
+
+    // Leave direct message conversations with the guy in them
+    var toRemove = <LPHAddress>[];
+    final controller = Get.find<ConversationController>();
+    for (var conversation in controller.conversations.values) {
+      if (conversation.members.values.any((mem) => mem.address == id) && conversation.type == dbe.ConversationType.directMessage) {
+        toRemove.add(conversation.id);
+      }
+    }
+    for (var key in toRemove) {
+      controller.conversations[key]!.delete();
+    }
 
     loading.value = false;
     return true;

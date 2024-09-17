@@ -29,6 +29,9 @@ class ChatPageTranslations extends Translations {
           'friends.placeholder': 'Search friends',
           'friends.different_town': 'Lives in a different town than you (@town).',
           'friends.remove': 'Remove friend',
+          'friends.remove.confirm': "Confirm removing friend",
+          'friends.remove.desc':
+              'Do you really want to remove this friend? This will also delete the conversation with them, the chat history and everything related to them.',
           'friend.removed': 'You removed this person.',
           'friends.add': 'Add friend',
           'friends.add.desc':

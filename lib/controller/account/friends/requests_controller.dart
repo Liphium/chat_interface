@@ -157,8 +157,12 @@ void sendFriendRequest(
   final requestController = Get.find<RequestController>();
   final requestSent = requestController.requests[address];
   if (requestSent != null) {
-    requestController.deleteRequest(requestSent);
-    await Get.find<FriendController>().addFromRequest(requestSent);
+    final result = await Get.find<FriendController>().addFromRequest(requestSent);
+    if (result) {
+      requestController.deleteRequest(requestSent);
+    } else {
+      showErrorPopup("error", "requests.error".tr);
+    }
     success("request.accepted");
   } else {
     // Save friend request in own vault
@@ -188,8 +192,8 @@ void sendFriendRequest(
 
 class Request {
   final LPHAddress id;
-  final String name;
-  final UTFString displayName;
+  String name;
+  UTFString displayName;
   String vaultId;
   int updatedAt;
   final KeyStorage keyStorage;

@@ -205,7 +205,7 @@ void sendActualMessage(
   json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
     "token": conversation.token.toMap(),
     "data": {
-      "timestamp": stamp,
+      "token": json["token"],
       "data": info,
     }
   });

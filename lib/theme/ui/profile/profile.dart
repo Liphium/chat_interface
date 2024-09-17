@@ -3,8 +3,10 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,15 @@ import 'package:get/get.dart';
 
 class ProfileDefaults {
   static Function(Friend, RxBool) deleteAction = (Friend friend, RxBool loading) async {
+    // Show a confirm popup
+    final result = await showConfirmPopup(ConfirmWindow(
+      title: "friends.remove.confirm".tr,
+      text: "friends.remove.desc".tr,
+    ));
+    if (!result) {
+      return;
+    }
+
     await friend.remove(loading);
     Get.back();
   };

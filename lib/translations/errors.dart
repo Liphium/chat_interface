@@ -40,6 +40,7 @@ class ErrorTranslations extends Translations {
               "I know you want to be this person's friend, but you already sent them a request. So please chill a little bit.",
           'request.not.found': 'User not found',
           'request.not.found.text': "You sure this is your friend? Maybe you just met them in your dreams?",
+          'requests.error': 'There was an error with accepting this request. Please try again later or update to the latest version.',
 
           // Chat
           'conversations.error': 'Conversation error',
