@@ -28,7 +28,7 @@ class ProfileHelper {
     final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id.encode()))).getSingleOrNull();
 
     final json = await postAuthorizedJSON("/account/profile/get", <String, dynamic>{
-      "id": friend.id,
+      "id": friend.id.id,
     });
 
     if (!json["success"]) {

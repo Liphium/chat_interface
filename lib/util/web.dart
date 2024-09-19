@@ -193,6 +193,9 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
       body: encryptAES(jsonEncode(body).toCharArray().unsignedView(), aesBase64),
     );
   } catch (e) {
+    if (isDebug && e is Error) {
+      sendLog("error: $e");
+    }
     return <String, dynamic>{"success": false, "error": "error.network".tr};
   }
 
