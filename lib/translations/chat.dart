@@ -27,25 +27,34 @@ class ChatPageTranslations extends Translations {
           // Friends
           'friends': 'Friends',
           'friends.placeholder': 'Search friends',
+          'friends.different_town': 'Lives in a different town than you (@town).',
           'friends.remove': 'Remove friend',
+          'friends.remove.confirm': "Confirm removing friend",
+          'friends.remove.desc':
+              'Do you really want to remove this friend? This will also delete the conversation with them, the chat history and everything related to them.',
           'friend.removed': 'You removed this person.',
           'friends.add': 'Add friend',
-          'friends.add.desc': 'To add your friend, we\'ll need his username. Please provide that below.',
+          'friends.add.desc':
+              'To add someone as a friend from your town, provide their username.\nTo add a friend outside of your town you\'ll need their address. It can be obtained by clicking the "Copy" button in Settings > Town > Address.',
           'friends.add.button': 'Send friend request',
-          'friends.name_placeholder': 'some_guy',
+          'friends.name_placeholder': 'some_guy or id@town',
           'friends.message': 'Start direct message',
           'friends.invite_to_space': 'Invite to current space',
           'friends.requests': 'Requests',
           'friends.requests_sent': 'Sent requests',
           'request.sent': 'Request successfully sent!',
-          'friends.empty': 'Seems like you don\'t have any friends with that name. You can add friends by clicking the icon on the right inside of the input field.',
+          'friends.empty':
+              'Seems like you don\'t have any friends with that name. You can add friends by clicking the icon on the right inside of the input field.',
           'request.confirm.title': 'Confirm request',
           'request.confirm.text':
               'By sending a friend request, the other person will be able to permantently see your profile (profile picture, description, etc.) unless you change your keys. Are you sure you want to give them this information?',
           'request.already.exists': 'Already exists',
-          'request.already.exists.text': 'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
+          'request.already.exists.text':
+              'You already sent a request to this person. We know you\'re excited, but please wait for them to accept your request.',
 
           // Conversations
+          'conversation.error': 'Conversation loading error',
+          'conversations.different_town': 'Conversation takes place outside of your town (@town).',
           'conversations.placeholder': 'Search',
           'conversations.hidden': "Searching for something else? You can use '.' at the beginning of your query to search for hidden conversations.",
           'conversations.create': 'Create conversation',
@@ -55,7 +64,8 @@ class ChatPageTranslations extends Translations {
           'chat.start_space': 'Start a private Space',
           'chat.add_space': 'Add to Space',
           'conversations.leave': 'Leave conversation',
-          'conversations.leave.text': 'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
+          'conversations.leave.text':
+              'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
           'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
           'conversations.add': 'Add a member',
           'conversations.add.create': 'New conversation',
@@ -97,7 +107,6 @@ class ChatPageTranslations extends Translations {
           'message.info.copy_id': 'Copy ID',
           'message.info.copy_signature': 'Copy signature',
           'message.info.copy_sender': 'Copy sender ID',
-          'message.info.copy_cert': 'Copy certificate',
           'message.empty': 'An empty message.',
 
           // Conversation info

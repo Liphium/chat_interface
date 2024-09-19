@@ -4,7 +4,7 @@ import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
@@ -26,7 +26,7 @@ class TrustedLinkHelper {
     _trustModeSetting = controller.settings[TrustedLinkSettings.trustMode]!;
   }
 
-  /// Show a confirm popup to confirm the user wants to add a new domain
+  /// Show a confirm popup to confirm the user wants to add a new domain (returns whether the domain was trusted)
   static Future<bool> askToAdd(String url) async {
     // Exclude own instance
     final domain = extractDomain(url);
@@ -54,6 +54,16 @@ class TrustedLinkHelper {
     }
 
     return result;
+  }
+
+  /// Ask for addition when the link is not trusted (returns whether trusted or not)
+  static Future<bool> askToAddIfNotAdded(String url) async {
+    if (await isLinkTrusted(url)) {
+      return true;
+    }
+
+    // Ask to add
+    return await askToAdd(url);
   }
 
   /// Returns wether it was added

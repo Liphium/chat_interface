@@ -9,10 +9,10 @@ import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -20,7 +20,7 @@ import 'package:pasteboard/pasteboard.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
 
-import '../../../theme/components/icon_button.dart';
+import '../../../theme/components/forms/icon_button.dart';
 import '../../../util/vertical_spacing.dart';
 
 import 'package:path/path.dart' as path;
@@ -44,7 +44,7 @@ class _MessageInputState extends State<MessageInput> {
   final _emojiSuggestions = <Emoji>[].obs;
 
   // For a little hack to prevent the answers from disappearing instantly
-  String? _previousAccount;
+  LPHAddress? _previousAccount;
 
   @override
   void dispose() {
@@ -82,7 +82,7 @@ class _MessageInputState extends State<MessageInput> {
     });
   }
 
-  void loadDraft(String conversation) {
+  void loadDraft(LPHAddress conversation) {
     if (MessageSendHelper.currentDraft.value != null) {
       MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] = MessageSendHelper.currentDraft.value!;
     }
@@ -93,7 +93,8 @@ class _MessageInputState extends State<MessageInput> {
 
   void resetCurrentDraft() {
     if (MessageSendHelper.currentDraft.value != null) {
-      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] = MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
+      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] =
+          MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
       MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
       _message.clear();
     }
@@ -103,11 +104,13 @@ class _MessageInputState extends State<MessageInput> {
   /// Replace the current selection with a new text
   void replaceSelection(String replacer) {
     // Compute the new offset before the text is changed
-    final beforeLeft = _message.selection.baseOffset > _message.selection.extentOffset ? _message.selection.baseOffset : _message.selection.extentOffset;
+    final beforeLeft =
+        _message.selection.baseOffset > _message.selection.extentOffset ? _message.selection.baseOffset : _message.selection.extentOffset;
     final newOffset = beforeLeft - (_message.selection.end - _message.selection.start) + replacer.length;
 
     // Change the text in the field to include the pasted text
-    _message.text = _message.text.substring(0, _message.selection.start) + replacer + _message.text.substring(_message.selection.end, _message.text.length);
+    _message.text =
+        _message.text.substring(0, _message.selection.start) + replacer + _message.text.substring(_message.selection.end, _message.text.length);
 
     // Change the selection to the calculated offset
     _message.selection = _message.selection.copyWith(
@@ -156,7 +159,8 @@ class _MessageInputState extends State<MessageInput> {
           }
 
           if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
-            sendTextMessage(loading, widget.conversation.id, _message.text, [], MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
+            sendTextMessage(
+                loading, widget.conversation.id, _message.text, [], MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
             return;
           }
 
@@ -164,8 +168,8 @@ class _MessageInputState extends State<MessageInput> {
             return;
           }
 
-          sendTextMessageWithFiles(
-              loading, widget.conversation.id, _message.text, MessageSendHelper.currentDraft.value!.files, MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
+          sendTextMessageWithFiles(loading, widget.conversation.id, _message.text, MessageSendHelper.currentDraft.value!.files,
+              MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
           return null;
         },
       ),
@@ -234,7 +238,7 @@ class _MessageInputState extends State<MessageInput> {
                       () {
                         final answer = MessageSendHelper.currentDraft.value?.answer.value;
                         if (answer != null) {
-                          _previousAccount = answer.senderAccount;
+                          _previousAccount = answer.senderAddress;
                         }
 
                         return Animate(
@@ -259,7 +263,9 @@ class _MessageInputState extends State<MessageInput> {
                                 Expanded(
                                   child: Text(
                                     "message.reply.text".trParams({
-                                      "name": _previousAccount == null ? "tf" : Get.find<FriendController>().friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
+                                      "name": _previousAccount == null
+                                          ? "tf"
+                                          : Get.find<FriendController>().friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
                                     }),
                                     style: theme.textTheme.labelMedium,
                                     maxLines: 1,
@@ -364,7 +370,7 @@ class _MessageInputState extends State<MessageInput> {
                         IconButton(
                           onPressed: () async {
                             if (MessageSendHelper.currentDraft.value!.files.length == 5) {
-                              showErrorPopup("error", "file.too_many");
+                              showErrorPopup("error", "file.too_many".tr);
                               return;
                             }
                             final result = await openFile();
@@ -394,6 +400,7 @@ class _MessageInputState extends State<MessageInput> {
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'chat.message'.tr,
+                                  hintStyle: theme.textTheme.bodyLarge,
                                 ),
                                 inputFormatters: [
                                   LengthLimitingTextInputFormatter(1000),

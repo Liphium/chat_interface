@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_setup.dart';
-import 'package:chat_interface/controller/current/steps/cluster_setup.dart';
 import 'package:chat_interface/controller/current/steps/connection_setup.dart';
 import 'package:chat_interface/controller/current/steps/friends_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
@@ -35,7 +34,6 @@ class ConnectionController extends GetxController {
     _steps.add(FriendsSetup());
 
     // Setup connection
-    _steps.add(ClusterSetup());
     _steps.add(ConnectionSetup());
 
     // Setup conversations

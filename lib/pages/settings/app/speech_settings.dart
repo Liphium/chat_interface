@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/theme/components/fj_slider.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_slider.dart';
+import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
@@ -60,12 +60,12 @@ class AudioSettingsPage extends StatefulWidget {
 }
 
 class _AudioSettingsPageState extends State<AudioSettingsPage> {
-  final _selected = "audio.microphone".obs;
+  final _selected = "audio.microphone".tr.obs;
 
   // Tabs
   final _tabs = <String, Widget>{
-    "audio.microphone": const MicrophoneTab(),
-    "audio.output": const OutputTab(),
+    "audio.microphone".tr: const MicrophoneTab(),
+    "audio.output".tr: const OutputTab(),
   };
 
   @override
@@ -77,27 +77,11 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //* Tabs
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SidebarButton(
-                onTap: () => _selected.value = "audio.microphone",
-                radius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(defaultSpacing),
-                ),
-                label: "audio.microphone",
-                selected: _selected,
-              ),
-              horizontalSpacing(elementSpacing),
-              SidebarButton(
-                onTap: () => _selected.value = "audio.output",
-                radius: const BorderRadius.only(
-                  topRight: Radius.circular(defaultSpacing),
-                ),
-                label: "audio.output",
-                selected: _selected,
-              )
-            ],
+          LPHTabElement(
+            tabs: ["audio.microphone".tr, "audio.output".tr],
+            onTabSwitch: (tab) {
+              _selected.value = tab;
+            },
           ),
 
           verticalSpacing(sectionSpacing),
@@ -408,7 +392,9 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
+          color: controller.settings["audio.microphone"]!.getOr(AudioSettings.defaultDeviceName) == current.id
+              ? Get.theme.colorScheme.primary
+              : Get.theme.colorScheme.onInverseSurface,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,
@@ -574,7 +560,8 @@ class _OutputTabState extends State<OutputTab> {
 
         Text("audio.device.default".tr, style: theme.textTheme.bodyMedium),
         verticalSpacing(elementSpacing),
-        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing), icon: Icons.done_all, label: "audio.device.default.button".tr),
+        buildOutputButton(controller, AudioSettings.defaultDeviceName, BorderRadius.circular(defaultSpacing),
+            icon: Icons.done_all, label: "audio.device.default.button".tr),
         verticalSpacing(defaultSpacing - elementSpacing),
 
         Column(
@@ -614,7 +601,9 @@ class _OutputTabState extends State<OutputTab> {
       padding: const EdgeInsets.only(bottom: elementSpacing),
       child: Obx(
         () => Material(
-          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
+          color: controller.settings["audio.output"]!.getOr(AudioSettings.defaultDeviceName) == current
+              ? Get.theme.colorScheme.primary
+              : Get.theme.colorScheme.onInverseSurface,
           borderRadius: radius,
           child: InkWell(
             borderRadius: radius,

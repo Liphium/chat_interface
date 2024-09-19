@@ -15,7 +15,7 @@ class FriendsVault {
 
     if (!json["success"]) {
       if (errorPopup) {
-        showErrorPopup("$prefix.${json["error"]}", "$prefix.${json["error"]}");
+        showErrorPopup("error", json["error"]);
       }
       return null;
     }

@@ -7,11 +7,12 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/settings/app/file_settings.dart';
+import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,11 +25,18 @@ class AttachmentController extends GetxController {
   final attachments = <String, AttachmentContainer>{};
 
   // Upload a file
-  Future<FileUploadResponse> uploadFile(UploadData data, StorageType type, String tag, {popups = true, String? fileName}) async {
+  Future<FileUploadResponse> uploadFile(
+    UploadData data,
+    StorageType type,
+    String tag, {
+    popups = true,
+    bool containerNameNull = false,
+    String? fileName,
+  }) async {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
-    final name = encryptSymmetric(fileName ?? path.basename(data.file.path), key);
+    final name = encryptSymmetric(UTFString(fileName ?? path.basename(data.file.path)).transform(), key);
 
     // Upload file
     final formData = dio_rs.FormData.fromMap({
@@ -40,7 +48,7 @@ class AttachmentController extends GetxController {
     });
 
     final res = await dio.post(
-      server("/account/files/upload").toString(),
+      ownServer("/account/files/upload"),
       data: formData,
       options: dio_rs.Options(
         headers: {
@@ -66,7 +74,13 @@ class AttachmentController extends GetxController {
 
     final file = File(path.join(AttachmentController.getFilePathForType(type), json["id"].toString()));
     await file.writeAsBytes(bytes);
-    final container = AttachmentContainer(type, json["id"], path.basename(data.file.path), json["url"], key);
+    final container = AttachmentContainer(
+      type,
+      json["id"],
+      containerNameNull ? null : UTFString(fileName ?? path.basename(data.file.path)),
+      json["url"],
+      key,
+    );
     sendLog("SENT ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
     attachments[container.id] = container;
@@ -75,7 +89,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Find a local file
-  Future<AttachmentContainer?> findLocalFile(AttachmentContainer container, {save = true}) async {
+  Future<AttachmentContainer?> findLocalFile(AttachmentContainer container, {bool save = true}) async {
     if (attachments.containsKey(container.id)) {
       return attachments[container.id];
     }
@@ -145,7 +159,7 @@ class AttachmentController extends GetxController {
 
     // Download and show progress
     final res = await dio.download(
-      serverPath("/account/files/download/${container.id}", instance: container.url),
+      serverPath(container.url, "/account/files/download/${container.id}").toString(),
       container.filePath,
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
@@ -338,11 +352,14 @@ class AttachmentContainer {
   late final AttachmentContainerType attachmentType;
   final StorageType storageType;
   final String id;
-  final String name;
+  final UTFString? fileName;
   final String url;
   int? width;
   int? height;
   final SecureKey? key;
+
+  // Get the file name (when name is empty it is the file id)
+  String get name => fileName?.text ?? id;
 
   // Download status
   final downloading = false.obs;
@@ -364,8 +381,8 @@ class AttachmentContainer {
     return true;
   }
 
-  AttachmentContainer(this.storageType, this.id, this.name, this.url, this.key) {
-    if (id == "" && name == "") {
+  AttachmentContainer(this.storageType, this.id, this.fileName, this.url, this.key) {
+    if (id == "") {
       for (var fileType in FileSettings.imageTypes) {
         if (url.endsWith(".$fileType")) {
           attachmentType = AttachmentContainerType.remoteImage;
@@ -407,10 +424,16 @@ class AttachmentContainer {
     return size;
   }
 
-  AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
+  AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", UTFString(""), url, null);
 
-  factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json) {
-    final container = AttachmentContainer(type, json["id"], json["name"], json["url"], unpackageSymmetricKey(json["key"]));
+  factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
+    final container = AttachmentContainer(
+      type,
+      json["i"],
+      json["n"] == null ? null : UTFString.untransform(json["n"]), // The name could be null
+      json["u"],
+      unpackageSymmetricKey(json["k"], sodium),
+    );
     container.width = json["w"];
     container.height = json["h"];
     return container;
@@ -429,10 +452,10 @@ class AttachmentContainer {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      "id": id,
-      "name": name,
-      "url": url,
-      "key": packageSymmetricKey(key!),
+      "i": id,
+      if (fileName != null) "n": fileName!.transform(),
+      "u": url,
+      "k": packageSymmetricKey(key!),
       if (width != null) "w": width,
       if (height != null) "h": height,
     };

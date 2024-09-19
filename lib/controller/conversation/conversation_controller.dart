@@ -12,9 +12,10 @@ import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/vault_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:get/get.dart';
@@ -26,8 +27,8 @@ part 'conversation_actions.dart';
 
 class ConversationController extends GetxController {
   final loaded = false.obs;
-  final order = <String>[].obs; // List of conversation IDs in order of last updated
-  final conversations = <String, Conversation>{};
+  final order = <LPHAddress>[].obs; // List of conversation IDs in order of last updated
+  final conversations = <LPHAddress, Conversation>{};
   int newConvs = 0;
 
   /// Add a conversation to the cache
@@ -38,7 +39,7 @@ class ConversationController extends GetxController {
 
     // Load members from the database
     if (conversation.members.isEmpty && loadMembers) {
-      final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id))).get();
+      final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id.encode()))).get();
 
       for (var member in members) {
         conversation.addMember(Member.fromData(member));
@@ -57,7 +58,7 @@ class ConversationController extends GetxController {
     conversation.save(saveMembers: false);
 
     // Subscribe to conversation
-    subscribeToConversation(Get.find<StatusController>().statusJson(), conversation.token);
+    subscribeToConversation(conversation.token);
 
     return true;
   }
@@ -93,8 +94,9 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  void updateMessageRead(String conversation, {bool increment = true, required int messageSendTime}) {
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation))).write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+  void updateMessageRead(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
+    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode())))
+        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
 
     // Swap in the map
     _insertToOrder(conversation);
@@ -105,21 +107,35 @@ class ConversationController extends GetxController {
   }
 
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date
-  void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, {bool overwriteReads = true}) async {
+  void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, List<dynamic> error, {bool overwriteReads = true}) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
-    for (var conversation in conversations.values) {
-      // Check if it was deleted
-      if (deleted.contains(conversation.token.id)) {
-        conversation.delete(request: false, popup: false);
-        continue;
-      }
 
+    // Delete all the conversations that should be deleted
+    var toRemove = <LPHAddress>[];
+    final controller = Get.find<ConversationController>();
+    for (var conversation in controller.conversations.values) {
+      if (deleted.contains(conversation.token.id.encode())) {
+        toRemove.add(conversation.id);
+      }
+    }
+    for (var key in toRemove) {
+      sendLog("deleting $key");
+      controller.conversations[key]!.delete(popup: false);
+    }
+
+    // Update all the conversations
+    for (var conversation in conversations.values) {
       // Get conversation info
-      final info = (conversationInfo[conversation.id] ?? {}) as Map<dynamic, dynamic>;
+      final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
       final lastRead = (info["r"] ?? 0) as int;
       final version = (info["v"] ?? 0) as int;
       conversation.notificationCount.value = (info["n"] ?? 0) as int;
+
+      // Set an error if there is one
+      if (error.contains(conversation.id.server)) {
+        conversation.error.value = "other.server.error".tr;
+      }
 
       // Check if the current version of the conversation is up to date
       sendLog("version ${conversation.id} client: ${conversation.lastVersion}, server: $version");
@@ -138,21 +154,21 @@ class ConversationController extends GetxController {
     loaded.value = true;
   }
 
-  void _insertToOrder(String id) {
+  void _insertToOrder(LPHAddress id) {
     if (order.contains(id)) {
       order.remove(id);
     }
     order.insert(0, id);
   }
 
-  void removeConversation(String id) {
+  void removeConversation(LPHAddress id) {
     conversations.remove(id);
     order.remove(id);
   }
 }
 
 class Conversation {
-  final String id;
+  final LPHAddress id;
   String vaultId;
   final model.ConversationType type;
   final ConversationToken token;
@@ -162,6 +178,7 @@ class Conversation {
   final readAt = 0.obs;
   final notificationCount = 0.obs;
   final containerSub = ConversationContainer("").obs; // Data subscription
+  final error = Rx<String?>(null);
   String packedKey;
   SecureKey? _cachedKey;
 
@@ -171,7 +188,7 @@ class Conversation {
   }
 
   final membersLoading = false.obs;
-  final members = <String, Member>{}.obs; // Token ID -> Member
+  final members = <LPHAddress, Member>{}.obs; // Token ID -> Member
 
   Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
     containerSub.value = container;
@@ -179,7 +196,7 @@ class Conversation {
   }
   Conversation.fromJson(Map<String, dynamic> json, String vaultId)
       : this(
-          json["id"],
+          LPHAddress.from(json["id"]),
           vaultId,
           model.ConversationType.values[json["type"]],
           ConversationToken.fromJson(json["token"]),
@@ -190,12 +207,12 @@ class Conversation {
         );
   Conversation.fromData(ConversationData data)
       : this(
-          data.id,
-          data.vaultId,
+          LPHAddress.from(data.id),
+          fromDbEncrypted(data.vaultId),
           data.type,
-          ConversationToken.fromJson(jsonDecode(data.token)),
-          ConversationContainer.fromJson(jsonDecode(data.data)),
-          data.key,
+          ConversationToken.fromJson(jsonDecode(fromDbEncrypted(data.token))),
+          ConversationContainer.fromJson(jsonDecode(fromDbEncrypted(data.data))),
+          fromDbEncrypted(data.key),
           data.lastVersion.toInt(),
           data.updatedAt.toInt(),
         );
@@ -231,49 +248,54 @@ class Conversation {
   /// Only works for direct messages
   String get dmName {
     final member = members.values.firstWhere(
-      (element) => element.account != StatusController.ownAccountId,
+      (element) => element.address != StatusController.ownAddress,
       orElse: () => Member(
-        StatusController.ownAccountId,
-        StatusController.ownAccountId,
+        LPHAddress.error(),
+        LPHAddress.error(),
         MemberRole.user,
       ),
     );
-    final friend = Get.find<FriendController>().friends[member.account] ?? Friend.unknown(container.name);
-    return friend.displayName.value.text;
+    return Get.find<FriendController>().friends[member.address]?.displayName.value.text ?? container.name;
   }
 
   /// Only works for direct messages
   Friend get otherMember {
     final member = members.values.firstWhere(
-      (element) => element.account != StatusController.ownAccountId,
+      (element) => element.address != StatusController.ownAddress,
       orElse: () => Member(
-        StatusController.ownAccountId,
-        StatusController.ownAccountId,
+        LPHAddress.error(),
+        LPHAddress.error(),
         MemberRole.user,
       ),
     );
-    return Get.find<FriendController>().friends[member.account] ?? Friend.unknown(container.name);
+    return Get.find<FriendController>().friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
   }
 
+  /// Check if a conversation is broken (borked)
   bool get borked =>
       !isGroup &&
       Get.find<FriendController>().friends[members.values
-              .firstWhere((element) => element.account != StatusController.ownAccountId, orElse: () => Member(StatusController.ownAccountId, StatusController.ownAccountId, MemberRole.user))
-              .account] ==
+              .firstWhere((element) => element.address != StatusController.ownAddress,
+                  orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user))
+              .address] ==
           null;
 
-  ConversationData get entity => ConversationData(
-      id: id,
-      vaultId: vaultId,
+  ConversationData get entity {
+    return ConversationData(
+      id: id.encode(),
+      vaultId: dbEncrypted(vaultId),
       type: type,
-      token: token.toJson(),
-      key: packageSymmetricKey(key),
-      data: jsonEncode(container.toJson()),
-      updatedAt: BigInt.from(updatedAt.value),
+      data: dbEncrypted(jsonEncode(container.toJson())),
+      token: dbEncrypted(token.toJson()),
+      key: dbEncrypted(packageSymmetricKey(key)),
       lastVersion: BigInt.from(lastVersion),
-      readAt: BigInt.from(readAt.value));
+      updatedAt: BigInt.from(updatedAt.value),
+      readAt: BigInt.from(readAt.value),
+    );
+  }
+
   String toJson() => jsonEncode(<String, dynamic>{
-        "id": id,
+        "id": id.encode(),
         "type": type.index,
         "token": token.toMap(),
         "key": packageSymmetricKey(key),
@@ -282,7 +304,7 @@ class Conversation {
       });
 
   // Delete conversation from vault and database
-  void delete({request = true, popup = true}) async {
+  void delete({bool request = true, bool popup = true}) async {
     final err = await removeFromVault(vaultId);
     if (err != null) {
       sendLog("Error deleting conversation from vault: $err");
@@ -292,19 +314,18 @@ class Conversation {
 
     if (request) {
       final json = await postNodeJSON("/conversations/leave", {
-        "id": token.id,
-        "token": token.token,
+        "token": token.toMap(),
       });
 
       if (!json["success"]) {
         sendLog("Error deleting conversation from vault: ${json["error"]}");
         if (popup) showErrorPopup("error".tr, "error.not_delete_conversation".tr);
-        return;
+        // Don't return here, should remove from the local vault regardless
       }
     }
 
-    db.conversation.deleteWhere((tbl) => tbl.id.equals(id));
-    db.member.deleteWhere((tbl) => tbl.conversationId.equals(id));
+    db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
+    db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
     Get.find<MessageController>().unselectConversation(id: id);
     Get.find<ConversationController>().removeConversation(id);
   }
@@ -333,8 +354,7 @@ class Conversation {
     // Get the data from the server
     membersLoading.value = true;
     final json = await postNodeJSON("/conversations/data", {
-      "id": token.id,
-      "token": token.token,
+      "token": token.toMap(),
     });
 
     if (!json["success"]) {
@@ -352,17 +372,18 @@ class Conversation {
     containerSub.value = container;
 
     // Update the members
-    final members = <String, Member>{};
+    final members = <LPHAddress, Member>{};
     for (var memberData in json["members"]) {
       sendLog(memberData);
       final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-      members[memberData["id"]] = Member(memberData["id"], memberContainer.id, MemberRole.fromValue(memberData["rank"]));
+      final address = LPHAddress.from(memberData["id"]);
+      members[address] = Member(address, memberContainer.id, MemberRole.fromValue(memberData["rank"]));
     }
 
     // Load the members into the database
     for (var currentMember in this.members.values) {
       if (!members.containsKey(currentMember.tokenId)) {
-        db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId));
+        db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
       }
     }
 

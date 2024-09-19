@@ -7,12 +7,12 @@ import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
+import 'package:chat_interface/pages/status/setup/setup_page.dart';
+import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/theme/components/transitions/transition_container.dart';
-import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -177,23 +177,13 @@ class KeySetup extends ConnectionStep {
       return json["error"];
     }
 
-    if (json["exists"]) {
-      Get.dialog(
-        KeyCodePage(
-          signature: signature,
-          signatureKeyPair: signatureKeyPair,
-          encryptionKeyPair: encryptionKeyPair,
-        ),
-        barrierDismissible: false,
-      );
-      return completer.future;
-    }
-
+    // Go to the key setup page
     Get.dialog(
-      KeySynchronizationPage(
+      KeySetupPage(
         signature: signature,
         signatureKeyPair: signatureKeyPair,
         encryptionKeyPair: encryptionKeyPair,
+        exists: json["exists"],
       ),
       barrierDismissible: false,
     );
@@ -201,9 +191,65 @@ class KeySetup extends ConnectionStep {
   }
 }
 
+class KeySetupPage extends StatefulWidget {
+  final KeyPair encryptionKeyPair;
+  final KeyPair signatureKeyPair;
+  final String signature;
+  final bool exists;
+
+  const KeySetupPage({
+    super.key,
+    required this.signatureKeyPair,
+    required this.signature,
+    required this.encryptionKeyPair,
+    required this.exists,
+  });
+
+  @override
+  State<KeySetupPage> createState() => _KeySetupPageState();
+}
+
+class _KeySetupPageState extends State<KeySetupPage> {
+  late SmoothDialogController controller;
+
+  @override
+  void initState() {
+    // Initalize the controller, so we can pass it into the key pages
+    controller = SmoothDialogController(const SetupLoadingWidget(text: "preparing"));
+
+    if (widget.exists) {
+      // If there is a key request already, go to the code page
+      controller.transitionTo(
+        KeyCodePage(
+          signature: widget.signature,
+          signatureKeyPair: widget.signatureKeyPair,
+          encryptionKeyPair: widget.encryptionKeyPair,
+        ),
+      );
+    } else {
+      // If there is no key request, go to the key sync page
+      controller.transitionTo(
+        KeySynchronizationPage(
+          signature: widget.signature,
+          signatureKeyPair: widget.signatureKeyPair,
+          encryptionKeyPair: widget.encryptionKeyPair,
+          controller: controller,
+        ),
+      );
+    }
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SmoothDialogWindow(controller: controller);
+  }
+}
+
 class KeySynchronizationPage extends StatefulWidget {
   final KeyPair encryptionKeyPair;
   final KeyPair signatureKeyPair;
+  final SmoothDialogController controller;
   final String signature;
 
   const KeySynchronizationPage({
@@ -211,6 +257,7 @@ class KeySynchronizationPage extends StatefulWidget {
     required this.signatureKeyPair,
     required this.signature,
     required this.encryptionKeyPair,
+    required this.controller,
   });
 
   @override
@@ -220,60 +267,46 @@ class KeySynchronizationPage extends StatefulWidget {
 class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: TransitionContainer(
-        tag: "login",
-        borderRadius: BorderRadius.circular(modelBorderRadius),
-        width: 370,
-        child: Padding(
-          padding: const EdgeInsets.all(modelPadding),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Your keys aren\'t synchronized'.tr,
-                style: Get.textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              verticalSpacing(sectionSpacing),
-              Text("If you are logging in for the first time on this device or changed your keys, this is completely normal. You have a couple of options here.", style: Get.textTheme.bodyMedium),
-              verticalSpacing(sectionSpacing),
-              Text(
-                "1. Get from another device",
-                style: Get.theme.textTheme.labelMedium,
-                textAlign: TextAlign.center,
-              ),
-              verticalSpacing(defaultSpacing),
-              Text("Ask another device that is currently logged into your account to send you the keys. Don't worry, we'll encrypt them in transfer.", style: Get.textTheme.bodyMedium),
-              verticalSpacing(defaultSpacing),
-              FJElevatedLoadingButton(
-                loading: false.obs,
-                onTap: () async {
-                  final json = await postJSON("/account/keys/requests/check", {
-                    "token": refreshToken,
-                    "signature": signMessage(widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
-                    "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
-                  });
-
-                  if (!json["success"]) {
-                    showErrorPopup("error", json["error"]);
-                    return;
-                  }
-
-                  Get.find<TransitionController>().dialogTransition(KeyCodePage(
-                    encryptionKeyPair: widget.encryptionKeyPair,
-                    signatureKeyPair: widget.signatureKeyPair,
-                    signature: widget.signature,
-                  ));
-                },
-                label: "Ask another device",
-              ),
-            ],
-          ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'key.sync.title'.tr,
+          style: Get.textTheme.headlineMedium,
+          textAlign: TextAlign.center,
         ),
-      ),
+        verticalSpacing(sectionSpacing),
+        Text(
+          "key.sync.desc".tr,
+          style: Get.textTheme.bodyMedium,
+        ),
+        verticalSpacing(sectionSpacing),
+        FJElevatedLoadingButton(
+          loading: false.obs,
+          onTap: () async {
+            final json = await postJSON("/account/keys/requests/check", {
+              "token": refreshToken,
+              "signature":
+                  signMessage(widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
+              "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
+            });
+
+            if (!json["success"]) {
+              showErrorPopup("error", json["error"]);
+              return;
+            }
+
+            widget.controller.transitionTo(KeyCodePage(
+              encryptionKeyPair: widget.encryptionKeyPair,
+              signatureKeyPair: widget.signatureKeyPair,
+              signature: widget.signature,
+            ));
+          },
+          label: "key.sync.ask_device".tr,
+        ),
+      ],
     );
   }
 }
@@ -337,33 +370,22 @@ class _KeyCodePageState extends State<KeyCodePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: TransitionContainer(
-        tag: "login",
-        borderRadius: BorderRadius.circular(modelBorderRadius),
-        width: 370,
-        child: Padding(
-          padding: const EdgeInsets.all(modelPadding),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Code: ${widget.signature}",
-                style: Get.textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              verticalSpacing(sectionSpacing),
-              Text(
-                'On the device where you are logged in, go to Settings > Data > Synchronization requests, click on the request and then type in the code above. We\'ll check if you did automatically.'
-                    .tr,
-                style: Get.textTheme.bodyMedium,
-              ),
-            ],
-          ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          "key.code".trParams({"code": widget.signature}),
+          style: Get.textTheme.headlineMedium,
+          textAlign: TextAlign.center,
         ),
-      ),
+        verticalSpacing(sectionSpacing),
+        Text(
+          'key.code.desc'.tr,
+          style: Get.textTheme.bodyMedium,
+        ),
+      ],
     );
   }
 }

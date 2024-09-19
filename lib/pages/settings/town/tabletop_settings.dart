@@ -4,27 +4,30 @@ import 'dart:math';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
-import 'package:chat_interface/pages/settings/app/file_settings.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
+import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
+import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:drift/drift.dart' as drift;
 
 class TabletopSettings {
   static const String framerate = "tabletop.framerate";
@@ -35,9 +38,17 @@ class TabletopSettings {
 
   static void addSettings(SettingController controller) {
     controller.settings[framerate] = Setting<double>(framerate, 60.0);
-    controller.settings[cursorHue] = Setting<double>(cursorHue, Random().nextDouble());
+    controller.settings[cursorHue] = Setting<double>(cursorHue, 0.0);
 
     controller.settings[smoothDragging] = Setting<bool>(smoothDragging, false);
+  }
+
+  /// Initialize the cursor hue to make sure it's actually randomized by default
+  static void initSettings() async {
+    final val = await (db.setting.select()..where((tbl) => tbl.key.equals(cursorHue))).getSingleOrNull();
+    if (val == null) {
+      Get.find<SettingController>().settings[cursorHue]!.setValue(Random().nextDouble());
+    }
   }
 
   static Color getCursorColor({double? hue}) {
@@ -55,12 +66,12 @@ class TabletopSettingsPage extends StatefulWidget {
 }
 
 class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
-  final _selected = "settings.tabletop.general".obs;
+  final _selected = "settings.tabletop.general".tr.obs;
 
   // Tabs
   final _tabs = <String, Widget>{
-    "settings.tabletop.general": const TabletopGeneralTab(),
-    "settings.tabletop.decks": const TabletopDeckTab(),
+    "settings.tabletop.general".tr: const TabletopGeneralTab(),
+    "settings.tabletop.decks".tr: const TabletopDeckTab(),
   };
 
   @override
@@ -72,26 +83,12 @@ class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //* Tabs
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SidebarButton(
-              onTap: () => _selected.value = "settings.tabletop.general",
-              radius: const BorderRadius.only(
-                bottomLeft: Radius.circular(defaultSpacing),
-              ),
-              label: "settings.tabletop.general",
-              selected: _selected,
-            ),
-            horizontalSpacing(elementSpacing),
-            SidebarButton(
-              onTap: () => _selected.value = "settings.tabletop.decks",
-              radius: const BorderRadius.only(
-                topRight: Radius.circular(defaultSpacing),
-              ),
-              label: "settings.tabletop.decks",
-              selected: _selected,
-            )
-          ]),
-
+          LPHTabElement(
+            tabs: _tabs.keys.toList(),
+            onTabSwitch: (tab) {
+              _selected.value = tab;
+            },
+          ),
           verticalSpacing(sectionSpacing),
 
           //* Current tab
@@ -162,7 +159,7 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
                   Align(
                     alignment: Alignment.center,
                     child: UserAvatar(
-                      id: StatusController.ownAccountId,
+                      id: StatusController.ownAddress,
                       size: 40,
                     ),
                   ),
@@ -273,7 +270,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
               FJElevatedButton(
                 onTap: () async {
                   if (_decks.length >= Constants.maxDecks) {
-                    showErrorPopup("error", "decks.limit_reached");
+                    showErrorPopup("error", "decks.limit_reached".tr);
                     return;
                   }
                   final result = await Get.dialog(const DeckCreationWindow());
@@ -516,15 +513,20 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                   // Check files
                   for (var file in result) {
-                    if (await file.length() > 10 * 1000 * 1000) {
-                      showErrorPopup("error".tr, "file.too_large".tr);
+                    if (await file.length() > specialConstants[Constants.specialConstantMaxFileSize]!) {
+                      showErrorPopup(
+                        "error",
+                        "file.too_large".trParams({
+                          "1": formatFileSize(specialConstants[Constants.specialConstantMaxFileSize]!),
+                        }),
+                      );
                       return;
                     }
                   }
 
                   final response = await Get.dialog(CardsUploadWindow(files: result), barrierDismissible: false);
                   if (response.isEmpty) {
-                    showErrorPopup("error", "app.error");
+                    showErrorPopupTranslated("error", "app.error".tr);
                     return;
                   }
 
@@ -538,7 +540,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                   final res = await widget.deck.save();
                   if (!res) {
-                    showErrorPopup("error", "server.error");
+                    showErrorPopupTranslated("error", "server.error".tr);
                     return;
                   }
                 },
@@ -599,7 +601,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                                   Get.find<AttachmentController>().deleteFile(card);
                                   final result = await widget.deck.save();
                                   if (!result) {
-                                    showErrorPopup("error", "server.error");
+                                    showErrorPopup("error", "server.error".tr);
                                   }
                                 },
                                 icon: const Icon(Icons.delete),
@@ -704,7 +706,12 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     _current.value = 0;
     for (var file in widget.files) {
       // Upload the card to the server
-      final response = await controller.uploadFile(UploadData(File(file.path)), StorageType.permanent, Constants.fileDeckTag);
+      final response = await controller.uploadFile(
+        UploadData(File(file.path)),
+        StorageType.permanent,
+        Constants.fileDeckTag,
+        containerNameNull: true,
+      );
       if (response.container == null) {
         Get.back(result: finished);
         showErrorPopup("error", response.message);

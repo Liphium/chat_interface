@@ -22,7 +22,8 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isDeafened.value = newOutput;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
+          newOutput ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       if (controller.members[SpaceMemberController.ownId]!.participant.value != null) {
         if (newOutput) {
           // Stop all audio and unsubscribe from tracks
@@ -55,7 +56,8 @@ class PublicationController extends GetxController {
     if (_connected) {
       final controller = Get.find<SpaceMemberController>();
       controller.members[SpaceMemberController.ownId]!.isMuted.value = newMuted;
-      controller.members[SpaceMemberController.ownId]!.isSpeaking.value = newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
+      controller.members[SpaceMemberController.ownId]!.isSpeaking.value =
+          newMuted ? false : controller.members[SpaceMemberController.ownId]!.isSpeaking.value;
       if (controller.members[SpaceMemberController.ownId] == null) {
         sendLog("local participant is null, this needs further investigation");
         return;

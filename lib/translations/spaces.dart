@@ -10,6 +10,9 @@ class SpacesTranslations extends Translations {
           'spaces.sharing_other_device': 'Sharing with friends',
           'spaces.count': '@count members',
           'spaces.toggle_people': 'Toggle showing people',
+          'spaces.tab.table': 'Tabletop',
+          'spaces.tab.people': 'People',
+          'spaces.tab.cinema': 'Cinema',
 
           // Game hub
           'game.lobby': 'Ready to start. (@count/@max)',
@@ -24,7 +27,8 @@ class SpacesTranslations extends Translations {
           'tabletop.object.text': 'Text',
           'tabletop.object.text.create': 'Create text object',
           'tabletop.object.text.placeholder': 'Enter text here',
-          'tabletop.object.deck.incompatible': 'This deck is incompatible with the newest version of the standard. Please create it again and try again.',
+          'tabletop.object.deck.incompatible':
+              'This deck is incompatible with the newest version of the standard. Please create it again and try again.',
         },
 
         //* German

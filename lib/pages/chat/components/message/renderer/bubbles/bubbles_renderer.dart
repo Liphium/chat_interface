@@ -6,7 +6,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/me
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_space_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/system_message_renderer.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -84,10 +84,10 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     }
 
     if (message.type == MessageType.system) {
-      return BubblesSystemMessageRenderer(message: message, accountId: MessageController.systemSender);
+      return BubblesSystemMessageRenderer(message: message);
     }
-    final sender = friendController.friends[message.senderAccount];
-    final self = message.senderAccount == StatusController.ownAccountId;
+    final sender = friendController.friends[message.senderAddress];
+    final self = message.senderAddress == StatusController.ownAddress;
 
     bool last = false;
     bool newHeading = false;
@@ -106,7 +106,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         renderer = BubblesMessageRenderer(
           key: ValueKey(message.id),
           message: message,
-          accountId: message.senderAccount,
+          senderAddress: message.senderAddress,
           self: self,
           last: last,
           sender: self ? Friend.me() : sender,
@@ -134,7 +134,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         renderer = BubblesSystemMessageRenderer(
           key: ValueKey(message.id),
           message: message,
-          accountId: message.senderAccount,
         );
     }
 

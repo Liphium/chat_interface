@@ -3,15 +3,14 @@ import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/games/wordgrid_engine.dart';
 import 'package:chat_interface/pages/spaces/gamemode/lobby_view.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GameHubController extends GetxController {
   // All games (mainly for UI)
   final games = {
-    "wordgrid": Game("wordgrid", "Word grid", "Play chess with your friends",
-        "It's very complicated yk", "assets/img/chess.jpg"),
+    "wordgrid": Game("wordgrid", "Word grid", "Play chess with your friends", "It's very complicated yk", "assets/img/chess.jpg"),
   };
 
   // Current sessions on the server
@@ -31,8 +30,7 @@ class GameHubController extends GetxController {
 
         if (event.data["success"]) {
           sendLog("Game session created");
-          final session = GameSession(event.data["session"], game,
-              event.data["min"], event.data["max"]);
+          final session = GameSession(event.data["session"], game, event.data["min"], event.data["max"]);
           engine.value = WordgridEngine(session.id);
         }
       },
@@ -52,8 +50,7 @@ class Game {
   final String name;
   final String shortDescription, description;
 
-  Game(this.serverId, this.name, this.shortDescription, this.description,
-      this.coverImageAsset);
+  Game(this.serverId, this.name, this.shortDescription, this.description, this.coverImageAsset);
 }
 
 // Abstract class for game engines (to be implemented by each game)
@@ -78,8 +75,7 @@ abstract class Engine {
   void receiveEvent(String event, dynamic data);
 
   void sendEvent(String event, dynamic data) {
-    spaceConnector.sendAction(Message("game_event",
-        <String, dynamic>{"session": sessionId, "name": event, "data": data}));
+    spaceConnector.sendAction(Message("game_event", <String, dynamic>{"session": sessionId, "name": event, "data": data}));
   }
 }
 
@@ -106,7 +102,7 @@ class GameSession {
         }), handler: (event) {
       loading = false;
       if (!event.data["success"]) {
-        showErrorPopup("error".tr, event.data["message"].toString().tr);
+        showErrorPopup("error".tr, event.data["message"]);
       }
     });
   }

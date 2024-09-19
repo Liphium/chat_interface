@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,6 +18,7 @@ class CallControls extends StatefulWidget {
 }
 
 class _CallControlsState extends State<CallControls> {
+  final GlobalKey tabletopKey = GlobalKey();
   StreamSubscription<dynamic>? subscription;
 
   @override
@@ -32,7 +35,7 @@ class _CallControlsState extends State<CallControls> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Get.theme;
-    final tableController = Get.find<TabletopController>();
+    final controller = Get.find<SpacesController>();
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -117,24 +120,43 @@ class _CallControlsState extends State<CallControls> {
         ),
         */
 
-        horizontalSpacing(defaultSpacing),
-
-        //* Table mode
+        //* Tabletop rotation button / Toggle people button
         Obx(
-          () => LoadingIconButton(
-            background: true,
-            padding: defaultSpacing,
-            loading: tableController.loading,
-            onTap: () {
-              if (tableController.enabled.value) {
-                tableController.disconnect();
-              } else {
-                tableController.connect();
-              }
-            },
-            icon: tableController.enabled.value ? Icons.speaker_group : Icons.table_restaurant,
-            iconSize: 28,
-          ),
+          () {
+            if (controller.currentTab.value == SpaceTabType.table.index) {
+              return Padding(
+                padding: const EdgeInsets.only(left: defaultSpacing),
+                child: LoadingIconButton(
+                  key: tabletopKey,
+                  background: true,
+                  padding: defaultSpacing,
+                  loading: Get.find<TabletopController>().loading,
+                  onTap: () {
+                    Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+                  },
+                  icon: Icons.crop_rotate,
+                  iconSize: 28,
+                ),
+              );
+            }
+
+            if (controller.currentTab.value == SpaceTabType.cinema.index) {
+              return Padding(
+                padding: const EdgeInsets.only(left: defaultSpacing),
+                child: LoadingIconButton(
+                  tooltip: "spaces.toggle_people".tr,
+                  loading: false.obs,
+                  padding: defaultSpacing,
+                  background: true,
+                  onTap: () => controller.hideOverlay.toggle(),
+                  icon: controller.hideOverlay.value ? Icons.visibility_off : Icons.visibility,
+                  iconSize: 28,
+                ),
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
         ),
 
         horizontalSpacing(defaultSpacing),
@@ -144,11 +166,11 @@ class _CallControlsState extends State<CallControls> {
           background: true,
           padding: defaultSpacing,
           loading: false.obs,
-          onTap: () => Get.find<SpacesController>().leaveCall(),
+          onTap: () => controller.leaveCall(),
           icon: Icons.call_end,
           color: theme.colorScheme.error,
           iconSize: 28,
-        )
+        ),
       ],
     );
   }

@@ -4,7 +4,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_ringing_window.dart';
-import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
+import 'package:chat_interface/pages/settings/town/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:get/get.dart';

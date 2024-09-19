@@ -5,7 +5,7 @@ import 'package:chat_interface/pages/chat/sidebar/friends/friend_add_window.dart
 import 'package:chat_interface/pages/chat/sidebar/friends/friend_button.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/request_button.dart';
 import 'package:chat_interface/controller/current/steps/friends_setup.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/containers/success_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -66,6 +66,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             iconColor: Get.theme.colorScheme.onPrimary,
                             fillColor: Get.theme.colorScheme.onPrimary,
                             hoverColor: Get.theme.colorScheme.onPrimary,
+                            hintStyle: Get.textTheme.bodyMedium,
                             hintText: "friends.placeholder".tr,
                           ),
                           onChanged: (value) {
@@ -120,8 +121,9 @@ class _FriendsPageState extends State<FriendsPage> {
 
                         Obx(() {
                           final found = friendController.friends.values.any((friend) =>
-                              (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) || friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
-                              friend.id != StatusController.ownAccountId);
+                              (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
+                                  friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
+                              friend.id != StatusController.ownAddress);
                           return Animate(
                               effects: [
                                 ExpandEffect(
@@ -271,7 +273,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                     itemBuilder: (context, index) {
                                       final friend = friendController.friends.values.elementAt(index);
 
-                                      if (friend.unknown || friend.id == StatusController.ownAccountId) {
+                                      if (friend.unknown || friend.id == StatusController.ownAddress) {
                                         return const SizedBox();
                                       }
                                       return Obx(

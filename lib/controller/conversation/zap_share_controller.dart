@@ -15,7 +15,7 @@ import 'package:chat_interface/pages/chat/components/conversations/zap_share_win
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:dio/dio.dart' as d;
 import 'package:file_selector/file_selector.dart';
@@ -29,8 +29,8 @@ import 'package:path/path.dart' as path;
 
 class ZapShareController extends GetxController {
   // Current transaction
-  final currentReceiver = Rx<String?>(null);
-  final currentConversation = Rx<String?>(null);
+  final currentReceiver = Rx<LPHAddress?>(null);
+  final currentConversation = Rx<LPHAddress?>(null);
   final waiting = false.obs;
   final step = "loading".tr.obs;
   final progress = 0.0.obs;
@@ -104,7 +104,7 @@ class ZapShareController extends GetxController {
 
   //* Everything about sending starts here
 
-  void newTransaction(String friendId, String conversationId, List<XFile> files) async {
+  void newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
@@ -167,7 +167,7 @@ class ZapShareController extends GetxController {
           return;
         }
 
-        currentReceiver.value = friendId;
+        currentReceiver.value = friend;
         currentConversation.value = conversationId;
         transactionId = event.data["id"];
         transactionToken = event.data["token"];
@@ -228,7 +228,7 @@ class ZapShareController extends GetxController {
       if (!success) {
         // Retry in case of an error and wait a little bit
         currentlySending--;
-        showErrorPopup("error", "server.error");
+        showErrorPopup("error", "server.error".tr);
         tries++;
         await Future.delayed(2000.ms);
       } else {
@@ -289,7 +289,7 @@ class ZapShareController extends GetxController {
         }
 
         if (res.statusCode != 200) {
-          showErrorPopup("error", "server.error");
+          showErrorPopup("error", "server.error".tr);
           sendLog("Failed to send chunk $chunk");
           completer.complete(false);
           return;
@@ -358,13 +358,13 @@ class ZapShareController extends GetxController {
   //* Everything about receiving starts here
 
   /// Join a transaction with a given ID and token + start listening for parts
-  void joinTransaction(String conversation, String friendId, LiveshareInviteContainer container) async {
+  void joinTransaction(LPHAddress conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
     }
-    if (friendId == StatusController.ownAccountId) {
-      showErrorPopup("error", "chat.zapshare.not_send_self");
+    if (friendAddress == StatusController.ownAddress) {
+      showErrorPopup("error", "chat.zapshare.not_send_self".tr);
       return;
     }
     resetControllerState();
@@ -377,7 +377,7 @@ class ZapShareController extends GetxController {
       {"id": container.id, "token": container.token},
     );
     if (!json["success"]) {
-      showErrorPopup("error", "chat.zapshare.not_found");
+      showErrorPopup("error", "chat.zapshare.not_found".tr);
       return;
     }
     endPart = (json["size"].toDouble() / chunkSize.toDouble()).ceil();
@@ -385,7 +385,7 @@ class ZapShareController extends GetxController {
     sendLog(base64Encode(container.key.extractBytes()));
     key = container.key;
     currentConversation.value = conversation;
-    currentReceiver.value = friendId;
+    currentReceiver.value = friendAddress;
 
     // Subscribe to byte stream
     final formData = d.FormData.fromMap({
@@ -476,7 +476,7 @@ class ZapShareController extends GetxController {
 
             if (res.statusCode != 200) {
               sendLog("ERROR DOWNLOADING CHUNK $currentChunk");
-              showErrorPopup("error", "server.error");
+              showErrorPopup("error", "server.error".tr);
               return;
             }
 

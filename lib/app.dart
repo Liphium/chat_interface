@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/status/starting_page.dart';
+import 'package:chat_interface/pages/status/setup/setup_page.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/translations/translations.dart';
 import 'package:flutter/material.dart';
@@ -9,14 +9,14 @@ class ChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetX<ThemeManager>(builder: (manager) {
+    return Obx(() {
       return GetMaterialApp(
         title: 'Liphium',
-        theme: manager.currentTheme.value,
+        theme: Get.find<ThemeManager>().currentTheme.value,
         translations: MainTranslations(),
         locale: Get.deviceLocale,
         fallbackLocale: const Locale("en", "US"),
-        home: const StartingPage(),
+        home: const SetupPage(),
         debugShowCheckedModeBanner: false,
       );
     });

@@ -14,7 +14,7 @@ import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
@@ -202,7 +202,7 @@ class Connector {
   /// Optionally, you can specify a [waiter] to wait for the response.
   void sendAction(Message message, {Function(Event)? handler}) {
     if (!_connected) {
-      showErrorPopup("error", "error.network");
+      showErrorPopup("error", "error.network".tr);
       sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${message.action}");
       return;
     }
@@ -219,8 +219,6 @@ class Connector {
 
     // Add responseId to action
     message.action = "${message.action}:$responseId";
-
-    sendLog("sent action ${message.action}");
 
     // Send and encrypt the message (using AES key)
     connection?.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));

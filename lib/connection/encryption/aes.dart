@@ -19,8 +19,7 @@ Uint8List decryptAES(Uint8List data, String key) {
   final encrypter = Encrypter(AES(Key.fromBase64(key), mode: AESMode.gcm));
   final iv = IV.fromBase64(base64Encode(data.sublist(0, 12)));
 
-  return Uint8List.fromList(
-      encrypter.decryptBytes(Encrypted(data.sublist(12)), iv: iv));
+  return Uint8List.fromList(encrypter.decryptBytes(Encrypted(data.sublist(12)), iv: iv));
 }
 
 Uint8List randomAESKey() {

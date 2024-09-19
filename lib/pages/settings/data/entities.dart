@@ -1,18 +1,20 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/settings/account/authentication_settings.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/account/invites_page.dart';
-import 'package:chat_interface/pages/settings/app/file_settings.dart';
+import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
-import 'package:chat_interface/pages/settings/app/spaces_settings.dart';
+import 'package:chat_interface/pages/settings/town/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
-import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
+import 'package:chat_interface/pages/settings/town/town_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,19 +22,24 @@ enum SettingLabel {
   // Account settings (everything to do with the account and stored on the server)
   account("settings.tab.account", [
     SettingCategory("data", Icons.account_circle, DataSettingsPage()),
-    SettingCategory("invites", Icons.mail, InvitesPage(), displayTitle: false)
+    SettingCategory("invites", Icons.mail, InvitesPage(), displayTitle: false),
     //SettingCategory("profile", Icons.assignment, null),
-    //SettingCategory("security", Icons.security, null),
+    SettingCategory("authentication", Icons.security, AuthenticationSettingsPage()),
     //SettingCategory("devices", Icons.phone_android, null),
+  ]),
+
+  // Everything related to the town and its features
+  town("settings.tab.town", [
+    SettingCategory("town", Icons.cottage, TownSettingsPage()),
+    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false),
+    SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage(), mobile: false),
+    SettingCategory("files", Icons.folder, FileSettingsPage()),
   ]),
 
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
-    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false),
-    SettingCategory("files", Icons.folder, FileSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false),
     SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false),
-    SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage(), mobile: false),
     //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("language", Icons.public, LanguageSettingsPage()),
     SettingCategory("logging", Icons.insights, LogSettingsPage()),

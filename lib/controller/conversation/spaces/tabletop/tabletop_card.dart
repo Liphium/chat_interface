@@ -5,7 +5,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
@@ -16,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CardObject extends TableObject {
-  late AttachmentContainer container;
+  AttachmentContainer? container;
   bool error = false;
   bool downloaded = false;
   bool inventory = false;
@@ -179,14 +178,14 @@ class CardObject extends TableObject {
     flipAnimation.setValue(flipped ? 1 : 0);
 
     // Check if it's the same object and ignore to prevent flickering
-    if (container.id == json["id"]) {
+    if (container?.id == json["id"]) {
       return;
     }
 
     // Download the new image
-    final type = await AttachmentController.checkLocations(json["id"], StorageType.cache);
+    final type = await AttachmentController.checkLocations(json["i"], StorageType.cache);
     container = AttachmentContainer.fromJson(type, jsonDecode(data));
-    final download = await Get.find<AttachmentController>().downloadAttachment(container);
+    final download = await Get.find<AttachmentController>().downloadAttachment(container!);
     if (!download) {
       error = true;
       sendLog("failed to download card");
@@ -194,7 +193,7 @@ class CardObject extends TableObject {
     }
 
     // Get image from file
-    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container.filePath).readAsBytes());
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container!.filePath).readAsBytes());
     final descriptor = await ui.ImageDescriptor.encoded(buffer);
     final codec = await descriptor.instantiateCodec();
     image = (await codec.getNextFrame()).image;
@@ -204,7 +203,7 @@ class CardObject extends TableObject {
 
   @override
   String getData() {
-    final json = container.toJson();
+    final json = container!.toJson();
     json["flip"] = flipped;
     return jsonEncode(json);
   }
@@ -244,7 +243,7 @@ class CardObject extends TableObject {
         onTap: (controller) {
           sendLog("viewing..");
           Get.back();
-          Get.dialog(ImagePreviewWindow(file: File(container.filePath)));
+          Get.dialog(ImagePreviewWindow(file: File(container!.filePath)));
         },
       ),
     ];
@@ -256,7 +255,7 @@ class CardObject extends TableObject {
         icon: Icons.fullscreen,
         label: 'View in image viewer',
         onTap: (controller) {
-          Get.dialog(ImagePreviewWindow(file: File(container.filePath)));
+          Get.dialog(ImagePreviewWindow(file: File(container!.filePath)));
         },
       ),
     ];

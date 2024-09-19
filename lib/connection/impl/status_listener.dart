@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -11,57 +10,57 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 void setupStatusListener() {
   // Handle friend status change
-  connector.listen("acc_st", (event) {
-    final friend = handleStatus(event);
+  connector.listen("acc_st", (event) async {
+    final friend = handleStatus(event, false);
     if (friend == null) return;
     if (!friend.answerStatus) return;
     friend.answerStatus = false;
 
     // Send back status
     final controller = Get.find<StatusController>();
-    String status = generateStatusData(controller.statusJson());
 
     // Get dm with friend
     final dm = Get.find<ConversationController>().conversations.values.firstWhere(
-          (element) => element.members.length == 2 && element.members.values.any((element) => element.account == friend.id),
+          (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
         );
 
-    connector.sendAction(Message("st_res", <String, dynamic>{
-      "id": dm.token.id,
-      "token": dm.token.token,
-      "status": status,
-      "data": controller.sharedContentPacket(),
-    }));
+    sendLog("sending status answer");
+    await postNodeJSON("/conversations/answer_status", {
+      "token": dm.token.toMap(),
+      "data": {
+        "status": controller.statusPacket(),
+        "data": controller.sharedContentPacket(),
+      }
+    });
   }, afterSetup: true);
 
   // Don't send back when it's an answer
   connector.listen("acc_st:a", (event) {
     sendLog("received status answer");
-    handleStatus(event);
+    handleStatus(event, false);
   }, afterSetup: true);
 
   // Receive status changes from other devices
   connector.listen("acc_st:o", (event) {
     sendLog("received status change from other device");
-    handleStatus(event);
+    handleStatus(event, true);
   }, afterSetup: true);
 }
 
-Friend? handleStatus(Event event) {
-  final convId = event.data["c"] as String;
-  final owner = event.data["o"] as String;
+Friend? handleStatus(Event event, bool own) {
   final message = event.data["st"] as String;
-  final controller = Get.find<FriendController>();
 
-  // Load own status (if it's sent by the same account)
+  // Load own status when the packet specifies it
   final statusController = Get.find<StatusController>();
-  if (owner == StatusController.ownAccountId) {
-    controller.friends[owner]!.loadStatus(message);
+  final controller = Get.find<FriendController>();
+  if (own) {
+    controller.friends[StatusController.ownAddress]!.loadStatus(message);
     statusController.fromStatusJson(decryptSymmetric(message, profileKey));
     // Load own shared content
     final (container, shouldUpdate) = _dataToContainer(statusController.ownContainer.value, event.data["d"], profileKey);
@@ -72,6 +71,10 @@ Friend? handleStatus(Event event) {
     return null;
   }
 
+  // Get all the parameters for the actual status event
+  final convId = LPHAddress.from(event.data["c"] as String);
+  final owner = LPHAddress.from(event.data["o"] as String);
+
   // Get conversation from the status packet
   final convController = Get.find<ConversationController>();
   final conversation = convController.conversations[convId];
@@ -81,14 +84,17 @@ Friend? handleStatus(Event event) {
   }
 
   // Get the account id of the person sending the status packet
-  final member = conversation.members.values.firstWhere((mem) => mem.tokenId == owner, orElse: () => Member("", "", MemberRole.user));
-  if (member.tokenId == "") {
+  final member = conversation.members.values.firstWhere(
+    (mem) => mem.tokenId == owner,
+    orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
+  );
+  if (member.tokenId.isError()) {
     sendLog("member $owner not found in conversation $convId (status packet)");
     return null;
   }
-  final friend = controller.friends[member.account];
+  final friend = controller.friends[member.address];
   if (friend == null) {
-    sendLog("account ${member.account} isn't a friend (status packet)");
+    sendLog("account ${member.address.toString()} isn't a friend (status packet)");
     return null;
   }
 

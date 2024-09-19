@@ -69,13 +69,30 @@ ColorFactory buildColorFactoryFromSettings() {
     backgroundMode = controller.settings[ThemeSettings.backgroundMode]!.getValue() as int;
   }
 
-  return ColorFactory(
-      primHue, secHue, sat, themeMode == -1 ? ThemeSettings.baseLuminosityDark : ThemeSettings.baseLuminosityLight, themeMode, ThemeSettings.luminosityJumps, backgroundMode);
+  return ColorFactory(primHue, secHue, sat, themeMode == -1 ? ThemeSettings.baseLuminosityDark : ThemeSettings.baseLuminosityLight, themeMode,
+      ThemeSettings.luminosityJumps, backgroundMode);
+}
+
+ColorFactory buildColorFactoryFromPreset(ThemePreset preset) {
+  // Base values
+  var primHue = preset.primaryHue * 360.0;
+  var secHue = preset.secondaryHue * 360.0;
+  var sat = preset.baseSaturation;
+
+  // Advanced color
+  var themeMode = ThemeSettings.themeModes[preset.themeMode];
+  var backgroundMode = preset.backgroundMode;
+
+  return ColorFactory(primHue, secHue, sat, themeMode == -1 ? ThemeSettings.baseLuminosityDark : ThemeSettings.baseLuminosityLight, themeMode,
+      ThemeSettings.luminosityJumps, backgroundMode);
 }
 
 ThemeData getThemeData() {
   final factory = buildColorFactoryFromSettings();
+  return getThemeDataFromFactory(factory);
+}
 
+ThemeData getThemeDataFromFactory(ColorFactory factory) {
   if (factory.themeMode.isNegative) {
     //* Dark theme
     return defaultDarkTheme.copyWith(
@@ -108,7 +125,7 @@ ThemeData getThemeData() {
           errorContainer: factory.customHueContainer(0.0),
 
           // Unused
-          onSecondary: Color(0xFFbababa),
+          onSecondary: const Color(0xFFbababa),
 
           // Unimportant font colors
           surface: factory.getUnimportantFontColor(),

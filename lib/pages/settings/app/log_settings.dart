@@ -5,7 +5,7 @@ import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -40,7 +40,8 @@ class LogManager {
     await loggingDirectory!.create();
 
     // Initialize the newest log file
-    currentLogFile = File(path.join(loggingDirectory!.path, "log-${DateTime.now().toUtc().toString().replaceAll(" ", "_").replaceAll(":", "-").split(".")[0]}.txt"));
+    currentLogFile = File(
+        path.join(loggingDirectory!.path, "log-${DateTime.now().toUtc().toString().replaceAll(" ", "_").replaceAll(":", "-").split(".")[0]}.txt"));
     await currentLogFile!.create();
 
     return true;
@@ -66,7 +67,8 @@ class LogManager {
 
   /// Custom log function copied from GetUtils.printFunction to write things to the file too
   static void _errorLogFunction(String prefix, dynamic value, String info, {isError = false}) {
-    currentLogFile!.writeAsStringSync("${DateTime.now().toUtc()}: ${isError ? "error" : "info"}: ${value.toString()} ($info) \n", mode: FileMode.append);
+    currentLogFile!
+        .writeAsStringSync("${DateTime.now().toUtc()}: ${isError ? "error" : "info"}: ${value.toString()} ($info) \n", mode: FileMode.append);
   }
 }
 

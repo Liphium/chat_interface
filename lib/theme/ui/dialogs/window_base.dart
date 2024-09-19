@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +31,7 @@ class DialogBase extends StatelessWidget {
   final Widget child;
   final double maxWidth;
   final bool showTitleDesktop;
+  final bool mobilePage;
   final List<Widget> title;
 
   const DialogBase({
@@ -38,13 +39,14 @@ class DialogBase extends StatelessWidget {
     required this.child,
     this.maxWidth = 400,
     this.title = const [],
+    this.mobilePage = false,
     this.showTitleDesktop = true,
   });
 
   @override
   Widget build(BuildContext context) {
     // Return without animation on mobile
-    if (isMobileMode()) {
+    if (isMobileMode() && mobilePage) {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
         child: SafeArea(
@@ -120,18 +122,20 @@ class DialogBase extends StatelessWidget {
           child: Container(
             width: maxWidth,
             padding: const EdgeInsets.all(dialogPadding),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (showTitleDesktop && title.isNotEmpty)
-                  Row(
-                    children: [
-                      ...title,
-                    ],
-                  ),
-                if (showTitleDesktop && title.isNotEmpty) verticalSpacing(defaultSpacing),
-                child,
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (showTitleDesktop && title.isNotEmpty)
+                    Row(
+                      children: [
+                        ...title,
+                      ],
+                    ),
+                  if (showTitleDesktop && title.isNotEmpty) verticalSpacing(defaultSpacing),
+                  child,
+                ],
+              ),
             ),
           ),
         ),

@@ -12,8 +12,10 @@ class SetupTranslations extends Translations {
           // General setup
           'setup.choose.instance': 'Choose an instance.',
           'setup.instance.name': 'Enter a new name',
-          'setup.choose.server': 'Choose a server',
-          'server.choose.server.connecting': 'Currently connecting to',
+          'setup.choose.town': 'Choose a town.',
+          'setup.choose.town.desc':
+              'A town is the place where you create your Liphium account. If you don\'t know any town, you\'re out of luck until more options are available. For now, you can click the link below to learn more.',
+          'setup.choose.town.selector': 'Enter the domain of your town',
           'setup.policy': 'Your privacy on Liphium.',
           'setup.policy.text':
               'By pressing \'Accept\', you acknowledge that you have carefully reviewed and accepted our Privacy Policy and Terms of Service which you can read by clicking on \'View agreements\' below, after which the \'Accept\' button will appear.',
@@ -45,6 +47,15 @@ class SetupTranslations extends Translations {
           'login.no_account': 'Register an account',
           'input.password': 'Your password, please',
           'login.forgot': 'Reset your password',
+
+          // Key setup
+          'key.sync.title': 'Your keys aren\'t synchronized.',
+          'key.sync.desc':
+              'If you are logging in for the first time on this device or changed your keys, this is completely normal. You can ask another device to grab the keys from there, don\'t worry, we\'ll encrypt them in transfer.',
+          'key.sync.ask_device': 'Ask another device',
+          'key.code': 'Code: @code',
+          'key.code.desc':
+              'On any device where you are currently logged in, go to Settings > Data > Synchronization requests. Click on the correct request and then input the code above into the dialog that pops up. We\'ll check if you did automatically.',
         },
       };
 }

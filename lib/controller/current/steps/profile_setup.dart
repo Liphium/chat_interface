@@ -25,7 +25,7 @@ class ProfileSetup extends ConnectionStep {
     String session = getSessionFromJWT(sessionToken);
 
     // Refresh token
-    final body = await postJSON("/auth/refresh", <String, dynamic>{
+    final body = await postJSON("/account/auth/refresh", <String, dynamic>{
       "session": session,
       "token": refreshToken,
     });
@@ -35,8 +35,13 @@ class ProfileSetup extends ConnectionStep {
       loadTokensFromPayload(body);
       await setEncryptedValue("tokens", tokensToPayload());
     } else {
+      // Check if the status code isn't 200 (set by the _postTCP method)
+      if (body["code"] != null && body["code"] != 200) {
+        return SetupResponse(error: "server.error");
+      }
+
       // Check if the session is not verified
-      if (body["error"] == "session.not_verified") {
+      if (body["verified"] != null && !body["verified"]) {
         final res = await KeySetup.openKeySynchronization();
         return SetupResponse(
           retryConnection: true,
@@ -44,18 +49,8 @@ class ProfileSetup extends ConnectionStep {
         );
       }
 
-      // Check if the error says that the token can't be refreshed, but is still valid
-      if (body["error"] == "session.duration") {
-        return SetupResponse();
-      }
-
-      // Check if the status code isn't 200 (set by the _postTCP method)
-      if (body["code"] != null && body["code"] != 200) {
-        return SetupResponse(error: "server.error");
-      }
-
       // Check if the account data is invalid (make sure to delete everything)
-      if (body["error"] == "not.valid") {
+      if (body["valid"] != null && !body["valid"]) {
         await db.setting.deleteWhere((tbl) => tbl.key.equals("tokens"));
         return SetupResponse(restart: true);
       }

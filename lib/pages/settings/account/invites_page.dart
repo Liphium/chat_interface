@@ -1,6 +1,6 @@
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -26,9 +26,10 @@ class _InvitesPageState extends State<InvitesPage> {
     loading.value = true;
 
     final json = await postAuthorizedJSON("/account/invite/get_all", <String, dynamic>{});
+    loading.value = false;
 
     if (!json["success"]) {
-      showErrorPopup("error", json["error"]);
+      _error.value = (json["error"] as String).tr;
       return;
     }
 
@@ -36,11 +37,10 @@ class _InvitesPageState extends State<InvitesPage> {
     if (json["invites"] != null) {
       invites.value = List<String>.from(json["invites"]);
     }
-
-    loading.value = false;
   }
 
   // Data
+  final _error = "".obs;
   final count = 0.obs;
   final invites = <String>[].obs;
   final loading = false.obs;
@@ -58,7 +58,7 @@ class _InvitesPageState extends State<InvitesPage> {
       return;
     }
 
-    showErrorPopup("success", "settings.invites.generated");
+    showErrorPopup("success", "settings.invites.generated".tr);
     Clipboard.setData(ClipboardData(text: json["invite"]));
 
     count.value -= 1;
@@ -72,12 +72,33 @@ class _InvitesPageState extends State<InvitesPage> {
       label: "invites",
       child: Obx(() {
         if (loading.value) {
-          return Padding(padding: const EdgeInsets.all(defaultSpacing), child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
+          return Padding(
+            padding: const EdgeInsets.only(top: defaultSpacing),
+            child: Padding(
+              padding: const EdgeInsets.all(defaultSpacing),
+              child: Center(
+                child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
+              ),
+            ),
+          );
+        }
+
+        if (_error.value != "") {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              verticalSpacing(defaultSpacing),
+              Text("error".tr, style: Get.theme.textTheme.headlineMedium),
+              verticalSpacing(defaultSpacing),
+              Text(_error.value, style: Get.theme.textTheme.bodyMedium),
+            ],
+          );
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            verticalSpacing(defaultSpacing),
             Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
             verticalSpacing(defaultSpacing),
             Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),

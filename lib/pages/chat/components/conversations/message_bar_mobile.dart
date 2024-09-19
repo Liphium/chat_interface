@@ -1,7 +1,7 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
 import 'package:chat_interface/pages/chat/conversation_info_page.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

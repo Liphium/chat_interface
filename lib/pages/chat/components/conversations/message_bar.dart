@@ -6,10 +6,10 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/chat/conversation_info_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -79,7 +79,8 @@ class _MessageBarState extends State<MessageBar> {
                     children: [
                       Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                       horizontalSpacing(defaultSpacing),
-                      Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName, style: Theme.of(context).textTheme.titleMedium),
+                      Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
+                          style: Theme.of(context).textTheme.titleMedium),
                     ],
                   ),
                 ),
@@ -155,8 +156,10 @@ class _MessageBarState extends State<MessageBar> {
                   child: Obx(
                     () => IconButton(
                       iconSize: 27,
-                      icon:
-                          Icon(Icons.group, color: controller.settings[AppSettings.showGroupMembers]!.value.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
+                      icon: Icon(Icons.group,
+                          color: controller.settings[AppSettings.showGroupMembers]!.value.value
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
                         controller.settings[AppSettings.showGroupMembers]!.setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
                       },
@@ -204,7 +207,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
           // Get all friends in conversation
           var initial = <Friend>[];
           for (var member in widget.conversation.members.values) {
-            if (member.account == StatusController.ownAccountId) {
+            if (member.address == StatusController.ownAddress) {
               continue;
             }
             final friend = member.getFriend();
@@ -231,7 +234,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
               for (var friend in finalList) {
                 final res = await addToConversation(widget.conversation, friend);
                 if (!res) {
-                  showErrorPopup("error", "server.error");
+                  showErrorPopup("error", "server.error".tr);
                   return null;
                 }
               }
@@ -241,7 +244,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
           ));
         } else {
           // Get the friend and open the window
-          final friend = widget.conversation.members.values.firstWhere((element) => element.account != StatusController.ownAccountId).getFriend();
+          final friend = widget.conversation.members.values.firstWhere((element) => element.address != StatusController.ownAddress).getFriend();
           if (friend.unknown) {
             return;
           }

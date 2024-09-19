@@ -35,19 +35,19 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
             }
           },
           child: LayoutBuilder(builder: (context, constraints) {
-            const sidebarWidth = 250.0;
+            const sidebarWidth = 300.0;
             final biggestWidth = constraints.biggest.width;
             var containerWidth = 0.0;
             var pageWidth = 1000.0;
             if (biggestWidth > 1000 + sidebarWidth + 24) {
               containerWidth = (biggestWidth - 1000 - sidebarWidth) / 2;
             } else {
-              pageWidth = biggestWidth - sidebarWidth - 8;
+              pageWidth = biggestWidth - sidebarWidth - defaultSpacing * 1.5;
             }
 
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(
                   width: containerWidth,

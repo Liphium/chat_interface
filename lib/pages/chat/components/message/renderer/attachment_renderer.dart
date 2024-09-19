@@ -5,11 +5,11 @@ import 'package:chat_interface/pages/chat/components/library/library_favorite_bu
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,7 +33,9 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
   @override
   void initState() {
     super.initState();
-    if (widget.container.attachmentType == AttachmentContainerType.remoteImage && widget.message != null && (widget.message?.heightCallback ?? false)) {
+    if (widget.container.attachmentType == AttachmentContainerType.remoteImage &&
+        widget.message != null &&
+        (widget.message?.heightCallback ?? false)) {
       _networkImage = Image.network(
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null || loadingProgress.expectedTotalBytes == null) {

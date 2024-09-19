@@ -20,7 +20,7 @@ import 'app.dart';
 
 // Configuration constants
 const appTag = "liphium_chat";
-const protocolVersion = 4;
+const protocolVersion = 5;
 
 final dio = Dio();
 late final Sodium sodiumLib;
@@ -103,7 +103,7 @@ void initApp(List<String> args) async {
 
   // Initialize sodium
   await initSodium();
-  print(packageSymmetricKey(randomSymmetricKey()));
+  sendLog(packageSymmetricKey(randomSymmetricKey()));
 
   await RustLib.init();
 

@@ -1,7 +1,7 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -43,7 +43,7 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("settings.data.change_password.dialog".tr, style: Get.theme.textTheme.bodyMedium),
+          Text("settings.authentication.change_password.dialog".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
 
           // Current password

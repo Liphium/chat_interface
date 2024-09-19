@@ -12,11 +12,10 @@ import 'package:chat_interface/controller/conversation/townsquare_controller.dar
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
-import 'package:chat_interface/pages/settings/app/file_settings.dart';
+import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart' as material;
@@ -35,7 +34,7 @@ enum OpenTabType {
 class MessageController extends GetxController {
   // Constants
   Message? hoveredMessage;
-  static String systemSender = "6969";
+  static LPHAddress systemSender = LPHAddress("liphium.com", "6969");
 
   final loaded = false.obs;
   final currentOpenType = OpenTabType.conversation.obs;
@@ -43,7 +42,7 @@ class MessageController extends GetxController {
   final messages = <Message>[].obs;
 
   /// Unselect a conversation (when id is set, the current conversation will only be closed if it has that id)
-  void unselectConversation({String? id}) {
+  void unselectConversation({LPHAddress? id}) {
     if (id != null && currentConversation.value?.id != id) {
       return;
     }
@@ -80,8 +79,7 @@ class MessageController extends GetxController {
   void overwriteRead(Conversation conversation) async {
     // Send new read state to the server
     final json = await postNodeJSON("/conversations/read", {
-      "id": conversation.token.id,
-      "token": conversation.token.token,
+      "token": conversation.token.toMap(),
     });
     if (json["success"]) {
       conversation.notificationCount.value = 0;
@@ -90,7 +88,7 @@ class MessageController extends GetxController {
   }
 
   /// Delete a message from the client with an id
-  void deleteMessageFromClient(String conversation, String id) async {
+  void deleteMessageFromClient(LPHAddress conversation, String id) async {
     // Check if message is in the selected conversation
     if (currentConversation.value?.id == conversation) {
       messages.removeWhere((element) => element.id == id);
@@ -135,7 +133,7 @@ class MessageController extends GetxController {
     }
 
     // On call message type, ring using the message
-    if (message.type == MessageType.call && message.senderAccount != StatusController.ownAccountId) {
+    if (message.type == MessageType.call && message.senderAddress != StatusController.ownAddress) {
       // Get the conversation for the ring
       final conversation = Get.find<ConversationController>().conversations[message.conversation];
       if (conversation == null) {
@@ -233,14 +231,13 @@ class MessageController extends GetxController {
     // Load the messages from the server using the list_before endpoint
     final conversation = currentConversation.value!;
     final json = await postNodeJSON("/conversations/message/list_before", {
-      "token_id": conversation.token.id,
-      "token": conversation.token.token,
-      "before": date,
+      "token": conversation.token.toMap(),
+      "data": date,
     });
 
     // Check if there was an error
     if (!json["success"]) {
-      showErrorPopup("error", json["error"]);
+      conversation.error.value = json["error"];
       newMessagesLoading.value = false;
       return (false, false);
     }
@@ -274,14 +271,13 @@ class MessageController extends GetxController {
     // Load messages from the server
     final conversation = currentConversation.value!;
     final json = await postNodeJSON("/conversations/message/list_after", {
-      "token_id": conversation.token.id,
-      "token": conversation.token.token,
-      "after": firstMessage.createdAt.millisecondsSinceEpoch,
+      "token": conversation.token.toMap(),
+      "data": firstMessage.createdAt.millisecondsSinceEpoch,
     });
 
     // Check if there was an error
     if (!json["success"]) {
-      showErrorPopup("error", json["error"]);
+      conversation.error.value = json["error"];
       newMessagesLoading.value = false;
       return false;
     }
@@ -412,11 +408,10 @@ class Message {
   List<String> attachments;
   final verified = true.obs;
   String answer;
-  final String certificate;
-  final String sender;
-  final String senderAccount;
+  final LPHAddress sender;
+  final LPHAddress senderAddress;
   final DateTime createdAt;
-  final String conversation;
+  final LPHAddress conversation;
   final bool edited;
 
   Function()? highlightCallback;
@@ -454,7 +449,7 @@ class Message {
           continue;
         }
         final json = jsonDecode(attachment);
-        final type = await AttachmentController.checkLocations(json["id"], StorageType.temporary);
+        final type = await AttachmentController.checkLocations(json["i"], StorageType.temporary);
         final decoded = AttachmentContainer.fromJson(type, json);
         var container = await Get.find<AttachmentController>().findLocalFile(decoded);
         sendLog("FOUND: ${container?.filePath}");
@@ -506,9 +501,8 @@ class Message {
     this.content,
     this.answer,
     this.attachments,
-    this.certificate,
     this.sender,
-    this.senderAccount,
+    this.senderAddress,
     this.createdAt,
     this.conversation,
     this.edited,
@@ -523,9 +517,8 @@ class Message {
   static Future<Message?> loadFromServer(Conversation conversation, String messageId, {init = true}) async {
     // Get the message from the server
     final json = await postNodeJSON("/conversations/message/get", {
-      "token_id": conversation.token.id,
-      "token": conversation.token.token,
-      "message": messageId,
+      "token": conversation.token.toMap(),
+      "data": messageId,
     });
 
     // Check if there is an error
@@ -589,9 +582,11 @@ class Message {
   /// **Doesn't verify the signature**
   static (Message, SymmetricSequencedInfo?) fromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
     // Convert to message
-    final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[json["sender"]]?.account ?? "removed";
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], json["certificate"], json["sender"], account, DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["conversation"],
-        json["edited"], false);
+    final senderAddress = LPHAddress.from(json["sender"]);
+    final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[senderAddress]?.address ??
+        LPHAddress("-", "removed".tr);
+    var message = Message(json["id"], MessageType.text, json["data"], "", [], senderAddress, account,
+        DateTime.fromMillisecondsSinceEpoch(json["creation"]), LPHAddress.from(json["conversation"]), json["edited"], false);
 
     // Decrypt content
     conversation ??= Get.find<ConversationController>().conversations[json["conversation"]]!;
@@ -632,7 +627,7 @@ class Message {
   void verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
     final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
     sendLog("${conversation.members} | ${this.sender}");
-    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.account);
+    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.address);
     if (sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;
@@ -667,16 +662,12 @@ class Message {
 
     // Send a request to the server
     final json = await postNodeJSON("/conversations/message/delete", {
-      "certificate": certificate,
-      "id": token.id,
-      "token": token.token,
+      "token": token.toMap(),
+      "data": id,
     });
     sendLog(json);
 
     if (!json["success"]) {
-      if (json["error"] == "server.error") {
-        return "message.delete_error";
-      }
       return json["error"];
     }
 

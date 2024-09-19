@@ -10,6 +10,9 @@ class GeneralSettingsTranslations extends Translations {
           'settings.tab.appearance': 'Appearance',
           'settings.tab.app': 'App',
           'settings.tab.security': 'Security',
+          'settings.tab.town': 'Your town',
+          'settings.town': 'Town',
+          'settings.town.desc': 'The capabilities of your town.',
           'settings.data': 'Data',
           'settings.data.desc': 'Manage your account.',
           'settings.profile': 'Profile',
@@ -44,6 +47,8 @@ class GeneralSettingsTranslations extends Translations {
           'settings.experimental': 'Experimental',
           'settings.logging': 'Logging',
           'settings.logging.desc': 'The logs the app collects.',
+          'settings.authentication': 'Authentication',
+          'settings.authentication.desc': 'Setup multi-factor-authentication.',
 
           // Trusted links
           'links.warning':

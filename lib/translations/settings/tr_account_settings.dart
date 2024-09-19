@@ -11,7 +11,8 @@ class AccountSettingsTranslations extends Translations {
               'Liphium\'s social features allow you to share things not just with your friends, but also with the people on your instance. You can chat with everyone, but therefore it\'s not encrypted, so we allow you to disable it.',
           'data.social': 'Enable social features',
           'settings.data.profile_picture': 'Profile picture',
-          'settings.data.profile_picture.select': 'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
+          'settings.data.profile_picture.select':
+              'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',
           'settings.data.profile_picture.requirements': 'Can only be a JPEG or PNG and can\'t be larger than 10 MB.',
           'settings.data.profile_picture.remove': 'Remove profile picture',
           'settings.data.profile_picture.remove.confirm': 'Are you sure you want to remove your profile picture?',
@@ -21,8 +22,6 @@ class AccountSettingsTranslations extends Translations {
           'settings.data.permissions.description':
               'If you don\'t know what this is, it\'s fine. This is just data from the server that we can ask you for in case of problems. Here\'s which permissions you have:',
           'settings.data.account': 'Account data',
-          'settings.data.password.description': 'We\'ll not show your password here. That would be stupid.',
-          'settings.data.change_password.dialog': 'Let\'s make sure your account is secure again. All your devices (also this one) will be logged out after you click "Save".',
           'settings.data.email.description': 'Showing your email would be work. And I don\'t like that, you know.',
           'settings.data.log_out': 'Log out of your account',
           'settings.data.log_out.description':
@@ -44,6 +43,13 @@ class AccountSettingsTranslations extends Translations {
           'key_requests.code.placeholder': 'abcdef',
           'key_requests.code.error': 'This code is invalid. Please try again.',
           'key_requests.code.button': 'Verify code',
+
+          // Authentication settings
+          'settings.authentication.first_factor': 'First factor',
+          'settings.authentication.password.description': 'We\'ll not show your password here. That would be stupid.',
+          'settings.authentication.change_password.dialog':
+              'Let\'s make sure your account is secure again. All your devices (also this one) will be logged out after you click "Save".',
+          'settings.authentication.second_factor': 'Second factor',
 
           // Invite settings (this is mostly alpha only)
           'settings.invites.description':

@@ -2,6 +2,7 @@ import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 
 void setupMessageListener() {
@@ -10,7 +11,7 @@ void setupMessageListener() {
     final controller = Get.find<MessageController>();
 
     // Check if the conversation even exists on this account
-    final conversation = Get.find<ConversationController>().conversations[event.data["msg"]["conversation"]];
+    final conversation = Get.find<ConversationController>().conversations[LPHAddress.from(event.data["msg"]["conversation"])];
     if (conversation == null) {
       sendLog("invalid message, conversation not found");
       return;

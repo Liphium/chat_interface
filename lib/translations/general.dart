@@ -6,13 +6,16 @@ class GeneralTranslations extends Translations {
         //* English US
         'en_US': {
           // Actions
+          'learn_more': 'Learn more',
           'offline': 'Offline',
           'loading': 'Loading..',
           'preparing': 'Preparing..',
+          'rendering': 'Rendering..',
           'success': 'Success',
           'create': 'Create',
           'ok': 'Okay',
           'edit': 'Edit',
+          'copy': 'Copy',
           'retry': 'Retry',
           'back': 'Back',
           'no.got': 'No, you got me',
@@ -72,7 +75,7 @@ class GeneralTranslations extends Translations {
           'file.uploading': 'Uploading @index of @total..',
           'file.links.title': 'Unknown location found',
           'file.links.description':
-              'You are trying to download a file from @domain. This could potentially lead to your IP address or personal information being exposed. Do you want to add @domain to your list of trusted providers?',
+              'You are trying to connect to a town at @domain. This could potentially lead to your IP address or personal information being exposed. Do you want to add @domain to your list of trusted towns?',
 
           // For specifically adding the links to GIFs or images on a different server
           'file.images.trust.title': 'Add to trusted links',

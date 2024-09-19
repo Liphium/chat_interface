@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
@@ -20,35 +21,44 @@ class MemberController extends GetxController {
 }
 
 class Member {
-  final String tokenId; // Token id
-  final String account; // Account id
+  final LPHAddress tokenId; // Token id
+  final LPHAddress address; // Account id
   final MemberRole role;
 
-  Member(this.tokenId, this.account, this.role);
-  Member.unknown(this.account)
-      : tokenId = "",
+  Member(this.tokenId, this.address, this.role);
+  Member.unknown(this.address)
+      : tokenId = LPHAddress.error(),
         role = MemberRole.user;
   Member.fromJson(Map<String, dynamic> json)
-      : tokenId = json['id'],
-        account = json['account'],
+      : tokenId = LPHAddress.from(json['id']),
+        address = LPHAddress.from(json['address']),
         role = MemberRole.fromValue(json['role']);
 
-  Member.fromData(MemberData data) : this(data.id, data.accountId, MemberRole.fromValue(data.roleId));
+  Member.fromData(MemberData data)
+      : this(
+          LPHAddress.from(data.id),
+          LPHAddress.from(fromDbEncrypted(data.accountId)),
+          MemberRole.fromValue(data.roleId),
+        );
 
-  MemberData toData(String conversation) => MemberData(id: tokenId, accountId: account, roleId: role.value, conversationId: conversation);
+  MemberData toData(LPHAddress conversation) => MemberData(
+        id: tokenId.encode(),
+        accountId: dbEncrypted(address.encode()),
+        roleId: role.value,
+        conversationId: conversation.encode(),
+      );
 
   Friend getFriend([FriendController? controller]) {
-    if (StatusController.ownAccountId == account) return Friend.me();
+    if (StatusController.ownAddress == address) return Friend.me();
     controller ??= Get.find<FriendController>();
-    return controller.friends[account] ?? Friend.unknown(account);
+    return controller.friends[address] ?? Friend.unknown(address);
   }
 
-  Future<bool> promote(String conversationId) async {
+  Future<bool> promote(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/promote_token", {
-      "id": conversation.token.id,
-      "token": conversation.token.token,
-      "user": tokenId,
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
     });
 
     if (!json["success"]) {
@@ -58,12 +68,11 @@ class Member {
     return true;
   }
 
-  Future<bool> demote(String conversationId) async {
+  Future<bool> demote(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/demote_token", {
-      "id": conversation.token.id,
-      "token": conversation.token.token,
-      "user": tokenId,
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
     });
 
     if (!json["success"]) {
@@ -73,12 +82,11 @@ class Member {
     return true;
   }
 
-  Future<bool> remove(String conversationId) async {
+  Future<bool> remove(LPHAddress conversationId) async {
     final conversation = Get.find<ConversationController>().conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/kick_member", {
-      "id": conversation.token.id,
-      "token": conversation.token.token,
-      "target": tokenId,
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
     });
 
     if (!json["success"]) {

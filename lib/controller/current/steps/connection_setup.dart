@@ -3,7 +3,6 @@ import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 
 import '../../../util/web.dart';
-import 'cluster_setup.dart';
 
 class ConnectionSetup extends ConnectionStep {
   ConnectionSetup() : super('loading.connection');
@@ -11,7 +10,6 @@ class ConnectionSetup extends ConnectionStep {
   @override
   Future<SetupResponse> load() async {
     final body = await postAuthorizedJSON("/node/connect", <String, dynamic>{
-      "cluster": connectedCluster.id,
       "tag": appTag,
       "token": refreshToken,
     });

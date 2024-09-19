@@ -1,6 +1,6 @@
 import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/pages/chat/components/library/library_tab.dart';
-import 'package:chat_interface/pages/chat/sidebar/sidebar_button.dart';
+import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +16,13 @@ class LibraryWindow extends StatefulWidget {
 }
 
 class _LibraryWindowState extends State<LibraryWindow> {
-  final _selected = "library.all".obs;
+  final _selected = "library.all".tr.obs;
+
+  final _tabs = <String, Widget>{
+    'library.all'.tr: const LibraryTab(),
+    'library.images'.tr: const LibraryTab(filter: LibraryEntryType.image),
+    'library.gifs'.tr: const LibraryTab(filter: LibraryEntryType.gif),
+  };
 
   @override
   void initState() {
@@ -30,56 +36,28 @@ class _LibraryWindowState extends State<LibraryWindow> {
       maxSize: 500,
       position: widget.data,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           //* Tabs
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SidebarButton(
-                onTap: () => _selected.value = "library.all",
-                radius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(defaultSpacing),
-                ),
-                label: "library.all",
-                background: Get.theme.colorScheme.inverseSurface,
-                selected: _selected,
-              ),
-              horizontalSpacing(elementSpacing),
-              SidebarButton(
-                onTap: () => _selected.value = "library.images",
-                radius: const BorderRadius.only(),
-                label: "library.images",
-                background: Get.theme.colorScheme.inverseSurface,
-                selected: _selected,
-              ),
-              horizontalSpacing(elementSpacing),
-              SidebarButton(
-                onTap: () => _selected.value = "library.gifs",
-                radius: const BorderRadius.only(
-                  topRight: Radius.circular(defaultSpacing),
-                ),
-                label: "library.gifs",
-                background: Get.theme.colorScheme.inverseSurface,
-                selected: _selected,
-              ),
+          LPHTabElement(
+            tabs: [
+              "library.all".tr,
+              "library.images".tr,
+              "library.gifs".tr,
             ],
+            onTabSwitch: (newTab) {
+              _selected.value = newTab;
+            },
           ),
+          verticalSpacing(elementSpacing),
           SizedBox(
             height: 400,
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.only(top: defaultSpacing),
                 child: Obx(() {
-                  switch (_selected.value) {
-                    case "library.all":
-                      return const LibraryTab();
-                    case "library.images":
-                      return const LibraryTab(filter: LibraryEntryType.image);
-                    case "library.gifs":
-                      return const LibraryTab(filter: LibraryEntryType.gif);
-                  }
-                  return const SizedBox();
+                  return _tabs[_selected.value]!;
                 }),
               ),
             ),

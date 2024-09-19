@@ -3,11 +3,12 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
-import 'package:chat_interface/theme/components/fj_textfield.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -157,6 +158,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: 'search'.tr,
+                      hintStyle: Get.textTheme.bodyLarge,
                     ),
                     cursorColor: theme.colorScheme.onPrimary,
                     style: theme.textTheme.labelLarge,
@@ -168,14 +170,15 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       if (friendController.friends.isNotEmpty) {
                         final member = friendController.friends.values.firstWhere(
                           (element) =>
-                              (element.name.toLowerCase().contains(value.toLowerCase()) || element.displayName.value.text.toLowerCase().contains(value.toLowerCase())) &&
-                              element.id != StatusController.ownAccountId,
-                          orElse: () => Friend.unknown("-"),
+                              (element.name.toLowerCase().contains(value.toLowerCase()) ||
+                                  element.displayName.value.text.toLowerCase().contains(value.toLowerCase())) &&
+                              element.id != StatusController.ownAddress,
+                          orElse: () => Friend.unknown(LPHAddress.error()),
                         );
-                        if (member.id != "-") {
+                        if (member.id.id != "-") {
                           if (_members.contains(member)) {
                             _members.remove(member);
-                          } else if (member.id != StatusController.ownAccountId) {
+                          } else if (member.id != StatusController.ownAddress) {
                             _members.add(member);
                           }
                         }
@@ -203,13 +206,15 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 itemBuilder: (context, index) {
                   Friend friend = friendController.friends.values.elementAt(index);
 
-                  if (friend.id == StatusController.ownAccountId) {
+                  if (friend.id == StatusController.ownAddress) {
                     return const SizedBox();
                   }
 
                   return Obx(() {
                     final search = _search.value;
-                    if (search.isNotEmpty && !(friend.name.toLowerCase().contains(search.toLowerCase()) || friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
+                    if (search.isNotEmpty &&
+                        !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
+                            friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
                       return const SizedBox();
                     }
 

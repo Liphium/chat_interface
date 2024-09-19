@@ -53,7 +53,8 @@ String formatDay(DateTime time) {
   } else if (time.day == now.day - 1) {
     return "time.yesterday".tr;
   } else {
-    return "time".trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+    return "time"
+        .trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
   }
 }
 
@@ -72,12 +73,12 @@ String formatGeneralTime(DateTime time) {
 }
 
 class ExpandEffect extends CustomEffect {
-  ExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, super.delay})
+  ExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, double? customHeightFactor, super.delay})
       : super(builder: (context, value, child) {
           return ClipRect(
             child: Align(
               alignment: alignment ?? Alignment.topCenter,
-              heightFactor: axis == Axis.vertical ? max(value, 0.0) : null,
+              heightFactor: customHeightFactor ?? (axis == Axis.vertical ? max(value, 0.0) : null),
               widthFactor: axis == Axis.horizontal ? max(value, 0.0) : null,
               child: child,
             ),

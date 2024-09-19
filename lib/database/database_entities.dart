@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/settings/app/file_settings.dart';
+import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:drift/drift.dart';
 
 enum ConversationType { directMessage, group }

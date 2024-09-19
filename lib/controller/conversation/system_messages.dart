@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,8 +16,8 @@ class SystemMessages {
       translation: (msg) {
         final friendController = Get.find<FriendController>();
         return "chat.rank_change.${msg.attachments[0]}->${msg.attachments[1]}".trParams({
-          "name": friendController.getFriend(msg.attachments[2]).displayName.value.text,
-          "sender": friendController.getFriend(msg.attachments[3]).displayName.value.text, // NZJNP232RS5g
+          "name": friendController.getFriend(LPHAddress.from(msg.attachments[2])).displayName.value.text,
+          "sender": friendController.getFriend(LPHAddress.from(msg.attachments[3])).displayName.value.text, // NZJNP232RS5g
         });
       },
       handler: (msg) {
@@ -30,7 +31,7 @@ class SystemMessages {
       Icons.vpn_key,
       translation: (msg) {
         return "chat.token_change".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -45,7 +46,7 @@ class SystemMessages {
       translation: (msg) {
         sendLog(msg.attachments[0]);
         return "chat.member_join".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -59,8 +60,8 @@ class SystemMessages {
       Icons.waving_hand,
       translation: (msg) {
         return "chat.member_invite".trParams({
-          "invitor": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
-          "name": Get.find<FriendController>().getFriend(msg.attachments[1]).displayName.value.text,
+          "invitor": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[1])).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -74,7 +75,7 @@ class SystemMessages {
       Icons.arrow_back,
       translation: (msg) {
         return "chat.member_leave".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -88,8 +89,8 @@ class SystemMessages {
       Icons.arrow_back,
       translation: (msg) {
         return "chat.kick".trParams({
-          "issuer": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
-          "name": Get.find<FriendController>().getFriend(msg.attachments[1]).displayName.value.text,
+          "issuer": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[1])).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -103,7 +104,7 @@ class SystemMessages {
       Icons.shield,
       translation: (msg) {
         return "chat.new_admin".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -117,7 +118,7 @@ class SystemMessages {
       Icons.update,
       translation: (msg) {
         return "chat.edit_data".trParams({
-          "name": Get.find<FriendController>().getFriend(msg.attachments[0]).displayName.value.text,
+          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value.text,
         });
       },
       handler: (msg) {
@@ -145,7 +146,7 @@ class SystemMessages {
       render: false,
       handler: (msg) {
         final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        if (msg.attachments[0] == StatusController.ownAccountId) {
+        if (LPHAddress.from(msg.attachments[0]) == StatusController.ownAddress) {
           conversation.delete(popup: false, request: false);
         }
       },

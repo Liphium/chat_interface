@@ -9,6 +9,7 @@ import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -27,7 +28,6 @@ class SpaceMemberController extends GetxController {
   void onMembersChanged(List<dynamic> members) {
     sendLog("members changed");
     final statusController = Get.find<StatusController>();
-    final myId = StatusController.ownAccountId;
     final membersFound = <String>[];
 
     // id = encryptedId:clientId
@@ -36,15 +36,21 @@ class SpaceMemberController extends GetxController {
     for (var member in members) {
       final args = member["id"].split(":");
       final decrypted = decryptSymmetric(args[0], key!);
+      final address = LPHAddress.from(decrypted);
       final clientId = args[1];
       sendLog("$decrypted:$clientId");
-      if (decrypted == myId) {
+      if (address == StatusController.ownAddress) {
         SpaceMemberController.ownId = clientId;
       }
       membersFound.add(clientId);
       if (this.members[clientId] == null) {
         this.members[clientId] = SpaceMember(
-            Get.find<FriendController>().friends[decrypted] ?? (decrypted == myId ? Friend.me(statusController) : Friend.unknown(decrypted)), clientId, member["muted"], member["deafened"]);
+          Get.find<FriendController>().friends[address] ??
+              (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
+          clientId,
+          member["muted"],
+          member["deafened"],
+        );
 
         // See if there is already a participant with that id in the call
         if (SpacesController.livekitRoom != null) {

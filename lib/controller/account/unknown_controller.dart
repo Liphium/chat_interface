@@ -5,56 +5,107 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/database/trusted_links.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
 class UnknownController extends GetxController {
-  final cache = <String, UnknownAccount>{};
+  final cache = <LPHAddress, UnknownAccount>{};
 
-  Future<UnknownAccount?> loadUnknownProfile(String id) async {
-    if (id == StatusController.ownAccountId) {
-      return UnknownAccount(id, "", UTFString(""), signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
+  /// Load the profile of an unknown account by name
+  Future<UnknownAccount?> getUnknownProfileByName(String name) async {
+    // Ignore if it is the name of the current account
+    if (Get.find<StatusController>().name.value == name) {
+      return UnknownAccount(StatusController.ownAddress, name, UTFString(""), signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
     }
 
-    final controller = Get.find<FriendController>();
-    if (controller.friends[id] != null) {
-      return UnknownAccount.fromFriend(controller.friends[id]!);
-    }
-
-    if (cache[id] != null) {
-      if (cache[id]!.lastFetch != null && DateTime.now().difference(cache[id]!.lastFetch!) < const Duration(minutes: 5)) {
-        return cache[id];
-      }
-    }
-
-    final json = await postAuthorizedJSON("/account/get", {
-      "id": id,
+    // Get account
+    final json = await postAuthorizedJSON("/account/get_name", {
+      "name": name,
     });
 
+    // Check if it was successful
     if (!json["success"]) {
+      sendLog("couldn't retrieve account $name because of: ${json["error"]}");
       return null;
     }
 
+    // Parse the response into an unknown account
     final profile = UnknownAccount(
-      id,
+      LPHAddress(basePath, json["id"]),
       json["name"],
       UTFString.untransform(json["display_name"]),
       unpackagePublicKey(json["sg"]),
       unpackagePublicKey(json["pub"]),
     );
 
+    // Add the unknown profile to the database
     db.unknownProfile.insertOnConflictUpdate(profile.toData());
-    cache[id] = profile;
+    cache[profile.id] = profile;
+    return profile;
+  }
+
+  /// Load the profile of someone unknown
+  Future<UnknownAccount?> loadUnknownProfile(LPHAddress address) async {
+    // Ignore if it is the id of the current account
+    if (address == StatusController.ownAddress) {
+      return UnknownAccount(StatusController.ownAddress, "", UTFString(""), signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
+    }
+
+    // If the id matches a friend, use that instead
+    final controller = Get.find<FriendController>();
+    if (controller.friends[address] != null) {
+      return UnknownAccount.fromFriend(controller.friends[address]!);
+    }
+
+    // If the guy is in the cache, that works too
+    if (cache[address] != null) {
+      // Make sure the cached version isn't too old
+      if (cache[address]!.lastFetch != null && DateTime.now().difference(cache[address]!.lastFetch!) < const Duration(minutes: 5)) {
+        return cache[address];
+      }
+    }
+
+    // Make sure the server is trusted
+    if (!await TrustedLinkHelper.askToAddIfNotAdded(address.server)) {
+      return null;
+    }
+
+    // Get account
+    final json = await postAddress(address.server, "/account/get", {
+      "id": address.id,
+    });
+
+    // Check if it was successful
+    if (!json["success"]) {
+      sendLog("couldn't retrieve account ${address.id} on ${address.server} because of: ${json["error"]}");
+      return null;
+    }
+
+    // Parse the response into an unknown account
+    final profile = UnknownAccount(
+      address,
+      json["name"],
+      UTFString.untransform(json["display_name"]),
+      unpackagePublicKey(json["sg"]),
+      unpackagePublicKey(json["pub"]),
+    );
+
+    // Add the unknown profile to the database
+    db.unknownProfile.insertOnConflictUpdate(profile.toData());
+    cache[address] = profile;
     return profile;
   }
 }
 
 class UnknownAccount {
-  final String id;
-  final String? name;
-  final UTFString? displayName;
+  final LPHAddress id;
+  final String name;
+  final UTFString displayName;
 
   final Uint8List signatureKey;
   final Uint8List publicKey;
@@ -63,11 +114,11 @@ class UnknownAccount {
   UnknownAccount(this.id, this.name, this.displayName, this.signatureKey, this.publicKey);
 
   factory UnknownAccount.fromData(UnknownProfileData data) {
-    final keys = jsonDecode(data.keys);
+    final keys = jsonDecode(fromDbEncrypted(data.keys));
     return UnknownAccount(
-      data.id,
-      data.name == "" ? null : data.name,
-      data.displayName == "" ? null : UTFString.untransform(data.displayName),
+      LPHAddress.from(data.id),
+      fromDbEncrypted(data.name),
+      UTFString.untransform(fromDbEncrypted(data.displayName)),
       unpackagePublicKey(keys["sg"]),
       unpackagePublicKey(keys["pub"]),
     );
@@ -84,12 +135,12 @@ class UnknownAccount {
   }
 
   UnknownProfileData toData() => UnknownProfileData(
-        id: id,
-        name: name ?? "",
-        displayName: displayName?.transform() ?? "",
-        keys: jsonEncode({
+        id: id.encode(),
+        name: dbEncrypted(name),
+        displayName: dbEncrypted(displayName.transform()),
+        keys: dbEncrypted(jsonEncode({
           "sg": packagePublicKey(signatureKey),
           "pub": packagePublicKey(publicKey),
-        }),
+        })),
       );
 }

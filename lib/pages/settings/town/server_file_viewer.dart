@@ -4,14 +4,16 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
-import 'package:chat_interface/theme/components/icon_button.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/standards/unicode_string.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:open_app_file/open_app_file.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 class ServerFileViewer extends StatefulWidget {
   const ServerFileViewer({super.key});
@@ -96,10 +98,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
       final list = <FileContainer>[];
 
       for (var file in json["files"]) {
-        final container = FileContainer.fromJson(file);
-        final packagedKey = decryptAsymmetricAnonymous(keyPairs[0].publicKey, keyPairs[0].secretKey, container.key, sodium);
-        container.name = decryptSymmetric(container.name, unpackageSymmetricKey(packagedKey, sodium), sodium);
-        list.add(container);
+        list.add(FileContainer.fromJson(file, keyPairs[0], sodium));
       }
 
       return list;
@@ -203,7 +202,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(file.name, style: Get.theme.textTheme.labelMedium),
+                                      Text(file.name.text, style: Get.theme.textTheme.labelMedium),
                                       Text(formatFileSize(file.size), style: Get.theme.textTheme.bodyMedium),
                                     ],
                                   ),
@@ -352,7 +351,7 @@ class _PageSwitcherState extends State<PageSwitcher> {
 
 class FileContainer {
   String id;
-  String name;
+  UTFString name;
   String type;
   String key;
   String account;
@@ -377,10 +376,14 @@ class FileContainer {
   );
 
   // Deserialize from JSON
-  factory FileContainer.fromJson(Map<String, dynamic> json) {
+  factory FileContainer.fromJson(Map<String, dynamic> json, KeyPair key, [Sodium? sodium]) {
+    // Get the name and stuff
+    final packagedKey = decryptAsymmetricAnonymous(key.publicKey, key.secretKey, json["key"], sodium);
+    final name = decryptSymmetric(json["name"], unpackageSymmetricKey(packagedKey, sodium), sodium);
+
     return FileContainer(
       json['id'],
-      json['name'],
+      UTFString.untransform(name),
       json['type'],
       json['key'],
       json['account'],
@@ -389,20 +392,5 @@ class FileContainer {
       json['system'] ?? false,
       json['created'],
     );
-  }
-
-  // Serialize to JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'type': type,
-      'key': key,
-      'account': account,
-      'size': size,
-      'tag': tag,
-      'system': system,
-      'created': createdAt,
-    };
   }
 }

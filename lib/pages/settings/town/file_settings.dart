@@ -1,12 +1,12 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/settings/app/server_file_viewer.dart';
+import 'package:chat_interface/pages/settings/town/server_file_viewer.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -117,6 +117,20 @@ class FileSettingsPage extends StatelessWidget {
                     Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
                     horizontalSpacing(defaultSpacing),
                     Text("settings.file.cache.open_cache".tr, style: Get.textTheme.labelLarge),
+                  ],
+                ),
+              ),
+              FJElevatedButton(
+                onTap: () async {
+                  final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_${StatusController.ownAccountId}");
+                  OpenAppFile.open(fileFolder);
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
+                    horizontalSpacing(defaultSpacing),
+                    Text("settings.file.cache.open_saved_files".tr, style: Get.textTheme.labelLarge),
                   ],
                 ),
               ),

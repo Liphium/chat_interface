@@ -10,10 +10,11 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
@@ -24,10 +25,10 @@ class ProfileHelper {
   /// Returns the file ID associated with the profile picture.
   static Future<String?> downloadProfilePicture(Friend friend) async {
     // Get old profile picture
-    final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id))).getSingleOrNull();
+    final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id.encode()))).getSingleOrNull();
 
     final json = await postAuthorizedJSON("/account/profile/get", <String, dynamic>{
-      "id": friend.id,
+      "id": friend.id.id,
     });
 
     if (!json["success"]) {
@@ -58,7 +59,7 @@ class ProfileHelper {
     String? oldPath;
     if (oldProfile != null) {
       if (oldProfile.pictureContainer != "") {
-        oldPictureId = jsonDecode(oldProfile.pictureContainer)["id"];
+        oldPictureId = jsonDecode(fromDbEncrypted(oldProfile.pictureContainer))["id"];
         oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
         if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
           return null; // Nothing changed
@@ -67,7 +68,8 @@ class ProfileHelper {
     }
 
     // Decrypt the profile picture data
-    final container = AttachmentContainer.fromJson(StorageType.permanent, jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
+    final container =
+        AttachmentContainer.fromJson(StorageType.permanent, jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
 
     if (container.id != json["profile"]["picture"]) {
       return null;
@@ -86,7 +88,7 @@ class ProfileHelper {
 
     // Delete old profile
     if (oldProfile != null) {
-      await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id))).go();
+      await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id.encode()))).go();
     }
 
     // Save the profile picture data
@@ -111,12 +113,12 @@ class ProfileHelper {
       "container": encryptSymmetric(jsonEncode(response.container!.toJson()), profileKey),
     });
     if (!json["success"]) {
-      showErrorPopup("error", "profile_picture.not_set");
+      showErrorPopup("error", "profile_picture.not_set".tr);
       return false;
     }
 
     // Set in local database
-    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(response.container!);
+    Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
 
     return true;
   }
@@ -130,7 +132,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    Get.find<FriendController>().friends[StatusController.ownAccountId]!.updateProfilePicture(null);
+    Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(null);
     return true;
   }
 

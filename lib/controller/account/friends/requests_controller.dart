@@ -3,16 +3,17 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
+import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/friends_setup.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
-import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
@@ -20,8 +21,8 @@ import 'package:get/get.dart';
 import 'friend_controller.dart';
 
 class RequestController extends GetxController {
-  final requestsSent = <String, Request>{}.obs;
-  final requests = <String, Request>{}.obs;
+  final requestsSent = <LPHAddress, Request>{}.obs;
+  final requests = <LPHAddress, Request>{}.obs;
 
   void reset() {
     requests.clear();
@@ -29,10 +30,11 @@ class RequestController extends GetxController {
 
   Future<bool> loadRequests() async {
     for (RequestData data in await db.request.select().get()) {
+      final address = LPHAddress.from(data.id);
       if (data.self) {
-        requestsSent[data.id] = Request.fromEntity(data);
+        requestsSent[address] = Request.fromEntity(data);
       } else {
-        requests[data.id] == Request.fromEntity(data);
+        requests[address] == Request.fromEntity(data);
       }
     }
 
@@ -53,7 +55,7 @@ class RequestController extends GetxController {
     if (removal) {
       requestsSent.remove(request.id);
     }
-    await db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
+    await db.request.deleteWhere((tbl) => tbl.id.equals(request.id.encode()));
     return true;
   }
 
@@ -61,7 +63,7 @@ class RequestController extends GetxController {
     if (removal) {
       requests.remove(request.id);
     }
-    await db.request.deleteWhere((tbl) => tbl.id.equals(request.id));
+    await db.request.deleteWhere((tbl) => tbl.id.equals(request.id.encode()));
     return true;
   }
 }
@@ -73,36 +75,39 @@ void newFriendRequest(String name, Function(String) success) async {
   requestsLoading.value = true;
 
   final controller = Get.find<StatusController>();
-  if (name == controller.name.value) {
-    showErrorPopup("request.self", "request.self.text");
+  if (name == controller.name.value || LPHAddress.from(name) == StatusController.ownAddress) {
+    showErrorPopup("request.self", "request.self.text".tr);
     requestsLoading.value = false;
     return;
   }
 
-  // Get public key and id of the user
-  var json = await postAuthorizedJSON("/account/stored_actions/details", <String, dynamic>{
-    "username": name,
-  });
-  if (!json["success"]) {
-    showErrorPopup("request.${json["error"]}", "request.${json["error"]}.text");
+  // Get the unknown account from the name parameter
+  UnknownAccount? profile;
+  if (name.contains("@")) {
+    // If it is an address, get it by using the id
+    profile = await Get.find<UnknownController>().loadUnknownProfile(LPHAddress.from(name));
+  } else {
+    // If it is a name, then get it from the current instance by name
+    profile = await Get.find<UnknownController>().getUnknownProfileByName(name);
+  }
+
+  // Check if the profile is valid
+  if (profile == null) {
+    showErrorPopup("request.not.found", "request.not.found.text".tr);
     requestsLoading.value = false;
     return;
   }
-
-  final id = json["account"];
-  final publicKey = unpackagePublicKey(json["key"]);
-  final signatureKey = unpackagePublicKey(json["sg"]);
 
   //* Prompt with confirm popup
   var declined = true;
   await showConfirmPopup(ConfirmWindow(
     title: "request.confirm.title".tr,
     text: "request.confirm.text".trParams(<String, String>{
-      "username": "${json["display_name"]} ($name)",
+      "username": "${profile.displayName!.text} (${profile.name!})",
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(controller, name, UTFString.untransform(json["display_name"]), id, publicKey, signatureKey, success);
+      sendFriendRequest(controller, profile!.name!, profile.displayName!, profile.id, profile.publicKey, profile.signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -118,7 +123,7 @@ void sendFriendRequest(
   StatusController controller,
   String name,
   UTFString displayName,
-  String id,
+  LPHAddress address,
   Uint8List publicKey,
   Uint8List signatureKey,
   Function(String) success,
@@ -131,31 +136,38 @@ void sendFriendRequest(
   // Encrypt friend request
   sendLog("OWN STORED ACTION KEY: $storedActionKey");
   final payload = storedAction("fr_rq", <String, dynamic>{
+    "ad": StatusController.ownAddress.encode(),
     "name": controller.name.value,
     "dname": controller.displayName.value.transform(),
     "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, name),
+    "pub": packagePublicKey(asymmetricKeyPair.publicKey),
+    "sg": packagePublicKey(signatureKeyPair.publicKey),
     "pf": packageSymmetricKey(profileKey),
     "sa": storedActionKey,
   });
 
   // Send stored action
-  final result = await sendStoredAction(id, publicKey, payload);
-  if (!result) {
-    showErrorPopup(Constants.unknownError.tr, Constants.unknownErrorText.tr);
+  final result = await sendStoredAction(address, publicKey, payload);
+  if (result != null) {
+    showErrorPopup("error", result);
     requestsLoading.value = false;
     return;
   }
 
   // Accept friend request if there is one from the other user
   final requestController = Get.find<RequestController>();
-  final requestSent = requestController.requests[id];
+  final requestSent = requestController.requests[address];
   if (requestSent != null) {
-    requestController.deleteRequest(requestSent);
-    await Get.find<FriendController>().addFromRequest(requestSent);
+    final result = await Get.find<FriendController>().addFromRequest(requestSent);
+    if (result) {
+      requestController.deleteRequest(requestSent);
+    } else {
+      showErrorPopup("error", "requests.error".tr);
+    }
     success("request.accepted");
   } else {
     // Save friend request in own vault
-    var request = Request(id, name, displayName, "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
+    var request = Request(address, name, displayName, "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
     final vaultId = await FriendsVault.store(
       request.toStoredPayload(true),
       errorPopup: true,
@@ -180,9 +192,9 @@ void sendFriendRequest(
 }
 
 class Request {
-  final String id;
-  final String name;
-  final UTFString displayName;
+  final LPHAddress id;
+  String name;
+  UTFString displayName;
   String vaultId;
   int updatedAt;
   final KeyStorage keyStorage;
@@ -190,19 +202,14 @@ class Request {
 
   Request(this.id, this.name, this.displayName, this.vaultId, this.keyStorage, this.updatedAt);
 
-  /// Type to mock a request in case of orElse: statements. DON'T USE FOR TESTING
-  factory Request.mock(String id) {
-    return Request(id, "", UTFString(""), "", KeyStorage.empty(), 0);
-  }
-
   /// Get a request from the database object
   factory Request.fromEntity(RequestData data) {
     return Request(
-      data.id,
-      data.name,
-      UTFString.untransform(data.displayName),
-      data.vaultId,
-      KeyStorage.fromJson(jsonDecode(data.keys)),
+      LPHAddress.from(data.id),
+      fromDbEncrypted(data.name),
+      UTFString.untransform(fromDbEncrypted(data.displayName)),
+      fromDbEncrypted(data.vaultId),
+      KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
       data.updatedAt.toInt(),
     );
   }
@@ -210,7 +217,7 @@ class Request {
   /// Get a request from a stored payload in the database
   factory Request.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
     return Request(
-      json["id"],
+      LPHAddress.from(json["id"]),
       json["name"],
       UTFString.untransform(json["display_name"]),
       "",
@@ -223,7 +230,7 @@ class Request {
   String toStoredPayload(bool self) {
     final reqPayload = <String, dynamic>{
       "rq": true,
-      "id": id,
+      "id": id.encode(),
       "self": self,
       "name": name,
       "display_name": displayName.transform(),
@@ -235,11 +242,11 @@ class Request {
 
   /// Convert a request object to the equivalent database object
   RequestData entity(bool self) => RequestData(
-        id: id,
-        name: name,
-        displayName: displayName.transform(),
-        vaultId: vaultId,
-        keys: jsonEncode(keyStorage.toJson()),
+        id: id.encode(),
+        name: dbEncrypted(name),
+        displayName: dbEncrypted(displayName.transform()),
+        vaultId: dbEncrypted(vaultId),
+        keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
         self: self,
         updatedAt: BigInt.from(updatedAt),
       );

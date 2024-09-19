@@ -13,13 +13,13 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_member_cont
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/spaces/gamemode/spaces_game_hub.dart';
-import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,10 +34,8 @@ class SpacesController extends GetxController {
   final spaceLoading = false.obs;
   final connected = false.obs;
   final start = DateTime.now().obs;
-
-  //* Game mode
-  final playMode = false.obs;
-  final gameShelf = false.obs;
+  final currentTab = SpaceTabType.people.index.obs;
+  int _prevTab = SpaceTabType.people.index;
 
   //* Space information
   static String? currentDomain;
@@ -61,16 +59,48 @@ class SpacesController extends GetxController {
     }
   }
 
+  /// Switch to a tab programatically
+  void switchToTabAndChange(SpaceTabType type) {
+    currentTab.value = type.index;
+    switchToTab(type);
+  }
+
+  /// Event that is called after the tab switch was done through the selector
+  void switchToTab(SpaceTabType type) {
+    if (type.index == _prevTab) {
+      return;
+    }
+
+    // If the previous tab was the table, disconnect from the event stream
+    if (_prevTab == SpaceTabType.table.index) {
+      Get.find<TabletopController>().closeTableTab();
+    }
+
+    // If the current tab is a table tab, connect to the event stream
+    if (type == SpaceTabType.table) {
+      Get.find<TabletopController>().openTableTab();
+    }
+    _prevTab = currentTab.value;
+  }
+
   void cinemaMode(Widget widget) {
+    sendLog("cinema");
     if (cinemaWidget.value != null) {
       if (cinemaWidget.value == widget) {
-        cinemaWidget.value = null;
+        sendLog("already cinema");
+        if (currentTab.value == SpaceTabType.people.index) {
+          switchToTabAndChange(SpaceTabType.cinema);
+        } else {
+          switchToTabAndChange(SpaceTabType.people);
+        }
         return;
       }
       cinemaWidget.value = widget;
+      switchToTabAndChange(SpaceTabType.cinema);
       return;
     }
     cinemaWidget.value = widget;
+    switchToTabAndChange(SpaceTabType.cinema);
   }
 
   void createSpace(bool publish) {
@@ -81,11 +111,11 @@ class SpacesController extends GetxController {
     });
   }
 
-  void createAndConnect(String conversationId) {
+  void createAndConnect(LPHAddress conversationId) {
     _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, [], container.toInviteJson(), "", () => {}));
   }
 
-  void inviteToCall(String conversationId) {
+  void inviteToCall(LPHAddress conversationId) {
     sendActualMessage(spaceLoading, conversationId, MessageType.call, [], getContainer().toInviteJson(), "", () => {});
   }
 
@@ -93,36 +123,21 @@ class SpacesController extends GetxController {
     return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
   }
 
-  void switchToPlayMode() {
-    playMode.value = !playMode.value;
-    if (playMode.value) {
-      Get.offAll(const SpacesGameHub(), transition: Transition.fadeIn);
-      hideSidebar.value = true;
-    } else {
-      hideSidebar.value = false;
-      Get.offAll(getChatPage(), transition: Transition.fadeIn);
-    }
-  }
-
-  void openShelf() {
-    gameShelf.value = !gameShelf.value;
-  }
-
   void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {
     if (connected.value) {
-      showErrorPopup("error", "already.calling");
+      showErrorPopup("error", "already.calling".tr);
       return;
     }
     spaceLoading.value = true;
 
     connector.sendAction(msg.Message("spc_start", <String, dynamic>{}), handler: (event) {
       if (!event.data["success"]) {
-        if (event.data["message"] == "server.error") {
-          spaceLoading.value = false;
-          return _openNotAvailable();
-        }
         spaceLoading.value = false;
-        return showErrorPopup("error", "server.error");
+        sendLog(event.data);
+        if (event.data["message"] is String) {
+          return showErrorPopup("error", event.data["message"]);
+        }
+        return showErrorPopup("error", "server.error".tr);
       }
       final appToken = event.data["token"] as Map<String, dynamic>;
       final roomId = event.data["id"];
@@ -137,10 +152,6 @@ class SpacesController extends GetxController {
     });
   }
 
-  void _openNotAvailable() {
-    showErrorPopup("Spaces", "Spaces is currently unavailable. If you are an administrator, make sure this feature is enabled and verify that the servers are online.");
-  }
-
   void join(SpaceConnectionContainer container) {
     connector.sendAction(
         msg.Message("spc_join", <String, dynamic>{
@@ -148,29 +159,25 @@ class SpacesController extends GetxController {
         }), handler: (event) {
       if (!event.data["success"]) {
         if (event.data["message"] == "already.in.space") {
-          showConfirmPopup(ConfirmWindow(
-            title: "spaces".tr,
-            text: "chat.space.leave".tr,
-            onDecline: () => {},
-            onConfirm: () {
-              connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) {
-                if (!event.data["success"]) {
-                  if (event.data["message"] == "server.error") {
-                    return _openNotAvailable();
-                  }
-                  return showErrorPopup("How?",
-                      "I don't understand this world anymore. I'm sorry. It seems like this feature is currently pretty broken for you, tell the developers about it and we'll fix it sometime, yk like never?");
-                }
+          // Leave the space immediately
+          connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) async {
+            if (!event.data["success"]) {
+              if (event.data["message"] is String) {
+                return showErrorPopup("error", event.data["message"]);
+              }
+              return showErrorPopup("error", "server.error".tr);
+            }
 
-                // Try joining again
-                join(container);
-              });
-            },
-          ));
+            // Wait a little bit, in case a server abuses this as an infinite loop
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            // Try joining again
+            join(container);
+          });
           return;
         }
 
-        return showErrorPopup("error", "server.error");
+        return showErrorPopup("error", "server.error".tr);
       }
 
       // Load information from space container
@@ -188,6 +195,7 @@ class SpacesController extends GetxController {
       return;
     }
     currentDomain = appToken["domain"];
+    currentTab.value = SpaceTabType.people.index;
 
     // Setup all controllers
     Get.find<PublicationController>().onConnect();
@@ -197,7 +205,7 @@ class SpacesController extends GetxController {
     final result = await createSpaceConnection(appToken["domain"], appToken["token"]);
     sendLog("COULD CONNECT TO SPACE NODE: $result");
     if (!result) {
-      showErrorPopup("error", "server.error");
+      showErrorPopup("error", "server.error".tr);
       spaceLoading.value = false;
       return;
     }
@@ -205,13 +213,14 @@ class SpacesController extends GetxController {
     spaceConnector.sendAction(
       msg.Message(
         "setup",
-        <String, dynamic>{
-          "data": encryptSymmetric(StatusController.ownAccountId, key!),
+        {
+          "data": encryptSymmetric(StatusController.ownAddress.encode(), key!),
+          "color": Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue() as double,
         },
       ),
       handler: (event) async {
         if (!event.data["success"]) {
-          showErrorPopup("error", "server.error");
+          showErrorPopup("error", "server.error".tr);
           spaceLoading.value = false;
           return;
         }
@@ -272,7 +281,7 @@ class SpacesController extends GetxController {
     Get.find<SpaceMemberController>().onDisconnect();
     Get.find<PublicationController>().disconnect();
     Get.find<GameHubController>().leaveCall();
-    Get.find<TabletopController>().disconnect(leave: false);
+    Get.find<TabletopController>().resetControllerState();
 
     if (!error) {
       Get.offAll(getChatPage(), transition: Transition.fadeIn);
@@ -289,12 +298,22 @@ class SpacesController extends GetxController {
   }
 }
 
+enum SpaceTabType {
+  table("spaces.tab.table"),
+  people("spaces.tab.people"),
+  cinema("spaces.tab.cinema");
+
+  final String name;
+
+  const SpaceTabType(this.name);
+}
+
 class SpaceInfo {
   late bool exists;
   bool error = false;
   late DateTime start;
   final List<Friend> friends = [];
-  late final List<String> members;
+  late final List<LPHAddress> members;
 
   SpaceInfo(this.start, this.members) {
     error = false;
@@ -308,7 +327,7 @@ class SpaceInfo {
 
   SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
     start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
-    members = List<String>.from(json["members"].map((e) => decryptSymmetric(e, container.key)));
+    members = List<LPHAddress>.from(json["members"].map((e) => LPHAddress.from(decryptSymmetric(e, container.key))));
     exists = true;
 
     final controller = Get.find<FriendController>();
@@ -336,7 +355,8 @@ class SpaceConnectionContainer extends ShareContainer {
   bool get cancelled => _timer == null;
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
-  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender]) : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+  SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
+      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {

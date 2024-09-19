@@ -20,10 +20,13 @@ class FJTextField extends StatefulWidget {
   final bool autocorrect;
   final Function(String)? onChange;
   final List<TextInputFormatter>? inputFormatters;
+  final FocusNode? focusNode;
+  final Function(String)? onSubmitted;
 
   const FJTextField({
     super.key,
     this.controller,
+    this.focusNode,
     this.hintText,
     this.prefixIcon,
     this.errorText,
@@ -36,6 +39,7 @@ class FJTextField extends StatefulWidget {
     this.maxLines = 1,
     this.maxLength,
     this.onChange,
+    this.onSubmitted,
     this.inputFormatters,
   });
 
@@ -92,6 +96,7 @@ class _FJTextFieldState extends State<FJTextField> {
                       isDense: true,
                       hintText: widget.hintText,
                       labelStyle: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
+                      hintStyle: widget.small ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge,
                       errorText: widget.errorText,
                       border: InputBorder.none,
                       counterText: "",
@@ -109,6 +114,7 @@ class _FJTextFieldState extends State<FJTextField> {
                     focusNode: _node,
                     onChanged: widget.onChange,
                     inputFormatters: widget.inputFormatters,
+                    onSubmitted: widget.onSubmitted,
                   ),
                 ),
               ],

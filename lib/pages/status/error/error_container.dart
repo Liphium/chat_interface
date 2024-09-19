@@ -30,7 +30,10 @@ class ErrorContainer extends StatelessWidget {
         children: [
           Icon(Icons.error, color: Theme.of(context).colorScheme.error),
           horizontalSpacing(defaultSpacing),
-          if (expand) Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium)) else Text(message, style: Theme.of(context).textTheme.labelMedium),
+          if (expand)
+            Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium))
+          else
+            Text(message, style: Theme.of(context).textTheme.labelMedium),
         ],
       ),
     );
@@ -62,7 +65,10 @@ class InfoContainer extends StatelessWidget {
         children: [
           Icon(Icons.info, color: Theme.of(context).colorScheme.onPrimary),
           horizontalSpacing(defaultSpacing),
-          if (expand) Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium)) else Text(message, style: Theme.of(context).textTheme.labelMedium),
+          if (expand)
+            Expanded(child: Text(message, style: Theme.of(context).textTheme.labelMedium))
+          else
+            Text(message, style: Theme.of(context).textTheme.labelMedium),
         ],
       ),
     );

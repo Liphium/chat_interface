@@ -9,17 +9,15 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_text.dart';
-import 'package:chat_interface/pages/settings/app/tabletop_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class TabletopController extends GetxController {
   final loading = false.obs;
-  final enabled = false.obs;
 
   /// Currently held object
   TableObject? heldObject;
@@ -52,7 +50,6 @@ class TabletopController extends GetxController {
   /// Reset the entire state of the controller (on every call start)
   void resetControllerState() {
     loading.value = false;
-    enabled.value = false;
 
     heldObject = null;
     movingAllowed = true;
@@ -78,38 +75,43 @@ class TabletopController extends GetxController {
     canvasRotation.value = 0.0;
   }
 
-  /// Join the tabletop session
-  void connect() {
-    if (enabled.value || loading.value) {
-      return;
-    }
-    loading.value = true;
-
-    // Reset positions
-    canvasOffset = const Offset(0, 0);
-    canvasZoom = 0.5;
-    canvasRotation.value = 0;
-    mousePos = const Offset(0, 0);
-    mousePosUnmodified = const Offset(0, 0);
-
+  /// Called when the tabletop tab is opened (to receive events again)
+  void openTableTab() {
     spaceConnector.sendAction(
-      Message("table_join", <String, dynamic>{
-        "color": Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue() as double,
-      }),
+      Message("table_enable", <String, dynamic>{}),
       handler: (event) {
         sendLog("hello world");
         loading.value = false;
 
         if (!event.data["success"]) {
-          showErrorPopup("error", "server.error");
+          showErrorPopup("error", "server.error".tr);
           return;
         }
         sendLog("success");
-        enabled.value = true;
 
         _ticker = Timer.periodic(const Duration(milliseconds: 1000 ~/ tickRate), (timer) {
           _handleTableTick();
         });
+      },
+    );
+  }
+
+  /// Called when the tabletop tab is closed (to disable events)
+  void closeTableTab() {
+    objects.clear();
+    _ticker?.cancel();
+    hoveringObjects.clear();
+    cursors.clear();
+    loading.value = true;
+    spaceConnector.sendAction(
+      Message("table_disable", <String, dynamic>{}),
+      handler: (event) {
+        loading.value = false;
+
+        if (!event.data["success"]) {
+          showErrorPopup("error", "server.error".tr);
+          return;
+        }
       },
     );
   }
@@ -144,32 +146,6 @@ class TabletopController extends GetxController {
     }
 
     _lastMousePos = mousePos;
-  }
-
-  /// Leave the tabletop session
-  void disconnect({bool leave = true}) {
-    objects.clear();
-    _ticker?.cancel();
-    cursors.clear();
-    inventory.clear();
-    if (leave) {
-      loading.value = true;
-      spaceConnector.sendAction(
-        Message("table_leave", <String, dynamic>{}),
-        handler: (event) {
-          loading.value = false;
-
-          if (!event.data["success"]) {
-            showErrorPopup("error", "server.error");
-            return;
-          }
-          enabled.value = false;
-        },
-      );
-      resetControllerState();
-    } else {
-      enabled.value = false;
-    }
   }
 
   /// Update the cursor position of other people
@@ -273,7 +249,7 @@ class TabletopController extends GetxController {
     // Select the object
     final success = await object.select();
     if (!success) {
-      showErrorPopup("error", "tabletop.object_already_held");
+      showErrorPopup("error", "tabletop.object_already_held".tr);
       stopHoldingObject(error: true);
       return;
     }
@@ -355,7 +331,7 @@ abstract class TableObject {
     this.location = location;
   }
 
-  double lastRotation = -1;
+  double lastRotation = 0;
   void rotate(double rot) {
     sendLog(lastRotation);
     if (lastRotation == -1) {
@@ -452,9 +428,7 @@ abstract class TableObject {
 
   /// Remove an object
   void sendRemove() {
-    spaceConnector.sendAction(Message("tobj_delete", <String, dynamic>{
-      "id": id,
-    }));
+    spaceConnector.sendAction(Message("tobj_delete", id));
   }
 
   /// Start a modification process (data)
@@ -462,17 +436,17 @@ abstract class TableObject {
     final completer = Completer<bool>();
 
     spaceConnector.sendAction(
-        Message("tobj_select", <String, dynamic>{
-          "id": id,
-        }), handler: (event) {
-      if (!event.data["success"]) {
-        showErrorPopup("error", event.data["message"]);
-        sendLog("can't modify rn");
-        completer.complete(false);
-        return;
-      }
-      completer.complete(true);
-    });
+      Message("tobj_select", id),
+      handler: (event) {
+        if (!event.data["success"]) {
+          showErrorPopup("error", event.data["message"]);
+          sendLog("can't modify rn");
+          completer.complete(false);
+          return;
+        }
+        completer.complete(true);
+      },
+    );
 
     return completer.future;
   }
@@ -482,9 +456,7 @@ abstract class TableObject {
     final completer = Completer<bool>();
 
     spaceConnector.sendAction(
-      Message("tobj_unselect", <String, dynamic>{
-        "id": id,
-      }),
+      Message("tobj_unselect", id),
       handler: (event) {
         if (!event.data["success"]) {
           sendLog("can't modify rn");
@@ -509,9 +481,7 @@ abstract class TableObject {
     currentlyModifying = true;
     dataBeforeQueue = getData();
     spaceConnector.sendAction(
-      Message("tobj_mqueue", {
-        "id": id,
-      }),
+      Message("tobj_mqueue", id),
       handler: (event) {
         if (!event.data["success"]) {
           showErrorPopup("error", event.data["message"]);

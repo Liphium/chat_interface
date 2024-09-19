@@ -2,11 +2,11 @@ part of 'message_feed.dart';
 
 class MessageSendHelper {
   static final currentDraft = Rx<MessageDraft?>(null);
-  static final drafts = <String, MessageDraft>{}; // ConversationId, Message draft
+  static final drafts = <LPHAddress, MessageDraft>{}; // ConversationId -> Message draft
 
   /// Add a reply to the current message draft
   static void addReplyToCurrentDraft(Message message) {
-    currentDraft.value?.answer.value = AnswerData(message.id, message.senderAccount, message.content, message.attachments);
+    currentDraft.value?.answer.value = AnswerData(message.id, message.senderAddress, message.content, message.attachments);
   }
 
   /// Add a file to the current message draft
@@ -42,11 +42,11 @@ class MessageSendHelper {
 
 class AnswerData {
   final String id;
-  final String senderAccount;
+  final LPHAddress senderAddress;
   final String content;
   final List<String> attachments;
 
-  AnswerData(this.id, this.senderAccount, this.content, this.attachments);
+  AnswerData(this.id, this.senderAddress, this.content, this.attachments);
 
   static String answerContent(MessageType type, String content, List<String> attachments, {FriendController? controller}) {
     switch (type) {
@@ -72,7 +72,7 @@ class AnswerData {
 }
 
 class MessageDraft {
-  final String conversationId;
+  final LPHAddress conversationId;
   final answer = Rx<AnswerData?>(null);
   String message;
   final files = <UploadData>[].obs;
@@ -89,7 +89,14 @@ class UploadData {
 }
 
 /// Send a text message with files attached (files will be uploaded)
-void sendTextMessageWithFiles(RxBool loading, String conversationId, String message, List<UploadData> files, String answer, Function() callback) async {
+void sendTextMessageWithFiles(
+  RxBool loading,
+  LPHAddress conversationId,
+  String message,
+  List<UploadData> files,
+  String answer,
+  Function() callback,
+) async {
   if (loading.value) {
     return;
   }
@@ -113,7 +120,14 @@ void sendTextMessageWithFiles(RxBool loading, String conversationId, String mess
 }
 
 /// Send a text message with attachments
-void sendTextMessage(RxBool loading, String conversationId, String message, List<String> attachments, String answer, Function() callback) async {
+void sendTextMessage(
+  RxBool loading,
+  LPHAddress conversationId,
+  String message,
+  List<String> attachments,
+  String answer,
+  Function() callback,
+) async {
   if (loading.value) {
     return;
   }
@@ -149,7 +163,15 @@ void sendTextMessage(RxBool loading, String conversationId, String message, List
   sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), answer, callback);
 }
 
-void sendActualMessage(RxBool loading, String conversationId, MessageType type, List<String> attachments, String message, String answer, Function() callback) async {
+void sendActualMessage(
+  RxBool loading,
+  LPHAddress conversationId,
+  MessageType type,
+  List<String> attachments,
+  String message,
+  String answer,
+  Function() callback,
+) async {
   if (message.isEmpty && attachments.isEmpty) {
     callback.call();
     return;
@@ -159,7 +181,18 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   // Encrypt message with signature
   ConversationController controller = Get.find();
   final conversation = controller.conversations[conversationId]!;
-  final stamp = DateTime.now().millisecondsSinceEpoch;
+
+  // Grab a new timestamp from the server
+  var json = await postNodeJSON("/conversations/timestamp", {
+    "token": conversation.token.toMap(),
+  });
+  if (!json["success"]) {
+    showErrorPopup("error", json["error"]);
+    return;
+  }
+
+  // Use the timestamp from the json (to prevent desynchronization and stuff)
+  final stamp = (json["stamp"] as num).toInt();
   final content = jsonEncode(<String, dynamic>{
     "c": message,
     "t": type.index,
@@ -169,23 +202,18 @@ void sendActualMessage(RxBool loading, String conversationId, MessageType type, 
   final info = SymmetricSequencedInfo.builder(content, stamp).finish(conversation.key);
 
   // Send message
-  final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
-    "conversation": conversation.id,
-    "token_id": conversation.token.id,
-    "token": conversation.token.token,
-    "timestamp": stamp,
-    "data": info,
+  json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
+    "token": conversation.token.toMap(),
+    "data": {
+      "token": json["token"],
+      "data": info,
+    }
   });
 
   callback.call();
   if (!json["success"]) {
     loading.value = false;
-    String message = "conv_msg_create.${json["error"]}";
-    if (json["message"] == "server.error") {
-      message = "server.error";
-    }
-
-    showErrorPopup("error", message);
+    showErrorPopup("error", json["error"]);
     return;
   }
 

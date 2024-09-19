@@ -2,6 +2,7 @@ import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -25,6 +26,9 @@ class SettingsSetup extends Setup {
 
     // Changes the color theme
     Get.find<ThemeManager>().changeTheme(getThemeData());
+
+    // Initialize the tabletop settings
+    TabletopSettings.initSettings();
 
     // Delete old logs
     final list = await LogManager.loggingDirectory!.list().toList();

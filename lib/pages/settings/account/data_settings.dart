@@ -3,18 +3,17 @@ import 'package:chat_interface/controller/conversation/townsquare_controller.dar
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
-import 'package:chat_interface/pages/settings/account/change_password_window.dart';
 import 'package:chat_interface/pages/settings/account/log_out_window.dart';
 import 'package:chat_interface/pages/settings/account/key_requests_window.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
-import 'package:chat_interface/theme/components/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/profile_picture_window.dart';
-import 'package:chat_interface/util/snackbar.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -151,7 +150,7 @@ class DataSettingsPage extends StatelessWidget {
                   ),
                 ),
                 UserAvatar(
-                  id: StatusController.ownAccountId,
+                  id: StatusController.ownAddress,
                   size: 100,
                 )
               ],
@@ -261,37 +260,6 @@ class DataSettingsPage extends StatelessWidget {
             ),
           ),
           verticalSpacing(defaultSpacing),
-
-          //* Password
-          Container(
-            decoration: BoxDecoration(
-              color: Get.theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(sectionSpacing),
-            ),
-            padding: const EdgeInsets.all(sectionSpacing),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("password".tr, style: Get.theme.textTheme.labelMedium),
-                      verticalSpacing(elementSpacing),
-                      Text("settings.data.password.description".tr, style: Get.theme.textTheme.bodyMedium),
-                    ],
-                  ),
-                ),
-                horizontalSpacing(defaultSpacing),
-                FJElevatedButton(
-                  smallCorners: true,
-                  onTap: () => showModal(const ChangePasswordWindow()),
-                  child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
-                ),
-              ],
-            ),
-          ),
-          verticalSpacing(sectionSpacing),
 
           /*
           / Email
