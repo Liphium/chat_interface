@@ -612,7 +612,7 @@ class Message {
     if (type != MessageType.system) {
       type = MessageType.values[contentJson["t"] ?? 0];
       if (type == MessageType.text) {
-        content = utf8.decode(base64Decode(contentJson["c"]));
+        content = contentJson["c"];
       } else {
         content = contentJson["c"];
       }

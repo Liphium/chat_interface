@@ -7,7 +7,6 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -20,7 +19,7 @@ class UnknownController extends GetxController {
   Future<UnknownAccount?> getUnknownProfileByName(String name) async {
     // Ignore if it is the name of the current account
     if (Get.find<StatusController>().name.value == name) {
-      return UnknownAccount(StatusController.ownAddress, name, UTFString(""), signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
+      return UnknownAccount(StatusController.ownAddress, name, "", signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
     }
 
     // Get account
@@ -38,7 +37,7 @@ class UnknownController extends GetxController {
     final profile = UnknownAccount(
       LPHAddress(basePath, json["id"]),
       json["name"],
-      UTFString.untransform(json["display_name"]),
+      json["display_name"],
       unpackagePublicKey(json["sg"]),
       unpackagePublicKey(json["pub"]),
     );
@@ -53,7 +52,7 @@ class UnknownController extends GetxController {
   Future<UnknownAccount?> loadUnknownProfile(LPHAddress address) async {
     // Ignore if it is the id of the current account
     if (address == StatusController.ownAddress) {
-      return UnknownAccount(StatusController.ownAddress, "", UTFString(""), signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
+      return UnknownAccount(StatusController.ownAddress, "", "", signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
     }
 
     // If the id matches a friend, use that instead
@@ -90,7 +89,7 @@ class UnknownController extends GetxController {
     final profile = UnknownAccount(
       address,
       json["name"],
-      UTFString.untransform(json["display_name"]),
+      json["display_name"],
       unpackagePublicKey(json["sg"]),
       unpackagePublicKey(json["pub"]),
     );
@@ -105,7 +104,7 @@ class UnknownController extends GetxController {
 class UnknownAccount {
   final LPHAddress id;
   final String name;
-  final UTFString displayName;
+  final String displayName;
 
   final Uint8List signatureKey;
   final Uint8List publicKey;
@@ -118,7 +117,7 @@ class UnknownAccount {
     return UnknownAccount(
       LPHAddress.from(data.id),
       fromDbEncrypted(data.name),
-      UTFString.untransform(fromDbEncrypted(data.displayName)),
+      fromDbEncrypted(data.displayName),
       unpackagePublicKey(keys["sg"]),
       unpackagePublicKey(keys["pub"]),
     );
@@ -137,7 +136,7 @@ class UnknownAccount {
   UnknownProfileData toData() => UnknownProfileData(
         id: id.encode(),
         name: dbEncrypted(name),
-        displayName: dbEncrypted(displayName.transform()),
+        displayName: dbEncrypted(displayName),
         keys: dbEncrypted(jsonEncode({
           "sg": packagePublicKey(signatureKey),
           "pub": packagePublicKey(publicKey),

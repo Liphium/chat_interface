@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +65,15 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
             onTap: () {
               Clipboard.setData(ClipboardData(text: conversationToken.tokenId.encode()));
               Get.back();
+            },
+            loading: false.obs,
+          ),
+          verticalSpacing(elementSpacing),
+          ProfileButton(
+            icon: Icons.copy,
+            label: "message.info.read_old".tr,
+            onTap: () {
+              showSuccessPopup("success", utf8.decode(base64Decode(widget.message.content)));
             },
             loading: false.obs,
           ),

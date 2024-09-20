@@ -203,7 +203,7 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
     return <String, dynamic>{"success": false, "code": res.statusCode, "error": defaultError.tr};
   }
 
-  return jsonDecode(String.fromCharCodes(decryptAES(res.bodyBytes, aesBase64)));
+  return jsonDecode(utf8.decode(decryptAES(res.bodyBytes, aesBase64)));
 }
 
 String localeString(Locale locale) {

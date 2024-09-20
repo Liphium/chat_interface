@@ -10,7 +10,6 @@ import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
@@ -36,7 +35,7 @@ class AttachmentController extends GetxController {
     final bytes = await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
-    final name = encryptSymmetric(UTFString(fileName ?? path.basename(data.file.path)).transform(), key);
+    final name = encryptSymmetric(fileName ?? path.basename(data.file.path), key);
 
     // Upload file
     final formData = dio_rs.FormData.fromMap({
@@ -77,7 +76,7 @@ class AttachmentController extends GetxController {
     final container = AttachmentContainer(
       type,
       json["id"],
-      containerNameNull ? null : UTFString(fileName ?? path.basename(data.file.path)),
+      containerNameNull ? null : fileName ?? path.basename(data.file.path),
       json["url"],
       key,
     );
@@ -352,14 +351,14 @@ class AttachmentContainer {
   late final AttachmentContainerType attachmentType;
   final StorageType storageType;
   final String id;
-  final UTFString? fileName;
+  final String? fileName;
   final String url;
   int? width;
   int? height;
   final SecureKey? key;
 
   // Get the file name (when name is empty it is the file id)
-  String get name => fileName?.text ?? id;
+  String get name => fileName ?? id;
 
   // Download status
   final downloading = false.obs;
@@ -424,13 +423,13 @@ class AttachmentContainer {
     return size;
   }
 
-  AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", UTFString(""), url, null);
+  AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
 
   factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
     final container = AttachmentContainer(
       type,
       json["i"],
-      json["n"] == null ? null : UTFString.untransform(json["n"]), // The name could be null
+      json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
       json["u"],
       unpackageSymmetricKey(json["k"], sodium),
     );
@@ -453,7 +452,7 @@ class AttachmentContainer {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       "i": id,
-      if (fileName != null) "n": fileName!.transform(),
+      if (fileName != null) "n": fileName!,
       "u": url,
       "k": packageSymmetricKey(key!),
       if (width != null) "w": width,

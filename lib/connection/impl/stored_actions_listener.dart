@@ -13,7 +13,6 @@ import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 
@@ -179,7 +178,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   request = Request(
     address,
     json["name"],
-    UTFString.untransform(json["dname"]),
+    json["dname"],
     "",
     KeyStorage(publicKey, signaturePub, profileKey, json["sa"]),
     DateTime.now().millisecondsSinceEpoch,

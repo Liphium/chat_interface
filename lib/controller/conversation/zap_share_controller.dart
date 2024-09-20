@@ -427,7 +427,7 @@ class ZapShareController extends GetxController {
       (event) async {
         sendLog("hi hi");
         // Parse the server sent event (Format: data: <data>\n\n)
-        final packet = String.fromCharCodes(event);
+        final packet = utf8.decode(event);
         final data = packet.substring(6).trim();
         if (!receivedInfo) {
           receivedInfo = true;

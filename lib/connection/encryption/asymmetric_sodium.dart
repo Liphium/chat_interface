@@ -45,7 +45,7 @@ DecryptionResult decryptAsymmetricAuth(Uint8List publicKey, SecureKey secretKey,
   } catch (e) {
     return DecryptionResult("", false);
   }
-  return DecryptionResult(String.fromCharCodes(decrypted), true);
+  return DecryptionResult(utf8.decode(decrypted), true);
 }
 
 String packagePublicKey(Uint8List publicKey) {
@@ -79,7 +79,7 @@ String decryptAsymmetricAnonymous(Uint8List publicKey, SecureKey secretKey, Stri
   final cipherText = base64Decode(message);
   var decrypted = "";
   try {
-    decrypted = String.fromCharCodes(sodium.crypto.box.sealOpen(
+    decrypted = utf8.decode(sodium.crypto.box.sealOpen(
       cipherText: cipherText,
       publicKey: publicKey,
       secretKey: secretKey,

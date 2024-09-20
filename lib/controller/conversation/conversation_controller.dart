@@ -255,7 +255,7 @@ class Conversation {
         MemberRole.user,
       ),
     );
-    return Get.find<FriendController>().friends[member.address]?.displayName.value.text ?? container.name;
+    return Get.find<FriendController>().friends[member.address]?.displayName.value ?? container.name;
   }
 
   /// Only works for direct messages

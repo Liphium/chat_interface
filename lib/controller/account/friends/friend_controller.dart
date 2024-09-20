@@ -21,7 +21,6 @@ import 'package:chat_interface/controller/current/steps/vault_setup.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
@@ -88,8 +87,8 @@ class FriendController extends GetxController {
     }
 
     // Set name and display name from the server
-    request.displayName = guy.displayName!;
-    request.name = guy.name!;
+    request.displayName = guy.displayName;
+    request.name = guy.name;
 
     // Remove from requests controller
     Get.find<RequestController>().deleteSentRequest(request);
@@ -154,9 +153,9 @@ class Friend {
   int updatedAt;
 
   // Display name of the friend
-  final displayName = UTFString("").obs;
+  final displayName = "".obs;
 
-  void updateDisplayName(UTFString displayName) {
+  void updateDisplayName(String displayName) {
     if (id == StatusController.ownAddress) {
       return;
     }
@@ -167,13 +166,13 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, UTFString displayName, this.vaultId, this.keyStorage, this.updatedAt, {this.unknown = false}) {
+  Friend(this.id, this.name, String displayName, this.vaultId, this.keyStorage, this.updatedAt, {this.unknown = false}) {
     this.displayName.value = displayName;
   }
 
   /// The friend for a system component (used in system messages for members)
   factory Friend.system() {
-    return Friend(LPHAddress(basePath, "system"), "system", UTFString("system"), "", KeyStorage.empty(), 0);
+    return Friend(LPHAddress(basePath, "system"), "system", "system", "", KeyStorage.empty(), 0);
   }
 
   /// Own account as a friend (used to make implementations simpler)
@@ -196,7 +195,7 @@ class Friend {
     if (address.id.length >= 5) {
       shownId = address.id.substring(0, 5);
     }
-    final friend = Friend(address, "lph-$shownId", UTFString("lph-$shownId"), "", KeyStorage.empty(), 0);
+    final friend = Friend(address, "lph-$shownId", "lph-$shownId", "", KeyStorage.empty(), 0);
     friend.unknown = true;
     return friend;
   }
@@ -206,7 +205,7 @@ class Friend {
     return Friend(
       LPHAddress.from(data.id),
       fromDbEncrypted(data.name),
-      UTFString.untransform(fromDbEncrypted(data.displayName)),
+      fromDbEncrypted(data.displayName),
       fromDbEncrypted(data.vaultId),
       KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
       data.updatedAt.toInt(),
@@ -218,7 +217,7 @@ class Friend {
     return Friend(
       LPHAddress.from(json["id"]),
       json["name"],
-      UTFString.untransform(json["dname"]),
+      json["dname"],
       "",
       KeyStorage.fromJson(json),
       updatedAt,
@@ -231,7 +230,7 @@ class Friend {
       "rq": false, // If it is a request or not (requests are stored in the same place)
       "id": id.encode(),
       "name": name,
-      "dname": displayName.value.transform(),
+      "dname": displayName.value,
     };
     reqPayload.addAll(keyStorage.toJson());
 
@@ -244,7 +243,7 @@ class Friend {
   FriendData entity() => FriendData(
         id: id.encode(),
         name: dbEncrypted(name),
-        displayName: dbEncrypted(displayName.value.transform()),
+        displayName: dbEncrypted(displayName.value),
         vaultId: dbEncrypted(vaultId),
         keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
         updatedAt: BigInt.from(updatedAt),

@@ -42,7 +42,7 @@ class _FriendButtonState extends State<FriendButton> {
                   Icon(Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                   horizontalSpacing(defaultSpacing),
                   Text(
-                    widget.friend.displayName.value.text,
+                    widget.friend.displayName.value,
                     style: Get.theme.textTheme.labelMedium,
                   ),
                   if (widget.friend.id.server != basePath)

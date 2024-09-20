@@ -1,5 +1,4 @@
 import 'package:chat_interface/pages/status/error/error_container.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/ssr/ssr.dart';
@@ -109,11 +108,7 @@ class _SSRRendererState extends State<SSRRenderer> {
         obscureText: json["hidden"],
         hintText: json["placeholder"],
         onChange: (value) {
-          if (json["utf8"] ?? false) {
-            widget.ssr.currentInputValues[json["name"]] = UTFString(value).transform();
-          } else {
-            widget.ssr.currentInputValues[json["name"]] = value;
-          }
+          widget.ssr.currentInputValues[json["name"]] = value;
         },
       ),
     );

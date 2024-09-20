@@ -116,7 +116,7 @@ void sendTextMessageWithFiles(
   }
 
   loading.value = false;
-  sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), answer, callback);
+  sendActualMessage(loading, conversationId, MessageType.text, attachments, message, answer, callback);
 }
 
 /// Send a text message with attachments
@@ -160,7 +160,7 @@ void sendTextMessage(
   }
 
   loading.value = true;
-  sendActualMessage(loading, conversationId, MessageType.text, attachments, base64Encode(utf8.encode(message)), answer, callback);
+  sendActualMessage(loading, conversationId, MessageType.text, attachments, message, answer, callback);
 }
 
 void sendActualMessage(

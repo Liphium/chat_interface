@@ -50,7 +50,8 @@ String packageRSAPrivateKey(RSAPrivateKey key) {
 /// Unpackage a private key from a string.
 RSAPrivateKey unpackageRSAPrivateKey(String key) {
   final parts = key.split(":");
-  return RSAPrivateKey(BigInt.parse(parts[0], radix: 36), BigInt.parse(parts[2], radix: 36), BigInt.parse(parts[3], radix: 36), BigInt.parse(parts[4], radix: 36));
+  return RSAPrivateKey(
+      BigInt.parse(parts[0], radix: 36), BigInt.parse(parts[2], radix: 36), BigInt.parse(parts[3], radix: 36), BigInt.parse(parts[4], radix: 36));
 }
 
 /// Turn a public and private key into an [AsymmetricKeyPair].
@@ -111,7 +112,7 @@ void testEncryptionRSA() {
   final data = file.readAsBytesSync();
 
   final decrypted = decryptRSA(data, priv);
-  final decryptedString = String.fromCharCodes(decrypted);
+  final decryptedString = utf8.decode(decrypted);
   sendLog(decryptedString);
 
   final key = randomAESKey();

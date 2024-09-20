@@ -51,7 +51,7 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                   visible: !widget.last,
                   replacement: const SizedBox(width: 34), //* Show timestamp instead
                   child: Tooltip(
-                    message: sender.displayName.value.text,
+                    message: sender.displayName.value,
                     child: UserAvatar(id: sender.id, size: 34),
                   ),
                 ),
@@ -145,7 +145,8 @@ Widget renderMiniAvatars(int amount) {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
                   child: Center(
-                    child: Text("+${amount - realAmount + 1}", style: Get.theme.textTheme.labelSmall!.copyWith(color: Get.theme.colorScheme.onPrimary)),
+                    child:
+                        Text("+${amount - realAmount + 1}", style: Get.theme.textTheme.labelSmall!.copyWith(color: Get.theme.colorScheme.onPrimary)),
                   ),
                 ),
               )

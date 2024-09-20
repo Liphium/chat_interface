@@ -11,7 +11,6 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -43,7 +42,7 @@ class ProfileHelper {
     }
 
     // Check if there is a new display name
-    final displayName = UTFString.untransform(json["display_name"]);
+    final displayName = json["display_name"];
     if (displayName != friend.displayName.value) {
       friend.updateDisplayName(displayName);
     }

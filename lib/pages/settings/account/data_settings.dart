@@ -210,9 +210,9 @@ class DataSettingsPage extends StatelessWidget {
                     verticalSpacing(elementSpacing),
                     Obx(
                       () => Text(
-                        controller.displayName.value.text.toLowerCase() == controller.name.value.toLowerCase()
+                        controller.displayName.value.toLowerCase() == controller.name.value.toLowerCase()
                             ? List.generate(controller.name.value.length, (index) => "*").join("")
-                            : controller.displayName.value.text,
+                            : controller.displayName.value,
                         style: Get.theme.textTheme.bodyMedium,
                       ),
                     ),

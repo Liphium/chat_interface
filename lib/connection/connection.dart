@@ -101,7 +101,7 @@ class Connector {
         }
 
         // Decode the message
-        Event event = Event.fromJson(String.fromCharCodes(msg));
+        Event event = Event.fromJson(utf8.decode(msg));
 
         // Check if it is a response
         if (event.name.startsWith("res:")) {
