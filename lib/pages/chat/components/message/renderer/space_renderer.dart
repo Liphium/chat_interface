@@ -216,7 +216,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                                     return Positioned(
                                       left: index * 25,
                                       child: Tooltip(
-                                        message: info.friends[index].displayName.value.text,
+                                        message: info.friends[index].displayName.value,
                                         child: SizedBox(
                                           width: 40,
                                           height: 40,

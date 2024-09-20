@@ -4,7 +4,6 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -202,7 +201,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(file.name.text, style: Get.theme.textTheme.labelMedium),
+                                      Text(file.name, style: Get.theme.textTheme.labelMedium),
                                       Text(formatFileSize(file.size), style: Get.theme.textTheme.bodyMedium),
                                     ],
                                   ),
@@ -351,7 +350,7 @@ class _PageSwitcherState extends State<PageSwitcher> {
 
 class FileContainer {
   String id;
-  UTFString name;
+  String name;
   String type;
   String key;
   String account;
@@ -383,7 +382,7 @@ class FileContainer {
 
     return FileContainer(
       json['id'],
-      UTFString.untransform(name),
+      name,
       json['type'],
       json['key'],
       json['account'],

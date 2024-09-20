@@ -88,7 +88,7 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                                                         return Padding(
                                                           padding: const EdgeInsets.only(right: elementSpacing),
                                                           child: Tooltip(
-                                                            message: member?.friend.displayName.value.text ?? "Unknown",
+                                                            message: member?.friend.displayName.value ?? "Unknown",
                                                             child: SizedBox(
                                                               width: 40,
                                                               height: 40,

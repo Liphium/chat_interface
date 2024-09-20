@@ -149,7 +149,7 @@ class _ProfileState extends State<Profile> {
                   horizontalSpacing(defaultSpacing),
                   Flexible(
                     child: Text(
-                      widget.friend.displayName.value.text,
+                      widget.friend.displayName.value,
                       overflow: TextOverflow.ellipsis,
                       style: Get.theme.textTheme.titleMedium,
                     ),

@@ -121,7 +121,7 @@ class _FriendsPageState extends State<FriendsPage> {
 
                         Obx(() {
                           final found = friendController.friends.values.any((friend) =>
-                              (friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
+                              (friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
                                   friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
                               friend.id != StatusController.ownAddress);
                           return Animate(
@@ -279,7 +279,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                       return Obx(
                                         () {
                                           final visible = query.value.isEmpty ||
-                                              friend.displayName.value.text.toLowerCase().contains(query.value.toLowerCase()) ||
+                                              friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
                                               friend.name.toLowerCase().contains(query.value.toLowerCase());
 
                                           return Animate(

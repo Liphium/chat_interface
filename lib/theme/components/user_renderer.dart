@@ -65,7 +65,7 @@ class _UserAvatarState extends State<UserAvatar> {
               child: SelectionContainer.disabled(
                 child: Center(
                   child: Text(
-                    friend.displayName.value.text.substring(0, 1),
+                    friend.displayName.value.substring(0, 1),
                     style: Get.theme.textTheme.labelMedium!.copyWith(
                       fontSize: (widget.size ?? 45) * 0.5,
                       fontWeight: FontWeight.bold,
@@ -108,7 +108,7 @@ class UserRenderer extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Flexible(child: Text(friend.displayName.value.text, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium)),
+                  Flexible(child: Text(friend.displayName.value, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium)),
                   if (friend.id.server != basePath)
                     Padding(
                       padding: const EdgeInsets.only(left: defaultSpacing),

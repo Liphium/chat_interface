@@ -107,6 +107,7 @@ class ChatPageTranslations extends Translations {
           'message.info.copy_id': 'Copy ID',
           'message.info.copy_signature': 'Copy signature',
           'message.info.copy_sender': 'Copy sender ID',
+          'message.info.read_old': 'Read old message',
           'message.empty': 'An empty message.',
 
           // Conversation info

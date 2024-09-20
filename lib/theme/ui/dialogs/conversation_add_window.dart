@@ -171,7 +171,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                         final member = friendController.friends.values.firstWhere(
                           (element) =>
                               (element.name.toLowerCase().contains(value.toLowerCase()) ||
-                                  element.displayName.value.text.toLowerCase().contains(value.toLowerCase())) &&
+                                  element.displayName.value.toLowerCase().contains(value.toLowerCase())) &&
                               element.id != StatusController.ownAddress,
                           orElse: () => Friend.unknown(LPHAddress.error()),
                         );
@@ -214,7 +214,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     final search = _search.value;
                     if (search.isNotEmpty &&
                         !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
-                            friend.displayName.value.text.toLowerCase().contains(search.toLowerCase()))) {
+                            friend.displayName.value.toLowerCase().contains(search.toLowerCase()))) {
                       return const SizedBox();
                     }
 
@@ -246,7 +246,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                                     size: 35,
                                   ),
                                   horizontalSpacing(defaultSpacing),
-                                  Obx(() => Text(friend.displayName.value.text, style: theme.textTheme.labelLarge)),
+                                  Obx(() => Text(friend.displayName.value, style: theme.textTheme.labelLarge)),
                                 ],
                               ),
                             ),

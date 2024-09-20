@@ -65,7 +65,7 @@ class _RequestButtonState extends State<RequestButton> {
                 children: [
                   Icon(Icons.email, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                   horizontalSpacing(defaultSpacing),
-                  Text(widget.request.displayName.text, style: Get.theme.textTheme.titleMedium),
+                  Text(widget.request.displayName, style: Get.theme.textTheme.titleMedium),
                   if (widget.request.id.server != basePath)
                     Padding(
                       padding: const EdgeInsets.only(left: defaultSpacing),

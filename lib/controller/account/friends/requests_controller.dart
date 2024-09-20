@@ -10,7 +10,6 @@ import 'package:chat_interface/controller/current/steps/friends_setup.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_setup.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -103,11 +102,11 @@ void newFriendRequest(String name, Function(String) success) async {
   await showConfirmPopup(ConfirmWindow(
     title: "request.confirm.title".tr,
     text: "request.confirm.text".trParams(<String, String>{
-      "username": "${profile.displayName!.text} (${profile.name!})",
+      "username": "${profile.displayName} (${profile.name})",
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(controller, profile!.name!, profile.displayName!, profile.id, profile.publicKey, profile.signatureKey, success);
+      sendFriendRequest(controller, profile!.name, profile.displayName, profile.id, profile.publicKey, profile.signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -122,7 +121,7 @@ void newFriendRequest(String name, Function(String) success) async {
 void sendFriendRequest(
   StatusController controller,
   String name,
-  UTFString displayName,
+  String displayName,
   LPHAddress address,
   Uint8List publicKey,
   Uint8List signatureKey,
@@ -138,7 +137,7 @@ void sendFriendRequest(
   final payload = storedAction("fr_rq", <String, dynamic>{
     "ad": StatusController.ownAddress.encode(),
     "name": controller.name.value,
-    "dname": controller.displayName.value.transform(),
+    "dname": controller.displayName.value,
     "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, name),
     "pub": packagePublicKey(asymmetricKeyPair.publicKey),
     "sg": packagePublicKey(signatureKeyPair.publicKey),
@@ -194,7 +193,7 @@ void sendFriendRequest(
 class Request {
   final LPHAddress id;
   String name;
-  UTFString displayName;
+  String displayName;
   String vaultId;
   int updatedAt;
   final KeyStorage keyStorage;
@@ -207,7 +206,7 @@ class Request {
     return Request(
       LPHAddress.from(data.id),
       fromDbEncrypted(data.name),
-      UTFString.untransform(fromDbEncrypted(data.displayName)),
+      fromDbEncrypted(data.displayName),
       fromDbEncrypted(data.vaultId),
       KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
       data.updatedAt.toInt(),
@@ -219,7 +218,7 @@ class Request {
     return Request(
       LPHAddress.from(json["id"]),
       json["name"],
-      UTFString.untransform(json["display_name"]),
+      json["display_name"],
       "",
       KeyStorage.fromJson(json),
       updatedAt,
@@ -233,7 +232,7 @@ class Request {
       "id": id.encode(),
       "self": self,
       "name": name,
-      "display_name": displayName.transform(),
+      "display_name": displayName,
     };
     reqPayload.addAll(keyStorage.toJson());
 
@@ -244,7 +243,7 @@ class Request {
   RequestData entity(bool self) => RequestData(
         id: id.encode(),
         name: dbEncrypted(name),
-        displayName: dbEncrypted(displayName.transform()),
+        displayName: dbEncrypted(displayName),
         vaultId: dbEncrypted(vaultId),
         keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
         self: self,

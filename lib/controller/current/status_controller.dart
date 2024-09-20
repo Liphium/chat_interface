@@ -11,7 +11,6 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_setup.dart';
-import 'package:chat_interface/standards/unicode_string.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -34,7 +33,7 @@ class StatusController extends GetxController {
     });
   }
 
-  final displayName = UTFString("not-set").obs;
+  final displayName = "not-set".obs;
   final name = 'not-set'.obs;
 
   // Status message
