@@ -16,7 +16,7 @@ class UpdateSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    if (!checkVersion || isDebug) {
+    if (!checkVersion) {
       return null;
     }
 
@@ -146,11 +146,6 @@ void installApp(RxString status, ReleaseData data) async {
     step = "add to start";
     if (GetPlatform.isWindows) {
       final shortcutPath = path.join("C:/ProgramData/Microsoft/Windows/Start Menu/Programs", "Liphium.lnk");
-      final shortcutFile = File(shortcutPath);
-      if (await shortcutFile.exists()) {
-        step = "delete current";
-        await shortcutFile.delete();
-      }
 
       // Execute a powershell command to create a shortcut (dart doesn't have support for this..)
       step = "execute powershell command";
@@ -171,8 +166,6 @@ void installApp(RxString status, ReleaseData data) async {
       if (result.exitCode != 0) {
         status.value = "Shortcut couldn't be created (${result.exitCode})";
       }
-    } else if (GetPlatform.isLinux) {
-      // TODO: Make compatible with Linux
     }
 
     // Restart the setup
