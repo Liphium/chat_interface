@@ -53,7 +53,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
   void getStorageData() async {
     final json = await postAuthorizedJSON("/account/files/storage", {});
     if (!json["success"]) {
-      storageLine.value = json["error"].tr;
+      storageLine.value = json["error"];
       return;
     }
     storageLine.value = "settings.file.uploaded.description".trParams({
@@ -148,7 +148,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
               PageSwitcher(
                 loading: pageLoading,
                 currentPage: currentPage,
-                fileCount: totalCount,
+                count: totalCount,
                 page: (page) => goToPage(page),
               ),
               verticalSpacing(defaultSpacing),
@@ -253,7 +253,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
               PageSwitcher(
                 loading: pageLoading,
                 currentPage: currentPage,
-                fileCount: totalCount,
+                count: totalCount,
                 page: (page) => goToPage(page),
               ),
               verticalSpacing(defaultSpacing),
@@ -267,14 +267,14 @@ class _ConversationsPageState extends State<ServerFileViewer> {
 
 class PageSwitcher extends StatefulWidget {
   final RxInt currentPage;
-  final RxInt fileCount;
+  final RxInt count;
   final RxBool loading;
   final Function(int) page;
 
   const PageSwitcher({
     super.key,
     required this.currentPage,
-    required this.fileCount,
+    required this.count,
     required this.loading,
     required this.page,
   });
@@ -284,7 +284,7 @@ class PageSwitcher extends StatefulWidget {
 }
 
 class _PageSwitcherState extends State<PageSwitcher> {
-  int getMaxPage() => (widget.fileCount.value / 20).ceil();
+  int getMaxPage() => (widget.count.value / 20).ceil();
 
   @override
   Widget build(BuildContext context) {

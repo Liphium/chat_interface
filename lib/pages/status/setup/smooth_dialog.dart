@@ -45,6 +45,19 @@ class SmoothDialogController {
     }
     transitionComplete = Future.delayed(750.ms);
   }
+
+  void transitionToContinuos(Widget widget) async {
+    await transitionComplete;
+    direction = !direction;
+    final widgetToClone = widgetTwo.value;
+    widgetOne.value = widgetToClone;
+    widgetTwo.value = widget;
+    _two.value = 0;
+    _two.animateTo(1, duration: 750.ms, curve: curve);
+    _one.value = 1;
+    _one.animateBack(0.0, duration: 750.ms, curve: curve);
+    transitionComplete = Future.delayed(750.ms);
+  }
 }
 
 class SmoothDialog extends StatefulWidget {
@@ -160,7 +173,10 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
 class SmoothDialogWindow extends StatefulWidget {
   final SmoothDialogController controller;
 
-  const SmoothDialogWindow({super.key, required this.controller});
+  const SmoothDialogWindow({
+    super.key,
+    required this.controller,
+  });
 
   @override
   State<SmoothDialogWindow> createState() => _SmoothDialogWindowState();
@@ -260,6 +276,92 @@ class _SmoothDialogWindowState extends State<SmoothDialogWindow> with TickerProv
           ),
         ),
       ),
+    );
+  }
+}
+
+class SmoothBox extends StatefulWidget {
+  final SmoothDialogController controller;
+
+  const SmoothBox({
+    super.key,
+    required this.controller,
+  });
+
+  @override
+  State<SmoothBox> createState() => _SmoothBoxState();
+}
+
+class _SmoothBoxState extends State<SmoothBox> with TickerProviderStateMixin {
+  late AnimationController _one, _two;
+
+  @override
+  void initState() {
+    _one = AnimationController(vsync: this, duration: 2000.ms);
+    _two = AnimationController(vsync: this, duration: 2000.ms);
+    _one.stop();
+    _one.value = 0;
+    _two.stop();
+    _two.value = 1;
+    widget.controller.init(_one, _two);
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _one.dispose();
+    _two.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Animate(
+          controller: _one,
+          autoPlay: false,
+          effects: [
+            ExpandEffect(
+              axis: Axis.vertical,
+              alignment: Alignment.bottomCenter,
+            ),
+            const FadeEffect(
+              begin: 0,
+              end: 1,
+              curve: Curves.linear,
+            ),
+          ],
+          child: Obx(
+            () => SizedBox(
+              key: ValueKey(widget.controller.keyOne),
+              child: widget.controller.widgetOne.value ?? const SizedBox(),
+            ),
+          ),
+        ),
+        Animate(
+          controller: _two,
+          autoPlay: false,
+          effects: [
+            ExpandEffect(
+              axis: Axis.vertical,
+              alignment: Alignment.topCenter,
+            ),
+            const FadeEffect(
+              begin: 0,
+              end: 1,
+            ),
+          ],
+          child: Obx(
+            () => SizedBox(
+              key: ValueKey(widget.controller.keyTwo),
+              child: widget.controller.widgetTwo.value!,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

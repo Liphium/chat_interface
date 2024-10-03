@@ -83,7 +83,7 @@ class _FJTextFieldState extends State<FJTextField> {
               children: [
                 if (widget.prefixIcon != null)
                   Padding(
-                    padding: const EdgeInsets.only(right: defaultSpacing, left: elementSpacing),
+                    padding: const EdgeInsets.only(right: defaultSpacing, left: 0),
                     child: Icon(
                       widget.prefixIcon,
                       color: Get.theme.colorScheme.onPrimary,

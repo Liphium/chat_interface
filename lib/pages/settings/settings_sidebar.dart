@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -91,6 +92,10 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: current.categories.map((element) {
                                   if (!element.mobile && GetPlatform.isMobile) {
+                                    return const SizedBox();
+                                  }
+
+                                  if (!StatusController.permissions.contains("admin") && element.admin) {
                                     return const SizedBox();
                                   }
 

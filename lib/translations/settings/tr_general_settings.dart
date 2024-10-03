@@ -13,6 +13,8 @@ class GeneralSettingsTranslations extends Translations {
           'settings.tab.town': 'Your town',
           'settings.town': 'Town',
           'settings.town.desc': 'The capabilities of your town.',
+          'settings.accounts': 'Accounts',
+          'settings.accounts.desc': 'Manage all the accounts in your town.',
           'settings.data': 'Data',
           'settings.data.desc': 'Manage your account.',
           'settings.profile': 'Profile',

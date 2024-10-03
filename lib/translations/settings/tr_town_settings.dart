@@ -13,6 +13,24 @@ class TownSettingTranslations extends Translations {
           'settings.town.address.desc': 'This address can be used to add you as a friend by people outside of your town.',
           'settings.town.address.copied': 'Your address has been copied. Anyone can use it add you as a friend.',
 
+          // Admin accounts page
+          'settings.accounts.count': 'Accounts created (@count)',
+          'settings.accounts.none': 'No accounts found.',
+          'settings.accounts.created': 'Created on @date at @time',
+          'settings.accounts.delete.confirm': 'Do you really want to delete this account?',
+          'settings.accounts.delete.desc':
+              'This will get rid of every last thing they uploaded to your town. Please understand that conversations, messages and all chat-related content can only be deleted by the person themself because Liphium doesn\'t know which conversations you are a part of.',
+          'settings.accounts.search': 'Search accounts',
+
+          // Admin account profile
+          'settings.acc_profile.title': 'Profile for @name',
+          'settings.acc_profile.tab.info': 'Info',
+          'settings.acc_profile.tab.actions': 'Actions',
+          'settings.acc_profile.info.id': 'Account ID',
+          'settings.acc_profile.info.email': 'Email address',
+          'settings.acc_profile.info.username': 'Username',
+          'settings.acc_profile.info.display_name': 'Display name',
+
           // Tabletop settings
           'settings.tabletop.decks': 'Decks',
           'settings.tabletop.decks.error':

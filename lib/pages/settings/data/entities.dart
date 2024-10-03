@@ -4,6 +4,7 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/account/authentication_settings.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/account/invites_page.dart';
+import 'package:chat_interface/pages/settings/town/admin_accounts_page.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
@@ -31,6 +32,7 @@ enum SettingLabel {
   // Everything related to the town and its features
   town("settings.tab.town", [
     SettingCategory("town", Icons.cottage, TownSettingsPage()),
+    SettingCategory("accounts", Icons.person_search, AdminAccountsPage(), admin: true),
     SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false),
     SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage(), mobile: false),
     SettingCategory("files", Icons.folder, FileSettingsPage()),
@@ -70,9 +72,10 @@ class SettingCategory {
   final IconData icon;
   final Widget? widget;
   final bool mobile;
+  final bool admin;
   final bool displayTitle;
 
-  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true});
+  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true, this.admin = false});
 }
 
 class Setting<T> {
