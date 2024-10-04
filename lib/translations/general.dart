@@ -54,6 +54,7 @@ class GeneralTranslations extends Translations {
           'app.settings': 'App settings',
           'spaces': 'Spaces',
           'page_switcher': 'Page @count/@max',
+          'rank': 'Rank',
 
           // Placeholder
           'placeholder.domain': 'example.com',

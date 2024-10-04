@@ -4,7 +4,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class ServerStoredInfo {
@@ -15,7 +15,8 @@ class ServerStoredInfo {
 
   /// Decrypt stored stored info with own public and private key
   factory ServerStoredInfo.untransform(String transformed, {Sodium? sodium, KeyPair? ownKeyPair}) {
-    final result = decryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, transformed, sodium);
+    final result =
+        decryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, transformed, sodium);
     return ServerStoredInfo(result.message, error: !result.success);
   }
 

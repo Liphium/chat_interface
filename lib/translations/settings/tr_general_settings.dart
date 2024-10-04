@@ -46,6 +46,7 @@ class GeneralSettingsTranslations extends Translations {
           'settings.trusted_links': 'Trusted Links',
           'settings.trusted_links.desc': 'The websites you trust.',
           'settings.invites.title': 'You have @count invites left.',
+          'settings.invites.title.admin': 'You have unlimited invites left.',
           'settings.experimental': 'Experimental',
           'settings.logging': 'Logging',
           'settings.logging.desc': 'The logs the app collects.',

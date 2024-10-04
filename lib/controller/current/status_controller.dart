@@ -10,7 +10,7 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -19,6 +19,7 @@ import 'package:get/get.dart';
 class StatusController extends GetxController {
   static String ownAccountId = "";
   static List<String> permissions = [];
+  static List<RankData> ranks = [];
   static LPHAddress get ownAddress => LPHAddress(basePath, ownAccountId);
 
   Timer? _timer;
@@ -160,4 +161,34 @@ abstract class ShareContainer {
   }
 
   void onDrop() {}
+}
+
+class RankData {
+  int id;
+  String name;
+  int level;
+
+  RankData({
+    required this.id,
+    required this.name,
+    required this.level,
+  });
+
+  // Factory constructor to create Rank object from JSON
+  factory RankData.fromJson(Map<String, dynamic> json) {
+    return RankData(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      level: json['level'] as int,
+    );
+  }
+
+  // Method to convert Rank object to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'level': level,
+    };
+  }
 }

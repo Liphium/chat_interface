@@ -269,8 +269,18 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                                         showConfirmPopup(ConfirmWindow(
                                           title: "settings.accounts.delete.confirm".tr,
                                           text: "settings.accounts.delete.desc".tr,
-                                          onConfirm: () {
-                                            //account.deleteLoading.value = true;
+                                          onConfirm: () async {
+                                            account.deleteLoading.value = true;
+                                            final json = await postAuthorizedJSON("/townhall/accounts/delete", {
+                                              "account": account.id,
+                                            });
+                                            account.deleteLoading.value = false;
+
+                                            if (!json["success"]) {
+                                              showErrorPopup("error", json["error"]);
+                                              return;
+                                            }
+
                                             account.deleted.value = true;
                                           },
                                         ));

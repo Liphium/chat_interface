@@ -35,6 +35,9 @@ class AccountSetup extends ConnectionStep {
 
     // Set all permissions
     StatusController.permissions = List<String>.from(body["permissions"]);
+    for (var rankJson in body["ranks"]) {
+      StatusController.ranks.add(RankData.fromJson(rankJson));
+    }
 
     return SetupResponse();
   }

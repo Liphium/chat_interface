@@ -30,6 +30,8 @@ class TownSettingTranslations extends Translations {
           'settings.acc_profile.info.email': 'Email address',
           'settings.acc_profile.info.username': 'Username',
           'settings.acc_profile.info.display_name': 'Display name',
+          'settings.rank_change.desc':
+              'Select one of the ranks below to be the new rank of the user. The permission level of the rank is in the brackets behind the name.',
 
           // Tabletop settings
           'settings.tabletop.decks': 'Decks',
