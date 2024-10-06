@@ -63,6 +63,7 @@ class FJSlider extends StatelessWidget {
 }
 
 class FJSliderWithInput extends StatefulWidget {
+  final bool secondaryColor;
   final double value;
   final double min, max;
   final String? label;
@@ -82,6 +83,7 @@ class FJSliderWithInput extends StatefulWidget {
     this.label,
     this.transformer,
     this.reverseTransformer,
+    this.secondaryColor = false,
   });
 
   @override
@@ -131,12 +133,13 @@ class _FJSliderWithInputState extends State<FJSliderWithInput> {
             ),
           ),
           horizontalSpacing(defaultSpacing),
-          Expanded(
-            flex: 1,
+          SizedBox(
+            width: 70,
             child: FJTextField(
               animation: false,
               hintText: widget.label,
               controller: _controller,
+              secondaryColor: widget.secondaryColor,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChange: (value) {
                 if (value.isEmpty) {

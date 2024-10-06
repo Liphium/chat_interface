@@ -12,6 +12,7 @@ class TownSettingTranslations extends Translations {
           'settings.town.address': 'Your address',
           'settings.town.address.desc': 'This address can be used to add you as a friend by people outside of your town.',
           'settings.town.address.copied': 'Your address has been copied. Anyone can use it add you as a friend.',
+          'settings.town.settings': 'Town settings',
 
           // Admin accounts page
           'settings.accounts.count': 'Accounts created (@count)',

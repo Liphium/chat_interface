@@ -3,6 +3,7 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -18,6 +19,8 @@ class TownSettingsPage extends StatefulWidget {
 }
 
 class _TownSettingsPageState extends State<TownSettingsPage> {
+  final maxFileSize = 10.0.obs;
+
   @override
   Widget build(BuildContext context) {
     return SettingsPageBase(
@@ -95,6 +98,28 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
             ),
           ),
           verticalSpacing(sectionSpacing),
+
+          if (StatusController.permissions.contains("admin"))
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                //* Settings for the current town (admin only)
+                Text("settings.town.settings".tr, style: Get.theme.textTheme.labelLarge),
+                verticalSpacing(defaultSpacing),
+
+                Text("Max upload size"),
+                Obx(
+                  () => FJSliderWithInput(
+                    secondaryColor: true,
+                    min: 0,
+                    max: 100,
+                    value: maxFileSize.value,
+                    onChanged: (val) => maxFileSize.value = val,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
