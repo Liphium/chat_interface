@@ -150,6 +150,18 @@ class _FJSliderWithInputState extends State<FJSliderWithInput> {
                 finalValue = clampDouble(finalValue, widget.min, widget.max);
                 widget.onChanged!(finalValue);
               },
+              onTapOutside: (event) {
+                widget.onChangeEnd!(widget.value);
+              },
+              onSubmitted: (val) {
+                if (val.isEmpty) {
+                  return;
+                }
+                final newValue = double.parse(val);
+                var finalValue = widget.reverseTransformer?.call(newValue) ?? newValue;
+                finalValue = clampDouble(finalValue, widget.min, widget.max);
+                widget.onChangeEnd!(finalValue);
+              },
             ),
           )
         ],
