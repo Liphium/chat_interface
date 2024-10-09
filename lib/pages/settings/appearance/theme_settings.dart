@@ -91,30 +91,31 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
       _factory.value = buildColorFactoryFromSettings();
     });
 
+    if (isMobileMode()) {
+      return SettingsPageBase(
+        label: "colors",
+        child: ColorPreview(
+          factory: _factory,
+          mobile: true,
+        ),
+      );
+    }
+
     return SettingsPageBase(
       label: "colors",
-      child: LayoutBuilder(builder: (context, constraints) {
-        if (isMobileMode()) {
-          return ColorPreview(
-            factory: _factory,
-            mobile: true,
-          );
-        }
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Expanded(
+            child: ThemeSettingsElement(),
+          ),
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Expanded(
-              child: ThemeSettingsElement(),
-            ),
-
-            //* Color preview
-            Expanded(
-              child: ColorPreview(factory: _factory),
-            ),
-          ],
-        );
-      }),
+          //* Color preview
+          Expanded(
+            child: ColorPreview(factory: _factory),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -137,15 +138,17 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
         verticalSpacing(elementSpacing),
         ListSelectionSetting(settingName: ThemeSettings.themePreset, items: ThemeSettings.themePresets),
         verticalSpacing(sectionSpacing),
-        Obx(() => Visibility(
+        Obx(
+          () => Visibility(
             visible: Get.find<SettingController>().settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text("theme.custom.title".tr, style: Get.theme.textTheme.labelLarge),
                 verticalSpacing(defaultSpacing),
 
-                //* Sliders
+                // Sliders
                 const DoubleSelectionSetting(settingName: ThemeSettings.primaryHue, description: "custom.primary_hue", min: 0.0, max: 1.0),
                 verticalSpacing(defaultSpacing),
 
@@ -155,14 +158,15 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 const DoubleSelectionSetting(settingName: ThemeSettings.baseSaturation, description: "custom.base_saturation", min: 0.0, max: 1.0),
                 verticalSpacing(defaultSpacing),
 
-                //* Selections
+                // Selections
                 Text(
                   "custom.theme_mode".tr,
                 ),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
-                    settingName: ThemeSettings.themeMode,
-                    items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)]),
+                  settingName: ThemeSettings.themeMode,
+                  items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)],
+                ),
                 verticalSpacing(defaultSpacing),
 
                 Text(
@@ -173,7 +177,9 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
 
                 verticalSpacing(sectionSpacing)
               ],
-            ))),
+            ),
+          ),
+        ),
         FJElevatedButton(
           onTap: () {
             final ThemeData theme = getThemeData();
