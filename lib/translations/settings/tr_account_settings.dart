@@ -8,8 +8,8 @@ class AccountSettingsTranslations extends Translations {
           // Data settings
           'settings.data.social': 'Social features',
           'settings.data.social.text':
-              'Liphium\'s social features allow you to share things not just with your friends, but also with the people on your instance. You can chat with everyone, but therefore it\'s not encrypted, so we allow you to disable it.',
-          'data.social': 'Enable social features',
+              'Liphium\'s social features are currently in the experimental phase. They open up new ways to share information with your friends. Kind of like what other platforms are doing, but it\'s all end-to-end encrypted and private.',
+          'social.enable': 'Enable social features',
           'settings.data.profile_picture': 'Profile picture',
           'settings.data.profile_picture.select':
               'Now just zoom and move your image into the perfect spot! So it makes your beauty shine, if you even have any...',

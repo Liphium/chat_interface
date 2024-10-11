@@ -5,11 +5,12 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
+import 'package:chat_interface/pages/settings/account/data_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -187,8 +188,6 @@ class _SidebarState extends State<Sidebar> {
 
               //* Townsquare
               Obx(() {
-                final tsController = Get.find<TownsquareController>();
-                final loading = tsController.connecting.value;
                 return Animate(
                   effects: [
                     ExpandEffect(
@@ -203,22 +202,23 @@ class _SidebarState extends State<Sidebar> {
                       duration: 500.ms,
                     ),
                   ],
-                  target: tsController.enabled.value ? 1 : 0,
+                  target: Get.find<StatusController>().type.value != 3 &&
+                          (Get.find<SettingController>().settings[DataSettings.socialFeatures]!.value.value as bool? ?? false)
+                      ? 1
+                      : 0,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
                     child: Padding(
                       padding: const EdgeInsets.only(top: defaultSpacing),
                       child: Material(
-                        color: tsController.inView.value ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
+                        color: Get.find<MessageController>().currentOpenType.value == OpenTabType.townsquare
+                            ? Get.theme.colorScheme.primary
+                            : Get.theme.colorScheme.onInverseSurface,
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           hoverColor: theme.colorScheme.primary.withAlpha(150),
-                          onTap: !loading
-                              ? () {
-                                  tsController.view();
-                                }
-                              : null,
+                          onTap: () => Get.find<MessageController>().openTab(OpenTabType.townsquare),
                           child: Padding(
                             padding: const EdgeInsets.all(elementSpacing2),
                             child: Row(
@@ -235,14 +235,7 @@ class _SidebarState extends State<Sidebar> {
                                         Icon(Icons.science, size: 22, color: Get.theme.colorScheme.error),
                                       ],
                                     ),
-                                    Text(
-                                        loading
-                                            ? "townsquare.connecting".tr
-                                            : "townsquare.viewing".trParams({
-                                                "count": "0",
-                                                "total": "20",
-                                              }),
-                                        style: Get.theme.textTheme.bodySmall),
+                                    Text("10 new posts", style: Get.theme.textTheme.bodySmall),
                                   ],
                                 )
                               ],

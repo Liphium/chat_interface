@@ -58,7 +58,7 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                       children: [
                         Icon(Icons.arrow_back, color: Get.theme.colorScheme.onPrimary),
                         horizontalSpacing(defaultSpacing),
-                        Text("Back", style: Get.textTheme.labelLarge),
+                        Text("back".tr, style: Get.textTheme.labelLarge),
                       ],
                     ),
                   ),

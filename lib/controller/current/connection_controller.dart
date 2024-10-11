@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/controller/current/steps/connection_step.dart';
 import 'package:chat_interface/controller/current/steps/friends_step.dart';
@@ -79,7 +78,6 @@ class ConnectionController extends GetxController {
 
     // Run somewhere at the end
     connector.runAfterSetupQueue();
-    Get.find<TownsquareController>().updateEnabledState();
     connected.value = true;
     error.value = "";
     loading.value = false;

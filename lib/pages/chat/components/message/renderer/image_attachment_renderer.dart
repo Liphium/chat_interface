@@ -74,7 +74,7 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                 child: Center(
                   child: IconButton(
                     onPressed: () {
-                      Get.find<AttachmentController>().downloadAttachment(widget.image);
+                      Get.find<AttachmentController>().downloadAttachment(widget.image, ignoreLimit: true);
                     },
                     icon: const Icon(Icons.download, size: 40),
                   ),
@@ -82,16 +82,19 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
               );
             }
 
-            return LibraryFavoriteButton(
-              container: widget.image,
-              child: Material(
-                color: Get.theme.colorScheme.primaryContainer,
-                child: InkWell(
-                  onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.image.filePath))),
-                  child: Image.file(
-                    File(widget.image.filePath),
-                    width: width,
-                    height: height,
+            return SizedBox(
+              width: width,
+              height: height,
+              child: LibraryFavoriteButton(
+                container: widget.image,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.image.filePath))),
+                    child: Image.file(
+                      File(widget.image.filePath),
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 ),
               ),

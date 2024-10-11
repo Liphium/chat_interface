@@ -8,9 +8,10 @@ import 'package:chat_interface/connection/impl/setup_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
+import 'package:chat_interface/pages/settings/account/data_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -101,6 +102,12 @@ class StatusController extends GetxController {
     if (statusLoading.value) return false;
     statusLoading.value = true;
 
+    // Secret: Enable new social features experiment
+    if (message == "liphium.social") {
+      message = "activated";
+      Get.find<SettingController>().settings[DataSettings.socialFeatures]!.setValue(true);
+    }
+
     // Validate the status to make sure everything is fine
     connector.sendAction(
         Message("st_validate", <String, dynamic>{
@@ -112,7 +119,6 @@ class StatusController extends GetxController {
       if (event.data["success"] == true) {
         if (message != null) status.value = message;
         if (type != null) this.type.value = type;
-        Get.find<TownsquareController>().updateEnabledState();
 
         // Send the new status
         subscribeToConversations(controller: this);

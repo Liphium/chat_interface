@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
+import 'package:chat_interface/pages/chat/components/townsquare/townsquare_page.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/pages/spaces/call_rectangle.dart';
@@ -72,6 +73,8 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                     // Check if a space is selected (show the page if it is)
                     final controller = Get.find<MessageController>();
                     switch (controller.currentOpenType.value) {
+                      case OpenTabType.townsquare:
+                        return const TownsquarePage();
                       case OpenTabType.conversation:
                         if (controller.currentConversation.value == null) {
                           return Column(

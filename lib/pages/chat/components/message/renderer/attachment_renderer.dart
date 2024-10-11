@@ -258,7 +258,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
 
             return IconButton(
               onPressed: () {
-                Get.find<AttachmentController>().downloadAttachment(widget.container);
+                Get.find<AttachmentController>().downloadAttachment(widget.container, ignoreLimit: true);
               },
               icon: const Icon(Icons.download),
             );

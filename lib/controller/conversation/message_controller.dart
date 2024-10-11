@@ -8,7 +8,6 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
-import 'package:chat_interface/controller/conversation/townsquare_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
@@ -52,11 +51,13 @@ class MessageController extends GetxController {
 
   void openTab(OpenTabType type) {
     currentOpenType.value = type;
+    if (type != OpenTabType.conversation) {
+      unselectConversation();
+    }
   }
 
   void selectConversation(Conversation conversation) async {
     currentOpenType.value = OpenTabType.conversation;
-    Get.find<TownsquareController>().close();
     loaded.value = false;
     topReached = false;
     if (isMobileMode()) {
