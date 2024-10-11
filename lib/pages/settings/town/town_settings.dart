@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
+import 'package:chat_interface/pages/settings/town/town_admin_settings.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -18,6 +19,8 @@ class TownSettingsPage extends StatefulWidget {
 }
 
 class _TownSettingsPageState extends State<TownSettingsPage> {
+  final maxFileSize = 10.0.obs;
+
   @override
   Widget build(BuildContext context) {
     return SettingsPageBase(
@@ -95,6 +98,8 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
             ),
           ),
           verticalSpacing(sectionSpacing),
+
+          if (StatusController.permissions.contains("admin")) const TownAdminSettings(),
         ],
       ),
     );

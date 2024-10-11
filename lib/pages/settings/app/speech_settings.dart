@@ -343,7 +343,7 @@ class _MicrophoneTabState extends State<MicrophoneTab> {
                     value: clampDouble(sens.value.value, -70, 0),
                     min: -70,
                     max: 0,
-                    secondaryTrackValue: _sensitivity.value,
+                    secondaryTrackValue: -35,
                     onChanged: (value) => sens.value.value = value,
                     onChangeEnd: (value) {
                       sens.setValue(value);
@@ -462,6 +462,7 @@ class MicrophoneSensitivitySlider extends StatelessWidget {
         trackHeight: 6,
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
             child: LayoutBuilder(

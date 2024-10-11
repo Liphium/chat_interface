@@ -7,6 +7,7 @@ import 'package:archive/archive_io.dart';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart' as msg;
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -425,7 +426,6 @@ class ZapShareController extends GetxController {
     Timer? downloadTimer;
     partSubscription = body.stream.listen(
       (event) async {
-        sendLog("hi hi");
         // Parse the server sent event (Format: data: <data>\n\n)
         final packet = utf8.decode(event);
         final data = packet.substring(6).trim();
@@ -500,9 +500,11 @@ class ZapShareController extends GetxController {
                 completed = complete;
                 if (completed) {
                   sendLog("download completed, stitching..");
-                  await _stitchFileTogether(container.fileName, receiveDir);
+                  final dir = await _stitchFileTogether(container.fileName, receiveDir);
                   await receiveDir.delete(recursive: true);
-                  OpenAppFile.open((await getDownloadsDirectory())!.path);
+                  if (dir != null) {
+                    OpenAppFile.open(dir);
+                  }
                   partSubscription?.cancel();
                 }
               },
@@ -555,11 +557,28 @@ class ZapShareController extends GetxController {
     callback?.call(res.data["complete"]);
   }
 
-  Future<bool> _stitchFileTogether(String fileName, Directory dir) async {
+  /// Returns the directory the file was saved to (if successful)
+  Future<String?> _stitchFileTogether(String fileName, Directory dir) async {
     step.value = "chat.zapshare.finishing".tr;
-    final downloads = await getDownloadsDirectory();
-    final file = File("${downloads!.path}/$fileName");
 
+    // Let the user pick where to store the finished file on desktop
+    File file;
+    if (GetPlatform.isDesktop) {
+      final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
+      if (result == null) {
+        showErrorPopup("error", "zap.no_save_location".tr);
+        file = File(path.join(AttachmentController.getFilePathForType(StorageType.permanent), fileName));
+      } else {
+        file = File(result.path);
+      }
+    } else {
+      // Just put it into the downloads folder
+      // TODO: Check if this actually works on mobile
+      final downloads = await getDownloadsDirectory();
+      file = File(path.join(downloads!.path, fileName));
+    }
+
+    // Stitch together the final file
     int currentIndex = 1;
     while (true) {
       final chunk = File("${dir.path}/chunk_$currentIndex");
@@ -579,7 +598,7 @@ class ZapShareController extends GetxController {
       currentIndex++;
     }
 
-    return true;
+    return file.parent.path;
   }
 }
 

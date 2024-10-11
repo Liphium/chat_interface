@@ -19,8 +19,7 @@ class TextPatternManager {
     patterns.add(TrollPattern());
   }
 
-  List<ProcessedText> process(String text, TextStyle style,
-      {bool renderPatterns = false}) {
+  List<ProcessedText> process(String text, TextStyle style, {bool renderPatterns = false}) {
     List<ProcessedText> spans = [];
 
     // Scan text for patterns
@@ -36,8 +35,7 @@ class TextPatternManager {
     }
 
     // Sort patterns
-    patternMap = Map.fromEntries(
-        patternMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+    patternMap = Map.fromEntries(patternMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
 
     // Process text
     int lastIndex = 0;
@@ -54,10 +52,7 @@ class TextPatternManager {
       } else {
         index = patternMap.keys.elementAt(mapIndex);
         if (mapIndex != patternMap.length - 1) {
-          lengthAfter = patternMap[patternMap.keys.elementAt(mapIndex + 1)]!
-              .first
-              .pattern
-              .length;
+          lengthAfter = patternMap[patternMap.keys.elementAt(mapIndex + 1)]!.first.pattern.length;
         }
       }
 
@@ -76,12 +71,9 @@ class TextPatternManager {
       // Check if span is nessecary
       if (lastIndex != index) {
         if (currentStyle == style && !renderPatterns) {
-          spans.add(ProcessedText(
-              text.substring(lastIndex + lastLength, index - lengthAfter),
-              currentStyle));
+          spans.add(ProcessedText(text.substring(lastIndex + lastLength, index - lengthAfter), currentStyle));
         } else {
-          spans.add(
-              ProcessedText(text.substring(lastIndex, index), currentStyle));
+          spans.add(ProcessedText(text.substring(lastIndex, index), currentStyle));
         }
       }
 

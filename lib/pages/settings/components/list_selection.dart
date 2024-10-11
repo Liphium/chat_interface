@@ -28,6 +28,7 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
     SettingController controller = Get.find();
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: List.generate(widget.items.length, (index) {
         final first = index == 0;
         final last = index == widget.items.length - 1;

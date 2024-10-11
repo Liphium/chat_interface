@@ -9,7 +9,7 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/controller/current/steps/key_setup.dart';
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
@@ -108,7 +108,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Download an attachment
-  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true}) async {
+  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true, bool ignoreLimit = false}) async {
     if (container.downloading.value) return true;
     if (container.attachmentType != AttachmentContainerType.file) return false;
 
@@ -124,23 +124,6 @@ class AttachmentController extends GetxController {
     }
     attachments[container.id] = container;
     container.downloading.value = true;
-    sendLog("Downloading ${container.name}...");
-    final maxSize = Get.find<SettingController>().settings[FileSettings.maxFileSize]!.getValue();
-
-    final json = await postAuthorizedJSON("/account/files/info", {
-      "id": container.id,
-    });
-
-    if (!json["success"]) {
-      container.errorHappened(false);
-      return false;
-    }
-
-    final size = json["file"]["size"] / 1000.0 / 1000.0; // Convert to MB
-    if (size > maxSize) {
-      container.errorHappened(false);
-      return false;
-    }
 
     // Check if the domain is trusted or ask the user to add a new one to the list of trusted providers if needed
     if (!await TrustedLinkHelper.isLinkTrusted(container.url)) {
@@ -154,6 +137,28 @@ class AttachmentController extends GetxController {
         container.errorHappened(true);
         return false;
       }
+    }
+
+    sendLog("Downloading ${container.name}...");
+    final maxSize = Get.find<SettingController>().settings[FileSettings.maxFileSize]!.getValue();
+
+    // Check the file size to make sure it isn't over the limit
+    final json = await postAddress(container.url, "/account/file_info/info", {
+      "id": container.id,
+    });
+
+    if (!json["success"]) {
+      if (popups) {
+        showErrorPopup("error", json["error"]);
+      }
+      container.errorHappened(false);
+      return false;
+    }
+
+    final size = json["file"]["size"] / 1000.0 / 1000.0; // Convert to MB
+    if (size > maxSize && !ignoreLimit) {
+      container.errorHappened(false);
+      return false;
     }
 
     // Download and show progress

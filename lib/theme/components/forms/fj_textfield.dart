@@ -22,6 +22,7 @@ class FJTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final FocusNode? focusNode;
   final Function(String)? onSubmitted;
+  final TapRegionCallback? onTapOutside;
 
   const FJTextField({
     super.key,
@@ -41,6 +42,7 @@ class FJTextField extends StatefulWidget {
     this.onChange,
     this.onSubmitted,
     this.inputFormatters,
+    this.onTapOutside,
   });
 
   @override
@@ -83,7 +85,7 @@ class _FJTextFieldState extends State<FJTextField> {
               children: [
                 if (widget.prefixIcon != null)
                   Padding(
-                    padding: const EdgeInsets.only(right: defaultSpacing, left: elementSpacing),
+                    padding: const EdgeInsets.only(right: defaultSpacing, left: 0),
                     child: Icon(
                       widget.prefixIcon,
                       color: Get.theme.colorScheme.onPrimary,
@@ -111,6 +113,10 @@ class _FJTextFieldState extends State<FJTextField> {
                     maxLength: widget.maxLength,
                     maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
                     onTap: () => _focus.value = true,
+                    onTapOutside: (event) {
+                      widget.onTapOutside?.call(event);
+                      _node.unfocus();
+                    },
                     focusNode: _node,
                     onChanged: widget.onChange,
                     inputFormatters: widget.inputFormatters,

@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -99,7 +100,11 @@ class _InvitesPageState extends State<InvitesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             verticalSpacing(defaultSpacing),
-            Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
+            // Show that the guy has unlimited invites if he's an admin
+            if (StatusController.permissions.contains("admin"))
+              Text("settings.invites.title.admin".tr, style: Get.theme.textTheme.headlineMedium)
+            else
+              Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
             verticalSpacing(defaultSpacing),
             Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),
             verticalSpacing(defaultSpacing),

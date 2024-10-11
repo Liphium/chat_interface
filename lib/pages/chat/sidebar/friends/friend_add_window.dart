@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
-import 'package:chat_interface/controller/current/steps/friends_setup.dart';
+import 'package:chat_interface/controller/current/steps/friends_step.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';

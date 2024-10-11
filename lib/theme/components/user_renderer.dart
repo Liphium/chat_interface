@@ -113,10 +113,15 @@ class UserRenderer extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: defaultSpacing),
                       child: Tooltip(
+                        waitDuration: const Duration(milliseconds: 500),
                         message: "friends.different_town".trParams({
                           "town": friend.id.server,
                         }),
-                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                        child: Icon(
+                          Icons.sensors,
+                          color: Get.theme.colorScheme.onPrimary,
+                          size: 21,
+                        ),
                       ),
                     ),
                   horizontalSpacing(defaultSpacing),

@@ -58,6 +58,10 @@ String formatDay(DateTime time) {
   }
 }
 
+String formatOnlyYear(DateTime time) {
+  return "time".trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+}
+
 String formatMessageTime(DateTime time) {
   return "message.time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0")});
 }
