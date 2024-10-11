@@ -1,4 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class MessageFormatter {
   final TextStyle normalStyle;
@@ -12,10 +15,44 @@ class MessageFormatter {
     final emojiStyle = style.copyWith(
         /* fontFamily: "Emoji", */
         );
+    final linkStyle = style.copyWith(color: Get.theme.colorScheme.onPrimary);
+    final linkRegex = RegExp(r'(https?://[^\s]+)');
 
     var current = TextSpan(style: style);
     var textSpans = <TextSpan>[];
-    for (var char in text.characters) {
+    var lastIndex = 0;
+
+    for (var match in linkRegex.allMatches(text)) {
+      // Handle text before the link
+      for (var char in text.substring(lastIndex, match.start).characters) {
+        if (emojiRegex.hasMatch(char)) {
+          textSpans.add(current);
+          textSpans.add(TextSpan(text: char, style: emojiStyle));
+          current = TextSpan(text: "", style: style);
+        } else {
+          current = TextSpan(text: (current.text ?? "") + char, style: current.style);
+        }
+      }
+
+      // Add the link with linkStyle
+      if (current.text != null && current.text!.isNotEmpty) {
+        textSpans.add(current);
+      }
+      textSpans.add(TextSpan(
+        text: match.group(0),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () {
+            launchUrlString(match.group(0)!);
+          },
+        style: linkStyle,
+      ));
+      current = TextSpan(text: "", style: style);
+
+      lastIndex = match.end;
+    }
+
+    // Handle the rest of the text after the last link
+    for (var char in text.substring(lastIndex).characters) {
       if (emojiRegex.hasMatch(char)) {
         textSpans.add(current);
         textSpans.add(TextSpan(text: char, style: emojiStyle));
@@ -24,6 +61,7 @@ class MessageFormatter {
         current = TextSpan(text: (current.text ?? "") + char, style: current.style);
       }
     }
+
     if (current.text != null && current.text!.isNotEmpty) {
       textSpans.add(current);
     }
@@ -105,6 +143,8 @@ class MessageFormatter {
       }
     }
     parsedText.addAll(_parseWithEmojis(text.substring(currentStart, text.length), normalStyle));
+
+    // Parse links
 
     return TextSpan(children: parsedText, style: normalStyle);
   }

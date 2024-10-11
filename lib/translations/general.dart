@@ -90,7 +90,7 @@ class GeneralTranslations extends Translations {
           'context_menu.selectAll': 'Select all',
           'context_menu.share': 'Share',
           'context_menu.delete': 'Delete',
-          'context_menu.custom': 'Custom'
+          'context_menu.custom': 'Custom',
         },
 
         //* German

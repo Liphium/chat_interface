@@ -359,27 +359,15 @@ class _SidebarState extends State<Sidebar> {
                                                               crossAxisAlignment: CrossAxisAlignment.start,
                                                               children: [
                                                                 //* Conversation title
-                                                                Obx(() {
-                                                                  if (conversation.isGroup) {
-                                                                    return Text(
-                                                                      conversation.containerSub.value.name,
-                                                                      style: messageController.currentConversation.value == conversation
-                                                                          ? theme.textTheme.labelMedium
-                                                                          : theme.textTheme.bodyMedium,
-                                                                      textHeightBehavior: noTextHeight,
-                                                                    );
-                                                                  }
-
-                                                                  return Row(
+                                                                if (conversation.isGroup)
+                                                                  Row(
                                                                     children: [
                                                                       Flexible(
                                                                         child: Text(
-                                                                          friend != null ? conversation.dmName : conversation.containerSub.value.name,
+                                                                          conversation.containerSub.value.name,
                                                                           style: messageController.currentConversation.value == conversation
                                                                               ? theme.textTheme.labelMedium
                                                                               : theme.textTheme.bodyMedium,
-                                                                          maxLines: 1,
-                                                                          overflow: TextOverflow.ellipsis,
                                                                           textHeightBehavior: noTextHeight,
                                                                         ),
                                                                       ),
@@ -387,27 +375,56 @@ class _SidebarState extends State<Sidebar> {
                                                                         Padding(
                                                                           padding: const EdgeInsets.only(left: defaultSpacing),
                                                                           child: Tooltip(
+                                                                            waitDuration: const Duration(milliseconds: 500),
                                                                             message: "conversations.different_town".trParams({
                                                                               "town": conversation.id.server,
                                                                             }),
-                                                                            child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                                                                            child: Icon(
+                                                                              Icons.sensors,
+                                                                              color: Get.theme.colorScheme.onPrimary,
+                                                                              size: 21,
+                                                                            ),
                                                                           ),
                                                                         ),
-                                                                      if (friend != null && friend.id.server != basePath)
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.only(left: defaultSpacing),
-                                                                          child: Tooltip(
-                                                                            message: "friends.different_town".trParams({
-                                                                              "town": friend.id.server,
-                                                                            }),
-                                                                            child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
-                                                                          ),
-                                                                        ),
-                                                                      horizontalSpacing(defaultSpacing),
-                                                                      if (friend != null) StatusRenderer(status: friend.statusType.value),
                                                                     ],
-                                                                  );
-                                                                }),
+                                                                  )
+                                                                else
+                                                                  Obx(() {
+                                                                    return Row(
+                                                                      children: [
+                                                                        Flexible(
+                                                                          child: Text(
+                                                                            friend != null
+                                                                                ? conversation.dmName
+                                                                                : conversation.containerSub.value.name,
+                                                                            style: messageController.currentConversation.value == conversation
+                                                                                ? theme.textTheme.labelMedium
+                                                                                : theme.textTheme.bodyMedium,
+                                                                            maxLines: 1,
+                                                                            overflow: TextOverflow.ellipsis,
+                                                                            textHeightBehavior: noTextHeight,
+                                                                          ),
+                                                                        ),
+                                                                        if (friend != null && friend.id.server != basePath)
+                                                                          Padding(
+                                                                            padding: const EdgeInsets.only(left: defaultSpacing),
+                                                                            child: Tooltip(
+                                                                              waitDuration: const Duration(milliseconds: 500),
+                                                                              message: "friends.different_town".trParams({
+                                                                                "town": friend.id.server,
+                                                                              }),
+                                                                              child: Icon(
+                                                                                Icons.sensors,
+                                                                                color: Get.theme.colorScheme.onPrimary,
+                                                                                size: 21,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        horizontalSpacing(defaultSpacing),
+                                                                        if (friend != null) StatusRenderer(status: friend.statusType.value),
+                                                                      ],
+                                                                    );
+                                                                  }),
 
                                                                 friend == null
                                                                     ? verticalSpacing(elementSpacing * 0.5)

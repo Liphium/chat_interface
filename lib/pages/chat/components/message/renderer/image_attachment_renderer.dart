@@ -94,6 +94,8 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                     child: Image.file(
                       File(widget.image.filePath),
                       fit: BoxFit.fill,
+                      width: double.infinity,
+                      height: double.infinity,
                     ),
                   ),
                 ),
