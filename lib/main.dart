@@ -14,6 +14,7 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
+import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
@@ -113,6 +114,19 @@ void initApp(List<String> args) async {
       sendLog("FROM RUST: ${event.tag} | ${event.msg}");
     });
   }
+
+  // Initialize tray manager
+  await trayManager.setIcon(GetPlatform.isWindows ? "assets/img/app_icon.ico" : "img/app_icon.png");
+  await trayManager.setContextMenu(Menu(items: [
+    MenuItem(
+      key: "show_window",
+      label: "Show window",
+    ),
+    MenuItem(
+      key: "exit_app",
+      label: "Exit app",
+    )
+  ]));
 
   // Wait for it to be finished
   await Future.delayed(100.ms);
