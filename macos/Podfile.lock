@@ -16,7 +16,7 @@ PODS:
   - FlutterMacOS (1.0.0)
   - just_audio (0.0.1):
     - FlutterMacOS
-  - livekit_client (2.2.4):
+  - livekit_client (2.2.6):
     - FlutterMacOS
     - WebRTC-SDK (= 125.6422.04)
   - pasteboard (0.0.1):
@@ -28,7 +28,8 @@ PODS:
     - FlutterMacOS
   - screen_retriever (0.0.1):
     - FlutterMacOS
-  - sodium_libs (2.2.1):
+  - sodium_libs (3.0.0):
+    - Flutter
     - FlutterMacOS
   - "sqlite3 (3.46.1+1)":
     - "sqlite3/common (= 3.46.1+1)"
@@ -48,6 +49,8 @@ PODS:
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
+  - tray_manager (0.0.1):
+    - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
   - WebRTC-SDK (125.6422.04)
@@ -68,8 +71,9 @@ DEPENDENCIES:
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - rust_builder (from `Flutter/ephemeral/.symlinks/plugins/rust_builder/macos`)
   - screen_retriever (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos`)
-  - sodium_libs (from `Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos`)
+  - sodium_libs (from `Flutter/ephemeral/.symlinks/plugins/sodium_libs/darwin`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
+  - tray_manager (from `Flutter/ephemeral/.symlinks/plugins/tray_manager/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
@@ -106,9 +110,11 @@ EXTERNAL SOURCES:
   screen_retriever:
     :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos
   sodium_libs:
-    :path: Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos
+    :path: Flutter/ephemeral/.symlinks/plugins/sodium_libs/darwin
   sqlite3_flutter_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos
+  tray_manager:
+    :path: Flutter/ephemeral/.symlinks/plugins/tray_manager/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
   window_manager:
@@ -117,21 +123,22 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
-  device_info_plus: ce1b7762849d3ec103d0e0517299f2db7ad60720
-  file_selector_macos: 54fdab7caa3ac3fc43c9fac4d7d8d231277f8cf2
+  device_info_plus: f1aae8670672f75c4c8850ecbe0b2ddef62b0a22
+  file_selector_macos: cc3858c981fe6889f364731200d6232dac1d812d
   flutter_secure_storage_macos: 59459653abe1adb92abbc8ea747d79f8d19866c9
   flutter_webrtc: 2b4e4a2de70a1485836e40fd71a7a94c77d49bd9
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   just_audio: 9b67ca7b97c61cfc9784ea23cd8cc55eb226d489
-  livekit_client: 95f3b71e6545845aa658a6df0a3a62dcc3471d7c
+  livekit_client: 98d09566e3a936b3402be8091ec3845556d36800
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   rust_builder: 7467e04b4dbbc87c09b04ec4f3864d7846f5dab2
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
-  sodium_libs: d39bd76697736cb11ce4a0be73b9b4bc64466d6f
+  sodium_libs: 446b7e214913e02c68d1d12e04509429bd6cbf27
   sqlite3: 0bb0e6389d824e40296f531b858a2a0b71c0d2fb
   sqlite3_flutter_libs: 5ca46c1a04eddfbeeb5b16566164aa7ad1616e7b
-  url_launcher_macos: 5f437abeda8c85500ceb03f5c1938a8c5a705399
+  tray_manager: 9064e219c56d75c476e46b9a21182087930baf90
+  url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
   WebRTC-SDK: c3d69a87e7185fad3568f6f3cff7c9ac5890acf3
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 

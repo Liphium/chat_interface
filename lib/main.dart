@@ -116,7 +116,7 @@ void initApp(List<String> args) async {
   }
 
   // Initialize tray manager
-  await trayManager.setIcon(GetPlatform.isWindows ? "assets/img/app_icon.ico" : "img/app_icon.png");
+  await trayManager.setIcon(GetPlatform.isWindows ? "assets/img/app_icon.ico" : "assets/img/app_icon.png");
   await trayManager.setContextMenu(Menu(items: [
     MenuItem(
       key: "show_window",
