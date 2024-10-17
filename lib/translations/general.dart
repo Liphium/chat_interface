@@ -91,6 +91,10 @@ class GeneralTranslations extends Translations {
           'context_menu.share': 'Share',
           'context_menu.delete': 'Delete',
           'context_menu.custom': 'Custom',
+
+          // Tray icon context menu
+          'tray.show_window': 'Show window',
+          'tray.exit_app': 'Exit app',
         },
 
         //* German

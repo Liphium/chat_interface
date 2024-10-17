@@ -11,11 +11,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:liphium_desktop/liphium_desktop.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:chat_interface/src/rust/api/interaction.dart' as api;
-import 'package:tray_manager/tray_manager.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 
@@ -94,11 +93,6 @@ void main(List<String> args) async {
 /// App init function, start Liphium Chat
 void initApp(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb) {
-    if (!GetPlatform.isMobile) {
-      await windowManager.ensureInitialized();
-    }
-  }
   executableArguments = args;
   sendLog("Current save directory: ${(await getApplicationSupportDirectory()).path}");
 
@@ -108,25 +102,15 @@ void initApp(List<String> args) async {
 
   await RustLib.init();
 
+  // Initialize the window
+  initDesktopWindow();
+
   // Initialize logging from the native side
   if (configDisableRust) {
     api.createLogStream().listen((event) {
       sendLog("FROM RUST: ${event.tag} | ${event.msg}");
     });
   }
-
-  // Initialize tray manager
-  await trayManager.setIcon(GetPlatform.isWindows ? "assets/img/app_icon.ico" : "assets/img/app_icon.png");
-  await trayManager.setContextMenu(Menu(items: [
-    MenuItem(
-      key: "show_window",
-      label: "Show window",
-    ),
-    MenuItem(
-      key: "exit_app",
-      label: "Exit app",
-    )
-  ]));
 
   // Wait for it to be finished
   await Future.delayed(100.ms);
@@ -139,13 +123,6 @@ void initApp(List<String> args) async {
   // Initialize controllers
   initializeControllers();
 
-  if (!GetPlatform.isMobile) {
-    await windowManager.setMinimumSize(const Size(300, 500));
-    await windowManager.setTitle("Liphium");
-    if (!isDebug) {
-      await windowManager.setAlignment(Alignment.center);
-    }
-  }
   runApp(const ChatApp());
 }
 
