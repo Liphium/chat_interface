@@ -81,6 +81,9 @@ flutter:
 
   assets:
     - assets/
+    - assets/tray/
+    - assets/img/
+    - assets/music/
 
 msix_config:
   display_name: Liphium

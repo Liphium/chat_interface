@@ -284,17 +284,6 @@ class _ProfileState extends State<OwnProfile> {
             loading: testLoading,
           ),
           verticalSpacing(elementSpacing),
-
-          //* Hide profile
-          ProfileButton(
-            key: _emojiKey,
-            icon: Icons.emoji_emotions,
-            label: 'emojis'.tr,
-            onTap: () async {
-              Get.dialog(EmojiWindow(data: ContextMenuData.fromKey(_emojiKey, above: true)));
-            },
-            loading: testLoading,
-          ),
         ],
       ),
     );

@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
+import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:drift/native.dart';
+import 'package:drift/wasm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
@@ -28,6 +30,12 @@ class InstanceSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
+    // Make sure to just launch into the default instance on web
+    if (GetPlatform.isWeb) {
+      await setupInstance("default");
+      return null;
+    }
+
     // Get list of instances
     sendLog((await getApplicationSupportDirectory()).path);
     final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
@@ -37,7 +45,10 @@ class InstanceSetup extends Setup {
     final instances = await dir.list().toList();
 
     if (instances.isEmpty || !isDebug) {
-      await setupInstance("default");
+      final error = await setupInstance("default");
+      if (error != null) {
+        return ErrorPage(title: error);
+      }
       return null;
     }
 
@@ -57,30 +68,44 @@ String fromDbEncrypted(String cipher) {
 late SecureKey databaseKey;
 String currentInstance = "";
 
-Future<bool> setupInstance(String name, {bool next = false}) async {
-  // Initialize database
+/// Open an instance by name (on web, the name parameter will be ignored)
+///
+/// Returns an error if there is one.
+Future<String?> setupInstance(String name, {bool next = false}) async {
   if (databaseInitialized) {
     await db.close();
   }
 
-  // Get the path to the instance
-  final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
-  final file = File(path.join(dbFolder, '$name.db'));
+  if (GetPlatform.isWeb) {
+    // Initialize the wasm database for web
+    final wasmDb = await WasmDatabase.open(
+      databaseName: "default",
+      sqlite3Uri: Uri.parse("sqlite.wasm"),
+      driftWorkerUri: Uri.parse("drift_worker.dart.js"),
+    );
+    db = Database(wasmDb.resolvedExecutor);
+  } else {
+    // Initialize the database for all native platforms
 
-  // Clear the temp directory for zap share
-  final folder = path.join((await getTemporaryDirectory()).path, "liphium");
-  try {
-    await File(folder).delete(recursive: true);
-  } catch (e) {
-    sendLog("seems like the cache folder is already deleted");
+    // Get the path to the instance
+    final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
+    final file = File(path.join(dbFolder, '$name.db'));
+
+    // Clear the temp directory for zap share
+    final folder = path.join((await getTemporaryDirectory()).path, "liphium");
+    try {
+      await File(folder).delete(recursive: true);
+    } catch (e) {
+      sendLog("seems like the cache folder is already deleted");
+    }
+
+    // Open the encrypted database (code was taken from the drift encrypted example)
+    db = Database(NativeDatabase.createInBackground(
+      file,
+      logStatements: driftLogger,
+    ));
+    currentInstance = name;
   }
-
-  // Open the encrypted database (code was taken from the drift encrypted example)
-  db = Database(NativeDatabase.createInBackground(
-    file,
-    logStatements: driftLogger,
-  ));
-  currentInstance = name;
 
   // Create tables
   var _ = await (db.select(db.setting)).get();
@@ -97,7 +122,7 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
     encryptionKey = await secureStorage.read(key: databaseKeyField);
     if (encryptionKey == null) {
       sendLog("couldn't write encryption key to secure storage");
-      return false;
+      return "Your browser doesn't support secure storage.";
     }
 
     // Migrate all fields that need to be encrypted from now on
@@ -130,7 +155,7 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
     setupManager.next(open: true);
   }
 
-  return true;
+  return null;
 }
 
 /// Encrypts the specified field in the settings table of the database (to migrate it from being unencrypted before)

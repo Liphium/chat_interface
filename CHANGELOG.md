@@ -1,3 +1,11 @@
+## Reminders for contributors
+
+- On every release, update `sqlite.wasm` in the web folder to the latest version.
+
+## Currently in dev
+
+- Liphium now closes to the tray on desktop
+
 ## 0.4.0
 
 - Fixed the shortcut being deleted and re-created when installing a new version causing it to unpinned from the taskbar/start menu (Windows auto updater)
