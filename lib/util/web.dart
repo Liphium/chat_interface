@@ -7,6 +7,7 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart' as d;
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' as g;
 import 'package:http/http.dart';
@@ -286,4 +287,14 @@ Map<String, dynamic> authenticatedStoredAction(String name, Map<String, dynamic>
   prefixJson.addAll(payload);
 
   return prefixJson;
+}
+
+/// A helper method to check if a XFile exists
+Future<bool> doesFileExist(XFile file) async {
+  try {
+    await file.length();
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

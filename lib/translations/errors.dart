@@ -31,6 +31,7 @@ class ErrorTranslations extends Translations {
           'protocol.error':
               'The town you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that town to update to the latest version.',
           'spaces.not.setup': 'Spaces is not supported in your town. Please contact the owners of this town and ask them to set up Spaces.',
+          'not.supported': 'This feature is not supported on this platform.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',

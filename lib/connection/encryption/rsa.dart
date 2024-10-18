@@ -1,12 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:chat_interface/connection/encryption/aes.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/export.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 const standardKeySize = 2048;
 
@@ -101,27 +96,4 @@ List<int> decryptRSA(Uint8List encrypted, RSAPrivateKey key) {
   final iv = enc.IV.fromLength(16);
 
   return encrypter.decryptBytes(enc.Encrypted(encrypted), iv: iv);
-}
-
-void testEncryptionRSA() {
-  const String srvPriv =
-      "1csunyawmdfm4wnhpv8h5f3gbgwxeq7n68r3gtoak33e0bje5zszv3nilf4qvwee4lldvnsta8isqclpjscmbicqekc6gc1c7l36bom99hlr7y77o52uh7nigyjwqo9rp6z3pi4hv4ld7ul1cp9bltwidhvttwqff9ux7312cunse1o0q4807uhbmfg44s9lhnake8d3a00dxfzi3zlke0e9z87my6sk3d074wvhhqcaq0sx61yticepum5jr08sw4ql2wv8nqlkwez2im4zq6efgf1gofp1a69yrqwkgqrtbdrllmnb6rx37ata0kw9203qi93ok2j4tq4bj247x1w5px4myhl2jkpuy0obphxf5svem81of6zzksefd39b0vys6usvfjpn1:1ekh:55m0x5tb8098nbc57dflswdjpe4m9gimbebl43c04976udcm3xd3j7kf6ql68dk7kiix1kvv4c2eqhije21fgyk1610y6cxtaaemutpt4jzqqgd5yejtyivsmtbz3m568f3q4b46mjlkfnbk0g0qnuwcfs91onssoj2w7mdfriru8y2izuhgddoxfxzrpn1xqdcf6rexme8frndvjsncepfb6kddsfcfjbgejd5ntz5i4fgz63fvj033um25xih6igyx500n7nbd9sfd4t891n0ttv5rznmbiz9cat3d48onf7o71h2kxuy6f6sutel2sodl0oxu1cbyj8j40tfn5pzzcvgziy1sk0yzqjmnnsdd4eatgstvo0wc5ogbs5iljhdto75b3ln5:15dgugvnbbwb92pp6jgvl68p2iiitgvesssq9zg4vhsx8pjm79xr3n5i5kv9b8ydtxr77argwk2n462zrw86mhrkgmpsugzw1i8jh0erqoojw7xi8447cmcb9fwqtib8xynhl11xkj27n1cmmdhdp7y3rqa6d96oxxutixkbfvx6h21nggmy10hqzzysbotdrsdezbz:16gnijn1log6fqc2wxxce86mjbsrg1czi1c3x4vp16kzl7loahy7mqg3lkoy2asn2i102hhd0b8bev7o93zjgtl1tdivpvkrbsl8249fxwre0d9896wtxk66sqzw3k6t207goz75v9ipfwr6qslqdgbq4bfq5do80dubpodzm8yhzmwfmtdbzrcoify9o0o7nu6on0z";
-
-  final priv = unpackageRSAPrivateKey(srvPriv);
-  final file = File("C:/Users/thisi/OneDrive/Desktop/testin/test.msg");
-  final data = file.readAsBytesSync();
-
-  final decrypted = decryptRSA(data, priv);
-  final decryptedString = utf8.decode(decrypted);
-  sendLog(decryptedString);
-
-  final key = randomAESKey();
-  sendLog(key);
-
-  const msg = "hello world";
-  final encrypted = encryptAES(msg.toCharArray().unsignedView(), base64Encode(key));
-  sendLog(base64Encode(encrypted));
-  final decrypted2 = decryptAES(encrypted, base64Encode(key));
-
-  sendLog(decrypted2);
 }

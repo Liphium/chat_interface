@@ -26,6 +26,7 @@ final dio = Dio();
 late final Sodium sodiumLib;
 bool isHttps = true;
 const bool driftLogger = true;
+const bool isWeb = kIsWeb || kIsWasm;
 
 // Build level settings
 const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
@@ -117,7 +118,6 @@ void initApp(List<String> args) async {
 
   if (isDebug) {
     await encryptionTest();
-    // testEncryptionRSA(); This crashes the app for anyone not on my windows system xd
   }
 
   // Initialize controllers

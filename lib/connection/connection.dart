@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:chat_interface/connection/encryption/aes.dart';
@@ -17,6 +16,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
@@ -189,7 +189,7 @@ class Connector {
     // Make sure no handler is registered for the claimed action "res" (for handling responses)
     if (event == "res") {
       sendLog("You can't register an event handler for 'res'. This is already used by the system to handle responses.");
-      exit(1);
+      SystemNavigator.pop();
     }
 
     _handlers[event] = handler;
