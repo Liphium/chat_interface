@@ -1,6 +1,6 @@
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
-import 'package:chat_interface/pages/tray_icon.dart';
+import 'package:chat_interface/theme/desktop_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -48,7 +48,7 @@ class SetupLoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DesktopManager(
+    return CloseToTray(
       child: Center(
         child: Text(text.tr, style: Get.textTheme.headlineMedium),
       ),
