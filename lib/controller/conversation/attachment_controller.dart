@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
@@ -13,9 +14,11 @@ import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio_rs;
+import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
@@ -93,12 +96,12 @@ class AttachmentController extends GetxController {
       return attachments[container.id];
     }
 
-    final file = File(container.filePath);
-    final exists = await file.exists();
+    final exists = await doesFileExist(container.file!);
     if (!exists) {
       return null;
     }
 
+    // If it exists, mark it as downloaded and cache the container
     container.downloaded.value = true;
     if (save) {
       attachments[container.id] = container;
@@ -162,28 +165,27 @@ class AttachmentController extends GetxController {
     }
 
     // Download and show progress
-    final res = await dio.download(
+    final res = await dio.get<Uint8List>(
       serverPath(container.url, "/account/files/download/${container.id}").toString(),
-      container.filePath,
+      options: dio_rs.Options(
+        method: "POST",
+        responseType: dio_rs.ResponseType.bytes,
+        validateStatus: (status) => true,
+      ),
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
       },
-      options: dio_rs.Options(
-        validateStatus: (status) => true,
-        method: "POST",
-      ),
     );
 
-    if (res.statusCode != 200) {
+    if (res.statusCode != 200 || res.data == null) {
       container.errorHappened(false);
       return false;
     }
 
     // Decrypt file
-    final file = File(container.filePath);
-    final encrypted = await file.readAsBytes();
-    final decrypted = decryptSymmetricBytes(encrypted, container.key!);
-    await file.writeAsBytes(decrypted);
+    final decrypted = decryptSymmetricBytes(res.data!, container.key!);
+    container.file = XFile(container.file!.path, bytes: decrypted);
+    await container.file!.saveTo(container.file!.path);
 
     container.downloading.value = false;
     container.error.value = false;
@@ -193,15 +195,14 @@ class AttachmentController extends GetxController {
   }
 
   /// Delete a file
-  Future<bool> deleteFile(AttachmentContainer container, {popup = false}) {
-    return deleteFileFromPath(container.id, container.filePath, popup: popup);
+  Future<bool> deleteFile(AttachmentContainer container, {popup = false}) async {
+    return await deleteFileFromPath(container.id, container.file, popup: popup);
   }
 
   /// Delete a file based on a path and an id
-  Future<bool> deleteFileFromPath(String id, String? path, {popup = false}) async {
-    if (path != null) {
-      final file = File(path);
-      await file.delete();
+  Future<bool> deleteFileFromPath(String id, XFile? file, {popup = false}) async {
+    if (file != null) {
+      fileUtil.delete(file);
     }
     attachments.remove(id);
 
@@ -352,7 +353,7 @@ class FileUploadResponse {
 enum AttachmentContainerType { link, remoteImage, file }
 
 class AttachmentContainer {
-  late final String filePath;
+  late XFile? file;
   late final AttachmentContainerType attachmentType;
   final StorageType storageType;
   final String id;
@@ -398,16 +399,16 @@ class AttachmentContainer {
     } else {
       attachmentType = AttachmentContainerType.file;
     }
-    filePath = path.join(AttachmentController.getFilePathForType(storageType), id);
+    file = XFile(path.join(AttachmentController.getFilePathForType(storageType), id));
   }
 
   Future<Size?> precalculateWidthAndHeight() async {
-    if (attachmentType != AttachmentContainerType.file) {
+    if (attachmentType != AttachmentContainerType.file || file == null) {
       return null;
     }
     bool found = false;
     for (var extension in FileSettings.imageTypes) {
-      if (filePath.endsWith(".$extension")) {
+      if (path.basename(file!.path).endsWith(".$extension")) {
         found = true;
       }
     }
@@ -417,7 +418,7 @@ class AttachmentContainer {
     }
 
     // Grab resolution from it
-    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(filePath).readAsBytes());
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(file!.path).readAsBytes());
     final descriptor = await ui.ImageDescriptor.encoded(buffer);
     final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
 

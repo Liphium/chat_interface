@@ -47,7 +47,7 @@ class CardObject extends TableObject {
     Get.find<AttachmentController>().downloadAttachment(container).then((success) async {
       if (success) {
         // Get the actual image and add it to the object
-        final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container.filePath).readAsBytes());
+        final buffer = await ui.ImmutableBuffer.fromUint8List(await container.file!.readAsBytes());
         final descriptor = await ui.ImageDescriptor.encoded(buffer);
         final codec = await descriptor.instantiateCodec();
         obj.image = (await codec.getNextFrame()).image;
@@ -193,7 +193,7 @@ class CardObject extends TableObject {
     }
 
     // Get image from file
-    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container!.filePath).readAsBytes());
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await container!.file!.readAsBytes());
     final descriptor = await ui.ImageDescriptor.encoded(buffer);
     final codec = await descriptor.instantiateCodec();
     image = (await codec.getNextFrame()).image;
