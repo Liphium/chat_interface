@@ -6,7 +6,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/me
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
-import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -247,7 +247,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             if (widget.container.downloaded.value) {
               return IconButton(
                 onPressed: () async {
-                  final result = await OpenAppFile.open(widget.container.filePath);
+                  final result = await OpenAppFile.open(widget.container.file!.path);
                   if (result.type == ResultType.error) {
                     showErrorPopup("error", result.message);
                   }

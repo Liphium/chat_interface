@@ -10,7 +10,7 @@ class MessageSendHelper {
   }
 
   /// Add a file to the current message draft
-  static Future<bool> addFile(File file) async {
+  static Future<bool> addFile(XFile file) async {
     if (currentDraft.value == null) {
       return false;
     }
@@ -82,7 +82,7 @@ class MessageDraft {
 }
 
 class UploadData {
-  final File file;
+  final XFile file;
   final progress = 0.0.obs;
 
   UploadData(this.file);

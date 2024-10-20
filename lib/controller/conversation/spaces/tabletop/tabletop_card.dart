@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -8,7 +7,7 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
-import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -243,7 +242,7 @@ class CardObject extends TableObject {
         onTap: (controller) {
           sendLog("viewing..");
           Get.back();
-          Get.dialog(ImagePreviewWindow(file: File(container!.filePath)));
+          Get.dialog(ImagePreviewWindow(image: image));
         },
       ),
     ];
@@ -255,7 +254,7 @@ class CardObject extends TableObject {
         icon: Icons.fullscreen,
         label: 'View in image viewer',
         onTap: (controller) {
-          Get.dialog(ImagePreviewWindow(file: File(container!.filePath)));
+          Get.dialog(ImagePreviewWindow(image: image));
         },
       ),
     ];

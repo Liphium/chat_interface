@@ -1,14 +1,17 @@
-import 'dart:io';
 import 'dart:math';
+import 'dart:ui' as ui;
 
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:liphium_bridge/liphium_bridge.dart';
 
 class ImagePreviewWindow extends StatelessWidget {
+  final ui.Image? image;
   final String? url;
-  final File? file;
+  final XFile? file;
 
-  const ImagePreviewWindow({super.key, this.file, this.url});
+  const ImagePreviewWindow({super.key, this.image, this.file, this.url});
 
   @override
   Widget build(BuildContext context) {
@@ -48,50 +51,11 @@ class ImagePreviewWindow extends StatelessWidget {
                     height: constraints.maxHeight * 0.6,
                     child: GestureDetector(
                       onTap: () => {},
-                      child: url == null ? Image.file(file!) : Image.network(url!),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-        Positioned(
-          top: 0,
-          right: 0,
-          child: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        )
-      ],
-    );
-  }
-}
-
-class ImageHeroPreview extends StatelessWidget {
-  final File file;
-  final String tag;
-
-  const ImageHeroPreview({super.key, required this.file, required this.tag});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        LayoutBuilder(builder: (context, constraints) {
-          return GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: InteractiveViewer(
-              maxScale: 5,
-              child: Center(
-                child: SizedBox(
-                  height: constraints.maxHeight * 0.6,
-                  child: GestureDetector(
-                    onTap: () => {},
-                    child: Hero(
-                      tag: tag,
-                      child: Image.file(file),
+                      child: image != null
+                          ? RawImage(image: image)
+                          : url == null
+                              ? XImage(file: file!)
+                              : Image.network(url!),
                     ),
                   ),
                 ),

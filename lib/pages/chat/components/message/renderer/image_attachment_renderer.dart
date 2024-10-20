@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
-import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:liphium_bridge/liphium_bridge.dart';
 
 class ImageAttachmentRenderer extends StatefulWidget {
   final AttachmentContainer image;
@@ -90,9 +89,9 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
-                    onTap: () => Get.dialog(ImagePreviewWindow(file: File(widget.image.filePath))),
-                    child: Image.file(
-                      File(widget.image.filePath),
+                    onTap: () => Get.dialog(ImagePreviewWindow(file: widget.image.file!)),
+                    child: XImage(
+                      file: widget.image.file!,
                       fit: BoxFit.fill,
                       width: double.infinity,
                       height: double.infinity,

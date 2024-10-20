@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -12,6 +11,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:liphium_bridge/liphium_bridge.dart';
 
 class LibraryTab extends StatefulWidget {
   final LibraryEntryType? filter;
@@ -104,15 +104,15 @@ class _LibraryTabState extends State<LibraryTab> {
           container.downloaded.value = true;
 
           // Render attachment container
-          Image image;
+          Widget image;
           if (container.attachmentType == AttachmentContainerType.remoteImage) {
             image = Image.network(
               container.url,
               fit: BoxFit.cover,
             );
           } else {
-            image = Image.file(
-              File(container.filePath),
+            image = XImage(
+              file: container.file!,
               fit: BoxFit.cover,
             );
           }

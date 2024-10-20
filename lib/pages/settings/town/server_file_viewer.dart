@@ -8,6 +8,7 @@ import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -230,7 +231,11 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                       file.deleteLoading.value = true;
 
                                       // Make a request to the server
-                                      final success = await Get.find<AttachmentController>().deleteFileFromPath(file.id, file.path, popup: true);
+                                      final success = await Get.find<AttachmentController>().deleteFileFromPath(
+                                        file.id,
+                                        file.path != null ? XFile(file.path!) : null,
+                                        popup: true,
+                                      );
                                       if (!success) {
                                         file.path = null;
                                       }

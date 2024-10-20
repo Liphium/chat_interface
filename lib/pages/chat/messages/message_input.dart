@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -189,7 +188,7 @@ class _MessageInputState extends State<MessageInput> {
           // Check if files are in the clipboard
           if (files.isNotEmpty) {
             for (var path in files) {
-              await MessageSendHelper.addFile(File(path));
+              await MessageSendHelper.addFile(XFile(path));
             }
             return;
           }
@@ -199,8 +198,9 @@ class _MessageInputState extends State<MessageInput> {
             final tempPath = await getTemporaryDirectory();
 
             // Save the file
-            final tempFile = File(path.join(tempPath.path, "pasted_image_${getRandomString(5)}.png"));
-            await tempFile.writeAsBytes(image, flush: true);
+            final filePath = path.join(tempPath.path, "pasted_image_${getRandomString(5)}.png");
+            final tempFile = XFile(filePath, bytes: image);
+            await tempFile.saveTo(filePath);
             MessageSendHelper.currentDraft.value!.files.add(UploadData(tempFile));
             return;
           }
@@ -377,7 +377,7 @@ class _MessageInputState extends State<MessageInput> {
                             if (result == null) {
                               return;
                             }
-                            MessageSendHelper.addFile(File(result.path));
+                            MessageSendHelper.addFile(result);
                           },
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,
