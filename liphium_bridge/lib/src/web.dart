@@ -5,10 +5,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:liphium_bridge/src/base.dart';
 
+// Feature support
+const isDirectorySupported = false;
+
 class FileUtil extends FileUtilBase {
   @override
   Future<bool> delete(XFile file, {bool recursive = false}) async {
     return true;
+  }
+
+  @override
+  Future<bool> appendToFile(XFile file, Uint8List bytes) {
+    throw UnsupportedError("appendToFile() is not supported on the web.");
   }
 }
 
@@ -101,5 +109,24 @@ class XFileImage extends ImageProvider<XFileImage> {
     final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
 
     return decode(buffer);
+  }
+}
+
+class XDirectory extends XDirectoryBase {
+  XDirectory(super.path);
+
+  @override
+  Future<XDirectory> createTemp([String? prefix]) {
+    throw UnimplementedError("createTemp() is not supported.");
+  }
+
+  @override
+  Future<XDirectory> create() {
+    throw UnimplementedError("create() is not supported.");
+  }
+
+  @override
+  Future<bool> delete({bool recursive = false}) {
+    throw UnimplementedError("delete() is not supported.");
   }
 }

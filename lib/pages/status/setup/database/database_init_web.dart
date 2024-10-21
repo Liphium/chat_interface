@@ -12,7 +12,7 @@ Future<String?> loadInstance(String name) async {
   // Initialize the wasm database for web
   final wasmDb = await WasmDatabase.open(
     databaseName: "default",
-    sqlite3Uri: Uri.parse("sqlite.wasm"),
+    sqlite3Uri: Uri.parse("sqlite3.wasm"),
     driftWorkerUri: Uri.parse("drift_worker.dart.js"),
   );
   db = Database(wasmDb.resolvedExecutor);

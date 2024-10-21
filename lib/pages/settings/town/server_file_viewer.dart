@@ -219,7 +219,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                   horizontalSpacing(defaultSpacing + elementSpacing),
                                   if (file.path != null)
                                     IconButton(
-                                      onPressed: () => OpenAppFile.open(file.path!, locate: true),
+                                      onPressed: () => OpenAppFile.open(file.path!),
                                       icon: const Icon(Icons.launch),
                                     ),
                                   LoadingIconButton(

@@ -1,3 +1,4 @@
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
@@ -31,14 +32,16 @@ class SettingsSetup extends Setup {
     TabletopSettings.initSettings();
 
     // Delete old logs
-    final list = await LogManager.loggingDirectory!.list().toList();
-    list.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
-    var index = Get.find<SettingController>().settings[LogSettings.amountOfLogs]!.getValue() as double;
-    for (final file in list) {
-      if (index <= 0) {
-        await file.delete();
+    if (!isWeb) {
+      final list = await LogManager.loggingDirectory!.list().toList();
+      list.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
+      var index = Get.find<SettingController>().settings[LogSettings.amountOfLogs]!.getValue() as double;
+      for (final file in list) {
+        if (index <= 0) {
+          await file.delete();
+        }
+        index--;
       }
-      index--;
     }
 
     sendLog("hi hi");

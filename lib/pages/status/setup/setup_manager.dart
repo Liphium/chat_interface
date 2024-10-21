@@ -41,7 +41,9 @@ class SetupManager {
     // Initialize setup
 
     // Setup app
-    _steps.add(PolicySetup());
+    if (!isWeb) {
+      _steps.add(PolicySetup());
+    }
     if (GetPlatform.isWindows) {
       _steps.add(UpdateSetup());
     }

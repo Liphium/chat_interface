@@ -262,20 +262,22 @@ class AttachmentController extends GetxController {
   static String _pathPermanent = "";
 
   static void initFilePath(String accountId) async {
-    // Init folder for cached files
-    final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
-    _pathCache = cacheFolder;
-    await Directory(cacheFolder).create();
+    if (!isWeb) {
+      // Init folder for cached files
+      final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
+      _pathCache = cacheFolder;
+      await Directory(cacheFolder).create();
 
-    // Init folder for temporary files
-    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_$accountId");
-    _pathTemporary = fileFolder;
-    await Directory(fileFolder).create();
+      // Init folder for temporary files
+      final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_$accountId");
+      _pathTemporary = fileFolder;
+      await Directory(fileFolder).create();
 
-    // Init folder for permanent files
-    final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_$accountId");
-    _pathPermanent = saveFolder;
-    await Directory(saveFolder).create();
+      // Init folder for permanent files
+      final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_$accountId");
+      _pathPermanent = saveFolder;
+      await Directory(saveFolder).create();
+    }
   }
 
   static String getFilePathForType(StorageType type) {

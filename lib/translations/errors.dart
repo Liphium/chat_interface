@@ -58,6 +58,7 @@ class ErrorTranslations extends Translations {
               'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
           'zap.no_save_location':
               'Because you didn\'t pick a save location, we just stored it in your saved files folder. You can access it from the settings.',
+          'zap.error': 'Zap Error',
 
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',

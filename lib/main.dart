@@ -95,13 +95,17 @@ void main(List<String> args) async {
 void initApp(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   executableArguments = args;
-  sendLog("Current save directory: ${(await getApplicationSupportDirectory()).path}");
+  if (!isWeb) {
+    sendLog("Current save directory: ${(await getApplicationSupportDirectory()).path}");
+  }
 
   // Initialize sodium
   await initSodium();
   sendLog(packageSymmetricKey(randomSymmetricKey()));
 
-  await RustLib.init();
+  if (!isWeb) {
+    await RustLib.init();
+  }
 
   // Initialize the window
   initDesktopWindow();

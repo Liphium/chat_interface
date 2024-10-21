@@ -1,11 +1,21 @@
+import 'dart:typed_data';
+
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:liphium_bridge/src/base.dart';
+
+// Feature support
+const isDirectorySupported = false;
 
 class FileUtil extends FileUtilBase {
   @override
   Future<bool> delete(XFile file, {bool recursive = false}) {
     throw UnimplementedError("delete() is not implemented.");
+  }
+
+  @override
+  Future<bool> appendToFile(XFile file, Uint8List bytes) {
+    throw UnimplementedError("appendToFile() is not implemented.");
   }
 }
 
@@ -32,5 +42,24 @@ class XImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Placeholder();
+  }
+}
+
+class XDirectory extends XDirectoryBase {
+  XDirectory(super.path);
+
+  @override
+  Future<XDirectory> createTemp([String? prefix]) {
+    throw UnimplementedError("createTemp() is not implemented.");
+  }
+
+  @override
+  Future<XDirectory> create() {
+    throw UnimplementedError("create() is not implemented.");
+  }
+
+  @override
+  Future<bool> delete({bool recursive = false}) {
+    throw UnimplementedError("delete() is not implemented");
   }
 }
