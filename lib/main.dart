@@ -20,7 +20,7 @@ import 'app.dart';
 
 // Configuration constants
 const appTag = "liphium_chat";
-const protocolVersion = 6;
+const protocolVersion = 7;
 
 final dio = Dio();
 late final Sodium sodiumLib;
@@ -31,7 +31,7 @@ const bool isWeb = kIsWeb || kIsWasm;
 // Build level settings
 const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
 const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
-const bool configDisableRust = bool.fromEnvironment("DISABLE_RUST", defaultValue: false);
+const bool configDisableRust = bool.fromEnvironment("DISABLE_RUST", defaultValue: false) || isWeb;
 
 // Authentication types
 enum AuthType {
@@ -111,7 +111,7 @@ void initApp(List<String> args) async {
   initDesktopWindow();
 
   // Initialize logging from the native side
-  if (configDisableRust) {
+  if (!configDisableRust) {
     api.createLogStream().listen((event) {
       sendLog("FROM RUST: ${event.tag} | ${event.msg}");
     });

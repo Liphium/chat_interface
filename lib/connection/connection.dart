@@ -20,7 +20,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
 import 'package:sodium_libs/sodium_libs.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_client/web_socket_client.dart';
 
 import 'impl/setup_listener.dart';
 import 'messaging.dart';
@@ -29,7 +29,7 @@ int nodeId = 0;
 String nodeDomain = "";
 
 class Connector {
-  WebSocketChannel? connection;
+  WebSocket? connection;
   final _handlers = <String, Function(Event)>{};
   final _afterSetup = <String, bool>{};
   final _afterSetupQueue = <Event>[];
@@ -46,8 +46,6 @@ class Connector {
 
   Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
     this.url = url;
-
-    sendLog("hi connector");
 
     // Generate an AES key for the connection
     aesKey = randomAESKey();
@@ -70,15 +68,20 @@ class Connector {
 
     initialized = true;
     try {
-      connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token, base64Encode(encryptedKey)]);
+      connection = WebSocket(
+        Uri.parse(url),
+        headers: {
+          "LPH-Token": token,
+          "LPH-Attachments": base64Encode(encryptedKey),
+        },
+      );
     } catch (e) {
-      sendLog("FAILED TO CONNECT TO $url");
-      e.printError();
+      sendLog("FAILED TO CONNECT TO $url: $e");
       return false;
     }
     _connected = true;
 
-    connection!.stream.listen(
+    connection!.messages.listen(
       (encrypted) {
         if (encrypted is! Uint8List) {
           sendLog("RECEIVED INVALID MESSAGE: $encrypted");
@@ -168,7 +171,7 @@ class Connector {
 
   void disconnect() {
     _connected = false;
-    connection?.sink.close();
+    connection?.close();
   }
 
   void runAfterSetupQueue() {
@@ -220,7 +223,7 @@ class Connector {
     message.action = "${message.action}:$responseId";
 
     // Send and encrypt the message (using AES key)
-    connection?.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
+    connection?.send(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
   }
 }
 

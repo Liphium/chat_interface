@@ -1,10 +1,12 @@
 ## Reminders for contributors
 
-- On every release, update `sqlite.wasm` in the web folder to the latest version.
+- On every release, update `sqlite3.wasm` in the web folder to the latest version.
 
 ## Currently in dev
 
+- This release of Liphium is compatible with protocol v7
 - Liphium now closes to the tray on desktop
+- The WebSocket connection now uses a new packet to authenticate the user instead of protocols
 
 ## 0.4.0
 
