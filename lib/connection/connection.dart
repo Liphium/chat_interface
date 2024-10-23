@@ -20,7 +20,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
 import 'package:sodium_libs/sodium_libs.dart';
-import 'package:web_socket_client/web_socket_client.dart';
+import 'package:web_socket/web_socket.dart';
 
 import 'impl/setup_listener.dart';
 import 'messaging.dart';
@@ -68,25 +68,31 @@ class Connector {
 
     initialized = true;
     try {
-      connection = WebSocket(
-        Uri.parse(url),
-        headers: {
-          "LPH-Token": token,
-          "LPH-Attachments": base64Encode(encryptedKey),
-        },
-      );
+      connection = await WebSocket.connect(Uri.parse(url));
     } catch (e) {
       sendLog("FAILED TO CONNECT TO $url: $e");
       return false;
     }
     _connected = true;
 
-    connection!.messages.listen(
-      (encrypted) {
-        if (encrypted is! Uint8List) {
-          sendLog("RECEIVED INVALID MESSAGE: $encrypted");
+    connection!.sendText(jsonEncode({
+      "token": token,
+      "attachments": base64Encode(encryptedKey),
+    }));
+
+    connection!.events.listen(
+      (message) {
+        if (message is CloseReceived) {
+          sendLog("CLOSE RECEIVED");
           return;
         }
+
+        // Make sure the message is binary data
+        if (message is! BinaryDataReceived) {
+          sendLog("RECEIVED INVALID EVENT: $message");
+          return;
+        }
+        final encrypted = message.data;
 
         // Decrypt the message (using the AES key)
         Uint8List msg;
@@ -171,7 +177,9 @@ class Connector {
 
   void disconnect() {
     _connected = false;
-    connection?.close();
+    try {
+      connection?.close();
+    } catch (_) {}
   }
 
   void runAfterSetupQueue() {
@@ -223,7 +231,7 @@ class Connector {
     message.action = "${message.action}:$responseId";
 
     // Send and encrypt the message (using AES key)
-    connection?.send(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
+    connection?.sendBytes(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
   }
 }
 

@@ -56,7 +56,6 @@ class ChatPageTranslations extends Translations {
           'conversation.error': 'Conversation loading error',
           'conversations.different_town': 'Conversation takes place outside of your town (@town).',
           'conversations.placeholder': 'Search',
-          'conversations.hidden': "Searching for something else? You can use '.' at the beginning of your query to search for hidden conversations.",
           'conversations.create': 'Create conversation',
           'conversations.name': 'Conversation name',
           'chat.message': 'Say something',

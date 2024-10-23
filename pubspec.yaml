@@ -48,7 +48,7 @@ dependencies:
   tray_manager: ">=0.2.4 <1.0.0"
   liphium_bridge:
     path: ./liphium_bridge
-  web_socket_client: ">=0.1.5 <1.0.0"
+  web_socket: ^0.1.6
 
 dev_dependencies:
   flutter_test:

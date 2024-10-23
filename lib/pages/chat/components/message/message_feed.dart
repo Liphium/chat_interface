@@ -159,6 +159,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                       });
 
                                       return FadingEdgeScrollView.fromScrollView(
+                                        gradientFractionOnEnd: 0,
                                         child: ListView.builder(
                                           itemCount: controller.messages.length + 2,
                                           reverse: true,
