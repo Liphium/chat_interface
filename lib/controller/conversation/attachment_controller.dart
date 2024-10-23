@@ -74,8 +74,9 @@ class AttachmentController extends GetxController {
       return FileUploadResponse(json["error"], null);
     }
 
-    final file = File(path.join(AttachmentController.getFilePathForType(type), json["id"].toString()));
-    await file.writeAsBytes(bytes);
+    final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
+    final file = XFile(filePath, bytes: bytes);
+    await file.saveTo(filePath);
     final container = AttachmentContainer(
       type,
       json["id"],
@@ -185,12 +186,16 @@ class AttachmentController extends GetxController {
     // Decrypt file
     final decrypted = decryptSymmetricBytes(res.data!, container.key!);
     container.file = XFile(container.file!.path, bytes: decrypted);
-    await container.file!.saveTo(container.file!.path);
+    if (!isWeb) {
+      await container.file!.saveTo(container.file!.path);
+    }
 
     container.downloading.value = false;
     container.error.value = false;
     container.downloaded.value = true;
-    cleanUpCache();
+    if (!isWeb) {
+      cleanUpCache();
+    }
     return true;
   }
 
@@ -248,11 +253,11 @@ class AttachmentController extends GetxController {
 
   // Delete all files from the device
   Future<bool> deleteAllFiles() async {
-    var dir = Directory(_pathTemporary);
+    var dir = XDirectory(_pathTemporary);
     await dir.delete(recursive: true);
-    dir = Directory(_pathCache);
+    dir = XDirectory(_pathCache);
     await dir.delete(recursive: true);
-    dir = Directory(_pathPermanent);
+    dir = XDirectory(_pathPermanent);
     await dir.delete(recursive: true);
     return true;
   }
@@ -266,17 +271,17 @@ class AttachmentController extends GetxController {
       // Init folder for cached files
       final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
       _pathCache = cacheFolder;
-      await Directory(cacheFolder).create();
+      await XDirectory(cacheFolder).create();
 
       // Init folder for temporary files
       final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_$accountId");
       _pathTemporary = fileFolder;
-      await Directory(fileFolder).create();
+      await XDirectory(fileFolder).create();
 
       // Init folder for permanent files
       final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_$accountId");
       _pathPermanent = saveFolder;
-      await Directory(saveFolder).create();
+      await XDirectory(saveFolder).create();
     }
   }
 
@@ -295,8 +300,8 @@ class AttachmentController extends GetxController {
   static Future<StorageType> checkLocations(String id, StorageType defaultType, {types = StorageType.values}) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
-      final file = File(path.join(getFilePathForType(type), id));
-      if (await file.exists()) {
+      final file = XFile(path.join(getFilePathForType(type), id));
+      if (await doesFileExist(file)) {
         return type;
       }
     }
@@ -308,8 +313,8 @@ class AttachmentController extends GetxController {
   static Future<String?> getFilePathFor(String id, {types = StorageType.values}) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
-      final file = File(path.join(getFilePathForType(type), id));
-      if (await file.exists()) {
+      final file = XFile(path.join(getFilePathForType(type), id));
+      if (await doesFileExist(file)) {
         return file.path;
       }
     }
@@ -321,8 +326,8 @@ class AttachmentController extends GetxController {
   static Future<StorageType?> getStorageTypeFor(String id, {types = StorageType.values}) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
-      final file = File(path.join(getFilePathForType(type), id));
-      if (await file.exists()) {
+      final file = XFile(path.join(getFilePathForType(type), id));
+      if (await doesFileExist(file)) {
         return type;
       }
     }
