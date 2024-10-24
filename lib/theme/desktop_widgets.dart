@@ -40,7 +40,6 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
     if (isDesktopPlatform()) {
       windowManager.removeListener(this);
       trayManager.removeListener(this);
-      windowManager.setPreventClose(false);
     }
     super.dispose();
   }
@@ -87,7 +86,7 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
 
   @override
   void onWindowClose() async {
-    windowManager.setPreventClose(true);
+    await windowManager.setPreventClose(true);
     await windowManager.hide();
   }
 

@@ -25,7 +25,7 @@ enum SettingLabel {
     SettingCategory("data", Icons.account_circle, DataSettingsPage()),
     SettingCategory("invites", Icons.mail, InvitesPage(), displayTitle: false),
     //SettingCategory("profile", Icons.assignment, null),
-    SettingCategory("authentication", Icons.security, AuthenticationSettingsPage()),
+    //SettingCategory("authentication", Icons.security, AuthenticationSettingsPage()),
     //SettingCategory("devices", Icons.phone_android, null),
   ]),
 
@@ -40,10 +40,10 @@ enum SettingLabel {
 
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
+    SettingCategory("general", Icons.dashboard, LanguageSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false, web: false),
     SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false, web: false),
     //SettingCategory("notifications", Icons.notifications, null),
-    SettingCategory("language", Icons.public, LanguageSettingsPage()),
     SettingCategory("logging", Icons.insights, LogSettingsPage()),
   ]),
 
