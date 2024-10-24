@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/town/server_file_viewer.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
@@ -38,10 +39,10 @@ class FileSettings {
   static const List<String> audioTypes = ["mp3", "wav", "ogg"];
 
   static void addSettings(SettingController controller) {
-    controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, true);
+    controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, isWeb ? false : true);
     controller.settings[autoDownloadVideos] = Setting<bool>(autoDownloadVideos, false);
     controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, false);
-    controller.settings[maxFileSize] = Setting<double>(maxFileSize, 5.0);
+    controller.settings[maxFileSize] = Setting<double>(maxFileSize, isWeb ? 1.0 : 5.0);
     controller.settings[maxCacheSize] = Setting<double>(maxCacheSize, 500.0);
     controller.settings[fileCacheType] = Setting<int>(fileCacheType, 0);
   }

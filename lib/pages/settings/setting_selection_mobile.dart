@@ -1,3 +1,5 @@
+import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +41,12 @@ class SettingSelectionMobile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: current.categories.map((element) {
                   if (!element.mobile && GetPlatform.isMobile) {
+                    return const SizedBox();
+                  }
+                  if (!element.web && isWeb) {
+                    return const SizedBox();
+                  }
+                  if (!StatusController.permissions.contains("admin") && element.admin) {
                     return const SizedBox();
                   }
 

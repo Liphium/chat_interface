@@ -68,8 +68,8 @@ class ProfileHelper {
     }
 
     // Decrypt the profile picture data
-    final container =
-        AttachmentContainer.fromJson(StorageType.permanent, jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
+    final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey));
+    final container = Get.find<AttachmentController>().fromJson(StorageType.permanent, containerJson);
 
     if (container.id != json["profile"]["picture"]) {
       return null;

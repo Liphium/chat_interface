@@ -1,9 +1,11 @@
 import 'package:chat_interface/controller/current/connection_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_conversations.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -93,9 +95,13 @@ class _SidebarState extends State<Sidebar> {
                                     child: IconButton(
                                       key: _addSpaceKey,
                                       onPressed: () {
-                                        final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
+                                        if (isWeb) {
+                                          Get.dialog(UpgradeWindow());
+                                          return;
+                                        }
 
-                                        //* Open conversation add window
+                                        //* Open space add window
+                                        final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
                                         showModal(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
                                       },
                                       icon: Icon(Icons.rocket_launch, color: Get.theme.colorScheme.onPrimary),

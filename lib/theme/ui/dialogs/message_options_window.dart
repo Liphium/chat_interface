@@ -85,12 +85,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 icon: Icons.cloud_download,
                 label: "message.save_to".tr,
                 onTap: () async {
-                  // TODO: Test if this works on web
-                  if (isWeb) {
-                    controller.hoveredAttachment!.file!.saveTo(controller.hoveredAttachment!.name);
-                    return;
-                  }
-
                   // Make sure this can't be used on either mobile or web
                   if (!isDesktopPlatform()) {
                     showErrorPopup("error", "not.supported".tr);

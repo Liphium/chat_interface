@@ -33,15 +33,15 @@ enum SettingLabel {
   town("settings.tab.town", [
     SettingCategory("town", Icons.cottage, TownSettingsPage()),
     SettingCategory("accounts", Icons.person_search, AdminAccountsPage(), admin: true),
-    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false),
-    SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage(), mobile: false),
+    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false, web: false),
+    SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage(), mobile: false, web: false),
     SettingCategory("files", Icons.folder, FileSettingsPage()),
   ]),
 
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
-    SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false),
-    SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false),
+    SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false, web: false),
+    SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false, web: false),
     //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("language", Icons.public, LanguageSettingsPage()),
     SettingCategory("logging", Icons.insights, LogSettingsPage()),
@@ -50,7 +50,7 @@ enum SettingLabel {
   // Everything to do with the appereance of the app
   appearance("settings.tab.appearance", [
     SettingCategory("chat", Icons.chat_bubble, ChatSettingsPage()),
-    SettingCategory("colors", Icons.color_lens, ThemeSettingsPage(), mobile: false),
+    SettingCategory("colors", Icons.color_lens, ThemeSettingsPage(), mobile: false, web: false),
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 
@@ -74,8 +74,9 @@ class SettingCategory {
   final bool mobile;
   final bool admin;
   final bool displayTitle;
+  final bool web;
 
-  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true, this.admin = false});
+  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true, this.admin = false, this.web = true});
 }
 
 class Setting<T> {

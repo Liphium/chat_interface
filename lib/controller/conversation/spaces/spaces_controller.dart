@@ -28,6 +28,8 @@ import 'package:livekit_client/livekit_client.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:window_manager/window_manager.dart';
 
+bool areCallsSupported = !isWeb && !GetPlatform.isMobile;
+
 class SpacesController extends GetxController {
   //* Call status
   final inSpace = false.obs;

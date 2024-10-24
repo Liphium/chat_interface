@@ -452,28 +452,25 @@ class Message {
         }
         final json = jsonDecode(attachment);
         final type = await AttachmentController.checkLocations(json["i"], StorageType.temporary);
-        final decoded = AttachmentContainer.fromJson(type, json);
-        var container = await Get.find<AttachmentController>().findLocalFile(decoded);
-        sendLog("FOUND: ${container?.file?.path}");
-        if (container == null) {
-          final extension = decoded.id.split(".").last;
+        final container = Get.find<AttachmentController>().fromJson(type, json);
+        if (!await container.existsLocally()) {
+          final extension = container.id.split(".").last;
           if (FileSettings.imageTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(decoded);
+              Get.find<AttachmentController>().downloadAttachment(container);
             }
           } else if (FileSettings.videoTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(decoded);
+              Get.find<AttachmentController>().downloadAttachment(container);
             }
           } else if (FileSettings.audioTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(decoded);
+              Get.find<AttachmentController>().downloadAttachment(container);
             }
           }
-          container = decoded;
         }
         attachmentsRenderer.add(container);
       }

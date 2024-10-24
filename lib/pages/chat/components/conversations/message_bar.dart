@@ -122,7 +122,7 @@ class _MessageBarState extends State<MessageBar> {
                     ],
                   ),
 
-                if (Get.find<SpacesController>().inSpace.value)
+                if (Get.find<SpacesController>().inSpace.value && areCallsSupported)
                   LoadingIconButton(
                     icon: Icons.add_call,
                     iconSize: 27,
@@ -134,16 +134,17 @@ class _MessageBarState extends State<MessageBar> {
                     },
                   ),
 
-                LoadingIconButton(
-                  icon: Icons.call,
-                  iconSize: 27,
-                  loading: callLoading,
-                  tooltip: "chat.start_space".tr,
-                  onTap: () {
-                    final controller = Get.find<SpacesController>();
-                    controller.createAndConnect(widget.conversation.id);
-                  },
-                ),
+                if (areCallsSupported)
+                  LoadingIconButton(
+                    icon: Icons.call,
+                    iconSize: 27,
+                    loading: callLoading,
+                    tooltip: "chat.start_space".tr,
+                    onTap: () {
+                      final controller = Get.find<SpacesController>();
+                      controller.createAndConnect(widget.conversation.id);
+                    },
+                  ),
 
                 //* Invite people
                 ConversationAddButton(

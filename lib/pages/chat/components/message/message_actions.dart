@@ -48,16 +48,20 @@ class AnswerData {
 
   AnswerData(this.id, this.senderAddress, this.content, this.attachments);
 
+  /// Convert a message to the answer content for the reply container
   static String answerContent(MessageType type, String content, List<String> attachments, {FriendController? controller}) {
+    // Return different information based on every type
     switch (type) {
       case MessageType.text:
+        // If there is no content, say that the message is empty
         if (content == "" && attachments.isEmpty) {
           content = "message.empty".tr;
         } else if (content == "" && attachments.isNotEmpty) {
+          // If the message is empty and there are attachments, show the name of the first one
           if (attachments.first.isURL) {
             content = attachments.first;
           } else {
-            content = AttachmentContainer.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+            content = Get.find<AttachmentController>().fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
           }
         }
         return content;

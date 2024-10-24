@@ -368,7 +368,7 @@ class Friend {
     // Load the profile picture
     final json = jsonDecode(fromDbEncrypted(data.pictureContainer));
     final type = await AttachmentController.checkLocations(json["i"], StorageType.permanent);
-    profilePicture = AttachmentContainer.fromJson(type, json);
+    profilePicture = Get.find<AttachmentController>().fromJson(type, json);
     profilePictureImage.value = await ProfileHelper.loadImageFromBytes(await profilePicture!.file!.readAsBytes());
   }
 

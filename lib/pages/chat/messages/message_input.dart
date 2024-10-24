@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -369,6 +371,11 @@ class _MessageInputState extends State<MessageInput> {
                         //* Attach a file
                         IconButton(
                           onPressed: () async {
+                            if (isWeb) {
+                              Get.dialog(UpgradeWindow());
+                              return;
+                            }
+
                             if (MessageSendHelper.currentDraft.value!.files.length == 5) {
                               showErrorPopup("error", "file.too_many".tr);
                               return;

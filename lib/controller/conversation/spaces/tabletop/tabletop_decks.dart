@@ -78,7 +78,7 @@ class TabletopDeck {
     bool removed = false;
     for (var card in encodedCards) {
       final type = await AttachmentController.checkLocations(card['i'], usecase, types: [StorageType.permanent, StorageType.cache]);
-      final container = AttachmentContainer.fromJson(type, card);
+      final container = controller.fromJson(type, card);
       amounts[container.id] = card['a'] ?? 1;
       final result = await controller.downloadAttachment(container);
       if (!result || container.error.value) {

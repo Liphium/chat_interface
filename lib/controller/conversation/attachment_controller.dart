@@ -93,43 +93,13 @@ class AttachmentController extends GetxController {
     return FileUploadResponse("success", container);
   }
 
-  /// Find a local file
-  Future<AttachmentContainer?> findLocalFile(AttachmentContainer container, {bool save = true}) async {
-    if (attachments.containsKey(container.id)) {
-      return attachments[container.id];
-    }
-
-    // On web, the file is never cached
-    if (isWeb) {
-      return null;
-    }
-
-    final exists = await doesFileExist(container.file!);
-    if (!exists) {
-      return null;
-    }
-
-    // If it exists, mark it as downloaded and cache the container
-    container.downloaded.value = true;
-    if (save) {
-      attachments[container.id] = container;
-    }
-
-    return container;
-  }
-
   /// Download an attachment
   Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true, bool ignoreLimit = false}) async {
     if (container.downloading.value) return true;
+    if (container.downloaded.value) return true;
     if (container.attachmentType != AttachmentContainerType.file) return false;
 
-    final localFile = await findLocalFile(container);
-    if (localFile != null && !retry) {
-      // Check if there was an error already
-      if (localFile.error.value) {
-        return false;
-      }
-
+    if (await container.existsLocally() && !retry) {
       sendLog("already exists ${container.name} ${container.id}");
       return true;
     }
@@ -341,8 +311,27 @@ class AttachmentController extends GetxController {
     return null;
   }
 
-  /// Save a file to somewhere
-  void saveContainerTo(AttachmentContainer container) {}
+  /// Get an attachment container from json
+  AttachmentContainer fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
+    var container = attachments[json["i"]];
+    if (container != null) {
+      return container;
+    }
+
+    // Create a container and cache it immediately
+    container = AttachmentContainer(
+      type,
+      json["i"],
+      json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
+      json["u"],
+      unpackageSymmetricKey(json["k"], sodium),
+    );
+    container.width = json["w"];
+    container.height = json["h"];
+    attachments[container.id] = container;
+    container.initDownloadState();
+    return container;
+  }
 }
 
 /// The type of storage the file is in on device
@@ -403,6 +392,13 @@ class AttachmentContainer {
   }
 
   AttachmentContainer(this.storageType, this.id, this.fileName, this.url, this.key) {
+    setAttachmentType();
+    if (attachmentType == AttachmentContainerType.file) {
+      file = XFile(path.join(AttachmentController.getFilePathForType(storageType), id));
+    }
+  }
+
+  void setAttachmentType() {
     if (id == "") {
       for (var fileType in FileSettings.imageTypes) {
         if (url.endsWith(".$fileType")) {
@@ -415,7 +411,6 @@ class AttachmentContainer {
     } else {
       attachmentType = AttachmentContainerType.file;
     }
-    file = XFile(path.join(AttachmentController.getFilePathForType(storageType), id));
   }
 
   Future<Size?> precalculateWidthAndHeight() async {
@@ -447,19 +442,6 @@ class AttachmentContainer {
 
   AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
 
-  factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
-    final container = AttachmentContainer(
-      type,
-      json["i"],
-      json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
-      json["u"],
-      unpackageSymmetricKey(json["k"], sodium),
-    );
-    container.width = json["w"];
-    container.height = json["h"];
-    return container;
-  }
-
   String toAttachment() {
     switch (attachmentType) {
       case AttachmentContainerType.link:
@@ -468,6 +450,25 @@ class AttachmentContainer {
         return url;
       case AttachmentContainerType.file:
         return jsonEncode(toJson());
+    }
+  }
+
+  /// Check if this container exists on the local system
+  Future<bool> existsLocally() async {
+    if (attachmentType != AttachmentContainerType.file) {
+      return false;
+    }
+
+    if (isWeb) {
+      return false;
+    }
+
+    return doesFileExist(file!);
+  }
+
+  void initDownloadState() async {
+    if (await existsLocally()) {
+      downloaded.value = true;
     }
   }
 

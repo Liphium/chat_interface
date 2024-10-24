@@ -32,9 +32,12 @@ class _LibraryTabState extends State<LibraryTab> {
   final _show = false.obs;
 
   void loadMoreItems() async {
+    // Make sure to start from the top again when a new filter is set
     if (widget.filter != _lastFilter) {
       lastDate = BigInt.from(0);
     }
+
+    // Get all the library entries that match the current filter
     List<LibraryEntryData> entries;
     if (widget.filter != null) {
       entries = await (db.libraryEntry.select()
@@ -53,6 +56,9 @@ class _LibraryTabState extends State<LibraryTab> {
     if (entries.isNotEmpty) {
       lastDate = entries.last.createdAt;
     }
+
+    // Get all the attachment containers from the library entries for displaying them
+    final controller = Get.find<AttachmentController>();
     final newContainerList = <AttachmentContainer>[];
     for (var entry in entries) {
       if (entry.data.isURL) {
@@ -63,14 +69,18 @@ class _LibraryTabState extends State<LibraryTab> {
         if (type == null) {
           continue;
         }
-        newContainerList.add(AttachmentContainer.fromJson(type, json));
+        newContainerList.add(controller.fromJson(type, json));
       }
     }
+
+    // Add the containers to the list of entries
     if (_lastFilter != widget.filter) {
       _containerList.value = newContainerList;
     } else {
       _containerList.addAll(newContainerList);
     }
+
+    // Set what's nessecary for the next iteration
     _lastFilter = widget.filter;
     _show.value = true;
   }
