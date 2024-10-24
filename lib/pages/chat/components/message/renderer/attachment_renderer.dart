@@ -162,12 +162,6 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               heightFactor: loading.value ? 0 : 1,
               child: LibraryFavoriteButton(
                 container: widget.container,
-                onEnter: () {
-                  Get.find<MessageController>().hoveredAttachment = widget.container;
-                },
-                onExit: () {
-                  Get.find<MessageController>().hoveredAttachment = widget.container;
-                },
                 child: InkWell(
                   onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
                   borderRadius: BorderRadius.circular(defaultSpacing),
