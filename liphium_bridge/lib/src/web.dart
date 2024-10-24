@@ -18,6 +18,11 @@ class FileUtil extends FileUtilBase {
   Future<bool> appendToFile(XFile file, Uint8List bytes) {
     throw UnsupportedError("appendToFile() is not supported on the web.");
   }
+
+  @override
+  Future<bool> write(XFile file, Uint8List bytes) {
+    throw UnsupportedError("write() is not supported on the web.");
+  }
 }
 
 /// A wrapper for making displaying images easier with cross_file

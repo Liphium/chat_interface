@@ -17,6 +17,11 @@ abstract class FileUtilBase {
   ///
   /// On web, this method throws an exception since it's not supported there.
   Future<bool> appendToFile(XFile file, Uint8List bytes);
+
+  /// Write bytes to a file. If the doesn't exist yet, it is created.
+  ///
+  /// On web, this method throws an exception since it's not supported there.
+  Future<bool> write(XFile file, Uint8List bytes);
 }
 
 abstract class XDirectoryBase {

@@ -20,6 +20,12 @@ class FileUtil extends FileUtilBase {
     await File(file.path).writeAsBytes(bytes, mode: FileMode.writeOnlyAppend);
     return true;
   }
+
+  @override
+  Future<bool> write(XFile file, Uint8List bytes) async {
+    await File(file.path).writeAsBytes(bytes, mode: FileMode.write);
+    return true;
+  }
 }
 
 // The desktop implementation just uses the normal image with a file from dart:io.

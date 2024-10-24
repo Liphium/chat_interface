@@ -74,9 +74,11 @@ class AttachmentController extends GetxController {
       return FileUploadResponse(json["error"], null);
     }
 
-    final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
-    final file = XFile(filePath, bytes: bytes);
-    await file.saveTo(filePath);
+    // Copy the file into the local cache
+    if (!isWeb) {
+      final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
+      fileUtil.write(XFile(filePath), bytes);
+    }
     final container = AttachmentContainer(
       type,
       json["id"],
@@ -95,6 +97,11 @@ class AttachmentController extends GetxController {
   Future<AttachmentContainer?> findLocalFile(AttachmentContainer container, {bool save = true}) async {
     if (attachments.containsKey(container.id)) {
       return attachments[container.id];
+    }
+
+    // On web, the file is never cached
+    if (isWeb) {
+      return null;
     }
 
     final exists = await doesFileExist(container.file!);
@@ -167,9 +174,8 @@ class AttachmentController extends GetxController {
 
     // Download and show progress
     final res = await dio.get<Uint8List>(
-      serverPath(container.url, "/account/files/download/${container.id}").toString(),
+      serverPath(container.url, "/account/files_unencrypted/download/${container.id}").toString(),
       options: dio_rs.Options(
-        method: "POST",
         responseType: dio_rs.ResponseType.bytes,
         validateStatus: (status) => true,
       ),
@@ -187,7 +193,7 @@ class AttachmentController extends GetxController {
     final decrypted = decryptSymmetricBytes(res.data!, container.key!);
     container.file = XFile(container.file!.path, bytes: decrypted);
     if (!isWeb) {
-      await container.file!.saveTo(container.file!.path);
+      await fileUtil.write(container.file!, decrypted);
     }
 
     container.downloading.value = false;

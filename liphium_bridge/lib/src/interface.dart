@@ -17,6 +17,11 @@ class FileUtil extends FileUtilBase {
   Future<bool> appendToFile(XFile file, Uint8List bytes) {
     throw UnimplementedError("appendToFile() is not implemented.");
   }
+
+  @override
+  Future<bool> write(XFile file, Uint8List bytes) {
+    throw UnimplementedError("write() is not implemented.");
+  }
 }
 
 /// A wrapper for making displaying images easier with cross_file.
