@@ -1,3 +1,5 @@
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
+
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
@@ -10,12 +12,16 @@ class LibraryFavoriteButton extends StatefulWidget {
   final AttachmentContainer container;
   final Widget child;
   final Function()? callback;
+  final Function()? onEnter;
+  final Function()? onExit;
 
   const LibraryFavoriteButton({
     super.key,
     required this.child,
     required this.container,
     this.callback,
+    this.onEnter,
+    this.onExit,
   });
 
   @override
@@ -53,8 +59,12 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
       onEnter: (e) async {
         await fetchBookmarkState();
         visible.value = true;
+        widget.onEnter?.call();
       },
-      onExit: (e) => visible.value = false,
+      onExit: (e) {
+        visible.value = false;
+        widget.onExit?.call();
+      },
       child: Stack(
         children: [
           widget.child,

@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -7,9 +8,14 @@ import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
 
 class ImageAttachmentRenderer extends StatefulWidget {
+  final bool hoverCheck;
   final AttachmentContainer image;
 
-  const ImageAttachmentRenderer({super.key, required this.image});
+  const ImageAttachmentRenderer({
+    super.key,
+    required this.image,
+    this.hoverCheck = false,
+  });
 
   @override
   State<ImageAttachmentRenderer> createState() => _ImageAttachmentRendererState();
@@ -86,6 +92,14 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
               height: height,
               child: LibraryFavoriteButton(
                 container: widget.image,
+                onEnter: () {
+                  if (widget.hoverCheck) {
+                    Get.find<MessageController>().hoveredAttachment = widget.image;
+                  }
+                },
+                onExit: () {
+                  Get.find<MessageController>().hoveredAttachment = widget.image;
+                },
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(

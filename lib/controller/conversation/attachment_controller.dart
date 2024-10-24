@@ -340,6 +340,9 @@ class AttachmentController extends GetxController {
 
     return null;
   }
+
+  /// Save a file to somewhere
+  void saveContainerTo(AttachmentContainer container) {}
 }
 
 /// The type of storage the file is in on device

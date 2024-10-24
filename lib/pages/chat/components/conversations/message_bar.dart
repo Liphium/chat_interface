@@ -13,6 +13,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:liphium_bridge/liphium_bridge.dart';
 
 class MessageBar extends StatefulWidget {
   final Conversation conversation;
@@ -91,7 +92,7 @@ class _MessageBarState extends State<MessageBar> {
             Row(
               children: [
                 //* Zap share
-                if (widget.conversation.type == model.ConversationType.directMessage)
+                if (widget.conversation.type == model.ConversationType.directMessage && isDirectorySupported)
                   Stack(
                     key: _zapShareKey,
                     children: [
