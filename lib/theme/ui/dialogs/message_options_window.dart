@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -7,9 +8,11 @@ import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:pasteboard/pasteboard.dart';
 
 class MessageOptionsWindow extends StatefulWidget {
   final ContextMenuData data;
@@ -34,6 +37,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<MessageController>();
     final friend = Get.find<FriendController>().friends[widget.message.senderAddress];
 
     return SlidingWindowBase(
@@ -69,6 +73,56 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 label: "message.copy".tr,
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: widget.message.content));
+                  Get.back();
+                },
+                loading: false.obs,
+              ),
+            ),
+          if (controller.hoveredAttachment != null && widget.message.attachments.isNotEmpty && controller.hoveredAttachment!.downloaded.value)
+            Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.cloud_download,
+                label: "message.save_to".tr,
+                onTap: () async {
+                  // TODO: Test if this works on web
+                  if (isWeb) {
+                    controller.hoveredAttachment!.file!.saveTo(controller.hoveredAttachment!.name);
+                    return;
+                  }
+
+                  // Make sure this can't be used on either mobile or web
+                  if (!isDesktopPlatform()) {
+                    showErrorPopup("error", "not.supported".tr);
+                    return;
+                  }
+
+                  // Get the location where the file should be saved
+                  final attachment = controller.hoveredAttachment!;
+                  final saveLocation = await getSaveLocation(suggestedName: attachment.fileName);
+                  if (saveLocation == null) {
+                    return;
+                  }
+
+                  // Save the file to the desired location and go out of the menu
+                  await attachment.file!.saveTo(saveLocation.path); // TODO: Make sure this works
+                  Get.back();
+                },
+                loading: false.obs,
+              ),
+            ),
+          if (controller.hoveredAttachment != null &&
+              widget.message.attachments.isNotEmpty &&
+              controller.hoveredAttachment!.downloaded.value &&
+              isDesktopPlatform())
+            Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.content_copy,
+                label: "message.copy_file".tr,
+                onTap: () async {
+                  // Copy the file to clipboard
+                  await Pasteboard.writeFiles([controller.hoveredAttachment!.file!.path]);
                   Get.back();
                 },
                 loading: false.obs,

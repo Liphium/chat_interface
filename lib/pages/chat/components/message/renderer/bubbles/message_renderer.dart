@@ -219,7 +219,10 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                           if (container.width != null && container.height != null) {
                                             return Padding(
                                               padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                                              child: ImageAttachmentRenderer(image: container),
+                                              child: ImageAttachmentRenderer(
+                                                image: container,
+                                                hoverCheck: true,
+                                              ),
                                             );
                                           }
 

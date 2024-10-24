@@ -33,6 +33,7 @@ enum OpenTabType {
 class MessageController extends GetxController {
   // Constants
   Message? hoveredMessage;
+  AttachmentContainer? hoveredAttachment;
   static LPHAddress systemSender = LPHAddress("liphium.com", "6969");
 
   final loaded = false.obs;

@@ -100,6 +100,8 @@ class ChatPageTranslations extends Translations {
           'message.reply': 'Reply',
           'message.reply.text': 'Reply to @name',
           'message.copy': 'Copy content',
+          'message.save_to': 'Save file to directory',
+          'message.copy_file': 'Copy file to clipboard',
           'message.profile': 'Open profile',
           'message.delete': 'Delete message',
           'message.info.text': 'This message was sent by @account (@token) at @hour:@minute on @day/@month/@year.',
