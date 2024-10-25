@@ -110,9 +110,7 @@ class MessageController extends GetxController {
     );
 
     // Play a notification sound when a new message arrives
-    if (!await windowManager.isVisible()) {
-      RingingManager.playNotificationSound();
-    }
+    RingingManager.playNotificationSound();
 
     // Add message to message history if it's the selected one
     if (currentConversation.value?.id == message.conversation) {

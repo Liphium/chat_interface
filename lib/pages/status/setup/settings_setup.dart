@@ -1,5 +1,5 @@
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/settings/app/language_settings.dart';
+import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -23,7 +23,7 @@ class SettingsSetup extends Setup {
     }
 
     // Set current language
-    Get.updateLocale(LanguageSettings.languages[controller.settings[LanguageSettings.language]!.getValue()].locale);
+    Get.updateLocale(GeneralSettings.languages[controller.settings[GeneralSettings.language]!.getValue()].locale);
 
     // Changes the color theme
     Get.find<ThemeManager>().changeTheme(getThemeData());

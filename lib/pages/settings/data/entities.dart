@@ -3,11 +3,10 @@ import 'dart:convert';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/account/invites_page.dart';
+import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/town/admin_accounts_page.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
-import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
-import 'package:chat_interface/pages/settings/town/spaces_settings.dart';
 import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/app/video_settings.dart';
@@ -33,13 +32,12 @@ enum SettingLabel {
     SettingCategory("town", Icons.cottage, TownSettingsPage()),
     SettingCategory("accounts", Icons.person_search, AdminAccountsPage(), admin: true),
     SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false, web: false),
-    SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage(), mobile: false, web: false),
     SettingCategory("files", Icons.folder, FileSettingsPage()),
   ]),
 
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
-    SettingCategory("general", Icons.dashboard, LanguageSettingsPage()),
+    SettingCategory("general", Icons.dashboard, GeneralSettingsPage()),
     SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false, web: false),
     SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false, web: false),
     //SettingCategory("notifications", Icons.notifications, null),

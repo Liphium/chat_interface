@@ -9,8 +9,12 @@
 - The WebSocket connection now uses a new packet to authenticate the user instead of protocols
 - Web support is now experimental
 - Zap now runs at full speed
-- Added a button in the message options menu for saving files (just images for now) to a directory
-- Added a button in the message options menu for copying an attachment (just images for now) to clipboard
+- Added a button in the message options menu for saving files to a directory
+- Added a button in the message options menu for copying an attachment to clipboard
+- Added a button in the message options menu to launch the file with the default app
+- Added an audio player for attachments with an audio file type
+- Added a notification sound when a new message arrives when closed to tray (configurable)
+- Merged the language, Spaces and notification settings into one tab called "General"
 
 ## 0.4.0
 

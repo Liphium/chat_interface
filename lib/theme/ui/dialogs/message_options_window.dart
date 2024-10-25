@@ -12,6 +12,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:open_app_file/open_app_file.dart';
 import 'package:pasteboard/pasteboard.dart';
 
 class MessageOptionsWindow extends StatefulWidget {
@@ -78,7 +79,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 loading: false.obs,
               ),
             ),
-          if (controller.hoveredAttachment != null && widget.message.attachments.isNotEmpty && controller.hoveredAttachment!.downloaded.value)
+          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
             Padding(
               padding: const EdgeInsets.only(top: elementSpacing),
               child: ProfileButton(
@@ -92,23 +93,41 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   }
 
                   // Get the location where the file should be saved
-                  final attachment = controller.hoveredAttachment!;
+                  final attachment = widget.message.attachmentsRenderer[0];
                   final saveLocation = await getSaveLocation(suggestedName: attachment.fileName);
                   if (saveLocation == null) {
                     return;
                   }
 
                   // Save the file to the desired location and go out of the menu
-                  await attachment.file!.saveTo(saveLocation.path); // TODO: Make sure this works
+                  await attachment.file!.saveTo(saveLocation.path);
                   Get.back();
                 },
                 loading: false.obs,
               ),
             ),
-          if (controller.hoveredAttachment != null &&
-              widget.message.attachments.isNotEmpty &&
-              controller.hoveredAttachment!.downloaded.value &&
-              isDesktopPlatform())
+          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
+            Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.launch,
+                label: "message.open".tr,
+                onTap: () async {
+                  // Make sure this can't be used on either mobile or web
+                  if (!isDesktopPlatform()) {
+                    showErrorPopup("error", "not.supported".tr);
+                    return;
+                  }
+
+                  // Open the file with the default app
+                  final attachment = widget.message.attachmentsRenderer[0];
+                  OpenAppFile.open(attachment.file!.path);
+                  Get.back();
+                },
+                loading: false.obs,
+              ),
+            ),
+          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value && isDesktopPlatform())
             Padding(
               padding: const EdgeInsets.only(top: elementSpacing),
               child: ProfileButton(
@@ -116,7 +135,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 label: "message.copy_file".tr,
                 onTap: () async {
                   // Copy the file to clipboard
-                  await Pasteboard.writeFiles([controller.hoveredAttachment!.file!.path]);
+                  await Pasteboard.writeFiles([widget.message.attachmentsRenderer[0].file!.path]);
                   Get.back();
                 },
                 loading: false.obs,

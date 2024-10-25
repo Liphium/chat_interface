@@ -5,6 +5,19 @@ class AppSettingsTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
         //* English US
         'en_US': {
+          // General settings
+          'settings.general.notifications': 'Notifications',
+          'settings.general.ringtone': 'Spaces ringtone',
+          'settings.general.language': 'Choose the app language',
+          'notification_sounds.tooltip': 'This only plays the sound when your settings allow it to.',
+          'notification_sounds.enabled': 'Enable notification sounds',
+          'notification_sounds.do_not_disturb': 'Play notification sounds even when in do-not-disturb mode',
+          'notification_sounds.only_when_tray': 'Only play notification sounds when minimized to tray',
+          'ring.desc':
+              'The ringtone will follow all settings from the notification sounds above. You can also make it so the ringtone still plays when Liphium is not minimized by using the settings below.',
+          'ring.enable': 'Play a ring sound when being invited to a Space',
+          'ring.ignore_tray': 'Also play a ring sound when Liphium is not minimized to tray',
+
           // Audio settings
           'audio.microphone.windows_warning':
               'Windows is a little cunt and might decrease the volume of your system sounds while you are talking, so we advise that you either set Sound -> Communication to "Do nothing" in your System Control Panel or just click the button below. Why does this exist again?',
@@ -16,10 +29,12 @@ class AppSettingsTranslations extends Translations {
           'audio.device.custom': 'Or choose one of the following devices:',
           'audio.microphone.muted': 'Start muted in Spaces',
           'audio.microphone.sensitivity': 'Microphone sensitivity',
-          'audio.microphone.sensitivity.text': 'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
+          'audio.microphone.sensitivity.text':
+              'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
           'audio.microphone.sensitivity.automatic': 'Automatic',
           'audio.microphone.sensitivity.manual': 'Manual',
-          'audio.microphone.sensitivity.audio_detector': 'This thing shows if you are talking or not, if it\'s colored we would be transmitting your voice.',
+          'audio.microphone.sensitivity.audio_detector':
+              'This thing shows if you are talking or not, if it\'s colored we would be transmitting your voice.',
           'audio.microphone.processing': 'Microphone processing',
           'audio.microphone.processing.text': 'When changing any of these settings, please rejoin the space to apply them.',
           'audio.microphone.echo_cancellation': 'Echo cancellation',

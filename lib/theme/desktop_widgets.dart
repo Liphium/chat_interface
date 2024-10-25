@@ -78,9 +78,15 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
     );
   }
 
-  // Make sure the context menu opens when the tray icon is clicked
+  // Show the app when the tray icon is clicked
   @override
   void onTrayIconMouseDown() async {
+    await windowManager.show();
+  }
+
+  // Make sure the context menu opens when the tray icon is clicked
+  @override
+  void onTrayIconRightMouseDown() async {
     await trayManager.popUpContextMenu();
   }
 

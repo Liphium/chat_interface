@@ -61,9 +61,6 @@ class TownSettingTranslations extends Translations {
           'tabletop.general.color': 'The color of your cursor',
           'tabletop.general.color.description': 'This will be the color everyone sees when you are selecting something or moving your cursor.',
 
-          // Spaces
-          'spaces.ring_invite': 'Play a ring sound when being invited to a Space',
-
           // File settings
           'auto_download.images': 'Automatically download images',
           'auto_download.videos': 'Automatically download videos',

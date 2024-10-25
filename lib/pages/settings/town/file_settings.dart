@@ -35,8 +35,8 @@ class FileSettings {
   /// Doesn't include gifs
   static const List<String> staticImageTypes = ["png", "jpg", "jpeg", "webp", "bmp", "wbmp"];
   static const List<String> imageTypes = ["png", "jpg", "jpeg", "webp", "bmp", "wbmp", "gif"];
-  static const List<String> videoTypes = ["mp4", "mov", "avi", "mkv"];
-  static const List<String> audioTypes = ["mp3", "wav", "ogg"];
+  static const List<String> videoTypes = ["mp4", "avi", "mkv"];
+  static const List<String> audioTypes = ["mp3", "mov", "wav", "ogg"];
 
   static void addSettings(SettingController controller) {
     controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, isWeb ? false : true);

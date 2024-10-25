@@ -101,6 +101,7 @@ class ChatPageTranslations extends Translations {
           'message.reply.text': 'Reply to @name',
           'message.copy': 'Copy content',
           'message.save_to': 'Save file to directory',
+          'message.open': 'Open file with default',
           'message.copy_file': 'Copy file to clipboard',
           'message.profile': 'Open profile',
           'message.delete': 'Delete message',

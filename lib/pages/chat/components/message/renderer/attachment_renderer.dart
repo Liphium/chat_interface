@@ -2,7 +2,9 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/audio_attachment_player.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
+import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
@@ -14,6 +16,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:open_app_file/open_app_file.dart';
+import 'package:path/path.dart' as path;
 
 class AttachmentRenderer extends StatefulWidget {
   final Message? message;
@@ -180,6 +183,11 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           ],
         );
       });
+    }
+
+    // Render as an audio file
+    if (FileSettings.audioTypes.contains(path.extension(widget.container.name).substring(1))) {
+      return AudioAttachmentPlayer(container: widget.container);
     }
 
     return Container(
