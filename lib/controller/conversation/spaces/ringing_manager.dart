@@ -39,6 +39,12 @@ class RingingManager {
     stopRingtone();
   }
 
+  static void playNotificationSound() async {
+    await player.setAsset("assets/music/notification.mov");
+    await player.setVolume(0.1);
+    await player.play();
+  }
+
   /// Checks whether the client can currently be ringed
   static bool _canRing() {
     // Only ring when the status is online or away

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/settings/account/authentication_settings.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/account/invites_page.dart';
 import 'package:chat_interface/pages/settings/town/admin_accounts_page.dart';

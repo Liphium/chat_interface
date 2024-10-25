@@ -31,7 +31,6 @@ class _ProfileState extends State<OwnProfile> {
   final TextEditingController _status = TextEditingController();
   final statusMessage = "".obs;
   final FocusNode _statusFocus = FocusNode();
-  final GlobalKey _emojiKey = GlobalKey();
 
   // Developer things
   final testLoading = false.obs;

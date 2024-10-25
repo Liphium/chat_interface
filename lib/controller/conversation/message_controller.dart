@@ -23,6 +23,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sodium_libs/sodium_libs.dart';
+import 'package:window_manager/window_manager.dart';
 
 enum OpenTabType {
   conversation,
@@ -107,6 +108,11 @@ class MessageController extends GetxController {
       increment: currentConversation.value?.id != message.conversation,
       messageSendTime: message.createdAt.millisecondsSinceEpoch,
     );
+
+    // Play a notification sound when a new message arrives
+    if (!await windowManager.isVisible()) {
+      RingingManager.playNotificationSound();
+    }
 
     // Add message to message history if it's the selected one
     if (currentConversation.value?.id == message.conversation) {
