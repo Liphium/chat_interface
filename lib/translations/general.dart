@@ -55,6 +55,7 @@ class GeneralTranslations extends Translations {
           'spaces': 'Spaces',
           'page_switcher': 'Page @count/@max',
           'rank': 'Rank',
+          'liphium_address': 'Your Liphium address',
 
           // Placeholder
           'placeholder.domain': 'example.com',

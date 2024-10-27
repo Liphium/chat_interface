@@ -53,6 +53,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
       title: [
         Text("Developer info", style: Get.theme.textTheme.labelLarge),
       ],
+      mobilePage: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

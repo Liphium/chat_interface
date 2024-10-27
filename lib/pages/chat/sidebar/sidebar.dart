@@ -143,7 +143,7 @@ class _SidebarState extends State<Sidebar> {
                   ),
                 ),
               ),
-              const SidebarProfile()
+              if (!isMobileMode()) const SidebarProfile()
             ],
           ),
         );

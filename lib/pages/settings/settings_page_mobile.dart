@@ -1,6 +1,5 @@
 import 'package:chat_interface/pages/settings/setting_selection_mobile.dart';
 import 'package:chat_interface/pages/settings/settings_page_desktop.dart';
-import 'package:chat_interface/theme/ui/containers/universal_app_bar.dart';
 import 'package:chat_interface/util/platform_callback.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,27 +20,17 @@ class _SettingsPageState extends State<SettingsPageMobile> {
       },
       child: Scaffold(
         backgroundColor: Get.theme.colorScheme.onInverseSurface,
-        body: Column(
-          children: [
-            UniversalAppBar(
-              label: "app.settings".tr,
-              applyPadding: true,
+        body: Material(
+          color: Get.theme.colorScheme.onInverseSurface,
+          child: const SingleChildScrollView(
+            child: SafeArea(
+              bottom: true,
+              left: true,
+              right: true,
+              top: false,
+              child: SettingSelectionMobile(),
             ),
-            Expanded(
-              child: Material(
-                color: Get.theme.colorScheme.onInverseSurface,
-                child: const SingleChildScrollView(
-                  child: SafeArea(
-                    bottom: true,
-                    left: true,
-                    right: true,
-                    top: false,
-                    child: SettingSelectionMobile(),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
