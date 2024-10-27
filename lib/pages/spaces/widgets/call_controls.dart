@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
@@ -40,86 +39,6 @@ class _CallControlsState extends State<CallControls> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        //* Microphone button
-        GetX<PublicationController>(
-          builder: (controller) {
-            return LoadingIconButton(
-              background: true,
-              padding: defaultSpacing,
-              loading: controller.muteLoading,
-              onTap: () => controller.setMuted(!controller.muted.value),
-              icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-              iconSize: 28,
-              color: theme.colorScheme.onSurface,
-            );
-          },
-        ),
-
-        horizontalSpacing(defaultSpacing),
-
-        //* Audio output
-        GetX<PublicationController>(
-          builder: (controller) {
-            return LoadingIconButton(
-              background: true,
-              padding: defaultSpacing,
-              loading: controller.deafenLoading,
-              onTap: () => controller.setDeafened(!controller.deafened.value),
-              icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-              iconSize: 28,
-              color: theme.colorScheme.onSurface,
-            );
-          },
-        ),
-
-        horizontalSpacing(defaultSpacing),
-
-        //* Camera
-        GetX<PublicationController>(
-          builder: (controller) {
-            return LoadingIconButton(
-              background: true,
-              padding: defaultSpacing,
-              loading: controller.videoLoading,
-              onTap: () => controller.setVideoEnabled(!controller.videoEnabled.value),
-              icon: controller.videoEnabled.value ? Icons.videocam : Icons.videocam_off,
-              iconSize: 28,
-              color: theme.colorScheme.onSurface,
-            );
-          },
-        ),
-
-        /*
-        horizontalSpacing(defaultSpacing),
-    
-        // Screenshare
-        CallButtonBorder(
-          child: GetX<PublicationController>(
-            builder: (controller) {
-              return LoadingIconButton(
-                padding: defaultSpacing + elementSpacing,
-                loading: controller.screenshareLoading,
-                onTap: () async {
-                  final sources = await desktopCapturer.getSources(types: [SourceType.Screen]);
-                  if (sources.isNotEmpty) {
-                    controller.setScreenshareEnabled(
-                      !controller.screenshareEnabled.value,
-                      options: ScreenShareCaptureOptions(
-                        sourceId: sources.first.id,
-                      ),
-                    );
-                  }
-                  //sendLog(source);
-                },
-                icon: controller.videoEnabled.value ? Icons.stop_screen_share : Icons.screen_share,
-                iconSize: 35,
-                color: theme.colorScheme.onSurface,
-              );
-            },
-          ),
-        ),
-        */
-
         //* Tabletop rotation button / Toggle people button
         Obx(
           () {

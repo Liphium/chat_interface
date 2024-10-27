@@ -5,7 +5,6 @@ import 'package:chat_interface/pages/status/setup/policy_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_page.dart';
 import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
 import 'package:chat_interface/pages/status/setup/tokens_setup.dart';
-import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
@@ -55,9 +54,6 @@ class SetupManager {
 
   void retry() {
     current = -1;
-    if (!configDisableRust) {
-      api.stop();
-    }
     Get.find<FriendController>().onReload();
     if (controller == null) {
       Get.offAll(const SetupPage());

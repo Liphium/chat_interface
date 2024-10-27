@@ -7,7 +7,6 @@ import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
@@ -15,7 +14,6 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
-import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -24,7 +22,6 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:livekit_client/livekit_client.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -41,7 +38,6 @@ class SpacesController extends GetxController {
 
   //* Space information
   static String? currentDomain;
-  static Room? livekitRoom;
   final id = "".obs;
   static SecureKey? key;
 
@@ -200,7 +196,6 @@ class SpacesController extends GetxController {
     currentTab.value = SpaceTabType.people.index;
 
     // Setup all controllers
-    Get.find<PublicationController>().onConnect();
     Get.find<SpaceMemberController>().onConnect(key!);
 
     // Connect to space node
@@ -227,32 +222,6 @@ class SpacesController extends GetxController {
           return;
         }
 
-        // Connect to new voice chat
-        final keyProvider = await BaseKeyProvider.create();
-        await keyProvider.setKey(base64Encode(key!.extractBytes()));
-        livekitRoom = Room(
-          roomOptions: RoomOptions(
-            e2eeOptions: E2EEOptions(
-              keyProvider: keyProvider,
-            ),
-            adaptiveStream: true,
-            defaultAudioPublishOptions: const AudioPublishOptions(
-              audioBitrate: 128000,
-            ),
-          ),
-        );
-        await livekitRoom!.connect(
-          event.data["url"],
-          event.data["token"],
-          connectOptions: const ConnectOptions(
-            autoSubscribe: false,
-          ),
-        );
-        Get.find<SpaceMemberController>().onLivekitConnected();
-        if (!configDisableRust) {
-          await api.startTalkingEngine();
-        }
-
         // Open the screen
         Get.find<MessageController>().unselectConversation();
         Get.find<MessageController>().openTab(OpenTabType.space);
@@ -271,17 +240,12 @@ class SpacesController extends GetxController {
   void leaveCall({error = false}) async {
     inSpace.value = false;
     connected.value = false;
-    if (!configDisableRust) {
-      await api.stop();
-    }
     id.value = "";
     spaceConnector.disconnect();
-    livekitRoom?.disconnect();
 
     // Tell other controllers about it
     Get.find<StatusController>().stopSharing();
     Get.find<SpaceMemberController>().onDisconnect();
-    Get.find<PublicationController>().disconnect();
     Get.find<GameHubController>().leaveCall();
     Get.find<TabletopController>().resetControllerState();
 
@@ -289,14 +253,6 @@ class SpacesController extends GetxController {
       Get.offAll(getChatPage(), transition: Transition.fadeIn);
       Get.find<MessageController>().openTab(OpenTabType.conversation);
     }
-  }
-
-  /// Called every time the room updates
-  void updateRoomVideoState() {
-    hasVideo.value = livekitRoom!.remoteParticipants.values.any((element) => element.isCameraEnabled() || element.isScreenShareEnabled()) ||
-        livekitRoom!.localParticipant!.isCameraEnabled() ||
-        livekitRoom!.localParticipant!.isScreenShareEnabled();
-    sendLog("UPDATE VIDEO ${hasVideo.value}");
   }
 }
 

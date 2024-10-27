@@ -2,9 +2,7 @@ import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
-import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
-import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/call_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
@@ -32,8 +30,6 @@ class SettingController extends GetxController {
   }
 
   SettingController() {
-    AudioSettings.addSettings(this);
-    addVideoSettings(this);
     addCallAppearanceSettings(this);
     GeneralSettings.addSettings(this);
     TabletopSettings.addSettings(this);

@@ -7,9 +7,7 @@ import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/town/admin_accounts_page.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
-import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
-import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
@@ -38,8 +36,6 @@ enum SettingLabel {
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
     SettingCategory("general", Icons.dashboard, GeneralSettingsPage()),
-    SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false, web: false),
-    SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false, web: false),
     //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("logging", Icons.insights, LogSettingsPage()),
   ]),

@@ -4,7 +4,6 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
-import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +12,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
-import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
@@ -31,7 +29,6 @@ const bool isWeb = kIsWeb || kIsWasm;
 // Build level settings
 const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
 const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
-const bool configDisableRust = bool.fromEnvironment("DISABLE_RUST", defaultValue: false) || isWeb;
 
 // Authentication types
 enum AuthType {
@@ -103,19 +100,8 @@ void initApp(List<String> args) async {
   await initSodium();
   sendLog(packageSymmetricKey(randomSymmetricKey()));
 
-  if (!isWeb) {
-    await RustLib.init();
-  }
-
   // Initialize the window
   initDesktopWindow();
-
-  // Initialize logging from the native side
-  if (!configDisableRust) {
-    api.createLogStream().listen((event) {
-      sendLog("FROM RUST: ${event.tag} | ${event.msg}");
-    });
-  }
 
   // Wait for it to be finished
   await Future.delayed(100.ms);

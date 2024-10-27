@@ -23,7 +23,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sodium_libs/sodium_libs.dart';
-import 'package:window_manager/window_manager.dart';
 
 enum OpenTabType {
   conversation,
