@@ -15,6 +15,15 @@
 - Added an audio player for attachments with an audio file type
 - Added a notification sound when a new message arrives when closed to tray (configurable)
 - Merged the language, Spaces and notification settings into one tab called "General"
+- Removed audio and video chat from Spaces (read below)
+- Removed all Rust code related to audio since it's not being used anymore
+- TODO: Add chat functionality to Spaces
+
+### The removal of audio and video chat from Spaces
+
+I get that this is a weird move to make especially cause Spaces was supposed to be one of the selling points of Liphium. But over the last few weeks I've just realized that it needs a complete rework and rethinking. LiveKit has constantly caused issues for me and never worked properly. Because I want to ship a good app and not a broken mess, I've decided to remove it for now. The code was all cluttered and completely unreadable and absolute not something that should've ever been shipped. I need to have a little bit of a higher standard for this stuff and I'm going to build my own media engine and server for this project in the future. That will of course take some time, so in the meantime I'll focus on features that actually matter to the current users of the app. I'd rather have a set of features that works well, rather than a set of features where half are broken.
+
+This decision was made by me to make Liphium better and to make the progress of porting it to other platforms faster. When there is a stable release for all platforms that I currently want to target, I'll consider looking into adding voice and video chat again. Until then, expect an Android and iOS (at least alpha) version of Liphium to be released some time next month. That's what I'm going to work on for now.
 
 ## 0.4.0
 
