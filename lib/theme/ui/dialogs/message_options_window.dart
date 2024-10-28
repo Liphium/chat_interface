@@ -38,7 +38,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MessageController>();
     final friend = Get.find<FriendController>().friends[widget.message.senderAddress];
 
     return SlidingWindowBase(
