@@ -97,7 +97,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         child: Obx(
                           () => Material(
                             borderRadius: BorderRadius.circular(defaultSpacing),
-                            color: messageController.currentConversation.value == conversation && !isMobileMode()
+                            color: messageController.currentProvider.value?.conversation == conversation && !isMobileMode()
                                 ? Get.theme.colorScheme.onSurface.withOpacity(0.075)
                                 : Colors.transparent,
                             child: InkWell(
@@ -110,7 +110,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                               //* When conversation is tapped (open conversation)
                               onTap: () {
-                                if (messageController.currentConversation.value == conversation && !isMobileMode()) return;
+                                if (messageController.currentProvider.value?.conversation == conversation && !isMobileMode()) return;
                                 messageController.selectConversation(conversation);
                               },
 
@@ -151,7 +151,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                                       Flexible(
                                                         child: Text(
                                                           conversation.containerSub.value.name,
-                                                          style: messageController.currentConversation.value == conversation
+                                                          style: messageController.currentProvider.value?.conversation == conversation
                                                               ? Get.theme.textTheme.labelMedium
                                                               : Get.theme.textTheme.bodyMedium,
                                                           textHeightBehavior: noTextHeight,
@@ -181,7 +181,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                                         Flexible(
                                                           child: Text(
                                                             friend != null ? conversation.dmName : conversation.containerSub.value.name,
-                                                            style: messageController.currentConversation.value == conversation
+                                                            style: messageController.currentProvider.value?.conversation == conversation
                                                                 ? Get.theme.textTheme.labelMedium
                                                                 : Get.theme.textTheme.bodyMedium,
                                                             maxLines: 1,

@@ -39,15 +39,14 @@ class MessageController extends GetxController {
   final loaded = false.obs;
   final currentOpenType = OpenTabType.conversation.obs;
   final currentProvider = Rx<ConversationMessageProvider?>(null);
-  final messages = <Message>[].obs;
 
   /// Unselect a conversation (when id is set, the current conversation will only be closed if it has that id)
   void unselectConversation({LPHAddress? id}) {
     if (id != null && currentProvider.value?.conversation.id != id) {
       return;
     }
+    currentProvider.value?.messages.clear();
     currentProvider.value = null;
-    messages.clear();
   }
 
   void openTab(OpenTabType type) {
@@ -60,17 +59,16 @@ class MessageController extends GetxController {
   void selectConversation(Conversation conversation) async {
     currentOpenType.value = OpenTabType.conversation;
     loaded.value = false;
-    if (isMobileMode()) {
-      Get.to(ConversationPage(conversation: conversation));
-    }
     currentProvider.value = ConversationMessageProvider(conversation);
+    if (isMobileMode()) {
+      Get.to(ConversationPage(provider: currentProvider.value!));
+    }
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
       overwriteRead(conversation);
     }
 
     // Load messages
-    messages.clear();
     currentProvider.value!.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 
     loaded.value = true;
@@ -123,9 +121,9 @@ class MessageController extends GetxController {
         }
       } else {
         // Store normal type of message
-        if (messages.isNotEmpty && messages[0].id != message.id) {
+        if (currentProvider.value!.messages.isNotEmpty && currentProvider.value!.messages[0].id != message.id) {
           currentProvider.value!.addMessageToBottom(message);
-        } else if (messages.isEmpty) {
+        } else if (currentProvider.value!.messages.isEmpty) {
           currentProvider.value!.addMessageToBottom(message);
         }
       }
@@ -163,7 +161,7 @@ class ConversationMessageProvider extends MessageProvider {
   @override
   Future<(List<Message>?, bool)> loadMessagesBefore(int time) async {
     // Load messages from the server
-    final json = await postNodeJSON("/conversations/message/list_after", {
+    final json = await postNodeJSON("/conversations/message/list_before", {
       "token": conversation.token.toMap(),
       "data": time,
     });
@@ -188,7 +186,7 @@ class ConversationMessageProvider extends MessageProvider {
   @override
   Future<(List<Message>?, bool)> loadMessagesAfter(int time) async {
     // Load the messages from the server using the list_before endpoint
-    final json = await postNodeJSON("/conversations/message/list_before", {
+    final json = await postNodeJSON("/conversations/message/list_after", {
       "token": conversation.token.toMap(),
       "data": time,
     });

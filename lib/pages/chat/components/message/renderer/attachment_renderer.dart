@@ -20,9 +20,10 @@ import 'package:path/path.dart' as path;
 
 class AttachmentRenderer extends StatefulWidget {
   final Message? message;
+  final ConversationMessageProvider? provider;
   final AttachmentContainer container;
 
-  const AttachmentRenderer({super.key, required this.container, this.message});
+  const AttachmentRenderer({super.key, required this.container, this.message, this.provider});
 
   @override
   State<AttachmentRenderer> createState() => _AttachmentRendererState();
@@ -69,7 +70,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           sendLog("NEW HEIGHT ${widget.message!.heightKey!.currentContext!.size!.height}");
           final currentHeight = widget.message!.heightKey!.currentContext!.size!.height;
-          Get.find<MessageController>().messageHeightChange(widget.message!, currentHeight - widget.message!.currentHeight!);
+          widget.provider!.messageHeightChange(widget.message!, currentHeight - widget.message!.currentHeight!);
         });
       });
       stream.addListener(listener);

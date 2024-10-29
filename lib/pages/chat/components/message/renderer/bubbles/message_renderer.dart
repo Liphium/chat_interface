@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
@@ -16,6 +17,7 @@ import 'package:get/get.dart';
 
 class BubblesMessageRenderer extends StatefulWidget {
   final LPHAddress senderAddress;
+  final MessageProvider provider;
   final Message message;
   final bool self;
   final bool last;
@@ -24,6 +26,7 @@ class BubblesMessageRenderer extends StatefulWidget {
   const BubblesMessageRenderer({
     super.key,
     required this.message,
+    required this.provider,
     required this.senderAddress,
     this.self = false,
     this.last = false,
@@ -130,7 +133,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                                               color: widget.self ? theme.colorScheme.onPrimary.withOpacity(0.2) : theme.colorScheme.inverseSurface,
                                               child: InkWell(
                                                 borderRadius: BorderRadius.circular(defaultSpacing),
-                                                onTap: () => Get.find<MessageController>().scrollToMessage(widget.message.answer),
+                                                onTap: () => widget.provider.scrollToMessage(widget.message.answer),
                                                 child: Padding(
                                                   padding: const EdgeInsets.all(elementSpacing),
                                                   child: Row(

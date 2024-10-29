@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -123,6 +124,7 @@ abstract class MessageProvider {
     for (var message in loadedMessages) {
       message.heightCallback = true;
     }
+    sendLog(loadedMessages.length);
     loadedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Sort to prevent weird order
     messages.insertAll(0, loadedMessages);
 

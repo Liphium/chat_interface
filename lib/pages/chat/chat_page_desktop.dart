@@ -54,9 +54,9 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
           child: PlatformCallback(
             mobile: () {
               final controller = Get.find<MessageController>();
-              if (controller.currentConversation.value != null) {
+              if (controller.currentProvider.value != null) {
                 Get.off(const ChatPageMobile());
-                Get.to(ConversationPage(conversation: controller.currentConversation.value!));
+                Get.to(ConversationPage(provider: controller.currentProvider.value!));
               } else {
                 Get.off(const ChatPageMobile());
               }
@@ -78,7 +78,7 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                         case OpenTabType.townsquare:
                           return const TownsquarePage();
                         case OpenTabType.conversation:
-                          if (controller.currentConversation.value == null) {
+                          if (controller.currentProvider.value == null) {
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -91,7 +91,7 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                             );
                           }
 
-                          return MessageFeed(conversation: controller.currentConversation.value!);
+                          return MessageFeed();
                         default:
                           return const CallRectangle();
                       }

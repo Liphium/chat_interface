@@ -73,7 +73,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
 
                       return const SizedBox.shrink();
                     }
-                    final shown = Get.find<MessageController>().currentConversation.value == null;
+                    final shown = Get.find<MessageController>().currentProvider.value == null;
 
                     return Column(
                       children: [

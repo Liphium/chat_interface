@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
@@ -19,12 +20,14 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class BubblesRenderer extends StatefulWidget {
   final int index;
   final Message? message;
+  final MessageProvider provider;
   final AutoScrollController controller;
 
   const BubblesRenderer({
     super.key,
     required this.index,
     required this.controller,
+    required this.provider,
     this.message,
   });
 
@@ -55,16 +58,15 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     // Report the actual height to the controller to scroll up the viewport
     message.heightReported = true;
     message.heightKey = _heightKey;
-    Get.find<MessageController>().messageHeightCallback(message, _heightKey.currentContext!.size!.height);
+    widget.provider.messageHeightCallback(message, _heightKey.currentContext!.size!.height);
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MessageController>();
     final friendController = Get.find<FriendController>();
 
     // This is needed for jump to message
-    if (widget.index == controller.messages.length + 1) {
+    if (widget.index == widget.provider.messages.length + 1) {
       return SizedBox(
         height: Get.height,
       );
@@ -76,7 +78,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     }
 
     //* Chat bubbles
-    final message = widget.message ?? controller.messages[widget.index - 1];
+    final message = widget.message ?? widget.provider.messages[widget.index - 1];
 
     // Call the height callback (in case requested, for keeping the viewport up to date with the scroll)
     if (message.heightCallback && !message.heightReported) {
@@ -91,8 +93,8 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
     bool last = false;
     bool newHeading = false;
-    if (widget.index != controller.messages.length) {
-      final lastMessage = controller.messages[widget.index];
+    if (widget.index != widget.provider.messages.length) {
+      final lastMessage = widget.provider.messages[widget.index];
 
       // Check if the last message was a day before the current one
       if (lastMessage.createdAt.day != message.createdAt.day) {
@@ -106,6 +108,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         renderer = BubblesMessageRenderer(
           key: ValueKey(message.id),
           message: message,
+          provider: widget.provider,
           senderAddress: message.senderAddress,
           self: self,
           last: last,
@@ -150,7 +153,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (newHeading || widget.index == controller.messages.length)
+            if (newHeading || widget.index == widget.provider.messages.length)
               Padding(
                 padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
                 child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
