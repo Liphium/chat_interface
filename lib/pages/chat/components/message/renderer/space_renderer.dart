@@ -67,6 +67,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
 
   @override
   void dispose() {
+    widget.container.onDrop();
     _sub?.cancel();
     super.dispose();
   }

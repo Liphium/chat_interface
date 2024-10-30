@@ -228,6 +228,7 @@ class SpacesController extends GetxController {
 
         // Reset everything on the table
         Get.find<TabletopController>().resetControllerState();
+        Get.find<TabletopController>().openTableTab();
 
         connected.value = true;
         inSpace.value = true;

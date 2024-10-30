@@ -2,13 +2,10 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
-import 'package:chat_interface/pages/spaces/call_cinema.dart';
-import 'package:chat_interface/pages/spaces/call_grid.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/call_controls.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
-import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -57,82 +54,7 @@ class _CallRectangleState extends State<CallRectangle> {
           },
           child: Stack(
             children: [
-              Obx(
-                () {
-                  if (controller.currentTab.value == SpaceTabType.table.index) {
-                    return const TabletopView();
-                  }
-
-                  if (controller.currentTab.value == SpaceTabType.cinema.index && controller.cinemaWidget.value != null) {
-                    return const CallCinemaView();
-                  }
-
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Padding(
-                        padding: const EdgeInsets.all(defaultSpacing),
-                        child: CallGridView(constraints: constraints),
-                      );
-                    },
-                  );
-                },
-              ),
-
-              //* Tab selector
-              Align(
-                alignment: Alignment.topCenter,
-                child: Obx(
-                  () => Animate(
-                    effects: [
-                      FadeEffect(
-                        duration: 150.ms,
-                        end: 0.0,
-                        begin: 1.0,
-                      )
-                    ],
-                    target: (hovered.value || controlsHovered.value) || controller.currentTab.value == SpaceTabType.table.index ? 0 : 1,
-                    child: Container(
-                      width: double.infinity,
-                      // Create a gradient on this container from bottom to top
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.black.withOpacity(0),
-                            Colors.black.withOpacity(0.2),
-                          ],
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: sectionSpacing),
-                        child: Center(
-                          heightFactor: 1,
-                          child: LPHTabElement(
-                            selected: Get.find<SpacesController>().currentTab,
-                            tabs: SpaceTabType.values.map((t) => t.name.tr).toList(),
-                            onTabSwitch: (tab) {
-                              // Get the type
-                              SpaceTabType? type;
-                              for (var t in SpaceTabType.values) {
-                                if (t.name.tr == tab) {
-                                  type = t;
-                                  break;
-                                }
-                              }
-
-                              // Switch to the new tab
-                              if (type != null) {
-                                Get.find<SpacesController>().switchToTab(type);
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              const TabletopView(),
 
               //* Controls
               Align(
