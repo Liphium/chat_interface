@@ -17,6 +17,8 @@
 - Merged the language, Spaces and notification settings into one tab called "General"
 - Removed audio and video chat from Spaces (read below)
 - Removed all Rust code related to audio since it's not being used anymore
+- Removed tab selector in Spaces (now connects to Tabletop by default)
+- Fixed a bug where the Space attachment renderer would make requests even when the widget is disposed
 - TODO: Add chat functionality to Spaces
 
 ### The removal of audio and video chat from Spaces
