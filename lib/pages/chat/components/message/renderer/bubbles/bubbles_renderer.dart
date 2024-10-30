@@ -69,6 +69,27 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     if (widget.index == widget.provider.messages.length + 1) {
       return SizedBox(
         height: Get.height,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 500),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "chat.welcome.title".tr,
+                  style: Get.theme.textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
+                ),
+                verticalSpacing(sectionSpacing),
+                Text(
+                  "chat.welcome.desc".tr,
+                  style: Get.theme.textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                )
+              ],
+            ),
+          ),
+        ),
       );
     }
 

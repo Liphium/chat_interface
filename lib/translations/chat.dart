@@ -58,6 +58,9 @@ class ChatPageTranslations extends Translations {
           'conversations.placeholder': 'Search',
           'conversations.create': 'Create conversation',
           'conversations.name': 'Conversation name',
+          'chat.welcome.title': 'Welcome to this new chat!',
+          'chat.welcome.desc':
+              'You could start by saying something like "Hello!" or maybe "Good morning!". Greetings based on the time are always good, I would know as a certified social expert sitting at home currently developing this app.',
           'chat.message': 'Say something',
           'chat.members': '@count members',
           'chat.start_space': 'Start a private Space',

@@ -96,6 +96,27 @@ class _MessageFeedState extends State<MessageFeed> {
                         Expanded(
                           child: Stack(
                             children: [
+                              //* Messages
+                              Center(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200,
+                                  ),
+                                  child: Obx(
+                                    () {
+                                      if (!controller.loaded.value) {
+                                        return const SizedBox();
+                                      }
+
+                                      return MessageList(
+                                        key: ValueKey(controller.currentProvider.value!.conversation.id),
+                                        provider: controller.currentProvider.value!,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+
                               //* Animated loading indicator
                               Align(
                                 alignment: Alignment.topCenter,
@@ -134,27 +155,6 @@ class _MessageFeedState extends State<MessageFeed> {
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                              ),
-
-                              //* Messages
-                              Center(
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200,
-                                  ),
-                                  child: Obx(
-                                    () {
-                                      if (!controller.loaded.value) {
-                                        return const SizedBox();
-                                      }
-
-                                      return MessageList(
-                                        key: ValueKey(controller.currentProvider.value!.conversation.id),
-                                        provider: controller.currentProvider.value!,
-                                      );
-                                    },
                                   ),
                                 ),
                               ),
