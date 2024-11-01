@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
@@ -12,15 +10,10 @@ import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
-import 'package:chat_interface/pages/settings/town/file_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:flutter/material.dart' as material;
-import 'package:flutter/widgets.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -223,7 +216,7 @@ class ConversationMessageProvider extends MessageProvider {
     }
 
     // Parse message and init attachments (if desired)
-    final message = await Message.unpackInIsolate(conversation, json["message"]);
+    final message = await ConversationMessageProvider.unpackMessageInIsolate(conversation, json["message"]);
     if (init) {
       await message.initAttachments(this);
     }
@@ -245,7 +238,7 @@ class ConversationMessageProvider extends MessageProvider {
         // Process all messages
         final list = <(Message, SymmetricSequencedInfo?)>[];
         for (var msgJson in json) {
-          final (message, info) = Message.fromJson(
+          final (message, info) = ConversationMessageProvider.messageFromJson(
             msgJson,
             conversation: copy,
             key: keys[0],
@@ -281,121 +274,13 @@ class ConversationMessageProvider extends MessageProvider {
 
     return loadedMessages.map((tuple) => tuple.$1).toList();
   }
-}
 
-class Message {
-  final String id;
-  MessageType type;
-  String content;
-  List<String> attachments;
-  final verified = true.obs;
-  String answer;
-  final LPHAddress sender;
-  final LPHAddress senderAddress;
-  final DateTime createdAt;
-  final LPHAddress conversation;
-  final bool edited;
-
-  Function()? highlightCallback;
-  AnimationController? highlightAnimation;
-  final canScroll = false.obs;
-  double? currentHeight;
-  GlobalKey? heightKey;
-  bool heightReported = false;
-  bool heightCallback = false;
-  bool renderingAttachments = false;
-  final attachmentsRenderer = <AttachmentContainer>[];
-  Message? answerMessage;
-
-  /// Extracts and decrypts the attachments
-  Future<bool> initAttachments(MessageProvider provider) async {
-    //* Load answer
-    if (answer != "") {
-      final message = await provider.loadMessageFromServer(answer, init: false);
-      answerMessage = message;
-    } else {
-      answerMessage = null;
-    }
-
-    //* Load attachments
-    if (attachmentsRenderer.isNotEmpty || renderingAttachments) {
-      return true;
-    }
-    renderingAttachments = true;
-    if (attachments.isNotEmpty && type != MessageType.system) {
-      for (var attachment in attachments) {
-        if (attachment.isURL) {
-          final container = AttachmentContainer.remoteImage(attachment);
-          await container.init();
-          attachmentsRenderer.add(container);
-          continue;
-        }
-        final json = jsonDecode(attachment);
-        final type = await AttachmentController.checkLocations(json["i"], StorageType.temporary);
-        final container = Get.find<AttachmentController>().fromJson(type, json);
-        if (!await container.existsLocally()) {
-          final extension = container.id.split(".").last;
-          if (FileSettings.imageTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
-            if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
-            }
-          } else if (FileSettings.videoTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
-            if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
-            }
-          } else if (FileSettings.audioTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
-            if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
-            }
-          }
-        }
-        attachmentsRenderer.add(container);
-      }
-      renderingAttachments = false;
-    }
-
-    return true;
-  }
-
-  //* Animation when a new message enters the chat
-  bool playAnimation = false;
-  material.AnimationController? controller;
-  void initAnimation(material.TickerProvider provider) {
-    if (controller != null) {
-      return;
-    }
-
-    controller = material.AnimationController(vsync: provider, duration: 250.ms);
-    Timer(250.ms, () {
-      controller!.forward(from: 0);
-    });
-  }
-
-  Message(
-    this.id,
-    this.type,
-    this.content,
-    this.answer,
-    this.attachments,
-    this.sender,
-    this.senderAddress,
-    this.createdAt,
-    this.conversation,
-    this.edited,
-    bool verified,
-  ) {
-    this.verified.value = verified;
-  }
-
-  /// Unpack a message json in an isolate
+  /// Unpack a message json in an isolate.
   ///
   /// Also verifies the signature (but that happens in the main isolate).
   ///
   /// For the future also: TODO: Unpack the signature in a different isolate
-  static Future<Message> unpackInIsolate(Conversation conv, Map<String, dynamic> json) async {
+  static Future<Message> unpackMessageInIsolate(Conversation conv, Map<String, dynamic> json) async {
     // Run an isolate to parse the message
     final copy = Conversation.copyWithoutKey(conv);
     final (message, info) = await _extractMessageIsolate(json, copy, conv.key);
@@ -412,7 +297,7 @@ class Message {
     return sodiumLib.runIsolated(
       (sodium, keys, pairs) {
         // Unpack the actual message
-        final (msg, info) = Message.fromJson(
+        final (msg, info) = messageFromJson(
           json,
           sodium: sodium,
           key: keys[0],
@@ -434,7 +319,7 @@ class Message {
   /// Load a message from json (from the server) and get the corresponding [SymmetricSequencedInfo] (only if no system message).
   ///
   /// **Doesn't verify the signature**
-  static (Message, SymmetricSequencedInfo?) fromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
+  static (Message, SymmetricSequencedInfo?) messageFromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
     // Convert to message
     final senderAddress = LPHAddress.from(json["sender"]);
     final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[senderAddress]?.address ??
@@ -459,79 +344,4 @@ class Message {
 
     return (message, info);
   }
-
-  /// Loads the content from the message (signature, type, content)
-  void loadContent({Map<String, dynamic>? json}) {
-    final contentJson = json ?? jsonDecode(content);
-    if (type != MessageType.system) {
-      type = MessageType.values[contentJson["t"] ?? 0];
-      if (type == MessageType.text) {
-        content = contentJson["c"];
-      } else {
-        content = contentJson["c"];
-      }
-    } else {
-      content = contentJson["c"];
-    }
-    attachments = List<String>.from(contentJson["a"] ?? [""]);
-    answer = contentJson["r"] ?? "";
-  }
-
-  /// Verifies the signature of the message
-  void verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
-    final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
-    sendLog("${conversation.members} | ${this.sender}");
-    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.address);
-    if (sender == null) {
-      sendLog("NO SENDER FOUND");
-      verified.value = false;
-      return;
-    }
-    verified.value = info.verifySignature(sender.signatureKey, sodium);
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{};
-  }
-
-  /// Decrypts the account ids of a system message
-  void decryptSystemMessageAttachments([Conversation? conv, SecureKey? key, Sodium? sodium]) {
-    conv ??= Get.find<ConversationController>().conversations[conversation]!;
-    for (var i = 0; i < attachments.length; i++) {
-      if (attachments[i].startsWith("a:")) {
-        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), key ?? conv.key, sodium))["id"];
-      }
-    }
-  }
-
-  /// Delete message on the server (and on the client)
-  ///
-  /// Returns null if successful, otherwise an error message
-  Future<String?> delete() async {
-    // Check if the message is sent by the user
-    final token = Get.find<ConversationController>().conversations[conversation]!.token;
-    if (sender != token.id) {
-      return "no.permission";
-    }
-
-    // Send a request to the server
-    final json = await postNodeJSON("/conversations/message/delete", {
-      "token": token.toMap(),
-      "data": id,
-    });
-    sendLog(json);
-
-    if (!json["success"]) {
-      return json["error"];
-    }
-
-    return null;
-  }
-}
-
-enum MessageType {
-  text,
-  system,
-  call,
-  liveshare;
 }

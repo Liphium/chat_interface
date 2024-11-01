@@ -4,7 +4,7 @@ import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/townsquare/townsquare_page.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
-import 'package:chat_interface/pages/spaces/call_rectangle.dart';
+import 'package:chat_interface/pages/spaces/space_rectangle.dart';
 import 'package:chat_interface/theme/desktop_widgets.dart';
 import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -93,7 +93,7 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
 
                           return MessageFeed();
                         default:
-                          return const CallRectangle();
+                          return const SpaceRectangle();
                       }
                     },
                   ),

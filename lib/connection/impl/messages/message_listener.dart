@@ -18,7 +18,7 @@ void setupMessageListener() {
     }
 
     // Unpack the message in a different isolate (to prevent lag)
-    final message = await Message.unpackInIsolate(conversation, event.data["msg"]);
+    final message = await ConversationMessageProvider.unpackMessageInIsolate(conversation, event.data["msg"]);
 
     // Check if there are too many attachments
     if (message.attachments.length > 5) {

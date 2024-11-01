@@ -7,6 +7,7 @@ import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
@@ -19,7 +20,6 @@ import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:sodium_libs/sodium_libs.dart';
@@ -33,8 +33,8 @@ class SpacesController extends GetxController {
   final spaceLoading = false.obs;
   final connected = false.obs;
   final start = DateTime.now().obs;
-  final currentTab = SpaceTabType.people.index.obs;
-  int _prevTab = SpaceTabType.people.index;
+  final currentTab = SpaceTabType.table.index.obs;
+  int _prevTab = SpaceTabType.table.index;
 
   //* Space information
   static String? currentDomain;
@@ -42,11 +42,9 @@ class SpacesController extends GetxController {
   static SecureKey? key;
 
   //* Call layout
+  final chatOpen = false.obs;
   final hideSidebar = false.obs;
   final fullScreen = false.obs;
-  final hasVideo = false.obs;
-  final hideOverlay = false.obs;
-  final cinemaWidget = Rx<Widget?>(null);
 
   void toggleFullScreen() {
     fullScreen.toggle();
@@ -79,26 +77,6 @@ class SpacesController extends GetxController {
       Get.find<TabletopController>().openTableTab();
     }
     _prevTab = currentTab.value;
-  }
-
-  void cinemaMode(Widget widget) {
-    sendLog("cinema");
-    if (cinemaWidget.value != null) {
-      if (cinemaWidget.value == widget) {
-        sendLog("already cinema");
-        if (currentTab.value == SpaceTabType.people.index) {
-          switchToTabAndChange(SpaceTabType.cinema);
-        } else {
-          switchToTabAndChange(SpaceTabType.people);
-        }
-        return;
-      }
-      cinemaWidget.value = widget;
-      switchToTabAndChange(SpaceTabType.cinema);
-      return;
-    }
-    cinemaWidget.value = widget;
-    switchToTabAndChange(SpaceTabType.cinema);
   }
 
   void createSpace(bool publish) {
@@ -193,7 +171,7 @@ class SpacesController extends GetxController {
       return;
     }
     currentDomain = appToken["domain"];
-    currentTab.value = SpaceTabType.people.index;
+    currentTab.value = SpaceTabType.table.index;
 
     // Setup all controllers
     Get.find<SpaceMemberController>().onConnect(key!);

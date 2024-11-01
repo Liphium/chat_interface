@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/pages/spaces/call_rectangle.dart';
-import 'package:chat_interface/pages/spaces/widgets/call_controls.dart';
+import 'package:chat_interface/pages/spaces/space_rectangle.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_controls.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -190,14 +190,14 @@ class _SpacesGameHubState extends State<SpacesGameHub> {
                               color: Get.theme.colorScheme.inverseSurface,
                               padding: const EdgeInsets.all(defaultSpacing),
                               width: constraints.maxWidth,
-                              child: const Center(child: CallControls()));
+                              child: const Center(child: SpaceControls()));
                         },
                       )
                     ],
                   );
                 }
 
-                return const CallRectangle();
+                return const SpaceRectangle();
               }),
             ),
           ],
