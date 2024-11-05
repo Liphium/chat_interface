@@ -21,10 +21,17 @@ import 'package:path/path.dart' as path;
 
 class AttachmentRenderer extends StatefulWidget {
   final Message? message;
+  final bool self;
   final ConversationMessageProvider? provider;
   final AttachmentContainer container;
 
-  const AttachmentRenderer({super.key, required this.container, this.message, this.provider});
+  const AttachmentRenderer({
+    super.key,
+    required this.container,
+    required this.self,
+    this.message,
+    this.provider,
+  });
 
   @override
   State<AttachmentRenderer> createState() => _AttachmentRendererState();
@@ -120,7 +127,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             padding: const EdgeInsets.all(defaultSpacing),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(defaultSpacing),
-              color: Get.theme.colorScheme.primaryContainer,
+              color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -196,7 +203,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       padding: const EdgeInsets.all(defaultSpacing),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color: Get.theme.colorScheme.primaryContainer,
+        color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -217,6 +224,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                   child: Text(
                     widget.container.name,
                     style: Get.theme.textTheme.labelMedium,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Flexible(
