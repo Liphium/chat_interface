@@ -90,11 +90,11 @@ class MessageController extends GetxController {
   /// Store the message in the cache if it is the current selected conversation.
   ///
   /// Also handles system messages.
-  void storeMessage(Message message) async {
+  void storeMessage(Message message, Conversation conversation) async {
     // Update message reading
     Get.find<ConversationController>().updateMessageRead(
-      message.conversation,
-      increment: currentProvider.value?.conversation.id != message.conversation,
+      conversation.id,
+      increment: currentProvider.value?.conversation.id != conversation.id,
       messageSendTime: message.createdAt.millisecondsSinceEpoch,
     );
 
@@ -102,7 +102,7 @@ class MessageController extends GetxController {
     RingingManager.playNotificationSound();
 
     // Add message to message history if it's the selected one
-    if (currentProvider.value?.conversation.id == message.conversation) {
+    if (currentProvider.value?.conversation.id == conversation.id) {
       if (message.sender != currentProvider.value?.conversation.token.id) {
         overwriteRead(currentProvider.value!.conversation);
       }
@@ -124,18 +124,11 @@ class MessageController extends GetxController {
 
     // Handle system messages
     if (message.type == MessageType.system) {
-      SystemMessages.messages[message.content]?.handle(message);
+      SystemMessages.messages[message.content]?.handle(message, currentProvider.value!);
     }
 
     // On call message type, ring using the message
     if (message.type == MessageType.call && message.senderAddress != StatusController.ownAddress) {
-      // Get the conversation for the ring
-      final conversation = Get.find<ConversationController>().conversations[message.conversation];
-      if (conversation == null) {
-        return;
-      }
-
-      // Decode the message and stuff
       final container = SpaceConnectionContainer.fromJson(jsonDecode(message.content));
       RingingManager.startRinging(conversation, container);
     }
@@ -252,7 +245,7 @@ class ConversationMessageProvider extends MessageProvider {
 
           // Decrypt system message attachments
           if (message.type == MessageType.system) {
-            message.decryptSystemMessageAttachments(copy, keys[0], sodium);
+            message.decryptSystemMessageAttachments(keys[0], sodium);
           }
 
           list.add((message, info));
@@ -306,7 +299,7 @@ class ConversationMessageProvider extends MessageProvider {
 
         // Unpack the system message attachments in case needed
         if (msg.type == MessageType.system) {
-          msg.decryptSystemMessageAttachments(copied, keys[0], sodium);
+          msg.decryptSystemMessageAttachments(keys[0], sodium);
         }
 
         // Return it to the main isolate
@@ -325,7 +318,7 @@ class ConversationMessageProvider extends MessageProvider {
     final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[senderAddress]?.address ??
         LPHAddress("-", "removed".tr);
     var message = Message(json["id"], MessageType.text, json["data"], "", [], senderAddress, account,
-        DateTime.fromMillisecondsSinceEpoch(json["creation"]), LPHAddress.from(json["conversation"]), json["edited"], false);
+        DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["edited"], false);
 
     // Decrypt content
     conversation ??= Get.find<ConversationController>().conversations[json["conversation"]]!;
@@ -343,5 +336,33 @@ class ConversationMessageProvider extends MessageProvider {
     message.loadContent();
 
     return (message, info);
+  }
+
+  @override
+  Future<String?> deleteMessage(Message message) async {
+    // Check if the message is sent by the user
+    final token = Get.find<ConversationController>().conversations[conversation.id]!.token;
+    if (message.sender != token.id) {
+      return "no.permission".tr;
+    }
+
+    // Send a request to the server
+    final json = await postNodeJSON("/conversations/message/delete", {
+      "token": token.toMap(),
+      "data": message.id,
+    });
+    sendLog(json);
+
+    if (!json["success"]) {
+      return json["error"];
+    }
+
+    return null;
+  }
+
+  @override
+  Future<bool> deleteMessageFromClient(String id) async {
+    messages.removeWhere((element) => element.id == id);
+    return true;
   }
 }

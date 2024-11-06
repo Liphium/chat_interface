@@ -27,6 +27,6 @@ void setupMessageListener() {
     }
 
     // Tell the controller about the message
-    controller.storeMessage(message);
+    controller.storeMessage(message, conversation);
   });
 }

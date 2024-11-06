@@ -19,6 +19,7 @@ class MessageOptionsWindow extends StatefulWidget {
   final ContextMenuData data;
   final bool self;
   final Message message;
+  final MessageProvider provider;
   final List<ProfileButton>? extra;
 
   const MessageOptionsWindow({
@@ -26,6 +27,7 @@ class MessageOptionsWindow extends StatefulWidget {
     required this.data,
     required this.self,
     required this.message,
+    required this.provider,
     this.extra,
   });
 
@@ -61,7 +63,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             label: "message.info".tr,
             onTap: () {
               Get.back();
-              Get.dialog(MessageInfoWindow(message: widget.message));
+              Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider));
             },
             loading: false.obs,
           ),
@@ -177,7 +179,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   messageDeletionLoading.value = true;
 
                   // Delete message
-                  final result = await widget.message.delete();
+                  final result = await widget.message.delete(widget.provider);
                   messageDeletionLoading.value = false;
                   if (result != null) {
                     showErrorPopup("error", result);

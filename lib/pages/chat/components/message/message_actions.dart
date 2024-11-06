@@ -223,5 +223,5 @@ void sendActualMessage(
 
   // Store message
   final msg = await ConversationMessageProvider.unpackMessageInIsolate(conversation, json["message"]);
-  Get.find<MessageController>().storeMessage(msg);
+  Get.find<MessageController>().storeMessage(msg, conversation);
 }

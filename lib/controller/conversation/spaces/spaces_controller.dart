@@ -9,6 +9,7 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
@@ -225,6 +226,7 @@ class SpacesController extends GetxController {
     Get.find<StatusController>().stopSharing();
     Get.find<SpaceMemberController>().onDisconnect();
     Get.find<TabletopController>().resetControllerState();
+    Get.find<SpacesMessageController>().clearProvider();
 
     if (!error) {
       Get.offAll(getChatPage(), transition: Transition.fadeIn);

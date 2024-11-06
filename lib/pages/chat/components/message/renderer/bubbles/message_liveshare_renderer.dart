@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
@@ -12,12 +13,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BubblesLiveshareMessageRenderer extends StatefulWidget {
+  final MessageProvider provider;
   final Message message;
   final bool self;
   final bool last;
   final Friend? sender;
 
-  const BubblesLiveshareMessageRenderer({super.key, required this.message, this.self = false, this.last = false, this.sender});
+  const BubblesLiveshareMessageRenderer({
+    super.key,
+    required this.provider,
+    required this.message,
+    this.self = false,
+    this.last = false,
+    this.sender,
+  });
 
   @override
   State<BubblesLiveshareMessageRenderer> createState() => _BubblesLiveshareMessageRendererState();
@@ -244,7 +253,20 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
 
                         //* Accept button
                         Obx(() {
-                          if (available.value && controller.currentConversation.value == widget.message.conversation) {
+                          // Return loading if this message wasn't send inside of a conversation
+                          if (widget.provider is! ConversationMessageProvider) {
+                            return SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: CircularProgressIndicator(
+                                color: Get.theme.colorScheme.onPrimary,
+                                value: controller.progress.value,
+                              ),
+                            );
+                          }
+
+                          final convProvider = widget.provider as ConversationMessageProvider;
+                          if (available.value && controller.currentConversation.value == convProvider.conversation.id) {
                             return SizedBox(
                               width: 30,
                               height: 30,
@@ -258,8 +280,11 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                           return Visibility(
                             visible: available.value && !widget.self,
                             child: IconButton(
-                              onPressed: () => Get.find<ZapShareController>()
-                                  .joinTransaction(widget.message.conversation, widget.message.senderAddress, container!),
+                              onPressed: () => Get.find<ZapShareController>().joinTransaction(
+                                convProvider.conversation.id,
+                                widget.message.senderAddress,
+                                container!,
+                              ),
                               icon: const Icon(Icons.check),
                             ),
                           );

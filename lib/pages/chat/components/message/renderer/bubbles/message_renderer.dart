@@ -67,6 +67,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
               data: menuData,
               self: widget.message.senderAddress == StatusController.ownAddress,
               message: widget.message,
+              provider: widget.provider,
             ));
           },
           child: Padding(

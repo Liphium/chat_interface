@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
@@ -208,6 +207,14 @@ abstract class MessageProvider {
   ///
   /// If the message is null, an error occured.
   Future<Message?> loadMessageFromServer(String id, {bool init = true});
+
+  /// This method deletes a message only from the client by id.
+  Future<bool> deleteMessageFromClient(String id);
+
+  /// This method deletes a message from the server and client.
+  ///
+  /// Returns an error if there is one.
+  Future<String?> deleteMessage(Message message);
 }
 
 class Message {
@@ -220,7 +227,6 @@ class Message {
   final LPHAddress sender;
   final LPHAddress senderAddress;
   final DateTime createdAt;
-  final LPHAddress conversation;
   final bool edited;
 
   Function()? highlightCallback;
@@ -310,7 +316,6 @@ class Message {
     this.sender,
     this.senderAddress,
     this.createdAt,
-    this.conversation,
     this.edited,
     bool verified,
   ) {
@@ -336,9 +341,7 @@ class Message {
 
   /// Verifies the signature of the message
   void verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
-    final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
-    sendLog("${conversation.members} | ${this.sender}");
-    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.address);
+    final sender = await Get.find<UnknownController>().loadUnknownProfile(senderAddress);
     if (sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;
@@ -352,11 +355,10 @@ class Message {
   }
 
   /// Decrypts the account ids of a system message
-  void decryptSystemMessageAttachments([Conversation? conv, SecureKey? key, Sodium? sodium]) {
-    conv ??= Get.find<ConversationController>().conversations[conversation]!;
+  void decryptSystemMessageAttachments(SecureKey key, Sodium sodium) {
     for (var i = 0; i < attachments.length; i++) {
       if (attachments[i].startsWith("a:")) {
-        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), key ?? conv.key, sodium))["id"];
+        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), key, sodium))["id"];
       }
     }
   }
@@ -364,23 +366,10 @@ class Message {
   /// Delete message on the server (and on the client)
   ///
   /// Returns null if successful, otherwise an error message
-  Future<String?> delete() async {
-    // Check if the message is sent by the user
-    final token = Get.find<ConversationController>().conversations[conversation]!.token;
-    if (sender != token.id) {
-      return "no.permission";
-    }
+  Future<String?> delete(MessageProvider provider) async {
+    provider.deleteMessage(this);
 
-    // Send a request to the server
-    final json = await postNodeJSON("/conversations/message/delete", {
-      "token": token.toMap(),
-      "data": id,
-    });
-    sendLog(json);
-
-    if (!json["success"]) {
-      return json["error"];
-    }
+    // TODO: Reimplement with provider
 
     return null;
   }

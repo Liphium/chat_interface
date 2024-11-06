@@ -64,7 +64,7 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
     }
 
     if (message.type == MessageType.system) {
-      return BubblesSystemMessageRenderer(message: message);
+      return BubblesSystemMessageRenderer(message: message, provider: widget.provider);
     }
     final sender = friendController.friends[message.senderAddress];
     final self = message.senderAddress == StatusController.ownAddress;
@@ -106,6 +106,7 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
         renderer = BubblesLiveshareMessageRenderer(
           key: ValueKey(message.id),
           message: message,
+          provider: widget.provider,
           self: self,
           last: last,
           sender: self ? Friend.me() : sender,
@@ -115,6 +116,7 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
         renderer = BubblesSystemMessageRenderer(
           key: ValueKey(message.id),
           message: message,
+          provider: widget.provider,
         );
     }
 
