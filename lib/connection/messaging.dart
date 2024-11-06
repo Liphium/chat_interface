@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 
-/// An event is sent from the server to the client when a [Message] was parsed by the server.
+/// An event is sent from the server to the client when a [ServerAction] was parsed by the server.
 class Event {
   /// Name of the event
   final String name;
@@ -25,16 +25,16 @@ class Event {
 }
 
 /// A message is sent to the server to perform an action.
-class Message {
+class ServerAction {
   /// Action to perform
   String action;
 
   /// Data of the action
   final dynamic data;
 
-  Message(this.action, this.data);
-  Message.fromMap(Map<String, dynamic> map) : this(map['action'], map['data']);
-  Message.fromJson(String json) : this.fromMap(jsonDecode(json));
+  ServerAction(this.action, this.data);
+  ServerAction.fromMap(Map<String, dynamic> map) : this(map['action'], map['data']);
+  ServerAction.fromJson(String json) : this.fromMap(jsonDecode(json));
 
   Map<String, dynamic> toMap() => {
         'action': action,

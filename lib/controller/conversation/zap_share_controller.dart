@@ -76,7 +76,7 @@ class ZapShareController extends GetxController {
     }
     if (uploading) {
       connector.sendAction(
-        Message("cancel_transaction", <String, dynamic>{}),
+        ServerAction("cancel_transaction", <String, dynamic>{}),
       );
     } else {
       partSubscription?.cancel();
@@ -141,7 +141,7 @@ class ZapShareController extends GetxController {
     endPart = (fileSize.toDouble() / chunkSize.toDouble()).ceil();
     step.value = "chat.zapshare.waiting".tr;
     connector.sendAction(
-      Message("create_transaction", <String, dynamic>{
+      ServerAction("create_transaction", <String, dynamic>{
         "name": fileName,
         "size": fileSize,
       }),

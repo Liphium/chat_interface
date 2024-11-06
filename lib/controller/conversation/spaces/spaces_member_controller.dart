@@ -12,10 +12,6 @@ class SpaceMemberController extends GetxController {
   final members = <String, SpaceMember>{}.obs;
   static String ownId = "";
 
-  // Action names
-  static const String startedTalkingAction = "started_talking";
-  static const String stoppedTalkingAction = "stopped_talking";
-
   void onMembersChanged(List<dynamic> members) {
     sendLog("members changed");
     final statusController = Get.find<StatusController>();

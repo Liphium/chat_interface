@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/aes.dart';
@@ -206,15 +207,16 @@ class Connector {
     _afterSetup[event] = afterSetup;
   }
 
-  /// Send a [Message] to the node.
+  /// Send a [ServerAction] to the node.
   ///
   /// Optionally, you can specify a [handler] to handle the response (this will be called multiple times if there are multiple responses).
-  /// Optionally, you can specify a [waiter] to wait for the response.
-  void sendAction(Message message, {Function(Event)? handler}) {
+  ///
+  /// Returns the response id of the responder to the action (if one is specified).
+  String? sendAction(ServerAction action, {Function(Event)? handler}) {
     if (!_connected) {
       showErrorPopup("error", "error.network".tr);
-      sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${message.action}");
-      return;
+      sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${action.action}");
+      return null;
     }
 
     // Generate a valid response id
@@ -225,13 +227,50 @@ class Connector {
 
     // Register the handler and waiter
     _responders[responseId] = handler;
-    _responseTo[responseId] = message.action;
+    _responseTo[responseId] = action.action;
 
     // Add responseId to action
-    message.action = "${message.action}:$responseId";
+    action.action = "${action.action}:$responseId";
 
     // Send and encrypt the message (using AES key)
-    connection?.sendBytes(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
+    connection?.sendBytes(encryptAES(action.toJson().toCharArray().unsignedView(), aesBase64!));
+
+    return responseId;
+  }
+
+  /// Send a [ServerAction] to the node.
+  ///
+  /// Returns an event if one was sent back by the server.
+  Future<Event?> sendActionAndWait(ServerAction action, {Duration? timeout}) {
+    final completer = Completer<Event?>();
+    final responseId = sendAction(
+      action,
+      handler: (event) {
+        completer.complete(event);
+      },
+    );
+    if (responseId == null) {
+      completer.complete(null);
+    } else {
+      Timer(
+        timeout ?? Duration(seconds: 10),
+        () {
+          // If the event already received a response, it doesn't matter
+          if (completer.isCompleted) {
+            return;
+          }
+
+          // Attach an error handler to make sure the error is logged when the server doesn't respond
+          _responders[responseId] = (event) {
+            sendLog("Event ${event.name} received even though there was an error with this previously.");
+          };
+
+          sendLog("Response to ${action.action} timed out");
+          completer.complete(null);
+        },
+      );
+    }
+    return completer.future;
   }
 }
 

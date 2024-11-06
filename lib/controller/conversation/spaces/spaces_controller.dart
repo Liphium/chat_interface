@@ -8,7 +8,6 @@ import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -106,7 +105,7 @@ class SpacesController extends GetxController {
     }
     spaceLoading.value = true;
 
-    connector.sendAction(msg.Message("spc_start", <String, dynamic>{}), handler: (event) {
+    connector.sendAction(msg.ServerAction("spc_start", <String, dynamic>{}), handler: (event) {
       if (!event.data["success"]) {
         spaceLoading.value = false;
         sendLog(event.data);
@@ -130,13 +129,13 @@ class SpacesController extends GetxController {
 
   void join(SpaceConnectionContainer container) {
     connector.sendAction(
-        msg.Message("spc_join", <String, dynamic>{
+        msg.ServerAction("spc_join", <String, dynamic>{
           "id": container.roomId,
         }), handler: (event) {
       if (!event.data["success"]) {
         if (event.data["message"] == "already.in.space") {
           // Leave the space immediately
-          connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) async {
+          connector.sendAction(msg.ServerAction("spc_leave", <String, dynamic>{}), handler: (event) async {
             if (!event.data["success"]) {
               if (event.data["message"] is String) {
                 return showErrorPopup("error", event.data["message"]);
@@ -186,7 +185,7 @@ class SpacesController extends GetxController {
     }
 
     spaceConnector.sendAction(
-      msg.Message(
+      msg.ServerAction(
         "setup",
         {
           "data": encryptSymmetric(StatusController.ownAddress.encode(), key!),
@@ -225,7 +224,6 @@ class SpacesController extends GetxController {
     // Tell other controllers about it
     Get.find<StatusController>().stopSharing();
     Get.find<SpaceMemberController>().onDisconnect();
-    Get.find<GameHubController>().leaveCall();
     Get.find<TabletopController>().resetControllerState();
 
     if (!error) {

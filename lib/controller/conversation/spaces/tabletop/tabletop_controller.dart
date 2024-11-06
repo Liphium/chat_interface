@@ -78,7 +78,7 @@ class TabletopController extends GetxController {
   /// Called when the tabletop tab is opened (to receive events again)
   void openTableTab() {
     spaceConnector.sendAction(
-      Message("table_enable", <String, dynamic>{}),
+      ServerAction("table_enable", <String, dynamic>{}),
       handler: (event) {
         sendLog("hello world");
         loading.value = false;
@@ -104,7 +104,7 @@ class TabletopController extends GetxController {
     cursors.clear();
     loading.value = true;
     spaceConnector.sendAction(
-      Message("table_disable", <String, dynamic>{}),
+      ServerAction("table_disable", <String, dynamic>{}),
       handler: (event) {
         loading.value = false;
 
@@ -122,7 +122,7 @@ class TabletopController extends GetxController {
     if (heldObject != null) {
       if (movingAllowed) {
         spaceConnector.sendAction(
-          Message("tobj_move", <String, dynamic>{
+          ServerAction("tobj_move", <String, dynamic>{
             "id": heldObject!.id,
             "x": heldObject!.location.dx,
             "y": heldObject!.location.dy,
@@ -139,7 +139,7 @@ class TabletopController extends GetxController {
 
     // Send mouse position if available
     if (_lastMousePos != mousePos) {
-      spaceConnector.sendAction(Message("tc_move", <String, dynamic>{
+      spaceConnector.sendAction(ServerAction("tc_move", <String, dynamic>{
         "x": mousePos.dx,
         "y": mousePos.dy,
       }));
@@ -344,7 +344,7 @@ abstract class TableObject {
   void newRotation(double rot) {
     // TODO: handle error when rotation fails
     queue(() async {
-      spaceConnector.sendAction(Message("tobj_rotate", <String, dynamic>{
+      spaceConnector.sendAction(ServerAction("tobj_rotate", <String, dynamic>{
         "id": id,
         "r": rot,
       }));
@@ -401,7 +401,7 @@ abstract class TableObject {
 
     // Send to the server
     spaceConnector.sendAction(
-      Message("tobj_create", <String, dynamic>{
+      ServerAction("tobj_create", <String, dynamic>{
         "x": location.dx,
         "y": location.dy,
         "w": size.width,
@@ -428,7 +428,7 @@ abstract class TableObject {
 
   /// Remove an object
   void sendRemove() {
-    spaceConnector.sendAction(Message("tobj_delete", id));
+    spaceConnector.sendAction(ServerAction("tobj_delete", id));
   }
 
   /// Start a modification process (data)
@@ -436,7 +436,7 @@ abstract class TableObject {
     final completer = Completer<bool>();
 
     spaceConnector.sendAction(
-      Message("tobj_select", id),
+      ServerAction("tobj_select", id),
       handler: (event) {
         if (!event.data["success"]) {
           showErrorPopup("error", event.data["message"]);
@@ -456,7 +456,7 @@ abstract class TableObject {
     final completer = Completer<bool>();
 
     spaceConnector.sendAction(
-      Message("tobj_unselect", id),
+      ServerAction("tobj_unselect", id),
       handler: (event) {
         if (!event.data["success"]) {
           sendLog("can't modify rn");
@@ -481,7 +481,7 @@ abstract class TableObject {
     currentlyModifying = true;
     dataBeforeQueue = getData();
     spaceConnector.sendAction(
-      Message("tobj_mqueue", id),
+      ServerAction("tobj_mqueue", id),
       handler: (event) {
         if (!event.data["success"]) {
           showErrorPopup("error", event.data["message"]);
@@ -503,7 +503,7 @@ abstract class TableObject {
   Future<bool> modifyData() {
     final completer = Completer<bool>();
     spaceConnector.sendAction(
-      Message("tobj_modify", <String, dynamic>{
+      ServerAction("tobj_modify", <String, dynamic>{
         "id": id,
         "data": encryptedData(),
         "width": size.width,
