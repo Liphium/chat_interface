@@ -79,6 +79,11 @@ class ErrorTranslations extends Translations {
           'tabletop.invalid_action': 'You can\'t do that right now. Please try again later.',
           'no.start':
               'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
+
+          // Message errors
+          'error.message.timestamp': 'A timestamp for your message could not be generated.',
+          'error.message.empty': 'Your message is empty, please add some content to send it.',
+          'error.message.loading': 'A message is still waiting to be sent, please wait for it to finish.',
         },
 
         //* German

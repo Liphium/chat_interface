@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
@@ -27,9 +27,14 @@ import '../../../util/vertical_spacing.dart';
 import 'package:path/path.dart' as path;
 
 class MessageInput extends StatefulWidget {
-  final Conversation conversation;
+  final String draft;
+  final MessageProvider provider;
 
-  const MessageInput({super.key, required this.conversation});
+  const MessageInput({
+    super.key,
+    required this.draft,
+    required this.provider,
+  });
 
   @override
   State<MessageInput> createState() => _MessageInputState();
@@ -56,12 +61,19 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   @override
+  void didUpdateWidget(covariant MessageInput oldWidget) {
+    // Load the draft of the current conversation in case the widget was updated
+    loadDraft(widget.draft);
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void initState() {
     super.initState();
 
-    // Clear message input when conversation changes
+    // Clear message input when conversation changes and change to current draft
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      loadDraft(widget.conversation.id);
+      loadDraft(widget.draft);
     });
 
     _message.addListener(() {
@@ -83,20 +95,19 @@ class _MessageInputState extends State<MessageInput> {
     });
   }
 
-  void loadDraft(LPHAddress conversation) {
+  void loadDraft(String newDraft) {
     if (MessageSendHelper.currentDraft.value != null) {
-      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] = MessageSendHelper.currentDraft.value!;
+      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.target] = MessageSendHelper.currentDraft.value!;
     }
-    MessageSendHelper.currentDraft.value = MessageSendHelper.drafts[conversation] ?? MessageDraft(conversation, "");
+    MessageSendHelper.currentDraft.value = MessageSendHelper.drafts[newDraft] ?? MessageDraft(newDraft, "");
     _message.text = MessageSendHelper.currentDraft.value!.message;
     _inputFocus.requestFocus();
   }
 
   void resetCurrentDraft() {
     if (MessageSendHelper.currentDraft.value != null) {
-      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.conversationId] =
-          MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
-      MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.conversationId, "");
+      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.target] = MessageDraft(MessageSendHelper.currentDraft.value!.target, "");
+      MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.target, "");
       _message.clear();
     }
     loading.value = false;
@@ -152,16 +163,27 @@ class _MessageInputState extends State<MessageInput> {
     // All actions that can be performed using shortcuts in the input field-
     final actionsMap = {
       SendIntent: CallbackAction<SendIntent>(
-        onInvoke: (SendIntent intent) {
+        onInvoke: (SendIntent intent) async {
           // Do emoji suggestion instead when pressing enter
           if (_emojiSuggestions.isNotEmpty) {
             doEmojiSuggestion(_emojiSuggestions[0].emoji);
             return;
           }
 
+          // Send a regular text message if there are no files to attach
           if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
-            sendTextMessage(
-                loading, widget.conversation.id, _message.text, [], MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
+            final error = await widget.provider.sendMessage(
+              loading,
+              MessageType.text,
+              [],
+              _message.text,
+              MessageSendHelper.currentDraft.value!.answer.value?.id ?? "",
+            );
+            if (error != null) {
+              showErrorPopup("error", error);
+            } else {
+              resetCurrentDraft();
+            }
             return;
           }
 
@@ -169,8 +191,18 @@ class _MessageInputState extends State<MessageInput> {
             return;
           }
 
-          sendTextMessageWithFiles(loading, widget.conversation.id, _message.text, MessageSendHelper.currentDraft.value!.files,
-              MessageSendHelper.currentDraft.value!.answer.value?.id ?? "", resetCurrentDraft);
+          // Send a regular text message with files
+          final error = await widget.provider.sendTextMessageWithFiles(
+            loading,
+            _message.text,
+            MessageSendHelper.currentDraft.value!.files,
+            MessageSendHelper.currentDraft.value!.answer.value?.id ?? "",
+          );
+          if (error != null) {
+            showErrorPopup("error", error);
+          } else {
+            resetCurrentDraft();
+          }
           return null;
         },
       ),

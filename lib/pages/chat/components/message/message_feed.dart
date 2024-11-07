@@ -1,30 +1,15 @@
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar_mobile.dart';
 import 'package:chat_interface/pages/chat/components/message/message_list.dart';
-import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
-import 'package:chat_interface/standards/server_stored_information.dart';
-import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:chat_interface/util/web.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-
-part 'message_actions.dart';
 
 class MessageFeed extends StatefulWidget {
   const MessageFeed({super.key});
@@ -168,7 +153,8 @@ class _MessageFeedState extends State<MessageFeed> {
                           child: controller.currentProvider.value!.conversation.borked
                               ? const SizedBox.shrink()
                               : MessageInput(
-                                  conversation: controller.currentProvider.value!.conversation,
+                                  draft: controller.currentProvider.value!.conversation.id.encode(),
+                                  provider: controller.currentProvider.value!,
                                 ),
                         )
                       ],

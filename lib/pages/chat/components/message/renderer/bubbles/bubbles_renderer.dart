@@ -67,26 +67,33 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
     // This is needed for jump to message
     if (widget.index == widget.provider.messages.length + 1) {
+      if (widget.provider.newMessagesLoading.value) {
+        return const SizedBox();
+      }
+
       return SizedBox(
         height: Get.height,
         child: Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 500),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "chat.welcome.title".tr,
-                  style: Get.theme.textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                verticalSpacing(sectionSpacing),
-                Text(
-                  "chat.welcome.desc".tr,
-                  style: Get.theme.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                )
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: sectionSpacing),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "chat.welcome.title".tr,
+                    style: Get.theme.textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  verticalSpacing(sectionSpacing),
+                  Text(
+                    "chat.welcome.desc".tr,
+                    style: Get.theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  )
+                ],
+              ),
             ),
           ),
         ),

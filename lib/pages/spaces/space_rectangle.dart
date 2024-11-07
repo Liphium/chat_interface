@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_controls.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -110,6 +112,9 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                   child: Container(
                     color: Get.theme.colorScheme.onInverseSurface,
                     width: 350,
+                    child: MessageList(
+                      provider: Get.find<SpacesMessageController>().provider,
+                    ),
                   ),
                 ),
               )

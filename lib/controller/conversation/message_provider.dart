@@ -2,17 +2,24 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sodium_libs/sodium_libs.dart';
+
+// Package this and message sending as one
+part 'message_sending.dart';
 
 abstract class MessageProvider {
   final messages = <Message>[].obs;
@@ -190,6 +197,108 @@ abstract class MessageProvider {
     return true;
   }
 
+  /// Send a text message with files attached.
+  /// The files will be uploaded to the server automatically.
+  ///
+  /// Returns an error or null if successful.
+  Future<String?> sendTextMessageWithFiles(
+    RxBool loading,
+    String message,
+    List<UploadData> files,
+    String answer,
+  ) async {
+    if (loading.value) {
+      return "error.message.loading";
+    }
+    loading.value = true;
+
+    // Upload files
+    final attachments = <String>[];
+    for (var file in files) {
+      final res = await Get.find<AttachmentController>().uploadFile(file, StorageType.temporary, Constants.fileAttachmentTag);
+      if (res.container == null) {
+        return res.message;
+      }
+      await res.container!.precalculateWidthAndHeight();
+      attachments.add(res.data);
+    }
+
+    loading.value = false;
+    return sendMessage(loading, MessageType.text, attachments, message, answer);
+  }
+
+  /// Send a message into the channel of the message provider.
+  ///
+  /// Returns an error or null if successful.
+  Future<String?> sendMessage(
+    RxBool loading,
+    MessageType type,
+    List<String> attachments,
+    String message,
+    String answer,
+  ) async {
+    if (message.isEmpty && attachments.isEmpty) {
+      return 'error.message.empty'.tr;
+    }
+    loading.value = true;
+
+    // Upload all the files in case it is a text message
+    if (type == MessageType.text) {
+      // Scan for links with remote images (and add them as attachments)
+      if (attachments.isEmpty) {
+        for (var line in message.split("\n")) {
+          bool found = false;
+          for (var word in line.split(" ")) {
+            if (word.isURL) {
+              for (var fileType in FileSettings.imageTypes) {
+                if (word.endsWith(".$fileType")) {
+                  attachments.add(word);
+                  if (message.trim() == word) {
+                    message = "";
+                  }
+                  found = attachments.length > 3;
+                  break;
+                }
+              }
+              if (found) {
+                break;
+              }
+            }
+          }
+          if (found) {
+            break;
+          }
+        }
+      }
+    }
+
+    // Grab a new timestamp from the server
+    var obj = await getTimestamp();
+    if (obj == null) {
+      return "error.message.timestamp".tr;
+    }
+
+    // Use the timestamp from the json (to prevent desynchronization and stuff)
+    final (timeToken, stamp) = obj;
+    final content = jsonEncode(<String, dynamic>{
+      "c": message,
+      "t": type.index,
+      "a": attachments,
+      "r": answer,
+    });
+
+    // Encrypt message with signature
+    final info = SymmetricSequencedInfo.builder(content, stamp).finish(await encryptionKey());
+
+    // Send message
+    final error = await _handleMessageSend(info);
+    if (error != null) {
+      loading.value = false;
+      return error;
+    }
+    return null;
+  }
+
   /// This method should load new messages after the specified unix timestamp.
   ///
   /// The boolean in the tuple should indicate whether and error happend or not.
@@ -215,6 +324,20 @@ abstract class MessageProvider {
   ///
   /// Returns an error if there is one.
   Future<String?> deleteMessage(Message message);
+
+  /// This method gets a timestamp token and the time in unix from the server.
+  ///
+  /// This helps prevent inconsistent time on the client and makes sure the message order is proper.
+  Future<(String, int)?> getTimestamp();
+
+  /// This method should get the encryption key of the message provider.
+  Future<SecureKey> encryptionKey();
+
+  /// This method is called with an encrypted string that contains the entire message.
+  /// This method should send this data to the server as the message.
+  ///
+  /// This method should return an error or null if it was successful.
+  Future<String?> _handleMessageSend(String data);
 }
 
 class Message {
@@ -368,9 +491,6 @@ class Message {
   /// Returns null if successful, otherwise an error message
   Future<String?> delete(MessageProvider provider) async {
     provider.deleteMessage(this);
-
-    // TODO: Reimplement with provider
-
     return null;
   }
 }

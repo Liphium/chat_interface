@@ -6,7 +6,6 @@ import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
@@ -138,8 +137,7 @@ class _LibraryTabState extends State<LibraryTab> {
                 if (controller.currentProvider.value == null) {
                   return;
                 }
-                sendActualMessage(
-                    false.obs, controller.currentProvider.value!.conversation.id, MessageType.text, [container.toAttachment()], "", "", () => {});
+                controller.currentProvider.value?.sendMessage(false.obs, MessageType.text, [container.toAttachment()], "", "");
                 Get.back();
               },
               child: ClipRRect(
