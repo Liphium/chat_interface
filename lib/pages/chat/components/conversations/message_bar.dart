@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -17,8 +18,9 @@ import 'package:liphium_bridge/liphium_bridge.dart';
 
 class MessageBar extends StatefulWidget {
   final Conversation conversation;
+  final MessageProvider provider;
 
-  const MessageBar({super.key, required this.conversation});
+  const MessageBar({super.key, required this.conversation, required this.provider});
 
   @override
   State<MessageBar> createState() => _MessageBarState();
@@ -130,7 +132,7 @@ class _MessageBarState extends State<MessageBar> {
                     tooltip: "chat.add_space".tr,
                     onTap: () {
                       final controller = Get.find<SpacesController>();
-                      controller.inviteToCall(widget.conversation.id);
+                      controller.inviteToCall(widget.provider);
                     },
                   ),
 
@@ -142,7 +144,7 @@ class _MessageBarState extends State<MessageBar> {
                     tooltip: "chat.start_space".tr,
                     onTap: () {
                       final controller = Get.find<SpacesController>();
-                      controller.createAndConnect(widget.conversation.id);
+                      controller.createAndConnect(widget.provider);
                     },
                   ),
 

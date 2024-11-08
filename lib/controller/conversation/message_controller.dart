@@ -61,7 +61,7 @@ class MessageController extends GetxController {
       overwriteRead(conversation);
     }
 
-    // Load messages
+    // Make sure the thing has some messages in it
     currentProvider.value!.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 
     loaded.value = true;
@@ -137,12 +137,8 @@ class MessageController extends GetxController {
 
 /// A message provider that loads messages from a conversation.
 class ConversationMessageProvider extends MessageProvider {
-  Conversation conversation;
+  final Conversation conversation;
   ConversationMessageProvider(this.conversation);
-
-  void changeConversation(Conversation conv) {
-    conversation = conv;
-  }
 
   @override
   Future<(List<Message>?, bool)> loadMessagesBefore(int time) async {
@@ -364,5 +360,41 @@ class ConversationMessageProvider extends MessageProvider {
   Future<bool> deleteMessageFromClient(String id) async {
     messages.removeWhere((element) => element.id == id);
     return true;
+  }
+
+  @override
+  SecureKey encryptionKey() {
+    return conversation.key;
+  }
+
+  @override
+  Future<(String, int)?> getTimestamp() async {
+    // Grab a new timestamp from the server
+    var json = await postNodeJSON("/conversations/timestamp", {
+      "token": conversation.token.toMap(),
+    });
+    if (!json["success"]) {
+      return null;
+    }
+
+    // The stamp is first casted to a num to prevent an error (don't remove)
+    return (json["token"] as String, (json["stamp"] as num).toInt());
+  }
+
+  @override
+  Future<String?> handleMessageSend(String timeToken, String data) async {
+    // Send message to the server with conversation token as authentication
+    final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
+      "token": conversation.token.toMap(),
+      "data": {
+        "token": timeToken,
+        "data": data,
+      }
+    });
+
+    if (!json["success"]) {
+      return json["error"];
+    }
+    return null;
   }
 }

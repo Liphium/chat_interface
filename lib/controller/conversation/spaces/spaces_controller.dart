@@ -16,7 +16,6 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
@@ -87,12 +86,12 @@ class SpacesController extends GetxController {
     });
   }
 
-  void createAndConnect(LPHAddress conversationId) {
-    _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, [], container.toInviteJson(), "", () => {}));
+  void createAndConnect(MessageProvider provider) {
+    _startSpace((container) => provider.sendMessage(spaceLoading, MessageType.call, [], container.toInviteJson(), ""));
   }
 
-  void inviteToCall(LPHAddress conversationId) {
-    sendActualMessage(spaceLoading, conversationId, MessageType.call, [], getContainer().toInviteJson(), "", () => {});
+  void inviteToCall(MessageProvider provider) {
+    provider.sendMessage(spaceLoading, MessageType.call, [], getContainer().toInviteJson(), "");
   }
 
   SpaceConnectionContainer getContainer() {

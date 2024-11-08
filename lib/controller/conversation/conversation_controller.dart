@@ -182,9 +182,9 @@ class Conversation {
   String packedKey;
   SecureKey? _cachedKey;
 
-  get key {
+  SecureKey get key {
     _cachedKey ??= unpackageSymmetricKey(packedKey);
-    return _cachedKey;
+    return _cachedKey!;
   }
 
   final membersLoading = false.obs;

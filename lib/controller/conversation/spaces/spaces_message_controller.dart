@@ -242,4 +242,39 @@ class SpacesMessageProvider extends MessageProvider {
 
     return (message, info);
   }
+
+  @override
+  SecureKey encryptionKey() {
+    return SpacesController.key!;
+  }
+
+  @override
+  Future<(String, int)?> getTimestamp() async {
+    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_timestamp", {}));
+    if (event == null) {
+      return null;
+    }
+
+    // Retrieve the token and the stamp from the response
+    return (event.data["token"] as String, (event.data["time"] as num).toInt());
+  }
+
+  @override
+  Future<String?> handleMessageSend(String timeToken, String data) async {
+    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_send", {
+      "token": timeToken,
+      "data": data,
+    }));
+
+    // Return a server error if the thing didn't work
+    if (event == null) {
+      return "server.error".tr;
+    }
+
+    // Return the error if there is one
+    if (!event.data["success"]) {
+      return event.data["message"];
+    }
+    return null;
+  }
 }

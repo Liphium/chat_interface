@@ -288,10 +288,10 @@ abstract class MessageProvider {
     });
 
     // Encrypt message with signature
-    final info = SymmetricSequencedInfo.builder(content, stamp).finish(await encryptionKey());
+    final info = SymmetricSequencedInfo.builder(content, stamp).finish(encryptionKey());
 
     // Send message
-    final error = await _handleMessageSend(info);
+    final error = await handleMessageSend(timeToken, info);
     if (error != null) {
       loading.value = false;
       return error;
@@ -331,13 +331,13 @@ abstract class MessageProvider {
   Future<(String, int)?> getTimestamp();
 
   /// This method should get the encryption key of the message provider.
-  Future<SecureKey> encryptionKey();
+  SecureKey encryptionKey();
 
   /// This method is called with an encrypted string that contains the entire message.
   /// This method should send this data to the server as the message.
   ///
   /// This method should return an error or null if it was successful.
-  Future<String?> _handleMessageSend(String data);
+  Future<String?> handleMessageSend(String timeToken, String data);
 }
 
 class Message {

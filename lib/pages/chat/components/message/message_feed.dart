@@ -68,7 +68,10 @@ class _MessageFeedState extends State<MessageFeed> {
           if (isMobileMode())
             MobileMessageBar(conversation: controller.currentProvider.value!.conversation)
           else
-            MessageBar(conversation: controller.currentProvider.value!.conversation),
+            MessageBar(
+              conversation: controller.currentProvider.value!.conversation,
+              provider: controller.currentProvider.value!,
+            ),
 
           Expanded(
             child: Row(
