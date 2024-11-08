@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/spaces/space_connection.dart';
@@ -18,6 +17,7 @@ import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -98,90 +98,71 @@ class SpacesController extends GetxController {
     return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
   }
 
-  void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {
+  void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) async {
     if (connected.value) {
       showErrorPopup("error", "already.calling".tr);
       return;
     }
     spaceLoading.value = true;
 
-    connector.sendAction(msg.ServerAction("spc_start", <String, dynamic>{}), handler: (event) {
-      if (!event.data["success"]) {
-        spaceLoading.value = false;
-        sendLog(event.data);
-        if (event.data["message"] is String) {
-          return showErrorPopup("error", event.data["message"]);
-        }
-        return showErrorPopup("error", "server.error".tr);
-      }
-      final appToken = event.data["token"] as Map<String, dynamic>;
-      final roomId = event.data["id"];
-      sendLog("connecting to node ${appToken["node"]}..");
-      key = randomSymmetricKey();
-      id.value = roomId;
-      _connectToRoom(roomId, appToken, connectedCallback: connectedCallback);
-
-      // Send invites
-      final container = SpaceConnectionContainer(appToken["domain"], roomId, key!, null);
-      callback.call(container);
-    });
-  }
-
-  void join(SpaceConnectionContainer container) {
-    connector.sendAction(
-        msg.ServerAction("spc_join", <String, dynamic>{
-          "id": container.roomId,
-        }), handler: (event) {
-      if (!event.data["success"]) {
-        if (event.data["message"] == "already.in.space") {
-          // Leave the space immediately
-          connector.sendAction(msg.ServerAction("spc_leave", <String, dynamic>{}), handler: (event) async {
-            if (!event.data["success"]) {
-              if (event.data["message"] is String) {
-                return showErrorPopup("error", event.data["message"]);
-              }
-              return showErrorPopup("error", "server.error".tr);
-            }
-
-            // Wait a little bit, in case a server abuses this as an infinite loop
-            await Future.delayed(const Duration(milliseconds: 500));
-
-            // Try joining again
-            join(container);
-          });
-          return;
-        }
-
-        return showErrorPopup("error", "server.error".tr);
-      }
-
-      // Load information from space container
-      id.value = container.roomId;
-      key = container.key;
-
-      // Connect to the room
-      _connectToRoom(id.value, event.data["token"]);
-    });
-  }
-
-  void _connectToRoom(String id, Map<String, dynamic> appToken, {Function()? connectedCallback}) async {
-    if (key == null) {
-      sendLog("key is null: can't connect to space");
+    // Create a new space
+    final roomId = getRandomString(16);
+    key = randomSymmetricKey();
+    id.value = roomId;
+    final domain = await _connectToRoom(roomId, connectedCallback: connectedCallback);
+    if (domain == null) {
       return;
     }
-    currentDomain = appToken["domain"];
+
+    // Send invites
+    final container = SpaceConnectionContainer(domain, roomId, key!, null);
+    callback.call(container);
+  }
+
+  void join(SpaceConnectionContainer container) async {
+    spaceLoading.value = true;
+
+    // Load information from space container
+    id.value = container.roomId;
+    key = container.key;
+
+    // Connect to the room
+    await _connectToRoom(id.value);
+    spaceLoading.value = false;
+  }
+
+  /// Returns the domain of the node the Space is hosted on.
+  Future<String?> _connectToRoom(String id, {Function()? connectedCallback}) async {
+    final body = await postAuthorizedJSON("/node/connect", <String, dynamic>{
+      "tag": appTagSpaces,
+      "token": refreshToken,
+      "extra": id,
+    });
+
+    // Return an error
+    if (!body["success"]) {
+      showErrorPopup("error", "server.error".tr);
+      sendLog("WARNING: couldn't connect to space node");
+      return null;
+    }
+
+    if (key == null) {
+      sendLog("key is null: can't connect to space");
+      return null;
+    }
+    currentDomain = body["domain"];
     currentTab.value = SpaceTabType.table.index;
 
     // Setup all controllers
     Get.find<SpaceMemberController>().onConnect(key!);
 
     // Connect to space node
-    final result = await createSpaceConnection(appToken["domain"], appToken["token"]);
+    final result = await createSpaceConnection(body["domain"], body["token"]);
     sendLog("COULD CONNECT TO SPACE NODE: $result");
     if (!result) {
       showErrorPopup("error", "server.error".tr);
       spaceLoading.value = false;
-      return;
+      return null;
     }
 
     spaceConnector.sendAction(
@@ -202,6 +183,7 @@ class SpacesController extends GetxController {
         // Open the screen
         Get.find<MessageController>().unselectConversation();
         Get.find<MessageController>().openTab(OpenTabType.space);
+        Get.find<SpacesMessageController>().open();
 
         // Reset everything on the table
         Get.find<TabletopController>().resetControllerState();
@@ -213,6 +195,8 @@ class SpacesController extends GetxController {
         connectedCallback?.call();
       },
     );
+
+    return body["domain"];
   }
 
   void leaveCall({error = false}) async {

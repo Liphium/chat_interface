@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_controls.dart';
+import 'package:chat_interface/pages/spaces/widgets/spaces_message_feed.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -105,16 +104,18 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                       curve: Curves.easeInOut,
                       duration: 250.ms,
                       axis: Axis.horizontal,
+                      alignment: Alignment.centerRight,
                     ),
+                    FadeEffect(
+                      duration: 250.ms,
+                    )
                   ],
                   onInit: (ac) => ac.value = controller.chatOpen.value ? 1 : 0,
                   target: controller.chatOpen.value ? 1 : 0,
                   child: Container(
                     color: Get.theme.colorScheme.onInverseSurface,
-                    width: 350,
-                    child: MessageList(
-                      provider: Get.find<SpacesMessageController>().provider,
-                    ),
+                    width: 380,
+                    child: SpacesMessageFeed(),
                   ),
                 ),
               )

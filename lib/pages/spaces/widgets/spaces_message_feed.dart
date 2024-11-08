@@ -21,6 +21,11 @@ class SpacesMessageFeedState extends State<SpacesMessageFeed> {
             provider: Get.find<SpacesMessageController>().provider,
           ),
         ),
+        MessageInput(
+          draft: "spaces_input",
+          provider: Get.find<SpacesMessageController>().provider,
+          secondary: true,
+        ),
       ],
     );
   }

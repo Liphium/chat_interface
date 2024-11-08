@@ -21,6 +21,11 @@ class SpacesMessageController extends GetxController {
     provider = SpacesMessageProvider();
   }
 
+  /// Called when the space is started to load the first messages.
+  void open() {
+    provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
+  }
+
   /// Add a message to the Spaces chat.
   ///
   /// Also plays a notification sound if desired by the user.
@@ -65,18 +70,19 @@ class SpacesMessageProvider extends MessageProvider {
     // Load the messages from the server using the list_before endpoint
     final event = await spaceConnector.sendActionAndWait(ServerAction("msg_list_after", time));
     if (event == null) {
+      sendLog("something went wrong");
       return (null, true);
     }
 
     // Check if there was an error
     if (!event.data["success"]) {
-      newMessagesLoading.value = false;
+      sendLog("no data or something");
       return (null, true);
     }
 
     // Check if the bottom has been reached
     if (event.data["messages"] == null || event.data["messages"].isEmpty) {
-      newMessagesLoading.value = false;
+      sendLog("no messages lmfao");
       return (null, false);
     }
 
@@ -86,21 +92,24 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   Future<(List<Message>?, bool)> loadMessagesBefore(int time) async {
+    sendLog("load messages before");
+
     // Load messages from the server
     final event = await spaceConnector.sendActionAndWait(ServerAction("msg_list_before", time));
     if (event == null) {
+      sendLog("nothing");
       return (null, true);
     }
 
     // Check if there was an error
     if (!event.data["success"]) {
-      newMessagesLoading.value = false;
+      sendLog("nothing (err)");
       return (null, true);
     }
 
     // Check if the top has been reached
     if (event.data["messages"] == null || event.data["messages"].isEmpty) {
-      newMessagesLoading.value = false;
+      sendLog("no messages or sth");
       return (null, false);
     }
 
@@ -128,6 +137,7 @@ class SpacesMessageProvider extends MessageProvider {
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
   Future<List<Message>> _processMessages(List<dynamic> json) async {
     // Unpack the messages in an isolate (in a separate thread yk)
+    final members = Get.find<SpaceMemberController>().memberIds;
     final loadedMessages = await sodiumLib.runIsolated(
       (sodium, keys, pairs) async {
         // Process all messages
@@ -137,6 +147,7 @@ class SpacesMessageProvider extends MessageProvider {
             msgJson,
             key: keys[0],
             sodium: sodium,
+            members: members,
           );
 
           // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
@@ -176,7 +187,7 @@ class SpacesMessageProvider extends MessageProvider {
   /// For the future also: TODO: Unpack the signature in a different isolate
   static Future<Message> unpackMessageInIsolate(Map<String, dynamic> json) async {
     // Run an isolate to parse the message
-    final (message, info) = await _extractMessageIsolate(json, Get.find<SpaceMemberController>().members, SpacesController.key!);
+    final (message, info) = await _extractMessageIsolate(json, Get.find<SpaceMemberController>().memberIds, SpacesController.key!);
 
     // Verify the signature
     if (info != null) {
@@ -187,7 +198,10 @@ class SpacesMessageProvider extends MessageProvider {
   }
 
   static Future<(Message, SymmetricSequencedInfo?)> _extractMessageIsolate(
-      Map<String, dynamic> json, Map<String, SpaceMember> members, SecureKey key) {
+    Map<String, dynamic> json,
+    Map<String, LPHAddress> members,
+    SecureKey key,
+  ) {
     return sodiumLib.runIsolated(
       (sodium, keys, pairs) {
         // Unpack the actual message
@@ -195,6 +209,7 @@ class SpacesMessageProvider extends MessageProvider {
           json,
           sodium: sodium,
           key: keys[0],
+          members: members,
         );
 
         // Unpack the system message attachments in case needed
@@ -215,13 +230,13 @@ class SpacesMessageProvider extends MessageProvider {
   static (Message, SymmetricSequencedInfo?) messageFromJson(
     Map<String, dynamic> json, {
     LPHAddress? space,
-    Map<String, SpaceMember>? members,
+    Map<String, LPHAddress>? members,
     SecureKey? key,
     Sodium? sodium,
   }) {
     // Convert to message
-    members ??= Get.find<SpaceMemberController>().members;
-    final account = members[json["sender"]]!.friend.id;
+    members ??= Get.find<SpaceMemberController>().memberIds;
+    final account = members[json["sender"]]!;
     var message = Message(json["id"], MessageType.text, json["data"], "", [], account, account, DateTime.fromMillisecondsSinceEpoch(json["creation"]),
         json["edited"], false);
 

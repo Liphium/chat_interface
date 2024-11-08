@@ -79,14 +79,6 @@ class MessageController extends GetxController {
     }
   }
 
-  /// Delete a message from the client with an id
-  void deleteMessageFromClient(LPHAddress conversation, String id) async {
-    // Check if message is in the selected conversation
-    if (currentProvider.value?.conversation.id == conversation) {
-      currentProvider.value?.messages.removeWhere((element) => element.id == id);
-    }
-  }
-
   /// Store the message in the cache if it is the current selected conversation.
   ///
   /// Also handles system messages.

@@ -15,10 +15,12 @@ import 'package:liphium_bridge/liphium_bridge.dart';
 
 class LibraryTab extends StatefulWidget {
   final LibraryEntryType? filter;
+  final MessageProvider provider;
 
   const LibraryTab({
     super.key,
     this.filter,
+    required this.provider,
   });
 
   @override
@@ -133,11 +135,7 @@ class _LibraryTabState extends State<LibraryTab> {
               borderRadius: BorderRadius.circular(defaultSpacing),
               onTap: () {
                 //* Send message with the library element
-                final controller = Get.find<MessageController>();
-                if (controller.currentProvider.value == null) {
-                  return;
-                }
-                controller.currentProvider.value?.sendMessage(false.obs, MessageType.text, [container.toAttachment()], "", "");
+                widget.provider.sendMessage(false.obs, MessageType.text, [container.toAttachment()], "", "");
                 Get.back();
               },
               child: ClipRRect(

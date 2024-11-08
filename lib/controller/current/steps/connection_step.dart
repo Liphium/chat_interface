@@ -12,6 +12,7 @@ class ConnectionSetup extends ConnectionStep {
     final body = await postAuthorizedJSON("/node/connect", <String, dynamic>{
       "tag": appTag,
       "token": refreshToken,
+      "extra": "",
     });
 
     if (!body["success"]) {

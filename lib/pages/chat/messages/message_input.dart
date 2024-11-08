@@ -29,11 +29,13 @@ import 'package:path/path.dart' as path;
 class MessageInput extends StatefulWidget {
   final String draft;
   final MessageProvider provider;
+  final bool secondary;
 
   const MessageInput({
     super.key,
     required this.draft,
     required this.provider,
+    this.secondary = false,
   });
 
   @override
@@ -257,7 +259,7 @@ class _MessageInputState extends State<MessageInput> {
           Actions(
             actions: actionsMap,
             child: Material(
-              color: theme.colorScheme.onInverseSurface,
+              color: widget.secondary ? theme.colorScheme.inverseSurface : theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -462,7 +464,10 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         IconButton(
                           key: _libraryKey,
-                          onPressed: () => showModal(LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true))),
+                          onPressed: () => showModal(LibraryWindow(
+                            data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
+                            provider: widget.provider,
+                          )),
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),

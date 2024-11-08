@@ -10,6 +10,8 @@ class SpaceMemberController extends GetxController {
   SecureKey? key;
   final membersLoading = false.obs;
   final members = <String, SpaceMember>{}.obs;
+  // This is for caching only the account ids for message decryption
+  final memberIds = <String, LPHAddress>{}; // Client id -> Account id
   static String ownId = "";
 
   void onMembersChanged(List<dynamic> members) {
@@ -30,6 +32,8 @@ class SpaceMemberController extends GetxController {
         SpaceMemberController.ownId = clientId;
       }
       membersFound.add(clientId);
+
+      // Add the member to the list if they're not in it yet
       if (this.members[clientId] == null) {
         this.members[clientId] = SpaceMember(
           Get.find<FriendController>().friends[address] ??
@@ -39,6 +43,9 @@ class SpaceMemberController extends GetxController {
           member["deafened"],
         );
       }
+
+      // Cache the account id
+      memberIds[clientId] = address;
     }
 
     // Remove everyone who left the space

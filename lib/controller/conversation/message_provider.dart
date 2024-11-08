@@ -109,9 +109,11 @@ abstract class MessageProvider {
     // Load new messages
     final (loadedMessages, error) = await loadMessagesBefore(date);
     if (error) {
+      newMessagesLoading.value = false;
       return (false, true);
     }
     if (loadedMessages == null) {
+      newMessagesLoading.value = false;
       return (true, false);
     }
     messages.addAll(loadedMessages);
@@ -135,6 +137,7 @@ abstract class MessageProvider {
     // Process the messages
     final (loadedMessages, error) = await loadMessagesAfter(firstMessage.createdAt.millisecondsSinceEpoch);
     if (error || loadedMessages == null) {
+      newMessagesLoading.value = false;
       return true;
     }
     for (var message in loadedMessages) {
