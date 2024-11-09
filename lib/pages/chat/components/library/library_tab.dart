@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/database/database.dart';

@@ -10,7 +10,6 @@ import 'package:chat_interface/pages/chat/components/message/renderer/space_rend
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -298,7 +297,6 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                   //* Render shared content
                   if (friend != null)
                     Obx(() {
-                      sendLog("shared stuff");
                       final content = statusController.sharedContent[friend!.id];
                       if (content == null) {
                         return const SizedBox();

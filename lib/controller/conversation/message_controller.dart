@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
-import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
@@ -119,11 +116,13 @@ class MessageController extends GetxController {
       SystemMessages.messages[message.content]?.handle(message, currentProvider.value!);
     }
 
-    // On call message type, ring using the message
+    // On call message type, ring using the message TODO: Reintroduce the ringtone in Spaces
+    /*
     if (message.type == MessageType.call && message.senderAddress != StatusController.ownAddress) {
       final container = SpaceConnectionContainer.fromJson(jsonDecode(message.content));
       RingingManager.startRinging(conversation, container);
     }
+    */
   }
 }
 

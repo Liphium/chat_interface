@@ -9,6 +9,8 @@ class AppSettingsTranslations extends Translations {
           'settings.general.notifications': 'Notifications',
           'settings.general.ringtone': 'Spaces ringtone',
           'settings.general.language': 'Choose the app language',
+          'settings.general.ringtone.disabled':
+              'The Spaces ringtone is currently disabled. It will be re-introduced when voice chat returns to Spaces some time in 2025. Together with Liphium Ring, but that\'s not even on the roadmap yet.',
           'notification_sounds.tooltip': 'This only plays the sound when your settings allow it to.',
           'notification_sounds.enabled': 'Enable notification sounds',
           'notification_sounds.do_not_disturb': 'Play notification sounds even when in do-not-disturb mode',
@@ -17,38 +19,6 @@ class AppSettingsTranslations extends Translations {
               'The ringtone will follow all settings from the notification sounds above. You can also make it so the ringtone still plays when Liphium is not minimized by using the settings below.',
           'ring.enable': 'Play a ring sound when being invited to a Space',
           'ring.ignore_tray': 'Also play a ring sound when Liphium is not minimized to tray',
-
-          // Audio settings
-          'audio.microphone.windows_warning':
-              'Windows is a little cunt and might decrease the volume of your system sounds while you are talking, so we advise that you either set Sound -> Communication to "Do nothing" in your System Control Panel or just click the button below. Why does this exist again?',
-          'audio.device': 'Select a device',
-          'audio.device.default': "If you don't know what to select here, the default is probably fine:",
-          'audio.device.default.button': 'Use system default',
-          'audio.microphone': 'Microphone',
-          'audio.microphone.device': 'Or you just select one of these devices (the green verified indicator tries detecting the best microphone):',
-          'audio.device.custom': 'Or choose one of the following devices:',
-          'audio.microphone.muted': 'Start muted in Spaces',
-          'audio.microphone.sensitivity': 'Microphone sensitivity',
-          'audio.microphone.sensitivity.text':
-              'The green line is your current talking volume. Drag the slider to the point where you would like others to start hearing you.',
-          'audio.microphone.sensitivity.automatic': 'Automatic',
-          'audio.microphone.sensitivity.manual': 'Manual',
-          'audio.microphone.sensitivity.audio_detector':
-              'This thing shows if you are talking or not, if it\'s colored we would be transmitting your voice.',
-          'audio.microphone.processing': 'Microphone processing',
-          'audio.microphone.processing.text': 'When changing any of these settings, please rejoin the space to apply them.',
-          'audio.microphone.echo_cancellation': 'Echo cancellation',
-          'audio.microphone.noise_suppression': 'Noise suppression',
-          'audio.microphone.auto_gain_control': 'Auto gain control',
-          'audio.microphone.typing_noise_detection': 'Typing noise detection',
-          'audio.microphone.high_pass_filter': 'High-pass filter',
-          'audio.output': 'Output',
-          'audio.output.device': 'Or you just select one of these devices:',
-
-          // Camera settings
-          'video.camera.device': 'Select a camera',
-          'video.camera.preview': 'Camera preview',
-          'video.camera.preview.start': 'Start camera preview',
 
           // Logging settings
           'logging.amount.desc': 'Amount of logs to keep in the history',

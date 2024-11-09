@@ -119,13 +119,19 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   Future<String?> deleteMessage(Message message) async {
-    sendLog("deleting messages doesn't work here yet");
+    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_delete", message.id));
+    if (event == null) {
+      return "server.error".tr;
+    }
+    if (!event.data["success"]) {
+      return event.data["message"];
+    }
     return null;
   }
 
   @override
   Future<bool> deleteMessageFromClient(String id) async {
-    sendLog("deleting messages doesn't work here yet");
+    messages.removeWhere((element) => element.id == id);
     return false;
   }
 
@@ -212,11 +218,6 @@ class SpacesMessageProvider extends MessageProvider {
           members: members,
         );
 
-        // Unpack the system message attachments in case needed
-        if (msg.type == MessageType.system) {
-          // TODO: Handle system message attachments
-        }
-
         // Return it to the main isolate
         return (msg, info);
       },
@@ -236,12 +237,16 @@ class SpacesMessageProvider extends MessageProvider {
   }) {
     // Convert to message
     members ??= Get.find<SpaceMemberController>().memberIds;
-    final account = members[json["sender"]]!;
+    LPHAddress account;
+    if (json["sender"] == MessageController.systemSender.encode()) {
+      account = MessageController.systemSender;
+    } else {
+      account = members[json["sender"]] ?? LPHAddress("left", "liphium.com");
+    }
     var message = Message(json["id"], MessageType.text, json["data"], "", [], account, account, DateTime.fromMillisecondsSinceEpoch(json["creation"]),
         json["edited"], false);
 
-    // Decrypt content
-    key ??= SpacesController.key!;
+    // Handle system message in case it is one
     if (message.sender == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;
@@ -250,7 +255,8 @@ class SpacesMessageProvider extends MessageProvider {
       return (message, null);
     }
 
-    // Check signature
+    // Decrypt content and check signature
+    key ??= SpacesController.key!;
     final info = SymmetricSequencedInfo.extract(message.content, key, sodium);
     message.content = info.text;
     message.loadContent();

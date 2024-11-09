@@ -15,7 +15,6 @@ class SpaceMemberController extends GetxController {
   static String ownId = "";
 
   void onMembersChanged(List<dynamic> members) {
-    sendLog("members changed");
     final statusController = Get.find<StatusController>();
     final membersFound = <String>[];
 

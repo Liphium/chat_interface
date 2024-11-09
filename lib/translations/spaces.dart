@@ -6,6 +6,7 @@ class SpacesTranslations extends Translations {
         //* English US
         'en_US': {
           // General
+          'spaces.already_calling': 'You are already in a Space. Leave it if you want to open a new one.',
           'spaces.calling': 'is calling..',
           'spaces.sharing_other_device': 'Sharing with friends',
           'spaces.count': '@count members',

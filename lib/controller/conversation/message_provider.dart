@@ -31,6 +31,9 @@ abstract class MessageProvider {
   AutoScrollController? controller;
 
   void addMessageToBottom(Message message, {bool animation = true}) async {
+    // Reset the time of the message at the bottom
+    lastMessage = null;
+
     // Check if there are any messages with similar ids to prevent adding the same message again
     if (waitingMessages.any((msg) => msg == message.id)) {
       return;
@@ -94,6 +97,9 @@ abstract class MessageProvider {
   /// Whether or not the messages are loading at the top (for showing a loading indicator)
   bool messagesLoadingTop = false;
 
+  /// The timestamp of the last message at the bottom (for preventing too many requests)
+  int? lastMessage;
+
   /// Load new messages from the server for the top of the scroll feed.
   ///
   /// The `first boolean` tells you whether or not the top has been reached.
@@ -133,10 +139,20 @@ abstract class MessageProvider {
     messagesLoadingTop = false;
     newMessagesLoading.value = true; // We'll use the same loading as above to make sure this doesn't break anything
     final firstMessage = messages.first;
+    final time = firstMessage.createdAt.millisecondsSinceEpoch;
+
+    // Make sure this isn't a message that has returned no messages before
+    if (lastMessage == time) {
+      newMessagesLoading.value = false;
+      return true;
+    }
 
     // Process the messages
-    final (loadedMessages, error) = await loadMessagesAfter(firstMessage.createdAt.millisecondsSinceEpoch);
+    final (loadedMessages, error) = await loadMessagesAfter(time);
     if (error || loadedMessages == null) {
+      if (loadedMessages == null) {
+        lastMessage = time;
+      }
       newMessagesLoading.value = false;
       return true;
     }

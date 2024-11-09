@@ -126,10 +126,10 @@ class _MessageBarState extends State<MessageBar> {
 
                 if (Get.find<SpacesController>().inSpace.value && areCallsSupported)
                   LoadingIconButton(
-                    icon: Icons.add_call,
+                    icon: Icons.forward_to_inbox,
                     iconSize: 27,
                     loading: callLoading,
-                    tooltip: "chat.add_space".tr,
+                    tooltip: "chat.invite_to_space".tr,
                     onTap: () {
                       final controller = Get.find<SpacesController>();
                       controller.inviteToCall(widget.provider);
@@ -138,7 +138,7 @@ class _MessageBarState extends State<MessageBar> {
 
                 if (areCallsSupported)
                   LoadingIconButton(
-                    icon: Icons.call,
+                    icon: Icons.rocket_launch,
                     iconSize: 27,
                     loading: callLoading,
                     tooltip: "chat.start_space".tr,

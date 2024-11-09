@@ -100,7 +100,7 @@ class SpacesController extends GetxController {
 
   void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) async {
     if (connected.value) {
-      showErrorPopup("error", "already.calling".tr);
+      showErrorPopup("error", "spaces.already_calling".tr);
       return;
     }
     spaceLoading.value = true;
