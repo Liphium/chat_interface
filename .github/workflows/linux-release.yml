@@ -1,60 +1,51 @@
 name: Linux Release
 # Do this whenever someone pushes to the main branch
 on:
-    push:
-      branches: [ "main" ]
-    pull_request:
-      branches: [ "main" ]
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 jobs:
-    build:
-      # Normally you should build this stuff on older versions, but I don't want people to have old shit, so we're gonna do it this way
-      runs-on: ubuntu-latest
-  
-      steps:
-        - uses: actions/checkout@v3
+  build:
+    # Normally you should build this stuff on older versions, but I don't want people to have old shit, so we're gonna do it this way
+    runs-on: ubuntu-latest
 
-        # Get flutter downloaded
-        - name: Set up Flutter
-          uses: subosito/flutter-action@v2
-          with:
-            channel: 'stable'
+    steps:
+      - uses: actions/checkout@v3
 
-        # Download cargo
-        - name: Set up Rust and Cargo
-          uses: hecrj/setup-rust-action@v2
-          with:
-            rust-version: "stable"
+      # Get flutter downloaded
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
 
-        # Just to make sure
-        - run: flutter --version
-        - run: cargo version
-        - run: rustc --version
+      # Just to make sure
+      - run: flutter --version
 
-        # Get all the dependencies
-        - name: Get dependencies
-          run: flutter pub get
+      # Get all the dependencies
+      - name: Get dependencies
+        run: flutter pub get
 
-        - name: Update apt sources and stuff
-          run: sudo apt update
+      - name: Update apt sources and stuff
+        run: sudo apt update
 
-        - name: Install all dependencies with apt
-          run: sudo apt install cmake ninja-build libgtk-3-dev libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio libsodium-dev
-  
-        - name: More dependencies (GStreamer fucked the last line)
-          run: sudo apt install jackd libasound2-dev libasound2 libjack-jackd2-dev
+      - name: Install all dependencies with apt
+        run: sudo apt install cmake ninja-build libgtk-3-dev libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio libsodium-dev
 
-        # Runs a set of commands using the runners shell
-        - name: Start release build
-          run: flutter build linux --release -v --dart-define DEBUG_MODE=false
+      - name: More dependencies (GStreamer fucked the last line)
+        run: sudo apt install jackd libasound2-dev libasound2 libjack-jackd2-dev
 
-        - name: List directory (in case I'm stupid rn)
-          run: ls -a
+      # Runs a set of commands using the runners shell
+      - name: Start release build
+        run: flutter build linux --release -v --dart-define DEBUG_MODE=false
 
-        - uses: actions/upload-artifact@v4
-          with:
-            name: linux-build
-            path: ./build/linux/x64/release/bundle/
-            retention-days: 14
-            compression-level: 6
-            overwrite: false
-  
+      - name: List directory (in case I'm stupid rn)
+        run: ls -a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: ./build/linux/x64/release/bundle/
+          retention-days: 14
+          compression-level: 6
+          overwrite: false
