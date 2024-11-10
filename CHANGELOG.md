@@ -4,7 +4,7 @@
 
 ## Currently in dev
 
-- This release of Liphium is compatible with protocol v7
+- This release of Liphium is compatible with protocol v6
 - Liphium now closes to the tray on desktop
 - The WebSocket connection now uses a new packet to authenticate the user instead of protocols
 - Web support is now experimental
