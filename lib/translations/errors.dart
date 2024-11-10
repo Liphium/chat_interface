@@ -56,8 +56,7 @@ class ErrorTranslations extends Translations {
           'message.delete_error': 'Couldn\'t delete message. Please try again later.',
           'group.data_too_long':
               'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
-          'zap.no_save_location':
-              'Because you didn\'t pick a save location, we just stored it in your saved files folder. You can access it from the settings.',
+          'zap.no_save_location': 'Please select a save location for your file to use Zap.',
           'zap.error': 'Zap Error',
 
           // Settings

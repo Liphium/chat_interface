@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart' as msg;
@@ -86,13 +85,13 @@ class ZapShareController extends GetxController {
 
   /// Open the window for zap share for a conversation
   void openWindow(Conversation conversation, ContextMenuData data) async {
-    // If Zap Share is already doing something, show a menu
+    // If Zap is already doing something, show a menu
     if (isRunning()) {
       Get.dialog(ZapShareWindow(data: data, conversation: conversation));
       return;
     }
 
-    // Grab files
+    // If Zap is not running, let them select a file for transfer
     final file = await openFile();
     if (file == null) {
       return;
@@ -127,7 +126,7 @@ class ZapShareController extends GetxController {
     await chunksDir!.create();
     sendLog(chunksDir!.path);
 
-    // If there are more files than one, put them into an archive
+    // If there are more files than one, put them into an archive (TODO: Implement)
     step.value = "chat.zapshare.compressing".tr;
     XFile file = files[0];
 
@@ -227,20 +226,24 @@ class ZapShareController extends GetxController {
   /// Upload the actual file part to the server
   Future<bool> _sendActualFilePart(int chunk) async {
     if (!isRunning()) {
-      sendLog("why would the server ask for parts when zap share isn't even running :smug:");
+      sendLog("why would the server ask for parts when zap isn't even running :smug:");
       return false;
     }
 
     // Read the original file and extract one chunk
     final file = XFile(filePath!);
     final stream = file.openRead((chunk - 1) * chunkSize, chunk * chunkSize);
-    final toEncrypt = <int>[];
+    var currentIndex = 0;
+    final toEncrypt = Uint8List(chunkSize);
 
     // Send the chunk once done
     final completer = Completer<bool>();
     stream.listen(
       (bytes) {
-        toEncrypt.addAll(bytes);
+        for (var byte in bytes) {
+          toEncrypt[currentIndex] = byte;
+          currentIndex++;
+        }
       },
       cancelOnError: true,
       onError: (e) => sendLog(e),
@@ -324,15 +327,17 @@ class ZapShareController extends GetxController {
     filePath = null;
     zapperStarted = false;
     uploadToken = null;
-    Timer.periodic(2000.ms, (timer) async {
-      try {
-        await chunksDir?.delete(recursive: true);
-        chunksDir = null;
-        timer.cancel();
-      } catch (e) {
-        sendLog("couldn't delete chunk directory: $e");
-      }
-    });
+    if (chunksDir != null) {
+      Timer.periodic(2000.ms, (timer) async {
+        try {
+          await chunksDir?.delete(recursive: true);
+          chunksDir = null;
+          timer.cancel();
+        } catch (e) {
+          sendLog("couldn't delete chunk directory: $e");
+        }
+      });
+    }
     resetControllerState();
   }
 
@@ -363,7 +368,15 @@ class ZapShareController extends GetxController {
     }
     endPart = (json["size"].toDouble() / chunkSize.toDouble()).ceil();
 
-    sendLog(base64Encode(container.key.extractBytes()));
+    // Let the user decide where to save the file
+    // TODO: Think about something else for this on mobile
+    final FileSaveLocation? receiveFile = await getSaveLocation(suggestedName: container.fileName);
+    if (receiveFile == null) {
+      showErrorPopup("error", "zap.no_save_location".tr);
+      return;
+    }
+
+    // Set state visible in the app
     key = container.key;
     currentConversation.value = conversation;
     currentReceiver.value = friendAddress;
@@ -385,14 +398,6 @@ class ZapShareController extends GetxController {
       ),
     );
     final body = res.data as d.ResponseBody;
-
-    // Create receiving directory
-    var tempPath = await getTemporaryDirectory();
-    final tempDir = XDirectory(path.join(tempPath.path, "liphium"));
-    await tempDir.create();
-    final receiveDir = await tempDir.createTemp("liveshare-recv");
-    await receiveDir.create();
-    sendLog(receiveDir.path);
 
     // Data for downloads
     bool completed = false, waiting = false;
@@ -449,11 +454,11 @@ class ZapShareController extends GetxController {
               "token": container.token,
               "chunk": currentChunk,
             });
-            final res = await dio.download(
+            final res = await dio.get<Uint8List>(
               "${nodeProtocol()}${container.url}/liveshare/download",
-              "${receiveDir.path}/chunk_$currentChunk",
               data: formData,
               options: d.Options(
+                responseType: d.ResponseType.bytes,
                 validateStatus: (status) => true,
               ),
             );
@@ -465,8 +470,11 @@ class ZapShareController extends GetxController {
               continue;
             }
             tries = 0;
-
             currentPart.value = currentChunk;
+
+            // Append the chunk to the file
+            final decrypted = decryptSymmetricBytes(res.data!, key!);
+            await fileUtil.appendToFile(XFile(receiveFile.path), decrypted);
 
             // Check if new chunk can be downloaded right away
             if (currentChunk < maxChunk) {
@@ -476,6 +484,7 @@ class ZapShareController extends GetxController {
               waiting = true;
             }
 
+            // Tell the server the part was successfully received
             _tellReceived(
               container.url,
               container.id,
@@ -484,12 +493,8 @@ class ZapShareController extends GetxController {
               callback: (complete) async {
                 completed = complete;
                 if (completed) {
-                  sendLog("download completed, stitching..");
-                  final dir = await _stitchFileTogether(container.fileName, receiveDir);
-                  await receiveDir.delete(recursive: true);
-                  if (dir != null) {
-                    OpenAppFile.open(dir);
-                  }
+                  sendLog("download with zap completed, opening final folder..");
+                  OpenAppFile.open(path.dirname(receiveFile.path));
                   partSubscription?.cancel();
                 }
               },
@@ -504,12 +509,6 @@ class ZapShareController extends GetxController {
       cancelOnError: true,
       onDone: () async {
         onTransactionEnd();
-        // Give time to delete files
-        Timer(const Duration(seconds: 5), () {
-          if (!completed) {
-            receiveDir.delete(recursive: true);
-          }
-        });
       },
     );
   }
@@ -539,49 +538,6 @@ class ZapShareController extends GetxController {
     }
 
     callback?.call(res.data["complete"]);
-  }
-
-  /// Returns the directory the file was saved to (if successful)
-  Future<String?> _stitchFileTogether(String fileName, XDirectory dir) async {
-    step.value = "chat.zapshare.finishing".tr;
-
-    // Let the user pick where to store the finished file on desktop
-    XFile file;
-    if (GetPlatform.isDesktop) {
-      final FileSaveLocation? result = await getSaveLocation(suggestedName: fileName);
-      if (result == null) {
-        showErrorPopup("error", "zap.no_save_location".tr);
-        file = XFile(path.join(AttachmentController.getFilePathForType(StorageType.permanent), fileName));
-      } else {
-        file = XFile(result.path);
-      }
-    } else {
-      // Just put it into the downloads folder
-      // TODO: Check if this actually works on mobile
-      final downloads = await getDownloadsDirectory();
-      file = XFile(path.join(downloads!.path, fileName));
-    }
-
-    // Stitch together the final file
-    int currentIndex = 1;
-    while (true) {
-      final chunk = XFile("${dir.path}/chunk_$currentIndex");
-      if (!await doesFileExist(chunk)) {
-        break;
-      }
-
-      // Decrypt the current chunk
-      final bytes = await chunk.readAsBytes();
-      final decrypted = decryptSymmetricBytes(bytes, key!);
-
-      // Add the chunk to the file and delete the chunk
-      await fileUtil.appendToFile(file, decrypted);
-      fileUtil.delete(chunk);
-
-      currentIndex++;
-    }
-
-    return path.dirname(file.path);
   }
 }
 
