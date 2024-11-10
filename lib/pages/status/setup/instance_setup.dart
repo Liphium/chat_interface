@@ -40,8 +40,8 @@ class InstanceSetup extends Setup {
     }
 
     // Launch into the default instance in release mode and when there is no instance yet
-    if (instances.isEmpty || !isDebug || isWeb) {
-      final error = await setupInstance(instances.isNotEmpty ? instances[0].name : "default");
+    if (instances.isEmpty || !isDebug) {
+      final error = await setupInstance("default");
       if (error != null) {
         return ErrorPage(title: error);
       }
