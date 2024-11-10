@@ -19,7 +19,8 @@
 - Removed all Rust code related to audio since it's not being used anymore
 - Removed tab selector in Spaces (now connects to Tabletop by default)
 - Fixed a bug where the Space attachment renderer would make requests even when the widget is disposed
-- TODO: Add chat functionality to Spaces
+- Added a chat tab to Spaces
+- Made Zap ask where to put a file before accepting the request
 
 ### The removal of audio and video chat from Spaces
 
