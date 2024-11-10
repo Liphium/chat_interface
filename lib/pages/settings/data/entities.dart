@@ -1,17 +1,13 @@
 import 'dart:convert';
 
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/settings/account/authentication_settings.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/account/invites_page.dart';
+import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/town/admin_accounts_page.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
-import 'package:chat_interface/pages/settings/app/language_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
-import 'package:chat_interface/pages/settings/town/spaces_settings.dart';
-import 'package:chat_interface/pages/settings/app/speech_settings.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
-import 'package:chat_interface/pages/settings/app/video_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
@@ -25,7 +21,7 @@ enum SettingLabel {
     SettingCategory("data", Icons.account_circle, DataSettingsPage()),
     SettingCategory("invites", Icons.mail, InvitesPage(), displayTitle: false),
     //SettingCategory("profile", Icons.assignment, null),
-    SettingCategory("authentication", Icons.security, AuthenticationSettingsPage()),
+    //SettingCategory("authentication", Icons.security, AuthenticationSettingsPage()),
     //SettingCategory("devices", Icons.phone_android, null),
   ]),
 
@@ -33,24 +29,21 @@ enum SettingLabel {
   town("settings.tab.town", [
     SettingCategory("town", Icons.cottage, TownSettingsPage()),
     SettingCategory("accounts", Icons.person_search, AdminAccountsPage(), admin: true),
-    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false),
-    SettingCategory("spaces", Icons.rocket_launch, SpacesSettingsPage(), mobile: false),
+    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false, web: false),
     SettingCategory("files", Icons.folder, FileSettingsPage()),
   ]),
 
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
-    SettingCategory("audio", Icons.campaign, AudioSettingsPage(), mobile: false),
-    SettingCategory("camera", Icons.videocam, VideoSettingsPage(), mobile: false),
+    SettingCategory("general", Icons.dashboard, GeneralSettingsPage()),
     //SettingCategory("notifications", Icons.notifications, null),
-    SettingCategory("language", Icons.public, LanguageSettingsPage()),
     SettingCategory("logging", Icons.insights, LogSettingsPage()),
   ]),
 
   // Everything to do with the appereance of the app
   appearance("settings.tab.appearance", [
     SettingCategory("chat", Icons.chat_bubble, ChatSettingsPage()),
-    SettingCategory("colors", Icons.color_lens, ThemeSettingsPage(), mobile: false),
+    SettingCategory("colors", Icons.color_lens, ThemeSettingsPage(), mobile: false, web: false),
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 
@@ -74,8 +67,9 @@ class SettingCategory {
   final bool mobile;
   final bool admin;
   final bool displayTitle;
+  final bool web;
 
-  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true, this.admin = false});
+  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true, this.admin = false, this.web = true});
 }
 
 class Setting<T> {

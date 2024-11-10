@@ -1,20 +1,24 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:open_app_file/open_app_file.dart';
+import 'package:pasteboard/pasteboard.dart';
 
 class MessageOptionsWindow extends StatefulWidget {
   final ContextMenuData data;
   final bool self;
   final Message message;
+  final MessageProvider provider;
   final List<ProfileButton>? extra;
 
   const MessageOptionsWindow({
@@ -22,6 +26,7 @@ class MessageOptionsWindow extends StatefulWidget {
     required this.data,
     required this.self,
     required this.message,
+    required this.provider,
     this.extra,
   });
 
@@ -57,7 +62,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             label: "message.info".tr,
             onTap: () {
               Get.back();
-              Get.dialog(MessageInfoWindow(message: widget.message));
+              Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider));
             },
             loading: false.obs,
           ),
@@ -69,6 +74,68 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 label: "message.copy".tr,
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: widget.message.content));
+                  Get.back();
+                },
+                loading: false.obs,
+              ),
+            ),
+          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
+            Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.cloud_download,
+                label: "message.save_to".tr,
+                onTap: () async {
+                  // Make sure this can't be used on either mobile or web
+                  if (!isDesktopPlatform()) {
+                    showErrorPopup("error", "not.supported".tr);
+                    return;
+                  }
+
+                  // Get the location where the file should be saved
+                  final attachment = widget.message.attachmentsRenderer[0];
+                  final saveLocation = await getSaveLocation(suggestedName: attachment.fileName);
+                  if (saveLocation == null) {
+                    return;
+                  }
+
+                  // Save the file to the desired location and go out of the menu
+                  await attachment.file!.saveTo(saveLocation.path);
+                  Get.back();
+                },
+                loading: false.obs,
+              ),
+            ),
+          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
+            Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.launch,
+                label: "message.open".tr,
+                onTap: () async {
+                  // Make sure this can't be used on either mobile or web
+                  if (!isDesktopPlatform()) {
+                    showErrorPopup("error", "not.supported".tr);
+                    return;
+                  }
+
+                  // Open the file with the default app
+                  final attachment = widget.message.attachmentsRenderer[0];
+                  OpenAppFile.open(attachment.file!.path);
+                  Get.back();
+                },
+                loading: false.obs,
+              ),
+            ),
+          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value && isDesktopPlatform())
+            Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.content_copy,
+                label: "message.copy_file".tr,
+                onTap: () async {
+                  // Copy the file to clipboard
+                  await Pasteboard.writeFiles([widget.message.attachmentsRenderer[0].file!.path]);
                   Get.back();
                 },
                 loading: false.obs,
@@ -111,7 +178,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   messageDeletionLoading.value = true;
 
                   // Delete message
-                  final result = await widget.message.delete();
+                  final result = await widget.message.delete(widget.provider);
                   messageDeletionLoading.value = false;
                   if (result != null) {
                     showErrorPopup("error", result);

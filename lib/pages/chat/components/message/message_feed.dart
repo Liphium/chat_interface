@@ -1,37 +1,18 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar_mobile.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_mobile_renderer.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
-import 'package:chat_interface/pages/settings/town/file_settings.dart';
+import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
-import 'package:chat_interface/standards/server_stored_information.dart';
-import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
-import 'package:chat_interface/util/web.dart';
-import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
-
-part 'message_actions.dart';
 
 class MessageFeed extends StatefulWidget {
-  final Conversation conversation;
-
-  const MessageFeed({super.key, required this.conversation});
+  const MessageFeed({super.key});
 
   @override
   State<MessageFeed> createState() => _MessageFeedState();
@@ -40,19 +21,16 @@ class MessageFeed extends StatefulWidget {
 class _MessageFeedState extends State<MessageFeed> {
   final TextEditingController _message = TextEditingController();
   final loading = false.obs;
-  final _scrollController = AutoScrollController();
 
   @override
   void initState() {
     super.initState();
-    Get.find<MessageController>().newScrollController(_scrollController);
   }
 
   @override
   void dispose() {
     _message.dispose();
     super.dispose();
-    _scrollController.dispose();
   }
 
   @override
@@ -61,7 +39,7 @@ class _MessageFeedState extends State<MessageFeed> {
     SettingController settingController = Get.find();
 
     return Obx(() {
-      if (widget.conversation.error.value != null) {
+      if (controller.currentProvider.value!.conversation.error.value != null) {
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
@@ -74,7 +52,7 @@ class _MessageFeedState extends State<MessageFeed> {
                 ),
                 verticalSpacing(defaultSpacing),
                 Text(
-                  widget.conversation.error.value!,
+                  controller.currentProvider.value!.conversation.error.value!,
                   style: Get.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -87,7 +65,13 @@ class _MessageFeedState extends State<MessageFeed> {
       return Column(
         children: [
           //* Header
-          if (isMobileMode()) MobileMessageBar(conversation: widget.conversation) else MessageBar(conversation: widget.conversation),
+          if (isMobileMode())
+            MobileMessageBar(conversation: controller.currentProvider.value!.conversation)
+          else
+            MessageBar(
+              conversation: controller.currentProvider.value!.conversation,
+              provider: controller.currentProvider.value!,
+            ),
 
           Expanded(
             child: Row(
@@ -101,6 +85,27 @@ class _MessageFeedState extends State<MessageFeed> {
                         Expanded(
                           child: Stack(
                             children: [
+                              //* Messages
+                              Center(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200,
+                                  ),
+                                  child: Obx(
+                                    () {
+                                      if (!controller.loaded.value) {
+                                        return const SizedBox();
+                                      }
+
+                                      return MessageList(
+                                        key: ValueKey(controller.currentProvider.value!.conversation.id),
+                                        provider: controller.currentProvider.value!,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+
                               //* Animated loading indicator
                               Align(
                                 alignment: Alignment.topCenter,
@@ -112,7 +117,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                         duration: 250.ms,
                                       ),
                                     ],
-                                    target: controller.newMessagesLoading.value ? 1 : 0,
+                                    target: controller.currentProvider.value!.newMessagesLoading.value ? 1 : 0,
                                     child: Padding(
                                       padding: const EdgeInsets.all(defaultSpacing),
                                       child: Material(
@@ -142,58 +147,17 @@ class _MessageFeedState extends State<MessageFeed> {
                                   ),
                                 ),
                               ),
-
-                              //* Messages
-                              Center(
-                                child: ConstrainedBox(
-                                  constraints:
-                                      BoxConstraints(maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200),
-                                  child: Obx(
-                                    () {
-                                      if (!controller.loaded.value) {
-                                        return const SizedBox();
-                                      }
-
-                                      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                        controller.checkCurrentScrollHeight();
-                                      });
-
-                                      return FadingEdgeScrollView.fromScrollView(
-                                        child: ListView.builder(
-                                          itemCount: controller.messages.length + 2,
-                                          reverse: true,
-                                          controller: _scrollController,
-                                          addAutomaticKeepAlives: false,
-                                          addRepaintBoundaries: false,
-                                          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                                          itemBuilder: (context, index) {
-                                            if (isMobileMode()) {
-                                              return BubblesMobileRenderer(
-                                                index: index,
-                                                controller: _scrollController,
-                                              );
-                                            }
-                                            return BubblesRenderer(
-                                              index: index,
-                                              controller: _scrollController,
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),
 
                         //* Message input
                         SelectionContainer.disabled(
-                          child: widget.conversation.borked
+                          child: controller.currentProvider.value!.conversation.borked
                               ? const SizedBox.shrink()
                               : MessageInput(
-                                  conversation: widget.conversation,
+                                  draft: controller.currentProvider.value!.conversation.id.encode(),
+                                  provider: controller.currentProvider.value!,
                                 ),
                         )
                       ],
@@ -203,12 +167,12 @@ class _MessageFeedState extends State<MessageFeed> {
                 Obx(() {
                   final visible = settingController.settings[AppSettings.showGroupMembers]!.value.value;
                   return Visibility(
-                    visible: widget.conversation.isGroup && visible,
+                    visible: controller.currentProvider.value!.conversation.isGroup && visible,
                     child: Container(
                       color: Get.theme.colorScheme.onInverseSurface,
                       width: 300,
                       child: ConversationMembers(
-                        conversation: widget.conversation,
+                        conversation: controller.currentProvider.value!.conversation,
                       ),
                     ),
                   );

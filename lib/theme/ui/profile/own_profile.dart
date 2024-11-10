@@ -1,7 +1,6 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/emojis/emoji_window.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
@@ -32,7 +31,6 @@ class _ProfileState extends State<OwnProfile> {
   final TextEditingController _status = TextEditingController();
   final statusMessage = "".obs;
   final FocusNode _statusFocus = FocusNode();
-  final GlobalKey _emojiKey = GlobalKey();
 
   // Developer things
   final testLoading = false.obs;
@@ -284,17 +282,6 @@ class _ProfileState extends State<OwnProfile> {
             loading: testLoading,
           ),
           verticalSpacing(elementSpacing),
-
-          //* Hide profile
-          ProfileButton(
-            key: _emojiKey,
-            icon: Icons.emoji_emotions,
-            label: 'emojis'.tr,
-            onTap: () async {
-              Get.dialog(EmojiWindow(data: ContextMenuData.fromKey(_emojiKey, above: true)));
-            },
-            loading: testLoading,
-          ),
         ],
       ),
     );

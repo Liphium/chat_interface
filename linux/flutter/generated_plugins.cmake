@@ -5,17 +5,16 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_linux
   flutter_secure_storage_linux
-  flutter_webrtc
   pasteboard
   screen_retriever
   sodium_libs
   sqlite3_flutter_libs
+  tray_manager
   url_launcher_linux
   window_manager
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  rust_builder
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

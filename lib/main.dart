@@ -4,7 +4,6 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
-import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -13,24 +12,24 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
-import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 
 // Configuration constants
 const appTag = "liphium_chat";
-const protocolVersion = 5;
+const appTagSpaces = "liphium_spaces";
+const protocolVersion = 6;
 
 final dio = Dio();
 late final Sodium sodiumLib;
 bool isHttps = true;
 const bool driftLogger = true;
+const bool isWeb = kIsWeb || kIsWasm;
 
 // Build level settings
 const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
 const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
-const bool configDisableRust = bool.fromEnvironment("DISABLE_RUST", defaultValue: false);
 
 // Authentication types
 enum AuthType {
@@ -93,46 +92,45 @@ void main(List<String> args) async {
 /// App init function, start Liphium Chat
 void initApp(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb) {
-    if (!GetPlatform.isMobile) {
-      await windowManager.ensureInitialized();
-    }
-  }
   executableArguments = args;
-  sendLog("Current save directory: ${(await getApplicationSupportDirectory()).path}");
+  if (!isWeb) {
+    sendLog("Current save directory: ${(await getApplicationSupportDirectory()).path}");
+  }
 
   // Initialize sodium
   await initSodium();
   sendLog(packageSymmetricKey(randomSymmetricKey()));
 
-  await RustLib.init();
-
-  // Initialize logging from the native side
-  if (configDisableRust) {
-    api.createLogStream().listen((event) {
-      sendLog("FROM RUST: ${event.tag} | ${event.msg}");
-    });
-  }
+  // Initialize the window
+  initDesktopWindow();
 
   // Wait for it to be finished
   await Future.delayed(100.ms);
 
   if (isDebug) {
     await encryptionTest();
-    // testEncryptionRSA(); This crashes the app for anyone not on my windows system xd
   }
 
   // Initialize controllers
   initializeControllers();
 
-  if (!GetPlatform.isMobile) {
+  runApp(const ChatApp());
+}
+
+void initDesktopWindow() async {
+  if (isDesktopPlatform()) {
+    await windowManager.ensureInitialized();
     await windowManager.setMinimumSize(const Size(300, 500));
     await windowManager.setTitle("Liphium");
-    if (!isDebug) {
-      await windowManager.setAlignment(Alignment.center);
-    }
+    await windowManager.setAlignment(Alignment.center);
   }
-  runApp(const ChatApp());
+}
+
+bool isDesktopPlatform() {
+  if (kIsWeb || kIsWasm) {
+    return false;
+  }
+  return GetPlatform.isDesktop;
 }
 
 Future<bool> encryptionTest() async {

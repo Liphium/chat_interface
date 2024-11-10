@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -21,14 +22,12 @@ class _FriendButtonState extends State<FriendButton> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Get.theme.colorScheme.inverseSurface,
+      color: Get.theme.colorScheme.onInverseSurface,
       borderRadius: BorderRadius.circular(10),
       child: MouseRegion(
         onHover: (event) => widget.position.value = event.position,
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
-          hoverColor: Theme.of(context).colorScheme.primary.withAlpha(100),
-          splashColor: Theme.of(context).hoverColor,
 
           //* Show profile
           onTap: () => showModal(Profile(position: widget.position.value, friend: widget.friend)),
@@ -69,7 +68,7 @@ class _FriendButtonState extends State<FriendButton> {
                           .values
                           .where((element) => !element.isGroup && element.members.values.any((mem) => mem.address == widget.friend.id));
                       if (conversation.isNotEmpty) {
-                        Get.find<SpacesController>().inviteToCall(conversation.first.id);
+                        Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation.first));
                         Get.back();
                       }
                     },
@@ -83,7 +82,7 @@ class _FriendButtonState extends State<FriendButton> {
                           (element) => !element.isGroup && element.members.values.any((m) => m.address == widget.friend.id),
                         );
                     if (conversation.isNotEmpty) {
-                      Get.find<SpacesController>().createAndConnect(conversation.first.id);
+                      Get.find<SpacesController>().createAndConnect(ConversationMessageProvider(conversation.first));
                       Get.back();
                     }
                   },

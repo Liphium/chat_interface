@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
@@ -11,7 +10,6 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:path/path.dart' as path;
 
 class ProfilePictureWindow extends StatefulWidget {
   final XFile file;
@@ -158,16 +156,13 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                       ),
                     ),
                   );
-                  final currentFile = File(widget.file.path);
-                  final cutFile = File(path.join(currentFile.parent.path, ".cut-${widget.file.name}"));
-                  await cutFile.writeAsBytes(image);
+                  final cutFile = XFile(".cut-${widget.file.name}", bytes: image);
                   final res = await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name);
                   if (!res) {
                     uploading.value = false;
                     sendLog("kinda didn't work");
                     return;
                   }
-                  await cutFile.delete();
                   uploading.value = false;
                   sendLog("uploaded");
                   Get.back();

@@ -1,10 +1,10 @@
-import 'dart:io';
-
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:path/path.dart' as path;
 
 enum FileTypes {
@@ -54,7 +54,7 @@ IconData getIconForType(FileTypes type) {
 }
 
 class FilePreview extends StatelessWidget {
-  final File file;
+  final XFile file;
   const FilePreview({super.key, required this.file});
 
   @override
@@ -64,8 +64,8 @@ class FilePreview extends StatelessWidget {
 
     switch (type) {
       case FileTypes.image:
-        return Image.file(
-          File(file.path),
+        return XImage(
+          file: file,
           fit: BoxFit.cover,
         );
 

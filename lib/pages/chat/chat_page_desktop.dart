@@ -4,7 +4,8 @@ import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/townsquare/townsquare_page.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
-import 'package:chat_interface/pages/spaces/call_rectangle.dart';
+import 'package:chat_interface/pages/spaces/space_rectangle.dart';
+import 'package:chat_interface/theme/desktop_widgets.dart';
 import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -45,58 +46,60 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Get.theme.colorScheme.inverseSurface,
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        left: false,
-        child: PlatformCallback(
-          mobile: () {
-            final controller = Get.find<MessageController>();
-            if (controller.currentConversation.value != null) {
-              Get.off(const ChatPageMobile());
-              Get.to(ConversationPage(conversation: controller.currentConversation.value!));
-            } else {
-              Get.off(const ChatPageMobile());
-            }
-          },
-          child: Row(
-            children: [
-              const SelectionContainer.disabled(
-                child: SizedBox(
-                  width: 350,
-                  child: Sidebar(),
+      body: CloseToTray(
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          left: false,
+          child: PlatformCallback(
+            mobile: () {
+              final controller = Get.find<MessageController>();
+              if (controller.currentProvider.value != null) {
+                Get.off(const ChatPageMobile());
+                Get.to(ConversationPage(provider: controller.currentProvider.value!));
+              } else {
+                Get.off(const ChatPageMobile());
+              }
+            },
+            child: Row(
+              children: [
+                const SelectionContainer.disabled(
+                  child: SizedBox(
+                    width: 350,
+                    child: Sidebar(),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Obx(
-                  () {
-                    // Check if a space is selected (show the page if it is)
-                    final controller = Get.find<MessageController>();
-                    switch (controller.currentOpenType.value) {
-                      case OpenTabType.townsquare:
-                        return const TownsquarePage();
-                      case OpenTabType.conversation:
-                        if (controller.currentConversation.value == null) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-                              verticalSpacing(sectionSpacing),
-                              Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-                              verticalSpacing(elementSpacing),
-                              Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
-                            ],
-                          );
-                        }
+                Expanded(
+                  child: Obx(
+                    () {
+                      // Check if a space is selected (show the page if it is)
+                      final controller = Get.find<MessageController>();
+                      switch (controller.currentOpenType.value) {
+                        case OpenTabType.townsquare:
+                          return const TownsquarePage();
+                        case OpenTabType.conversation:
+                          if (controller.currentProvider.value == null) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
+                                verticalSpacing(sectionSpacing),
+                                Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
+                                verticalSpacing(elementSpacing),
+                                Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
+                              ],
+                            );
+                          }
 
-                        return MessageFeed(conversation: controller.currentConversation.value!);
-                      default:
-                        return const CallRectangle();
-                    }
-                  },
+                          return MessageFeed();
+                        default:
+                          return const SpaceRectangle();
+                      }
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

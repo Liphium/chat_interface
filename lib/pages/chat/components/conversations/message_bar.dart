@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -13,11 +14,13 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:liphium_bridge/liphium_bridge.dart';
 
 class MessageBar extends StatefulWidget {
   final Conversation conversation;
+  final MessageProvider provider;
 
-  const MessageBar({super.key, required this.conversation});
+  const MessageBar({super.key, required this.conversation, required this.provider});
 
   @override
   State<MessageBar> createState() => _MessageBarState();
@@ -91,7 +94,7 @@ class _MessageBarState extends State<MessageBar> {
             Row(
               children: [
                 //* Zap share
-                if (widget.conversation.type == model.ConversationType.directMessage)
+                if (widget.conversation.type == model.ConversationType.directMessage && isDirectorySupported)
                   Stack(
                     key: _zapShareKey,
                     children: [
@@ -121,28 +124,29 @@ class _MessageBarState extends State<MessageBar> {
                     ],
                   ),
 
-                if (Get.find<SpacesController>().inSpace.value)
+                if (Get.find<SpacesController>().inSpace.value && areCallsSupported)
                   LoadingIconButton(
-                    icon: Icons.add_call,
+                    icon: Icons.forward_to_inbox,
                     iconSize: 27,
                     loading: callLoading,
-                    tooltip: "chat.add_space".tr,
+                    tooltip: "chat.invite_to_space".tr,
                     onTap: () {
                       final controller = Get.find<SpacesController>();
-                      controller.inviteToCall(widget.conversation.id);
+                      controller.inviteToCall(widget.provider);
                     },
                   ),
 
-                LoadingIconButton(
-                  icon: Icons.call,
-                  iconSize: 27,
-                  loading: callLoading,
-                  tooltip: "chat.start_space".tr,
-                  onTap: () {
-                    final controller = Get.find<SpacesController>();
-                    controller.createAndConnect(widget.conversation.id);
-                  },
-                ),
+                if (areCallsSupported)
+                  LoadingIconButton(
+                    icon: Icons.rocket_launch,
+                    iconSize: 27,
+                    loading: callLoading,
+                    tooltip: "chat.start_space".tr,
+                    onTap: () {
+                      final controller = Get.find<SpacesController>();
+                      controller.createAndConnect(widget.provider);
+                    },
+                  ),
 
                 //* Invite people
                 ConversationAddButton(

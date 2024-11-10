@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_renderer.dart';
@@ -15,12 +15,14 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class BubblesMobileRenderer extends StatefulWidget {
   final int index;
   final Message? message;
+  final MessageProvider provider;
   final AutoScrollController controller;
 
   const BubblesMobileRenderer({
     super.key,
     required this.index,
     required this.controller,
+    required this.provider,
     this.message,
   });
 
@@ -35,11 +37,10 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MessageController>();
     final friendController = Get.find<FriendController>();
 
     // This is needed for jump to message
-    if (widget.index == controller.messages.length + 1) {
+    if (widget.index == widget.provider.messages.length + 1) {
       return SizedBox(
         height: Get.height,
       );
@@ -51,27 +52,27 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
     }
 
     //* Chat bubbles
-    final message = widget.message ?? controller.messages[widget.index - 1];
+    final message = widget.message ?? widget.provider.messages[widget.index - 1];
 
     if (message.heightCallback && !message.heightReported) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         sendLog(_heightKey.currentContext!.size!.height);
         message.heightReported = true;
         message.heightKey = _heightKey;
-        Get.find<MessageController>().messageHeightCallback(message, _heightKey.currentContext!.size!.height);
+        widget.provider.messageHeightCallback(message, _heightKey.currentContext!.size!.height);
       });
     }
 
     if (message.type == MessageType.system) {
-      return BubblesSystemMessageRenderer(message: message);
+      return BubblesSystemMessageRenderer(message: message, provider: widget.provider);
     }
     final sender = friendController.friends[message.senderAddress];
     final self = message.senderAddress == StatusController.ownAddress;
 
     bool last = false;
     bool newHeading = false;
-    if (widget.index != controller.messages.length) {
-      final lastMessage = controller.messages[widget.index];
+    if (widget.index != widget.provider.messages.length) {
+      final lastMessage = widget.provider.messages[widget.index];
 
       // Check if the last message was a day before the current one
       if (lastMessage.createdAt.day != message.createdAt.day) {
@@ -85,6 +86,7 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
         renderer = BubblesMessageRenderer(
           key: ValueKey(message.id),
           message: message,
+          provider: widget.provider,
           senderAddress: message.senderAddress,
           self: self,
           last: last,
@@ -104,6 +106,7 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
         renderer = BubblesLiveshareMessageRenderer(
           key: ValueKey(message.id),
           message: message,
+          provider: widget.provider,
           self: self,
           last: last,
           sender: self ? Friend.me() : sender,
@@ -113,6 +116,7 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
         renderer = BubblesSystemMessageRenderer(
           key: ValueKey(message.id),
           message: message,
+          provider: widget.provider,
         );
     }
 
@@ -125,7 +129,7 @@ class _BubblesRendererState extends State<BubblesMobileRenderer> with TickerProv
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (newHeading || widget.index == controller.messages.length)
+            if (newHeading || widget.index == widget.provider.messages.length)
               Padding(
                 padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
                 child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),

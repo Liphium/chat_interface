@@ -1,32 +1,30 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart' as msg;
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
-import 'package:chat_interface/src/rust/api/interaction.dart' as api;
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:livekit_client/livekit_client.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:window_manager/window_manager.dart';
+
+bool areCallsSupported = !isWeb && !GetPlatform.isMobile;
 
 class SpacesController extends GetxController {
   //* Call status
@@ -34,21 +32,18 @@ class SpacesController extends GetxController {
   final spaceLoading = false.obs;
   final connected = false.obs;
   final start = DateTime.now().obs;
-  final currentTab = SpaceTabType.people.index.obs;
-  int _prevTab = SpaceTabType.people.index;
+  final currentTab = SpaceTabType.table.index.obs;
+  int _prevTab = SpaceTabType.table.index;
 
   //* Space information
   static String? currentDomain;
-  static Room? livekitRoom;
   final id = "".obs;
   static SecureKey? key;
 
   //* Call layout
+  final chatOpen = false.obs;
   final hideSidebar = false.obs;
   final fullScreen = false.obs;
-  final hasVideo = false.obs;
-  final hideOverlay = false.obs;
-  final cinemaWidget = Rx<Widget?>(null);
 
   void toggleFullScreen() {
     fullScreen.toggle();
@@ -83,26 +78,6 @@ class SpacesController extends GetxController {
     _prevTab = currentTab.value;
   }
 
-  void cinemaMode(Widget widget) {
-    sendLog("cinema");
-    if (cinemaWidget.value != null) {
-      if (cinemaWidget.value == widget) {
-        sendLog("already cinema");
-        if (currentTab.value == SpaceTabType.people.index) {
-          switchToTabAndChange(SpaceTabType.cinema);
-        } else {
-          switchToTabAndChange(SpaceTabType.people);
-        }
-        return;
-      }
-      cinemaWidget.value = widget;
-      switchToTabAndChange(SpaceTabType.cinema);
-      return;
-    }
-    cinemaWidget.value = widget;
-    switchToTabAndChange(SpaceTabType.cinema);
-  }
-
   void createSpace(bool publish) {
     _startSpace((container) {
       if (publish) {
@@ -111,107 +86,87 @@ class SpacesController extends GetxController {
     });
   }
 
-  void createAndConnect(LPHAddress conversationId) {
-    _startSpace((container) => sendActualMessage(spaceLoading, conversationId, MessageType.call, [], container.toInviteJson(), "", () => {}));
+  void createAndConnect(MessageProvider provider) {
+    _startSpace((container) => provider.sendMessage(spaceLoading, MessageType.call, [], container.toInviteJson(), ""));
   }
 
-  void inviteToCall(LPHAddress conversationId) {
-    sendActualMessage(spaceLoading, conversationId, MessageType.call, [], getContainer().toInviteJson(), "", () => {});
+  void inviteToCall(MessageProvider provider) {
+    provider.sendMessage(spaceLoading, MessageType.call, [], getContainer().toInviteJson(), "");
   }
 
   SpaceConnectionContainer getContainer() {
     return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
   }
 
-  void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) {
+  void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) async {
     if (connected.value) {
-      showErrorPopup("error", "already.calling".tr);
+      showErrorPopup("error", "spaces.already_calling".tr);
       return;
     }
     spaceLoading.value = true;
 
-    connector.sendAction(msg.Message("spc_start", <String, dynamic>{}), handler: (event) {
-      if (!event.data["success"]) {
-        spaceLoading.value = false;
-        sendLog(event.data);
-        if (event.data["message"] is String) {
-          return showErrorPopup("error", event.data["message"]);
-        }
-        return showErrorPopup("error", "server.error".tr);
-      }
-      final appToken = event.data["token"] as Map<String, dynamic>;
-      final roomId = event.data["id"];
-      sendLog("connecting to node ${appToken["node"]}..");
-      key = randomSymmetricKey();
-      id.value = roomId;
-      _connectToRoom(roomId, appToken, connectedCallback: connectedCallback);
-
-      // Send invites
-      final container = SpaceConnectionContainer(appToken["domain"], roomId, key!, null);
-      callback.call(container);
-    });
-  }
-
-  void join(SpaceConnectionContainer container) {
-    connector.sendAction(
-        msg.Message("spc_join", <String, dynamic>{
-          "id": container.roomId,
-        }), handler: (event) {
-      if (!event.data["success"]) {
-        if (event.data["message"] == "already.in.space") {
-          // Leave the space immediately
-          connector.sendAction(msg.Message("spc_leave", <String, dynamic>{}), handler: (event) async {
-            if (!event.data["success"]) {
-              if (event.data["message"] is String) {
-                return showErrorPopup("error", event.data["message"]);
-              }
-              return showErrorPopup("error", "server.error".tr);
-            }
-
-            // Wait a little bit, in case a server abuses this as an infinite loop
-            await Future.delayed(const Duration(milliseconds: 500));
-
-            // Try joining again
-            join(container);
-          });
-          return;
-        }
-
-        return showErrorPopup("error", "server.error".tr);
-      }
-
-      // Load information from space container
-      id.value = container.roomId;
-      key = container.key;
-
-      // Connect to the room
-      _connectToRoom(id.value, event.data["token"]);
-    });
-  }
-
-  void _connectToRoom(String id, Map<String, dynamic> appToken, {Function()? connectedCallback}) async {
-    if (key == null) {
-      sendLog("key is null: can't connect to space");
+    // Create a new space
+    final roomId = getRandomString(16);
+    key = randomSymmetricKey();
+    id.value = roomId;
+    final domain = await _connectToRoom(roomId, connectedCallback: connectedCallback);
+    if (domain == null) {
       return;
     }
-    currentDomain = appToken["domain"];
-    currentTab.value = SpaceTabType.people.index;
+
+    // Send invites
+    final container = SpaceConnectionContainer(domain, roomId, key!, null);
+    callback.call(container);
+  }
+
+  void join(SpaceConnectionContainer container) async {
+    spaceLoading.value = true;
+
+    // Load information from space container
+    id.value = container.roomId;
+    key = container.key;
+
+    // Connect to the room
+    await _connectToRoom(id.value);
+    spaceLoading.value = false;
+  }
+
+  /// Returns the domain of the node the Space is hosted on.
+  Future<String?> _connectToRoom(String id, {Function()? connectedCallback}) async {
+    final body = await postAuthorizedJSON("/node/connect", <String, dynamic>{
+      "tag": appTagSpaces,
+      "token": refreshToken,
+      "extra": id,
+    });
+
+    // Return an error
+    if (!body["success"]) {
+      showErrorPopup("error", "server.error".tr);
+      sendLog("WARNING: couldn't connect to space node");
+      return null;
+    }
+
+    if (key == null) {
+      sendLog("key is null: can't connect to space");
+      return null;
+    }
+    currentDomain = body["domain"];
+    currentTab.value = SpaceTabType.table.index;
 
     // Setup all controllers
-    Get.find<PublicationController>().onConnect();
     Get.find<SpaceMemberController>().onConnect(key!);
 
     // Connect to space node
-    final result = await createSpaceConnection(appToken["domain"], appToken["token"]);
+    final result = await createSpaceConnection(body["domain"], body["token"]);
     sendLog("COULD CONNECT TO SPACE NODE: $result");
     if (!result) {
       showErrorPopup("error", "server.error".tr);
       spaceLoading.value = false;
-      return;
+      return null;
     }
 
     spaceConnector.sendAction(
-      msg.Message(
+      msg.ServerAction(
         "setup",
         {
           "data": encryptSymmetric(StatusController.ownAddress.encode(), key!),
@@ -225,38 +180,14 @@ class SpacesController extends GetxController {
           return;
         }
 
-        // Connect to new voice chat
-        final keyProvider = await BaseKeyProvider.create();
-        await keyProvider.setKey(base64Encode(key!.extractBytes()));
-        livekitRoom = Room(
-          roomOptions: RoomOptions(
-            e2eeOptions: E2EEOptions(
-              keyProvider: keyProvider,
-            ),
-            adaptiveStream: true,
-            defaultAudioPublishOptions: const AudioPublishOptions(
-              audioBitrate: 128000,
-            ),
-          ),
-        );
-        await livekitRoom!.connect(
-          event.data["url"],
-          event.data["token"],
-          connectOptions: const ConnectOptions(
-            autoSubscribe: false,
-          ),
-        );
-        Get.find<SpaceMemberController>().onLivekitConnected();
-        if (!configDisableRust) {
-          await api.startTalkingEngine();
-        }
-
         // Open the screen
         Get.find<MessageController>().unselectConversation();
         Get.find<MessageController>().openTab(OpenTabType.space);
+        Get.find<SpacesMessageController>().open();
 
         // Reset everything on the table
         Get.find<TabletopController>().resetControllerState();
+        Get.find<TabletopController>().openTableTab();
 
         connected.value = true;
         inSpace.value = true;
@@ -264,37 +195,26 @@ class SpacesController extends GetxController {
         connectedCallback?.call();
       },
     );
+
+    return body["domain"];
   }
 
   void leaveCall({error = false}) async {
     inSpace.value = false;
     connected.value = false;
-    if (!configDisableRust) {
-      await api.stop();
-    }
     id.value = "";
     spaceConnector.disconnect();
-    livekitRoom?.disconnect();
 
     // Tell other controllers about it
     Get.find<StatusController>().stopSharing();
     Get.find<SpaceMemberController>().onDisconnect();
-    Get.find<PublicationController>().disconnect();
-    Get.find<GameHubController>().leaveCall();
     Get.find<TabletopController>().resetControllerState();
+    Get.find<SpacesMessageController>().clearProvider();
 
     if (!error) {
       Get.offAll(getChatPage(), transition: Transition.fadeIn);
       Get.find<MessageController>().openTab(OpenTabType.conversation);
     }
-  }
-
-  /// Called every time the room updates
-  void updateRoomVideoState() {
-    hasVideo.value = livekitRoom!.remoteParticipants.values.any((element) => element.isCameraEnabled() || element.isScreenShareEnabled()) ||
-        livekitRoom!.localParticipant!.isCameraEnabled() ||
-        livekitRoom!.localParticipant!.isScreenShareEnabled();
-    sendLog("UPDATE VIDEO ${hasVideo.value}");
   }
 }
 

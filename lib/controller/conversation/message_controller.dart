@@ -1,27 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
-import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/conversation_page.dart';
-import 'package:chat_interface/pages/settings/town/file_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:flutter/material.dart' as material;
-import 'package:flutter/widgets.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 enum OpenTabType {
@@ -33,20 +23,20 @@ enum OpenTabType {
 class MessageController extends GetxController {
   // Constants
   Message? hoveredMessage;
+  AttachmentContainer? hoveredAttachment;
   static LPHAddress systemSender = LPHAddress("liphium.com", "6969");
 
   final loaded = false.obs;
   final currentOpenType = OpenTabType.conversation.obs;
-  final currentConversation = Rx<Conversation?>(null);
-  final messages = <Message>[].obs;
+  final currentProvider = Rx<ConversationMessageProvider?>(null);
 
   /// Unselect a conversation (when id is set, the current conversation will only be closed if it has that id)
   void unselectConversation({LPHAddress? id}) {
-    if (id != null && currentConversation.value?.id != id) {
+    if (id != null && currentProvider.value?.conversation.id != id) {
       return;
     }
-    currentConversation.value = null;
-    messages.clear();
+    currentProvider.value?.messages.clear();
+    currentProvider.value = null;
   }
 
   void openTab(OpenTabType type) {
@@ -59,19 +49,17 @@ class MessageController extends GetxController {
   void selectConversation(Conversation conversation) async {
     currentOpenType.value = OpenTabType.conversation;
     loaded.value = false;
-    topReached = false;
+    currentProvider.value = ConversationMessageProvider(conversation);
     if (isMobileMode()) {
-      Get.to(ConversationPage(conversation: conversation));
+      Get.to(ConversationPage(provider: currentProvider.value!));
     }
-    currentConversation.value = conversation;
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
       overwriteRead(conversation);
     }
 
-    // Load messages
-    messages.clear();
-    loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
+    // Make sure the thing has some messages in it
+    currentProvider.value!.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 
     loaded.value = true;
   }
@@ -88,217 +76,132 @@ class MessageController extends GetxController {
     }
   }
 
-  /// Delete a message from the client with an id
-  void deleteMessageFromClient(LPHAddress conversation, String id) async {
-    // Check if message is in the selected conversation
-    if (currentConversation.value?.id == conversation) {
-      messages.removeWhere((element) => element.id == id);
-    }
-  }
-
   /// Store the message in the cache if it is the current selected conversation.
   ///
   /// Also handles system messages.
-  void storeMessage(Message message) async {
+  void storeMessage(Message message, Conversation conversation) async {
     // Update message reading
     Get.find<ConversationController>().updateMessageRead(
-      message.conversation,
-      increment: currentConversation.value?.id != message.conversation,
+      conversation.id,
+      increment: currentProvider.value?.conversation.id != conversation.id,
       messageSendTime: message.createdAt.millisecondsSinceEpoch,
     );
 
+    // Play a notification sound when a new message arrives
+    RingingManager.playNotificationSound();
+
     // Add message to message history if it's the selected one
-    if (currentConversation.value?.id == message.conversation) {
-      if (message.sender != currentConversation.value?.token.id) {
-        overwriteRead(currentConversation.value!);
+    if (currentProvider.value?.conversation.id == conversation.id) {
+      if (message.sender != currentProvider.value?.conversation.token.id) {
+        overwriteRead(currentProvider.value!.conversation);
       }
 
       // Check if it is a system message and if it should be rendered or not
       if (message.type == MessageType.system) {
         if (SystemMessages.messages[message.content]?.render == true) {
-          addMessageToBottom(message);
+          currentProvider.value!.addMessageToBottom(message);
         }
       } else {
         // Store normal type of message
-        if (messages.isNotEmpty && messages[0].id != message.id) {
-          addMessageToBottom(message);
-        } else if (messages.isEmpty) {
-          addMessageToBottom(message);
+        if (currentProvider.value!.messages.isNotEmpty && currentProvider.value!.messages[0].id != message.id) {
+          currentProvider.value!.addMessageToBottom(message);
+        } else if (currentProvider.value!.messages.isEmpty) {
+          currentProvider.value!.addMessageToBottom(message);
         }
       }
     }
 
     // Handle system messages
     if (message.type == MessageType.system) {
-      SystemMessages.messages[message.content]?.handle(message);
+      SystemMessages.messages[message.content]?.handle(message, currentProvider.value!);
     }
 
-    // On call message type, ring using the message
+    // On call message type, ring using the message TODO: Reintroduce the ringtone in Spaces
+    /*
     if (message.type == MessageType.call && message.senderAddress != StatusController.ownAddress) {
-      // Get the conversation for the ring
-      final conversation = Get.find<ConversationController>().conversations[message.conversation];
-      if (conversation == null) {
-        return;
-      }
-
-      // Decode the message and stuff
       final container = SpaceConnectionContainer.fromJson(jsonDecode(message.content));
       RingingManager.startRinging(conversation, container);
     }
+    */
   }
+}
 
-  //* Scroll
-  static const newLoadOffset = 200;
-  bool topReached = false;
-  AutoScrollController? controller;
-  final waitingMessages = <String>[]; // To prevent messages from being sent twice due to a race condition
+/// A message provider that loads messages from a conversation.
+class ConversationMessageProvider extends MessageProvider {
+  final Conversation conversation;
+  ConversationMessageProvider(this.conversation);
 
-  void addMessageToBottom(Message message, {bool animation = true}) async {
-    // Check if there are any messages with similar ids to prevent adding the same message again
-    if (waitingMessages.any((msg) => msg == message.id)) {
-      return;
-    }
-    waitingMessages.add(message.id);
-
-    // Initialize all message data
-    await message.initAttachments();
-    waitingMessages.remove(message.id); // Remove after cause then it is added
-
-    // Only load the message, if scrolled near enough to the bottom
-    if (controller!.position.pixels <= newLoadOffset) {
-      if (controller!.position.pixels == 0) {
-        message.playAnimation = true;
-        messages.insert(0, message);
-        return;
-      }
-
-      message.heightCallback = true;
-      messages.insert(0, message);
-      return;
-    }
-  }
-
-  void messageHeightCallback(Message message, double height) {
-    message.canScroll.value = true;
-    message.currentHeight = height;
-    controller!.jumpTo(controller!.position.pixels + height);
-  }
-
-  void messageHeightChange(Message message, double extraHeight) {
-    if (message.heightKey != null) {
-      controller!.jumpTo(controller!.position.pixels + extraHeight);
-    }
-  }
-
-  void newScrollController(AutoScrollController newController) {
-    if (controller != null) {
-      controller!.removeListener(checkCurrentScrollHeight);
-    }
-    controller = newController;
-    controller!.addListener(checkCurrentScrollHeight);
-  }
-
-  /// Runs on every scroll to check if new messages should be loaded
-  void checkCurrentScrollHeight() async {
-    // Get.height is in there because there is a little bit of buffer above
-    if (controller!.position.pixels > controller!.position.maxScrollExtent - Get.height / 2 - newLoadOffset && !topReached) {
-      var (topReached, error) = await loadNewMessagesTop();
-      if (!error) {
-        this.topReached = topReached;
-      }
-    } else if (controller!.position.pixels <= newLoadOffset) {
-      loadNewMessagesBottom();
-    }
-  }
-
-  /// Loading state for new messages (at top or bottom)
-  final newMessagesLoading = false.obs;
-
-  /// Whether or not the messages are loading at the top (for showing a loading indicator)
-  bool messagesLoadingTop = false;
-
-  /// Load new messages from the server for the top of the scroll feed.
-  ///
-  /// The `first boolean` tells you whether or not the top has been reached.
-  /// The `second boolean` tells you whether or not it was still loading or an error happend.
-  Future<(bool, bool)> loadNewMessagesTop({int? date}) async {
-    if (newMessagesLoading.value || (messages.isEmpty && date == null)) {
-      return (false, true);
-    }
-    messagesLoadingTop = true;
-    newMessagesLoading.value = true;
-    date ??= messages.last.createdAt.millisecondsSinceEpoch;
-
-    // Load the messages from the server using the list_before endpoint
-    final conversation = currentConversation.value!;
+  @override
+  Future<(List<Message>?, bool)> loadMessagesBefore(int time) async {
+    // Load messages from the server
     final json = await postNodeJSON("/conversations/message/list_before", {
       "token": conversation.token.toMap(),
-      "data": date,
+      "data": time,
     });
 
     // Check if there was an error
     if (!json["success"]) {
       conversation.error.value = json["error"];
       newMessagesLoading.value = false;
-      return (false, false);
+      return (null, true);
     }
 
     // Check if the top has been reached
     if (json["messages"] == null || json["messages"].isEmpty) {
       newMessagesLoading.value = false;
-      return (true, false);
+      return (null, false);
     }
 
-    // Unpack the messages in an isolate (in a separate thread yk)
-    final loadedMessages = await _processMessages(conversation, json["messages"]);
-    messages.addAll(loadedMessages);
-
-    newMessagesLoading.value = false;
-    return (false, false);
+    // Process the messages in a seperate isolate
+    return (await _processMessages(json["messages"]), false);
   }
 
-  /// Load new messages at the bottom of the scroll feed from the server.
-  ///
-  /// Returns whether or not it was successful.
-  /// Will open an error dialog in case something goes wrong on the server.
-  Future<bool> loadNewMessagesBottom() async {
-    if (newMessagesLoading.value || messages.isEmpty) {
-      return false;
-    }
-    messagesLoadingTop = false;
-    newMessagesLoading.value = true; // We'll use the same loading as above to make sure this doesn't break anything
-    final firstMessage = messages.first;
-
-    // Load messages from the server
-    final conversation = currentConversation.value!;
+  @override
+  Future<(List<Message>?, bool)> loadMessagesAfter(int time) async {
+    // Load the messages from the server using the list_before endpoint
     final json = await postNodeJSON("/conversations/message/list_after", {
       "token": conversation.token.toMap(),
-      "data": firstMessage.createdAt.millisecondsSinceEpoch,
+      "data": time,
     });
 
     // Check if there was an error
     if (!json["success"]) {
       conversation.error.value = json["error"];
       newMessagesLoading.value = false;
-      return false;
+      return (null, true);
     }
 
-    // Check if the top has been reached
-    if (json["messages"].isEmpty) {
+    // Check if the bottom has been reached
+    if (json["messages"] == null || json["messages"].isEmpty) {
       newMessagesLoading.value = false;
-      return false;
+      return (null, false);
     }
 
-    // Process the messages
-    final loadedMessages = await _processMessages(conversation, json["messages"]);
-    for (var message in loadedMessages) {
-      message.heightCallback = true;
-    }
-    loadedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Sort to prevent weird order
-    messages.insertAll(0, loadedMessages);
+    // Unpack the messages in an isolate
+    return (await _processMessages(json["messages"]), false);
+  }
 
-    newMessagesLoading.value = false;
-    return true;
+  @override
+  Future<Message?> loadMessageFromServer(String id, {bool init = true}) async {
+    // Get the message from the server
+    final json = await postNodeJSON("/conversations/message/get", {
+      "token": conversation.token.toMap(),
+      "data": id,
+    });
+
+    // Check if there is an error
+    if (!json["success"]) {
+      sendLog("error fetching message $id: ${json["error"]}");
+      return null;
+    }
+
+    // Parse message and init attachments (if desired)
+    final message = await ConversationMessageProvider.unpackMessageInIsolate(conversation, json["message"]);
+    if (init) {
+      await message.initAttachments(this);
+    }
+
+    return message;
   }
 
   /// Process a message payload from the server in an isolate.
@@ -307,7 +210,7 @@ class MessageController extends GetxController {
   /// the signature is ran in the main isolate due to constraints with libsodium.
   ///
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
-  Future<List<Message>> _processMessages(Conversation conversation, List<dynamic> json) async {
+  Future<List<Message>> _processMessages(List<dynamic> json) async {
     // Unpack the messages in an isolate (in a separate thread yk)
     final copy = Conversation.copyWithoutKey(conversation);
     final loadedMessages = await sodiumLib.runIsolated(
@@ -315,7 +218,7 @@ class MessageController extends GetxController {
         // Process all messages
         final list = <(Message, SymmetricSequencedInfo?)>[];
         for (var msgJson in json) {
-          final (message, info) = Message.fromJson(
+          final (message, info) = ConversationMessageProvider.messageFromJson(
             msgJson,
             conversation: copy,
             key: keys[0],
@@ -329,7 +232,7 @@ class MessageController extends GetxController {
 
           // Decrypt system message attachments
           if (message.type == MessageType.system) {
-            message.decryptSystemMessageAttachments(copy, keys[0], sodium);
+            message.decryptSystemMessageAttachments(keys[0], sodium);
           }
 
           list.add((message, info));
@@ -346,203 +249,18 @@ class MessageController extends GetxController {
       if (info != null) {
         msg.verifySignature(info);
       }
-      await msg.initAttachments();
+      await msg.initAttachments(this);
     }
 
     return loadedMessages.map((tuple) => tuple.$1).toList();
   }
 
-  /// Scroll to a message (only animated when message is loaded in cache).
-  ///
-  /// Loads the message from the server if it is not in the cache and refreshes
-  /// the complete feed in that case.
-  Future<bool> scrollToMessage(String id) async {
-    // Check if message is already on screen
-    var message = messages.firstWhereOrNull((msg) => msg.id == id);
-    if (message != null) {
-      controller!.scrollToIndex(messages.indexOf(message) + 1);
-      if (message.highlightAnimation == null) {
-        // If the message is not yet rendered do it through a callback
-        message.highlightCallback = () {
-          Timer(500.ms, () {
-            message!.highlightAnimation!.value = 0;
-            message.highlightAnimation!.animateTo(1);
-          });
-        };
-      } else {
-        // If it is rendered, don't do it through a callback
-        message.highlightAnimation!.value = 0;
-        message.highlightAnimation!.animateTo(1);
-      }
-      return true;
-    }
-
-    // If message is not on screen, load it dynamically from the database
-    message = await Message.loadFromServer(currentConversation.value!, id);
-    if (message == null) {
-      return false;
-    }
-
-    // Add the message to the feed and remove all the others
-    messages.clear();
-    messages.add(message);
-
-    // Highlight the message
-    message.highlightCallback = () {
-      Timer(500.ms, () {
-        message!.highlightAnimation!.value = 0;
-        message.highlightAnimation!.animateTo(1);
-      });
-    };
-
-    // Load the messages below
-    await loadNewMessagesBottom();
-
-    return true;
-  }
-}
-
-class Message {
-  final String id;
-  MessageType type;
-  String content;
-  List<String> attachments;
-  final verified = true.obs;
-  String answer;
-  final LPHAddress sender;
-  final LPHAddress senderAddress;
-  final DateTime createdAt;
-  final LPHAddress conversation;
-  final bool edited;
-
-  Function()? highlightCallback;
-  AnimationController? highlightAnimation;
-  final canScroll = false.obs;
-  double? currentHeight;
-  GlobalKey? heightKey;
-  bool heightReported = false;
-  bool heightCallback = false;
-  bool renderingAttachments = false;
-  final attachmentsRenderer = <AttachmentContainer>[];
-  Message? answerMessage;
-
-  /// Extracts and decrypts the attachments
-  Future<bool> initAttachments() async {
-    //* Load answer
-    if (answer != "") {
-      final message = await Message.loadFromServer(Get.find<ConversationController>().conversations[conversation]!, answer, init: false);
-      answerMessage = message;
-    } else {
-      answerMessage = null;
-    }
-
-    //* Load attachments
-    if (attachmentsRenderer.isNotEmpty || renderingAttachments) {
-      return true;
-    }
-    renderingAttachments = true;
-    if (attachments.isNotEmpty && type != MessageType.system) {
-      for (var attachment in attachments) {
-        if (attachment.isURL) {
-          final container = AttachmentContainer.remoteImage(attachment);
-          await container.init();
-          attachmentsRenderer.add(container);
-          continue;
-        }
-        final json = jsonDecode(attachment);
-        final type = await AttachmentController.checkLocations(json["i"], StorageType.temporary);
-        final decoded = AttachmentContainer.fromJson(type, json);
-        var container = await Get.find<AttachmentController>().findLocalFile(decoded);
-        sendLog("FOUND: ${container?.filePath}");
-        if (container == null) {
-          final extension = decoded.id.split(".").last;
-          if (FileSettings.imageTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
-            if (download) {
-              Get.find<AttachmentController>().downloadAttachment(decoded);
-            }
-          } else if (FileSettings.videoTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
-            if (download) {
-              Get.find<AttachmentController>().downloadAttachment(decoded);
-            }
-          } else if (FileSettings.audioTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
-            if (download) {
-              Get.find<AttachmentController>().downloadAttachment(decoded);
-            }
-          }
-          container = decoded;
-        }
-        attachmentsRenderer.add(container);
-      }
-      renderingAttachments = false;
-    }
-
-    return true;
-  }
-
-  //* Animation when a new message enters the chat
-  bool playAnimation = false;
-  material.AnimationController? controller;
-  void initAnimation(material.TickerProvider provider) {
-    if (controller != null) {
-      return;
-    }
-
-    controller = material.AnimationController(vsync: provider, duration: 250.ms);
-    Timer(250.ms, () {
-      controller!.forward(from: 0);
-    });
-  }
-
-  Message(
-    this.id,
-    this.type,
-    this.content,
-    this.answer,
-    this.attachments,
-    this.sender,
-    this.senderAddress,
-    this.createdAt,
-    this.conversation,
-    this.edited,
-    bool verified,
-  ) {
-    this.verified.value = verified;
-  }
-
-  /// Load a message from the server.
-  ///
-  /// Uses a different isolate (than the main one) to unpack the message.
-  static Future<Message?> loadFromServer(Conversation conversation, String messageId, {init = true}) async {
-    // Get the message from the server
-    final json = await postNodeJSON("/conversations/message/get", {
-      "token": conversation.token.toMap(),
-      "data": messageId,
-    });
-
-    // Check if there is an error
-    if (!json["success"]) {
-      sendLog("error fetching message $messageId: ${json["error"]}");
-      return null;
-    }
-
-    // Parse message and init attachments (if desired)
-    final message = await Message.unpackInIsolate(conversation, json["message"]);
-    if (init) {
-      await message.initAttachments();
-    }
-
-    return message;
-  }
-
-  /// Unpack a message json in an isolate
+  /// Unpack a message json in an isolate.
   ///
   /// Also verifies the signature (but that happens in the main isolate).
   ///
   /// For the future also: TODO: Unpack the signature in a different isolate
-  static Future<Message> unpackInIsolate(Conversation conv, Map<String, dynamic> json) async {
+  static Future<Message> unpackMessageInIsolate(Conversation conv, Map<String, dynamic> json) async {
     // Run an isolate to parse the message
     final copy = Conversation.copyWithoutKey(conv);
     final (message, info) = await _extractMessageIsolate(json, copy, conv.key);
@@ -559,7 +277,7 @@ class Message {
     return sodiumLib.runIsolated(
       (sodium, keys, pairs) {
         // Unpack the actual message
-        final (msg, info) = Message.fromJson(
+        final (msg, info) = messageFromJson(
           json,
           sodium: sodium,
           key: keys[0],
@@ -568,7 +286,7 @@ class Message {
 
         // Unpack the system message attachments in case needed
         if (msg.type == MessageType.system) {
-          msg.decryptSystemMessageAttachments(copied, keys[0], sodium);
+          msg.decryptSystemMessageAttachments(keys[0], sodium);
         }
 
         // Return it to the main isolate
@@ -581,13 +299,13 @@ class Message {
   /// Load a message from json (from the server) and get the corresponding [SymmetricSequencedInfo] (only if no system message).
   ///
   /// **Doesn't verify the signature**
-  static (Message, SymmetricSequencedInfo?) fromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
+  static (Message, SymmetricSequencedInfo?) messageFromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
     // Convert to message
     final senderAddress = LPHAddress.from(json["sender"]);
     final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[senderAddress]?.address ??
         LPHAddress("-", "removed".tr);
     var message = Message(json["id"], MessageType.text, json["data"], "", [], senderAddress, account,
-        DateTime.fromMillisecondsSinceEpoch(json["creation"]), LPHAddress.from(json["conversation"]), json["edited"], false);
+        DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["edited"], false);
 
     // Decrypt content
     conversation ??= Get.find<ConversationController>().conversations[json["conversation"]]!;
@@ -607,64 +325,18 @@ class Message {
     return (message, info);
   }
 
-  /// Loads the content from the message (signature, type, content)
-  void loadContent({Map<String, dynamic>? json}) {
-    final contentJson = json ?? jsonDecode(content);
-    if (type != MessageType.system) {
-      type = MessageType.values[contentJson["t"] ?? 0];
-      if (type == MessageType.text) {
-        content = contentJson["c"];
-      } else {
-        content = contentJson["c"];
-      }
-    } else {
-      content = contentJson["c"];
-    }
-    attachments = List<String>.from(contentJson["a"] ?? [""]);
-    answer = contentJson["r"] ?? "";
-  }
-
-  /// Verifies the signature of the message
-  void verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
-    final conversation = Get.find<ConversationController>().conversations[this.conversation]!;
-    sendLog("${conversation.members} | ${this.sender}");
-    final sender = await Get.find<UnknownController>().loadUnknownProfile(conversation.members[this.sender]!.address);
-    if (sender == null) {
-      sendLog("NO SENDER FOUND");
-      verified.value = false;
-      return;
-    }
-    verified.value = info.verifySignature(sender.signatureKey, sodium);
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{};
-  }
-
-  /// Decrypts the account ids of a system message
-  void decryptSystemMessageAttachments([Conversation? conv, SecureKey? key, Sodium? sodium]) {
-    conv ??= Get.find<ConversationController>().conversations[conversation]!;
-    for (var i = 0; i < attachments.length; i++) {
-      if (attachments[i].startsWith("a:")) {
-        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), key ?? conv.key, sodium))["id"];
-      }
-    }
-  }
-
-  /// Delete message on the server (and on the client)
-  ///
-  /// Returns null if successful, otherwise an error message
-  Future<String?> delete() async {
+  @override
+  Future<String?> deleteMessage(Message message) async {
     // Check if the message is sent by the user
-    final token = Get.find<ConversationController>().conversations[conversation]!.token;
-    if (sender != token.id) {
-      return "no.permission";
+    final token = Get.find<ConversationController>().conversations[conversation.id]!.token;
+    if (message.sender != token.id) {
+      return "no.permission".tr;
     }
 
     // Send a request to the server
     final json = await postNodeJSON("/conversations/message/delete", {
       "token": token.toMap(),
-      "data": id,
+      "data": message.id,
     });
     sendLog(json);
 
@@ -674,11 +346,46 @@ class Message {
 
     return null;
   }
-}
 
-enum MessageType {
-  text,
-  system,
-  call,
-  liveshare;
+  @override
+  Future<bool> deleteMessageFromClient(String id) async {
+    messages.removeWhere((element) => element.id == id);
+    return true;
+  }
+
+  @override
+  SecureKey encryptionKey() {
+    return conversation.key;
+  }
+
+  @override
+  Future<(String, int)?> getTimestamp() async {
+    // Grab a new timestamp from the server
+    var json = await postNodeJSON("/conversations/timestamp", {
+      "token": conversation.token.toMap(),
+    });
+    if (!json["success"]) {
+      return null;
+    }
+
+    // The stamp is first casted to a num to prevent an error (don't remove)
+    return (json["token"] as String, (json["stamp"] as num).toInt());
+  }
+
+  @override
+  Future<String?> handleMessageSend(String timeToken, String data) async {
+    // Send message to the server with conversation token as authentication
+    final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
+      "token": conversation.token.toMap(),
+      "data": {
+        "token": timeToken,
+        "data": data,
+      }
+    });
+
+    if (!json["success"]) {
+      return json["error"];
+    }
+    return null;
+  }
 }

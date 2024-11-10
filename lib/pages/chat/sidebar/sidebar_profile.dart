@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -74,7 +73,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
 
                       return const SizedBox.shrink();
                     }
-                    final shown = Get.find<MessageController>().currentConversation.value == null;
+                    final shown = Get.find<MessageController>().currentProvider.value == null;
 
                     return Column(
                       children: [
@@ -102,30 +101,6 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                   ),
                                   horizontalSpacing(defaultSpacing),
                                   const Spacer(),
-                                  GetX<PublicationController>(
-                                    builder: (controller) {
-                                      return LoadingIconButton(
-                                        loading: controller.muteLoading,
-                                        onTap: () => controller.setMuted(!controller.muted.value),
-                                        icon: controller.muted.value ? Icons.mic_off : Icons.mic,
-                                        extra: defaultSpacing,
-                                        iconSize: 25,
-                                        color: theme.colorScheme.onSurface,
-                                      );
-                                    },
-                                  ),
-                                  GetX<PublicationController>(
-                                    builder: (controller) {
-                                      return LoadingIconButton(
-                                        loading: controller.deafenLoading,
-                                        onTap: () => controller.setDeafened(!controller.deafened.value),
-                                        icon: controller.deafened.value ? Icons.volume_off : Icons.volume_up,
-                                        extra: defaultSpacing,
-                                        iconSize: 25,
-                                        color: theme.colorScheme.onSurface,
-                                      );
-                                    },
-                                  ),
                                   LoadingIconButton(
                                     padding: 0,
                                     extra: 10,

@@ -32,6 +32,7 @@ class DialogBase extends StatelessWidget {
   final double maxWidth;
   final bool showTitleDesktop;
   final bool mobilePage;
+  final bool mobileFlat;
   final List<Widget> title;
 
   const DialogBase({
@@ -40,6 +41,7 @@ class DialogBase extends StatelessWidget {
     this.maxWidth = 400,
     this.title = const [],
     this.mobilePage = false,
+    this.mobileFlat = false,
     this.showTitleDesktop = true,
   });
 
@@ -82,6 +84,13 @@ class DialogBase extends StatelessWidget {
             ),
           ),
         ),
+      );
+    }
+
+    if (isMobileMode() && mobileFlat) {
+      return Padding(
+        padding: const EdgeInsets.all(defaultSpacing * 1.5),
+        child: child,
       );
     }
 

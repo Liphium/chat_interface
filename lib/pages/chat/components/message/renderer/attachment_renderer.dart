@@ -1,12 +1,15 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/audio_attachment_player.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
+import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
-import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -14,12 +17,21 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:open_app_file/open_app_file.dart';
+import 'package:path/path.dart' as path;
 
 class AttachmentRenderer extends StatefulWidget {
   final Message? message;
+  final bool self;
+  final ConversationMessageProvider? provider;
   final AttachmentContainer container;
 
-  const AttachmentRenderer({super.key, required this.container, this.message});
+  const AttachmentRenderer({
+    super.key,
+    required this.container,
+    required this.self,
+    this.message,
+    this.provider,
+  });
 
   @override
   State<AttachmentRenderer> createState() => _AttachmentRendererState();
@@ -66,7 +78,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           sendLog("NEW HEIGHT ${widget.message!.heightKey!.currentContext!.size!.height}");
           final currentHeight = widget.message!.heightKey!.currentContext!.size!.height;
-          Get.find<MessageController>().messageHeightChange(widget.message!, currentHeight - widget.message!.currentHeight!);
+          widget.provider!.messageHeightChange(widget.message!, currentHeight - widget.message!.currentHeight!);
         });
       });
       stream.addListener(listener);
@@ -115,7 +127,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             padding: const EdgeInsets.all(defaultSpacing),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(defaultSpacing),
-              color: Get.theme.colorScheme.primaryContainer,
+              color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -182,11 +194,16 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       });
     }
 
+    // Render as an audio file
+    if (FileSettings.audioTypes.contains(path.extension(widget.container.name).substring(1))) {
+      return AudioAttachmentPlayer(container: widget.container);
+    }
+
     return Container(
       padding: const EdgeInsets.all(defaultSpacing),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color: Get.theme.colorScheme.primaryContainer,
+        color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -207,6 +224,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                   child: Text(
                     widget.container.name,
                     style: Get.theme.textTheme.labelMedium,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Flexible(
@@ -247,7 +265,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             if (widget.container.downloaded.value) {
               return IconButton(
                 onPressed: () async {
-                  final result = await OpenAppFile.open(widget.container.filePath);
+                  final result = await OpenAppFile.open(widget.container.file!.path);
                   if (result.type == ResultType.error) {
                     showErrorPopup("error", result.message);
                   }

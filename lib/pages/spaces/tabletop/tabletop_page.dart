@@ -98,7 +98,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
             return Listener(
               onPointerHover: (event) {
                 tableController.mousePosUnmodified = event.localPosition;
-                tableController.mousePos = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                tableController.mousePos =
+                    TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
               },
               onPointerDown: (event) {
                 if (event.buttons == 2) {
@@ -120,7 +121,9 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     return;
                   }
 
-                  Get.dialog(ObjectCreateMenu(location: TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController)));
+                  Get.dialog(ObjectCreateMenu(
+                      location: TabletopView.localToWorldPos(
+                          event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController)));
                 } else if (event.buttons == 1) {
                   moved = false;
                 }
@@ -136,8 +139,10 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                 // Move the canvas when the mouse wheel is pressed
                 if (event.buttons == 4) {
-                  final old = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                  final newPos = TabletopView.localToWorldPos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                  final old =
+                      TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                  final newPos = TabletopView.localToWorldPos(
+                      event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
                   tableController.canvasOffset += newPos - old;
                 }
 
@@ -147,8 +152,10 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     // If there is a held object, move it, if not, add a new held object from the hovering objects list
                     if (tableController.heldObject != null) {
                       // Move the object
-                      final old = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                      final newPos = TabletopView.localToWorldPos(event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                      final old = TabletopView.localToWorldPos(
+                          event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                      final newPos = TabletopView.localToWorldPos(
+                          event.localPosition + event.delta, tableController.canvasZoom, tableController.canvasOffset, tableController);
                       tableController.heldObject!.location += newPos - old;
                     } else {
                       moved = true;
@@ -163,7 +170,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                 // Update the mouse position in the controller
                 tableController.mousePosUnmodified = event.localPosition;
-                tableController.mousePos = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                tableController.mousePos =
+                    TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
               },
 
               //* Handle when a mouse button is no longer pressed
@@ -209,8 +217,10 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   if (tableController.canvasZoom + scrollDelta > 5) return;
 
                   final zoomFactor = (tableController.canvasZoom + scrollDelta) / tableController.canvasZoom;
-                  final focalPoint = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
-                  final newFocalPoint = TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom + scrollDelta, tableController.canvasOffset, tableController);
+                  final focalPoint =
+                      TabletopView.localToWorldPos(event.localPosition, tableController.canvasZoom, tableController.canvasOffset, tableController);
+                  final newFocalPoint = TabletopView.localToWorldPos(
+                      event.localPosition, tableController.canvasZoom + scrollDelta, tableController.canvasOffset, tableController);
 
                   tableController.canvasOffset -= focalPoint - newFocalPoint;
                   tableController.canvasZoom *= zoomFactor;

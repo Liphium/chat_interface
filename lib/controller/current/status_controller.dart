@@ -110,7 +110,7 @@ class StatusController extends GetxController {
 
     // Validate the status to make sure everything is fine
     connector.sendAction(
-        Message("st_validate", <String, dynamic>{
+        ServerAction("st_validate", <String, dynamic>{
           "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
           "data": sharedContentPacket(),
         }), handler: (event) {

@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
@@ -17,7 +16,7 @@ import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
-import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
@@ -28,6 +27,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:liphium_bridge/liphium_bridge.dart';
 
 class TabletopSettings {
   static const String framerate = "tabletop.framerate";
@@ -577,14 +577,14 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
                       final card = widget.deck.cards[index];
-                      final file = File(widget.deck.cards[index].filePath);
+                      final file = widget.deck.cards[index].file!;
                       return Stack(
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(elementSpacing),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(defaultSpacing),
-                              child: Image.file(file, width: 200, height: 200, fit: BoxFit.cover),
+                              child: XImage(file: file, width: 200, height: 200, fit: BoxFit.cover),
                             ),
                           ),
                           Positioned(
@@ -707,7 +707,7 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     for (var file in widget.files) {
       // Upload the card to the server
       final response = await controller.uploadFile(
-        UploadData(File(file.path)),
+        UploadData(file),
         StorageType.permanent,
         Constants.fileDeckTag,
         containerNameNull: true,

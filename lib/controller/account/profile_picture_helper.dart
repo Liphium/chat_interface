@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/constants.dart';
@@ -16,7 +15,9 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:get/get.dart';
+import 'package:liphium_bridge/liphium_bridge.dart';
 
 class ProfileHelper {
   /// Download the profile picture of a friend (if it isn't downloaded or changed).
@@ -67,8 +68,8 @@ class ProfileHelper {
     }
 
     // Decrypt the profile picture data
-    final container =
-        AttachmentContainer.fromJson(StorageType.permanent, jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey)));
+    final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey));
+    final container = Get.find<AttachmentController>().fromJson(StorageType.permanent, containerJson);
 
     if (container.id != json["profile"]["picture"]) {
       return null;
@@ -76,7 +77,7 @@ class ProfileHelper {
 
     // Delete the old profile picture file (in case it exists)
     if (oldProfile != null && oldPath != null) {
-      await File(oldPath).delete();
+      await fileUtil.delete(XFile(oldPath));
     }
 
     // Download the file
@@ -97,7 +98,7 @@ class ProfileHelper {
   }
 
   /// Upload a profile picture to the server and set it as the current profile picture
-  static Future<bool> uploadProfilePicture(File file, String originalName) async {
+  static Future<bool> uploadProfilePicture(XFile file, String originalName) async {
     // Upload the file
     final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, Constants.fileAppDataTag);
     if (response.container == null) {
@@ -141,14 +142,23 @@ class ProfileHelper {
     return profile;
   }
 
+  /// Convert a file from a path to a dart:ui image
   static Future<ui.Image?> loadImage(String path) async {
-    final file = File(path);
-    final exists = await file.exists();
-    if (!exists) {
+    final file = XFile(path);
+    if (!await doesFileExist(file)) {
       sendLog("DOESNT EXIST: $path");
       return null;
     }
-    final Uint8List data = await File(path).readAsBytes();
+    final Uint8List data = await file.readAsBytes();
+    final Completer<ui.Image> completer = Completer();
+    ui.decodeImageFromList(data, (ui.Image img) {
+      return completer.complete(img);
+    });
+    return completer.future;
+  }
+
+  /// Convert bytes to a dart:ui Image
+  static Future<ui.Image?> loadImageFromBytes(Uint8List data) async {
     final Completer<ui.Image> completer = Completer();
     ui.decodeImageFromList(data, (ui.Image img) {
       return completer.complete(img);

@@ -11,6 +11,7 @@ class LoadingIconButton extends StatelessWidget {
   final double extra;
   final double padding;
   final bool background;
+  final Color? backgroundColor;
   final Function() onTap;
   final Function(BuildContext)? onTapContext;
 
@@ -26,6 +27,7 @@ class LoadingIconButton extends StatelessWidget {
     this.iconSize = 23,
     this.padding = 0,
     this.background = false,
+    this.backgroundColor,
   });
 
   @override
@@ -37,7 +39,7 @@ class LoadingIconButton extends StatelessWidget {
         height: iconSize + extra + padding,
         child: Material(
           borderRadius: BorderRadius.circular(50),
-          color: background ? Get.theme.colorScheme.primaryContainer : Colors.transparent,
+          color: background ? backgroundColor ?? Get.theme.colorScheme.primaryContainer : Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(50),
             onTap: () {

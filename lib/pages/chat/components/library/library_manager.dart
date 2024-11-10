@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/database.dart';
@@ -87,10 +86,10 @@ class LibraryManager {
         if (!container.downloaded.value) {
           break;
         }
-        final size = await _calculateImageDimension(Image.file(File(container.filePath)));
+        final size = await _calculateImageDimension(Image.memory(await container.file!.readAsBytes()));
         entry = LibraryEntry(
           "",
-          LibraryEntryType.fromFileName(container.filePath),
+          LibraryEntryType.fromFileName(container.file!.path),
           jsonEncode(container.toJson()),
           DateTime.now(),
           size.width.toInt(),

@@ -3,9 +3,8 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/publication_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/game_hub_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -41,10 +40,9 @@ void initializeControllers() {
 
   // Space controls
   Get.put(SpacesController());
-  Get.put(GameHubController());
   Get.put(SpaceMemberController());
-  Get.put(PublicationController());
   Get.put(TabletopController());
+  Get.put(SpacesMessageController());
 
   TrustedLinkHelper.init();
 }

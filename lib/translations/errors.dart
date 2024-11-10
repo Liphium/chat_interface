@@ -31,6 +31,7 @@ class ErrorTranslations extends Translations {
           'protocol.error':
               'The town you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that town to update to the latest version.',
           'spaces.not.setup': 'Spaces is not supported in your town. Please contact the owners of this town and ask them to set up Spaces.',
+          'not.supported': 'This feature is not supported on this platform.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',
@@ -55,8 +56,8 @@ class ErrorTranslations extends Translations {
           'message.delete_error': 'Couldn\'t delete message. Please try again later.',
           'group.data_too_long':
               'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
-          'zap.no_save_location':
-              'Because you didn\'t pick a save location, we just stored it in your saved files folder. You can access it from the settings.',
+          'zap.no_save_location': 'Please select a save location for your file to use Zap.',
+          'zap.error': 'Zap Error',
 
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
@@ -77,6 +78,11 @@ class ErrorTranslations extends Translations {
           'tabletop.invalid_action': 'You can\'t do that right now. Please try again later.',
           'no.start':
               'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
+
+          // Message errors
+          'error.message.timestamp': 'A timestamp for your message could not be generated.',
+          'error.message.empty': 'Your message is empty, please add some content to send it.',
+          'error.message.loading': 'A message is still waiting to be sent, please wait for it to finish.',
         },
 
         //* German

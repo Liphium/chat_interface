@@ -1,24 +1,25 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:liphium_bridge/liphium_bridge.dart';
 
 class LibraryTab extends StatefulWidget {
   final LibraryEntryType? filter;
+  final MessageProvider provider;
 
   const LibraryTab({
     super.key,
     this.filter,
+    required this.provider,
   });
 
   @override
@@ -32,9 +33,12 @@ class _LibraryTabState extends State<LibraryTab> {
   final _show = false.obs;
 
   void loadMoreItems() async {
+    // Make sure to start from the top again when a new filter is set
     if (widget.filter != _lastFilter) {
       lastDate = BigInt.from(0);
     }
+
+    // Get all the library entries that match the current filter
     List<LibraryEntryData> entries;
     if (widget.filter != null) {
       entries = await (db.libraryEntry.select()
@@ -53,6 +57,9 @@ class _LibraryTabState extends State<LibraryTab> {
     if (entries.isNotEmpty) {
       lastDate = entries.last.createdAt;
     }
+
+    // Get all the attachment containers from the library entries for displaying them
+    final controller = Get.find<AttachmentController>();
     final newContainerList = <AttachmentContainer>[];
     for (var entry in entries) {
       if (entry.data.isURL) {
@@ -63,14 +70,18 @@ class _LibraryTabState extends State<LibraryTab> {
         if (type == null) {
           continue;
         }
-        newContainerList.add(AttachmentContainer.fromJson(type, json));
+        newContainerList.add(controller.fromJson(type, json));
       }
     }
+
+    // Add the containers to the list of entries
     if (_lastFilter != widget.filter) {
       _containerList.value = newContainerList;
     } else {
       _containerList.addAll(newContainerList);
     }
+
+    // Set what's nessecary for the next iteration
     _lastFilter = widget.filter;
     _show.value = true;
   }
@@ -104,15 +115,15 @@ class _LibraryTabState extends State<LibraryTab> {
           container.downloaded.value = true;
 
           // Render attachment container
-          Image image;
+          Widget image;
           if (container.attachmentType == AttachmentContainerType.remoteImage) {
             image = Image.network(
               container.url,
               fit: BoxFit.cover,
             );
           } else {
-            image = Image.file(
-              File(container.filePath),
+            image = XImage(
+              file: container.file!,
               fit: BoxFit.cover,
             );
           }
@@ -123,12 +134,7 @@ class _LibraryTabState extends State<LibraryTab> {
               borderRadius: BorderRadius.circular(defaultSpacing),
               onTap: () {
                 //* Send message with the library element
-                final controller = Get.find<MessageController>();
-                if (controller.currentConversation.value == null) {
-                  return;
-                }
-                sendActualMessage(
-                    false.obs, controller.currentConversation.value!.id, MessageType.text, [container.toAttachment()], "", "", () => {});
+                widget.provider.sendMessage(false.obs, MessageType.text, [container.toAttachment()], "", "");
                 Get.back();
               },
               child: ClipRRect(

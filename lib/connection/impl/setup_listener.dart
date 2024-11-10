@@ -58,7 +58,7 @@ void subscribeToConversation(ConversationToken token, {StatusController? control
 
 void _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
   connector.sendAction(
-      Message("conv_sub", <String, dynamic>{
+      ServerAction("conv_sub", <String, dynamic>{
         "tokens": tokens,
         "status": status,
         "data": statusData,

@@ -1,17 +1,16 @@
-import 'dart:io';
-
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
+import 'package:chat_interface/pages/status/error/error_page.dart';
+import 'package:chat_interface/pages/status/setup/database/database_init_stub.dart'
+    if (dart.library.io) 'package:chat_interface/pages/status/setup/database/database_init_native.dart'
+    if (dart.library.js) 'package:chat_interface/pages/status/setup/database/database_init_web.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart' as drift;
-import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 import 'package:sodium_libs/sodium_libs.dart';
 
 import '../../../database/database.dart';
@@ -28,16 +27,24 @@ class InstanceSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    // Get list of instances
-    sendLog((await getApplicationSupportDirectory()).path);
-    final instanceFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
-    final dir = Directory(instanceFolder);
-
-    await dir.create();
-    final instances = await dir.list().toList();
-
-    if (instances.isEmpty || !isDebug) {
+    // Make sure to just launch into the default instance on web
+    if (isWeb) {
       await setupInstance("default");
+      return null;
+    }
+
+    // Get list of instances
+    final instances = await getInstances();
+    if (instances == null) {
+      return ErrorPage(title: "not.supported".tr);
+    }
+
+    // Launch into the default instance in release mode and when there is no instance yet
+    if (instances.isEmpty || !isDebug || isWeb) {
+      final error = await setupInstance(instances.isNotEmpty ? instances[0].name : "default");
+      if (error != null) {
+        return ErrorPage(title: error);
+      }
       return null;
     }
 
@@ -57,30 +64,16 @@ String fromDbEncrypted(String cipher) {
 late SecureKey databaseKey;
 String currentInstance = "";
 
-Future<bool> setupInstance(String name, {bool next = false}) async {
-  // Initialize database
+/// Open an instance by name (on web, the name parameter will be ignored)
+///
+/// Returns an error if there is one.
+Future<String?> setupInstance(String name, {bool next = false}) async {
   if (databaseInitialized) {
     await db.close();
   }
 
-  // Get the path to the instance
-  final dbFolder = path.join((await getApplicationSupportDirectory()).path, "instances");
-  final file = File(path.join(dbFolder, '$name.db'));
-
-  // Clear the temp directory for zap share
-  final folder = path.join((await getTemporaryDirectory()).path, "liphium");
-  try {
-    await File(folder).delete(recursive: true);
-  } catch (e) {
-    sendLog("seems like the cache folder is already deleted");
-  }
-
-  // Open the encrypted database (code was taken from the drift encrypted example)
-  db = Database(NativeDatabase.createInBackground(
-    file,
-    logStatements: driftLogger,
-  ));
-  currentInstance = name;
+  // Load the instance
+  await loadInstance(name);
 
   // Create tables
   var _ = await (db.select(db.setting)).get();
@@ -97,7 +90,7 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
     encryptionKey = await secureStorage.read(key: databaseKeyField);
     if (encryptionKey == null) {
       sendLog("couldn't write encryption key to secure storage");
-      return false;
+      return "Your browser doesn't support secure storage.";
     }
 
     // Migrate all fields that need to be encrypted from now on
@@ -130,7 +123,7 @@ Future<bool> setupInstance(String name, {bool next = false}) async {
     setupManager.next(open: true);
   }
 
-  return true;
+  return null;
 }
 
 /// Encrypts the specified field in the settings table of the database (to migrate it from being unencrypted before)
@@ -164,7 +157,7 @@ Future<int> setEncryptedValue(String field, String value) {
 }
 
 class InstanceSelectionPage extends StatefulWidget {
-  final List<FileSystemEntity> instances;
+  final List<Instance> instances;
 
   const InstanceSelectionPage({super.key, required this.instances});
 
@@ -201,7 +194,6 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
           itemCount: widget.instances.length,
           itemBuilder: (context, index) {
             var instance = widget.instances[index];
-            final base = path.basename(path.withoutExtension(instance.path));
 
             return Padding(
               padding: EdgeInsets.only(top: index == 0 ? 0 : defaultSpacing),
@@ -210,18 +202,17 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
                 color: Get.theme.colorScheme.primary,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(defaultSpacing),
-                  onTap: () => setupInstance(path.basename(path.withoutExtension(instance.path)), next: true),
+                  onTap: () => setupInstance(instance.name, next: true),
                   child: Padding(
                     padding: const EdgeInsets.all(elementSpacing),
                     child: Row(
                       children: [
                         horizontalSpacing(elementSpacing),
-                        Text(base, style: Get.textTheme.labelLarge),
+                        Text(instance.name, style: Get.textTheme.labelLarge),
                         const Spacer(),
                         IconButton(
                           onPressed: () async {
-                            sendLog("deleting");
-                            await File(instance.path).delete();
+                            await deleteInstance(instance.name);
                             setupManager.retry();
                           },
                           icon: const Icon(Icons.delete),

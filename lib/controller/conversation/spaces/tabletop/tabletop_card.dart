@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -8,7 +7,7 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
-import 'package:chat_interface/theme/ui/dialogs/attachment_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +46,7 @@ class CardObject extends TableObject {
     Get.find<AttachmentController>().downloadAttachment(container).then((success) async {
       if (success) {
         // Get the actual image and add it to the object
-        final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container.filePath).readAsBytes());
+        final buffer = await ui.ImmutableBuffer.fromUint8List(await container.file!.readAsBytes());
         final descriptor = await ui.ImageDescriptor.encoded(buffer);
         final codec = await descriptor.instantiateCodec();
         obj.image = (await codec.getNextFrame()).image;
@@ -184,7 +183,7 @@ class CardObject extends TableObject {
 
     // Download the new image
     final type = await AttachmentController.checkLocations(json["i"], StorageType.cache);
-    container = AttachmentContainer.fromJson(type, jsonDecode(data));
+    container = Get.find<AttachmentController>().fromJson(type, jsonDecode(data));
     final download = await Get.find<AttachmentController>().downloadAttachment(container!);
     if (!download) {
       error = true;
@@ -193,7 +192,7 @@ class CardObject extends TableObject {
     }
 
     // Get image from file
-    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(container!.filePath).readAsBytes());
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await container!.file!.readAsBytes());
     final descriptor = await ui.ImageDescriptor.encoded(buffer);
     final codec = await descriptor.instantiateCodec();
     image = (await codec.getNextFrame()).image;
@@ -243,7 +242,7 @@ class CardObject extends TableObject {
         onTap: (controller) {
           sendLog("viewing..");
           Get.back();
-          Get.dialog(ImagePreviewWindow(file: File(container!.filePath)));
+          Get.dialog(ImagePreviewWindow(image: image));
         },
       ),
     ];
@@ -255,7 +254,7 @@ class CardObject extends TableObject {
         icon: Icons.fullscreen,
         label: 'View in image viewer',
         onTap: (controller) {
-          Get.dialog(ImagePreviewWindow(file: File(container!.filePath)));
+          Get.dialog(ImagePreviewWindow(image: image));
         },
       ),
     ];

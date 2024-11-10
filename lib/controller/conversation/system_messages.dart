@@ -1,8 +1,7 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,15 +12,21 @@ class SystemMessages {
     // Format: [prevRole, newRole, memberId, senderId]
     "group.rank_change": SystemMessage(
       Icons.shield,
-      translation: (msg) {
-        final friendController = Get.find<FriendController>();
-        return "chat.rank_change.${msg.attachments[0]}->${msg.attachments[1]}".trParams({
-          "name": friendController.getFriend(LPHAddress.from(msg.attachments[2])).displayName.value,
-          "sender": friendController.getFriend(LPHAddress.from(msg.attachments[3])).displayName.value, // NZJNP232RS5g
-        });
+      translation: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          final friendController = Get.find<FriendController>();
+          return "chat.rank_change.${msg.attachments[0]}->${msg.attachments[1]}".trParams({
+            "name": friendController.getFriend(LPHAddress.from(msg.attachments[2])).displayName.value,
+            "sender": friendController.getFriend(LPHAddress.from(msg.attachments[3])).displayName.value, // NZJNP232RS5g
+          });
+        }
+
+        return "not.supported".tr;
       },
-      handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          provider.conversation.fetchData();
+        }
       },
     ),
 
@@ -29,13 +34,19 @@ class SystemMessages {
     // Format: [memberId]
     "group.token_change": SystemMessage(
       Icons.vpn_key,
-      translation: (msg) {
-        return "chat.token_change".trParams({
-          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-        });
+      translation: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          return "chat.token_change".trParams({
+            "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+          });
+        }
+
+        return "not.supported".tr;
       },
-      handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          provider.conversation.fetchData();
+        }
       },
     ),
 
@@ -43,14 +54,19 @@ class SystemMessages {
     // Format: [memberId]
     "group.member_join": SystemMessage(
       Icons.arrow_forward,
-      translation: (msg) {
-        sendLog(msg.attachments[0]);
-        return "chat.member_join".trParams({
-          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-        });
+      translation: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          return "chat.member_join".trParams({
+            "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+          });
+        }
+
+        return "not.supported".tr;
       },
-      handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          provider.conversation.fetchData();
+        }
       },
     ),
 
@@ -58,14 +74,20 @@ class SystemMessages {
     // Format: [invitorId, memberId]
     "group.member_invite": SystemMessage(
       Icons.waving_hand,
-      translation: (msg) {
-        return "chat.member_invite".trParams({
-          "invitor": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[1])).displayName.value,
-        });
+      translation: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          return "chat.member_invite".trParams({
+            "invitor": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[1])).displayName.value,
+          });
+        }
+
+        return "not.supported".tr;
       },
-      handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          provider.conversation.fetchData();
+        }
       },
     ),
 
@@ -73,13 +95,18 @@ class SystemMessages {
     // Format: [memberId]
     "group.member_leave": SystemMessage(
       Icons.arrow_back,
-      translation: (msg) {
-        return "chat.member_leave".trParams({
-          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-        });
+      translation: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          return "chat.member_leave".trParams({
+            "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+          });
+        }
+        return "not.supported".tr;
       },
-      handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          provider.conversation.fetchData();
+        }
       },
     ),
 
@@ -87,14 +114,19 @@ class SystemMessages {
     // Format: [issuerId, memberId]
     "group.member_kick": SystemMessage(
       Icons.arrow_back,
-      translation: (msg) {
-        return "chat.kick".trParams({
-          "issuer": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[1])).displayName.value,
-        });
+      translation: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          return "chat.kick".trParams({
+            "issuer": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[1])).displayName.value,
+          });
+        }
+        return "not.supported".tr;
       },
-      handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          provider.conversation.fetchData();
+        }
       },
     ),
 
@@ -102,13 +134,19 @@ class SystemMessages {
     // Format: [memberId]
     "group.new_admin": SystemMessage(
       Icons.shield,
-      translation: (msg) {
-        return "chat.new_admin".trParams({
-          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-        });
+      translation: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          return "chat.new_admin".trParams({
+            "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+          });
+        }
+
+        return "not.supported".tr;
       },
-      handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          provider.conversation.fetchData();
+        }
       },
     ),
 
@@ -116,13 +154,19 @@ class SystemMessages {
     // Format: [accountId]
     "conv.edited": SystemMessage(
       Icons.update,
-      translation: (msg) {
-        return "chat.edit_data".trParams({
-          "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-        });
+      translation: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          return "chat.edit_data".trParams({
+            "name": Get.find<FriendController>().getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+          });
+        }
+
+        return "not.supported".tr;
       },
-      handler: (msg) {
-        Get.find<ConversationController>().conversations[msg.conversation]?.fetchData();
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          provider.conversation.fetchData();
+        }
       },
     ),
 
@@ -131,10 +175,10 @@ class SystemMessages {
     "msg.deleted": SystemMessage(
       Icons.delete,
       render: false,
-      handler: (msg) {
-        Get.find<MessageController>().deleteMessageFromClient(msg.conversation, msg.attachments[0]);
+      handler: (msg, provider) {
+        provider.deleteMessageFromClient(msg.attachments[0]);
       },
-      translation: (msg) {
+      translation: (msg, provider) {
         return "msg.deleted".tr;
       },
     ),
@@ -144,13 +188,14 @@ class SystemMessages {
     "conv.kicked": SystemMessage(
       Icons.delete,
       render: false,
-      handler: (msg) {
-        final conversation = Get.find<ConversationController>().conversations[msg.conversation]!;
-        if (LPHAddress.from(msg.attachments[0]) == StatusController.ownAddress) {
-          conversation.delete(popup: false, request: false);
+      handler: (msg, provider) {
+        if (provider is ConversationMessageProvider) {
+          if (LPHAddress.from(msg.attachments[0]) == StatusController.ownAddress) {
+            provider.conversation.delete(popup: false, request: false);
+          }
         }
       },
-      translation: (msg) {
+      translation: (msg, provider) {
         return "msg.deleted".tr;
       },
     ),
@@ -160,12 +205,12 @@ class SystemMessages {
 class SystemMessage {
   final IconData icon;
   final bool render;
-  final String Function(Message) translation;
-  final Function(Message)? handler;
+  final String Function(Message, MessageProvider) translation;
+  final Function(Message, MessageProvider)? handler;
 
   SystemMessage(this.icon, {this.handler, required this.translation, this.render = true});
 
-  void handle(Message message) {
-    handler?.call(message);
+  void handle(Message message, MessageProvider provider) {
+    handler?.call(message, provider);
   }
 }

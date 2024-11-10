@@ -1,6 +1,5 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
@@ -17,11 +16,12 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:pointycastle/export.dart';
 import 'package:sodium_libs/sodium_libs.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket/web_socket.dart';
 
 import 'impl/setup_listener.dart';
 import 'messaging.dart';
@@ -30,7 +30,7 @@ int nodeId = 0;
 String nodeDomain = "";
 
 class Connector {
-  WebSocketChannel? connection;
+  WebSocket? connection;
   final _handlers = <String, Function(Event)>{};
   final _afterSetup = <String, bool>{};
   final _afterSetupQueue = <Event>[];
@@ -47,8 +47,6 @@ class Connector {
 
   Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
     this.url = url;
-
-    sendLog("hi connector");
 
     // Generate an AES key for the connection
     aesKey = randomAESKey();
@@ -71,20 +69,31 @@ class Connector {
 
     initialized = true;
     try {
-      connection = WebSocketChannel.connect(Uri.parse(url), protocols: [token, base64Encode(encryptedKey)]);
+      connection = await WebSocket.connect(Uri.parse(url));
     } catch (e) {
-      sendLog("FAILED TO CONNECT TO $url");
-      e.printError();
+      sendLog("FAILED TO CONNECT TO $url: $e");
       return false;
     }
     _connected = true;
 
-    connection!.stream.listen(
-      (encrypted) {
-        if (encrypted is! Uint8List) {
-          sendLog("RECEIVED INVALID MESSAGE: $encrypted");
+    connection!.sendText(jsonEncode({
+      "token": token,
+      "attachments": base64Encode(encryptedKey),
+    }));
+
+    connection!.events.listen(
+      (message) {
+        if (message is CloseReceived) {
+          sendLog("CLOSE RECEIVED");
           return;
         }
+
+        // Make sure the message is binary data
+        if (message is! BinaryDataReceived) {
+          sendLog("RECEIVED INVALID EVENT: $message");
+          return;
+        }
+        final encrypted = message.data;
 
         // Decrypt the message (using the AES key)
         Uint8List msg;
@@ -169,7 +178,9 @@ class Connector {
 
   void disconnect() {
     _connected = false;
-    connection?.sink.close();
+    try {
+      connection?.close();
+    } catch (_) {}
   }
 
   void runAfterSetupQueue() {
@@ -189,22 +200,23 @@ class Connector {
     // Make sure no handler is registered for the claimed action "res" (for handling responses)
     if (event == "res") {
       sendLog("You can't register an event handler for 'res'. This is already used by the system to handle responses.");
-      exit(1);
+      SystemNavigator.pop();
     }
 
     _handlers[event] = handler;
     _afterSetup[event] = afterSetup;
   }
 
-  /// Send a [Message] to the node.
+  /// Send a [ServerAction] to the node.
   ///
   /// Optionally, you can specify a [handler] to handle the response (this will be called multiple times if there are multiple responses).
-  /// Optionally, you can specify a [waiter] to wait for the response.
-  void sendAction(Message message, {Function(Event)? handler}) {
+  ///
+  /// Returns the response id of the responder to the action (if one is specified).
+  String? sendAction(ServerAction action, {Function(Event)? handler}) {
     if (!_connected) {
       showErrorPopup("error", "error.network".tr);
-      sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${message.action}");
-      return;
+      sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${action.action}");
+      return null;
     }
 
     // Generate a valid response id
@@ -215,13 +227,50 @@ class Connector {
 
     // Register the handler and waiter
     _responders[responseId] = handler;
-    _responseTo[responseId] = message.action;
+    _responseTo[responseId] = action.action;
 
     // Add responseId to action
-    message.action = "${message.action}:$responseId";
+    action.action = "${action.action}:$responseId";
 
     // Send and encrypt the message (using AES key)
-    connection?.sink.add(encryptAES(message.toJson().toCharArray().unsignedView(), aesBase64!));
+    connection?.sendBytes(encryptAES(action.toJson().toCharArray().unsignedView(), aesBase64!));
+
+    return responseId;
+  }
+
+  /// Send a [ServerAction] to the node.
+  ///
+  /// Returns an event if one was sent back by the server.
+  Future<Event?> sendActionAndWait(ServerAction action, {Duration? timeout}) {
+    final completer = Completer<Event?>();
+    final responseId = sendAction(
+      action,
+      handler: (event) {
+        completer.complete(event);
+      },
+    );
+    if (responseId == null) {
+      completer.complete(null);
+    } else {
+      Timer(
+        timeout ?? Duration(seconds: 10),
+        () {
+          // If the event already received a response, it doesn't matter
+          if (completer.isCompleted) {
+            return;
+          }
+
+          // Attach an error handler to make sure the error is logged when the server doesn't respond
+          _responders[responseId] = (event) {
+            sendLog("Event ${event.name} received even though there was an error with this previously.");
+          };
+
+          sendLog("Response to ${action.action} timed out");
+          completer.complete(null);
+        },
+      );
+    }
+    return completer.future;
   }
 }
 

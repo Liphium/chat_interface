@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -31,7 +32,7 @@ class LogManager {
   ///
   /// Returns whether anything changed (if it was successful).
   static Future<bool> enableLogging() async {
-    if (currentLogFile != null) {
+    if (currentLogFile != null || isWeb) {
       return false;
     }
 

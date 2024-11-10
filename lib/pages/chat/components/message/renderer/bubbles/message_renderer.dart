@@ -1,7 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/image_attachment_renderer.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
@@ -16,6 +15,7 @@ import 'package:get/get.dart';
 
 class BubblesMessageRenderer extends StatefulWidget {
   final LPHAddress senderAddress;
+  final MessageProvider provider;
   final Message message;
   final bool self;
   final bool last;
@@ -24,6 +24,7 @@ class BubblesMessageRenderer extends StatefulWidget {
   const BubblesMessageRenderer({
     super.key,
     required this.message,
+    required this.provider,
     required this.senderAddress,
     this.self = false,
     this.last = false,
@@ -41,7 +42,6 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
   @override
   Widget build(BuildContext context) {
     Friend sender = widget.sender ?? Friend.unknown(widget.senderAddress);
-    ThemeData theme = Theme.of(context);
 
     return RepaintBoundary(
       child: MouseRegion(
@@ -66,6 +66,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
               data: menuData,
               self: widget.message.senderAddress == StatusController.ownAddress,
               message: widget.message,
+              provider: widget.provider,
             ));
           },
           child: Padding(
@@ -101,141 +102,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Flexible(
-                        child: LayoutBuilder(builder: (context, constraints) {
-                          return ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: isMobileMode() ? Get.width * 0.75 : (Get.width - 350) * 0.5),
-                            child: Column(
-                              crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                              children: [
-                                //* Message content (text)
-                                Visibility(
-                                  visible: widget.message.content.isNotEmpty,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(defaultSpacing),
-                                      color: widget.self ? theme.colorScheme.primary : theme.colorScheme.primaryContainer,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                                      children: [
-                                        //* Reply message
-                                        if (widget.message.answerMessage == null)
-                                          const SizedBox()
-                                        else
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
-                                            child: Material(
-                                              borderRadius: BorderRadius.circular(defaultSpacing),
-                                              color: widget.self ? theme.colorScheme.onPrimary.withOpacity(0.2) : theme.colorScheme.inverseSurface,
-                                              child: InkWell(
-                                                borderRadius: BorderRadius.circular(defaultSpacing),
-                                                onTap: () => Get.find<MessageController>().scrollToMessage(widget.message.answer),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(elementSpacing),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      UserAvatar(id: widget.message.answerMessage!.senderAddress, size: 30),
-                                                      horizontalSpacing(elementSpacing),
-                                                      if (widget.message.answerMessage!.type == MessageType.call)
-                                                        Icon(Icons.public, color: theme.colorScheme.onPrimary)
-                                                      else if (widget.message.answerMessage!.type == MessageType.liveshare)
-                                                        Icon(Icons.electric_bolt, color: theme.colorScheme.onPrimary)
-                                                      else if (widget.message.answerMessage!.type == MessageType.system)
-                                                        Icon(Icons.info, color: theme.colorScheme.onPrimary)
-                                                      else
-                                                        const SizedBox(),
-                                                      horizontalSpacing(elementSpacing),
-                                                      Flexible(
-                                                        child: Text(
-                                                          AnswerData.answerContent(widget.message.answerMessage!.type,
-                                                              widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
-                                                          style: Get.theme.textTheme.labelMedium,
-                                                          overflow: TextOverflow.ellipsis,
-                                                          maxLines: 1,
-                                                        ),
-                                                      ),
-                                                      horizontalSpacing(elementSpacing),
-                                                      Icon(Icons.reply, color: theme.colorScheme.onPrimary),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-
-                                        //* Actual message (with formatted renderer)
-                                        FormattedText(
-                                          text: widget.message.content,
-                                          baseStyle: theme.textTheme.labelLarge!,
-                                        ),
-
-                                        //* Mobile timestamp and verified indicator
-                                        if (isMobileMode())
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(top: elementSpacing),
-                                                child: SelectionContainer.disabled(
-                                                  child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
-                                                ),
-                                              ),
-                                              Obx(() {
-                                                final verified = widget.message.verified.value;
-                                                return Visibility(
-                                                  visible: !verified,
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.only(left: elementSpacing),
-                                                    child: Tooltip(
-                                                      message: "chat.not.signed".tr,
-                                                      child: const Icon(
-                                                        Icons.warning_rounded,
-                                                        color: Colors.amber,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              })
-                                            ],
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                //* Attachments
-                                SelectionContainer.disabled(
-                                  child: Visibility(
-                                    visible: widget.message.attachmentsRenderer.isNotEmpty,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: List.generate(widget.message.attachmentsRenderer.length, (index) {
-                                          final container = widget.message.attachmentsRenderer[index];
-
-                                          if (container.width != null && container.height != null) {
-                                            return Padding(
-                                              padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                                              child: ImageAttachmentRenderer(image: container),
-                                            );
-                                          }
-
-                                          return Padding(
-                                            padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                                            child: AttachmentRenderer(container: container, message: widget.message),
-                                          );
-                                        }).toList(),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
+                        child: renderMessageContent(),
                       ),
 
                       //* Desktop timestamp
@@ -274,6 +141,153 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                 )
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget renderMessageContent() {
+    return LayoutBuilder(builder: (context, constraints) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: isMobileMode() ? Get.width * 0.75 : (Get.width - 350) * 0.5),
+        child: Column(
+          crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            //* Message content (text)
+            Visibility(
+              visible: widget.message.content.isNotEmpty,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(defaultSpacing),
+                  color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                ),
+                child: Column(
+                  crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  children: [
+                    renderReplyMessage(),
+
+                    //* Actual message (with formatted renderer)
+                    FormattedText(
+                      text: widget.message.content,
+                      baseStyle: Get.theme.textTheme.labelLarge!,
+                    ),
+
+                    //* Mobile timestamp and verified indicator
+                    if (isMobileMode())
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: elementSpacing),
+                            child: SelectionContainer.disabled(
+                              child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                            ),
+                          ),
+                          Obx(() {
+                            final verified = widget.message.verified.value;
+                            return Visibility(
+                              visible: !verified,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: elementSpacing),
+                                child: Tooltip(
+                                  message: "chat.not.signed".tr,
+                                  child: const Icon(
+                                    Icons.warning_rounded,
+                                    color: Colors.amber,
+                                  ),
+                                ),
+                              ),
+                            );
+                          })
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+
+            renderAttachments(),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget renderReplyMessage() {
+    if (widget.message.answerMessage == null) {
+      return const SizedBox();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
+      child: Material(
+        borderRadius: BorderRadius.circular(defaultSpacing),
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withOpacity(0.2) : Get.theme.colorScheme.inverseSurface,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(defaultSpacing),
+          onTap: () => widget.provider.scrollToMessage(widget.message.answer),
+          child: Padding(
+            padding: const EdgeInsets.all(elementSpacing),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                UserAvatar(id: widget.message.answerMessage!.senderAddress, size: 30),
+                horizontalSpacing(elementSpacing),
+                if (widget.message.answerMessage!.type == MessageType.call)
+                  Icon(Icons.public, color: Get.theme.colorScheme.onPrimary)
+                else if (widget.message.answerMessage!.type == MessageType.liveshare)
+                  Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary)
+                else if (widget.message.answerMessage!.type == MessageType.system)
+                  Icon(Icons.info, color: Get.theme.colorScheme.onPrimary)
+                else
+                  const SizedBox(),
+                horizontalSpacing(elementSpacing),
+                Flexible(
+                  child: Text(
+                    AnswerData.answerContent(
+                        widget.message.answerMessage!.type, widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
+                    style: Get.theme.textTheme.labelMedium,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+                horizontalSpacing(elementSpacing),
+                Icon(Icons.reply, color: Get.theme.colorScheme.onPrimary),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget renderAttachments() {
+    return SelectionContainer.disabled(
+      child: Visibility(
+        visible: widget.message.attachmentsRenderer.isNotEmpty,
+        child: Padding(
+          padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(widget.message.attachmentsRenderer.length, (index) {
+              final container = widget.message.attachmentsRenderer[index];
+
+              if (container.width != null && container.height != null) {
+                return Padding(
+                  padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
+                  child: ImageAttachmentRenderer(
+                    image: container,
+                    hoverCheck: true,
+                  ),
+                );
+              }
+
+              return Padding(
+                padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
+                child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
+              );
+            }).toList(),
           ),
         ),
       ),

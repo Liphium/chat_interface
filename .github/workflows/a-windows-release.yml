@@ -1,50 +1,41 @@
 name: A Windows Release # The A so it runs first lmfao
 # Do this whenever someone pushes to the main branch
 on:
-    push:
-      branches: [ "main" ]
-    pull_request:
-      branches: [ "main" ]
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 jobs:
-    build:
-      runs-on: windows-latest
-  
-      steps:
-        - uses: actions/checkout@v3
+  build:
+    runs-on: windows-latest
 
-        # Get flutter downloaded
-        - name: Set up Flutter
-          uses: subosito/flutter-action@v2
-          with:
-            channel: 'stable'
+    steps:
+      - uses: actions/checkout@v3
 
-        # Download cargo
-        - name: Set up Rust and Cargo
-          uses: hecrj/setup-rust-action@v2
-          with:
-            rust-version: "stable"
+      # Get flutter downloaded
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
 
-        # Just to make sure
-        - run: flutter --version
-        - run: cargo version
-        - run: rustc --version
+      # Just to make sure
+      - run: flutter --version
 
-        # Get all the dependencies
-        - name: Get dependencies
-          run: flutter pub get
-          
-        # Runs a set of commands using the runners shell
-        - name: Start release build
-          run: flutter build windows --release -v --dart-define DEBUG_MODE=false 
+      # Get all the dependencies
+      - name: Get dependencies
+        run: flutter pub get
 
-        - name: List directory (in case I'm stupid rn)
-          run: ls
+      # Runs a set of commands using the runners shell
+      - name: Start release build
+        run: flutter build windows --release -v --dart-define DEBUG_MODE=false
 
-        - uses: actions/upload-artifact@v4
-          with:
-            name: windows-build
-            path: ./build/windows/x64/runner/Release/
-            retention-days: 14
-            compression-level: 6
-            overwrite: false
-  
+      - name: List directory (in case I'm stupid rn)
+        run: ls
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: ./build/windows/x64/runner/Release/
+          retention-days: 14
+          compression-level: 6
+          overwrite: false

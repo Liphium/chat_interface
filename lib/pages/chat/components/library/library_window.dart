@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/pages/chat/components/library/library_tab.dart';
 import 'package:chat_interface/theme/components/lph_tab_element.dart';
@@ -8,8 +9,13 @@ import 'package:get/get.dart';
 
 class LibraryWindow extends StatefulWidget {
   final ContextMenuData data;
+  final MessageProvider provider;
 
-  const LibraryWindow({super.key, required this.data});
+  const LibraryWindow({
+    super.key,
+    required this.data,
+    required this.provider,
+  });
 
   @override
   State<LibraryWindow> createState() => _LibraryWindowState();
@@ -18,14 +24,25 @@ class LibraryWindow extends StatefulWidget {
 class _LibraryWindowState extends State<LibraryWindow> {
   final _selected = "library.all".tr.obs;
 
-  final _tabs = <String, Widget>{
-    'library.all'.tr: const LibraryTab(),
-    'library.images'.tr: const LibraryTab(filter: LibraryEntryType.image),
-    'library.gifs'.tr: const LibraryTab(filter: LibraryEntryType.gif),
-  };
+  var _tabs = <String, Widget>{};
+
+  @override
+  void didUpdateWidget(covariant LibraryWindow oldWidget) {
+    _tabs = <String, Widget>{
+      'library.all'.tr: LibraryTab(provider: widget.provider),
+      'library.images'.tr: LibraryTab(filter: LibraryEntryType.image, provider: widget.provider),
+      'library.gifs'.tr: LibraryTab(filter: LibraryEntryType.gif, provider: widget.provider),
+    };
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   void initState() {
+    _tabs = <String, Widget>{
+      'library.all'.tr: LibraryTab(provider: widget.provider),
+      'library.images'.tr: LibraryTab(filter: LibraryEntryType.image, provider: widget.provider),
+      'library.gifs'.tr: LibraryTab(filter: LibraryEntryType.gif, provider: widget.provider),
+    };
     super.initState();
   }
 

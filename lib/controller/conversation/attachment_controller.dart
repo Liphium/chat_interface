@@ -1,21 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio_rs;
+import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
@@ -71,8 +74,11 @@ class AttachmentController extends GetxController {
       return FileUploadResponse(json["error"], null);
     }
 
-    final file = File(path.join(AttachmentController.getFilePathForType(type), json["id"].toString()));
-    await file.writeAsBytes(bytes);
+    // Copy the file into the local cache
+    if (!isWeb) {
+      final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
+      fileUtil.write(XFile(filePath), bytes);
+    }
     final container = AttachmentContainer(
       type,
       json["id"],
@@ -87,38 +93,13 @@ class AttachmentController extends GetxController {
     return FileUploadResponse("success", container);
   }
 
-  /// Find a local file
-  Future<AttachmentContainer?> findLocalFile(AttachmentContainer container, {bool save = true}) async {
-    if (attachments.containsKey(container.id)) {
-      return attachments[container.id];
-    }
-
-    final file = File(container.filePath);
-    final exists = await file.exists();
-    if (!exists) {
-      return null;
-    }
-
-    container.downloaded.value = true;
-    if (save) {
-      attachments[container.id] = container;
-    }
-
-    return container;
-  }
-
   /// Download an attachment
   Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true, bool ignoreLimit = false}) async {
     if (container.downloading.value) return true;
+    if (container.downloaded.value) return true;
     if (container.attachmentType != AttachmentContainerType.file) return false;
 
-    final localFile = await findLocalFile(container);
-    if (localFile != null && !retry) {
-      // Check if there was an error already
-      if (localFile.error.value) {
-        return false;
-      }
-
+    if (await container.existsLocally() && !retry) {
       sendLog("already exists ${container.name} ${container.id}");
       return true;
     }
@@ -162,46 +143,47 @@ class AttachmentController extends GetxController {
     }
 
     // Download and show progress
-    final res = await dio.download(
-      serverPath(container.url, "/account/files/download/${container.id}").toString(),
-      container.filePath,
+    final res = await dio.get<Uint8List>(
+      serverPath(container.url, "/account/files_unencrypted/download/${container.id}").toString(),
+      options: dio_rs.Options(
+        responseType: dio_rs.ResponseType.bytes,
+        validateStatus: (status) => true,
+      ),
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
       },
-      options: dio_rs.Options(
-        validateStatus: (status) => true,
-        method: "POST",
-      ),
     );
 
-    if (res.statusCode != 200) {
+    if (res.statusCode != 200 || res.data == null) {
       container.errorHappened(false);
       return false;
     }
 
     // Decrypt file
-    final file = File(container.filePath);
-    final encrypted = await file.readAsBytes();
-    final decrypted = decryptSymmetricBytes(encrypted, container.key!);
-    await file.writeAsBytes(decrypted);
+    final decrypted = decryptSymmetricBytes(res.data!, container.key!);
+    container.file = XFile(container.file!.path, bytes: decrypted);
+    if (!isWeb) {
+      await fileUtil.write(container.file!, decrypted);
+    }
 
     container.downloading.value = false;
     container.error.value = false;
     container.downloaded.value = true;
-    cleanUpCache();
+    if (!isWeb) {
+      cleanUpCache();
+    }
     return true;
   }
 
   /// Delete a file
-  Future<bool> deleteFile(AttachmentContainer container, {popup = false}) {
-    return deleteFileFromPath(container.id, container.filePath, popup: popup);
+  Future<bool> deleteFile(AttachmentContainer container, {popup = false}) async {
+    return await deleteFileFromPath(container.id, container.file, popup: popup);
   }
 
   /// Delete a file based on a path and an id
-  Future<bool> deleteFileFromPath(String id, String? path, {popup = false}) async {
-    if (path != null) {
-      final file = File(path);
-      await file.delete();
+  Future<bool> deleteFileFromPath(String id, XFile? file, {popup = false}) async {
+    if (file != null) {
+      fileUtil.delete(file);
     }
     attachments.remove(id);
 
@@ -247,11 +229,11 @@ class AttachmentController extends GetxController {
 
   // Delete all files from the device
   Future<bool> deleteAllFiles() async {
-    var dir = Directory(_pathTemporary);
+    var dir = XDirectory(_pathTemporary);
     await dir.delete(recursive: true);
-    dir = Directory(_pathCache);
+    dir = XDirectory(_pathCache);
     await dir.delete(recursive: true);
-    dir = Directory(_pathPermanent);
+    dir = XDirectory(_pathPermanent);
     await dir.delete(recursive: true);
     return true;
   }
@@ -261,20 +243,22 @@ class AttachmentController extends GetxController {
   static String _pathPermanent = "";
 
   static void initFilePath(String accountId) async {
-    // Init folder for cached files
-    final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
-    _pathCache = cacheFolder;
-    await Directory(cacheFolder).create();
+    if (!isWeb) {
+      // Init folder for cached files
+      final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
+      _pathCache = cacheFolder;
+      await XDirectory(cacheFolder).create();
 
-    // Init folder for temporary files
-    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_$accountId");
-    _pathTemporary = fileFolder;
-    await Directory(fileFolder).create();
+      // Init folder for temporary files
+      final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_$accountId");
+      _pathTemporary = fileFolder;
+      await XDirectory(fileFolder).create();
 
-    // Init folder for permanent files
-    final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_$accountId");
-    _pathPermanent = saveFolder;
-    await Directory(saveFolder).create();
+      // Init folder for permanent files
+      final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_$accountId");
+      _pathPermanent = saveFolder;
+      await XDirectory(saveFolder).create();
+    }
   }
 
   static String getFilePathForType(StorageType type) {
@@ -292,8 +276,8 @@ class AttachmentController extends GetxController {
   static Future<StorageType> checkLocations(String id, StorageType defaultType, {types = StorageType.values}) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
-      final file = File(path.join(getFilePathForType(type), id));
-      if (await file.exists()) {
+      final file = XFile(path.join(getFilePathForType(type), id));
+      if (await doesFileExist(file)) {
         return type;
       }
     }
@@ -305,8 +289,8 @@ class AttachmentController extends GetxController {
   static Future<String?> getFilePathFor(String id, {types = StorageType.values}) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
-      final file = File(path.join(getFilePathForType(type), id));
-      if (await file.exists()) {
+      final file = XFile(path.join(getFilePathForType(type), id));
+      if (await doesFileExist(file)) {
         return file.path;
       }
     }
@@ -318,13 +302,35 @@ class AttachmentController extends GetxController {
   static Future<StorageType?> getStorageTypeFor(String id, {types = StorageType.values}) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
-      final file = File(path.join(getFilePathForType(type), id));
-      if (await file.exists()) {
+      final file = XFile(path.join(getFilePathForType(type), id));
+      if (await doesFileExist(file)) {
         return type;
       }
     }
 
     return null;
+  }
+
+  /// Get an attachment container from json
+  AttachmentContainer fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
+    var container = attachments[json["i"]];
+    if (container != null) {
+      return container;
+    }
+
+    // Create a container and cache it immediately
+    container = AttachmentContainer(
+      type,
+      json["i"],
+      json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
+      json["u"],
+      unpackageSymmetricKey(json["k"], sodium),
+    );
+    container.width = json["w"];
+    container.height = json["h"];
+    attachments[container.id] = container;
+    container.initDownloadState();
+    return container;
   }
 }
 
@@ -352,7 +358,7 @@ class FileUploadResponse {
 enum AttachmentContainerType { link, remoteImage, file }
 
 class AttachmentContainer {
-  late final String filePath;
+  late XFile? file;
   late final AttachmentContainerType attachmentType;
   final StorageType storageType;
   final String id;
@@ -386,6 +392,13 @@ class AttachmentContainer {
   }
 
   AttachmentContainer(this.storageType, this.id, this.fileName, this.url, this.key) {
+    setAttachmentType();
+    if (attachmentType == AttachmentContainerType.file) {
+      file = XFile(path.join(AttachmentController.getFilePathForType(storageType), id));
+    }
+  }
+
+  void setAttachmentType() {
     if (id == "") {
       for (var fileType in FileSettings.imageTypes) {
         if (url.endsWith(".$fileType")) {
@@ -398,16 +411,15 @@ class AttachmentContainer {
     } else {
       attachmentType = AttachmentContainerType.file;
     }
-    filePath = path.join(AttachmentController.getFilePathForType(storageType), id);
   }
 
   Future<Size?> precalculateWidthAndHeight() async {
-    if (attachmentType != AttachmentContainerType.file) {
+    if (attachmentType != AttachmentContainerType.file || file == null) {
       return null;
     }
     bool found = false;
     for (var extension in FileSettings.imageTypes) {
-      if (filePath.endsWith(".$extension")) {
+      if (path.basename(file!.path).endsWith(".$extension")) {
         found = true;
       }
     }
@@ -417,7 +429,7 @@ class AttachmentContainer {
     }
 
     // Grab resolution from it
-    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(filePath).readAsBytes());
+    final buffer = await ui.ImmutableBuffer.fromUint8List(await File(file!.path).readAsBytes());
     final descriptor = await ui.ImageDescriptor.encoded(buffer);
     final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
 
@@ -430,19 +442,6 @@ class AttachmentContainer {
 
   AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
 
-  factory AttachmentContainer.fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
-    final container = AttachmentContainer(
-      type,
-      json["i"],
-      json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
-      json["u"],
-      unpackageSymmetricKey(json["k"], sodium),
-    );
-    container.width = json["w"];
-    container.height = json["h"];
-    return container;
-  }
-
   String toAttachment() {
     switch (attachmentType) {
       case AttachmentContainerType.link:
@@ -451,6 +450,25 @@ class AttachmentContainer {
         return url;
       case AttachmentContainerType.file:
         return jsonEncode(toJson());
+    }
+  }
+
+  /// Check if this container exists on the local system
+  Future<bool> existsLocally() async {
+    if (attachmentType != AttachmentContainerType.file) {
+      return false;
+    }
+
+    if (isWeb) {
+      return false;
+    }
+
+    return doesFileExist(file!);
+  }
+
+  void initDownloadState() async {
+    if (await existsLocally()) {
+      downloaded.value = true;
     }
   }
 
