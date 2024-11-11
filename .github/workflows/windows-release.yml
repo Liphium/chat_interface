@@ -1,9 +1,7 @@
-name: A Windows Release # The A so it runs first lmfao
+name: Windows Release
 # Do this whenever someone pushes to the main branch
 on:
   push:
-    branches: ["main"]
-  pull_request:
     branches: ["main"]
 jobs:
   build:
