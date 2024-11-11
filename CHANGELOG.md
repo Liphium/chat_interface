@@ -2,6 +2,10 @@
 
 - On every release, update `sqlite3.wasm` in the web folder to the latest version.
 
+## 0.5.1
+
+- Quick fix for client app developers, now opens 'default' in non-debug mode
+
 ## 0.5.0
 
 - This release of Liphium is compatible with protocol v6
