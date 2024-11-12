@@ -2,6 +2,10 @@
 
 - On every release, update `sqlite3.wasm` in the web folder to the latest version.
 
+## Currently in dev
+
+- Added a max length attribute to the SSR renderer for input fields (now being used by the server)
+
 ## 0.5.2
 
 - Liphium is now one-instanced meaning you won't have to look for that pesky tray icon again :)
