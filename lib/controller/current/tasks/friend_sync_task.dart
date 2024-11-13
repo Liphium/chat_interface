@@ -7,7 +7,7 @@ import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/controller/current/steps/key_step.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -15,11 +15,11 @@ import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:sodium_libs/sodium_libs_sumo.dart';
 
-class FriendsSetup extends ConnectionStep {
-  FriendsSetup() : super("loading.friends");
+class FriendsSyncTask extends SynchronizationTask {
+  FriendsSyncTask() : super("loading.friends", const Duration(seconds: 30));
 
   @override
-  Future<SetupResponse> load() async {
+  Future<String?> refresh() async {
     // Load requests and friends from database
     await Get.find<RequestController>().loadRequests();
     await Get.find<FriendController>().loadFriends();
@@ -27,14 +27,17 @@ class FriendsSetup extends ConnectionStep {
     // Refresh from server vault
     final error = await refreshFriendsVault();
     if (error != null) {
-      return SetupResponse(error: error);
+      return error;
     }
 
     // Add own account so status and stuff can be tracked there
     Get.find<FriendController>().addSelf();
 
-    return SetupResponse();
+    return null;
   }
+
+  @override
+  void onRestart() {}
 }
 
 class _FriendsListResponse {
@@ -80,7 +83,7 @@ Future<String?> refreshFriendsVault() async {
   });
   if (!json["success"]) {
     friendsVaultRefreshing.value = false;
-    return "friends.error";
+    return "friends.error".tr;
   }
 
   // Parse the JSON (in different isolate)

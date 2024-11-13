@@ -4,10 +4,10 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
-import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -17,11 +17,11 @@ import 'package:sodium_libs/sodium_libs.dart';
 
 part 'vault_actions.dart';
 
-class VaultSetup extends ConnectionStep {
-  VaultSetup() : super("loading.vault");
+class VaultSyncTask extends SynchronizationTask {
+  VaultSyncTask() : super("loading.vault", const Duration(seconds: 30));
 
   @override
-  Future<SetupResponse> load() async {
+  Future<String?> refresh() async {
     // Load conversations from the database
     final conversationController = Get.find<ConversationController>();
     final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
@@ -33,8 +33,11 @@ class VaultSetup extends ConnectionStep {
     await refreshVault();
     await LibraryManager.refreshEntries();
 
-    return SetupResponse();
+    return null;
   }
+
+  @override
+  void onRestart() {}
 }
 
 class VaultEntry {

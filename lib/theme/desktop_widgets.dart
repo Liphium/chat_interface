@@ -6,8 +6,6 @@ import 'package:get/get.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
-bool _isTrayInitalized = false;
-
 class CloseToTray extends StatefulWidget {
   final Widget child;
 
@@ -38,6 +36,8 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
   @override
   void dispose() {
     if (isDesktopPlatform()) {
+      trayManager.destroy();
+      windowManager.setPreventClose(false);
       windowManager.removeListener(this);
       trayManager.removeListener(this);
     }
@@ -46,10 +46,6 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
 
   /// Adds Liphium to the tray
   void initTray() async {
-    if (_isTrayInitalized) {
-      return;
-    }
-    _isTrayInitalized = true;
     await trayManager.setIcon(Platform.isWindows
         ? "assets/tray/icon_windows.ico"
         : Platform.isMacOS

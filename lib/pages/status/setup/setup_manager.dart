@@ -113,6 +113,7 @@ class SetupManager {
       if (controller != null) {
         await controller!.transitionComplete;
       }
+      controller = null;
       Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
       Get.find<ConnectionController>().tryConnection();
     }

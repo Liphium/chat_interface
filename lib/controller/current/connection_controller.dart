@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/controller/current/steps/connection_step.dart';
-import 'package:chat_interface/controller/current/steps/friends_step.dart';
+import 'package:chat_interface/controller/current/tasks/friend_sync_task.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/steps/profile_step.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
-import 'package:chat_interface/controller/current/steps/vault_step.dart';
+import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -19,27 +19,44 @@ class ConnectionController extends GetxController {
   final connected = false.obs;
   final error = RxString("");
   Timer? _retryTimer;
+
+  // Static tasks so their loading state can be accessed from anywhere
+  static final friendSyncTask = FriendsSyncTask();
+
+  /// Tasks that run after the setup
+  final _tasks = <SynchronizationTask>[
+    friendSyncTask,
+  ];
+  bool tasksRan = false;
+
+  /// Steps that run to get the client connected
   final _steps = <ConnectionStep>[];
 
   ConnectionController() {
-    // Setup account
-    _steps.add(ProfileSetup());
-    _steps.add(AccountSetup());
+    //* Steps that run to get everything to set up
 
-    // Setup encryption
+    // Refresh the token and make sure it works
+    _steps.add(RefreshTokenStep());
+
+    // Get all the keys from the server (or generate new ones)
     _steps.add(KeySetup());
 
-    // Fetch data
-    _steps.add(FriendsSetup());
+    // Get all the data about the account from the server
+    _steps.add(AccountSetup());
 
-    // Setup connection
+    // Process all stored actions from the server that haven't been processed yet
+    _steps.add(StoredActionsSetup());
+
+    // Connect to the server
     _steps.add(ConnectionSetup());
 
-    // Setup conversations
-    _steps.add(VaultSetup());
+    //* Steps that can be ran after the setup
 
-    // Handle new stored actions
-    _steps.add(StoredActionsSetup());
+    // Load all the friends from the server vault
+    _tasks.add(FriendsSyncTask());
+
+    // Load all conversations and stuff from the vault
+    _tasks.add(VaultSyncTask());
   }
 
   void tryConnection() async {
@@ -64,7 +81,7 @@ class ConnectionController extends GetxController {
 
       // If a restart is requested, restart the setup
       if (result.restart) {
-        setupManager.retry();
+        _restart();
         return;
       }
 
@@ -76,11 +93,25 @@ class ConnectionController extends GetxController {
       }
     }
 
-    // Run somewhere at the end
+    // Run everything that needs to happen after connected
     connector.runAfterSetupQueue();
     connected.value = true;
     error.value = "";
     loading.value = false;
+
+    _startTasks();
+  }
+
+  void _startTasks() async {
+    if (tasksRan) return;
+    tasksRan = true;
+
+    // TODO: Run all the synchronization tasks
+  }
+
+  void _restart() {
+    tasksRan = false;
+    setupManager.retry();
   }
 
   /// Retries to connect again after a certain amount of time
@@ -116,6 +147,22 @@ abstract class ConnectionStep {
   final String name;
   ConnectionStep(this.name);
 
-  /// bool: Should restart, String?: error
+  /// This method should load everything related to this step.
   Future<SetupResponse> load();
+}
+
+abstract class SynchronizationTask {
+  final String name;
+  final Duration frequency;
+
+  SynchronizationTask(this.name, this.frequency);
+
+  bool loading = false;
+
+  /// This method should load everything related to this step.
+  ///
+  /// Returns an error if there is one.
+  Future<String?> refresh();
+
+  void onRestart();
 }

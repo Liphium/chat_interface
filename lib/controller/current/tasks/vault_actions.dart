@@ -1,4 +1,4 @@
-part of 'vault_step.dart';
+part of 'vault_sync_task.dart';
 
 /// Remove an entry from the vault (returns null if successful (error otherwise))
 Future<String?> removeFromVault(String id) async {
