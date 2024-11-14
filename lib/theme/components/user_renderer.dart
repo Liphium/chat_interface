@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -59,13 +60,14 @@ class _UserAvatarState extends State<UserAvatar> {
             );
           }
 
+          final cuttedDisplayName = friend.displayName.value.substring(0, 1);
           return ClipOval(
             child: Container(
               color: Get.theme.colorScheme.primaryContainer,
               child: SelectionContainer.disabled(
                 child: Center(
                   child: Text(
-                    friend.displayName.value.substring(0, 1),
+                    cuttedDisplayName,
                     style: Get.theme.textTheme.labelMedium!.copyWith(
                       fontSize: (widget.size ?? 45) * 0.5,
                       fontWeight: FontWeight.bold,

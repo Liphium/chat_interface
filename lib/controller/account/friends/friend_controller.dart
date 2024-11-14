@@ -15,7 +15,6 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart' as dbe;
-import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -39,7 +38,6 @@ class FriendController extends GetxController {
   }
 
   void addSelf() {
-    sendLog("adding self as ${StatusController.ownAddress.encode()}");
     friends[StatusController.ownAddress] = Friend.me();
   }
 
@@ -162,7 +160,8 @@ class Friend {
       controller.name.value,
       controller.displayName.value,
       "",
-      KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+      KeyStorage.empty(),
+      // KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
       0,
     );
   }

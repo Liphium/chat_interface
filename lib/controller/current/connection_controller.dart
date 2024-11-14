@@ -33,6 +33,14 @@ class ConnectionController extends GetxController {
   final _steps = <ConnectionStep>[];
 
   ConnectionController() {
+    //* Steps that are initialized before the connection process and run continuously
+
+    // Load all the friends from the server vault
+    _tasks.add(FriendsSyncTask());
+
+    // Load all conversations and stuff from the vault
+    _tasks.add(VaultSyncTask());
+
     //* Steps that run to get everything to set up
 
     // Refresh the token and make sure it works
@@ -42,29 +50,25 @@ class ConnectionController extends GetxController {
     _steps.add(KeySetup());
 
     // Get all the data about the account from the server
-    _steps.add(AccountSetup());
+    _steps.add(AccountStep());
 
     // Process all stored actions from the server that haven't been processed yet
     _steps.add(StoredActionsSetup());
 
     // Connect to the server
     _steps.add(ConnectionSetup());
-
-    //* Steps that can be ran after the setup
-
-    // Load all the friends from the server vault
-    _tasks.add(FriendsSyncTask());
-
-    // Load all conversations and stuff from the vault
-    _tasks.add(VaultSyncTask());
   }
 
   void tryConnection() async {
-    // Reset all previous state
-    connected.value = false;
-    loading.value = true;
-    serverPublicKey = null;
-    connector.disconnect();
+    // Initialize all the stuff
+    for (var task in _tasks) {
+      final result = await task.init();
+      if (result != null) {
+        error.value = "";
+        error.value = result;
+        _retry();
+      }
+    }
 
     // Do all setup steps
     for (var step in _steps) {
@@ -106,13 +110,26 @@ class ConnectionController extends GetxController {
     if (tasksRan) return;
     tasksRan = true;
 
+    // Start all the tasks
     for (var task in _tasks) {
-      await task.init();
+      task.start();
     }
   }
 
   void _restart() {
     tasksRan = false;
+
+    // Reset all data from the tasks before the restart
+    for (var task in _tasks) {
+      task.onRestart();
+    }
+
+    // Reset all previous state
+    connected.value = false;
+    loading.value = true;
+    serverPublicKey = null;
+    connector.disconnect();
+
     setupManager.retry();
   }
 
@@ -164,7 +181,6 @@ abstract class SynchronizationTask {
 
   /// Starts the task.
   void start() async {
-    await init();
     _timer = Timer.periodic(
       frequency,
       (timer) async {
@@ -172,7 +188,7 @@ abstract class SynchronizationTask {
           return;
         }
         loading.value = true;
-        await init();
+        await refresh();
         loading.value = false;
       },
     );

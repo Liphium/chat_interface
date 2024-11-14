@@ -94,11 +94,7 @@ class KeySetup extends ConnectionStep {
       await setEncryptedValue("signature_private_key", packagedSignaturePriv);
       await setEncryptedValue("signature_public_key", packagedSignaturePub);
     } else {
-      final res = await openKeySynchronization();
-      return SetupResponse(
-        retryConnection: true,
-        error: res,
-      );
+      asymmetricKeyPair = toKeyPair(publicKey, privateKey);
     }
 
     // Grab signature key from client database

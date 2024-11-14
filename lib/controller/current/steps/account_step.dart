@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -12,8 +13,8 @@ import 'package:sodium_libs/sodium_libs.dart';
 late SecureKey vaultKey;
 late SecureKey profileKey;
 
-class AccountSetup extends ConnectionStep {
-  AccountSetup() : super('loading.account');
+class AccountStep extends ConnectionStep {
+  AccountStep() : super('loading.account');
 
   @override
   Future<SetupResponse> load() async {
@@ -27,15 +28,21 @@ class AccountSetup extends ConnectionStep {
 
     // Set all account data
     StatusController controller = Get.find();
-    controller.name.value = account["username"];
-    if (account["display_name"] != "") {
-      sendLog("HELLO DISPLAY NAME FROM SERVER ${account["display_name"]}");
-      controller.displayName.value = account["display_name"];
-    } else {
-      controller.displayName.value = account["username"];
-      sendLog("SETTING DISPLAY NAME ${controller.displayName.value}");
+    final uNameChanged = controller.name.value != account["username"];
+    final dNameChanged = controller.displayName.value != account["display_name"];
+
+    // Set the account id if there isn't one
+    if (StatusController.ownAccountId == "" || uNameChanged || dNameChanged || StatusController.ownAccountId != account["id"]) {
+      sendLog("setting account id");
+      setEncryptedValue("cache_account_id", account["id"]);
+      setEncryptedValue("cache_account_uname", account["username"]);
+      setEncryptedValue("cache_account_dname", account["display_name"]);
+
+      // Restart to migrate to the new account id
+      return SetupResponse(
+        restart: true,
+      );
     }
-    StatusController.ownAccountId = account["id"];
 
     // Init file paths with account id
     AttachmentController.initFilePath(account["id"]);

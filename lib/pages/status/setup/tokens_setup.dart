@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/server_selector_container.dart';
@@ -9,6 +10,7 @@ import 'package:chat_interface/theme/components/ssr/ssr.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class TokensSetup extends Setup {
   TokensSetup() : super("loading.tokens", false);
@@ -58,6 +60,11 @@ class TokensSetup extends Setup {
 
       return const SetupLoadingWidget(text: "rendering");
     }
+
+    // Load account stuff from settings
+    StatusController.ownAccountId = await retrieveEncryptedValue("cache_account_id") ?? "";
+    Get.find<StatusController>().name.value = await retrieveEncryptedValue("cache_account_uname") ?? "";
+    Get.find<StatusController>().displayName.value = await retrieveEncryptedValue("cache_account_dname") ?? "";
 
     return null;
   }
