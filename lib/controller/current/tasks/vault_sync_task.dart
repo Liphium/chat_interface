@@ -21,19 +21,27 @@ class VaultSyncTask extends SynchronizationTask {
   VaultSyncTask() : super("loading.vault", const Duration(seconds: 30));
 
   @override
-  Future<String?> refresh() async {
+  Future<String?> init() async {
     // Load conversations from the database
     final conversationController = Get.find<ConversationController>();
     final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
     for (var conversation in conversations) {
       await conversationController.add(Conversation.fromData(conversation));
     }
-
-    // Refresh the vault
-    await refreshVault();
-    await LibraryManager.refreshEntries();
-
     return null;
+  }
+
+  @override
+  Future<String?> refresh() async {
+    // Refresh the regular vault (conversations and stuff)
+    var error = await refreshVault();
+    if (error != null) {
+      return error;
+    }
+
+    // Refresh the library (gifs, saved images, etc.)
+    error = await LibraryManager.refreshEntries();
+    return error;
   }
 
   @override

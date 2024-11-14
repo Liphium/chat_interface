@@ -1,4 +1,3 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/policy_setup.dart';
@@ -54,7 +53,6 @@ class SetupManager {
 
   void retry() {
     current = -1;
-    Get.find<FriendController>().onReload();
     if (controller == null) {
       Get.offAll(const SetupPage());
     } else {

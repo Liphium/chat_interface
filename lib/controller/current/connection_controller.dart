@@ -106,7 +106,9 @@ class ConnectionController extends GetxController {
     if (tasksRan) return;
     tasksRan = true;
 
-    // TODO: Run all the synchronization tasks
+    for (var task in _tasks) {
+      await task.init();
+    }
   }
 
   void _restart() {
@@ -157,12 +159,43 @@ abstract class SynchronizationTask {
 
   SynchronizationTask(this.name, this.frequency);
 
-  bool loading = false;
+  Timer? _timer;
+  final loading = false.obs;
 
-  /// This method should load everything related to this step.
+  /// Starts the task.
+  void start() async {
+    await init();
+    _timer = Timer.periodic(
+      frequency,
+      (timer) async {
+        if (loading.value) {
+          return;
+        }
+        loading.value = true;
+        await init();
+        loading.value = false;
+      },
+    );
+  }
+
+  /// This method should initialize everything needed for the task.
+  ///
+  /// Returns an error if there is one.
+  Future<String?> init();
+
+  /// Stops the task.
+  Future<String?> stop() {
+    _timer?.cancel();
+    return refresh();
+  }
+
+  /// This method will be called every time in the loop.
+  /// You can specify the duration of it using the [frequency] parameter in
+  /// the constructor.
   ///
   /// Returns an error if there is one.
   Future<String?> refresh();
 
+  /// This method should reset everything and prepare the task for a restart.
   void onRestart();
 }

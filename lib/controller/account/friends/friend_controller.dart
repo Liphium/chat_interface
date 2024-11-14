@@ -15,12 +15,8 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart' as dbe;
-import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
-import 'package:chat_interface/controller/current/tasks/friend_sync_task.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
-import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
-import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -34,30 +30,12 @@ part 'friends_vault.dart';
 
 class FriendController extends GetxController {
   final friends = <LPHAddress, Friend>{}.obs;
-  Timer? _timer; // Timer to refresh the friends vault every 5 minutes
 
   Future<bool> loadFriends() async {
     for (FriendData data in await db.friend.select().get()) {
       friends[LPHAddress.from(data.id)] = Friend.fromEntity(data);
     }
-
-    // Start timer to refresh the vault every couple of seconds (for multi-device synchronization)
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 30), (timer) async {
-      if (!SetupManager.setupFinished) {
-        return;
-      }
-      sendLog("refreshing all vaults");
-      await refreshFriendsVault();
-      await refreshVault();
-      LibraryManager.refreshEntries();
-    });
     return true;
-  }
-
-  /// Cancels the timer (should be called when reloading)
-  void onReload() {
-    _timer?.cancel();
   }
 
   void addSelf() {

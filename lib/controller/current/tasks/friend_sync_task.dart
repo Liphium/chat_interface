@@ -19,21 +19,20 @@ class FriendsSyncTask extends SynchronizationTask {
   FriendsSyncTask() : super("loading.friends", const Duration(seconds: 30));
 
   @override
-  Future<String?> refresh() async {
+  Future<String?> init() async {
     // Load requests and friends from database
     await Get.find<RequestController>().loadRequests();
     await Get.find<FriendController>().loadFriends();
-
-    // Refresh from server vault
-    final error = await refreshFriendsVault();
-    if (error != null) {
-      return error;
-    }
 
     // Add own account so status and stuff can be tracked there
     Get.find<FriendController>().addSelf();
 
     return null;
+  }
+
+  @override
+  Future<String?> refresh() {
+    return refreshFriendsVault();
   }
 
   @override

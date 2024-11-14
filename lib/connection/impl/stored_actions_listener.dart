@@ -9,7 +9,6 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
-import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/database/trusted_links.dart';
