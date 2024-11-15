@@ -5,6 +5,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_page.dart';
@@ -104,6 +105,9 @@ class KeySetup extends ConnectionStep {
       return SetupResponse(error: "key.error");
     }
     signatureKeyPair = toKeyPair(signaturePublicKey, signaturePrivateKey);
+
+    // Add self as a friend for easier implementations
+    Get.find<FriendController>().addSelf();
 
     return SetupResponse();
   }

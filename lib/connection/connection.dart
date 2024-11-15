@@ -102,7 +102,7 @@ class Connector {
         } catch (e) {
           sendLog("HASH: ${hashShaBytes(encrypted)}");
 
-          sendLog("FAILED TO DECRYPT MESSAGE with key ${aesBase64!}");
+          sendLog("FAILED TO DECRYPT MESSAGE");
           sendLog(
               "This is most likely due to another client being in the same network, connected over the same port as you are. We can't do anything about this and this will not occur in production.");
           e.printError();

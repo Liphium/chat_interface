@@ -119,7 +119,6 @@ Friend? handleStatus(Event event, bool own) {
 (ShareContainer?, bool) _dataToContainer(ShareContainer? existing, String data, SecureKey profileKey) {
   if (data != "") {
     final sharedJson = decryptSymmetric(data, profileKey);
-    sendLog("RECEIVED SHARED CONTENT $sharedJson");
     final shared = jsonDecode(sharedJson) as Map<String, dynamic>;
     switch (ShareType.values[shared["type"] as int]) {
       // Shared space

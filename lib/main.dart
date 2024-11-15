@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -99,7 +98,6 @@ void initApp(List<String> args) async {
 
   // Initialize sodium
   await initSodium();
-  sendLog(packageSymmetricKey(randomSymmetricKey()));
 
   // Initialize the window
   initDesktopWindow();

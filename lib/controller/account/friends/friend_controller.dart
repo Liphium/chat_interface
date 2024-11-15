@@ -13,6 +13,7 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart' as dbe;
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
@@ -160,8 +161,7 @@ class Friend {
       controller.name.value,
       controller.displayName.value,
       "",
-      KeyStorage.empty(),
-      // KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+      KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
       0,
     );
   }
