@@ -18,7 +18,7 @@ import 'app.dart';
 // Configuration constants
 const appTag = "liphium_chat";
 const appTagSpaces = "liphium_spaces";
-const protocolVersion = 6;
+const protocolVersion = 7;
 
 final dio = Dio();
 late final Sodium sodiumLib;
@@ -120,7 +120,9 @@ void initDesktopWindow() async {
     await windowManager.ensureInitialized();
     await windowManager.setMinimumSize(const Size(300, 500));
     await windowManager.setTitle("Liphium");
-    await windowManager.setAlignment(Alignment.center);
+    if (!isDebug) {
+      await windowManager.setAlignment(Alignment.center);
+    }
   }
 }
 

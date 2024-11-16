@@ -22,10 +22,12 @@ class ConnectionController extends GetxController {
 
   // Static tasks so their loading state can be accessed from anywhere
   static final friendSyncTask = FriendsSyncTask();
+  static final vaultSyncTask = VaultSyncTask();
 
   /// Tasks that run after the setup
   final _tasks = <SynchronizationTask>[
     friendSyncTask,
+    vaultSyncTask,
   ];
   bool tasksRan = false;
 
@@ -33,16 +35,6 @@ class ConnectionController extends GetxController {
   final _steps = <ConnectionStep>[];
 
   ConnectionController() {
-    //* Steps that are initialized before the connection process and run continuously
-
-    // Load all the friends from the server vault
-    _tasks.add(FriendsSyncTask());
-
-    // Load all conversations and stuff from the vault
-    _tasks.add(VaultSyncTask());
-
-    //* Steps that run to get everything to set up
-
     // Refresh the token and make sure it works
     _steps.add(RefreshTokenStep());
 
@@ -52,11 +44,11 @@ class ConnectionController extends GetxController {
     // Get all the data about the account from the server
     _steps.add(AccountStep());
 
-    // Process all stored actions from the server that haven't been processed yet
-    _steps.add(StoredActionsSetup());
-
     // Connect to the server
     _steps.add(ConnectionSetup());
+
+    // Process all stored actions from the server that haven't been processed yet
+    _steps.add(StoredActionsSetup());
   }
 
   void tryConnection() async {
@@ -121,7 +113,7 @@ class ConnectionController extends GetxController {
 
     // Reset all data from the tasks before the restart
     for (var task in _tasks) {
-      task.onRestart();
+      task.stop();
     }
 
     // Reset all previous state
@@ -188,7 +180,10 @@ abstract class SynchronizationTask {
           return;
         }
         loading.value = true;
-        await refresh();
+        final result = await refresh();
+        if (result != null) {
+          sendLog("task $name finished with error: $result");
+        }
         loading.value = false;
       },
     );
@@ -200,9 +195,9 @@ abstract class SynchronizationTask {
   Future<String?> init();
 
   /// Stops the task.
-  Future<String?> stop() {
+  void stop() {
     _timer?.cancel();
-    return refresh();
+    onRestart();
   }
 
   /// This method will be called every time in the loop.

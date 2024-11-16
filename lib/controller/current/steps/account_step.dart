@@ -1,7 +1,9 @@
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
@@ -44,9 +46,6 @@ class AccountStep extends ConnectionStep {
       );
     }
 
-    // Init file paths with account id
-    AttachmentController.initFilePath(account["id"]);
-
     // Set all permissions
     StatusController.permissions = List<String>.from(body["permissions"]);
     for (var rankJson in body["ranks"]) {
@@ -62,6 +61,10 @@ class AccountStep extends ConnectionStep {
     profileKey = unpackageSymmetricKey(profileInfo.text);
     vaultKey = unpackageSymmetricKey(vaultInfo.text);
     storedActionKey = body["actions"];
+
+    // Set own key pair as cached (in the friend that represents this account)
+    Get.find<FriendController>().friends[StatusController.ownAddress]!.keyStorage =
+        KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, "");
 
     return SetupResponse();
   }

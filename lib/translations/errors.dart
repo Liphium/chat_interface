@@ -28,8 +28,10 @@ class ErrorTranslations extends Translations {
           'invalid.method': 'This is incorrect. Please try again.',
           'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
           'password.incorrect': 'Your password is incorrect. Please try again.',
-          'protocol.error':
+          'protocol.error.server':
               'The town you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that town to update to the latest version.',
+          'protocol.error.client':
+              'The town you are trying to connect to runs a more up to date version of Liphium. Please update your app to make sure everything works fine.',
           'spaces.not.setup': 'Spaces is not supported in your town. Please contact the owners of this town and ask them to set up Spaces.',
           'not.supported': 'This feature is not supported on this platform.',
 

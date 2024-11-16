@@ -20,6 +20,8 @@ class BubblesMessageRenderer extends StatefulWidget {
   final bool self;
   final bool last;
   final Friend? sender;
+  final bool mobileLayout;
+  final double? overwritePadding;
 
   const BubblesMessageRenderer({
     super.key,
@@ -29,6 +31,8 @@ class BubblesMessageRenderer extends StatefulWidget {
     this.self = false,
     this.last = false,
     this.sender,
+    this.mobileLayout = false,
+    this.overwritePadding,
   });
 
   @override
@@ -54,11 +58,6 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
           behavior: HitTestBehavior.translucent,
           // Detect right click to open a context menu
           onSecondaryTap: () {
-            // Only for desktop
-            if (GetPlatform.isMobile) {
-              return;
-            }
-
             final menuData = ContextMenuData.fromPosition(Offset(_mouseX, _mouseY));
 
             // Open the context menu
@@ -72,7 +71,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
           child: Padding(
             padding: EdgeInsets.symmetric(
               vertical: elementSpacing,
-              horizontal: isMobileMode() ? defaultSpacing : sectionSpacing,
+              horizontal: widget.overwritePadding ?? (widget.mobileLayout ? defaultSpacing : sectionSpacing),
             ),
             child: Row(
               textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
@@ -106,36 +105,34 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                       ),
 
                       //* Desktop timestamp
-                      if (!isMobileMode()) horizontalSpacing(defaultSpacing),
+                      horizontalSpacing(defaultSpacing),
 
-                      if (!isMobileMode())
-                        Padding(
-                          padding: const EdgeInsets.only(top: defaultSpacing),
-                          child: SelectionContainer.disabled(
-                            child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: defaultSpacing),
+                        child: SelectionContainer.disabled(
+                          child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
                         ),
+                      ),
 
                       //* Desktop verified indicator
-                      if (!isMobileMode()) horizontalSpacing(defaultSpacing),
+                      horizontalSpacing(defaultSpacing),
 
-                      if (!isMobileMode())
-                        Obx(() {
-                          final verified = widget.message.verified.value;
-                          return Visibility(
-                            visible: !verified,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: elementSpacing),
-                              child: Tooltip(
-                                message: "chat.not.signed".tr,
-                                child: const Icon(
-                                  Icons.warning_rounded,
-                                  color: Colors.amber,
-                                ),
+                      Obx(() {
+                        final verified = widget.message.verified.value;
+                        return Visibility(
+                          visible: !verified,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
+                            child: Tooltip(
+                              message: "chat.not.signed".tr,
+                              child: const Icon(
+                                Icons.warning_rounded,
+                                color: Colors.amber,
                               ),
                             ),
-                          );
-                        })
+                          ),
+                        );
+                      })
                     ],
                   ),
                 )
@@ -150,7 +147,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
   Widget renderMessageContent() {
     return LayoutBuilder(builder: (context, constraints) {
       return ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: isMobileMode() ? Get.width * 0.75 : (Get.width - 350) * 0.5),
+        constraints: BoxConstraints(maxWidth: widget.mobileLayout ? Get.width * 0.75 : (Get.width - 350) * 0.5),
         child: Column(
           crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
@@ -173,36 +170,6 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                       text: widget.message.content,
                       baseStyle: Get.theme.textTheme.labelLarge!,
                     ),
-
-                    //* Mobile timestamp and verified indicator
-                    if (isMobileMode())
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: elementSpacing),
-                            child: SelectionContainer.disabled(
-                              child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
-                            ),
-                          ),
-                          Obx(() {
-                            final verified = widget.message.verified.value;
-                            return Visibility(
-                              visible: !verified,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: elementSpacing),
-                                child: Tooltip(
-                                  message: "chat.not.signed".tr,
-                                  child: const Icon(
-                                    Icons.warning_rounded,
-                                    color: Colors.amber,
-                                  ),
-                                ),
-                              ),
-                            );
-                          })
-                        ],
-                      ),
                   ],
                 ),
               ),

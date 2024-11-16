@@ -12,7 +12,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class MessageFeed extends StatefulWidget {
-  const MessageFeed({super.key});
+  final double? overwritePadding;
+
+  const MessageFeed({
+    super.key,
+    this.overwritePadding,
+  });
 
   @override
   State<MessageFeed> createState() => _MessageFeedState();
@@ -100,6 +105,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                       return MessageList(
                                         key: ValueKey(controller.currentProvider.value!.conversation.id),
                                         provider: controller.currentProvider.value!,
+                                        overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
                                       );
                                     },
                                   ),

@@ -9,6 +9,7 @@ class BubblesSystemMessageRenderer extends StatefulWidget {
   final MessageProvider provider;
   final bool self;
   final bool last;
+  final bool mobileLayout;
 
   const BubblesSystemMessageRenderer({
     super.key,
@@ -16,6 +17,7 @@ class BubblesSystemMessageRenderer extends StatefulWidget {
     required this.provider,
     this.self = false,
     this.last = false,
+    this.mobileLayout = false,
   });
 
   @override

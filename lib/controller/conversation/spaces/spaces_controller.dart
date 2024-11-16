@@ -41,7 +41,7 @@ class SpacesController extends GetxController {
   static SecureKey? key;
 
   //* Call layout
-  final chatOpen = false.obs;
+  final chatOpen = true.obs;
   final hideSidebar = false.obs;
   final fullScreen = false.obs;
 
@@ -191,6 +191,7 @@ class SpacesController extends GetxController {
 
         connected.value = true;
         inSpace.value = true;
+        chatOpen.value = true;
         spaceLoading.value = false;
         connectedCallback?.call();
       },

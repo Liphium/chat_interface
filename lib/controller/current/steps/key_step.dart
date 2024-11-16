@@ -7,6 +7,8 @@ import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_page.dart';
 import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
@@ -31,24 +33,16 @@ class KeySetup extends ConnectionStep {
 
   @override
   Future<SetupResponse> load() async {
-    // Get keys from the server
+    // Get the public key from the server (to check if keys are still the same)
+    var res = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});
+
+    // Get keys from the local database (or an empty string)
     var publicKey = await retrieveEncryptedValue("public_key");
     var privateKey = await retrieveEncryptedValue("private_key");
 
-    // If there are no keys, can't continue with setup
-    if (publicKey == null || privateKey == null) {
-      // Check if there is a public key on the server
-      var res = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});
-      if (res["success"]) {
-        // Open the key synchronization in case there is
-        final res = await openKeySynchronization();
-        return SetupResponse(
-          retryConnection: true,
-          error: res,
-        );
-      }
-
-      // Generate new keys in case there aren't ones yet
+    // If there is no public key on the server, generate new keys
+    if (!res["success"]) {
+      // Generate new keys
       final signatureKeyPair = generateSignatureKeyPair();
       final pair = generateAsymmetricKeyPair();
 
@@ -95,6 +89,25 @@ class KeySetup extends ConnectionStep {
       await setEncryptedValue("signature_private_key", packagedSignaturePriv);
       await setEncryptedValue("signature_public_key", packagedSignaturePub);
     } else {
+      // Open key synchronization if there are no local keys
+      if (publicKey == null || privateKey == null) {
+        final res = await openKeySynchronization();
+        return SetupResponse(
+          restart: true,
+          error: res,
+        );
+      }
+
+      // Check if the key is the same as on the server
+      if (res["key"] != publicKey) {
+        final res = await openKeySynchronization();
+        return SetupResponse(
+          restart: true,
+          error: res,
+        );
+      }
+
+      // Set local key pair
       asymmetricKeyPair = toKeyPair(publicKey, privateKey);
     }
 
@@ -105,9 +118,6 @@ class KeySetup extends ConnectionStep {
       return SetupResponse(error: "key.error");
     }
     signatureKeyPair = toKeyPair(signaturePublicKey, signaturePrivateKey);
-
-    // Add self as a friend for easier implementations
-    Get.find<FriendController>().addSelf();
 
     return SetupResponse();
   }

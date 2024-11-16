@@ -13,7 +13,6 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
-import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart' as dbe;
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
@@ -72,7 +71,6 @@ class FriendController extends GetxController {
     Get.find<RequestController>().deleteSentRequest(request);
 
     // Remove request from server
-    sendLog(request.vaultId);
     final friendsVault = await FriendsVault.remove(request.vaultId);
     if (!friendsVault) {
       add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
@@ -100,7 +98,6 @@ class FriendController extends GetxController {
   }
 
   void add(Friend friend) {
-    sendLog("ADDED ${friend.name}");
     friends[friend.id] = friend;
     if (friend.id != StatusController.ownAddress) {
       db.friend.insertOnConflictUpdate(friend.entity());
@@ -161,14 +158,13 @@ class Friend {
       controller.name.value,
       controller.displayName.value,
       "",
-      KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+      KeyStorage.empty(),
       0,
     );
   }
 
   /// Used for unknown accounts where only an id is known
   factory Friend.unknown(LPHAddress address) {
-    sendLog(address);
     var shownId = "removed".tr;
     if (address.id.length >= 5) {
       shownId = address.id.substring(0, 5);
@@ -251,11 +247,9 @@ class Friend {
   void loadStatus(String message) {
     message = decryptSymmetric(message, keyStorage.profileKey);
     final data = jsonDecode(message);
-    sendLog("received $data");
     try {
       status.value = utf8.decode(base64Decode(data["s"]));
     } catch (e) {
-      sendLog("no status");
       status.value = "";
     }
     statusType.value = data["t"];
@@ -347,6 +341,12 @@ class Friend {
     final json = jsonDecode(fromDbEncrypted(data.pictureContainer));
     final type = await AttachmentController.checkLocations(json["i"], StorageType.permanent);
     profilePicture = Get.find<AttachmentController>().fromJson(type, json);
+
+    // Make sure the file actually exists
+    if (!await doesFileExist(profilePicture!.file!)) {
+      return;
+    }
+
     profilePictureImage.value = await ProfileHelper.loadImageFromBytes(await profilePicture!.file!.readAsBytes());
   }
 

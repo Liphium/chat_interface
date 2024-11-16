@@ -119,12 +119,6 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
 
 //* Friend requests
 Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> json) async {
-  // Delete the action (it doesn't need to be handled twice)
-  final response = await deleteStoredAction(actionId);
-  if (!response) {
-    sendLog("WARNING: couldn't delete stored action");
-  }
-
   // Get the address from the friend request
   final address = LPHAddress.from(json["ad"]);
   if (address.id == "-") {
@@ -199,12 +193,6 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 
 //* Conversation opening
 Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> actionJson) async {
-  // Delete the action (it doesn't need to be handled twice)
-  final response = await deleteStoredAction(actionId);
-  if (!response) {
-    sendLog("WARNING: couldn't delete stored action");
-  }
-
   sendLog("opening conversation with ${actionJson["s"]}");
   final friend = Get.find<FriendController>().friends[LPHAddress.from(actionJson["s"])];
   if (friend == null) {
@@ -214,6 +202,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
 
   // Activate the token from the request
   final token = jsonDecode(actionJson["token"]);
+  sendLog(token);
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"token": token});
   if (!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
@@ -251,12 +240,6 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
 
 //* Friend removal
 Future<bool> _handleFriendRemoval(String actionId, Map<String, dynamic> actionJson) async {
-  // Delete the action (it doesn't need to be handled twice)
-  final response = await deleteStoredAction(actionId);
-  if (!response) {
-    sendLog("WARNING: couldn't delete stored action");
-  }
-
   sendLog("deleting friend ${actionJson["s"]}");
   final friend = Get.find<FriendController>().friends[LPHAddress.from(actionJson["s"])];
   if (friend == null) {

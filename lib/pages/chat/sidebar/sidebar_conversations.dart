@@ -10,6 +10,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/space_rend
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -55,15 +56,20 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
               Friend? friend;
               if (!conversation.isGroup) {
+                // Fetch the member that isn't the own account
                 LPHAddress id = conversation.members.values
                     .firstWhere(
                       (element) => element.address != StatusController.ownAddress,
                       orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
                     )
                     .address;
+
+                // If not found, just use own friend as a backup plan
                 if (id.id == "-") {
+                  sendLog("THIS SHOULD NOT HAPPEN, rendering me as member of conversation");
                   friend = Friend.me();
                 } else {
+                  // If found, use the actual friend of course
                   friend = friendController.friends[id];
                 }
               }

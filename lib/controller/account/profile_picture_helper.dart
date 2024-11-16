@@ -59,7 +59,7 @@ class ProfileHelper {
     String? oldPath;
     if (oldProfile != null) {
       if (oldProfile.pictureContainer != "") {
-        oldPictureId = jsonDecode(fromDbEncrypted(oldProfile.pictureContainer))["id"];
+        oldPictureId = jsonDecode(fromDbEncrypted(oldProfile.pictureContainer))["i"];
         oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
         if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
           return null; // Nothing changed
@@ -81,7 +81,7 @@ class ProfileHelper {
     }
 
     // Download the file
-    final success = await Get.find<AttachmentController>().downloadAttachment(container);
+    final success = await Get.find<AttachmentController>().downloadAttachment(container, popups: false);
     if (!success) {
       return null;
     }
@@ -98,9 +98,14 @@ class ProfileHelper {
   }
 
   /// Upload a profile picture to the server and set it as the current profile picture
-  static Future<bool> uploadProfilePicture(XFile file, String originalName) async {
+  static Future<bool> uploadProfilePicture(XFile file, String originalName, {Uint8List? bytes}) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, Constants.fileAppDataTag);
+    final response = await Get.find<AttachmentController>().uploadFile(
+      UploadData(file),
+      StorageType.permanent,
+      Constants.fileAppDataTag,
+      bytes: bytes,
+    );
     if (response.container == null) {
       showErrorPopup("error", response.message);
       return false;

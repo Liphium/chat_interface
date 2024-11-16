@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
@@ -65,6 +66,9 @@ class TokensSetup extends Setup {
     StatusController.ownAccountId = await retrieveEncryptedValue("cache_account_id") ?? "";
     Get.find<StatusController>().name.value = await retrieveEncryptedValue("cache_account_uname") ?? "";
     Get.find<StatusController>().displayName.value = await retrieveEncryptedValue("cache_account_dname") ?? "";
+
+    // Init file paths with account id
+    AttachmentController.initFilePath(StatusController.ownAccountId);
 
     return null;
   }

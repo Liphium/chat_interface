@@ -88,8 +88,12 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
 
   @override
   void onWindowClose() async {
-    await windowManager.setPreventClose(true);
-    await windowManager.hide();
+    if (isDebug) {
+      exit(0);
+    } else {
+      await windowManager.setPreventClose(true);
+      await windowManager.hide();
+    }
   }
 
   @override

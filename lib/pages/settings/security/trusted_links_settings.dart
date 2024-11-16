@@ -19,7 +19,7 @@ class TrustedLinkSettings {
 
   static const trustModes = [
     SelectableItem("links.trust_mode.all", Icons.share),
-    SelectableItem("links.trust_mode.list", Icons.sort, experimental: true),
+    SelectableItem("links.trust_mode.list", Icons.sort),
     SelectableItem("links.trust_mode.none", Icons.close),
   ];
 

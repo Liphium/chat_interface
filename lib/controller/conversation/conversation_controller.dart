@@ -33,10 +33,6 @@ class ConversationController extends GetxController {
 
   /// Add a conversation to the cache
   Future<bool> add(Conversation conversation, {loadMembers = true}) async {
-    // Insert into cache
-    _insertToOrder(conversation.id);
-    conversations[conversation.id] = conversation;
-
     // Load members from the database
     if (conversation.members.isEmpty && loadMembers) {
       final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id.encode()))).get();
@@ -45,6 +41,10 @@ class ConversationController extends GetxController {
         conversation.addMember(Member.fromData(member));
       }
     }
+
+    // Insert into cache
+    _insertToOrder(conversation.id);
+    conversations[conversation.id] = conversation;
 
     return true;
   }

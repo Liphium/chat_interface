@@ -33,9 +33,10 @@ class AttachmentController extends GetxController {
     String tag, {
     popups = true,
     bool containerNameNull = false,
+    Uint8List? bytes,
     String? fileName,
   }) async {
-    final bytes = await data.file.readAsBytes();
+    bytes ??= await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
     final name = encryptSymmetric(fileName ?? path.basename(data.file.path), key);

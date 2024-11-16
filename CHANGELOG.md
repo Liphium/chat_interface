@@ -5,6 +5,14 @@
 ## Currently in dev
 
 - Added a max length attribute to the SSR renderer for input fields (now being used by the server)
+- Made the startup of the app significantly faster by reducing the amount of server interactions
+- Made the app startup seem faster by first loading local data
+- Fixed a bug where the profile picture wouldn't load (because of the new attachment container schema)
+- Made the profile picture selector more stable with smaller images
+- Profile pictures that couldn't be found no longer show error popups
+- The chat in Spaces is now open by default
+- Made the protocol version error specify which version is out of date (client or server)
+- The Zap requests and Spaces invites are now embedded into the message itself to make relation more clear
 
 ## 0.5.2
 

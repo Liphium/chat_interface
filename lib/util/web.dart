@@ -117,8 +117,12 @@ Future<String?> grabServerPublicKey({String defaultError = "server.error"}) asyn
   final json = jsonDecode(res.body);
 
   // Check the protocol version
-  if (json["protocol_version"] != protocolVersion) {
-    return "protocol.error".tr;
+  if (json["protocol_version"] > protocolVersion) {
+    return "protocol.error.client".tr;
+  }
+
+  if (json["protocol_version"] < protocolVersion) {
+    return "protocol.error.server".tr;
   }
 
   serverPublicKey = unpackageRSAPublicKey(json['pub']);
@@ -142,8 +146,12 @@ Future<String?> grabServerPublicURL(String server, {String defaultError = "serve
   final json = jsonDecode(res.body);
 
   // Check the protocol version
-  if (json["protocol_version"] != protocolVersion) {
-    return "protocol.error";
+  if (json["protocol_version"] > protocolVersion) {
+    return "protocol.error.client".tr;
+  }
+
+  if (json["protocol_version"] < protocolVersion) {
+    return "protocol.error.server".tr;
   }
 
   serverPublicKeys[server] = unpackageRSAPublicKey(json['pub']);

@@ -24,6 +24,9 @@ class FriendsSyncTask extends SynchronizationTask {
     await Get.find<RequestController>().loadRequests();
     await Get.find<FriendController>().loadFriends();
 
+    // Add self as friend (without keys)
+    Get.find<FriendController>().addSelf();
+
     return null;
   }
 
