@@ -13,6 +13,7 @@
 - The chat in Spaces is now open by default
 - Made the protocol version error specify which version is out of date (client or server)
 - The Zap requests and Spaces invites are now embedded into the message itself to make relation more clear
+- Made the updater more reliable by having it always download and start the latest version
 
 ## 0.5.2
 
