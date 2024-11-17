@@ -7,6 +7,7 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -50,7 +51,7 @@ class UpdateSetup extends Setup {
     }
 
     // Find the current version
-    bool found = false;
+    String? foundPath;
     int versionsFound = 0;
     for (var entity in entities) {
       final name = path.basename(entity.path);
@@ -59,19 +60,30 @@ class UpdateSetup extends Setup {
         versionsFound++;
       }
       if (name == release.version) {
-        found = true;
+        foundPath = entity.path;
       }
     }
 
-    // Check if installation is needed
-    if (versionsFound > 1 || downloadFile) {
-      return _installPage(release);
+    // If the newest version wasn't found, download it
+    if (foundPath == null) {
+      return _updatePage(release);
     }
 
-    if (found) {
+    // If the most recent version is running, install or run normally
+    if (Platform.resolvedExecutable.contains(release.version)) {
+      // Check if installation is needed
+      if (versionsFound > 1 || downloadFile) {
+        return _installPage(release);
+      }
+
       return null;
     }
-    return _updatePage(release);
+
+    // If not, run the latest version instead of the current one
+    await Future.delayed(Duration(milliseconds: 500)); // Just in case this becomes an infinite loop
+    restartProcessAsAdmin(path: path.join(foundPath, "chat_interface.exe"));
+    SystemNavigator.pop();
+    return null;
   }
 }
 
@@ -255,8 +267,6 @@ Future<bool> updateApp(RxString status, ReleaseData data) async {
 
       sendLog("restarting with path: ${executable.path}");
       await restartProcessAsAdmin(path: executable.path);
-    } else if (GetPlatform.isLinux) {
-      // TODO: Fix the linux updater
     }
 
     exit(0);
