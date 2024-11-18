@@ -1,6 +1,5 @@
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
-import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

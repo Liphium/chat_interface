@@ -11,7 +11,6 @@ import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -160,8 +159,6 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     } else {
                       moved = true;
 
-                      sendLog("hiii");
-
                       // Start holding the object
                       tableController.startHoldingObject(tableController.hoveringObjects.last);
                     }
@@ -180,7 +177,6 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                   tableController.hoveringObjects.first.runAction(tableController);
                   return;
                 }
-                sendLog(tableController.inventoryHoverIndex);
 
                 final obj = tableController.heldObject;
                 if (obj != null && obj is CardObject) {

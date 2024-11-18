@@ -1,7 +1,9 @@
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:math' as math;
 
 class TabletopPainter extends CustomPainter {
   final TabletopController controller;
@@ -34,19 +36,41 @@ class TabletopPainter extends CustomPainter {
     canvas.translate(size.width / 2, size.height / 2);
     canvas.rotate(rotation);
     canvas.translate(-size.width / 2, -size.height / 2);
+
     final paint = Paint()
-      ..color = Get.theme.colorScheme.primaryContainer
+      ..color = Get.theme.colorScheme.onSurface.withOpacity(0.1)
       ..strokeWidth = 1.0;
 
-    final gridSize = 100.0 * scale;
+    final gridSize = 200.0 * scale;
 
-    for (double x = (offset.dx * scale % gridSize) - gridSize; x < size.width; x += gridSize) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    // Calculate the maximum distance needed to cover rotated corners
+    final diagonal = math.sqrt(size.width * size.width + size.height * size.height);
+    final extraSpace = (diagonal - math.min(size.width, size.height)) / 2;
+
+    // Extend drawing area
+    final startX = ((offset.dx * scale + extraSpace) % gridSize) - gridSize - extraSpace;
+    final endX = size.width + extraSpace;
+    final startY = ((offset.dy * scale + extraSpace) % gridSize) - gridSize - extraSpace;
+    final endY = size.height + extraSpace;
+
+    // Draw vertical lines
+    for (double x = startX; x < endX; x += gridSize) {
+      canvas.drawLine(
+        Offset(x, -extraSpace),
+        Offset(x, size.height + extraSpace),
+        paint,
+      );
     }
 
-    for (double y = (offset.dy * scale % gridSize) - gridSize; y < size.height; y += gridSize) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    // Draw horizontal lines
+    for (double y = startY; y < endY; y += gridSize) {
+      canvas.drawLine(
+        Offset(-extraSpace, y),
+        Offset(size.width + extraSpace, y),
+        paint,
+      );
     }
+
     canvas.restore();
     */
 
@@ -55,6 +79,40 @@ class TabletopPainter extends CustomPainter {
     canvas.rotate(rotation);
     canvas.scale(scale);
     canvas.translate(offset.dx, offset.dy);
+
+    /*
+    // Draw grid in world mode
+    final paint = Paint()
+      ..color = Get.theme.colorScheme.onSurface.withOpacity(0.1)
+      ..strokeWidth = 1.0;
+
+    final gridSize = 200.0;
+
+    // Calculate top-left world position
+    final startX = -offset.dx + (offset.dx % gridSize) - gridSize;
+    final startY = -offset.dy + (offset.dy % gridSize) - gridSize;
+    final endX = -offset.dx + (size.width * scale) + (offset.dx % gridSize) + gridSize;
+    final endY = -offset.dy + (size.height * scale) + (offset.dy % gridSize) + gridSize;
+
+    canvas.drawCircle(-offset, 20, paint..color = Colors.blue);
+
+    // Draw grid
+    for (double x = startX; x < endX; x += gridSize) {
+      canvas.drawLine(
+        Offset(x, startY),
+        Offset(x, endY),
+        paint,
+      );
+    }
+
+    for (double y = startY; y < endY; y += gridSize) {
+      canvas.drawLine(
+        Offset(startX, y),
+        Offset(endX, y),
+        paint,
+      );
+    }
+    */
 
     final now = DateTime.now();
     controller.hoveringObjects = controller.raycast(mousePosition);
