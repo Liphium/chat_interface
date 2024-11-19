@@ -44,7 +44,7 @@ class ZapShareController extends GetxController {
   SecureKey? key;
   StreamSubscription<Uint8List>? partSubscription;
 
-  static const chunkSize = 512 * 1024;
+  static const chunkSize = 1024 * 1024;
 
   bool isRunning() {
     return currentReceiver.value != null || currentConversation.value != null || waiting.value;
@@ -441,6 +441,7 @@ class ZapShareController extends GetxController {
               if (currentChunk < maxChunk) {
                 currentChunk++;
                 progress.value = currentChunk / endPart;
+                currentPart.value = currentChunk;
                 waiting = false;
               } else {
                 await Future.delayed(10.ms); // To prevent infinite spinning

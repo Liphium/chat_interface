@@ -9,7 +9,7 @@
 #include <file_selector_linux/file_selector_plugin.h>
 #include <flutter_secure_storage_linux/flutter_secure_storage_linux_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
-#include <screen_retriever_linux/screen_retriever_linux_plugin.h>
+#include <screen_retriever/screen_retriever_plugin.h>
 #include <sodium_libs/sodium_libs_plugin.h>
 #include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
 #include <tray_manager/tray_manager_plugin.h>
@@ -26,9 +26,9 @@ void fl_register_plugins(FlPluginRegistry* registry) {
   g_autoptr(FlPluginRegistrar) pasteboard_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "PasteboardPlugin");
   pasteboard_plugin_register_with_registrar(pasteboard_registrar);
-  g_autoptr(FlPluginRegistrar) screen_retriever_linux_registrar =
-      fl_plugin_registry_get_registrar_for_plugin(registry, "ScreenRetrieverLinuxPlugin");
-  screen_retriever_linux_plugin_register_with_registrar(screen_retriever_linux_registrar);
+  g_autoptr(FlPluginRegistrar) screen_retriever_registrar =
+      fl_plugin_registry_get_registrar_for_plugin(registry, "ScreenRetrieverPlugin");
+  screen_retriever_plugin_register_with_registrar(screen_retriever_registrar);
   g_autoptr(FlPluginRegistrar) sodium_libs_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "SodiumLibsPlugin");
   sodium_libs_plugin_register_with_registrar(sodium_libs_registrar);
