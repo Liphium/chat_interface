@@ -111,9 +111,12 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         verticalSpacing(elementSpacing),
-                        Text(
-                          "#${widget.container.roomId}",
-                          style: Get.theme.textTheme.bodySmall,
+                        Flexible(
+                          child: Text(
+                            "#${widget.container.roomId}",
+                            style: Get.theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),

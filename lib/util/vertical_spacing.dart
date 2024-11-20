@@ -29,7 +29,14 @@ bool isMobileMode() {
 
 Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) {
   if (isMobileMode()) {
-    return Get.to<T>(widget);
+    return showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      context: Get.context!,
+      builder: (context) {
+        return widget;
+      },
+    );
   } else {
     return Get.dialog(widget);
   }

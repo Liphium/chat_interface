@@ -37,6 +37,7 @@ class _FriendsPageState extends State<FriendsPage> {
       ],
       showTitleDesktop: false,
       maxWidth: 500,
+      mobileSheet: false,
       mobileFlat: true,
       child: ConstrainedBox(
         constraints: const BoxConstraints(

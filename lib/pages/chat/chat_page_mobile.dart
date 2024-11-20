@@ -1,7 +1,7 @@
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
-import 'package:chat_interface/pages/settings/settings_page_mobile.dart';
+import 'package:chat_interface/pages/settings/settings_tab_mobile.dart';
 import 'package:chat_interface/theme/components/legacy/sidebar_icon_button.dart';
 import 'package:chat_interface/theme/ui/profile/own_profile_mobile.dart';
 import 'package:chat_interface/util/platform_callback.dart';
@@ -10,21 +10,34 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChatPageMobile extends StatefulWidget {
-  const ChatPageMobile({super.key});
+  final int selected;
+
+  const ChatPageMobile({
+    super.key,
+    this.selected = 0,
+  });
 
   @override
   State<ChatPageMobile> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPageMobile> {
+  // The currently selected tab
   final selected = 0.obs;
 
+  // All tabs that can be selected
   final tabs = <int, Widget>{
     0: const Sidebar(),
     1: const OwnProfileMobile(),
     2: const FriendsPage(),
-    3: const SettingsPageMobile(),
+    3: const SettingsTabMobile(),
   };
+
+  @override
+  void initState() {
+    selected.value = widget.selected;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

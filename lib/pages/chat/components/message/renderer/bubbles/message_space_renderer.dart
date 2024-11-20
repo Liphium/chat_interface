@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
@@ -178,44 +177,4 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
       ),
     );
   }
-}
-
-Widget renderMiniAvatars(int amount) {
-  final realAmount = min(amount, 5);
-  return SizedBox(
-    width: sectionSpacing * (realAmount + 2),
-    height: sectionSpacing * 1.5,
-    child: Stack(
-      children: List.generate(realAmount, (index) {
-        final positionedWidget = index == realAmount - 1 && amount > 5
-            ? Container(
-                height: sectionSpacing * 1.5,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(sectionSpacing * 1.5),
-                  color: Get.theme.colorScheme.inverseSurface,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
-                  child: Center(
-                    child:
-                        Text("+${amount - realAmount + 1}", style: Get.theme.textTheme.labelSmall!.copyWith(color: Get.theme.colorScheme.onPrimary)),
-                  ),
-                ),
-              )
-            : SizedBox(
-                width: sectionSpacing * 1.5,
-                height: sectionSpacing * 1.5,
-                child: CircleAvatar(
-                  backgroundColor: index % 2 == 0 ? Get.theme.colorScheme.errorContainer : Get.theme.colorScheme.tertiaryContainer,
-                  child: Icon(Icons.person, size: sectionSpacing, color: Get.theme.colorScheme.onSurface),
-                ),
-              );
-
-        return Positioned(
-          left: index * sectionSpacing,
-          child: positionedWidget,
-        );
-      }),
-    ),
-  );
 }

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +30,7 @@ class DialogBase extends StatelessWidget {
   final Widget child;
   final double maxWidth;
   final bool showTitleDesktop;
-  final bool mobilePage;
+  final bool mobileSheet;
   final bool mobileFlat;
   final List<Widget> title;
 
@@ -40,7 +39,7 @@ class DialogBase extends StatelessWidget {
     required this.child,
     this.maxWidth = 400,
     this.title = const [],
-    this.mobilePage = false,
+    this.mobileSheet = true,
     this.mobileFlat = false,
     this.showTitleDesktop = true,
   });
@@ -48,48 +47,31 @@ class DialogBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Return without animation on mobile
-    if (isMobileMode() && mobilePage) {
-      return Material(
-        color: Get.theme.colorScheme.onInverseSurface,
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(defaultSpacing),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+    if (isMobileMode() && mobileSheet) {
+      return LPHBottomSheet(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(elementSpacing),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(elementSpacing),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        LoadingIconButton(
-                          onTap: () => Get.back(),
-                          color: Get.theme.colorScheme.onPrimary,
-                          padding: 0,
-                          iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
-                          extra: defaultSpacing,
-                          icon: Icons.arrow_back,
-                        ),
-                        horizontalSpacing(defaultSpacing),
-                        ...title,
-                      ],
-                    ),
-                  ),
-                  verticalSpacing(defaultSpacing),
-                  child,
+                  ...title,
                 ],
               ),
             ),
-          ),
+            verticalSpacing(defaultSpacing),
+            child,
+          ],
         ),
       );
     }
 
     if (isMobileMode() && mobileFlat) {
       return Padding(
-        padding: const EdgeInsets.all(defaultSpacing * 1.5),
+        padding: const EdgeInsets.all(defaultSpacing),
         child: child,
       );
     }
@@ -173,45 +155,22 @@ class SlidingWindowBase extends StatelessWidget {
   Widget build(BuildContext context) {
     // Return without animation on mobile
     if (isMobileMode()) {
-      return Material(
-        color: Get.theme.colorScheme.onInverseSurface,
-        child: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: defaultSpacing,
-                left: defaultSpacing,
-                top: defaultSpacing,
-                bottom: Get.mediaQuery.padding.bottom != 0 && GetPlatform.isMobile ? Get.mediaQuery.padding.bottom : defaultSpacing,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      return LPHBottomSheet(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: elementSpacing),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(elementSpacing),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        LoadingIconButton(
-                          onTap: () => Get.back(),
-                          color: Get.theme.colorScheme.onPrimary,
-                          padding: 0,
-                          iconSize: Get.theme.textTheme.labelLarge!.fontSize! * 1.5,
-                          extra: defaultSpacing,
-                          icon: Icons.arrow_back,
-                        ),
-                        horizontalSpacing(defaultSpacing),
-                        ...title,
-                      ],
-                    ),
-                  ),
-                  verticalSpacing(defaultSpacing),
-                  child,
+                  ...title,
                 ],
               ),
             ),
-          ),
+            verticalSpacing(defaultSpacing),
+            child,
+          ],
         ),
       );
     }
@@ -263,6 +222,60 @@ class SlidingWindowBase extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class LPHBottomSheet extends StatelessWidget {
+  final Widget child;
+
+  const LPHBottomSheet({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final random = math.Random();
+    final randomOffset = random.nextDouble() * 3 + 2;
+    final randomHz = random.nextDouble() * 1 + 1.5;
+
+    return Animate(
+      effects: [
+        ShakeEffect(
+          duration: 400.ms,
+          hz: randomHz,
+          offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+          rotation: 0,
+          curve: Curves.decelerate,
+        ),
+        ScaleEffect(
+          duration: 250.ms,
+          curve: Curves.decelerate,
+          begin: Offset(0.8, 0.8),
+        ),
+      ],
+      child: Material(
+        color: Get.theme.colorScheme.onInverseSurface,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(sectionSpacing * 1.5),
+          topRight: Radius.circular(sectionSpacing * 1.5),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: sectionSpacing,
+                left: sectionSpacing,
+                top: sectionSpacing,
+                bottom: Get.mediaQuery.padding.bottom != 0 && GetPlatform.isMobile ? Get.mediaQuery.padding.bottom : sectionSpacing,
+              ),
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

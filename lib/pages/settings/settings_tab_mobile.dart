@@ -4,14 +4,14 @@ import 'package:chat_interface/util/platform_callback.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SettingsPageMobile extends StatefulWidget {
-  const SettingsPageMobile({super.key});
+class SettingsTabMobile extends StatefulWidget {
+  const SettingsTabMobile({super.key});
 
   @override
-  State<SettingsPageMobile> createState() => _SettingsPageState();
+  State<SettingsTabMobile> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPageMobile> {
+class _SettingsPageState extends State<SettingsTabMobile> {
   @override
   Widget build(BuildContext context) {
     return PlatformCallback(

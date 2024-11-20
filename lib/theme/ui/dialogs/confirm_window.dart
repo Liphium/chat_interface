@@ -18,11 +18,12 @@ class ConfirmWindow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
+      title: [
+        Text(title, style: Get.theme.textTheme.titleMedium),
+      ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(title, style: Get.theme.textTheme.titleMedium),
-          verticalSpacing(defaultSpacing),
           Text(text, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(sectionSpacing),
           Row(

@@ -300,7 +300,7 @@ class DataSettingsPage extends StatelessWidget {
           FJElevatedButton(
             smallCorners: true,
             onTap: () {
-              Get.dialog(const LogOutWindow());
+              showModal(const LogOutWindow());
             },
             child: Row(
               mainAxisSize: MainAxisSize.min,

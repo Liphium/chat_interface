@@ -15,7 +15,8 @@
 - The Zap requests and Spaces invites are now embedded into the message itself to make relation more clear
 - Made the updater more reliable by having it always download and start the latest version
 - Optimized Zap chunking size to perform better on faster internet connections
-- Fixed a bug where Zap wouldn't show progress when receiving a file 
+- Fixed a bug where Zap wouldn't show progress when receiving a file
+- Added automatic layering to Tabletop to make playing card games with card stacking easier
 
 ## 0.5.2
 

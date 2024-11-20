@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_conversations.dart';
@@ -91,7 +92,7 @@ class _SidebarState extends State<Sidebar> {
                                   ),
                                   horizontalSpacing(defaultSpacing * 0.5),
                                   Visibility(
-                                    visible: !GetPlatform.isMobile,
+                                    visible: !areCallsSupported,
                                     child: IconButton(
                                       key: _addSpaceKey,
                                       onPressed: () {

@@ -8,7 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   just_audio_windows
   pasteboard
   permission_handler_windows
-  screen_retriever
+  screen_retriever_windows
   sodium_libs
   sqlite3_flutter_libs
   tray_manager

@@ -273,7 +273,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                     showErrorPopup("error", "decks.limit_reached".tr);
                     return;
                   }
-                  final result = await Get.dialog(const DeckCreationWindow());
+                  final result = await showModal(const DeckCreationWindow());
                   if (result is TabletopDeck) {
                     _decks.add(result);
                   }
@@ -327,7 +327,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            Get.dialog(DeckCreationWindow(deck: deck)).then((value) {
+                            showModal(DeckCreationWindow(deck: deck))?.then((value) {
                               if (value is TabletopDeck) {
                                 deck.name = value.name;
                                 _loading.value = true;
@@ -353,7 +353,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                         ),
                         horizontalSpacing(defaultSpacing),
                         FJElevatedButton(
-                          onTap: () => Get.dialog(DeckCardsWindow(deck: deck)),
+                          onTap: () => showModal(DeckCardsWindow(deck: deck)),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -404,6 +404,7 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
   Widget build(BuildContext context) {
     _nameController.text = widget.deck?.name ?? "";
     return DialogBase(
+      title: const [],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -493,6 +494,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
+      title: const [],
       maxWidth: 800,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

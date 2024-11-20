@@ -1,7 +1,7 @@
 import 'dart:math';
 
+import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/pages/settings/settings_page_mobile.dart';
 import 'package:chat_interface/pages/settings/settings_sidebar.dart';
 import 'package:chat_interface/pages/settings/setting_selection_mobile.dart';
 import 'package:chat_interface/util/platform_callback.dart';
@@ -28,10 +28,10 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
           mobile: () {
             final current = Get.find<SettingController>().currentCategory.value;
             if (current != null) {
-              Get.off(const SettingsPageMobile());
+              Get.off(const ChatPageMobile(selected: 3));
               Get.to(current.widget);
             } else {
-              Get.off(const SettingsPageMobile());
+              Get.off(const ChatPageMobile(selected: 3));
             }
           },
           child: LayoutBuilder(builder: (context, constraints) {
