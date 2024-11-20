@@ -18,20 +18,20 @@ class DeckObject extends TableObject {
 
   /// All card ids in the order they are in the deck (we separate this from the cards map so we don't have
   /// to send all the card data to the server twice if a card is in there twice)
-  var order = <String>[];
+  var cardOrder = <String>[];
 
   // The width and height of the current top card
   final width = AnimatedDouble(500);
   final height = AnimatedDouble(500);
 
-  DeckObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.deck);
+  DeckObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.deck);
 
   factory DeckObject.createFromDeck(Offset location, TabletopDeck deck) {
-    final obj = DeckObject("", location, const Size(500, 500));
+    final obj = DeckObject("", 0, location, const Size(500, 500));
     for (var card in deck.cards) {
       obj.cards[card.id] = card;
       for (int i = 0; i < (deck.amounts[card.id] ?? 1); i++) {
-        obj.order.add(card.id);
+        obj.cardOrder.add(card.id);
       }
     }
     obj.setWidthAndHeight(replace: true);
@@ -75,7 +75,7 @@ class DeckObject extends TableObject {
       Paint()..color = Get.theme.colorScheme.inverseSurface,
     );
     var textSpan = TextSpan(
-      text: order.length.toString(),
+      text: cardOrder.length.toString(),
       style: TextStyle(
         color: Get.theme.colorScheme.onPrimary,
         fontSize: 100,
@@ -94,7 +94,7 @@ class DeckObject extends TableObject {
 
   @override
   void handleData(String data) async {
-    order.clear();
+    cardOrder.clear();
     cards.clear();
 
     // Unpack all the json in an isolate
@@ -102,7 +102,7 @@ class DeckObject extends TableObject {
       return jsonDecode(data);
     });
 
-    order = (json["order"] as List<dynamic>).cast<String>();
+    cardOrder = (json["order"] as List<dynamic>).cast<String>();
 
     // Go through all cards and unpack them (only works in main thread cause sodium)
     final cardMap = json["cards"] as Map<String, dynamic>;
@@ -118,7 +118,7 @@ class DeckObject extends TableObject {
 
   /// Refresh the current top card and set width and height of it
   void setWidthAndHeight({bool replace = false}) {
-    final top = order.firstOrNull;
+    final top = cardOrder.firstOrNull;
     if (top != null) {
       final card = cards[top]!;
       final newSize = CardObject.normalizeSize(Size(card.width!.toDouble(), card.height!.toDouble()), CardObject.cardNormalizer);
@@ -142,7 +142,7 @@ class DeckObject extends TableObject {
 
     return jsonEncode({
       "cards": map,
-      "order": order.toList(),
+      "order": cardOrder.toList(),
     });
   }
 
@@ -153,16 +153,16 @@ class DeckObject extends TableObject {
 
   /// Draw a card from the deck into the inventory
   void drawCardIntoInventory(TabletopController controller) async {
-    if (order.isEmpty) {
+    if (cardOrder.isEmpty) {
       return;
     }
     queue(() async {
       // Get the card and its container
-      final cardId = order.removeAt(0);
+      final cardId = cardOrder.removeAt(0);
       final container = cards[cardId]!;
 
       // Remove the container of the card from the cards map in case it is no longer needed
-      if (!order.contains(cardId)) {
+      if (!cardOrder.contains(cardId)) {
         cards.remove(cardId);
       }
 
@@ -181,7 +181,7 @@ class DeckObject extends TableObject {
   /// Shuffle the deck
   void shuffle() {
     queue(() async {
-      order.shuffle();
+      cardOrder.shuffle();
       modifyData();
     });
   }
@@ -190,7 +190,7 @@ class DeckObject extends TableObject {
     queue(() async {
       // Add teh card to the local deck
       cards[obj.container!.id] = obj.container!;
-      order.add(obj.container!.id);
+      cardOrder.add(obj.container!.id);
 
       // Update the deck on the server
       final valid = await modifyData();

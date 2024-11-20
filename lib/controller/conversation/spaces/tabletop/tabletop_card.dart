@@ -23,7 +23,7 @@ class CardObject extends TableObject {
   bool flipped = false;
   final flipAnimation = AnimatedDouble(0, duration: 750);
 
-  CardObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.card);
+  CardObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.card);
 
   static Future<CardObject?> downloadCard(AttachmentContainer container, Offset location, {String id = ""}) async {
     // Check if the container fits the new standard
@@ -36,6 +36,7 @@ class CardObject extends TableObject {
     final normalized = normalizeSize(size, cardNormalizer);
     final obj = CardObject(
       id,
+      0,
       location,
       normalized,
     );

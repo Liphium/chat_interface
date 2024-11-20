@@ -13,6 +13,7 @@ void setupTabletopListeners() {
     for (var obj in event.data["obj"]) {
       controller.addObject(controller.newObject(
         TableObjectType.values[obj["t"]],
+        obj["o"],
         obj["id"],
         Offset((obj["x"] as num).toDouble(), (obj["y"] as num).toDouble()),
         Size((obj["w"] as num).toDouble(), (obj["h"] as num).toDouble()),
@@ -31,12 +32,31 @@ void setupTabletopListeners() {
     controller.addObject(controller.newObject(
       TableObjectType.values[event.data["type"]],
       event.data["id"],
+      event.data["o"],
       Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
       Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble()),
       (event.data["r"] as num).toDouble(),
       event.data["data"],
     ));
   });
+
+  // Listen for swaps
+  spaceConnector.listen(
+    "tobj_order",
+    (event) {
+      // Set new order for the first object
+      var objectId = event.data["o"];
+      var newOrder = (event.data["or"] as num).toInt();
+      controller.objectOrder[newOrder] = objectId;
+      controller.objects[objectId]!.order = newOrder;
+
+      // Set new order for the second object
+      objectId = event.data["lo"];
+      newOrder = (event.data["lor"] as num).toInt();
+      controller.objectOrder[newOrder] = objectId;
+      controller.objects[objectId]!.order = newOrder;
+    },
+  );
 
   // Listen for cursor movements
   spaceConnector.listen("tc_moved", (event) {

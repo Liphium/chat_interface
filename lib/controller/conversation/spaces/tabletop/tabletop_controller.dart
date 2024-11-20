@@ -27,7 +27,9 @@ class TabletopController extends GetxController {
 
   List<TableObject> hoveringObjects = [];
   final inventory = <CardObject>[].obs;
-  final objects = <String, TableObject>{}.obs;
+  final objectOrder = <int, String>{};
+  int maxOrder = 0;
+  final objects = <String, TableObject>{};
   final cursors = <String, TabletopCursor>{}.obs; // Other users cursors
 
   /// The rate at which the table is updated (to the server)
@@ -162,17 +164,17 @@ class TabletopController extends GetxController {
   }
 
   /// Create a new object
-  TableObject newObject(TableObjectType type, String id, Offset location, Size size, double rotation, String data) {
+  TableObject newObject(TableObjectType type, String id, int order, Offset location, Size size, double rotation, String data) {
     TableObject object;
     switch (type) {
       case TableObjectType.text:
-        object = TextObject(id, location, size);
+        object = TextObject(id, order, location, size);
         break;
       case TableObjectType.deck:
-        object = DeckObject(id, location, size);
+        object = DeckObject(id, order, location, size);
         break;
       case TableObjectType.card:
-        object = CardObject(id, location, size);
+        object = CardObject(id, order, location, size);
         break;
     }
     object.rotate(rotation);
@@ -182,24 +184,50 @@ class TabletopController extends GetxController {
 
   /// Add an object to the list
   void addObject(TableObject object) {
-    if (object.id == "") {
+    if (object.id == "" || object.order == 0) {
       return;
     }
+    if (object.order > maxOrder) {
+      maxOrder = object.order;
+    }
+    objectOrder[object.order] = object.id;
     objects[object.id] = object;
   }
 
   /// Remove an object from the list
   void removeObject({TableObject? object, String? id}) {
-    objects.remove(id ?? object?.id);
+    final obj = objects.remove(id ?? object?.id);
+    if (obj != null) {
+      objectOrder.remove(obj.order);
+    }
+  }
+
+  /// Set the order of an object
+  void setOrder(String object, int newOrder) {
+    if (newOrder > maxOrder) {
+      maxOrder = newOrder;
+    }
+    objectOrder[newOrder] = object;
+    objects[object]!.order = newOrder;
   }
 
   /// Get the object at a location
   List<TableObject> raycast(Offset location) {
     final objects = <TableObject>[];
-    for (var object in this.objects.values) {
+    final typesFound = <TableObjectType>[];
+    for (var i = maxOrder; i > 0; i--) {
+      // Get the object at the current drawing layer
+      final objectId = objectOrder[i];
+      if (objectId == null) {
+        continue;
+      }
+
+      // Check if the object is hovered
+      final object = this.objects[objectId]!;
       final rect = Rect.fromLTWH(object.location.dx, object.location.dy, object.size.width, object.size.height);
-      if (rect.contains(location)) {
+      if (rect.contains(location) && !typesFound.contains(object.type)) {
         objects.add(object);
+        typesFound.add(object.type);
       }
     }
     return objects;
@@ -207,8 +235,6 @@ class TabletopController extends GetxController {
 
   /// Start holding an object in tabletop (also drops objects in case they don't exist)
   void startHoldingObject(TableObject object) async {
-    sendLog("should start holding");
-
     // Check if it is a card from the inventory that should be dropped
     var currentlyExists = false;
     if (object is CardObject && object.inventory) {
@@ -291,10 +317,11 @@ enum TableObjectType {
 }
 
 abstract class TableObject {
-  TableObject(this.id, this.location, this.size, this.type);
+  TableObject(this.id, this.order, this.location, this.size, this.type);
 
   Function()? dataCallback;
   String id;
+  int order;
   TableObjectType type;
 
   /// The size of the object
@@ -417,7 +444,8 @@ abstract class TableObject {
           return;
         }
         id = event.data["id"];
-        sendLog("ADDING $id to table");
+        order = event.data["o"];
+        sendLog("ADDING $id to table with order $order");
         Get.find<TabletopController>().addObject(this);
         completer.complete(true);
       },

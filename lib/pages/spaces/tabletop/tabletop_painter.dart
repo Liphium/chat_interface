@@ -1,9 +1,7 @@
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:math' as math;
 
 class TabletopPainter extends CustomPainter {
   final TabletopController controller;
@@ -116,20 +114,22 @@ class TabletopPainter extends CustomPainter {
 
     final now = DateTime.now();
     controller.hoveringObjects = controller.raycast(mousePosition);
-
-    for (var object in controller.objects.values) {
-      if (controller.hoveringObjects.contains(object)) {
+    for (var i = 1; i <= controller.maxOrder; i++) {
+      // Get the object at the current drawing layer
+      final objectId = controller.objectOrder[i];
+      if (objectId == null) {
         continue;
       }
-      final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
-      object.scale.setValue(1.0);
-      object.unhoverRotation();
-      drawObject(canvas, location, object, now);
-    }
 
-    for (var object in controller.hoveringObjects) {
+      // Render the object
+      final object = controller.objects[objectId]!;
+      if (controller.hoveringObjects.contains(object)) {
+        object.hoverRotation(-rotation);
+      } else {
+        object.scale.setValue(1.0);
+        object.unhoverRotation();
+      }
       final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
-      object.hoverRotation(-rotation);
       drawObject(canvas, location, object, now);
     }
 

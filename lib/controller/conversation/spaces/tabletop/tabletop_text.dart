@@ -14,10 +14,10 @@ class TextObject extends TableObject {
   final fontSize = AnimatedDouble(0);
   String text = "";
 
-  TextObject(String id, Offset location, Size size) : super(id, location, size, TableObjectType.text);
+  TextObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.text);
 
   factory TextObject.createFromText(Offset location, String text, double fontSize) {
-    final obj = TextObject("", location, const Size(0, 0));
+    final obj = TextObject("", 0, location, const Size(0, 0));
     obj.text = text;
     obj.fontSize.setRealValue(fontSize);
     obj.evaluateSize();
