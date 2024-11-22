@@ -24,10 +24,10 @@ class _SettingsPageState extends State<SettingsTabMobile> {
           color: Get.theme.colorScheme.onInverseSurface,
           child: const SingleChildScrollView(
             child: SafeArea(
-              bottom: true,
+              bottom: false,
               left: true,
               right: true,
-              top: false,
+              top: true,
               child: SettingSelectionMobile(),
             ),
           ),
