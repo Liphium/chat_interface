@@ -34,12 +34,15 @@ class _SidebarState extends State<Sidebar> {
       //* Sidebar content
       child: LayoutBuilder(builder: (context, constraints) {
         return Padding(
-          padding: EdgeInsets.only(top: Get.mediaQuery.padding.top != 0 && GetPlatform.isMobile ? 0 : defaultSpacing),
+          padding: EdgeInsets.only(
+            top: Get.mediaQuery.padding.top != 0 && GetPlatform.isMobile ? 0 : defaultSpacing,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Show error from the connection
               SafeArea(
+                top: false,
                 bottom: false,
                 child: AnimatedErrorContainer(
                   padding: const EdgeInsets.only(

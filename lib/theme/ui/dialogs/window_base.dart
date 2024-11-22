@@ -71,7 +71,11 @@ class DialogBase extends StatelessWidget {
 
     if (isMobileMode() && mobileFlat) {
       return Padding(
-        padding: const EdgeInsets.all(defaultSpacing),
+        padding: EdgeInsets.only(
+          top: Get.mediaQuery.padding.top,
+          right: defaultSpacing * 1.5,
+          left: defaultSpacing * 1.5,
+        ),
         child: child,
       );
     }

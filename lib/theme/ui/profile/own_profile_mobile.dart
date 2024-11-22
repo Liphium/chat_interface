@@ -46,8 +46,19 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
     _status.text = controller.status.value;
     statusMessage.value = controller.status.value;
 
+    // Calculate the edge insets for the device
+    var startPadding = EdgeInsets.all(defaultSpacing * 1.5);
+    if (Get.mediaQuery.padding.top != 0) {
+      startPadding = EdgeInsets.only(
+        top: Get.mediaQuery.padding.top,
+        bottom: startPadding.bottom,
+        right: startPadding.right,
+        left: startPadding.left,
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.all(defaultSpacing * 1.5),
+      padding: startPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

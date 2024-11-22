@@ -23,7 +23,7 @@ class SidebarIconButton extends StatefulWidget {
 }
 
 class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderStateMixin {
-  late final AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -31,6 +31,12 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
       vsync: this,
     );
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant SidebarIconButton oldWidget) {
+    _controller = AnimationController(vsync: this);
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

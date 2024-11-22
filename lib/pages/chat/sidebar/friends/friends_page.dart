@@ -52,7 +52,7 @@ class _FriendsPageState extends State<FriendsPage> {
                 borderRadius: BorderRadius.circular(defaultSpacing),
                 color: Get.theme.colorScheme.primary,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
+                  padding: EdgeInsets.symmetric(horizontal: elementSpacing),
                   child: Row(
                     children: [
                       horizontalSpacing(defaultSpacing),
