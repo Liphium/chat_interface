@@ -21,7 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
@@ -495,7 +495,7 @@ class ZapShareController extends GetxController {
                 completed = complete;
                 if (completed) {
                   sendLog("download with zap completed, opening final folder..");
-                  OpenAppFile.open(path.dirname(receiveFile.path));
+                  OpenFile.open(path.dirname(receiveFile.path));
                   partSubscription?.cancel();
                 }
               },

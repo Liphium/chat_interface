@@ -12,7 +12,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class ServerFileViewer extends StatefulWidget {
@@ -219,7 +219,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                   horizontalSpacing(defaultSpacing + elementSpacing),
                                   if (file.path != null)
                                     IconButton(
-                                      onPressed: () => OpenAppFile.open(file.path!),
+                                      onPressed: () => OpenFile.open(file.path!),
                                       icon: const Icon(Icons.launch),
                                     ),
                                   LoadingIconButton(

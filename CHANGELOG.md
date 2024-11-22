@@ -17,6 +17,7 @@
 - Optimized Zap chunking size to perform better on faster internet connections
 - Fixed a bug where Zap wouldn't show progress when receiving a file
 - Added automatic layering to Tabletop to make playing card games with card stacking easier
+- Updated the version of the package used to open files using native apps
 
 ## 0.5.2
 

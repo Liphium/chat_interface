@@ -16,7 +16,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
 
 class AttachmentRenderer extends StatefulWidget {
@@ -265,7 +265,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             if (widget.container.downloaded.value) {
               return IconButton(
                 onPressed: () async {
-                  final result = await OpenAppFile.open(widget.container.file!.path);
+                  final result = await OpenFile.open(widget.container.file!.path);
                   if (result.type == ResultType.error) {
                     showErrorPopup("error", result.message);
                   }

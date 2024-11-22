@@ -11,7 +11,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:pasteboard/pasteboard.dart';
 
 class MessageOptionsWindow extends StatefulWidget {
@@ -121,7 +121,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
                   // Open the file with the default app
                   final attachment = widget.message.attachmentsRenderer[0];
-                  OpenAppFile.open(attachment.file!.path);
+                  OpenFile.open(attachment.file!.path);
                   Get.back();
                 },
                 loading: false.obs,

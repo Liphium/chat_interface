@@ -11,7 +11,7 @@ import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
@@ -110,7 +110,7 @@ class FileSettingsPage extends StatelessWidget {
               FJElevatedButton(
                 onTap: () async {
                   final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_${StatusController.ownAccountId}");
-                  OpenAppFile.open(cacheFolder);
+                  OpenFile.open(cacheFolder);
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -124,7 +124,7 @@ class FileSettingsPage extends StatelessWidget {
               FJElevatedButton(
                 onTap: () async {
                   final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_${StatusController.ownAccountId}");
-                  OpenAppFile.open(fileFolder);
+                  OpenFile.open(fileFolder);
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -138,7 +138,7 @@ class FileSettingsPage extends StatelessWidget {
               FJElevatedButton(
                 onTap: () async {
                   final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_${StatusController.ownAccountId}");
-                  OpenAppFile.open(fileFolder);
+                  OpenFile.open(fileFolder);
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
