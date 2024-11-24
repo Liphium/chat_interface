@@ -57,6 +57,10 @@ class GeneralTranslations extends Translations {
           'rank': 'Rank',
           'liphium_address': 'Your Liphium address',
 
+          // Spaces
+          'spaces.not_supported': 'Not supported',
+          'spaces.not_supported.desc': 'We\'re sorry for the inconvenience, but as of now Spaces is only available on Desktop as a preview.',
+
           // Placeholder
           'placeholder.domain': 'example.com',
 

@@ -1,9 +1,11 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_dev_window.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,6 +27,9 @@ class ConversationInfoPage extends StatefulWidget {
 }
 
 class _ConversationInfoPageState extends State<ConversationInfoPage> {
+  // Loading states
+  final deleteLoading = false.obs;
+
   @override
   Widget build(BuildContext context) {
     return SlidingWindowBase(
@@ -90,20 +95,16 @@ class _ConversationInfoPageState extends State<ConversationInfoPage> {
           ),
           Visibility(
             visible: widget.conversation.isGroup,
-            replacement: ProfileButton(
-              icon: Icons.person,
-              label: "View profile",
-              onTap: () => Get.dialog(Profile(friend: widget.conversation.otherMember)),
-              loading: false.obs,
-            ),
-            child: ProfileButton(
-              icon: Icons.edit,
-              label: "Edit title",
-              onTap: () => {},
-              loading: false.obs,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.edit,
+                label: "Edit title",
+                onTap: () => {},
+                loading: false.obs,
+              ),
             ),
           ),
-          verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.developer_mode,
             label: "For developers",
@@ -123,8 +124,10 @@ class _ConversationInfoPageState extends State<ConversationInfoPage> {
               iconColor: Get.theme.colorScheme.error,
               icon: Icons.delete,
               label: "Remove friend",
-              onTap: () => {},
-              loading: false.obs,
+              onTap: () {
+                ProfileDefaults.deleteAction.call(widget.conversation.otherMember, deleteLoading);
+              },
+              loading: deleteLoading,
             ),
           ),
           verticalSpacing(elementSpacing),
@@ -133,7 +136,15 @@ class _ConversationInfoPageState extends State<ConversationInfoPage> {
             iconColor: Get.theme.colorScheme.error,
             icon: Icons.logout,
             label: "Leave conversation",
-            onTap: () => {},
+            onTap: () => showConfirmPopup(ConfirmWindow(
+              title: "conversations.leave".tr,
+              text: "conversations.leave.text".tr,
+              onConfirm: () {
+                widget.conversation.delete();
+                Get.back();
+              },
+              onDecline: () => {},
+            )),
             loading: false.obs,
           ),
         ],

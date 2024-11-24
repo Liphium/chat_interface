@@ -87,7 +87,16 @@ class SpacesController extends GetxController {
   }
 
   void createAndConnect(MessageProvider provider) {
+    if (!areSpacesSupported) {
+      showNotSupported();
+      return;
+    }
+
     _startSpace((container) => provider.sendMessage(spaceLoading, MessageType.call, [], container.toInviteJson(), ""));
+  }
+
+  void showNotSupported() {
+    showErrorPopup("spaces.not_supported", "spaces.not_supported.desc".tr);
   }
 
   void inviteToCall(MessageProvider provider) {

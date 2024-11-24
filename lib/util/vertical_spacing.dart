@@ -27,16 +27,24 @@ bool isMobileMode() {
   return Get.width < 800 || Get.height < 500;
 }
 
-Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) {
+Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) async {
   if (isMobileMode()) {
+    if (Get.mediaQuery.viewInsets.bottom > 0) {
+      await Future.delayed(300.ms);
+    }
+
     return showModalBottomSheet(
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       context: Get.context!,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom),
-          child: widget,
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom),
+              child: widget,
+            );
+          },
         );
       },
     );

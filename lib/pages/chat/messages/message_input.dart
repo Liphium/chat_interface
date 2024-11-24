@@ -103,7 +103,9 @@ class _MessageInputState extends State<MessageInput> {
     }
     MessageSendHelper.currentDraft.value = MessageSendHelper.drafts[newDraft] ?? MessageDraft(newDraft, "");
     _message.text = MessageSendHelper.currentDraft.value!.message;
-    _inputFocus.requestFocus();
+    if (!isMobileMode()) {
+      _inputFocus.requestFocus();
+    }
   }
 
   void resetCurrentDraft() {
@@ -428,7 +430,7 @@ class _MessageInputState extends State<MessageInput> {
                         horizontalSpacing(defaultSpacing),
                         Expanded(
                           child: FocusableActionDetector(
-                            autofocus: true,
+                            autofocus: !isMobileMode(),
                             actions: actionsMap,
                             shortcuts: {
                               LogicalKeySet(LogicalKeyboardKey.enter): const SendIntent(),
@@ -453,6 +455,9 @@ class _MessageInputState extends State<MessageInput> {
                                 onAppPrivateCommand: (action, data) {
                                   sendLog("app private command");
                                 },
+                                onTapOutside: (event) {
+                                  _inputFocus.unfocus();
+                                },
                                 cursorColor: theme.colorScheme.tertiary,
                                 style: theme.textTheme.labelLarge,
                                 controller: _message,
@@ -464,10 +469,12 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         IconButton(
                           key: _libraryKey,
-                          onPressed: () => showModal(LibraryWindow(
-                            data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
-                            provider: widget.provider,
-                          )),
+                          onPressed: () => showModal(
+                            LibraryWindow(
+                              data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
+                              provider: widget.provider,
+                            ),
+                          ),
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),

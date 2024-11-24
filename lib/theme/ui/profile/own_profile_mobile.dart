@@ -5,6 +5,7 @@ import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/forms/lph_action_fields.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/profile/developer_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -29,6 +30,7 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
 
   // Developer things
   final testLoading = false.obs;
+  final _clicks = 0.obs;
 
   @override
   void dispose() {
@@ -103,34 +105,11 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                     children: [
                       LoadingIconButton(
                         onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            enableDrag: true,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (context) {
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: Get.mediaQuery.viewInsets.bottom,
-                                ),
-                                child: Container(
-                                  color: Colors.black,
-                                  width: double.infinity,
-                                  height: 300,
-                                  child: Center(
-                                    child: FJTextField(),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                          /*
                           _clicks.value++;
                           if (_clicks.value > 7) {
                             showModal(const DeveloperWindow());
                           }
                           Clipboard.setData(ClipboardData(text: controller.name.value));
-                          */
                         },
                         background: true,
                         backgroundColor: Get.theme.colorScheme.primary,

@@ -67,7 +67,7 @@ class ChatPageTranslations extends Translations {
           'chat.invite_to_space': 'Invite to Space',
           'conversations.leave': 'Leave conversation',
           'conversations.leave.text':
-              'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back.',
+              'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back. If this is a private chat with someone, it will be deleted forever.',
           'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
           'conversations.add': 'Add a member',
           'conversations.add.create': 'New conversation',
@@ -160,7 +160,6 @@ class ChatPageTranslations extends Translations {
           'chat.space.not_found': 'This space already ended.',
           'chat.space.loading': 'Loading space..',
           'chat.space.leave': 'Do you really want to leave your current space?',
-          'tabletop.general.smooth_scrolling': 'Smooth scrolling',
 
           // Townsquare
           'townsquare.connection_error': "Couldn't connect to Townsquare. Please contact the admins of your instance about this or try again later.",

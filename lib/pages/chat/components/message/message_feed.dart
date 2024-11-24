@@ -70,13 +70,16 @@ class _MessageFeedState extends State<MessageFeed> {
       return Column(
         children: [
           //* Header
-          if (isMobileMode())
-            MobileMessageBar(conversation: controller.currentProvider.value!.conversation)
-          else
-            MessageBar(
-              conversation: controller.currentProvider.value!.conversation,
-              provider: controller.currentProvider.value!,
-            ),
+          DevicePadding(
+            top: true,
+            padding: const EdgeInsets.all(0),
+            child: isMobileMode()
+                ? MobileMessageBar(conversation: controller.currentProvider.value!.conversation)
+                : MessageBar(
+                    conversation: controller.currentProvider.value!.conversation,
+                    provider: controller.currentProvider.value!,
+                  ),
+          ),
 
           Expanded(
             child: Row(

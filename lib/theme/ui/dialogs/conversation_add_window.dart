@@ -90,7 +90,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
         _members.add(friend);
       }
     }
-    _searchFocusNode.requestFocus();
+    if (!isMobileMode()) {
+      _searchFocusNode.requestFocus();
+    }
     super.initState();
   }
 
@@ -186,7 +188,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
                         _search.value = "";
                         _searchController.clear();
-                        _searchFocusNode.requestFocus();
+                        if (!isMobileMode()) {
+                          _searchFocusNode.requestFocus();
+                        }
                       }
                     },
                     maxLines: 1,

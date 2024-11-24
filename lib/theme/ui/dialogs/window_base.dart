@@ -53,16 +53,17 @@ class DialogBase extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(elementSpacing),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ...title,
-                ],
+            if (title.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(elementSpacing),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ...title,
+                  ],
+                ),
               ),
-            ),
-            verticalSpacing(defaultSpacing),
+            if (title.isNotEmpty) verticalSpacing(defaultSpacing),
             child,
           ],
         ),
@@ -166,16 +167,17 @@ class SlidingWindowBase extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: elementSpacing),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ...title,
-                ],
+            if (title.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: elementSpacing),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ...title,
+                  ],
+                ),
               ),
-            ),
-            verticalSpacing(defaultSpacing),
+            if (title.isNotEmpty) verticalSpacing(defaultSpacing),
             child,
           ],
         ),
