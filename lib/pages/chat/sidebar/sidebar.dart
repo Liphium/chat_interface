@@ -32,126 +32,124 @@ class _SidebarState extends State<Sidebar> {
       ),
 
       //* Sidebar content
-      child: LayoutBuilder(builder: (context, constraints) {
-        return Padding(
-          padding: EdgeInsets.only(
-            top: Get.mediaQuery.padding.top != 0 && GetPlatform.isMobile ? 0 : defaultSpacing,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Show error from the connection
-              SafeArea(
-                top: false,
-                bottom: false,
-                child: AnimatedErrorContainer(
-                  padding: const EdgeInsets.only(
-                    bottom: defaultSpacing,
-                    right: defaultSpacing,
-                    left: defaultSpacing,
-                  ),
-                  message: Get.find<ConnectionController>().error,
+      child: DevicePadding(
+        top: true,
+        right: true,
+        left: true,
+        padding: EdgeInsets.all(0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Padding for the sidebar to make sure the error doesn't look weird
+            verticalSpacing(defaultSpacing),
+
+            // Show error from the connection
+            SafeArea(
+              top: false,
+              bottom: false,
+              child: AnimatedErrorContainer(
+                padding: const EdgeInsets.only(
+                  bottom: defaultSpacing,
+                  right: defaultSpacing,
+                  left: defaultSpacing,
                 ),
+                message: Get.find<ConnectionController>().error,
               ),
+            ),
 
-              //* Search field
-              SafeArea(
-                bottom: false,
-                child: SizedBox(
-                  height: 48,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: Material(
-                            borderRadius: BorderRadius.circular(defaultSpacing),
-                            color: Get.theme.colorScheme.primary,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
-                              child: Row(
-                                children: [
-                                  horizontalSpacing(defaultSpacing),
-                                  Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
-                                  horizontalSpacing(defaultSpacing),
-                                  Expanded(
-                                    child: TextField(
-                                      style: Get.theme.textTheme.labelMedium,
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        focusColor: Get.theme.colorScheme.onPrimary,
-                                        iconColor: Get.theme.colorScheme.onPrimary,
-                                        fillColor: Get.theme.colorScheme.onPrimary,
-                                        hoverColor: Get.theme.colorScheme.onPrimary,
-                                        hintText: "conversations.placeholder".tr,
-                                        hintStyle: Get.textTheme.bodyMedium,
-                                      ),
-                                      onChanged: (value) {
-                                        query.value = value;
-                                      },
-                                      cursorColor: Get.theme.colorScheme.onPrimary,
-                                    ),
+            //* Search field
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+              child: SizedBox(
+                height: 48,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Material(
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        color: Get.theme.colorScheme.primary,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing * 0.5),
+                          child: Row(
+                            children: [
+                              horizontalSpacing(defaultSpacing),
+                              Icon(Icons.search, color: Get.theme.colorScheme.onPrimary),
+                              horizontalSpacing(defaultSpacing),
+                              Expanded(
+                                child: TextField(
+                                  style: Get.theme.textTheme.labelMedium,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    focusColor: Get.theme.colorScheme.onPrimary,
+                                    iconColor: Get.theme.colorScheme.onPrimary,
+                                    fillColor: Get.theme.colorScheme.onPrimary,
+                                    hoverColor: Get.theme.colorScheme.onPrimary,
+                                    hintText: "conversations.placeholder".tr,
+                                    hintStyle: Get.textTheme.bodyMedium,
                                   ),
-                                  horizontalSpacing(defaultSpacing * 0.5),
-                                  Visibility(
-                                    visible: !areCallsSupported,
-                                    child: IconButton(
-                                      key: _addSpaceKey,
-                                      onPressed: () {
-                                        if (isWeb) {
-                                          Get.dialog(UpgradeWindow());
-                                          return;
-                                        }
-
-                                        //* Open space add window
-                                        final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
-                                        showModal(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                                      },
-                                      icon: Icon(Icons.rocket_launch, color: Get.theme.colorScheme.onPrimary),
-                                    ),
-                                  ),
-                                  horizontalSpacing(defaultSpacing * 0.5),
-                                  IconButton(
-                                    key: _addConvKey,
-                                    onPressed: () {
-                                      final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
-
-                                      //* Open conversation add window
-                                      showModal(ConversationAddWindow(
-                                        position:
-                                            ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
-                                      ));
-                                    },
-                                    icon: Icon(Icons.chat_bubble, color: Get.theme.colorScheme.onPrimary),
-                                  ),
-                                ],
+                                  onChanged: (value) {
+                                    query.value = value;
+                                  },
+                                  cursorColor: Get.theme.colorScheme.onPrimary,
+                                ),
                               ),
-                            ),
+                              horizontalSpacing(defaultSpacing * 0.5),
+                              Visibility(
+                                visible: !areSpacesSupported,
+                                child: IconButton(
+                                  key: _addSpaceKey,
+                                  onPressed: () {
+                                    if (isWeb) {
+                                      Get.dialog(UpgradeWindow());
+                                      return;
+                                    }
+
+                                    //* Open space add window
+                                    final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
+                                    showModal(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                                  },
+                                  icon: Icon(Icons.rocket_launch, color: Get.theme.colorScheme.onPrimary),
+                                ),
+                              ),
+                              horizontalSpacing(defaultSpacing * 0.5),
+                              IconButton(
+                                key: _addConvKey,
+                                onPressed: () {
+                                  final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
+
+                                  //* Open conversation add window
+                                  showModal(ConversationAddWindow(
+                                    position: ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
+                                  ));
+                                },
+                                icon: Icon(Icons.chat_bubble, color: Get.theme.colorScheme.onPrimary),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
+            ),
 
-              // Conversation list and the profile
-              Expanded(
-                child: SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                    child: SidebarConversationList(query: query),
-                  ),
+            // Conversation list and the profile
+            Expanded(
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                  child: SidebarConversationList(query: query),
                 ),
               ),
-              if (!isMobileMode()) const SidebarProfile()
-            ],
-          ),
-        );
-      }),
+            ),
+            if (!isMobileMode()) const SidebarProfile()
+          ],
+        ),
+      ),
     );
   }
 }

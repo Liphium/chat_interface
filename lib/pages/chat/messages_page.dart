@@ -5,16 +5,16 @@ import 'package:chat_interface/util/platform_callback.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ConversationPage extends StatefulWidget {
+class MessagesPageMobile extends StatefulWidget {
   final ConversationMessageProvider provider;
 
-  const ConversationPage({super.key, required this.provider});
+  const MessagesPageMobile({super.key, required this.provider});
 
   @override
-  State<ConversationPage> createState() => _ConversationPageState();
+  State<MessagesPageMobile> createState() => _MessagesPageMobileState();
 }
 
-class _ConversationPageState extends State<ConversationPage> {
+class _MessagesPageMobileState extends State<MessagesPageMobile> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);

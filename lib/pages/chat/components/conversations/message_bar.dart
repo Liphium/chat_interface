@@ -124,7 +124,7 @@ class _MessageBarState extends State<MessageBar> {
                     ],
                   ),
 
-                if (Get.find<SpacesController>().inSpace.value && areCallsSupported)
+                if (Get.find<SpacesController>().inSpace.value && areSpacesSupported)
                   LoadingIconButton(
                     icon: Icons.forward_to_inbox,
                     iconSize: 27,
@@ -136,7 +136,7 @@ class _MessageBarState extends State<MessageBar> {
                     },
                   ),
 
-                if (areCallsSupported)
+                if (areSpacesSupported)
                   LoadingIconButton(
                     icon: Icons.rocket_launch,
                     iconSize: 27,

@@ -9,7 +9,6 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:screenshot/screenshot.dart';
 
 class ProfilePictureWindow extends StatefulWidget {

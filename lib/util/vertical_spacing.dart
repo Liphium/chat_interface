@@ -34,7 +34,10 @@ Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) {
       isScrollControlled: true,
       context: Get.context!,
       builder: (context) {
-        return widget;
+        return Padding(
+          padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom),
+          child: widget,
+        );
       },
     );
   } else {
@@ -111,4 +114,48 @@ class ReverseExpandEffect extends CustomEffect {
             );
           },
         );
+}
+
+class DevicePadding extends StatelessWidget {
+  final bool top;
+  final bool bottom;
+  final bool left;
+  final bool right;
+
+  final EdgeInsets padding;
+  final Widget? child;
+
+  const DevicePadding({
+    super.key,
+    this.top = false,
+    this.bottom = false,
+    this.left = false,
+    this.right = false,
+    required this.padding,
+    this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    var finalPadding = padding;
+
+    // Check if there is device padding
+    if (Get.mediaQuery.padding != EdgeInsets.zero) {
+      var extraTop = Get.mediaQuery.padding.top;
+      var extraBottom = Get.mediaQuery.padding.bottom;
+      var extraRight = Get.mediaQuery.padding.right;
+      var extraLeft = Get.mediaQuery.padding.left;
+      finalPadding = EdgeInsets.only(
+        top: top ? extraTop + padding.top : padding.top,
+        bottom: top ? extraBottom + padding.bottom : padding.bottom,
+        right: top ? extraRight + padding.right : padding.right,
+        left: top ? extraLeft + padding.left : padding.left,
+      );
+    }
+
+    return Padding(
+      padding: finalPadding,
+      child: child,
+    );
+  }
 }

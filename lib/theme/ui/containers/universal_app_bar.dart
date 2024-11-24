@@ -16,36 +16,31 @@ class UniversalAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      elevation: 2.0,
       color: Get.theme.colorScheme.primaryContainer,
-      child: SafeArea(
+      child: DevicePadding(
         top: applyPadding,
-        bottom: false,
         right: true,
         left: true,
-        child: Padding(
-          padding: GetPlatform.isMobile
-              ? const EdgeInsets.only(
-                  bottom: defaultSpacing,
-                  right: defaultSpacing,
-                  left: defaultSpacing,
-                )
-              : const EdgeInsets.all(defaultSpacing),
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: () => Get.back(),
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: Get.theme.colorScheme.onPrimary,
-                ),
+        padding: const EdgeInsets.symmetric(
+          vertical: elementSpacing,
+          horizontal: defaultSpacing,
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: () => Get.back(),
+              icon: Icon(
+                Icons.arrow_back,
+                color: Get.theme.colorScheme.onPrimary,
               ),
-              horizontalSpacing(defaultSpacing),
-              Text(
-                label.tr,
-                style: Get.theme.textTheme.labelLarge,
-              )
-            ],
-          ),
+            ),
+            horizontalSpacing(defaultSpacing),
+            Text(
+              label.tr,
+              style: Get.theme.textTheme.labelLarge,
+            )
+          ],
         ),
       ),
     );

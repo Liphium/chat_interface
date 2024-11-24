@@ -1,10 +1,10 @@
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
+import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/forms/lph_action_fields.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
-import 'package:chat_interface/theme/ui/profile/developer_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -29,7 +29,6 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
 
   // Developer things
   final testLoading = false.obs;
-  final _clicks = 0.obs;
 
   @override
   void dispose() {
@@ -46,19 +45,11 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
     _status.text = controller.status.value;
     statusMessage.value = controller.status.value;
 
-    // Calculate the edge insets for the device
-    var startPadding = EdgeInsets.all(defaultSpacing * 1.5);
-    if (Get.mediaQuery.padding.top != 0) {
-      startPadding = EdgeInsets.only(
-        top: Get.mediaQuery.padding.top,
-        bottom: startPadding.bottom,
-        right: startPadding.right,
-        left: startPadding.left,
-      );
-    }
-
-    return Padding(
-      padding: startPadding,
+    return DevicePadding(
+      top: true,
+      right: true,
+      left: true,
+      padding: EdgeInsets.all(defaultSpacing * 1.5),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,11 +103,34 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                     children: [
                       LoadingIconButton(
                         onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            enableDrag: true,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: Get.mediaQuery.viewInsets.bottom,
+                                ),
+                                child: Container(
+                                  color: Colors.black,
+                                  width: double.infinity,
+                                  height: 300,
+                                  child: Center(
+                                    child: FJTextField(),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                          /*
                           _clicks.value++;
                           if (_clicks.value > 7) {
                             showModal(const DeveloperWindow());
                           }
                           Clipboard.setData(ClipboardData(text: controller.name.value));
+                          */
                         },
                         background: true,
                         backgroundColor: Get.theme.colorScheme.primary,

@@ -6,7 +6,7 @@ import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/chat/conversation_page.dart';
+import 'package:chat_interface/pages/chat/messages_page.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -51,7 +51,7 @@ class MessageController extends GetxController {
     loaded.value = false;
     currentProvider.value = ConversationMessageProvider(conversation);
     if (isMobileMode()) {
-      Get.to(ConversationPage(provider: currentProvider.value!));
+      Get.to(MessagesPageMobile(provider: currentProvider.value!));
     }
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server

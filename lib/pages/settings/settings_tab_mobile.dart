@@ -1,6 +1,7 @@
 import 'package:chat_interface/pages/settings/setting_selection_mobile.dart';
 import 'package:chat_interface/pages/settings/settings_page_desktop.dart';
 import 'package:chat_interface/util/platform_callback.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,11 +24,11 @@ class _SettingsPageState extends State<SettingsTabMobile> {
         body: Material(
           color: Get.theme.colorScheme.onInverseSurface,
           child: const SingleChildScrollView(
-            child: SafeArea(
-              bottom: false,
+            child: DevicePadding(
               left: true,
               right: true,
               top: true,
+              padding: EdgeInsets.only(top: defaultSpacing * 1.5),
               child: SettingSelectionMobile(),
             ),
           ),

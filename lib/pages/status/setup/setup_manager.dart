@@ -53,13 +53,13 @@ class SetupManager {
 
   void retry() {
     current = -1;
+    db.close();
     if (controller == null) {
       Get.offAll(const SetupPage());
     } else {
       controller!.transitionTo(const SetupLoadingWidget());
       next(open: false);
     }
-    db.close();
   }
 
   void next({bool open = true}) async {

@@ -70,9 +70,12 @@ class DialogBase extends StatelessWidget {
     }
 
     if (isMobileMode() && mobileFlat) {
-      return Padding(
+      return DevicePadding(
+        top: true,
+        right: true,
+        left: true,
         padding: EdgeInsets.only(
-          top: Get.mediaQuery.padding.top,
+          top: defaultSpacing * 1.5,
           right: defaultSpacing * 1.5,
           left: defaultSpacing * 1.5,
         ),
@@ -244,38 +247,41 @@ class LPHBottomSheet extends StatelessWidget {
     final randomOffset = random.nextDouble() * 3 + 2;
     final randomHz = random.nextDouble() * 1 + 1.5;
 
-    return Animate(
-      effects: [
-        ShakeEffect(
-          duration: 400.ms,
-          hz: randomHz,
-          offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
-          rotation: 0,
-          curve: Curves.decelerate,
-        ),
-        ScaleEffect(
-          duration: 250.ms,
-          curve: Curves.decelerate,
-          begin: Offset(0.8, 0.8),
-        ),
-      ],
-      child: Material(
-        color: Get.theme.colorScheme.onInverseSurface,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(sectionSpacing * 1.5),
-          topRight: Radius.circular(sectionSpacing * 1.5),
-        ),
-        child: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: sectionSpacing,
-                left: sectionSpacing,
-                top: sectionSpacing,
-                bottom: Get.mediaQuery.padding.bottom != 0 && GetPlatform.isMobile ? Get.mediaQuery.padding.bottom : sectionSpacing,
+    return Padding(
+      padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom),
+      child: Animate(
+        effects: [
+          ShakeEffect(
+            duration: 400.ms,
+            hz: randomHz,
+            offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+            rotation: 0,
+            curve: Curves.decelerate,
+          ),
+          ScaleEffect(
+            duration: 250.ms,
+            curve: Curves.decelerate,
+            begin: Offset(0.8, 0.8),
+          ),
+        ],
+        child: Material(
+          color: Get.theme.colorScheme.onInverseSurface,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(sectionSpacing * 1.5),
+            topRight: Radius.circular(sectionSpacing * 1.5),
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  right: sectionSpacing,
+                  left: sectionSpacing,
+                  top: sectionSpacing,
+                  bottom: Get.mediaQuery.padding.bottom != 0 && GetPlatform.isMobile ? Get.mediaQuery.padding.bottom : sectionSpacing,
+                ),
+                child: child,
               ),
-              child: child,
             ),
           ),
         ),

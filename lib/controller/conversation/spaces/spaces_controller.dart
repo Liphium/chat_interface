@@ -24,7 +24,7 @@ import 'package:http/http.dart' as http;
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:window_manager/window_manager.dart';
 
-bool areCallsSupported = !isWeb && !GetPlatform.isMobile;
+bool areSpacesSupported = !isWeb && !GetPlatform.isMobile;
 
 class SpacesController extends GetxController {
   //* Call status

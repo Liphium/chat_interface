@@ -2,7 +2,7 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/townsquare/townsquare_page.dart';
-import 'package:chat_interface/pages/chat/conversation_page.dart';
+import 'package:chat_interface/pages/chat/messages_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/pages/spaces/space_rectangle.dart';
 import 'package:chat_interface/theme/desktop_widgets.dart';
@@ -56,7 +56,7 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
               final controller = Get.find<MessageController>();
               if (controller.currentProvider.value != null) {
                 Get.off(const ChatPageMobile());
-                Get.to(ConversationPage(provider: controller.currentProvider.value!));
+                Get.to(MessagesPageMobile(provider: controller.currentProvider.value!));
               } else {
                 Get.off(const ChatPageMobile());
               }

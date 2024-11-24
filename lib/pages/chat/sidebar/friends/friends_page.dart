@@ -60,7 +60,7 @@ class _FriendsPageState extends State<FriendsPage> {
                       horizontalSpacing(defaultSpacing),
                       Expanded(
                         child: TextField(
-                          autofocus: true,
+                          autofocus: !isMobileMode(),
                           style: Get.theme.textTheme.labelMedium,
                           decoration: InputDecoration(
                             border: InputBorder.none,
