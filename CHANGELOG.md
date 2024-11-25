@@ -4,6 +4,7 @@
 
 ## Currently in dev
 
+- This release of Liphium is compatible with protocol v7
 - Added a max length attribute to the SSR renderer for input fields (now being used by the server)
 - Made the startup of the app significantly faster by reducing the amount of server interactions
 - Made the app startup seem faster by first loading local data
