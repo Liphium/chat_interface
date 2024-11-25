@@ -29,13 +29,11 @@ class Database extends _$Database {
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
-      onUpgrade: (m, from, to) async {
-        stepByStep(
-          from1To2: (m, schema) async {
-            m.createTable(schema.message);
-          },
-        );
-      },
+      onUpgrade: stepByStep(
+        from1To2: (m, schema) async {
+          m.createTable(schema.message);
+        },
+      ),
     );
   }
 }
