@@ -92,7 +92,7 @@ class MessageController extends GetxController {
 
     // Add message to message history if it's the selected one
     if (currentProvider.value?.conversation.id == conversation.id) {
-      if (message.sender != currentProvider.value?.conversation.token.id) {
+      if (message.senderToken != currentProvider.value?.conversation.token.id) {
         overwriteRead(currentProvider.value!.conversation);
       }
 
@@ -124,6 +124,9 @@ class MessageController extends GetxController {
     }
     */
   }
+
+  /// Store all of the messages in the list in the local database.
+  void storeMessages(List<Message> messages, Conversation conversation) {}
 }
 
 /// A message provider that loads messages from a conversation.
@@ -211,6 +214,22 @@ class ConversationMessageProvider extends MessageProvider {
   ///
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
   Future<List<Message>> _processMessages(List<dynamic> json) async {
+    // Unpack the messages itself in an isolate
+    final unpacked = await unpackMessagesInIsolate(conversation, json);
+
+    // Init the attachments to prepare the messages for rendering
+    await Future.wait(unpacked.map((msg) => msg.initAttachments(this)));
+
+    return unpacked;
+  }
+
+  /// Process a message payload from the server in an isolate.
+  ///
+  /// All the json decoding and decryption is running in one isolate, only the verification of
+  /// the signature is ran in the main isolate due to constraints with libsodium.
+  ///
+  /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
+  static Future<List<Message>> unpackMessagesInIsolate(Conversation conversation, List<dynamic> json) async {
     // Unpack the messages in an isolate (in a separate thread yk)
     final copy = Conversation.copyWithoutKey(conversation);
     final loadedMessages = await sodiumLib.runIsolated(
@@ -249,7 +268,6 @@ class ConversationMessageProvider extends MessageProvider {
       if (info != null) {
         msg.verifySignature(info);
       }
-      await msg.initAttachments(this);
     }
 
     return loadedMessages.map((tuple) => tuple.$1).toList();
@@ -300,16 +318,27 @@ class ConversationMessageProvider extends MessageProvider {
   ///
   /// **Doesn't verify the signature**
   static (Message, SymmetricSequencedInfo?) messageFromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
-    // Convert to message
-    final senderAddress = LPHAddress.from(json["sender"]);
-    final account = (conversation ?? Get.find<ConversationController>().conversations[json["conversation"]]!).members[senderAddress]?.address ??
-        LPHAddress("-", "removed".tr);
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], senderAddress, account,
-        DateTime.fromMillisecondsSinceEpoch(json["creation"]), json["edited"], false);
+    // Get the account of the sender
+    final senderAddress = LPHAddress.from(json["sr"]);
+    conversation ??= Get.find<ConversationController>().conversations[json["cv"]]!;
+    final account = conversation.members[senderAddress]?.address ?? LPHAddress("-", "removed".tr);
+
+    // Create a base message from already known data
+    final message = Message(
+      id: json["id"],
+      type: MessageType.text,
+      content: json["dt"],
+      answer: "",
+      attachments: [],
+      senderToken: senderAddress,
+      senderAddress: account,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json["ct"]),
+      edited: json["ed"],
+      verified: false,
+    );
 
     // Decrypt content
-    conversation ??= Get.find<ConversationController>().conversations[json["conversation"]]!;
-    if (message.sender == MessageController.systemSender) {
+    if (message.senderToken == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();
@@ -329,7 +358,7 @@ class ConversationMessageProvider extends MessageProvider {
   Future<String?> deleteMessage(Message message) async {
     // Check if the message is sent by the user
     final token = Get.find<ConversationController>().conversations[conversation.id]!.token;
-    if (message.sender != token.id) {
+    if (message.senderToken != token.id) {
       return "no.permission".tr;
     }
 

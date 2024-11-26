@@ -35,7 +35,7 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
     final provider = widget.provider;
     Member member;
     if (provider is ConversationMessageProvider) {
-      member = Get.find<ConversationController>().conversations[provider.conversation.id]!.members[widget.message.sender] ??
+      member = Get.find<ConversationController>().conversations[provider.conversation.id]!.members[widget.message.senderToken] ??
           Member(LPHAddress("", "removed".tr), widget.message.senderAddress, MemberRole.user);
     } else {
       member = Member(LPHAddress("", "removed".tr), widget.message.senderAddress, MemberRole.user);

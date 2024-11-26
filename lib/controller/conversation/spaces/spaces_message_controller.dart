@@ -238,16 +238,26 @@ class SpacesMessageProvider extends MessageProvider {
     // Convert to message
     members ??= Get.find<SpaceMemberController>().memberIds;
     LPHAddress account;
-    if (json["sender"] == MessageController.systemSender.encode()) {
+    if (json["sr"] == MessageController.systemSender.encode()) {
       account = MessageController.systemSender;
     } else {
-      account = members[json["sender"]] ?? LPHAddress("left", "liphium.com");
+      account = members[json["sr"]] ?? LPHAddress("left", "liphium.com");
     }
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], account, account, DateTime.fromMillisecondsSinceEpoch(json["creation"]),
-        json["edited"], false);
+    var message = Message(
+      id: json["id"],
+      type: MessageType.text,
+      content: json["dt"],
+      answer: "",
+      attachments: [],
+      senderToken: account,
+      senderAddress: account,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json["creation"]),
+      edited: json["ed"],
+      verified: false,
+    );
 
     // Handle system message in case it is one
-    if (message.sender == MessageController.systemSender) {
+    if (message.senderToken == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();

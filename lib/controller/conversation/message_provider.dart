@@ -366,7 +366,7 @@ class Message {
   List<String> attachments;
   final verified = true.obs;
   String answer;
-  final LPHAddress sender;
+  final LPHAddress senderToken;
   final LPHAddress senderAddress;
   final DateTime createdAt;
   final bool edited;
@@ -449,18 +449,18 @@ class Message {
     });
   }
 
-  Message(
-    this.id,
-    this.type,
-    this.content,
-    this.answer,
-    this.attachments,
-    this.sender,
-    this.senderAddress,
-    this.createdAt,
-    this.edited,
-    bool verified,
-  ) {
+  Message({
+    required this.id,
+    required this.type,
+    required this.content,
+    required this.answer,
+    required this.attachments,
+    required this.senderToken,
+    required this.senderAddress,
+    required this.createdAt,
+    required this.edited,
+    required bool verified,
+  }) {
     this.verified.value = verified;
   }
 
@@ -490,10 +490,6 @@ class Message {
       return;
     }
     verified.value = info.verifySignature(sender.signatureKey, sodium);
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{};
   }
 
   /// Decrypts the account ids of a system message

@@ -268,10 +268,10 @@ class Shape1 extends i0.VersionedTable {
       columnsByName['content']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<String> get attachments =>
       columnsByName['attachments']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get sender =>
-      columnsByName['sender']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get senderAccount =>
-      columnsByName['sender_account']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get senderToken =>
+      columnsByName['sender_token']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get senderAddress =>
+      columnsByName['sender_address']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<String> get answer =>
       columnsByName['answer']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<BigInt> get createdAt =>
@@ -299,10 +299,10 @@ i1.GeneratedColumn<String> _column_12(String aliasedName) =>
     i1.GeneratedColumn<String>('attachments', aliasedName, false,
         type: i1.DriftSqlType.string);
 i1.GeneratedColumn<String> _column_13(String aliasedName) =>
-    i1.GeneratedColumn<String>('sender', aliasedName, false,
+    i1.GeneratedColumn<String>('sender_token', aliasedName, false,
         type: i1.DriftSqlType.string);
 i1.GeneratedColumn<String> _column_14(String aliasedName) =>
-    i1.GeneratedColumn<String>('sender_account', aliasedName, false,
+    i1.GeneratedColumn<String>('sender_address', aliasedName, false,
         type: i1.DriftSqlType.string);
 i1.GeneratedColumn<String> _column_15(String aliasedName) =>
     i1.GeneratedColumn<String>('answer', aliasedName, false,

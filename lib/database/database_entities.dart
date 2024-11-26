@@ -25,8 +25,8 @@ class Message extends Table {
   IntColumn get type => integer()();
   TextColumn get content => text()();
   TextColumn get attachments => text()();
-  TextColumn get sender => text()();
-  TextColumn get senderAccount => text()();
+  TextColumn get senderToken => text()();
+  TextColumn get senderAddress => text()();
   TextColumn get answer => text()();
   Int64Column get createdAt => int64()();
   TextColumn get conversationId => text()();

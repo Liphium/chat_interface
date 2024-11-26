@@ -405,11 +405,11 @@ class Message extends Table with TableInfo<Message, MessageData> {
   late final GeneratedColumn<String> attachments = GeneratedColumn<String>(
       'attachments', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
-      'sender', aliasedName, false,
+  late final GeneratedColumn<String> senderToken = GeneratedColumn<String>(
+      'sender_token', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> senderAccount = GeneratedColumn<String>(
-      'sender_account', aliasedName, false,
+  late final GeneratedColumn<String> senderAddress = GeneratedColumn<String>(
+      'sender_address', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   late final GeneratedColumn<String> answer = GeneratedColumn<String>(
       'answer', aliasedName, false,
@@ -434,8 +434,8 @@ class Message extends Table with TableInfo<Message, MessageData> {
         type,
         content,
         attachments,
-        sender,
-        senderAccount,
+        senderToken,
+        senderAddress,
         answer,
         createdAt,
         conversationId,
@@ -464,10 +464,10 @@ class Message extends Table with TableInfo<Message, MessageData> {
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
       attachments: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!,
-      sender: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sender'])!,
-      senderAccount: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sender_account'])!,
+      senderToken: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_token'])!,
+      senderAddress: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_address'])!,
       answer: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}answer'])!,
       createdAt: attachedDatabase.typeMapping
@@ -492,8 +492,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final int type;
   final String content;
   final String attachments;
-  final String sender;
-  final String senderAccount;
+  final String senderToken;
+  final String senderAddress;
   final String answer;
   final BigInt createdAt;
   final String conversationId;
@@ -505,8 +505,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       required this.type,
       required this.content,
       required this.attachments,
-      required this.sender,
-      required this.senderAccount,
+      required this.senderToken,
+      required this.senderAddress,
       required this.answer,
       required this.createdAt,
       required this.conversationId,
@@ -520,8 +520,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     map['type'] = Variable<int>(type);
     map['content'] = Variable<String>(content);
     map['attachments'] = Variable<String>(attachments);
-    map['sender'] = Variable<String>(sender);
-    map['sender_account'] = Variable<String>(senderAccount);
+    map['sender_token'] = Variable<String>(senderToken);
+    map['sender_address'] = Variable<String>(senderAddress);
     map['answer'] = Variable<String>(answer);
     map['created_at'] = Variable<BigInt>(createdAt);
     map['conversation_id'] = Variable<String>(conversationId);
@@ -537,8 +537,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       type: Value(type),
       content: Value(content),
       attachments: Value(attachments),
-      sender: Value(sender),
-      senderAccount: Value(senderAccount),
+      senderToken: Value(senderToken),
+      senderAddress: Value(senderAddress),
       answer: Value(answer),
       createdAt: Value(createdAt),
       conversationId: Value(conversationId),
@@ -556,8 +556,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       type: serializer.fromJson<int>(json['type']),
       content: serializer.fromJson<String>(json['content']),
       attachments: serializer.fromJson<String>(json['attachments']),
-      sender: serializer.fromJson<String>(json['sender']),
-      senderAccount: serializer.fromJson<String>(json['senderAccount']),
+      senderToken: serializer.fromJson<String>(json['senderToken']),
+      senderAddress: serializer.fromJson<String>(json['senderAddress']),
       answer: serializer.fromJson<String>(json['answer']),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
       conversationId: serializer.fromJson<String>(json['conversationId']),
@@ -574,8 +574,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       'type': serializer.toJson<int>(type),
       'content': serializer.toJson<String>(content),
       'attachments': serializer.toJson<String>(attachments),
-      'sender': serializer.toJson<String>(sender),
-      'senderAccount': serializer.toJson<String>(senderAccount),
+      'senderToken': serializer.toJson<String>(senderToken),
+      'senderAddress': serializer.toJson<String>(senderAddress),
       'answer': serializer.toJson<String>(answer),
       'createdAt': serializer.toJson<BigInt>(createdAt),
       'conversationId': serializer.toJson<String>(conversationId),
@@ -590,8 +590,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           int? type,
           String? content,
           String? attachments,
-          String? sender,
-          String? senderAccount,
+          String? senderToken,
+          String? senderAddress,
           String? answer,
           BigInt? createdAt,
           String? conversationId,
@@ -603,8 +603,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
         type: type ?? this.type,
         content: content ?? this.content,
         attachments: attachments ?? this.attachments,
-        sender: sender ?? this.sender,
-        senderAccount: senderAccount ?? this.senderAccount,
+        senderToken: senderToken ?? this.senderToken,
+        senderAddress: senderAddress ?? this.senderAddress,
         answer: answer ?? this.answer,
         createdAt: createdAt ?? this.createdAt,
         conversationId: conversationId ?? this.conversationId,
@@ -619,10 +619,11 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       content: data.content.present ? data.content.value : this.content,
       attachments:
           data.attachments.present ? data.attachments.value : this.attachments,
-      sender: data.sender.present ? data.sender.value : this.sender,
-      senderAccount: data.senderAccount.present
-          ? data.senderAccount.value
-          : this.senderAccount,
+      senderToken:
+          data.senderToken.present ? data.senderToken.value : this.senderToken,
+      senderAddress: data.senderAddress.present
+          ? data.senderAddress.value
+          : this.senderAddress,
       answer: data.answer.present ? data.answer.value : this.answer,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       conversationId: data.conversationId.present
@@ -641,8 +642,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           ..write('type: $type, ')
           ..write('content: $content, ')
           ..write('attachments: $attachments, ')
-          ..write('sender: $sender, ')
-          ..write('senderAccount: $senderAccount, ')
+          ..write('senderToken: $senderToken, ')
+          ..write('senderAddress: $senderAddress, ')
           ..write('answer: $answer, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')
@@ -659,8 +660,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       type,
       content,
       attachments,
-      sender,
-      senderAccount,
+      senderToken,
+      senderAddress,
       answer,
       createdAt,
       conversationId,
@@ -675,8 +676,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           other.type == this.type &&
           other.content == this.content &&
           other.attachments == this.attachments &&
-          other.sender == this.sender &&
-          other.senderAccount == this.senderAccount &&
+          other.senderToken == this.senderToken &&
+          other.senderAddress == this.senderAddress &&
           other.answer == this.answer &&
           other.createdAt == this.createdAt &&
           other.conversationId == this.conversationId &&
@@ -690,8 +691,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<int> type;
   final Value<String> content;
   final Value<String> attachments;
-  final Value<String> sender;
-  final Value<String> senderAccount;
+  final Value<String> senderToken;
+  final Value<String> senderAddress;
   final Value<String> answer;
   final Value<BigInt> createdAt;
   final Value<String> conversationId;
@@ -704,8 +705,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.type = const Value.absent(),
     this.content = const Value.absent(),
     this.attachments = const Value.absent(),
-    this.sender = const Value.absent(),
-    this.senderAccount = const Value.absent(),
+    this.senderToken = const Value.absent(),
+    this.senderAddress = const Value.absent(),
     this.answer = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.conversationId = const Value.absent(),
@@ -719,8 +720,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required int type,
     required String content,
     required String attachments,
-    required String sender,
-    required String senderAccount,
+    required String senderToken,
+    required String senderAddress,
     required String answer,
     required BigInt createdAt,
     required String conversationId,
@@ -732,8 +733,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
         type = Value(type),
         content = Value(content),
         attachments = Value(attachments),
-        sender = Value(sender),
-        senderAccount = Value(senderAccount),
+        senderToken = Value(senderToken),
+        senderAddress = Value(senderAddress),
         answer = Value(answer),
         createdAt = Value(createdAt),
         conversationId = Value(conversationId),
@@ -745,8 +746,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     Expression<int>? type,
     Expression<String>? content,
     Expression<String>? attachments,
-    Expression<String>? sender,
-    Expression<String>? senderAccount,
+    Expression<String>? senderToken,
+    Expression<String>? senderAddress,
     Expression<String>? answer,
     Expression<BigInt>? createdAt,
     Expression<String>? conversationId,
@@ -760,8 +761,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       if (type != null) 'type': type,
       if (content != null) 'content': content,
       if (attachments != null) 'attachments': attachments,
-      if (sender != null) 'sender': sender,
-      if (senderAccount != null) 'sender_account': senderAccount,
+      if (senderToken != null) 'sender_token': senderToken,
+      if (senderAddress != null) 'sender_address': senderAddress,
       if (answer != null) 'answer': answer,
       if (createdAt != null) 'created_at': createdAt,
       if (conversationId != null) 'conversation_id': conversationId,
@@ -777,8 +778,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<int>? type,
       Value<String>? content,
       Value<String>? attachments,
-      Value<String>? sender,
-      Value<String>? senderAccount,
+      Value<String>? senderToken,
+      Value<String>? senderAddress,
       Value<String>? answer,
       Value<BigInt>? createdAt,
       Value<String>? conversationId,
@@ -791,8 +792,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       type: type ?? this.type,
       content: content ?? this.content,
       attachments: attachments ?? this.attachments,
-      sender: sender ?? this.sender,
-      senderAccount: senderAccount ?? this.senderAccount,
+      senderToken: senderToken ?? this.senderToken,
+      senderAddress: senderAddress ?? this.senderAddress,
       answer: answer ?? this.answer,
       createdAt: createdAt ?? this.createdAt,
       conversationId: conversationId ?? this.conversationId,
@@ -822,11 +823,11 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     if (attachments.present) {
       map['attachments'] = Variable<String>(attachments.value);
     }
-    if (sender.present) {
-      map['sender'] = Variable<String>(sender.value);
+    if (senderToken.present) {
+      map['sender_token'] = Variable<String>(senderToken.value);
     }
-    if (senderAccount.present) {
-      map['sender_account'] = Variable<String>(senderAccount.value);
+    if (senderAddress.present) {
+      map['sender_address'] = Variable<String>(senderAddress.value);
     }
     if (answer.present) {
       map['answer'] = Variable<String>(answer.value);
@@ -855,8 +856,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
           ..write('type: $type, ')
           ..write('content: $content, ')
           ..write('attachments: $attachments, ')
-          ..write('sender: $sender, ')
-          ..write('senderAccount: $senderAccount, ')
+          ..write('senderToken: $senderToken, ')
+          ..write('senderAddress: $senderAddress, ')
           ..write('answer: $answer, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversationId: $conversationId, ')

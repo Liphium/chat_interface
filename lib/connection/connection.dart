@@ -5,7 +5,7 @@ import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
 import 'package:chat_interface/connection/impl/live_share_listener.dart';
-import 'package:chat_interface/connection/impl/messages/message_listener.dart';
+import 'package:chat_interface/connection/impl/message_listener.dart';
 import 'package:chat_interface/connection/impl/status_listener.dart';
 import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
