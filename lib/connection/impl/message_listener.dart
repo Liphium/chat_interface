@@ -9,7 +9,7 @@ void setupMessageListener() {
   // Listen for one message
   connector.listen("conv_msg", (event) async {
     // Check if the conversation even exists on this account
-    final conversation = Get.find<ConversationController>().conversations[LPHAddress.from(event.data["msg"]["conversation"])];
+    final conversation = Get.find<ConversationController>().conversations[LPHAddress.from(event.data["msg"]["cv"])];
     if (conversation == null) {
       sendLog("WARNING: invalid message, conversation not found");
       return;
@@ -33,7 +33,7 @@ void setupMessageListener() {
     "conv_msg_mp",
     (event) async {
       // Check if the conversation even exists on this account
-      final conversation = Get.find<ConversationController>().conversations[LPHAddress.from(event.data["conv"])];
+      final conversation = Get.find<ConversationController>().conversations[LPHAddress.from(event.data["cv"])];
       if (conversation == null) {
         sendLog("WARNING: invalid message, conversation not found");
         return;
