@@ -76,23 +76,26 @@ class MessageController extends GetxController {
     }
   }
 
-  /// Store the message in the cache if it is the current selected conversation.
+  /// Store the message in the local database and in the cache (if the conversation is selected).
   ///
   /// Also handles system messages.
-  void storeMessage(Message message, Conversation conversation) async {
-    // Update message reading
-    Get.find<ConversationController>().updateMessageRead(
-      conversation.id,
-      increment: currentProvider.value?.conversation.id != conversation.id,
-      messageSendTime: message.createdAt.millisecondsSinceEpoch,
-    );
+  void storeMessage(Message message, Conversation conversation, {bool simple = false}) async {
+    // Ignore certain things in case they are already done or not needed
+    if (!simple) {
+      // Update message read time for conversations (nessecary for notification count)
+      Get.find<ConversationController>().updateMessageRead(
+        conversation.id,
+        increment: currentProvider.value?.conversation.id != conversation.id,
+        messageSendTime: message.createdAt.millisecondsSinceEpoch,
+      );
 
-    // Play a notification sound when a new message arrives
-    RingingManager.playNotificationSound();
+      // Play a notification sound when a new message arrives
+      RingingManager.playNotificationSound();
+    }
 
     // Add message to message history if it's the selected one
     if (currentProvider.value?.conversation.id == conversation.id) {
-      if (message.senderToken != currentProvider.value?.conversation.token.id) {
+      if (message.senderToken != currentProvider.value?.conversation.token.id && !simple) {
         overwriteRead(currentProvider.value!.conversation);
       }
 
@@ -126,7 +129,33 @@ class MessageController extends GetxController {
   }
 
   /// Store all of the messages in the list in the local database.
-  void storeMessages(List<Message> messages, Conversation conversation) {}
+  ///
+  /// This method doesn't play a sound because it's only used for synchronization.
+  void storeMessages(List<Message> messages, Conversation conversation) {
+    // Sort all the messages to prevent failing system messages
+    messages.sort(
+      (a, b) {
+        return a.createdAt.compareTo(b.createdAt);
+      },
+    );
+
+    // Store the messages in the local database (using simple mode)
+    for (var message in messages) {
+      storeMessage(message, conversation, simple: true);
+    }
+
+    // Update message read time (to sort conversations properly)
+    Get.find<ConversationController>().updateMessageRead(
+      conversation.id,
+      increment: currentProvider.value?.conversation.id != conversation.id,
+      messageSendTime: messages.last.createdAt.millisecondsSinceEpoch,
+    );
+
+    // Tell the server about the new read state in case the messages have been received properly
+    if (messages.last.senderToken != currentProvider.value?.conversation.token.id) {
+      overwriteRead(currentProvider.value!.conversation);
+    }
+  }
 }
 
 /// A message provider that loads messages from a conversation.

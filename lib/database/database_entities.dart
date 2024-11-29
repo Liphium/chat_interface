@@ -20,16 +20,11 @@ class Conversation extends Table {
 
 class Message extends Table {
   TextColumn get id => text()();
-  BoolColumn get verified => boolean()();
-  BoolColumn get system => boolean()();
-  IntColumn get type => integer()();
   TextColumn get content => text()();
-  TextColumn get attachments => text()();
   TextColumn get senderToken => text()();
   TextColumn get senderAddress => text()();
-  TextColumn get answer => text()();
   Int64Column get createdAt => int64()();
-  TextColumn get conversationId => text()();
+  TextColumn get conversation => text()();
   BoolColumn get edited => boolean()();
 
   @override

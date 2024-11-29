@@ -126,7 +126,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
                   if (!widget.container.downloaded.value) {
                     return IconButton(
                       onPressed: () {
-                        Get.find<AttachmentController>().downloadAttachment(widget.container, ignoreLimit: true);
+                        Get.find<AttachmentController>().downloadAttachment(widget.container);
                       },
                       icon: const Icon(Icons.download),
                     );

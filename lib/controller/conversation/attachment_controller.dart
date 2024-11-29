@@ -95,7 +95,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Download an attachment
-  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true, bool ignoreLimit = false}) async {
+  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true, bool ignoreLimit = true}) async {
     if (container.downloading.value) return true;
     if (container.downloaded.value) return true;
     if (container.attachmentType != AttachmentContainerType.file) return false;

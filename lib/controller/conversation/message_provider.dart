@@ -413,17 +413,17 @@ class Message {
           if (FileSettings.imageTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
+              Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.videoTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
+              Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.audioTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
+              Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           }
         }

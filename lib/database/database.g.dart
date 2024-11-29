@@ -466,6 +466,616 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   }
 }
 
+class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MessageTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _verifiedMeta =
+      const VerificationMeta('verified');
+  @override
+  late final GeneratedColumn<bool> verified = GeneratedColumn<bool>(
+      'verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
+  static const VerificationMeta _systemMeta = const VerificationMeta('system');
+  @override
+  late final GeneratedColumn<bool> system = GeneratedColumn<bool>(
+      'system', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("system" IN (0, 1))'));
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<int> type = GeneratedColumn<int>(
+      'type', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _contentMeta =
+      const VerificationMeta('content');
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+      'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _attachmentsMeta =
+      const VerificationMeta('attachments');
+  @override
+  late final GeneratedColumn<String> attachments = GeneratedColumn<String>(
+      'attachments', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _senderTokenMeta =
+      const VerificationMeta('senderToken');
+  @override
+  late final GeneratedColumn<String> senderToken = GeneratedColumn<String>(
+      'sender_token', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _senderAddressMeta =
+      const VerificationMeta('senderAddress');
+  @override
+  late final GeneratedColumn<String> senderAddress = GeneratedColumn<String>(
+      'sender_address', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _answerMeta = const VerificationMeta('answer');
+  @override
+  late final GeneratedColumn<String> answer = GeneratedColumn<String>(
+      'answer', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  @override
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _editedMeta = const VerificationMeta('edited');
+  @override
+  late final GeneratedColumn<bool> edited = GeneratedColumn<bool>(
+      'edited', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("edited" IN (0, 1))'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        verified,
+        system,
+        type,
+        content,
+        attachments,
+        senderToken,
+        senderAddress,
+        answer,
+        createdAt,
+        conversationId,
+        edited
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'message';
+  @override
+  VerificationContext validateIntegrity(Insertable<MessageData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('verified')) {
+      context.handle(_verifiedMeta,
+          verified.isAcceptableOrUnknown(data['verified']!, _verifiedMeta));
+    } else if (isInserting) {
+      context.missing(_verifiedMeta);
+    }
+    if (data.containsKey('system')) {
+      context.handle(_systemMeta,
+          system.isAcceptableOrUnknown(data['system']!, _systemMeta));
+    } else if (isInserting) {
+      context.missing(_systemMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('attachments')) {
+      context.handle(
+          _attachmentsMeta,
+          attachments.isAcceptableOrUnknown(
+              data['attachments']!, _attachmentsMeta));
+    } else if (isInserting) {
+      context.missing(_attachmentsMeta);
+    }
+    if (data.containsKey('sender_token')) {
+      context.handle(
+          _senderTokenMeta,
+          senderToken.isAcceptableOrUnknown(
+              data['sender_token']!, _senderTokenMeta));
+    } else if (isInserting) {
+      context.missing(_senderTokenMeta);
+    }
+    if (data.containsKey('sender_address')) {
+      context.handle(
+          _senderAddressMeta,
+          senderAddress.isAcceptableOrUnknown(
+              data['sender_address']!, _senderAddressMeta));
+    } else if (isInserting) {
+      context.missing(_senderAddressMeta);
+    }
+    if (data.containsKey('answer')) {
+      context.handle(_answerMeta,
+          answer.isAcceptableOrUnknown(data['answer']!, _answerMeta));
+    } else if (isInserting) {
+      context.missing(_answerMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('edited')) {
+      context.handle(_editedMeta,
+          edited.isAcceptableOrUnknown(data['edited']!, _editedMeta));
+    } else if (isInserting) {
+      context.missing(_editedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MessageData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MessageData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      verified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
+      system: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}system'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      attachments: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!,
+      senderToken: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_token'])!,
+      senderAddress: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_address'])!,
+      answer: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}answer'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      edited: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
+    );
+  }
+
+  @override
+  $MessageTable createAlias(String alias) {
+    return $MessageTable(attachedDatabase, alias);
+  }
+}
+
+class MessageData extends DataClass implements Insertable<MessageData> {
+  final String id;
+  final bool verified;
+  final bool system;
+  final int type;
+  final String content;
+  final String attachments;
+  final String senderToken;
+  final String senderAddress;
+  final String answer;
+  final BigInt createdAt;
+  final String conversationId;
+  final bool edited;
+  const MessageData(
+      {required this.id,
+      required this.verified,
+      required this.system,
+      required this.type,
+      required this.content,
+      required this.attachments,
+      required this.senderToken,
+      required this.senderAddress,
+      required this.answer,
+      required this.createdAt,
+      required this.conversationId,
+      required this.edited});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['verified'] = Variable<bool>(verified);
+    map['system'] = Variable<bool>(system);
+    map['type'] = Variable<int>(type);
+    map['content'] = Variable<String>(content);
+    map['attachments'] = Variable<String>(attachments);
+    map['sender_token'] = Variable<String>(senderToken);
+    map['sender_address'] = Variable<String>(senderAddress);
+    map['answer'] = Variable<String>(answer);
+    map['created_at'] = Variable<BigInt>(createdAt);
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['edited'] = Variable<bool>(edited);
+    return map;
+  }
+
+  MessageCompanion toCompanion(bool nullToAbsent) {
+    return MessageCompanion(
+      id: Value(id),
+      verified: Value(verified),
+      system: Value(system),
+      type: Value(type),
+      content: Value(content),
+      attachments: Value(attachments),
+      senderToken: Value(senderToken),
+      senderAddress: Value(senderAddress),
+      answer: Value(answer),
+      createdAt: Value(createdAt),
+      conversationId: Value(conversationId),
+      edited: Value(edited),
+    );
+  }
+
+  factory MessageData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MessageData(
+      id: serializer.fromJson<String>(json['id']),
+      verified: serializer.fromJson<bool>(json['verified']),
+      system: serializer.fromJson<bool>(json['system']),
+      type: serializer.fromJson<int>(json['type']),
+      content: serializer.fromJson<String>(json['content']),
+      attachments: serializer.fromJson<String>(json['attachments']),
+      senderToken: serializer.fromJson<String>(json['senderToken']),
+      senderAddress: serializer.fromJson<String>(json['senderAddress']),
+      answer: serializer.fromJson<String>(json['answer']),
+      createdAt: serializer.fromJson<BigInt>(json['createdAt']),
+      conversationId: serializer.fromJson<String>(json['conversationId']),
+      edited: serializer.fromJson<bool>(json['edited']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'verified': serializer.toJson<bool>(verified),
+      'system': serializer.toJson<bool>(system),
+      'type': serializer.toJson<int>(type),
+      'content': serializer.toJson<String>(content),
+      'attachments': serializer.toJson<String>(attachments),
+      'senderToken': serializer.toJson<String>(senderToken),
+      'senderAddress': serializer.toJson<String>(senderAddress),
+      'answer': serializer.toJson<String>(answer),
+      'createdAt': serializer.toJson<BigInt>(createdAt),
+      'conversationId': serializer.toJson<String>(conversationId),
+      'edited': serializer.toJson<bool>(edited),
+    };
+  }
+
+  MessageData copyWith(
+          {String? id,
+          bool? verified,
+          bool? system,
+          int? type,
+          String? content,
+          String? attachments,
+          String? senderToken,
+          String? senderAddress,
+          String? answer,
+          BigInt? createdAt,
+          String? conversationId,
+          bool? edited}) =>
+      MessageData(
+        id: id ?? this.id,
+        verified: verified ?? this.verified,
+        system: system ?? this.system,
+        type: type ?? this.type,
+        content: content ?? this.content,
+        attachments: attachments ?? this.attachments,
+        senderToken: senderToken ?? this.senderToken,
+        senderAddress: senderAddress ?? this.senderAddress,
+        answer: answer ?? this.answer,
+        createdAt: createdAt ?? this.createdAt,
+        conversationId: conversationId ?? this.conversationId,
+        edited: edited ?? this.edited,
+      );
+  MessageData copyWithCompanion(MessageCompanion data) {
+    return MessageData(
+      id: data.id.present ? data.id.value : this.id,
+      verified: data.verified.present ? data.verified.value : this.verified,
+      system: data.system.present ? data.system.value : this.system,
+      type: data.type.present ? data.type.value : this.type,
+      content: data.content.present ? data.content.value : this.content,
+      attachments:
+          data.attachments.present ? data.attachments.value : this.attachments,
+      senderToken:
+          data.senderToken.present ? data.senderToken.value : this.senderToken,
+      senderAddress: data.senderAddress.present
+          ? data.senderAddress.value
+          : this.senderAddress,
+      answer: data.answer.present ? data.answer.value : this.answer,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      edited: data.edited.present ? data.edited.value : this.edited,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessageData(')
+          ..write('id: $id, ')
+          ..write('verified: $verified, ')
+          ..write('system: $system, ')
+          ..write('type: $type, ')
+          ..write('content: $content, ')
+          ..write('attachments: $attachments, ')
+          ..write('senderToken: $senderToken, ')
+          ..write('senderAddress: $senderAddress, ')
+          ..write('answer: $answer, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('edited: $edited')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      verified,
+      system,
+      type,
+      content,
+      attachments,
+      senderToken,
+      senderAddress,
+      answer,
+      createdAt,
+      conversationId,
+      edited);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MessageData &&
+          other.id == this.id &&
+          other.verified == this.verified &&
+          other.system == this.system &&
+          other.type == this.type &&
+          other.content == this.content &&
+          other.attachments == this.attachments &&
+          other.senderToken == this.senderToken &&
+          other.senderAddress == this.senderAddress &&
+          other.answer == this.answer &&
+          other.createdAt == this.createdAt &&
+          other.conversationId == this.conversationId &&
+          other.edited == this.edited);
+}
+
+class MessageCompanion extends UpdateCompanion<MessageData> {
+  final Value<String> id;
+  final Value<bool> verified;
+  final Value<bool> system;
+  final Value<int> type;
+  final Value<String> content;
+  final Value<String> attachments;
+  final Value<String> senderToken;
+  final Value<String> senderAddress;
+  final Value<String> answer;
+  final Value<BigInt> createdAt;
+  final Value<String> conversationId;
+  final Value<bool> edited;
+  final Value<int> rowid;
+  const MessageCompanion({
+    this.id = const Value.absent(),
+    this.verified = const Value.absent(),
+    this.system = const Value.absent(),
+    this.type = const Value.absent(),
+    this.content = const Value.absent(),
+    this.attachments = const Value.absent(),
+    this.senderToken = const Value.absent(),
+    this.senderAddress = const Value.absent(),
+    this.answer = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.edited = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MessageCompanion.insert({
+    required String id,
+    required bool verified,
+    required bool system,
+    required int type,
+    required String content,
+    required String attachments,
+    required String senderToken,
+    required String senderAddress,
+    required String answer,
+    required BigInt createdAt,
+    required String conversationId,
+    required bool edited,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        verified = Value(verified),
+        system = Value(system),
+        type = Value(type),
+        content = Value(content),
+        attachments = Value(attachments),
+        senderToken = Value(senderToken),
+        senderAddress = Value(senderAddress),
+        answer = Value(answer),
+        createdAt = Value(createdAt),
+        conversationId = Value(conversationId),
+        edited = Value(edited);
+  static Insertable<MessageData> custom({
+    Expression<String>? id,
+    Expression<bool>? verified,
+    Expression<bool>? system,
+    Expression<int>? type,
+    Expression<String>? content,
+    Expression<String>? attachments,
+    Expression<String>? senderToken,
+    Expression<String>? senderAddress,
+    Expression<String>? answer,
+    Expression<BigInt>? createdAt,
+    Expression<String>? conversationId,
+    Expression<bool>? edited,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (verified != null) 'verified': verified,
+      if (system != null) 'system': system,
+      if (type != null) 'type': type,
+      if (content != null) 'content': content,
+      if (attachments != null) 'attachments': attachments,
+      if (senderToken != null) 'sender_token': senderToken,
+      if (senderAddress != null) 'sender_address': senderAddress,
+      if (answer != null) 'answer': answer,
+      if (createdAt != null) 'created_at': createdAt,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (edited != null) 'edited': edited,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MessageCompanion copyWith(
+      {Value<String>? id,
+      Value<bool>? verified,
+      Value<bool>? system,
+      Value<int>? type,
+      Value<String>? content,
+      Value<String>? attachments,
+      Value<String>? senderToken,
+      Value<String>? senderAddress,
+      Value<String>? answer,
+      Value<BigInt>? createdAt,
+      Value<String>? conversationId,
+      Value<bool>? edited,
+      Value<int>? rowid}) {
+    return MessageCompanion(
+      id: id ?? this.id,
+      verified: verified ?? this.verified,
+      system: system ?? this.system,
+      type: type ?? this.type,
+      content: content ?? this.content,
+      attachments: attachments ?? this.attachments,
+      senderToken: senderToken ?? this.senderToken,
+      senderAddress: senderAddress ?? this.senderAddress,
+      answer: answer ?? this.answer,
+      createdAt: createdAt ?? this.createdAt,
+      conversationId: conversationId ?? this.conversationId,
+      edited: edited ?? this.edited,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (verified.present) {
+      map['verified'] = Variable<bool>(verified.value);
+    }
+    if (system.present) {
+      map['system'] = Variable<bool>(system.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<int>(type.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (attachments.present) {
+      map['attachments'] = Variable<String>(attachments.value);
+    }
+    if (senderToken.present) {
+      map['sender_token'] = Variable<String>(senderToken.value);
+    }
+    if (senderAddress.present) {
+      map['sender_address'] = Variable<String>(senderAddress.value);
+    }
+    if (answer.present) {
+      map['answer'] = Variable<String>(answer.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<BigInt>(createdAt.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (edited.present) {
+      map['edited'] = Variable<bool>(edited.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessageCompanion(')
+          ..write('id: $id, ')
+          ..write('verified: $verified, ')
+          ..write('system: $system, ')
+          ..write('type: $type, ')
+          ..write('content: $content, ')
+          ..write('attachments: $attachments, ')
+          ..write('senderToken: $senderToken, ')
+          ..write('senderAddress: $senderAddress, ')
+          ..write('answer: $answer, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('edited: $edited, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -2672,6 +3282,7 @@ abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   $DatabaseManager get managers => $DatabaseManager(this);
   late final $ConversationTable conversation = $ConversationTable(this);
+  late final $MessageTable message = $MessageTable(this);
   late final $MemberTable member = $MemberTable(this);
   late final $SettingTable setting = $SettingTable(this);
   late final $FriendTable friend = $FriendTable(this);
@@ -2686,6 +3297,7 @@ abstract class _$Database extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         conversation,
+        message,
         member,
         setting,
         friend,
@@ -2931,6 +3543,278 @@ typedef $$ConversationTableProcessedTableManager = ProcessedTableManager<
       BaseReferences<_$Database, $ConversationTable, ConversationData>
     ),
     ConversationData,
+    PrefetchHooks Function()>;
+typedef $$MessageTableCreateCompanionBuilder = MessageCompanion Function({
+  required String id,
+  required bool verified,
+  required bool system,
+  required int type,
+  required String content,
+  required String attachments,
+  required String senderToken,
+  required String senderAddress,
+  required String answer,
+  required BigInt createdAt,
+  required String conversationId,
+  required bool edited,
+  Value<int> rowid,
+});
+typedef $$MessageTableUpdateCompanionBuilder = MessageCompanion Function({
+  Value<String> id,
+  Value<bool> verified,
+  Value<bool> system,
+  Value<int> type,
+  Value<String> content,
+  Value<String> attachments,
+  Value<String> senderToken,
+  Value<String> senderAddress,
+  Value<String> answer,
+  Value<BigInt> createdAt,
+  Value<String> conversationId,
+  Value<bool> edited,
+  Value<int> rowid,
+});
+
+class $$MessageTableFilterComposer extends Composer<_$Database, $MessageTable> {
+  $$MessageTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get verified => $composableBuilder(
+      column: $table.verified, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get system => $composableBuilder(
+      column: $table.system, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get attachments => $composableBuilder(
+      column: $table.attachments, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get senderToken => $composableBuilder(
+      column: $table.senderToken, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get senderAddress => $composableBuilder(
+      column: $table.senderAddress, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get answer => $composableBuilder(
+      column: $table.answer, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<BigInt> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get conversationId => $composableBuilder(
+      column: $table.conversationId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get edited => $composableBuilder(
+      column: $table.edited, builder: (column) => ColumnFilters(column));
+}
+
+class $$MessageTableOrderingComposer
+    extends Composer<_$Database, $MessageTable> {
+  $$MessageTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get verified => $composableBuilder(
+      column: $table.verified, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get system => $composableBuilder(
+      column: $table.system, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get attachments => $composableBuilder(
+      column: $table.attachments, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get senderToken => $composableBuilder(
+      column: $table.senderToken, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get senderAddress => $composableBuilder(
+      column: $table.senderAddress,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get answer => $composableBuilder(
+      column: $table.answer, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<BigInt> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get conversationId => $composableBuilder(
+      column: $table.conversationId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get edited => $composableBuilder(
+      column: $table.edited, builder: (column) => ColumnOrderings(column));
+}
+
+class $$MessageTableAnnotationComposer
+    extends Composer<_$Database, $MessageTable> {
+  $$MessageTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<bool> get verified =>
+      $composableBuilder(column: $table.verified, builder: (column) => column);
+
+  GeneratedColumn<bool> get system =>
+      $composableBuilder(column: $table.system, builder: (column) => column);
+
+  GeneratedColumn<int> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get attachments => $composableBuilder(
+      column: $table.attachments, builder: (column) => column);
+
+  GeneratedColumn<String> get senderToken => $composableBuilder(
+      column: $table.senderToken, builder: (column) => column);
+
+  GeneratedColumn<String> get senderAddress => $composableBuilder(
+      column: $table.senderAddress, builder: (column) => column);
+
+  GeneratedColumn<String> get answer =>
+      $composableBuilder(column: $table.answer, builder: (column) => column);
+
+  GeneratedColumn<BigInt> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get conversationId => $composableBuilder(
+      column: $table.conversationId, builder: (column) => column);
+
+  GeneratedColumn<bool> get edited =>
+      $composableBuilder(column: $table.edited, builder: (column) => column);
+}
+
+class $$MessageTableTableManager extends RootTableManager<
+    _$Database,
+    $MessageTable,
+    MessageData,
+    $$MessageTableFilterComposer,
+    $$MessageTableOrderingComposer,
+    $$MessageTableAnnotationComposer,
+    $$MessageTableCreateCompanionBuilder,
+    $$MessageTableUpdateCompanionBuilder,
+    (MessageData, BaseReferences<_$Database, $MessageTable, MessageData>),
+    MessageData,
+    PrefetchHooks Function()> {
+  $$MessageTableTableManager(_$Database db, $MessageTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MessageTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MessageTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MessageTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<bool> verified = const Value.absent(),
+            Value<bool> system = const Value.absent(),
+            Value<int> type = const Value.absent(),
+            Value<String> content = const Value.absent(),
+            Value<String> attachments = const Value.absent(),
+            Value<String> senderToken = const Value.absent(),
+            Value<String> senderAddress = const Value.absent(),
+            Value<String> answer = const Value.absent(),
+            Value<BigInt> createdAt = const Value.absent(),
+            Value<String> conversationId = const Value.absent(),
+            Value<bool> edited = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessageCompanion(
+            id: id,
+            verified: verified,
+            system: system,
+            type: type,
+            content: content,
+            attachments: attachments,
+            senderToken: senderToken,
+            senderAddress: senderAddress,
+            answer: answer,
+            createdAt: createdAt,
+            conversationId: conversationId,
+            edited: edited,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required bool verified,
+            required bool system,
+            required int type,
+            required String content,
+            required String attachments,
+            required String senderToken,
+            required String senderAddress,
+            required String answer,
+            required BigInt createdAt,
+            required String conversationId,
+            required bool edited,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessageCompanion.insert(
+            id: id,
+            verified: verified,
+            system: system,
+            type: type,
+            content: content,
+            attachments: attachments,
+            senderToken: senderToken,
+            senderAddress: senderAddress,
+            answer: answer,
+            createdAt: createdAt,
+            conversationId: conversationId,
+            edited: edited,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$MessageTableProcessedTableManager = ProcessedTableManager<
+    _$Database,
+    $MessageTable,
+    MessageData,
+    $$MessageTableFilterComposer,
+    $$MessageTableOrderingComposer,
+    $$MessageTableAnnotationComposer,
+    $$MessageTableCreateCompanionBuilder,
+    $$MessageTableUpdateCompanionBuilder,
+    (MessageData, BaseReferences<_$Database, $MessageTable, MessageData>),
+    MessageData,
     PrefetchHooks Function()>;
 typedef $$MemberTableCreateCompanionBuilder = MemberCompanion Function({
   required String id,
@@ -4176,6 +5060,8 @@ class $DatabaseManager {
   $DatabaseManager(this._db);
   $$ConversationTableTableManager get conversation =>
       $$ConversationTableTableManager(_db, _db.conversation);
+  $$MessageTableTableManager get message =>
+      $$MessageTableTableManager(_db, _db.message);
   $$MemberTableTableManager get member =>
       $$MemberTableTableManager(_db, _db.member);
   $$SettingTableTableManager get setting =>
