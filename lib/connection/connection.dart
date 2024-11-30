@@ -289,7 +289,7 @@ Future<bool> startConnection(String node, String connectionToken) async {
   setupSetupListeners();
   setupStoredActionListener();
   setupStatusListener();
-  setupMessageListener();
+  MessageListener.setupMessageListener();
   setupLiveshareListening();
 
   // Add listeners for Spaces (unrelated to chat node)

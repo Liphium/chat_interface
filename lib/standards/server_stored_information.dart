@@ -90,7 +90,7 @@ class SymmetricSequencedInfo {
   }
 
   /// Returns the actual thing that can be sent around
-  String finish(SecureKey key) => "$seq:$signature:${encryptSymmetric(text, key)}";
+  String finish(SecureKey key, {Sodium? sodium}) => "$seq:$signature:${encryptSymmetric(text, key, sodium)}";
 
   /// Untransform time encrypted info using the secret key
   factory SymmetricSequencedInfo.extract(String transformed, SecureKey key, [Sodium? sodium]) {

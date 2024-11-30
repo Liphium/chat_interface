@@ -405,6 +405,12 @@ class Message extends Table with TableInfo<Message, MessageData> {
       requiredDuringInsert: true,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("edited" IN (0, 1))'));
+  late final GeneratedColumn<bool> verified = GeneratedColumn<bool>(
+      'verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -413,7 +419,8 @@ class Message extends Table with TableInfo<Message, MessageData> {
         senderAddress,
         createdAt,
         conversation,
-        edited
+        edited,
+        verified
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -440,6 +447,8 @@ class Message extends Table with TableInfo<Message, MessageData> {
           .read(DriftSqlType.string, data['${effectivePrefix}conversation'])!,
       edited: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
+      verified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
     );
   }
 
@@ -457,6 +466,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   final BigInt createdAt;
   final String conversation;
   final bool edited;
+  final bool verified;
   const MessageData(
       {required this.id,
       required this.content,
@@ -464,7 +474,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       required this.senderAddress,
       required this.createdAt,
       required this.conversation,
-      required this.edited});
+      required this.edited,
+      required this.verified});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -475,6 +486,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     map['created_at'] = Variable<BigInt>(createdAt);
     map['conversation'] = Variable<String>(conversation);
     map['edited'] = Variable<bool>(edited);
+    map['verified'] = Variable<bool>(verified);
     return map;
   }
 
@@ -487,6 +499,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       createdAt: Value(createdAt),
       conversation: Value(conversation),
       edited: Value(edited),
+      verified: Value(verified),
     );
   }
 
@@ -501,6 +514,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
       conversation: serializer.fromJson<String>(json['conversation']),
       edited: serializer.fromJson<bool>(json['edited']),
+      verified: serializer.fromJson<bool>(json['verified']),
     );
   }
   @override
@@ -514,6 +528,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       'createdAt': serializer.toJson<BigInt>(createdAt),
       'conversation': serializer.toJson<String>(conversation),
       'edited': serializer.toJson<bool>(edited),
+      'verified': serializer.toJson<bool>(verified),
     };
   }
 
@@ -524,7 +539,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           String? senderAddress,
           BigInt? createdAt,
           String? conversation,
-          bool? edited}) =>
+          bool? edited,
+          bool? verified}) =>
       MessageData(
         id: id ?? this.id,
         content: content ?? this.content,
@@ -533,6 +549,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
         createdAt: createdAt ?? this.createdAt,
         conversation: conversation ?? this.conversation,
         edited: edited ?? this.edited,
+        verified: verified ?? this.verified,
       );
   MessageData copyWithCompanion(MessageCompanion data) {
     return MessageData(
@@ -548,6 +565,7 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           ? data.conversation.value
           : this.conversation,
       edited: data.edited.present ? data.edited.value : this.edited,
+      verified: data.verified.present ? data.verified.value : this.verified,
     );
   }
 
@@ -560,14 +578,15 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           ..write('senderAddress: $senderAddress, ')
           ..write('createdAt: $createdAt, ')
           ..write('conversation: $conversation, ')
-          ..write('edited: $edited')
+          ..write('edited: $edited, ')
+          ..write('verified: $verified')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, content, senderToken, senderAddress, createdAt, conversation, edited);
+  int get hashCode => Object.hash(id, content, senderToken, senderAddress,
+      createdAt, conversation, edited, verified);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -578,7 +597,8 @@ class MessageData extends DataClass implements Insertable<MessageData> {
           other.senderAddress == this.senderAddress &&
           other.createdAt == this.createdAt &&
           other.conversation == this.conversation &&
-          other.edited == this.edited);
+          other.edited == this.edited &&
+          other.verified == this.verified);
 }
 
 class MessageCompanion extends UpdateCompanion<MessageData> {
@@ -589,6 +609,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<BigInt> createdAt;
   final Value<String> conversation;
   final Value<bool> edited;
+  final Value<bool> verified;
   final Value<int> rowid;
   const MessageCompanion({
     this.id = const Value.absent(),
@@ -598,6 +619,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     this.createdAt = const Value.absent(),
     this.conversation = const Value.absent(),
     this.edited = const Value.absent(),
+    this.verified = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MessageCompanion.insert({
@@ -608,6 +630,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     required BigInt createdAt,
     required String conversation,
     required bool edited,
+    required bool verified,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         content = Value(content),
@@ -615,7 +638,8 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
         senderAddress = Value(senderAddress),
         createdAt = Value(createdAt),
         conversation = Value(conversation),
-        edited = Value(edited);
+        edited = Value(edited),
+        verified = Value(verified);
   static Insertable<MessageData> custom({
     Expression<String>? id,
     Expression<String>? content,
@@ -624,6 +648,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     Expression<BigInt>? createdAt,
     Expression<String>? conversation,
     Expression<bool>? edited,
+    Expression<bool>? verified,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -634,6 +659,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       if (createdAt != null) 'created_at': createdAt,
       if (conversation != null) 'conversation': conversation,
       if (edited != null) 'edited': edited,
+      if (verified != null) 'verified': verified,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -646,6 +672,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       Value<BigInt>? createdAt,
       Value<String>? conversation,
       Value<bool>? edited,
+      Value<bool>? verified,
       Value<int>? rowid}) {
     return MessageCompanion(
       id: id ?? this.id,
@@ -655,6 +682,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       createdAt: createdAt ?? this.createdAt,
       conversation: conversation ?? this.conversation,
       edited: edited ?? this.edited,
+      verified: verified ?? this.verified,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -683,6 +711,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     if (edited.present) {
       map['edited'] = Variable<bool>(edited.value);
     }
+    if (verified.present) {
+      map['verified'] = Variable<bool>(verified.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -699,6 +730,7 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
           ..write('createdAt: $createdAt, ')
           ..write('conversation: $conversation, ')
           ..write('edited: $edited, ')
+          ..write('verified: $verified, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

@@ -26,6 +26,7 @@ class Message extends Table {
   Int64Column get createdAt => int64()();
   TextColumn get conversation => text()();
   BoolColumn get edited => boolean()();
+  BoolColumn get verified => boolean()();
 
   @override
   Set<Column<Object>>? get primaryKey => {id};

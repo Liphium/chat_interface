@@ -1,18 +1,21 @@
 import 'dart:async';
-
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/messages_page.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
+import 'package:drift/drift.dart';
 
 enum OpenTabType {
   conversation,
@@ -165,27 +168,14 @@ class ConversationMessageProvider extends MessageProvider {
 
   @override
   Future<(List<Message>?, bool)> loadMessagesBefore(int time) async {
-    // Load messages from the server
-    final json = await postNodeJSON("/conversations/message/list_before", {
-      "token": conversation.token.toMap(),
-      "data": time,
-    });
-
-    // Check if there was an error
-    if (!json["success"]) {
-      conversation.error.value = json["error"];
-      newMessagesLoading.value = false;
-      return (null, true);
-    }
-
-    // Check if the top has been reached
-    if (json["messages"] == null || json["messages"].isEmpty) {
-      newMessagesLoading.value = false;
-      return (null, false);
-    }
+    // Load messages from the local database
+    final messageQuery = db.select(db.message)
+      ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
+      ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(time)));
+    final messages = await messageQuery.get();
 
     // Process the messages in a seperate isolate
-    return (await _processMessages(json["messages"]), false);
+    return (await _processMessages(messages), false);
   }
 
   @override
@@ -242,36 +232,14 @@ class ConversationMessageProvider extends MessageProvider {
   /// the signature is ran in the main isolate due to constraints with libsodium.
   ///
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
-  Future<List<Message>> _processMessages(List<dynamic> json) async {
-    // Unpack the messages itself in an isolate
-    final unpacked = await unpackMessagesInIsolate(conversation, json);
-
-    // Init the attachments to prepare the messages for rendering
-    await Future.wait(unpacked.map((msg) => msg.initAttachments(this)));
-
-    return unpacked;
-  }
-
-  /// Process a message payload from the server in an isolate.
-  ///
-  /// All the json decoding and decryption is running in one isolate, only the verification of
-  /// the signature is ran in the main isolate due to constraints with libsodium.
-  ///
-  /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
-  static Future<List<Message>> unpackMessagesInIsolate(Conversation conversation, List<dynamic> json) async {
+  Future<List<Message>> _processMessages(List<MessageData> messages) async {
     // Unpack the messages in an isolate (in a separate thread yk)
-    final copy = Conversation.copyWithoutKey(conversation);
     final loadedMessages = await sodiumLib.runIsolated(
       (sodium, keys, pairs) async {
         // Process all messages
-        final list = <(Message, SymmetricSequencedInfo?)>[];
-        for (var msgJson in json) {
-          final (message, info) = ConversationMessageProvider.messageFromJson(
-            msgJson,
-            conversation: copy,
-            key: keys[0],
-            sodium: sodium,
-          );
+        final list = <Message>[];
+        for (var data in messages) {
+          final message = await decryptFromLocalDatabase(data);
 
           // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
           if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
@@ -283,7 +251,7 @@ class ConversationMessageProvider extends MessageProvider {
             message.decryptSystemMessageAttachments(keys[0], sodium);
           }
 
-          list.add((message, info));
+          list.add(message);
         }
 
         // Return the list to the main isolate
@@ -293,94 +261,49 @@ class ConversationMessageProvider extends MessageProvider {
     );
 
     // Init the attachments on all messages and verify signatures
-    for (var (msg, info) in loadedMessages) {
+    for (var data in loadedMessages) {
       if (info != null) {
         msg.verifySignature(info);
       }
     }
 
     return loadedMessages.map((tuple) => tuple.$1).toList();
+
+    // Init the attachments to prepare the messages for rendering
+    await Future.wait(unpacked.map((msg) => msg.initAttachments(this)));
+
+    return unpacked;
   }
 
-  /// Unpack a message json in an isolate.
-  ///
-  /// Also verifies the signature (but that happens in the main isolate).
-  ///
-  /// For the future also: TODO: Unpack the signature in a different isolate
-  static Future<Message> unpackMessageInIsolate(Conversation conv, Map<String, dynamic> json) async {
-    // Run an isolate to parse the message
-    final copy = Conversation.copyWithoutKey(conv);
-    final (message, info) = await _extractMessageIsolate(json, copy, conv.key);
+  /// Decrypt a message from the local database.
+  static Future<Message> decryptFromLocalDatabase(MessageData data, {SecureKey? key}) async {
+    key ??= databaseKey;
 
-    // Verify the signature
-    if (info != null) {
-      message.verifySignature(info);
-    }
-
-    return message;
-  }
-
-  static Future<(Message, SymmetricSequencedInfo?)> _extractMessageIsolate(Map<String, dynamic> json, Conversation copied, SecureKey key) {
-    return sodiumLib.runIsolated(
-      (sodium, keys, pairs) {
-        // Unpack the actual message
-        final (msg, info) = messageFromJson(
-          json,
-          sodium: sodium,
-          key: keys[0],
-          conversation: copied,
-        );
-
-        // Unpack the system message attachments in case needed
-        if (msg.type == MessageType.system) {
-          msg.decryptSystemMessageAttachments(keys[0], sodium);
-        }
-
-        // Return it to the main isolate
-        return (msg, info);
-      },
-      secureKeys: [key],
-    );
-  }
-
-  /// Load a message from json (from the server) and get the corresponding [SymmetricSequencedInfo] (only if no system message).
-  ///
-  /// **Doesn't verify the signature**
-  static (Message, SymmetricSequencedInfo?) messageFromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
-    // Get the account of the sender
-    final senderAddress = LPHAddress.from(json["sr"]);
-    conversation ??= Get.find<ConversationController>().conversations[json["cv"]]!;
-    final account = conversation.members[senderAddress]?.address ?? LPHAddress("-", "removed".tr);
-
-    // Create a base message from already known data
+    // Create a new base message
     final message = Message(
-      id: json["id"],
+      id: data.id,
       type: MessageType.text,
-      content: json["dt"],
+      content: decryptSymmetric(data.content, key),
       answer: "",
       attachments: [],
-      senderToken: senderAddress,
-      senderAddress: account,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(json["ct"]),
-      edited: json["ed"],
-      verified: false,
+      senderToken: LPHAddress.from(decryptSymmetric(data.senderToken, key)),
+      senderAddress: LPHAddress.from(decryptSymmetric(data.senderToken, key)),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(data.createdAt.toInt()),
+      edited: data.edited,
+      verified: data.verified,
     );
 
-    // Decrypt content
+    // Set the type to system in case it is a system message
     if (message.senderToken == MessageController.systemSender) {
-      message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();
-      sendLog("SYSTEM MESSAGE");
-      return (message, null);
+      return message;
     }
 
-    // Check signature
-    final info = SymmetricSequencedInfo.extract(message.content, key ?? conversation.key, sodium);
-    message.content = info.text;
+    // Load the type, attachments, answer, .. from the content json
     message.loadContent();
 
-    return (message, info);
+    return message;
   }
 
   @override

@@ -245,18 +245,18 @@ class SpacesMessageProvider extends MessageProvider {
     }
     var message = Message(
       id: json["id"],
-      type: MessageType.text,
+      type: MessageType.text, // Will be loaded later
       content: json["dt"],
       answer: "",
       attachments: [],
       senderToken: account,
       senderAddress: account,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(json["creation"]),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json["ct"]),
       edited: json["ed"],
       verified: false,
     );
 
-    // Handle system message in case it is one
+    // Load as a system message in case it's from the system sender
     if (message.senderToken == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;
