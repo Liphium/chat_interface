@@ -9,7 +9,6 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/messages_page.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
-import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -82,7 +81,13 @@ class MessageController extends GetxController {
   /// Store the message in the local database and in the cache (if the conversation is selected).
   ///
   /// Also handles system messages.
-  void storeMessage(Message message, Conversation conversation, {bool simple = false}) async {
+  Future<bool> storeMessage(
+    Message message,
+    Conversation conversation, {
+    bool simple = false,
+    Sodium? sodium,
+    SecureKey? key,
+  }) async {
     // Ignore certain things in case they are already done or not needed
     if (!simple) {
       // Update message read time for conversations (nessecary for notification count)
@@ -122,6 +127,21 @@ class MessageController extends GetxController {
       SystemMessages.messages[message.content]?.handle(message, currentProvider.value!);
     }
 
+    // Store message in local database
+    key ??= databaseKey;
+    db.into(db.message).insertOnConflictUpdate(
+          MessageData(
+            id: message.id,
+            content: encryptSymmetric(message.toContentJson(), key, sodium),
+            senderToken: message.senderToken.encode(),
+            senderAddress: encryptSymmetric(message.senderAddress.encode(), key, sodium),
+            createdAt: BigInt.from(message.createdAt.millisecondsSinceEpoch),
+            conversation: conversation.id.encode(),
+            edited: message.edited,
+            verified: message.verified.value,
+          ),
+        );
+
     // On call message type, ring using the message TODO: Reintroduce the ringtone in Spaces
     /*
     if (message.type == MessageType.call && message.senderAddress != StatusController.ownAddress) {
@@ -129,12 +149,14 @@ class MessageController extends GetxController {
       RingingManager.startRinging(conversation, container);
     }
     */
+
+    return true;
   }
 
   /// Store all of the messages in the list in the local database.
   ///
   /// This method doesn't play a sound because it's only used for synchronization.
-  void storeMessages(List<Message> messages, Conversation conversation) {
+  Future<bool> storeMessages(List<Message> messages, Conversation conversation) async {
     // Sort all the messages to prevent failing system messages
     messages.sort(
       (a, b) {
@@ -142,10 +164,13 @@ class MessageController extends GetxController {
       },
     );
 
-    // Store the messages in the local database (using simple mode)
-    for (var message in messages) {
-      storeMessage(message, conversation, simple: true);
-    }
+    // Store the messages in the local database (using simple mode) in a differnet isolate
+    final copied = Conversation.copyWithoutKey(conversation);
+    await sodiumLib.runIsolated((sodium, keys, pairs) async {
+      for (var message in messages) {
+        await storeMessage(message, copied, simple: true, sodium: sodium, key: keys[0]);
+      }
+    }, secureKeys: [databaseKey]);
 
     // Update message read time (to sort conversations properly)
     Get.find<ConversationController>().updateMessageRead(
@@ -158,6 +183,8 @@ class MessageController extends GetxController {
     if (messages.last.senderToken != currentProvider.value?.conversation.token.id) {
       overwriteRead(currentProvider.value!.conversation);
     }
+
+    return true;
   }
 }
 
@@ -180,114 +207,70 @@ class ConversationMessageProvider extends MessageProvider {
 
   @override
   Future<(List<Message>?, bool)> loadMessagesAfter(int time) async {
-    // Load the messages from the server using the list_before endpoint
-    final json = await postNodeJSON("/conversations/message/list_after", {
-      "token": conversation.token.toMap(),
-      "data": time,
-    });
+    // Load messages from the local database
+    final messageQuery = db.select(db.message)
+      ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
+      ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(time)));
+    final messages = await messageQuery.get();
 
-    // Check if there was an error
-    if (!json["success"]) {
-      conversation.error.value = json["error"];
-      newMessagesLoading.value = false;
-      return (null, true);
-    }
-
-    // Check if the bottom has been reached
-    if (json["messages"] == null || json["messages"].isEmpty) {
-      newMessagesLoading.value = false;
-      return (null, false);
-    }
-
-    // Unpack the messages in an isolate
-    return (await _processMessages(json["messages"]), false);
+    // Process the messages in a seperate isolate
+    return (await _processMessages(messages), false);
   }
 
   @override
   Future<Message?> loadMessageFromServer(String id, {bool init = true}) async {
-    // Get the message from the server
-    final json = await postNodeJSON("/conversations/message/get", {
-      "token": conversation.token.toMap(),
-      "data": id,
-    });
-
-    // Check if there is an error
-    if (!json["success"]) {
-      sendLog("error fetching message $id: ${json["error"]}");
+    // Get the message from the local database
+    // Load messages from the local database
+    final messageQuery = db.select(db.message)
+      ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
+      ..where((tbl) => tbl.id.equals(id))
+      ..limit(1);
+    final message = await messageQuery.getSingleOrNull();
+    if (message == null) {
       return null;
     }
 
-    // Parse message and init attachments (if desired)
-    final message = await ConversationMessageProvider.unpackMessageInIsolate(conversation, json["message"]);
-    if (init) {
-      await message.initAttachments(this);
-    }
-
-    return message;
+    // Process message as a new list and grab it from the list when finished
+    return (await _processMessages([message], init: init))[0];
   }
 
-  /// Process a message payload from the server in an isolate.
-  ///
-  /// All the json decoding and decryption is running in one isolate, only the verification of
-  /// the signature is ran in the main isolate due to constraints with libsodium.
+  /// Process a message payload from the local database.
+  /// TODO: Possibly run this in an isolate in the future (needs really advanced code)
   ///
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
-  Future<List<Message>> _processMessages(List<MessageData> messages) async {
-    // Unpack the messages in an isolate (in a separate thread yk)
-    final loadedMessages = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) async {
-        // Process all messages
-        final list = <Message>[];
-        for (var data in messages) {
-          final message = await decryptFromLocalDatabase(data);
+  Future<List<Message>> _processMessages(List<MessageData> messages, {bool init = true}) async {
+    // Process all messages
+    final list = <Message>[];
+    for (var data in messages) {
+      final message = decryptFromLocalDatabase(data, databaseKey);
 
-          // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
-          if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
-            continue;
-          }
-
-          // Decrypt system message attachments
-          if (message.type == MessageType.system) {
-            message.decryptSystemMessageAttachments(keys[0], sodium);
-          }
-
-          list.add(message);
-        }
-
-        // Return the list to the main isolate
-        return list;
-      },
-      secureKeys: [conversation.key],
-    );
-
-    // Init the attachments on all messages and verify signatures
-    for (var data in loadedMessages) {
-      if (info != null) {
-        msg.verifySignature(info);
+      // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
+      if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
+        continue;
       }
+
+      list.add(message);
     }
 
-    return loadedMessages.map((tuple) => tuple.$1).toList();
+    // Init the attachments to prepare the messages for rendering (if desired)
+    if (init) {
+      await Future.wait(list.map((msg) => msg.initAttachments(this)));
+    }
 
-    // Init the attachments to prepare the messages for rendering
-    await Future.wait(unpacked.map((msg) => msg.initAttachments(this)));
-
-    return unpacked;
+    return list;
   }
 
   /// Decrypt a message from the local database.
-  static Future<Message> decryptFromLocalDatabase(MessageData data, {SecureKey? key}) async {
-    key ??= databaseKey;
-
+  static Message decryptFromLocalDatabase(MessageData data, SecureKey key, {Sodium? sodium}) {
     // Create a new base message
     final message = Message(
       id: data.id,
       type: MessageType.text,
-      content: decryptSymmetric(data.content, key),
+      content: decryptSymmetric(data.content, key, sodium),
       answer: "",
       attachments: [],
-      senderToken: LPHAddress.from(decryptSymmetric(data.senderToken, key)),
-      senderAddress: LPHAddress.from(decryptSymmetric(data.senderToken, key)),
+      senderToken: LPHAddress.from(data.senderToken),
+      senderAddress: LPHAddress.from(decryptSymmetric(data.senderAddress, key, sodium)),
       createdAt: DateTime.fromMillisecondsSinceEpoch(data.createdAt.toInt()),
       edited: data.edited,
       verified: data.verified,

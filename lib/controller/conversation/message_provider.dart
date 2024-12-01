@@ -299,12 +299,12 @@ abstract class MessageProvider {
 
     // Use the timestamp from the json (to prevent desynchronization and stuff)
     final (timeToken, stamp) = obj;
-    final content = jsonEncode(<String, dynamic>{
-      "c": message,
-      "t": type.index,
-      "a": attachments,
-      "r": answer,
-    });
+    final content = Message.buildContentJson(
+      content: message,
+      type: type,
+      attachments: attachments,
+      answerId: answer,
+    );
 
     // Encrypt message with signature
     final info = SymmetricSequencedInfo.builder(content, stamp).finish(encryptionKey());
@@ -479,6 +479,26 @@ class Message {
     }
     attachments = List<String>.from(contentJson["a"] ?? [""]);
     answer = contentJson["r"] ?? "";
+  }
+
+  /// Convert content to a message content json
+  static String buildContentJson({
+    required String content,
+    required MessageType type,
+    required List<String> attachments,
+    required String answerId,
+  }) {
+    return jsonEncode(<String, dynamic>{
+      "c": content,
+      "t": type.index,
+      "a": attachments,
+      "r": answerId, // the "r" stands for reply
+    });
+  }
+
+  /// Convert current message to a content json
+  String toContentJson() {
+    return buildContentJson(content: content, type: type, attachments: attachments, answerId: answer);
   }
 
   /// Verifies the signature of the message

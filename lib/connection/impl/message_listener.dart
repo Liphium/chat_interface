@@ -31,8 +31,13 @@ class MessageListener {
         return;
       }
 
-      // Tell the controller about the message
-      Get.find<MessageController>().storeMessage(message, conversation);
+      // Tell the controller about the message in a different isolate
+      final copied = Conversation.copyWithoutKey(conversation);
+      sodiumLib.runIsolated(
+        (sodium, keys, pairs) {
+          Get.find<MessageController>().storeMessage(message, copied, key: keys[0], sodium: sodium);
+        },
+      );
     });
 
     // Listen for multiple messages (mp stands for multiple)
