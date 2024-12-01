@@ -150,7 +150,7 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> {
                   // Add a file to document that the privacy policy has been accepted
                   final file = await File(path.join(supportDir.path, agreeFile)).create();
                   await file.writeAsString(widget.versionToWrite);
-                  setupManager.next();
+                  await setupManager.next();
                 },
                 child: Center(child: Text("accept".tr, style: Get.textTheme.labelLarge)),
               ),

@@ -105,7 +105,7 @@ class StatusController extends GetxController {
     // Secret: Enable new social features experiment
     if (message == "liphium.social") {
       message = "activated";
-      Get.find<SettingController>().settings[DataSettings.socialFeatures]!.setValue(true);
+      await Get.find<SettingController>().settings[DataSettings.socialFeatures]!.setValue(true);
     }
 
     // Validate the status to make sure everything is fine
@@ -129,9 +129,9 @@ class StatusController extends GetxController {
   }
 
   // Log out of this account
-  void logOut({deleteEverything = false, deleteFiles = false}) async {
+  Future<void> logOut({deleteEverything = false, deleteFiles = false}) async {
     // Delete the session information
-    db.setting.deleteWhere((tbl) => tbl.key.equals("profile"));
+    await db.setting.deleteWhere((tbl) => tbl.key.equals("profile"));
 
     // Delete all data
     if (deleteEverything) {

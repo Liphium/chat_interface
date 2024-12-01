@@ -234,7 +234,7 @@ class TabletopController extends GetxController {
   }
 
   /// Start holding an object in tabletop (also drops objects in case they don't exist)
-  void startHoldingObject(TableObject object) async {
+  Future<void> startHoldingObject(TableObject object) async {
     // Check if it is a card from the inventory that should be dropped
     var currentlyExists = false;
     if (object is CardObject && object.inventory) {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -44,10 +45,10 @@ class TabletopSettings {
   }
 
   /// Initialize the cursor hue to make sure it's actually randomized by default
-  static void initSettings() async {
+  static Future<void> initSettings() async {
     final val = await (db.setting.select()..where((tbl) => tbl.key.equals(cursorHue))).getSingleOrNull();
     if (val == null) {
-      Get.find<SettingController>().settings[cursorHue]!.setValue(Random().nextDouble());
+      await Get.find<SettingController>().settings[cursorHue]!.setValue(Random().nextDouble());
     }
   }
 
@@ -221,7 +222,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
     super.initState();
   }
 
-  void getDecksFromServer() async {
+  Future<void> getDecksFromServer() async {
     final decks = await TabletopDecks.listDecks();
     if (decks == null) {
       _error.value = true;
@@ -600,7 +601,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                               child: IconButton(
                                 onPressed: () async {
                                   widget.deck.cards.remove(card);
-                                  Get.find<AttachmentController>().deleteFile(card);
+                                  unawaited(Get.find<AttachmentController>().deleteFile(card));
                                   final result = await widget.deck.save();
                                   if (!result) {
                                     showErrorPopup("error", "server.error".tr);
@@ -703,7 +704,7 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     super.initState();
   }
 
-  void startFileUploading() async {
+  Future<void> startFileUploading() async {
     final controller = Get.find<AttachmentController>();
     _current.value = 0;
     for (var file in widget.files) {

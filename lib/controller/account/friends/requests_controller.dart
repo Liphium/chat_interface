@@ -71,7 +71,7 @@ class RequestController extends GetxController {
 final requestsLoading = false.obs;
 
 /// Send a new friend request to an account by name
-void newFriendRequest(String name, Function(String) success) async {
+Future<void> newFriendRequest(String name, Function(String) success) async {
   requestsLoading.value = true;
 
   final controller = Get.find<StatusController>();
@@ -107,7 +107,7 @@ void newFriendRequest(String name, Function(String) success) async {
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(controller, profile!.name, profile.displayName, profile.id, profile.publicKey, profile.signatureKey, success);
+      await sendFriendRequest(controller, profile!.name, profile.displayName, profile.id, profile.publicKey, profile.signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -119,7 +119,7 @@ void newFriendRequest(String name, Function(String) success) async {
 }
 
 /// Send a friend request to an account
-void sendFriendRequest(
+Future<void> sendFriendRequest(
   StatusController controller,
   String name,
   String displayName,
@@ -160,7 +160,7 @@ void sendFriendRequest(
   if (requestSent != null) {
     final result = await Get.find<FriendController>().addFromRequest(requestSent);
     if (result) {
-      requestController.deleteRequest(requestSent);
+      await requestController.deleteRequest(requestSent);
     } else {
       showErrorPopup("error", "requests.error".tr);
     }
@@ -263,23 +263,23 @@ class Request {
   }
 
   // Decline friend request
-  void ignore() async {
+  Future<void> ignore() async {
     // Delete from friends vault
     await FriendsVault.remove(vaultId);
 
     // Delete from requests
     final requestController = Get.find<RequestController>();
-    requestController.deleteRequest(this);
+    await requestController.deleteRequest(this);
   }
 
   // Cancel friend request (only for sent requests)
-  void cancel() async {
+  Future<void> cancel() async {
     // Delete from friends vault
     await FriendsVault.remove(vaultId);
 
     // Delete from sent requests
     final requestController = Get.find<RequestController>();
-    requestController.deleteSentRequest(this);
+    await requestController.deleteSentRequest(this);
   }
 
   void save(bool self) {

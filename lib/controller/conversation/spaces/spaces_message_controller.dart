@@ -178,7 +178,7 @@ class SpacesMessageProvider extends MessageProvider {
     // Init the attachments on all messages and verify signatures
     for (var (msg, info) in loadedMessages) {
       if (info != null) {
-        msg.verifySignature(info);
+        await msg.verifySignature(info);
       }
       await msg.initAttachments(this);
     }
@@ -197,7 +197,7 @@ class SpacesMessageProvider extends MessageProvider {
 
     // Verify the signature
     if (info != null) {
-      message.verifySignature(info);
+      await message.verifySignature(info);
     }
 
     return message;

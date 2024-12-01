@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
@@ -276,7 +278,7 @@ class _ProfileState extends State<OwnProfile> {
             label: 'profile.test'.tr,
             onTap: () async {
               testLoading.value = true;
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
+              unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
               testLoading.value = false;
             },
             loading: testLoading,

@@ -66,7 +66,7 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
         FJElevatedLoadingButton(
           loading: false.obs,
           onTap: () async {
-            launchUrl(Uri.parse("https://liphium.com/docs/concepts/towns"));
+            await launchUrl(Uri.parse("https://liphium.com/docs/concepts/towns"));
           },
           label: "learn_more".tr,
         ),

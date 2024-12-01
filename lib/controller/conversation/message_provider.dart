@@ -30,9 +30,14 @@ abstract class MessageProvider {
   bool topReached = false;
   AutoScrollController? controller;
 
-  void addMessageToBottom(Message message, {bool animation = true}) async {
+  Future<void> addMessageToBottom(Message message, {bool animation = true}) async {
     // Reset the time of the message at the bottom
     lastMessage = null;
+
+    // Make sure the message is fit for the bottom
+    if (message.createdAt.isBefore(messages[0].createdAt)) {
+      return;
+    }
 
     // Check if there are any messages with similar ids to prevent adding the same message again
     if (waitingMessages.any((msg) => msg == message.id)) {
@@ -79,7 +84,7 @@ abstract class MessageProvider {
   }
 
   /// Runs on every scroll to check if new messages should be loaded
-  void checkCurrentScrollHeight() async {
+  Future<void> checkCurrentScrollHeight() async {
     // Get.height is in there because there is a little bit of buffer above
     if (controller == null) {
       return;
@@ -90,7 +95,7 @@ abstract class MessageProvider {
         this.topReached = topReached;
       }
     } else if (controller!.position.pixels <= newLoadOffset) {
-      loadNewMessagesBottom();
+      unawaited(loadNewMessagesBottom());
     }
   }
 
@@ -178,7 +183,7 @@ abstract class MessageProvider {
     // Check if message is already on screen
     var message = messages.firstWhereOrNull((msg) => msg.id == id);
     if (message != null) {
-      controller!.scrollToIndex(messages.indexOf(message) + 1);
+      unawaited(controller!.scrollToIndex(messages.indexOf(message) + 1));
       if (message.highlightAnimation == null) {
         // If the message is not yet rendered do it through a callback
         message.highlightCallback = () {
@@ -190,7 +195,7 @@ abstract class MessageProvider {
       } else {
         // If it is rendered, don't do it through a callback
         message.highlightAnimation!.value = 0;
-        message.highlightAnimation!.animateTo(1);
+        unawaited(message.highlightAnimation!.animateTo(1));
       }
       return true;
     }
@@ -416,17 +421,17 @@ class Message {
           if (FileSettings.imageTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
+              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.videoTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
+              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.audioTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
+              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           }
         }
@@ -505,14 +510,15 @@ class Message {
   }
 
   /// Verifies the signature of the message
-  void verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
+  Future<bool> verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
     final sender = await Get.find<UnknownController>().loadUnknownProfile(senderAddress);
     if (sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;
-      return;
+      return false;
     }
     verified.value = info.verifySignature(sender.signatureKey, sodium);
+    return true;
   }
 
   /// Decrypts the account ids of a system message
@@ -528,7 +534,7 @@ class Message {
   ///
   /// Returns null if successful, otherwise an error message
   Future<String?> delete(MessageProvider provider) async {
-    provider.deleteMessage(this);
+    await provider.deleteMessage(this);
     return null;
   }
 }

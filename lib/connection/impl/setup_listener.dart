@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/messaging.dart';
@@ -43,7 +45,7 @@ Future<bool> subscribeToConversations({StatusController? controller}) async {
   }
 
   // Subscribe
-  _sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, deletions: true);
+  unawaited(_sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, deletions: true));
   return true;
 }
 
@@ -55,10 +57,10 @@ void subscribeToConversation(ConversationToken token, {StatusController? control
   final tokens = <Map<String, dynamic>>[token.toMap()];
 
   // Subscribe
-  _sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, startup: false, deletions: deletions);
+  unawaited(_sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, startup: false, deletions: deletions));
 }
 
-void _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
+Future<void> _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
   // Get the maximum value of the currently synchronized messages
   final max = db.message.createdAt.max();
   final query = db.selectOnly(db.message)..addColumns([max]);

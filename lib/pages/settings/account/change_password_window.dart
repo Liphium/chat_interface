@@ -108,7 +108,7 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> {
               }
 
               // Log out of this device
-              Get.find<StatusController>().logOut();
+              await Get.find<StatusController>().logOut();
             },
             child: Center(child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
           )

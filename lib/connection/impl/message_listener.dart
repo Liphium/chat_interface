@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/connection/connection.dart' as cn;
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -15,6 +17,7 @@ class MessageListener {
   static void setupMessageListener() {
     // Listen for one message
     cn.connector.listen("conv_msg", (event) async {
+      sendLog("received one message");
       // Check if the conversation even exists on this account
       final conversation = Get.find<ConversationController>().conversations[LPHAddress.from(event.data["msg"]["cv"])];
       if (conversation == null) {
@@ -32,7 +35,7 @@ class MessageListener {
       }
 
       // Tell the controller about the message in a different isolate
-      Get.find<MessageController>().storeMessage(message, conversation);
+      unawaited(Get.find<MessageController>().storeMessage(message, conversation));
     });
 
     // Listen for multiple messages (mp stands for multiple)
@@ -60,7 +63,7 @@ class MessageListener {
         });
 
         // Store all of the messages in the local database
-        Get.find<MessageController>().storeMessages(messages, conversation);
+        unawaited(Get.find<MessageController>().storeMessages(messages, conversation));
       },
     );
   }
@@ -96,7 +99,7 @@ class MessageListener {
 
     // Verify the signature
     if (info != null) {
-      message.verifySignature(info);
+      await message.verifySignature(info);
     }
 
     return message;
@@ -145,7 +148,7 @@ class MessageListener {
     // Verify the signature of all messages
     for (var (msg, info) in loadedMessages) {
       if (info != null) {
-        msg.verifySignature(info);
+        await msg.verifySignature(info);
       }
     }
 

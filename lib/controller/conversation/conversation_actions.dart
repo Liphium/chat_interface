@@ -51,7 +51,7 @@ Future<bool> openDirectMessage(Friend friend) async {
             ConversationContainer(""), "", 0, 0),
       );
   if (!conversation.id.isError()) {
-    Get.find<MessageController>().selectConversation(conversation);
+    await Get.find<MessageController>().selectConversation(conversation);
     return true;
   }
 

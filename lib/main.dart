@@ -68,12 +68,12 @@ void main(List<String> args) async {
 
   if (isDebug) {
     // In Debug mode, this stuff will be printed to the console anyway
-    initApp(args);
+    unawaited(initApp(args));
   } else {
     // Run everything in a zone for error collection
-    runZonedGuarded(
+    unawaited(runZonedGuarded(
       () async {
-        initApp(args);
+        unawaited(initApp(args));
       },
       (error, stack) {
         LogManager.addError(error, stack);
@@ -84,12 +84,12 @@ void main(List<String> args) async {
           parent.print(zone, line);
         },
       ),
-    );
+    ));
   }
 }
 
 /// App init function, start Liphium Chat
-void initApp(List<String> args) async {
+Future<void> initApp(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   executableArguments = args;
   if (!isWeb) {
@@ -100,7 +100,7 @@ void initApp(List<String> args) async {
   await initSodium();
 
   // Initialize the window
-  initDesktopWindow();
+  await initDesktopWindow();
 
   // Wait for it to be finished
   await Future.delayed(100.ms);
@@ -115,7 +115,7 @@ void initApp(List<String> args) async {
   runApp(const ChatApp());
 }
 
-void initDesktopWindow() async {
+Future<void> initDesktopWindow() async {
   if (isDesktopPlatform()) {
     await windowManager.ensureInitialized();
     await windowManager.setMinimumSize(const Size(300, 500));

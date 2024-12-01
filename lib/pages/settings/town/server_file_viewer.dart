@@ -51,7 +51,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
     super.initState();
   }
 
-  void getStorageData() async {
+  Future<void> getStorageData() async {
     final json = await postAuthorizedJSON("/account/files/storage", {});
     if (!json["success"]) {
       storageLine.value = json["error"];
@@ -63,7 +63,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
     });
   }
 
-  void goToPage(int page) async {
+  Future<void> goToPage(int page) async {
     // Set the current page
     if (pageLoading.value) {
       return;

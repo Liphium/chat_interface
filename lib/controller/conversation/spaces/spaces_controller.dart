@@ -107,7 +107,7 @@ class SpacesController extends GetxController {
     return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
   }
 
-  void _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) async {
+  Future<void> _startSpace(Function(SpaceConnectionContainer) callback, {Function()? connectedCallback}) async {
     if (connected.value) {
       showErrorPopup("error", "spaces.already_calling".tr);
       return;
@@ -128,7 +128,7 @@ class SpacesController extends GetxController {
     callback.call(container);
   }
 
-  void join(SpaceConnectionContainer container) async {
+  Future<void> join(SpaceConnectionContainer container) async {
     spaceLoading.value = true;
 
     // Load information from space container
@@ -163,7 +163,7 @@ class SpacesController extends GetxController {
     currentTab.value = SpaceTabType.table.index;
 
     // Setup all controllers
-    Get.find<SpaceMemberController>().onConnect(key!);
+    await Get.find<SpaceMemberController>().onConnect(key!);
 
     // Connect to space node
     final result = await createSpaceConnection(body["domain"], body["token"]);
@@ -209,7 +209,7 @@ class SpacesController extends GetxController {
     return body["domain"];
   }
 
-  void leaveCall({error = false}) async {
+  Future<void> leaveCall({error = false}) async {
     inSpace.value = false;
     connected.value = false;
     id.value = "";
@@ -222,7 +222,7 @@ class SpacesController extends GetxController {
     Get.find<SpacesMessageController>().clearProvider();
 
     if (!error) {
-      Get.offAll(getChatPage(), transition: Transition.fadeIn);
+      unawaited(Get.offAll(getChatPage(), transition: Transition.fadeIn));
       Get.find<MessageController>().openTab(OpenTabType.conversation);
     }
   }

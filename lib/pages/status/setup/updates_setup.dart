@@ -81,8 +81,8 @@ class UpdateSetup extends Setup {
 
     // If not, run the latest version instead of the current one
     await Future.delayed(Duration(milliseconds: 500)); // Just in case this becomes an infinite loop
-    restartProcessAsAdmin(path: path.join(foundPath, "chat_interface.exe"));
-    SystemNavigator.pop();
+    await restartProcessAsAdmin(path: path.join(foundPath, "chat_interface.exe"));
+    await SystemNavigator.pop();
     return null;
   }
 }
@@ -116,12 +116,12 @@ class ReleaseData {
 }
 
 /// Install the current version of the app
-void installApp(RxString status, ReleaseData data) async {
+Future<void> installApp(RxString status, ReleaseData data) async {
   String step = "admin";
   try {
     // Run with admin privilege on windows
     if (Platform.isWindows && !executableArguments.contains("--update")) {
-      restartProcessAsAdmin();
+      await restartProcessAsAdmin();
       await Future.delayed(3.seconds);
       exit(0);
     }

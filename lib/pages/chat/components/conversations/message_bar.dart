@@ -100,7 +100,7 @@ class _MessageBarState extends State<MessageBar> {
                     children: [
                       IconButton(
                         onPressed: () async {
-                          zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
+                          await zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
                         },
                         icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                         tooltip: "chat.zapshare".tr,

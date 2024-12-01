@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/main.dart';
@@ -121,7 +123,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
                   // Open the file with the default app
                   final attachment = widget.message.attachmentsRenderer[0];
-                  OpenFile.open(attachment.file!.path);
+                  unawaited(OpenFile.open(attachment.file!.path));
                   Get.back();
                 },
                 loading: false.obs,

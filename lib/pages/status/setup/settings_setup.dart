@@ -23,13 +23,13 @@ class SettingsSetup extends Setup {
     }
 
     // Set current language
-    Get.updateLocale(GeneralSettings.languages[controller.settings[GeneralSettings.language]!.getValue()].locale);
+    await Get.updateLocale(GeneralSettings.languages[controller.settings[GeneralSettings.language]!.getValue()].locale);
 
     // Changes the color theme
     Get.find<ThemeManager>().changeTheme(getThemeData());
 
     // Initialize the tabletop settings
-    TabletopSettings.initSettings();
+    await TabletopSettings.initSettings();
 
     // Delete old logs
     if (!isWeb) {

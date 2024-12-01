@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
@@ -118,7 +120,7 @@ class DataSettingsPage extends StatelessWidget {
                                 return;
                               }
 
-                              showModal(ProfilePictureWindow(file: result));
+                              unawaited(showModal(ProfilePictureWindow(file: result)));
                             },
                             child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
                           ),

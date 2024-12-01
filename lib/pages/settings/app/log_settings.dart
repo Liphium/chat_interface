@@ -19,7 +19,7 @@ class LogManager {
   static File? currentLogFile;
 
   /// Deletes all current log files except for the current one.
-  static void deleteAllLogs() async {
+  static Future<void> deleteAllLogs() async {
     for (var file in await loggingDirectory!.list().toList()) {
       if (file.path == currentLogFile!.path) {
         continue;

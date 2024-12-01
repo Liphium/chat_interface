@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
@@ -82,7 +83,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
         if (currentFuture != null) {
           await currentFuture;
         }
-        goToPage(currentPage.value);
+        unawaited(goToPage(currentPage.value));
         currentFuture = Future.delayed(500.ms);
       },
     );
@@ -90,7 +91,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
     super.initState();
   }
 
-  void goToPage(int page) async {
+  Future<void> goToPage(int page) async {
     // Set the current page
     if (pageLoading.value) {
       return;
@@ -266,7 +267,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                                           return;
                                         }
 
-                                        showConfirmPopup(ConfirmWindow(
+                                        unawaited(showConfirmPopup(ConfirmWindow(
                                           title: "settings.accounts.delete.confirm".tr,
                                           text: "settings.accounts.delete.desc".tr,
                                           onConfirm: () async {
@@ -283,7 +284,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
 
                                             account.deleted.value = true;
                                           },
-                                        ));
+                                        )));
                                       },
                                       icon: Icons.delete,
                                     ),

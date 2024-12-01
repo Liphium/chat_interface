@@ -27,35 +27,35 @@ class SmoothDialogController {
   }
 
   static const curve = Curves.easeInOutQuart;
-  void transitionTo(Widget widget) async {
+  Future<void> transitionTo(Widget widget) async {
     await transitionComplete;
     direction = !direction;
     if (direction) {
       _two.value = 0;
-      _two.animateTo(1, duration: 750.ms, curve: curve);
+      unawaited(_two.animateTo(1, duration: 750.ms, curve: curve));
       _one.value = 1;
-      _one.animateBack(0.0, duration: 750.ms, curve: curve);
+      unawaited(_one.animateBack(0.0, duration: 750.ms, curve: curve));
       widgetTwo.value = widget;
     } else {
       _one.value = 0;
-      _one.animateTo(1, duration: 750.ms, curve: curve);
+      unawaited(_one.animateTo(1, duration: 750.ms, curve: curve));
       _two.value = 1;
-      _two.animateBack(0.0, duration: 750.ms, curve: curve);
+      unawaited(_two.animateBack(0.0, duration: 750.ms, curve: curve));
       widgetOne.value = widget;
     }
     transitionComplete = Future.delayed(750.ms);
   }
 
-  void transitionToContinuos(Widget widget) async {
+  Future<void> transitionToContinuos(Widget widget) async {
     await transitionComplete;
     direction = !direction;
     final widgetToClone = widgetTwo.value;
     widgetOne.value = widgetToClone;
     widgetTwo.value = widget;
     _two.value = 0;
-    _two.animateTo(1, duration: 750.ms, curve: curve);
+    unawaited(_two.animateTo(1, duration: 750.ms, curve: curve));
     _one.value = 1;
-    _one.animateBack(0.0, duration: 750.ms, curve: curve);
+    unawaited(_one.animateBack(0.0, duration: 750.ms, curve: curve));
     transitionComplete = Future.delayed(750.ms);
   }
 }

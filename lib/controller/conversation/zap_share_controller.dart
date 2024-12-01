@@ -84,10 +84,10 @@ class ZapShareController extends GetxController {
   }
 
   /// Open the window for zap share for a conversation
-  void openWindow(Conversation conversation, ContextMenuData data) async {
+  Future<void> openWindow(Conversation conversation, ContextMenuData data) async {
     // If Zap is already doing something, show a menu
     if (isRunning()) {
-      Get.dialog(ZapShareWindow(data: data, conversation: conversation));
+      unawaited(Get.dialog(ZapShareWindow(data: data, conversation: conversation)));
       return;
     }
 
@@ -98,12 +98,12 @@ class ZapShareController extends GetxController {
     }
 
     // Start the transaction
-    newTransaction(conversation.otherMember.id, conversation.id, [file]);
+    unawaited(newTransaction(conversation.otherMember.id, conversation.id, [file]));
   }
 
   //* Everything about sending starts here
 
-  void newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
+  Future<void> newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
     if (files.length > 1) {
       sendLog("zapping multiple files is currently not supported");
       return;
@@ -170,7 +170,7 @@ class ZapShareController extends GetxController {
   bool zapperStarted = false;
 
   /// Zap deamon
-  void _startZapper(int start, int end) async {
+  Future<void> _startZapper(int start, int end) async {
     if (zapperStarted) {
       return;
     }
@@ -297,7 +297,7 @@ class ZapShareController extends GetxController {
   int sending = 0;
 
   /// Called for every file part sending request by the server
-  void onFilePartRequest(Event event) async {
+  Future<void> onFilePartRequest(Event event) async {
     if (!isRunning()) {
       sendLog("why would the server ask for parts when zap share isn't even running :smug:");
       return;
@@ -311,11 +311,11 @@ class ZapShareController extends GetxController {
     currentEndPart = end;
 
     // Start the zapper (in case it isn't started yet)
-    _startZapper(start, end);
+    unawaited(_startZapper(start, end));
   }
 
   /// Called when a transaction is ended (only when sending)
-  void onTransactionEnd() async {
+  Future<void> onTransactionEnd() async {
     waiting.value = false;
     uploading = false;
     progress.value = 0.0;
@@ -344,7 +344,7 @@ class ZapShareController extends GetxController {
   //* Everything about receiving starts here
 
   /// Join a transaction with a given ID and token + start listening for parts
-  void joinTransaction(LPHAddress conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
+  Future<void> joinTransaction(LPHAddress conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
@@ -486,7 +486,7 @@ class ZapShareController extends GetxController {
             }
 
             // Tell the server the part was successfully received
-            _tellReceived(
+            unawaited(_tellReceived(
               container.url,
               container.id,
               container.token,
@@ -495,12 +495,12 @@ class ZapShareController extends GetxController {
                 completed = complete;
                 if (completed) {
                   sendLog("download with zap completed, opening final folder..");
-                  OpenFile.open(path.dirname(receiveFile.path));
-                  partSubscription?.cancel();
+                  unawaited(OpenFile.open(path.dirname(receiveFile.path)));
+                  await partSubscription?.cancel();
                 }
               },
               onError: () => sendLog("error"),
-            );
+            ));
           }
         }
       },
@@ -509,12 +509,12 @@ class ZapShareController extends GetxController {
       },
       cancelOnError: true,
       onDone: () async {
-        onTransactionEnd();
+        await onTransactionEnd();
       },
     );
   }
 
-  void _tellReceived(String url, String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
+  Future<void> _tellReceived(String url, String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
     // Send receive confirmation
     final res = await dio.post(
       "${nodeProtocol()}$url/liveshare/received",

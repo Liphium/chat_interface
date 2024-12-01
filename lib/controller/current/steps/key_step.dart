@@ -165,7 +165,7 @@ class KeySetup extends ConnectionStep {
     }
 
     // Go to the key setup page
-    Get.dialog(
+    unawaited(Get.dialog(
       KeySetupPage(
         signature: signature,
         signatureKeyPair: signatureKeyPair,
@@ -173,7 +173,7 @@ class KeySetup extends ConnectionStep {
         exists: json["exists"],
       ),
       barrierDismissible: false,
-    );
+    ));
     return completer.future;
   }
 }
@@ -285,11 +285,11 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
               return;
             }
 
-            widget.controller.transitionTo(KeyCodePage(
+            unawaited(widget.controller.transitionTo(KeyCodePage(
               encryptionKeyPair: widget.encryptionKeyPair,
               signatureKeyPair: widget.signatureKeyPair,
               signature: widget.signature,
-            ));
+            )));
           },
           label: "key.sync.ask_device".tr,
         ),

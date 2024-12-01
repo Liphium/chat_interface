@@ -78,7 +78,7 @@ class AttachmentController extends GetxController {
     // Copy the file into the local cache
     if (!isWeb) {
       final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
-      fileUtil.write(XFile(filePath), bytes);
+      await fileUtil.write(XFile(filePath), bytes);
     }
     final container = AttachmentContainer(
       type,
@@ -171,7 +171,7 @@ class AttachmentController extends GetxController {
     container.error.value = false;
     container.downloaded.value = true;
     if (!isWeb) {
-      cleanUpCache();
+      await cleanUpCache();
     }
     return true;
   }
@@ -184,7 +184,7 @@ class AttachmentController extends GetxController {
   /// Delete a file based on a path and an id
   Future<bool> deleteFileFromPath(String id, XFile? file, {popup = false}) async {
     if (file != null) {
-      fileUtil.delete(file);
+      await fileUtil.delete(file);
     }
     attachments.remove(id);
 
@@ -204,9 +204,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Clean the cache until the size is below the max cache size
-  void cleanUpCache() async {
-    // TODO: Test this stuff properly
-
+  Future<void> cleanUpCache() async {
     // Move into isolate in the future?
     final cacheType = Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue();
     if (cacheType == 0) return;
@@ -243,7 +241,7 @@ class AttachmentController extends GetxController {
   static String _pathTemporary = "";
   static String _pathPermanent = "";
 
-  static void initFilePath(String accountId) async {
+  static Future<void> initFilePath(String accountId) async {
     if (!isWeb) {
       // Init folder for cached files
       final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
@@ -467,7 +465,7 @@ class AttachmentContainer {
     return doesFileExist(file!);
   }
 
-  void initDownloadState() async {
+  Future<void> initDownloadState() async {
     if (await existsLocally()) {
       downloaded.value = true;
     }

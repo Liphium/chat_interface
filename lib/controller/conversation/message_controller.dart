@@ -49,26 +49,26 @@ class MessageController extends GetxController {
     }
   }
 
-  void selectConversation(Conversation conversation) async {
+  Future<void> selectConversation(Conversation conversation) async {
     currentOpenType.value = OpenTabType.conversation;
     loaded.value = false;
     currentProvider.value = ConversationMessageProvider(conversation);
     if (isMobileMode()) {
-      Get.to(MessagesPageMobile(provider: currentProvider.value!));
+      unawaited(Get.to(MessagesPageMobile(provider: currentProvider.value!)));
     }
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
-      overwriteRead(conversation);
+      await overwriteRead(conversation);
     }
 
     // Make sure the thing has some messages in it
-    currentProvider.value!.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
+    await currentProvider.value!.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 
     loaded.value = true;
   }
 
   // Push read state to the server
-  void overwriteRead(Conversation conversation) async {
+  Future<void> overwriteRead(Conversation conversation) async {
     // Send new read state to the server
     final json = await postNodeJSON("/conversations/read", {
       "token": conversation.token.toMap(),
@@ -98,26 +98,26 @@ class MessageController extends GetxController {
       );
 
       // Play a notification sound when a new message arrives
-      RingingManager.playNotificationSound();
+      unawaited(RingingManager.playNotificationSound());
     }
 
     // Add message to message history if it's the selected one
     if (currentProvider.value?.conversation.id == conversation.id) {
       if (message.senderToken != currentProvider.value?.conversation.token.id && !simple) {
-        overwriteRead(currentProvider.value!.conversation);
+        await overwriteRead(currentProvider.value!.conversation);
       }
 
       // Check if it is a system message and if it should be rendered or not
       if (message.type == MessageType.system) {
         if (SystemMessages.messages[message.content]?.render == true) {
-          currentProvider.value!.addMessageToBottom(message);
+          unawaited(currentProvider.value!.addMessageToBottom(message));
         }
       } else {
         // Store normal type of message
         if (currentProvider.value!.messages.isNotEmpty && currentProvider.value!.messages[0].id != message.id) {
-          currentProvider.value!.addMessageToBottom(message);
+          unawaited(currentProvider.value!.addMessageToBottom(message));
         } else if (currentProvider.value!.messages.isEmpty) {
-          currentProvider.value!.addMessageToBottom(message);
+          unawaited(currentProvider.value!.addMessageToBottom(message));
         }
       }
     }
@@ -149,6 +149,7 @@ class MessageController extends GetxController {
 
   /// Store a message in the local database.
   void _storeInLocalDatabase(Conversation conversation, Message message, {(String, String)? part}) {
+    sendLog("message has been inserted.");
     db.into(db.message).insertOnConflictUpdate(
           MessageData(
             id: message.id,
@@ -213,7 +214,7 @@ class MessageController extends GetxController {
 
     // Tell the server about the new read state in case the messages have been received properly
     if (currentProvider.value != null && currentProvider.value?.conversation.token.id != messages.last.senderToken) {
-      overwriteRead(currentProvider.value!.conversation);
+      await overwriteRead(currentProvider.value!.conversation);
     }
 
     return true;
@@ -428,7 +429,7 @@ class ConversationMessageProvider extends MessageProvider {
   @override
   Future<bool> deleteMessageFromClient(String id) async {
     messages.removeWhere((element) => element.id == id);
-    db.message.deleteWhere((tbl) => tbl.id.equals(id));
+    await db.message.deleteWhere((tbl) => tbl.id.equals(id));
     return true;
   }
 

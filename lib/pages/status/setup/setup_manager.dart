@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/policy_setup.dart';
@@ -62,15 +64,15 @@ class SetupManager {
     }
   }
 
-  void next({bool open = true}) async {
+  Future<void> next({bool open = true}) async {
     if (_steps.isEmpty) return;
     setupFinished = false;
 
     if (open) {
       if (controller != null) {
-        controller!.transitionTo(const SetupLoadingWidget());
+        unawaited(controller!.transitionTo(const SetupLoadingWidget()));
       } else {
-        Get.offAll(const SetupPage());
+        unawaited(Get.offAll(const SetupPage()));
       }
     }
 
@@ -78,7 +80,7 @@ class SetupManager {
     if (current < _steps.length) {
       final setup = _steps[current];
       if (setup.executed && setup.once) {
-        next(open: false);
+        unawaited(next(open: false));
         return;
       }
 
@@ -98,12 +100,12 @@ class SetupManager {
       }
 
       if (ready != null) {
-        controller!.transitionTo(ready);
+        unawaited(controller!.transitionTo(ready));
         return;
       }
 
       setup.executed = true;
-      next(open: false);
+      unawaited(next(open: false));
     } else {
       // Finish the setup and go to the chat page
       setupFinished = true;
@@ -112,8 +114,8 @@ class SetupManager {
         await controller!.transitionComplete;
       }
       controller = null;
-      Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
-      Get.find<ConnectionController>().tryConnection();
+      unawaited(Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500)));
+      unawaited(Get.find<ConnectionController>().tryConnection());
     }
   }
 

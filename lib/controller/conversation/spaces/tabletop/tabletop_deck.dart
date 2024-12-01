@@ -93,7 +93,7 @@ class DeckObject extends TableObject {
   }
 
   @override
-  void handleData(String data) async {
+  Future<void> handleData(String data) async {
     cardOrder.clear();
     cards.clear();
 
@@ -152,7 +152,7 @@ class DeckObject extends TableObject {
   }
 
   /// Draw a card from the deck into the inventory
-  void drawCardIntoInventory(TabletopController controller) async {
+  Future<void> drawCardIntoInventory(TabletopController controller) async {
     if (cardOrder.isEmpty) {
       return;
     }
@@ -182,7 +182,7 @@ class DeckObject extends TableObject {
   void shuffle() {
     queue(() async {
       cardOrder.shuffle();
-      modifyData();
+      await modifyData();
     });
   }
 
@@ -239,7 +239,7 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
     super.initState();
   }
 
-  void getDecksFromServer() async {
+  Future<void> getDecksFromServer() async {
     final decks = await TabletopDecks.listDecks();
     if (decks == null) {
       _error.value = true;
