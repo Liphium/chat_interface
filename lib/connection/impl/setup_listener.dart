@@ -4,8 +4,10 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:get/get.dart';
+import 'package:drift/drift.dart';
 
 import '../../util/logging_framework.dart';
 
@@ -57,10 +59,16 @@ void subscribeToConversation(ConversationToken token, {StatusController? control
 }
 
 void _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
+  // Get the maximum value of the currently synchronized messages
+  final max = db.message.createdAt.max();
+  final query = db.selectOnly(db.message)..addColumns([max]);
+  final maxValue = await query.map((row) => row.read(max)).getSingleOrNull();
+
   connector.sendAction(
       ServerAction("conv_sub", <String, dynamic>{
         "tokens": tokens,
         "status": status,
+        "sync": maxValue?.toInt() ?? 0,
         "data": statusData,
       }), handler: (event) {
     if (!event.data["success"]) {

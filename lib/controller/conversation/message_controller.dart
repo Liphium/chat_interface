@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/connection/impl/message_listener.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
@@ -85,8 +86,7 @@ class MessageController extends GetxController {
     Message message,
     Conversation conversation, {
     bool simple = false,
-    Sodium? sodium,
-    SecureKey? key,
+    (String, String)? part,
   }) async {
     // Ignore certain things in case they are already done or not needed
     if (!simple) {
@@ -125,22 +125,16 @@ class MessageController extends GetxController {
     // Handle system messages
     if (message.type == MessageType.system) {
       SystemMessages.messages[message.content]?.handle(message, currentProvider.value!);
-    }
 
-    // Store message in local database
-    key ??= databaseKey;
-    db.into(db.message).insertOnConflictUpdate(
-          MessageData(
-            id: message.id,
-            content: encryptSymmetric(message.toContentJson(), key, sodium),
-            senderToken: message.senderToken.encode(),
-            senderAddress: encryptSymmetric(message.senderAddress.encode(), key, sodium),
-            createdAt: BigInt.from(message.createdAt.millisecondsSinceEpoch),
-            conversation: conversation.id.encode(),
-            edited: message.edited,
-            verified: message.verified.value,
-          ),
-        );
+      // Check if message should be stored
+      if (SystemMessages.messages[message.content]?.store ?? false) {
+        // Store message in local database
+        _storeInLocalDatabase(conversation, message, part: part);
+      }
+    } else {
+      // Store message in local database
+      _storeInLocalDatabase(conversation, message, part: part);
+    }
 
     // On call message type, ring using the message TODO: Reintroduce the ringtone in Spaces
     /*
@@ -153,10 +147,30 @@ class MessageController extends GetxController {
     return true;
   }
 
+  /// Store a message in the local database.
+  void _storeInLocalDatabase(Conversation conversation, Message message, {(String, String)? part}) {
+    db.into(db.message).insertOnConflictUpdate(
+          MessageData(
+            id: message.id,
+            content: part?.$1 ?? encryptSymmetric(message.toContentJson(), databaseKey),
+            senderToken: message.senderToken.encode(),
+            senderAddress: part?.$2 ?? encryptSymmetric(message.senderAddress.encode(), databaseKey),
+            createdAt: BigInt.from(message.createdAt.millisecondsSinceEpoch),
+            conversation: conversation.id.encode(),
+            edited: message.edited,
+            verified: message.verified.value,
+          ),
+        );
+  }
+
   /// Store all of the messages in the list in the local database.
   ///
   /// This method doesn't play a sound because it's only used for synchronization.
   Future<bool> storeMessages(List<Message> messages, Conversation conversation) async {
+    if (messages.isEmpty) {
+      return false;
+    }
+
     // Sort all the messages to prevent failing system messages
     messages.sort(
       (a, b) {
@@ -164,13 +178,31 @@ class MessageController extends GetxController {
       },
     );
 
-    // Store the messages in the local database (using simple mode) in a differnet isolate
+    // Encrypt everything for local database storage
     final copied = Conversation.copyWithoutKey(conversation);
-    await sodiumLib.runIsolated((sodium, keys, pairs) async {
+    final parts = await sodiumLib.runIsolated((sodium, keys, pairs) async {
+      final list = <(String, String)>[];
       for (var message in messages) {
-        await storeMessage(message, copied, simple: true, sodium: sodium, key: keys[0]);
+        list.add((
+          encryptSymmetric(message.toContentJson(), keys[0], sodium),
+          encryptSymmetric(message.senderAddress.encode(), keys[0], sodium),
+        ));
       }
+
+      return list;
     }, secureKeys: [databaseKey]);
+
+    // Store all the messages in the local database
+    int index = 0;
+    for (var message in messages) {
+      await storeMessage(
+        message,
+        copied,
+        simple: true,
+        part: parts[index],
+      );
+      index++;
+    }
 
     // Update message read time (to sort conversations properly)
     Get.find<ConversationController>().updateMessageRead(
@@ -180,7 +212,7 @@ class MessageController extends GetxController {
     );
 
     // Tell the server about the new read state in case the messages have been received properly
-    if (messages.last.senderToken != currentProvider.value?.conversation.token.id) {
+    if (currentProvider.value != null && currentProvider.value?.conversation.token.id != messages.last.senderToken) {
       overwriteRead(currentProvider.value!.conversation);
     }
 
@@ -198,8 +230,35 @@ class ConversationMessageProvider extends MessageProvider {
     // Load messages from the local database
     final messageQuery = db.select(db.message)
       ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
-      ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(time)));
+      ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(time)))
+      ..orderBy([(u) => OrderingTerm.desc(u.createdAt)]);
     final messages = await messageQuery.get();
+
+    // If there are no messages on the client, check for them on the server
+    if (messages.isEmpty) {
+      // Load messages from the server
+      final json = await postNodeJSON("/conversations/message/list_before", {
+        "token": conversation.token.toMap(),
+        "data": time,
+      });
+
+      // Check if there was an error
+      if (!json["success"]) {
+        conversation.error.value = json["error"];
+        return (null, true);
+      }
+
+      // Check if the top has been reached
+      if (json["messages"] == null || json["messages"].isEmpty) {
+        return (null, false);
+      }
+      // Unpack the messages in an isolate
+      final messages = await MessageListener.unpackMessagesInIsolate(conversation, json["messages"]);
+
+      // Prepare messages for
+      await initAttachmentsForMessages(messages);
+      return (messages, false);
+    }
 
     // Process the messages in a seperate isolate
     return (await _processMessages(messages), false);
@@ -210,8 +269,36 @@ class ConversationMessageProvider extends MessageProvider {
     // Load messages from the local database
     final messageQuery = db.select(db.message)
       ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
-      ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(time)));
+      ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(time)))
+      ..orderBy([(u) => OrderingTerm.asc(u.createdAt)]);
     final messages = await messageQuery.get();
+
+    // If there are no messages, check if there are some on the server
+    if (messages.isEmpty) {
+      // Load the messages from the server
+      final json = await postNodeJSON("/conversations/message/list_after", {
+        "token": conversation.token.toMap(),
+        "data": time,
+      });
+
+      // Check if there was an error
+      if (!json["success"]) {
+        conversation.error.value = json["error"];
+        return (null, true);
+      }
+
+      // Check if the bottom has been reached
+      if (json["messages"] == null || json["messages"].isEmpty) {
+        return (null, false);
+      }
+
+      // Unpack the messages in an isolate
+      final messages = await MessageListener.unpackMessagesInIsolate(conversation, json["messages"]);
+
+      // Prepare messages for
+      await initAttachmentsForMessages(messages);
+      return (messages, false);
+    }
 
     // Process the messages in a seperate isolate
     return (await _processMessages(messages), false);
@@ -227,7 +314,25 @@ class ConversationMessageProvider extends MessageProvider {
       ..limit(1);
     final message = await messageQuery.getSingleOrNull();
     if (message == null) {
-      return null;
+      // Get the message from the server
+      final json = await postNodeJSON("/conversations/message/get", {
+        "token": conversation.token.toMap(),
+        "data": id,
+      });
+
+      // Check if there is an error
+      if (!json["success"]) {
+        sendLog("error fetching message $id: ${json["error"]}");
+        return null;
+      }
+
+      // Parse message and init attachments (if desired)
+      final message = await MessageListener.unpackMessageInIsolate(conversation, json["message"]);
+      if (init) {
+        await message.initAttachments(this);
+      }
+
+      return message;
     }
 
     // Process message as a new list and grab it from the list when finished
@@ -239,6 +344,10 @@ class ConversationMessageProvider extends MessageProvider {
   ///
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
   Future<List<Message>> _processMessages(List<MessageData> messages, {bool init = true}) async {
+    if (messages.isEmpty) {
+      return [];
+    }
+
     // Process all messages
     final list = <Message>[];
     for (var data in messages) {
@@ -254,10 +363,16 @@ class ConversationMessageProvider extends MessageProvider {
 
     // Init the attachments to prepare the messages for rendering (if desired)
     if (init) {
-      await Future.wait(list.map((msg) => msg.initAttachments(this)));
+      await initAttachmentsForMessages(list);
     }
 
     return list;
+  }
+
+  /// Init the attachments for all passed in messages.
+  Future<bool> initAttachmentsForMessages(List<Message> messages) async {
+    await Future.wait(messages.map((msg) => msg.initAttachments(this)));
+    return true;
   }
 
   /// Decrypt a message from the local database.
@@ -302,7 +417,6 @@ class ConversationMessageProvider extends MessageProvider {
       "token": token.toMap(),
       "data": message.id,
     });
-    sendLog(json);
 
     if (!json["success"]) {
       return json["error"];
@@ -314,6 +428,7 @@ class ConversationMessageProvider extends MessageProvider {
   @override
   Future<bool> deleteMessageFromClient(String id) async {
     messages.removeWhere((element) => element.id == id);
+    db.message.deleteWhere((tbl) => tbl.id.equals(id));
     return true;
   }
 

@@ -32,12 +32,7 @@ class MessageListener {
       }
 
       // Tell the controller about the message in a different isolate
-      final copied = Conversation.copyWithoutKey(conversation);
-      sodiumLib.runIsolated(
-        (sodium, keys, pairs) {
-          Get.find<MessageController>().storeMessage(message, copied, key: keys[0], sodium: sodium);
-        },
-      );
+      Get.find<MessageController>().storeMessage(message, conversation);
     });
 
     // Listen for multiple messages (mp stands for multiple)
@@ -147,7 +142,7 @@ class MessageListener {
       secureKeys: [conversation.key],
     );
 
-    // Init the attachments on all messages and verify signatures
+    // Verify the signature of all messages
     for (var (msg, info) in loadedMessages) {
       if (info != null) {
         msg.verifySignature(info);
@@ -162,18 +157,18 @@ class MessageListener {
   /// **Doesn't verify the signature**
   static (Message, SymmetricSequencedInfo?) messageFromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
     // Convert to message
-    conversation ??= Get.find<ConversationController>().conversations[json["conversation"]]!;
-    final senderAddress = LPHAddress.from(json["sender"]);
+    conversation ??= Get.find<ConversationController>().conversations[json["cv"]]!;
+    final senderAddress = LPHAddress.from(json["sr"]);
     final message = Message(
       id: json["id"],
       type: MessageType.text,
-      content: json["data"],
+      content: json["dt"],
       answer: "",
       attachments: [],
       senderToken: senderAddress,
       senderAddress: conversation.members[senderAddress]?.address ?? LPHAddress("-", "removed".tr),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(json["creation"]),
-      edited: json["edited"],
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json["ct"]),
+      edited: json["ed"],
       verified: false,
     );
 

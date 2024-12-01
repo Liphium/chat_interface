@@ -81,6 +81,9 @@ abstract class MessageProvider {
   /// Runs on every scroll to check if new messages should be loaded
   void checkCurrentScrollHeight() async {
     // Get.height is in there because there is a little bit of buffer above
+    if (controller == null) {
+      return;
+    }
     if (controller!.position.pixels > controller!.position.maxScrollExtent - Get.height / 2 - newLoadOffset && !topReached) {
       var (topReached, error) = await loadNewMessagesTop();
       if (!error) {

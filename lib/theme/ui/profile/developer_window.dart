@@ -86,6 +86,13 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.delete,
+            label: "Delete all messages (local)",
+            onTap: () => db.message.deleteAll(),
+            loading: false.obs,
+          ),
+          verticalSpacing(elementSpacing),
+          ProfileButton(
+            icon: Icons.delete,
             label: "Delete all library entries (local)",
             onTap: () => db.libraryEntry.deleteAll(),
             loading: false.obs,
