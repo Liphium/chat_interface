@@ -44,7 +44,7 @@ class CardObject extends TableObject {
     obj.imageSize = size;
 
     // Download the file
-    Get.find<AttachmentController>().downloadAttachment(container).then((success) async {
+    unawaited(Get.find<AttachmentController>().downloadAttachment(container).then((success) async {
       if (success) {
         // Get the actual image and add it to the object
         final buffer = await ui.ImmutableBuffer.fromUint8List(await container.file!.readAsBytes());
@@ -55,7 +55,7 @@ class CardObject extends TableObject {
       } else {
         obj.error = true;
       }
-    });
+    }));
 
     return obj;
   }
@@ -170,7 +170,7 @@ class CardObject extends TableObject {
   }
 
   @override
-  void handleData(String data) async {
+  Future<void> handleData(String data) async {
     sendLog("handling data");
     // Download attached container
     final json = jsonDecode(data);

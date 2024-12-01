@@ -112,14 +112,14 @@ Future<String?> refreshVault() async {
   // Add all new conversations
   for (var conversation in conversations) {
     if (controller.conversations[conversation.id] == null) {
-      controller.addFromVault(conversation);
+      await controller.addFromVault(conversation);
     }
   }
 
   // Delete all old conversations from the database
   final stringIds = ids.map((id) => id.encode());
-  db.conversation.deleteWhere((tbl) => tbl.id.isNotIn(stringIds));
-  db.member.deleteWhere((tbl) => tbl.conversationId.isNotIn(stringIds));
+  await db.conversation.deleteWhere((tbl) => tbl.id.isNotIn(stringIds));
+  await db.member.deleteWhere((tbl) => tbl.conversationId.isNotIn(stringIds));
 
   return null;
 }

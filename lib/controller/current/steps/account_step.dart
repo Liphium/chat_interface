@@ -35,9 +35,9 @@ class AccountStep extends ConnectionStep {
     // Set the account id if there isn't one
     if (StatusController.ownAccountId == "" || uNameChanged || dNameChanged || StatusController.ownAccountId != account["id"]) {
       sendLog("setting account id");
-      setEncryptedValue("cache_account_id", account["id"]);
-      setEncryptedValue("cache_account_uname", account["username"]);
-      setEncryptedValue("cache_account_dname", account["display_name"]);
+      await setEncryptedValue("cache_account_id", account["id"]);
+      await setEncryptedValue("cache_account_uname", account["username"]);
+      await setEncryptedValue("cache_account_dname", account["display_name"]);
 
       // Restart to migrate to the new account id
       return SetupResponse(

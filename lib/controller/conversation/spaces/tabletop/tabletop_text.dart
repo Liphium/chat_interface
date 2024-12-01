@@ -47,7 +47,7 @@ class TextObject extends TableObject {
   }
 
   @override
-  void handleData(String data) async {
+  Future<void> handleData(String data) async {
     final json = jsonDecode(data);
     text = json["text"];
     fontSize.setValue(json["size"]);

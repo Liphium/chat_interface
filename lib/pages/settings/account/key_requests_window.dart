@@ -61,7 +61,7 @@ class KeyRequest {
     };
   }
 
-  void updateStatus(bool delete, Function() success) async {
+  Future<void> updateStatus(bool delete, Function() success) async {
     // Make the payload
     late final String payload;
     if (delete) {
@@ -126,7 +126,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
     super.dispose();
   }
 
-  void requestKeyRequests() async {
+  Future<void> requestKeyRequests() async {
     loading.value = true;
 
     // Get the key synchronization requests from the server

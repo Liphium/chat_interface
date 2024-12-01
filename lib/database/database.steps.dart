@@ -52,15 +52,11 @@ final class Schema2 extends i0.VersionedSchema {
           _column_0,
           _column_9,
           _column_10,
-          _column_2,
           _column_11,
           _column_12,
           _column_13,
           _column_14,
           _column_15,
-          _column_16,
-          _column_17,
-          _column_18,
         ],
         attachedDatabase: database,
       ),
@@ -75,9 +71,9 @@ final class Schema2 extends i0.VersionedSchema {
         ],
         columns: [
           _column_0,
-          _column_19,
-          _column_20,
-          _column_21,
+          _column_16,
+          _column_17,
+          _column_18,
         ],
         attachedDatabase: database,
       ),
@@ -92,7 +88,7 @@ final class Schema2 extends i0.VersionedSchema {
         ],
         columns: [
           _column_5,
-          _column_22,
+          _column_19,
         ],
         attachedDatabase: database,
       ),
@@ -107,10 +103,10 @@ final class Schema2 extends i0.VersionedSchema {
         ],
         columns: [
           _column_0,
-          _column_23,
-          _column_24,
+          _column_20,
+          _column_21,
           _column_1,
-          _column_25,
+          _column_22,
           _column_7,
         ],
         attachedDatabase: database,
@@ -126,11 +122,11 @@ final class Schema2 extends i0.VersionedSchema {
         ],
         columns: [
           _column_0,
+          _column_20,
+          _column_21,
           _column_23,
-          _column_24,
-          _column_26,
           _column_1,
-          _column_25,
+          _column_22,
           _column_7,
         ],
         attachedDatabase: database,
@@ -146,9 +142,9 @@ final class Schema2 extends i0.VersionedSchema {
         ],
         columns: [
           _column_0,
-          _column_23,
-          _column_24,
-          _column_25,
+          _column_20,
+          _column_21,
+          _column_22,
         ],
         attachedDatabase: database,
       ),
@@ -163,7 +159,7 @@ final class Schema2 extends i0.VersionedSchema {
         ],
         columns: [
           _column_0,
-          _column_27,
+          _column_24,
           _column_3,
         ],
         attachedDatabase: database,
@@ -178,7 +174,7 @@ final class Schema2 extends i0.VersionedSchema {
           'PRIMARY KEY(domain)',
         ],
         columns: [
-          _column_28,
+          _column_25,
         ],
         attachedDatabase: database,
       ),
@@ -194,10 +190,10 @@ final class Schema2 extends i0.VersionedSchema {
         columns: [
           _column_0,
           _column_2,
-          _column_16,
+          _column_12,
           _column_3,
-          _column_29,
-          _column_30,
+          _column_26,
+          _column_27,
         ],
         attachedDatabase: database,
       ),
@@ -258,66 +254,47 @@ class Shape1 extends i0.VersionedTable {
   Shape1({required super.source, required super.alias}) : super.aliased();
   i1.GeneratedColumn<String> get id =>
       columnsByName['id']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<bool> get verified =>
-      columnsByName['verified']! as i1.GeneratedColumn<bool>;
-  i1.GeneratedColumn<bool> get system =>
-      columnsByName['system']! as i1.GeneratedColumn<bool>;
-  i1.GeneratedColumn<int> get type =>
-      columnsByName['type']! as i1.GeneratedColumn<int>;
   i1.GeneratedColumn<String> get content =>
       columnsByName['content']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get attachments =>
-      columnsByName['attachments']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get sender =>
-      columnsByName['sender']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get senderAccount =>
-      columnsByName['sender_account']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get answer =>
-      columnsByName['answer']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get senderToken =>
+      columnsByName['sender_token']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get senderAddress =>
+      columnsByName['sender_address']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<BigInt> get createdAt =>
       columnsByName['created_at']! as i1.GeneratedColumn<BigInt>;
-  i1.GeneratedColumn<String> get conversationId =>
-      columnsByName['conversation_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get conversation =>
+      columnsByName['conversation']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<bool> get edited =>
       columnsByName['edited']! as i1.GeneratedColumn<bool>;
+  i1.GeneratedColumn<bool> get verified =>
+      columnsByName['verified']! as i1.GeneratedColumn<bool>;
 }
 
-i1.GeneratedColumn<bool> _column_9(String aliasedName) =>
-    i1.GeneratedColumn<bool>('verified', aliasedName, false,
-        type: i1.DriftSqlType.bool,
-        defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
-            'CHECK ("verified" IN (0, 1))'));
-i1.GeneratedColumn<bool> _column_10(String aliasedName) =>
-    i1.GeneratedColumn<bool>('system', aliasedName, false,
-        type: i1.DriftSqlType.bool,
-        defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
-            'CHECK ("system" IN (0, 1))'));
-i1.GeneratedColumn<String> _column_11(String aliasedName) =>
+i1.GeneratedColumn<String> _column_9(String aliasedName) =>
     i1.GeneratedColumn<String>('content', aliasedName, false,
         type: i1.DriftSqlType.string);
-i1.GeneratedColumn<String> _column_12(String aliasedName) =>
-    i1.GeneratedColumn<String>('attachments', aliasedName, false,
+i1.GeneratedColumn<String> _column_10(String aliasedName) =>
+    i1.GeneratedColumn<String>('sender_token', aliasedName, false,
         type: i1.DriftSqlType.string);
-i1.GeneratedColumn<String> _column_13(String aliasedName) =>
-    i1.GeneratedColumn<String>('sender', aliasedName, false,
+i1.GeneratedColumn<String> _column_11(String aliasedName) =>
+    i1.GeneratedColumn<String>('sender_address', aliasedName, false,
         type: i1.DriftSqlType.string);
-i1.GeneratedColumn<String> _column_14(String aliasedName) =>
-    i1.GeneratedColumn<String>('sender_account', aliasedName, false,
-        type: i1.DriftSqlType.string);
-i1.GeneratedColumn<String> _column_15(String aliasedName) =>
-    i1.GeneratedColumn<String>('answer', aliasedName, false,
-        type: i1.DriftSqlType.string);
-i1.GeneratedColumn<BigInt> _column_16(String aliasedName) =>
+i1.GeneratedColumn<BigInt> _column_12(String aliasedName) =>
     i1.GeneratedColumn<BigInt>('created_at', aliasedName, false,
         type: i1.DriftSqlType.bigInt);
-i1.GeneratedColumn<String> _column_17(String aliasedName) =>
-    i1.GeneratedColumn<String>('conversation_id', aliasedName, false,
+i1.GeneratedColumn<String> _column_13(String aliasedName) =>
+    i1.GeneratedColumn<String>('conversation', aliasedName, false,
         type: i1.DriftSqlType.string);
-i1.GeneratedColumn<bool> _column_18(String aliasedName) =>
+i1.GeneratedColumn<bool> _column_14(String aliasedName) =>
     i1.GeneratedColumn<bool>('edited', aliasedName, false,
         type: i1.DriftSqlType.bool,
         defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
             'CHECK ("edited" IN (0, 1))'));
+i1.GeneratedColumn<bool> _column_15(String aliasedName) =>
+    i1.GeneratedColumn<bool>('verified', aliasedName, false,
+        type: i1.DriftSqlType.bool,
+        defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+            'CHECK ("verified" IN (0, 1))'));
 
 class Shape2 extends i0.VersionedTable {
   Shape2({required super.source, required super.alias}) : super.aliased();
@@ -331,13 +308,13 @@ class Shape2 extends i0.VersionedTable {
       columnsByName['role_id']! as i1.GeneratedColumn<int>;
 }
 
-i1.GeneratedColumn<String> _column_19(String aliasedName) =>
+i1.GeneratedColumn<String> _column_16(String aliasedName) =>
     i1.GeneratedColumn<String>('conversation_id', aliasedName, true,
         type: i1.DriftSqlType.string);
-i1.GeneratedColumn<String> _column_20(String aliasedName) =>
+i1.GeneratedColumn<String> _column_17(String aliasedName) =>
     i1.GeneratedColumn<String>('account_id', aliasedName, false,
         type: i1.DriftSqlType.string);
-i1.GeneratedColumn<int> _column_21(String aliasedName) =>
+i1.GeneratedColumn<int> _column_18(String aliasedName) =>
     i1.GeneratedColumn<int>('role_id', aliasedName, false,
         type: i1.DriftSqlType.int);
 
@@ -349,7 +326,7 @@ class Shape3 extends i0.VersionedTable {
       columnsByName['value']! as i1.GeneratedColumn<String>;
 }
 
-i1.GeneratedColumn<String> _column_22(String aliasedName) =>
+i1.GeneratedColumn<String> _column_19(String aliasedName) =>
     i1.GeneratedColumn<String>('value', aliasedName, false,
         type: i1.DriftSqlType.string);
 
@@ -369,13 +346,13 @@ class Shape4 extends i0.VersionedTable {
       columnsByName['updated_at']! as i1.GeneratedColumn<BigInt>;
 }
 
-i1.GeneratedColumn<String> _column_23(String aliasedName) =>
+i1.GeneratedColumn<String> _column_20(String aliasedName) =>
     i1.GeneratedColumn<String>('name', aliasedName, false,
         type: i1.DriftSqlType.string);
-i1.GeneratedColumn<String> _column_24(String aliasedName) =>
+i1.GeneratedColumn<String> _column_21(String aliasedName) =>
     i1.GeneratedColumn<String>('display_name', aliasedName, false,
         type: i1.DriftSqlType.string);
-i1.GeneratedColumn<String> _column_25(String aliasedName) =>
+i1.GeneratedColumn<String> _column_22(String aliasedName) =>
     i1.GeneratedColumn<String>('keys', aliasedName, false,
         type: i1.DriftSqlType.string);
 
@@ -397,7 +374,7 @@ class Shape5 extends i0.VersionedTable {
       columnsByName['updated_at']! as i1.GeneratedColumn<BigInt>;
 }
 
-i1.GeneratedColumn<bool> _column_26(String aliasedName) =>
+i1.GeneratedColumn<bool> _column_23(String aliasedName) =>
     i1.GeneratedColumn<bool>('self', aliasedName, false,
         type: i1.DriftSqlType.bool,
         defaultConstraints:
@@ -425,7 +402,7 @@ class Shape7 extends i0.VersionedTable {
       columnsByName['data']! as i1.GeneratedColumn<String>;
 }
 
-i1.GeneratedColumn<String> _column_27(String aliasedName) =>
+i1.GeneratedColumn<String> _column_24(String aliasedName) =>
     i1.GeneratedColumn<String>('picture_container', aliasedName, false,
         type: i1.DriftSqlType.string);
 
@@ -435,7 +412,7 @@ class Shape8 extends i0.VersionedTable {
       columnsByName['domain']! as i1.GeneratedColumn<String>;
 }
 
-i1.GeneratedColumn<String> _column_28(String aliasedName) =>
+i1.GeneratedColumn<String> _column_25(String aliasedName) =>
     i1.GeneratedColumn<String>('domain', aliasedName, false,
         type: i1.DriftSqlType.string);
 
@@ -455,10 +432,10 @@ class Shape9 extends i0.VersionedTable {
       columnsByName['height']! as i1.GeneratedColumn<int>;
 }
 
-i1.GeneratedColumn<int> _column_29(String aliasedName) =>
+i1.GeneratedColumn<int> _column_26(String aliasedName) =>
     i1.GeneratedColumn<int>('width', aliasedName, false,
         type: i1.DriftSqlType.int);
-i1.GeneratedColumn<int> _column_30(String aliasedName) =>
+i1.GeneratedColumn<int> _column_27(String aliasedName) =>
     i1.GeneratedColumn<int>('height', aliasedName, false,
         type: i1.DriftSqlType.int);
 i0.MigrationStepWithVersion migrationSteps({

@@ -466,6 +466,450 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   }
 }
 
+class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MessageTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _contentMeta =
+      const VerificationMeta('content');
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+      'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _senderTokenMeta =
+      const VerificationMeta('senderToken');
+  @override
+  late final GeneratedColumn<String> senderToken = GeneratedColumn<String>(
+      'sender_token', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _senderAddressMeta =
+      const VerificationMeta('senderAddress');
+  @override
+  late final GeneratedColumn<String> senderAddress = GeneratedColumn<String>(
+      'sender_address', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  static const VerificationMeta _conversationMeta =
+      const VerificationMeta('conversation');
+  @override
+  late final GeneratedColumn<String> conversation = GeneratedColumn<String>(
+      'conversation', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _editedMeta = const VerificationMeta('edited');
+  @override
+  late final GeneratedColumn<bool> edited = GeneratedColumn<bool>(
+      'edited', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("edited" IN (0, 1))'));
+  static const VerificationMeta _verifiedMeta =
+      const VerificationMeta('verified');
+  @override
+  late final GeneratedColumn<bool> verified = GeneratedColumn<bool>(
+      'verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        content,
+        senderToken,
+        senderAddress,
+        createdAt,
+        conversation,
+        edited,
+        verified
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'message';
+  @override
+  VerificationContext validateIntegrity(Insertable<MessageData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('sender_token')) {
+      context.handle(
+          _senderTokenMeta,
+          senderToken.isAcceptableOrUnknown(
+              data['sender_token']!, _senderTokenMeta));
+    } else if (isInserting) {
+      context.missing(_senderTokenMeta);
+    }
+    if (data.containsKey('sender_address')) {
+      context.handle(
+          _senderAddressMeta,
+          senderAddress.isAcceptableOrUnknown(
+              data['sender_address']!, _senderAddressMeta));
+    } else if (isInserting) {
+      context.missing(_senderAddressMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('conversation')) {
+      context.handle(
+          _conversationMeta,
+          conversation.isAcceptableOrUnknown(
+              data['conversation']!, _conversationMeta));
+    } else if (isInserting) {
+      context.missing(_conversationMeta);
+    }
+    if (data.containsKey('edited')) {
+      context.handle(_editedMeta,
+          edited.isAcceptableOrUnknown(data['edited']!, _editedMeta));
+    } else if (isInserting) {
+      context.missing(_editedMeta);
+    }
+    if (data.containsKey('verified')) {
+      context.handle(_verifiedMeta,
+          verified.isAcceptableOrUnknown(data['verified']!, _verifiedMeta));
+    } else if (isInserting) {
+      context.missing(_verifiedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MessageData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MessageData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      senderToken: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_token'])!,
+      senderAddress: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_address'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
+      conversation: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}conversation'])!,
+      edited: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
+      verified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
+    );
+  }
+
+  @override
+  $MessageTable createAlias(String alias) {
+    return $MessageTable(attachedDatabase, alias);
+  }
+}
+
+class MessageData extends DataClass implements Insertable<MessageData> {
+  final String id;
+  final String content;
+  final String senderToken;
+  final String senderAddress;
+  final BigInt createdAt;
+  final String conversation;
+  final bool edited;
+  final bool verified;
+  const MessageData(
+      {required this.id,
+      required this.content,
+      required this.senderToken,
+      required this.senderAddress,
+      required this.createdAt,
+      required this.conversation,
+      required this.edited,
+      required this.verified});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['content'] = Variable<String>(content);
+    map['sender_token'] = Variable<String>(senderToken);
+    map['sender_address'] = Variable<String>(senderAddress);
+    map['created_at'] = Variable<BigInt>(createdAt);
+    map['conversation'] = Variable<String>(conversation);
+    map['edited'] = Variable<bool>(edited);
+    map['verified'] = Variable<bool>(verified);
+    return map;
+  }
+
+  MessageCompanion toCompanion(bool nullToAbsent) {
+    return MessageCompanion(
+      id: Value(id),
+      content: Value(content),
+      senderToken: Value(senderToken),
+      senderAddress: Value(senderAddress),
+      createdAt: Value(createdAt),
+      conversation: Value(conversation),
+      edited: Value(edited),
+      verified: Value(verified),
+    );
+  }
+
+  factory MessageData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MessageData(
+      id: serializer.fromJson<String>(json['id']),
+      content: serializer.fromJson<String>(json['content']),
+      senderToken: serializer.fromJson<String>(json['senderToken']),
+      senderAddress: serializer.fromJson<String>(json['senderAddress']),
+      createdAt: serializer.fromJson<BigInt>(json['createdAt']),
+      conversation: serializer.fromJson<String>(json['conversation']),
+      edited: serializer.fromJson<bool>(json['edited']),
+      verified: serializer.fromJson<bool>(json['verified']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'content': serializer.toJson<String>(content),
+      'senderToken': serializer.toJson<String>(senderToken),
+      'senderAddress': serializer.toJson<String>(senderAddress),
+      'createdAt': serializer.toJson<BigInt>(createdAt),
+      'conversation': serializer.toJson<String>(conversation),
+      'edited': serializer.toJson<bool>(edited),
+      'verified': serializer.toJson<bool>(verified),
+    };
+  }
+
+  MessageData copyWith(
+          {String? id,
+          String? content,
+          String? senderToken,
+          String? senderAddress,
+          BigInt? createdAt,
+          String? conversation,
+          bool? edited,
+          bool? verified}) =>
+      MessageData(
+        id: id ?? this.id,
+        content: content ?? this.content,
+        senderToken: senderToken ?? this.senderToken,
+        senderAddress: senderAddress ?? this.senderAddress,
+        createdAt: createdAt ?? this.createdAt,
+        conversation: conversation ?? this.conversation,
+        edited: edited ?? this.edited,
+        verified: verified ?? this.verified,
+      );
+  MessageData copyWithCompanion(MessageCompanion data) {
+    return MessageData(
+      id: data.id.present ? data.id.value : this.id,
+      content: data.content.present ? data.content.value : this.content,
+      senderToken:
+          data.senderToken.present ? data.senderToken.value : this.senderToken,
+      senderAddress: data.senderAddress.present
+          ? data.senderAddress.value
+          : this.senderAddress,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      conversation: data.conversation.present
+          ? data.conversation.value
+          : this.conversation,
+      edited: data.edited.present ? data.edited.value : this.edited,
+      verified: data.verified.present ? data.verified.value : this.verified,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessageData(')
+          ..write('id: $id, ')
+          ..write('content: $content, ')
+          ..write('senderToken: $senderToken, ')
+          ..write('senderAddress: $senderAddress, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('conversation: $conversation, ')
+          ..write('edited: $edited, ')
+          ..write('verified: $verified')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, content, senderToken, senderAddress,
+      createdAt, conversation, edited, verified);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MessageData &&
+          other.id == this.id &&
+          other.content == this.content &&
+          other.senderToken == this.senderToken &&
+          other.senderAddress == this.senderAddress &&
+          other.createdAt == this.createdAt &&
+          other.conversation == this.conversation &&
+          other.edited == this.edited &&
+          other.verified == this.verified);
+}
+
+class MessageCompanion extends UpdateCompanion<MessageData> {
+  final Value<String> id;
+  final Value<String> content;
+  final Value<String> senderToken;
+  final Value<String> senderAddress;
+  final Value<BigInt> createdAt;
+  final Value<String> conversation;
+  final Value<bool> edited;
+  final Value<bool> verified;
+  final Value<int> rowid;
+  const MessageCompanion({
+    this.id = const Value.absent(),
+    this.content = const Value.absent(),
+    this.senderToken = const Value.absent(),
+    this.senderAddress = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.conversation = const Value.absent(),
+    this.edited = const Value.absent(),
+    this.verified = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MessageCompanion.insert({
+    required String id,
+    required String content,
+    required String senderToken,
+    required String senderAddress,
+    required BigInt createdAt,
+    required String conversation,
+    required bool edited,
+    required bool verified,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        content = Value(content),
+        senderToken = Value(senderToken),
+        senderAddress = Value(senderAddress),
+        createdAt = Value(createdAt),
+        conversation = Value(conversation),
+        edited = Value(edited),
+        verified = Value(verified);
+  static Insertable<MessageData> custom({
+    Expression<String>? id,
+    Expression<String>? content,
+    Expression<String>? senderToken,
+    Expression<String>? senderAddress,
+    Expression<BigInt>? createdAt,
+    Expression<String>? conversation,
+    Expression<bool>? edited,
+    Expression<bool>? verified,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (content != null) 'content': content,
+      if (senderToken != null) 'sender_token': senderToken,
+      if (senderAddress != null) 'sender_address': senderAddress,
+      if (createdAt != null) 'created_at': createdAt,
+      if (conversation != null) 'conversation': conversation,
+      if (edited != null) 'edited': edited,
+      if (verified != null) 'verified': verified,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MessageCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? content,
+      Value<String>? senderToken,
+      Value<String>? senderAddress,
+      Value<BigInt>? createdAt,
+      Value<String>? conversation,
+      Value<bool>? edited,
+      Value<bool>? verified,
+      Value<int>? rowid}) {
+    return MessageCompanion(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      senderToken: senderToken ?? this.senderToken,
+      senderAddress: senderAddress ?? this.senderAddress,
+      createdAt: createdAt ?? this.createdAt,
+      conversation: conversation ?? this.conversation,
+      edited: edited ?? this.edited,
+      verified: verified ?? this.verified,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (senderToken.present) {
+      map['sender_token'] = Variable<String>(senderToken.value);
+    }
+    if (senderAddress.present) {
+      map['sender_address'] = Variable<String>(senderAddress.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<BigInt>(createdAt.value);
+    }
+    if (conversation.present) {
+      map['conversation'] = Variable<String>(conversation.value);
+    }
+    if (edited.present) {
+      map['edited'] = Variable<bool>(edited.value);
+    }
+    if (verified.present) {
+      map['verified'] = Variable<bool>(verified.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessageCompanion(')
+          ..write('id: $id, ')
+          ..write('content: $content, ')
+          ..write('senderToken: $senderToken, ')
+          ..write('senderAddress: $senderAddress, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('conversation: $conversation, ')
+          ..write('edited: $edited, ')
+          ..write('verified: $verified, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -2672,6 +3116,7 @@ abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   $DatabaseManager get managers => $DatabaseManager(this);
   late final $ConversationTable conversation = $ConversationTable(this);
+  late final $MessageTable message = $MessageTable(this);
   late final $MemberTable member = $MemberTable(this);
   late final $SettingTable setting = $SettingTable(this);
   late final $FriendTable friend = $FriendTable(this);
@@ -2686,6 +3131,7 @@ abstract class _$Database extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         conversation,
+        message,
         member,
         setting,
         friend,
@@ -2931,6 +3377,217 @@ typedef $$ConversationTableProcessedTableManager = ProcessedTableManager<
       BaseReferences<_$Database, $ConversationTable, ConversationData>
     ),
     ConversationData,
+    PrefetchHooks Function()>;
+typedef $$MessageTableCreateCompanionBuilder = MessageCompanion Function({
+  required String id,
+  required String content,
+  required String senderToken,
+  required String senderAddress,
+  required BigInt createdAt,
+  required String conversation,
+  required bool edited,
+  required bool verified,
+  Value<int> rowid,
+});
+typedef $$MessageTableUpdateCompanionBuilder = MessageCompanion Function({
+  Value<String> id,
+  Value<String> content,
+  Value<String> senderToken,
+  Value<String> senderAddress,
+  Value<BigInt> createdAt,
+  Value<String> conversation,
+  Value<bool> edited,
+  Value<bool> verified,
+  Value<int> rowid,
+});
+
+class $$MessageTableFilterComposer extends Composer<_$Database, $MessageTable> {
+  $$MessageTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get senderToken => $composableBuilder(
+      column: $table.senderToken, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get senderAddress => $composableBuilder(
+      column: $table.senderAddress, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<BigInt> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get conversation => $composableBuilder(
+      column: $table.conversation, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get edited => $composableBuilder(
+      column: $table.edited, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get verified => $composableBuilder(
+      column: $table.verified, builder: (column) => ColumnFilters(column));
+}
+
+class $$MessageTableOrderingComposer
+    extends Composer<_$Database, $MessageTable> {
+  $$MessageTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get senderToken => $composableBuilder(
+      column: $table.senderToken, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get senderAddress => $composableBuilder(
+      column: $table.senderAddress,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<BigInt> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get conversation => $composableBuilder(
+      column: $table.conversation,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get edited => $composableBuilder(
+      column: $table.edited, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get verified => $composableBuilder(
+      column: $table.verified, builder: (column) => ColumnOrderings(column));
+}
+
+class $$MessageTableAnnotationComposer
+    extends Composer<_$Database, $MessageTable> {
+  $$MessageTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get senderToken => $composableBuilder(
+      column: $table.senderToken, builder: (column) => column);
+
+  GeneratedColumn<String> get senderAddress => $composableBuilder(
+      column: $table.senderAddress, builder: (column) => column);
+
+  GeneratedColumn<BigInt> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get conversation => $composableBuilder(
+      column: $table.conversation, builder: (column) => column);
+
+  GeneratedColumn<bool> get edited =>
+      $composableBuilder(column: $table.edited, builder: (column) => column);
+
+  GeneratedColumn<bool> get verified =>
+      $composableBuilder(column: $table.verified, builder: (column) => column);
+}
+
+class $$MessageTableTableManager extends RootTableManager<
+    _$Database,
+    $MessageTable,
+    MessageData,
+    $$MessageTableFilterComposer,
+    $$MessageTableOrderingComposer,
+    $$MessageTableAnnotationComposer,
+    $$MessageTableCreateCompanionBuilder,
+    $$MessageTableUpdateCompanionBuilder,
+    (MessageData, BaseReferences<_$Database, $MessageTable, MessageData>),
+    MessageData,
+    PrefetchHooks Function()> {
+  $$MessageTableTableManager(_$Database db, $MessageTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MessageTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MessageTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MessageTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> content = const Value.absent(),
+            Value<String> senderToken = const Value.absent(),
+            Value<String> senderAddress = const Value.absent(),
+            Value<BigInt> createdAt = const Value.absent(),
+            Value<String> conversation = const Value.absent(),
+            Value<bool> edited = const Value.absent(),
+            Value<bool> verified = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessageCompanion(
+            id: id,
+            content: content,
+            senderToken: senderToken,
+            senderAddress: senderAddress,
+            createdAt: createdAt,
+            conversation: conversation,
+            edited: edited,
+            verified: verified,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String content,
+            required String senderToken,
+            required String senderAddress,
+            required BigInt createdAt,
+            required String conversation,
+            required bool edited,
+            required bool verified,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessageCompanion.insert(
+            id: id,
+            content: content,
+            senderToken: senderToken,
+            senderAddress: senderAddress,
+            createdAt: createdAt,
+            conversation: conversation,
+            edited: edited,
+            verified: verified,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$MessageTableProcessedTableManager = ProcessedTableManager<
+    _$Database,
+    $MessageTable,
+    MessageData,
+    $$MessageTableFilterComposer,
+    $$MessageTableOrderingComposer,
+    $$MessageTableAnnotationComposer,
+    $$MessageTableCreateCompanionBuilder,
+    $$MessageTableUpdateCompanionBuilder,
+    (MessageData, BaseReferences<_$Database, $MessageTable, MessageData>),
+    MessageData,
     PrefetchHooks Function()>;
 typedef $$MemberTableCreateCompanionBuilder = MemberCompanion Function({
   required String id,
@@ -4176,6 +4833,8 @@ class $DatabaseManager {
   $DatabaseManager(this._db);
   $$ConversationTableTableManager get conversation =>
       $$ConversationTableTableManager(_db, _db.conversation);
+  $$MessageTableTableManager get message =>
+      $$MessageTableTableManager(_db, _db.message);
   $$MemberTableTableManager get member =>
       $$MemberTableTableManager(_db, _db.member);
   $$SettingTableTableManager get setting =>

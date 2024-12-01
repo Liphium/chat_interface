@@ -46,7 +46,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
   }
 
   /// Get all the categories from the server
-  void fetchCategories() async {
+  Future<void> fetchCategories() async {
     loading.value = true;
     error.value = "";
     final json = await postAuthorizedJSON("/townhall/settings/categories", {});
@@ -62,11 +62,11 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
     }
 
     // Fetch category one
-    fetchSettings(categories[0].name);
+    await fetchSettings(categories[0].name);
   }
 
   /// Fetch the settings for a category
-  void fetchSettings(String name) async {
+  Future<void> fetchSettings(String name) async {
     final category = categories.firstWhere((c) => c.name == name);
     currentCategory = category.name;
     final json = await postAuthorizedJSON("/townhall/settings/${category.id}", {});

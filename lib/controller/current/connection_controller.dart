@@ -51,7 +51,7 @@ class ConnectionController extends GetxController {
     _steps.add(StoredActionsSetup());
   }
 
-  void tryConnection() async {
+  Future<void> tryConnection() async {
     // Initialize all the stuff
     for (var task in _tasks) {
       final result = await task.init();
@@ -84,7 +84,7 @@ class ConnectionController extends GetxController {
       // If a retry is requested, retry all setups
       if (result.retryConnection) {
         await Future.delayed(500.ms); // To prevent CPU overuse in case of a bug (hopefully never happens)
-        tryConnection();
+        unawaited(tryConnection());
         return;
       }
     }
@@ -95,16 +95,16 @@ class ConnectionController extends GetxController {
     error.value = "";
     loading.value = false;
 
-    _startTasks();
+    unawaited(_startTasks());
   }
 
-  void _startTasks() async {
+  Future<void> _startTasks() async {
     if (tasksRan) return;
     tasksRan = true;
 
     // Start all the tasks
     for (var task in _tasks) {
-      task.start();
+      unawaited(task.start());
     }
   }
 
@@ -172,7 +172,7 @@ abstract class SynchronizationTask {
   final loading = false.obs;
 
   /// Starts the task.
-  void start() async {
+  Future<void> start() async {
     _timer = Timer.periodic(
       frequency,
       (timer) async {

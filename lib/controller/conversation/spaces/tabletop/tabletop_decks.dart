@@ -73,7 +73,7 @@ class TabletopDeck {
   }
 
   /// usecase is the type of storage to use for the cards (for downloaded ones it should be "cache" for example)
-  void loadCards(StorageType usecase) async {
+  Future<void> loadCards(StorageType usecase) async {
     final controller = Get.find<AttachmentController>();
     bool removed = false;
     for (var card in encodedCards) {
@@ -90,7 +90,7 @@ class TabletopDeck {
 
     // Save the deck in case cards have been removed because they don't exist anymore
     if (removed) {
-      save();
+      await save();
     }
     encodedCards.clear();
   }

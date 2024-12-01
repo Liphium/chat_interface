@@ -54,7 +54,7 @@ class _ObjectCreateMenuState extends State<ObjectCreateMenu> {
                         default:
                           break;
                       }
-                      object?.sendAdd();
+                      await object?.sendAdd();
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(defaultSpacing),

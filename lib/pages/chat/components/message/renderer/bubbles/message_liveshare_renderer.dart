@@ -60,7 +60,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
     updateInfo();
   }
 
-  void updateInfo() async {
+  Future<void> updateInfo() async {
     if (transactionBegin != container!.id) {
       sendLog("WTF Flutter is actually weird $transactionBegin ${container!.id}");
       return;

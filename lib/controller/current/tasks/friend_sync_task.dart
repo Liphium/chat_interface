@@ -105,7 +105,7 @@ Future<String?> refreshFriendsVault() async {
       controller.addSentRequest(request);
     }
   }
-  db.request.deleteWhere((t) => t.id.isNotIn(res.allRequestIds.map((e) => e.encode()))); // Remove the other ones that aren't there
+  await db.request.deleteWhere((t) => t.id.isNotIn(res.allRequestIds.map((e) => e.encode()))); // Remove the other ones that aren't there
 
   // Push friends
   final friendController = Get.find<FriendController>();
@@ -115,7 +115,7 @@ Future<String?> refreshFriendsVault() async {
       friendController.add(friend);
     }
   }
-  db.friend.deleteWhere((t) => t.id.isNotIn(res.friendIds.map((e) => e.encode()))); // Remove the other ones that aren't there
+  await db.friend.deleteWhere((t) => t.id.isNotIn(res.friendIds.map((e) => e.encode()))); // Remove the other ones that aren't there
 
   friendsVaultRefreshing.value = false;
   return null;

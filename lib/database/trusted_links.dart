@@ -50,7 +50,7 @@ class TrustedLinkHelper {
     ));
 
     if (result) {
-      db.trustedLink.insertOnConflictUpdate(TrustedLinkData(domain: domain));
+      await db.trustedLink.insertOnConflictUpdate(TrustedLinkData(domain: domain));
     }
 
     return result;
@@ -71,7 +71,7 @@ class TrustedLinkHelper {
     if (await isLinkTrusted(domain)) {
       return false;
     }
-    db.trustedLink.insertOnConflictUpdate(TrustedLinkData(domain: domain));
+    await db.trustedLink.insertOnConflictUpdate(TrustedLinkData(domain: domain));
     return true;
   }
 

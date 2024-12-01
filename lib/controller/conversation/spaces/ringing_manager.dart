@@ -17,7 +17,7 @@ class RingingManager {
   static const ringtoneDuration = Duration(minutes: 1, seconds: 10);
 
   /// Start a ringing process based on a conversation and a space container
-  static void startRinging(Conversation conversation, SpaceConnectionContainer container) async {
+  static Future<void> startRinging(Conversation conversation, SpaceConnectionContainer container) async {
     if (ringing || !await _canRing()) {
       return;
     }
@@ -37,10 +37,10 @@ class RingingManager {
       conversation: conversation,
       container: container,
     ));
-    stopRingtone();
+    await stopRingtone();
   }
 
-  static void playRingSound() async {
+  static Future<void> playRingSound() async {
     await player.setAsset("assets/music/ringtone.mov");
     await player.setVolume(0.1);
     ringing = true;
@@ -52,7 +52,7 @@ class RingingManager {
     });
   }
 
-  static void playNotificationSound() async {
+  static Future<void> playNotificationSound() async {
     if (!await _canPlayNotificationSound()) {
       return;
     }
@@ -109,7 +109,7 @@ class RingingManager {
   }
 
   /// Stop the ringtone
-  static void stopRingtone() async {
+  static Future<void> stopRingtone() async {
     ringing = false;
     await player.stop();
   }

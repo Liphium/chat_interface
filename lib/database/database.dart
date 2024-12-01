@@ -31,7 +31,7 @@ class Database extends _$Database {
     return MigrationStrategy(
       onUpgrade: stepByStep(
         from1To2: (m, schema) async {
-          m.createTable(schema.message);
+          await m.createTable(schema.message);
         },
       ),
     );

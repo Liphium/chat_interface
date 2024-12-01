@@ -154,6 +154,7 @@ class SystemMessages {
     // Format: [accountId]
     "conv.edited": SystemMessage(
       Icons.update,
+      store: false,
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "chat.edit_data".trParams({
@@ -175,6 +176,7 @@ class SystemMessages {
     "msg.deleted": SystemMessage(
       Icons.delete,
       render: false,
+      store: false,
       handler: (msg, provider) {
         provider.deleteMessageFromClient(msg.attachments[0]);
       },
@@ -188,6 +190,7 @@ class SystemMessages {
     "conv.kicked": SystemMessage(
       Icons.delete,
       render: false,
+      store: false,
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           if (LPHAddress.from(msg.attachments[0]) == StatusController.ownAddress) {
@@ -205,10 +208,11 @@ class SystemMessages {
 class SystemMessage {
   final IconData icon;
   final bool render;
+  final bool store;
   final String Function(Message, MessageProvider) translation;
   final Function(Message, MessageProvider)? handler;
 
-  SystemMessage(this.icon, {this.handler, required this.translation, this.render = true});
+  SystemMessage(this.icon, {this.handler, required this.translation, this.render = true, this.store = true});
 
   void handle(Message message, MessageProvider provider) {
     handler?.call(message, provider);

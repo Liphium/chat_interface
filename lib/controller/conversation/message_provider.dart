@@ -30,9 +30,14 @@ abstract class MessageProvider {
   bool topReached = false;
   AutoScrollController? controller;
 
-  void addMessageToBottom(Message message, {bool animation = true}) async {
+  Future<void> addMessageToBottom(Message message, {bool animation = true}) async {
     // Reset the time of the message at the bottom
     lastMessage = null;
+
+    // Make sure the message is fit for the bottom
+    if (message.createdAt.isBefore(messages[0].createdAt)) {
+      return;
+    }
 
     // Check if there are any messages with similar ids to prevent adding the same message again
     if (waitingMessages.any((msg) => msg == message.id)) {
@@ -79,15 +84,18 @@ abstract class MessageProvider {
   }
 
   /// Runs on every scroll to check if new messages should be loaded
-  void checkCurrentScrollHeight() async {
+  Future<void> checkCurrentScrollHeight() async {
     // Get.height is in there because there is a little bit of buffer above
+    if (controller == null) {
+      return;
+    }
     if (controller!.position.pixels > controller!.position.maxScrollExtent - Get.height / 2 - newLoadOffset && !topReached) {
       var (topReached, error) = await loadNewMessagesTop();
       if (!error) {
         this.topReached = topReached;
       }
     } else if (controller!.position.pixels <= newLoadOffset) {
-      loadNewMessagesBottom();
+      unawaited(loadNewMessagesBottom());
     }
   }
 
@@ -175,7 +183,7 @@ abstract class MessageProvider {
     // Check if message is already on screen
     var message = messages.firstWhereOrNull((msg) => msg.id == id);
     if (message != null) {
-      controller!.scrollToIndex(messages.indexOf(message) + 1);
+      unawaited(controller!.scrollToIndex(messages.indexOf(message) + 1));
       if (message.highlightAnimation == null) {
         // If the message is not yet rendered do it through a callback
         message.highlightCallback = () {
@@ -187,7 +195,7 @@ abstract class MessageProvider {
       } else {
         // If it is rendered, don't do it through a callback
         message.highlightAnimation!.value = 0;
-        message.highlightAnimation!.animateTo(1);
+        unawaited(message.highlightAnimation!.animateTo(1));
       }
       return true;
     }
@@ -299,12 +307,12 @@ abstract class MessageProvider {
 
     // Use the timestamp from the json (to prevent desynchronization and stuff)
     final (timeToken, stamp) = obj;
-    final content = jsonEncode(<String, dynamic>{
-      "c": message,
-      "t": type.index,
-      "a": attachments,
-      "r": answer,
-    });
+    final content = Message.buildContentJson(
+      content: message,
+      type: type,
+      attachments: attachments,
+      answerId: answer,
+    );
 
     // Encrypt message with signature
     final info = SymmetricSequencedInfo.builder(content, stamp).finish(encryptionKey());
@@ -366,7 +374,7 @@ class Message {
   List<String> attachments;
   final verified = true.obs;
   String answer;
-  final LPHAddress sender;
+  final LPHAddress senderToken;
   final LPHAddress senderAddress;
   final DateTime createdAt;
   final bool edited;
@@ -413,17 +421,17 @@ class Message {
           if (FileSettings.imageTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
+              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.videoTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
+              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.audioTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
             if (download) {
-              Get.find<AttachmentController>().downloadAttachment(container);
+              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
             }
           }
         }
@@ -449,18 +457,18 @@ class Message {
     });
   }
 
-  Message(
-    this.id,
-    this.type,
-    this.content,
-    this.answer,
-    this.attachments,
-    this.sender,
-    this.senderAddress,
-    this.createdAt,
-    this.edited,
-    bool verified,
-  ) {
+  Message({
+    required this.id,
+    required this.type,
+    required this.content,
+    required this.answer,
+    required this.attachments,
+    required this.senderToken,
+    required this.senderAddress,
+    required this.createdAt,
+    required this.edited,
+    required bool verified,
+  }) {
     this.verified.value = verified;
   }
 
@@ -481,19 +489,36 @@ class Message {
     answer = contentJson["r"] ?? "";
   }
 
+  /// Convert content to a message content json
+  static String buildContentJson({
+    required String content,
+    required MessageType type,
+    required List<String> attachments,
+    required String answerId,
+  }) {
+    return jsonEncode(<String, dynamic>{
+      "c": content,
+      "t": type.index,
+      "a": attachments,
+      "r": answerId, // the "r" stands for reply
+    });
+  }
+
+  /// Convert current message to a content json
+  String toContentJson() {
+    return buildContentJson(content: content, type: type, attachments: attachments, answerId: answer);
+  }
+
   /// Verifies the signature of the message
-  void verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
+  Future<bool> verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
     final sender = await Get.find<UnknownController>().loadUnknownProfile(senderAddress);
     if (sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;
-      return;
+      return false;
     }
     verified.value = info.verifySignature(sender.signatureKey, sodium);
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{};
+    return true;
   }
 
   /// Decrypts the account ids of a system message
@@ -509,7 +534,7 @@ class Message {
   ///
   /// Returns null if successful, otherwise an error message
   Future<String?> delete(MessageProvider provider) async {
-    provider.deleteMessage(this);
+    await provider.deleteMessage(this);
     return null;
   }
 }

@@ -24,7 +24,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
   final remoteActionTesting = false.obs;
 
   /// Perform a remote action test with any instance server
-  void remoteActionTest(String server) async {
+  Future<void> remoteActionTest(String server) async {
     remoteActionTesting.value = true;
 
     // Make the post request to the test endpoint
@@ -81,6 +81,13 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             icon: Icons.delete,
             label: "Delete all friends (local)",
             onTap: () => db.friend.deleteAll(),
+            loading: false.obs,
+          ),
+          verticalSpacing(elementSpacing),
+          ProfileButton(
+            icon: Icons.delete,
+            label: "Delete all messages (local)",
+            onTap: () => db.message.deleteAll(),
             loading: false.obs,
           ),
           verticalSpacing(elementSpacing),

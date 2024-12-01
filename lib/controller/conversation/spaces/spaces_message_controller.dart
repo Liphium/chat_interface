@@ -178,7 +178,7 @@ class SpacesMessageProvider extends MessageProvider {
     // Init the attachments on all messages and verify signatures
     for (var (msg, info) in loadedMessages) {
       if (info != null) {
-        msg.verifySignature(info);
+        await msg.verifySignature(info);
       }
       await msg.initAttachments(this);
     }
@@ -197,7 +197,7 @@ class SpacesMessageProvider extends MessageProvider {
 
     // Verify the signature
     if (info != null) {
-      message.verifySignature(info);
+      await message.verifySignature(info);
     }
 
     return message;
@@ -238,16 +238,26 @@ class SpacesMessageProvider extends MessageProvider {
     // Convert to message
     members ??= Get.find<SpaceMemberController>().memberIds;
     LPHAddress account;
-    if (json["sender"] == MessageController.systemSender.encode()) {
+    if (json["sr"] == MessageController.systemSender.encode()) {
       account = MessageController.systemSender;
     } else {
-      account = members[json["sender"]] ?? LPHAddress("left", "liphium.com");
+      account = members[json["sr"]] ?? LPHAddress("left", "liphium.com");
     }
-    var message = Message(json["id"], MessageType.text, json["data"], "", [], account, account, DateTime.fromMillisecondsSinceEpoch(json["creation"]),
-        json["edited"], false);
+    var message = Message(
+      id: json["id"],
+      type: MessageType.text, // Will be loaded later
+      content: json["dt"],
+      answer: "",
+      attachments: [],
+      senderToken: account,
+      senderAddress: account,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json["ct"]),
+      edited: json["ed"],
+      verified: false,
+    );
 
-    // Handle system message in case it is one
-    if (message.sender == MessageController.systemSender) {
+    // Load as a system message in case it's from the system sender
+    if (message.senderToken == MessageController.systemSender) {
       message.verified.value = true;
       message.type = MessageType.system;
       message.loadContent();

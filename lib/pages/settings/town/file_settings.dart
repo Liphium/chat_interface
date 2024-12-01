@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/town/server_file_viewer.dart';
@@ -110,7 +112,7 @@ class FileSettingsPage extends StatelessWidget {
               FJElevatedButton(
                 onTap: () async {
                   final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_${StatusController.ownAccountId}");
-                  OpenFile.open(cacheFolder);
+                  unawaited(OpenFile.open(cacheFolder));
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -124,7 +126,7 @@ class FileSettingsPage extends StatelessWidget {
               FJElevatedButton(
                 onTap: () async {
                   final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_${StatusController.ownAccountId}");
-                  OpenFile.open(fileFolder);
+                  unawaited(OpenFile.open(fileFolder));
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -138,7 +140,7 @@ class FileSettingsPage extends StatelessWidget {
               FJElevatedButton(
                 onTap: () async {
                   final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_${StatusController.ownAccountId}");
-                  OpenFile.open(fileFolder);
+                  unawaited(OpenFile.open(fileFolder));
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

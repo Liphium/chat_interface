@@ -43,7 +43,7 @@ class UnknownController extends GetxController {
     );
 
     // Add the unknown profile to the database
-    db.unknownProfile.insertOnConflictUpdate(profile.toData());
+    await db.unknownProfile.insertOnConflictUpdate(profile.toData());
     cache[profile.id] = profile;
     return profile;
   }
@@ -95,7 +95,7 @@ class UnknownController extends GetxController {
     );
 
     // Add the unknown profile to the database
-    db.unknownProfile.insertOnConflictUpdate(profile.toData());
+    await db.unknownProfile.insertOnConflictUpdate(profile.toData());
     cache[address] = profile;
     return profile;
   }

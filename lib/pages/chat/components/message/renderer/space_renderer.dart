@@ -54,7 +54,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
     super.initState();
   }
 
-  void loadState() async {
+  Future<void> loadState() async {
     _info.value = await widget.container.getInfo(timer: widget.pollNewData);
     _sub = widget.container.info.listen((info) {
       if (widget.container.cancelled) {

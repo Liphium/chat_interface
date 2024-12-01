@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
@@ -126,7 +128,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
                   if (!widget.container.downloaded.value) {
                     return IconButton(
                       onPressed: () {
-                        Get.find<AttachmentController>().downloadAttachment(widget.container, ignoreLimit: true);
+                        Get.find<AttachmentController>().downloadAttachment(widget.container);
                       },
                       icon: const Icon(Icons.download),
                     );
@@ -136,20 +138,20 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
                     loading: false.obs,
                     onTap: () async {
                       if (playing.value) {
-                        player.pause();
+                        await player.pause();
                         playing.value = false;
                         paused = true;
                       } else {
                         if (paused) {
-                          player.play();
+                          unawaited(player.play());
                           paused = false;
                           playing.value = true;
                           return;
                         }
 
-                        player.setFilePath(widget.container.file!.path);
-                        player.setVolume(0.2);
-                        player.play();
+                        await player.setFilePath(widget.container.file!.path);
+                        await player.setVolume(0.2);
+                        unawaited(player.play());
                         playing.value = true;
                       }
                     },

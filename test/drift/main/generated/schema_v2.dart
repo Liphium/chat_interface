@@ -384,41 +384,20 @@ class Message extends Table with TableInfo<Message, MessageData> {
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<bool> verified = GeneratedColumn<bool>(
-      'verified', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
-  late final GeneratedColumn<bool> system = GeneratedColumn<bool>(
-      'system', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("system" IN (0, 1))'));
-  late final GeneratedColumn<int> type = GeneratedColumn<int>(
-      'type', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
       'content', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> attachments = GeneratedColumn<String>(
-      'attachments', aliasedName, false,
+  late final GeneratedColumn<String> senderToken = GeneratedColumn<String>(
+      'sender_token', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
-      'sender', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> senderAccount = GeneratedColumn<String>(
-      'sender_account', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> answer = GeneratedColumn<String>(
-      'answer', aliasedName, false,
+  late final GeneratedColumn<String> senderAddress = GeneratedColumn<String>(
+      'sender_address', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
       'created_at', aliasedName, false,
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-      'conversation_id', aliasedName, false,
+  late final GeneratedColumn<String> conversation = GeneratedColumn<String>(
+      'conversation', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   late final GeneratedColumn<bool> edited = GeneratedColumn<bool>(
       'edited', aliasedName, false,
@@ -426,20 +405,22 @@ class Message extends Table with TableInfo<Message, MessageData> {
       requiredDuringInsert: true,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("edited" IN (0, 1))'));
+  late final GeneratedColumn<bool> verified = GeneratedColumn<bool>(
+      'verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("verified" IN (0, 1))'));
   @override
   List<GeneratedColumn> get $columns => [
         id,
-        verified,
-        system,
-        type,
         content,
-        attachments,
-        sender,
-        senderAccount,
-        answer,
+        senderToken,
+        senderAddress,
         createdAt,
-        conversationId,
-        edited
+        conversation,
+        edited,
+        verified
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -454,28 +435,20 @@ class Message extends Table with TableInfo<Message, MessageData> {
     return MessageData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      verified: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
-      system: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}system'])!,
-      type: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
-      attachments: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}attachments'])!,
-      sender: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sender'])!,
-      senderAccount: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sender_account'])!,
-      answer: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}answer'])!,
+      senderToken: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_token'])!,
+      senderAddress: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_address'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
-      conversationId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      conversation: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}conversation'])!,
       edited: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}edited'])!,
+      verified: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}verified'])!,
     );
   }
 
@@ -487,62 +460,46 @@ class Message extends Table with TableInfo<Message, MessageData> {
 
 class MessageData extends DataClass implements Insertable<MessageData> {
   final String id;
-  final bool verified;
-  final bool system;
-  final int type;
   final String content;
-  final String attachments;
-  final String sender;
-  final String senderAccount;
-  final String answer;
+  final String senderToken;
+  final String senderAddress;
   final BigInt createdAt;
-  final String conversationId;
+  final String conversation;
   final bool edited;
+  final bool verified;
   const MessageData(
       {required this.id,
-      required this.verified,
-      required this.system,
-      required this.type,
       required this.content,
-      required this.attachments,
-      required this.sender,
-      required this.senderAccount,
-      required this.answer,
+      required this.senderToken,
+      required this.senderAddress,
       required this.createdAt,
-      required this.conversationId,
-      required this.edited});
+      required this.conversation,
+      required this.edited,
+      required this.verified});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['verified'] = Variable<bool>(verified);
-    map['system'] = Variable<bool>(system);
-    map['type'] = Variable<int>(type);
     map['content'] = Variable<String>(content);
-    map['attachments'] = Variable<String>(attachments);
-    map['sender'] = Variable<String>(sender);
-    map['sender_account'] = Variable<String>(senderAccount);
-    map['answer'] = Variable<String>(answer);
+    map['sender_token'] = Variable<String>(senderToken);
+    map['sender_address'] = Variable<String>(senderAddress);
     map['created_at'] = Variable<BigInt>(createdAt);
-    map['conversation_id'] = Variable<String>(conversationId);
+    map['conversation'] = Variable<String>(conversation);
     map['edited'] = Variable<bool>(edited);
+    map['verified'] = Variable<bool>(verified);
     return map;
   }
 
   MessageCompanion toCompanion(bool nullToAbsent) {
     return MessageCompanion(
       id: Value(id),
-      verified: Value(verified),
-      system: Value(system),
-      type: Value(type),
       content: Value(content),
-      attachments: Value(attachments),
-      sender: Value(sender),
-      senderAccount: Value(senderAccount),
-      answer: Value(answer),
+      senderToken: Value(senderToken),
+      senderAddress: Value(senderAddress),
       createdAt: Value(createdAt),
-      conversationId: Value(conversationId),
+      conversation: Value(conversation),
       edited: Value(edited),
+      verified: Value(verified),
     );
   }
 
@@ -551,17 +508,13 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
-      verified: serializer.fromJson<bool>(json['verified']),
-      system: serializer.fromJson<bool>(json['system']),
-      type: serializer.fromJson<int>(json['type']),
       content: serializer.fromJson<String>(json['content']),
-      attachments: serializer.fromJson<String>(json['attachments']),
-      sender: serializer.fromJson<String>(json['sender']),
-      senderAccount: serializer.fromJson<String>(json['senderAccount']),
-      answer: serializer.fromJson<String>(json['answer']),
+      senderToken: serializer.fromJson<String>(json['senderToken']),
+      senderAddress: serializer.fromJson<String>(json['senderAddress']),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
-      conversationId: serializer.fromJson<String>(json['conversationId']),
+      conversation: serializer.fromJson<String>(json['conversation']),
       edited: serializer.fromJson<bool>(json['edited']),
+      verified: serializer.fromJson<bool>(json['verified']),
     );
   }
   @override
@@ -569,66 +522,50 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'verified': serializer.toJson<bool>(verified),
-      'system': serializer.toJson<bool>(system),
-      'type': serializer.toJson<int>(type),
       'content': serializer.toJson<String>(content),
-      'attachments': serializer.toJson<String>(attachments),
-      'sender': serializer.toJson<String>(sender),
-      'senderAccount': serializer.toJson<String>(senderAccount),
-      'answer': serializer.toJson<String>(answer),
+      'senderToken': serializer.toJson<String>(senderToken),
+      'senderAddress': serializer.toJson<String>(senderAddress),
       'createdAt': serializer.toJson<BigInt>(createdAt),
-      'conversationId': serializer.toJson<String>(conversationId),
+      'conversation': serializer.toJson<String>(conversation),
       'edited': serializer.toJson<bool>(edited),
+      'verified': serializer.toJson<bool>(verified),
     };
   }
 
   MessageData copyWith(
           {String? id,
-          bool? verified,
-          bool? system,
-          int? type,
           String? content,
-          String? attachments,
-          String? sender,
-          String? senderAccount,
-          String? answer,
+          String? senderToken,
+          String? senderAddress,
           BigInt? createdAt,
-          String? conversationId,
-          bool? edited}) =>
+          String? conversation,
+          bool? edited,
+          bool? verified}) =>
       MessageData(
         id: id ?? this.id,
-        verified: verified ?? this.verified,
-        system: system ?? this.system,
-        type: type ?? this.type,
         content: content ?? this.content,
-        attachments: attachments ?? this.attachments,
-        sender: sender ?? this.sender,
-        senderAccount: senderAccount ?? this.senderAccount,
-        answer: answer ?? this.answer,
+        senderToken: senderToken ?? this.senderToken,
+        senderAddress: senderAddress ?? this.senderAddress,
         createdAt: createdAt ?? this.createdAt,
-        conversationId: conversationId ?? this.conversationId,
+        conversation: conversation ?? this.conversation,
         edited: edited ?? this.edited,
+        verified: verified ?? this.verified,
       );
   MessageData copyWithCompanion(MessageCompanion data) {
     return MessageData(
       id: data.id.present ? data.id.value : this.id,
-      verified: data.verified.present ? data.verified.value : this.verified,
-      system: data.system.present ? data.system.value : this.system,
-      type: data.type.present ? data.type.value : this.type,
       content: data.content.present ? data.content.value : this.content,
-      attachments:
-          data.attachments.present ? data.attachments.value : this.attachments,
-      sender: data.sender.present ? data.sender.value : this.sender,
-      senderAccount: data.senderAccount.present
-          ? data.senderAccount.value
-          : this.senderAccount,
-      answer: data.answer.present ? data.answer.value : this.answer,
+      senderToken:
+          data.senderToken.present ? data.senderToken.value : this.senderToken,
+      senderAddress: data.senderAddress.present
+          ? data.senderAddress.value
+          : this.senderAddress,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      conversationId: data.conversationId.present
-          ? data.conversationId.value
-          : this.conversationId,
+      conversation: data.conversation.present
+          ? data.conversation.value
+          : this.conversation,
       edited: data.edited.present ? data.edited.value : this.edited,
+      verified: data.verified.present ? data.verified.value : this.verified,
     );
   }
 
@@ -636,167 +573,116 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   String toString() {
     return (StringBuffer('MessageData(')
           ..write('id: $id, ')
-          ..write('verified: $verified, ')
-          ..write('system: $system, ')
-          ..write('type: $type, ')
           ..write('content: $content, ')
-          ..write('attachments: $attachments, ')
-          ..write('sender: $sender, ')
-          ..write('senderAccount: $senderAccount, ')
-          ..write('answer: $answer, ')
+          ..write('senderToken: $senderToken, ')
+          ..write('senderAddress: $senderAddress, ')
           ..write('createdAt: $createdAt, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('edited: $edited')
+          ..write('conversation: $conversation, ')
+          ..write('edited: $edited, ')
+          ..write('verified: $verified')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id,
-      verified,
-      system,
-      type,
-      content,
-      attachments,
-      sender,
-      senderAccount,
-      answer,
-      createdAt,
-      conversationId,
-      edited);
+  int get hashCode => Object.hash(id, content, senderToken, senderAddress,
+      createdAt, conversation, edited, verified);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageData &&
           other.id == this.id &&
-          other.verified == this.verified &&
-          other.system == this.system &&
-          other.type == this.type &&
           other.content == this.content &&
-          other.attachments == this.attachments &&
-          other.sender == this.sender &&
-          other.senderAccount == this.senderAccount &&
-          other.answer == this.answer &&
+          other.senderToken == this.senderToken &&
+          other.senderAddress == this.senderAddress &&
           other.createdAt == this.createdAt &&
-          other.conversationId == this.conversationId &&
-          other.edited == this.edited);
+          other.conversation == this.conversation &&
+          other.edited == this.edited &&
+          other.verified == this.verified);
 }
 
 class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> id;
-  final Value<bool> verified;
-  final Value<bool> system;
-  final Value<int> type;
   final Value<String> content;
-  final Value<String> attachments;
-  final Value<String> sender;
-  final Value<String> senderAccount;
-  final Value<String> answer;
+  final Value<String> senderToken;
+  final Value<String> senderAddress;
   final Value<BigInt> createdAt;
-  final Value<String> conversationId;
+  final Value<String> conversation;
   final Value<bool> edited;
+  final Value<bool> verified;
   final Value<int> rowid;
   const MessageCompanion({
     this.id = const Value.absent(),
-    this.verified = const Value.absent(),
-    this.system = const Value.absent(),
-    this.type = const Value.absent(),
     this.content = const Value.absent(),
-    this.attachments = const Value.absent(),
-    this.sender = const Value.absent(),
-    this.senderAccount = const Value.absent(),
-    this.answer = const Value.absent(),
+    this.senderToken = const Value.absent(),
+    this.senderAddress = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.conversationId = const Value.absent(),
+    this.conversation = const Value.absent(),
     this.edited = const Value.absent(),
+    this.verified = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MessageCompanion.insert({
     required String id,
-    required bool verified,
-    required bool system,
-    required int type,
     required String content,
-    required String attachments,
-    required String sender,
-    required String senderAccount,
-    required String answer,
+    required String senderToken,
+    required String senderAddress,
     required BigInt createdAt,
-    required String conversationId,
+    required String conversation,
     required bool edited,
+    required bool verified,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        verified = Value(verified),
-        system = Value(system),
-        type = Value(type),
         content = Value(content),
-        attachments = Value(attachments),
-        sender = Value(sender),
-        senderAccount = Value(senderAccount),
-        answer = Value(answer),
+        senderToken = Value(senderToken),
+        senderAddress = Value(senderAddress),
         createdAt = Value(createdAt),
-        conversationId = Value(conversationId),
-        edited = Value(edited);
+        conversation = Value(conversation),
+        edited = Value(edited),
+        verified = Value(verified);
   static Insertable<MessageData> custom({
     Expression<String>? id,
-    Expression<bool>? verified,
-    Expression<bool>? system,
-    Expression<int>? type,
     Expression<String>? content,
-    Expression<String>? attachments,
-    Expression<String>? sender,
-    Expression<String>? senderAccount,
-    Expression<String>? answer,
+    Expression<String>? senderToken,
+    Expression<String>? senderAddress,
     Expression<BigInt>? createdAt,
-    Expression<String>? conversationId,
+    Expression<String>? conversation,
     Expression<bool>? edited,
+    Expression<bool>? verified,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (verified != null) 'verified': verified,
-      if (system != null) 'system': system,
-      if (type != null) 'type': type,
       if (content != null) 'content': content,
-      if (attachments != null) 'attachments': attachments,
-      if (sender != null) 'sender': sender,
-      if (senderAccount != null) 'sender_account': senderAccount,
-      if (answer != null) 'answer': answer,
+      if (senderToken != null) 'sender_token': senderToken,
+      if (senderAddress != null) 'sender_address': senderAddress,
       if (createdAt != null) 'created_at': createdAt,
-      if (conversationId != null) 'conversation_id': conversationId,
+      if (conversation != null) 'conversation': conversation,
       if (edited != null) 'edited': edited,
+      if (verified != null) 'verified': verified,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   MessageCompanion copyWith(
       {Value<String>? id,
-      Value<bool>? verified,
-      Value<bool>? system,
-      Value<int>? type,
       Value<String>? content,
-      Value<String>? attachments,
-      Value<String>? sender,
-      Value<String>? senderAccount,
-      Value<String>? answer,
+      Value<String>? senderToken,
+      Value<String>? senderAddress,
       Value<BigInt>? createdAt,
-      Value<String>? conversationId,
+      Value<String>? conversation,
       Value<bool>? edited,
+      Value<bool>? verified,
       Value<int>? rowid}) {
     return MessageCompanion(
       id: id ?? this.id,
-      verified: verified ?? this.verified,
-      system: system ?? this.system,
-      type: type ?? this.type,
       content: content ?? this.content,
-      attachments: attachments ?? this.attachments,
-      sender: sender ?? this.sender,
-      senderAccount: senderAccount ?? this.senderAccount,
-      answer: answer ?? this.answer,
+      senderToken: senderToken ?? this.senderToken,
+      senderAddress: senderAddress ?? this.senderAddress,
       createdAt: createdAt ?? this.createdAt,
-      conversationId: conversationId ?? this.conversationId,
+      conversation: conversation ?? this.conversation,
       edited: edited ?? this.edited,
+      verified: verified ?? this.verified,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -807,38 +693,26 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (verified.present) {
-      map['verified'] = Variable<bool>(verified.value);
-    }
-    if (system.present) {
-      map['system'] = Variable<bool>(system.value);
-    }
-    if (type.present) {
-      map['type'] = Variable<int>(type.value);
-    }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
     }
-    if (attachments.present) {
-      map['attachments'] = Variable<String>(attachments.value);
+    if (senderToken.present) {
+      map['sender_token'] = Variable<String>(senderToken.value);
     }
-    if (sender.present) {
-      map['sender'] = Variable<String>(sender.value);
-    }
-    if (senderAccount.present) {
-      map['sender_account'] = Variable<String>(senderAccount.value);
-    }
-    if (answer.present) {
-      map['answer'] = Variable<String>(answer.value);
+    if (senderAddress.present) {
+      map['sender_address'] = Variable<String>(senderAddress.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<BigInt>(createdAt.value);
     }
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
+    if (conversation.present) {
+      map['conversation'] = Variable<String>(conversation.value);
     }
     if (edited.present) {
       map['edited'] = Variable<bool>(edited.value);
+    }
+    if (verified.present) {
+      map['verified'] = Variable<bool>(verified.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -850,17 +724,13 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   String toString() {
     return (StringBuffer('MessageCompanion(')
           ..write('id: $id, ')
-          ..write('verified: $verified, ')
-          ..write('system: $system, ')
-          ..write('type: $type, ')
           ..write('content: $content, ')
-          ..write('attachments: $attachments, ')
-          ..write('sender: $sender, ')
-          ..write('senderAccount: $senderAccount, ')
-          ..write('answer: $answer, ')
+          ..write('senderToken: $senderToken, ')
+          ..write('senderAddress: $senderAddress, ')
           ..write('createdAt: $createdAt, ')
-          ..write('conversationId: $conversationId, ')
+          ..write('conversation: $conversation, ')
           ..write('edited: $edited, ')
+          ..write('verified: $verified, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

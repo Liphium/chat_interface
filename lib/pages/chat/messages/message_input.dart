@@ -408,7 +408,7 @@ class _MessageInputState extends State<MessageInput> {
                         IconButton(
                           onPressed: () async {
                             if (isWeb) {
-                              Get.dialog(UpgradeWindow());
+                              unawaited(Get.dialog(UpgradeWindow()));
                               return;
                             }
 
@@ -420,7 +420,7 @@ class _MessageInputState extends State<MessageInput> {
                             if (result == null) {
                               return;
                             }
-                            MessageSendHelper.addFile(result);
+                            await MessageSendHelper.addFile(result);
                           },
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,

@@ -36,12 +36,12 @@ class TokensSetup extends Setup {
             await Future.delayed(const Duration(milliseconds: 750));
             first = false;
           }
-          setupManager.controller!.transitionTo(widget);
+          unawaited(setupManager.controller!.transitionTo(widget));
         },
       );
 
       // Start the SSR process
-      ssr.start(
+      unawaited(ssr.start(
         extra: {
           "/account/auth/form": ServerSelectorContainer(
             onSelected: () {
@@ -57,7 +57,7 @@ class TokensSetup extends Setup {
         if (error != null) {
           setupManager.error(error);
         }
-      });
+      }));
 
       return const SetupLoadingWidget(text: "rendering");
     }
@@ -68,7 +68,7 @@ class TokensSetup extends Setup {
     Get.find<StatusController>().displayName.value = await retrieveEncryptedValue("cache_account_dname") ?? "";
 
     // Init file paths with account id
-    AttachmentController.initFilePath(StatusController.ownAccountId);
+    await AttachmentController.initFilePath(StatusController.ownAccountId);
 
     return null;
   }

@@ -26,7 +26,7 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
     super.initState();
   }
 
-  void grabFileInfo() async {
+  Future<void> grabFileInfo() async {
     final json = await postAuthorizedJSON("/account/files/info", {
       "id": widget.container.id,
     });

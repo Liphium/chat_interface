@@ -36,7 +36,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
     initImage();
   }
 
-  void initImage() async {
+  Future<void> initImage() async {
     final image = await ProfileHelper.loadImage(widget.file.path);
     if (image == null) return;
 

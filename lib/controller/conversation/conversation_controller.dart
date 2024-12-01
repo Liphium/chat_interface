@@ -52,7 +52,7 @@ class ConversationController extends GetxController {
   /// Add a new conversation and refresh members (also subscribes)
   Future<bool> addFromVault(Conversation conversation) async {
     // Insert it into cache
-    add(conversation, loadMembers: false);
+    await add(conversation, loadMembers: false);
 
     // Insert into database
     conversation.save(saveMembers: false);
@@ -107,7 +107,12 @@ class ConversationController extends GetxController {
   }
 
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date
-  void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, List<dynamic> error, {bool overwriteReads = true}) async {
+  Future<void> finishedLoading(
+    Map<String, dynamic> conversationInfo,
+    List<dynamic> deleted,
+    List<dynamic> error, {
+    bool overwriteReads = true,
+  }) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
 
@@ -121,7 +126,7 @@ class ConversationController extends GetxController {
     }
     for (var key in toRemove) {
       sendLog("deleting $key");
-      controller.conversations[key]!.delete(popup: false);
+      await controller.conversations[key]!.delete(popup: false);
     }
 
     // Update all the conversations
@@ -304,7 +309,7 @@ class Conversation {
       });
 
   // Delete conversation from vault and database
-  void delete({bool request = true, bool popup = true}) async {
+  Future<void> delete({bool request = true, bool popup = true}) async {
     final err = await removeFromVault(vaultId);
     if (err != null) {
       sendLog("Error deleting conversation from vault: $err");
@@ -324,8 +329,8 @@ class Conversation {
       }
     }
 
-    db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
-    db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
+    await db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
+    await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
     Get.find<MessageController>().unselectConversation(id: id);
     Get.find<ConversationController>().removeConversation(id);
   }
@@ -383,7 +388,7 @@ class Conversation {
     // Load the members into the database
     for (var currentMember in this.members.values) {
       if (!members.containsKey(currentMember.tokenId)) {
-        db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
+        await db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
       }
     }
 

@@ -45,7 +45,7 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
   }
 
   /// Adds Liphium to the tray
-  void initTray() async {
+  Future<void> initTray() async {
     await trayManager.setIcon(Platform.isWindows
         ? "assets/tray/icon_windows.ico"
         : Platform.isMacOS
@@ -76,18 +76,18 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
 
   // Show the app when the tray icon is clicked
   @override
-  void onTrayIconMouseDown() async {
+  Future<void> onTrayIconMouseDown() async {
     await windowManager.show();
   }
 
   // Make sure the context menu opens when the tray icon is clicked
   @override
-  void onTrayIconRightMouseDown() async {
+  Future<void> onTrayIconRightMouseDown() async {
     await trayManager.popUpContextMenu();
   }
 
   @override
-  void onWindowClose() async {
+  Future<void> onWindowClose() async {
     if (isDebug) {
       exit(0);
     } else {

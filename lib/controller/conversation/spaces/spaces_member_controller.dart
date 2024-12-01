@@ -52,7 +52,7 @@ class SpaceMemberController extends GetxController {
     membersLoading.value = false;
   }
 
-  void onConnect(SecureKey key) async {
+  Future<void> onConnect(SecureKey key) async {
     this.key = key;
   }
 

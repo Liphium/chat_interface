@@ -51,7 +51,7 @@ class ProfileHelper {
     // Check if there is a profile picture
     if (json["profile"]["picture"] == null) {
       // Remove the current profile picture
-      friend.updateProfilePicture(null);
+      await friend.updateProfilePicture(null);
       return null;
     }
 
@@ -92,7 +92,7 @@ class ProfileHelper {
     }
 
     // Save the profile picture data
-    friend.updateProfilePicture(container);
+    await friend.updateProfilePicture(container);
 
     return json["profile"]["id"];
   }
@@ -123,7 +123,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
+    await Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
 
     return true;
   }
@@ -137,7 +137,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(null);
+    await Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(null);
     return true;
   }
 

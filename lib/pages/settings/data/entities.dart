@@ -95,7 +95,7 @@ class Setting<T> {
     return jsonEncode({"v": getValue()});
   }
 
-  void setValue(T value) async {
+  Future<void> setValue(T value) async {
     this.value.value = value;
     await db.into(db.setting).insertOnConflictUpdate(SettingData(key: label, value: stringify()));
   }

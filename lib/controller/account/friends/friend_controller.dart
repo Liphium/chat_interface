@@ -68,7 +68,7 @@ class FriendController extends GetxController {
     request.name = guy.name;
 
     // Remove from requests controller
-    Get.find<RequestController>().deleteSentRequest(request);
+    await Get.find<RequestController>().deleteSentRequest(request);
 
     // Remove request from server
     final friendsVault = await FriendsVault.remove(request.vaultId);
@@ -278,10 +278,10 @@ class Friend {
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Update the profile picture of this friend
-  void updateProfilePicture(AttachmentContainer? picture) async {
+  Future<void> updateProfilePicture(AttachmentContainer? picture) async {
     if (picture == null) {
       // Delete the profile picture if it is null
-      db.profile.insertOnConflictUpdate(ProfileData(
+      await db.profile.insertOnConflictUpdate(ProfileData(
         id: id.encode(),
         pictureContainer: "",
         data: "",
@@ -293,7 +293,7 @@ class Friend {
       profilePictureDataNull = true;
     } else {
       // Set a new profile picture if it is valid
-      db.profile.insertOnConflictUpdate(ProfileData(
+      await db.profile.insertOnConflictUpdate(ProfileData(
         id: id.encode(),
         pictureContainer: dbEncrypted(jsonEncode(picture.toJson())),
         data: "",
@@ -306,7 +306,7 @@ class Friend {
   }
 
   /// Load the profile picture of this friend
-  void loadProfilePicture() async {
+  Future<void> loadProfilePicture() async {
     if (unknown) {
       return;
     }
@@ -366,12 +366,12 @@ class Friend {
 
     // Remove the friend from the friends vault and local storage
     await FriendsVault.remove(vaultId);
-    db.friend.deleteWhere((tbl) => tbl.id.equals(id.encode()));
+    await db.friend.deleteWhere((tbl) => tbl.id.equals(id.encode()));
     Get.find<FriendController>().friends.remove(id);
 
     if (removeAction) {
       // Send the other guy a notice that he's been removed from your friends list
-      sendAuthenticatedStoredAction(this, authenticatedStoredAction("fr_rem", {}));
+      await sendAuthenticatedStoredAction(this, authenticatedStoredAction("fr_rem", {}));
     }
 
     // Leave direct message conversations with the guy in them
@@ -383,7 +383,7 @@ class Friend {
       }
     }
     for (var key in toRemove) {
-      controller.conversations[key]!.delete();
+      await controller.conversations[key]!.delete();
     }
 
     loading.value = false;
