@@ -32,8 +32,8 @@ class SpacesController extends GetxController {
   final spaceLoading = false.obs;
   final connected = false.obs;
   final start = DateTime.now().obs;
-  final currentTab = SpaceTabType.table.index.obs;
-  int _prevTab = SpaceTabType.table.index;
+  final currentTab = SpaceTabType.space.index.obs;
+  int _prevTab = SpaceTabType.space.index;
 
   //* Space information
   static String? currentDomain;
@@ -160,7 +160,7 @@ class SpacesController extends GetxController {
       return null;
     }
     currentDomain = body["domain"];
-    currentTab.value = SpaceTabType.table.index;
+    currentTab.value = SpaceTabType.space.index;
 
     // Setup all controllers
     await Get.find<SpaceMemberController>().onConnect(key!);
@@ -196,7 +196,6 @@ class SpacesController extends GetxController {
 
         // Reset everything on the table
         Get.find<TabletopController>().resetControllerState();
-        Get.find<TabletopController>().openTableTab();
 
         connected.value = true;
         inSpace.value = true;
@@ -229,9 +228,8 @@ class SpacesController extends GetxController {
 }
 
 enum SpaceTabType {
-  table("spaces.tab.table"),
-  people("spaces.tab.people"),
-  cinema("spaces.tab.cinema");
+  space("spaces.tab.space"),
+  table("spaces.tab.table");
 
   final String name;
 
