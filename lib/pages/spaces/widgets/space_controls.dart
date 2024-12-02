@@ -5,6 +5,7 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
+import 'package:chat_interface/pages/spaces/warp/warp_manager_window.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -74,19 +75,25 @@ class _SpaceControlsState extends State<SpaceControls> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Tabletop rotation button
-                    LoadingIconButton(
-                      key: tabletopKey,
-                      background: true,
-                      padding: defaultSpacing,
-                      loading: Get.find<TabletopController>().loading,
-                      onTap: () {
-                        Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
-                      },
-                      icon: Icons.crop_rotate,
-                      iconSize: 28,
+                    Obx(
+                      () => Visibility(
+                        visible: Get.find<SpacesController>().currentTab.value == SpaceTabType.table.index,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: defaultSpacing),
+                          child: LoadingIconButton(
+                            key: tabletopKey,
+                            background: true,
+                            padding: defaultSpacing,
+                            loading: Get.find<TabletopController>().loading,
+                            onTap: () {
+                              Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+                            },
+                            icon: Icons.crop_rotate,
+                            iconSize: 28,
+                          ),
+                        ),
+                      ),
                     ),
-
-                    horizontalSpacing(defaultSpacing),
 
                     // Full screen button
                     LoadingIconButton(
@@ -95,6 +102,18 @@ class _SpaceControlsState extends State<SpaceControls> {
                       padding: defaultSpacing,
                       onTap: () => controller.toggleFullScreen(),
                       icon: controller.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
+                      iconSize: 28,
+                    ),
+
+                    horizontalSpacing(defaultSpacing),
+
+                    // Warp manager button
+                    LoadingIconButton(
+                      loading: false.obs,
+                      background: true,
+                      padding: defaultSpacing,
+                      onTap: () => showModal(WarpManagerWindow()),
+                      icon: Icons.cyclone,
                       iconSize: 28,
                     ),
 

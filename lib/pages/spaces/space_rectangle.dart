@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_controls.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_info_tab.dart';
 import 'package:chat_interface/pages/spaces/widgets/spaces_message_feed.dart';
+import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -21,6 +23,12 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
   final hovered = true.obs;
   Timer? timer;
   final GlobalKey tabletopKey = GlobalKey();
+
+  // Space tabs
+  final _tabs = [
+    const SpaceInfoTab(),
+    const TabletopView(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +62,69 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
               Expanded(
                 child: Stack(
                   children: [
-                    const TabletopView(),
+                    Obx(() {
+                      return _tabs[Get.find<SpacesController>().currentTab.value];
+                    }),
+
+                    //* Tab
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Obx(
+                        () => Animate(
+                          effects: [
+                            FadeEffect(
+                              duration: 150.ms,
+                              end: 0.0,
+                              begin: 1.0,
+                            )
+                          ],
+                          target: hovered.value || controlsHovered.value ? 0 : 1,
+                          child: Container(
+                            width: double.infinity,
+                            // Create a gradient on this container from bottom to top
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0),
+                                  Colors.black.withOpacity(0.2),
+                                ],
+                              ),
+                            ),
+
+                            child: MouseRegion(
+                              onEnter: (event) => controlsHovered.value = true,
+                              onExit: (event) => controlsHovered.value = false,
+                              child: Center(
+                                heightFactor: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: sectionSpacing),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Get.theme.colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(defaultSpacing),
+                                    ),
+                                    padding: EdgeInsets.all(elementSpacing),
+                                    child: LPHTabElement(
+                                      tabs: SpaceTabType.values.map((e) => e.name.tr).toList(),
+                                      onTabSwitch: (el) {
+                                        final type = SpaceTabType.values.firstWhereOrNull((t) => t.name.tr == el);
+                                        if (type == null) {
+                                          return;
+                                        }
+                                        Get.find<SpacesController>().switchToTabAndChange(type);
+                                      },
+                                      selected: Get.find<SpacesController>().currentTab,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
                     //* Controls
                     Align(

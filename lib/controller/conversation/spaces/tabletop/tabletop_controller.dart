@@ -79,10 +79,10 @@ class TabletopController extends GetxController {
 
   /// Called when the tabletop tab is opened (to receive events again)
   void openTableTab() {
+    loading.value = true;
     spaceConnector.sendAction(
       ServerAction("table_enable", <String, dynamic>{}),
       handler: (event) {
-        sendLog("hello world");
         loading.value = false;
 
         if (!event.data["success"]) {
@@ -101,6 +101,7 @@ class TabletopController extends GetxController {
   /// Called when the tabletop tab is closed (to disable events)
   void closeTableTab() {
     objects.clear();
+    objectOrder.clear();
     _ticker?.cancel();
     hoveringObjects.clear();
     cursors.clear();

@@ -96,7 +96,7 @@ class _SidebarState extends State<Sidebar> {
                               ),
                               horizontalSpacing(defaultSpacing * 0.5),
                               Visibility(
-                                visible: !areSpacesSupported,
+                                visible: areSpacesSupported,
                                 child: IconButton(
                                   key: _addSpaceKey,
                                   onPressed: () {

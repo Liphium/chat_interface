@@ -13,8 +13,8 @@ void setupTabletopListeners() {
     for (var obj in event.data["obj"]) {
       controller.addObject(controller.newObject(
         TableObjectType.values[obj["t"]],
-        obj["o"],
-        obj["id"],
+        obj["id"] as String,
+        obj["o"] as int,
         Offset((obj["x"] as num).toDouble(), (obj["y"] as num).toDouble()),
         Size((obj["w"] as num).toDouble(), (obj["h"] as num).toDouble()),
         (obj["r"] as num).toDouble(),

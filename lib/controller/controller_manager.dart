@@ -4,6 +4,7 @@ import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -43,6 +44,7 @@ void initializeControllers() {
   Get.put(SpaceMemberController());
   Get.put(TabletopController());
   Get.put(SpacesMessageController());
+  Get.put(WarpController());
 
   TrustedLinkHelper.init();
 }

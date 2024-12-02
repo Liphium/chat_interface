@@ -11,9 +11,13 @@ class SpacesTranslations extends Translations {
           'spaces.sharing_other_device': 'Sharing with friends',
           'spaces.count': '@count members',
           'spaces.toggle_people': 'Toggle showing people',
+          'spaces.tab.space': 'Space',
           'spaces.tab.table': 'Tabletop',
-          'spaces.tab.people': 'People',
-          'spaces.tab.cinema': 'Cinema',
+
+          // Welcome screen
+          'spaces.welcome': 'Welcome to this Space!',
+          'spaces.welcome.desc':
+              'Spaces is Liphium\'s version of a temporary gathering where you can do all kinds of things with your friends. Click the arrow in the bottom right to open the chat. Click "Tabletop" in the tab selector right above this text to enjoy our Tabletop emulator for playing card games. Have fun!',
 
           // Game hub
           'game.lobby': 'Ready to start. (@count/@max)',
