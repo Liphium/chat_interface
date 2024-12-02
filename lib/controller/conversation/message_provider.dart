@@ -40,7 +40,7 @@ abstract class MessageProvider {
     }
 
     // Check if there are any messages with similar ids to prevent adding the same message again
-    if (waitingMessages.any((msg) => msg == message.id)) {
+    if (waitingMessages.any((msg) => msg == message.id) || messages.any((msg) => msg.id == message.id)) {
       return;
     }
     waitingMessages.add(message.id);
