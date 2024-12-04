@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -14,7 +15,10 @@ class WarpList extends StatelessWidget {
     return Obx(() {
       if (controller.warps.isEmpty) {
         return Padding(
-          padding: const EdgeInsets.only(top: defaultSpacing),
+          padding: const EdgeInsets.only(
+            top: sectionSpacing,
+            bottom: defaultSpacing,
+          ),
           child: Text("warp.list.empty".tr, style: Get.textTheme.labelMedium),
         );
       }
@@ -34,7 +38,11 @@ class WarpList extends StatelessWidget {
               borderRadius: BorderRadius.circular(defaultSpacing),
               child: InkWell(
                 borderRadius: BorderRadius.circular(defaultSpacing),
-                onTap: () => {},
+                onTap: () {
+                  if (warp.account.id == StatusController.ownAddress) {
+                    return;
+                  }
+                },
                 child: Padding(
                   padding: EdgeInsets.all(defaultSpacing),
                   child: Row(
@@ -46,10 +54,13 @@ class WarpList extends StatelessWidget {
                         style: Get.textTheme.labelMedium,
                       ),
                       const Spacer(),
-                      LoadingIconButton(
-                        onTap: () {},
-                        extra: 5,
-                        icon: Icons.add,
+                      Visibility(
+                        visible: warp.account.id != StatusController.ownAddress,
+                        child: LoadingIconButton(
+                          onTap: () {},
+                          extra: 5,
+                          icon: Icons.add,
+                        ),
                       ),
                     ],
                   ),

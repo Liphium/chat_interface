@@ -1,8 +1,7 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
-import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/spaces/warp/warp_connected_list.dart';
+import 'package:chat_interface/pages/spaces/warp/warp_create_window.dart';
 import 'package:chat_interface/pages/spaces/warp/warp_list.dart';
+import 'package:chat_interface/pages/spaces/warp/warp_shared_list.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -17,16 +16,6 @@ class WarpManagerWindow extends StatefulWidget {
 }
 
 class _WarpManagerWindowState extends State<WarpManagerWindow> {
-  @override
-  void initState() {
-    final ownFriend = Get.find<FriendController>().friends[StatusController.ownAddress]!;
-    if (Get.find<WarpController>().activeWarps.isEmpty) {
-      Get.find<WarpController>().activeWarps.add(WarpShareContainer("some-id", ownFriend, 25565));
-      Get.find<WarpController>().warps.add(WarpShareContainer("some-id", ownFriend, 25565));
-    }
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return DialogBase(
@@ -44,6 +33,9 @@ class _WarpManagerWindowState extends State<WarpManagerWindow> {
         children: [
           Text("warp.desc".tr, style: Get.textTheme.bodyMedium),
 
+          // Render the list of Warps the user is sharing (most important)
+          WarpSharedList(),
+
           // Render the list of Warps connected (first, because it's more important)
           WarpConnectedList(),
 
@@ -53,7 +45,7 @@ class _WarpManagerWindowState extends State<WarpManagerWindow> {
 
           // Render a button to host a Warp yourself
           FJElevatedButton(
-            onTap: () {},
+            onTap: () => showModal(WarpCreateWindow()),
             child: Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
