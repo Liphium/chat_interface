@@ -37,7 +37,7 @@ class SpacesTranslations extends Translations {
           'warp.shared.title': 'Shared Warps',
 
           // Translations for currently connected Warps
-          'warp.connected.title': 'Currently connected',
+          'warp.connected.title': 'Connected Warps',
           'warp.connected.item': '@origin > @goal',
 
           // Translations for Warps that are listed

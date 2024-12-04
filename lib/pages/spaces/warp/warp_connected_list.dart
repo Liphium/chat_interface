@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/conversation/spaces/warp_controller.da
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class WarpConnectedList extends StatelessWidget {
@@ -36,7 +37,7 @@ class WarpConnectedList extends StatelessWidget {
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    onTap: () => {},
+                    onTap: () => Clipboard.setData(ClipboardData(text: warp.goalPort.toString())),
                     child: Padding(
                       padding: EdgeInsets.all(defaultSpacing),
                       child: Row(
@@ -52,7 +53,7 @@ class WarpConnectedList extends StatelessWidget {
                           ),
                           const Spacer(),
                           LoadingIconButton(
-                            onTap: () {},
+                            onTap: () => controller.disconnectWarp(warp),
                             extra: 5,
                             icon: Icons.logout,
                           ),

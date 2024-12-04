@@ -10,6 +10,7 @@ import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -164,6 +165,7 @@ class SpacesController extends GetxController {
 
     // Setup all controllers
     await Get.find<SpaceMemberController>().onConnect(key!);
+    Get.find<WarpController>().resetControllerState();
 
     // Connect to space node
     final result = await createSpaceConnection(body["domain"], body["token"]);
@@ -218,6 +220,7 @@ class SpacesController extends GetxController {
     Get.find<StatusController>().stopSharing();
     Get.find<SpaceMemberController>().onDisconnect();
     Get.find<TabletopController>().resetControllerState();
+    Get.find<WarpController>().resetControllerState();
     Get.find<SpacesMessageController>().clearProvider();
 
     if (!error) {

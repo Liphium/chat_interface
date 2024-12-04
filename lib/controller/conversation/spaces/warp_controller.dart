@@ -10,6 +10,7 @@ import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/spaces/warp/warp_manager_window.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:get/get.dart';
 
@@ -24,6 +25,22 @@ class WarpController extends GetxController {
 
   /// Warps that are currently available (not connected) according to the server.
   final warps = <WarpShareContainer>[].obs;
+
+  void resetControllerState() {
+    // Stop all the Warps
+    for (var warp in sharedWarps.values) {
+      warp.stop(action: false);
+    }
+    for (var warp in activeWarps.values) {
+      warp.disconnectFromWarp(action: false);
+    }
+
+    // Delete all the state
+    warps.clear();
+    sharedWarps.clear();
+    activeWarps.clear();
+    loading = false;
+  }
 
   /// Create a Warp using the port it should share.
   ///
@@ -61,6 +78,10 @@ class WarpController extends GetxController {
   ///
   /// This will start an isolate that then tries to connect to every port on the local system.
   Future<void> connectToWarp(WarpShareContainer container) async {
+    if (loading) {
+      return;
+    }
+    container.loading.value = true;
     loading = true;
 
     // Scan for a port that is free on the current system
@@ -71,13 +92,14 @@ class WarpController extends GetxController {
       // Try connecting to the port
       try {
         await Socket.connect("localhost", currentPort);
-        found = true;
-      } catch (e) {
+
         // Generate a new random port
         currentPort = random.nextInt(65535 - 1024) + 1024;
 
         // This is just here in case this turns into an infinite loop and to prevent over-spinning
         await Future.delayed(Duration(milliseconds: 100));
+      } catch (e) {
+        found = true;
       }
     }
 
@@ -88,6 +110,7 @@ class WarpController extends GetxController {
     // Add the Warp to the list of active ones
     activeWarps[warp.id] = warp;
 
+    container.loading.value = false;
     loading = false;
   }
 
@@ -99,8 +122,10 @@ class WarpController extends GetxController {
 
   /// This method gets called when a Warp ends according to the server.
   void onWarpEnd(String warp) {
-    if (sharedWarps.containsKey(warp)) {
-      return;
+    // Disconnect if an active warp is closed
+    if (activeWarps.containsKey(warp)) {
+      activeWarps[warp]!.disconnectFromWarp(action: false);
+      activeWarps.remove(warp);
     }
 
     // Remove it from the list of Warps on the server
@@ -125,31 +150,72 @@ class SharedWarp {
 
   /// All the current connections coming from clients
   final _sockets = <String, Map<int, Socket>>{};
+
+  // All the subscriptions made for the sockets (they need to be cancelled on disconnect)
   final _subs = <String, Map<int, StreamSubscription>>{};
+
+  // All sequence related stuff for jitter buffering (can happen cause server)
+  final _sequenceNumbers = <String, Map<int, int>>{};
+  final _packetQueue = <String, Map<int, Map<int, Uint8List>>>{};
 
   /// Send a packet from a client to the Warp.
   ///
   /// This will also open a new connection to the server in case there isn't one yet (for this client).
-  Future<bool> receivePacketFromClient(String id, int connId, Uint8List bytes) async {
+  Future<bool> receivePacketFromClient(String id, int connId, Uint8List bytes, int seq) async {
     if (_sockets[id] == null) {
+      // Initialize the socket storage and completers
       _sockets[id] = <int, Socket>{};
+
+      // Initialize jitter buffering with correct values
+      _packetQueue[id] = <int, Map<int, Uint8List>>{};
+      _sequenceNumbers[id] = <int, int>{};
     }
 
     // Check if there is a connection already
-    if (_sockets[id]![connId] == null) {
+    if (_sequenceNumbers[id]![connId] == null) {
+      _sequenceNumbers[id]![connId] = seq - 1;
+
       // Create a new connection to the local server
       try {
         final socket = await Socket.connect("localhost", port);
         registerListener(id, connId, socket);
         _sockets[id]![connId] = socket;
       } catch (e) {
+        sendLog("couldn't connect to local server: $e");
         return false;
       }
+    }
+
+    // Check what the last sequence number was
+    if (seq != _sequenceNumbers[id]![connId]! + 1) {
+      if (_packetQueue[id]![connId] == null) {
+        _packetQueue[id]![connId] = <int, Uint8List>{};
+      }
+      sendLog("packet queue (share)");
+
+      // Add the packet to the packet queue for now
+      _packetQueue[id]![connId]![seq] = bytes;
+      return true;
+    } else {
+      _sequenceNumbers[id]![connId] = seq;
     }
 
     // Send the packet to the socket
     final socket = _sockets[id]![connId]!;
     socket.add(bytes);
+
+    // Check if there is a packet after it in the sequence queue
+    while (_packetQueue[id]![connId]?[seq + 1] != null) {
+      seq++;
+
+      // Send the packet to the socket and remove it from the queue
+      socket.add(_packetQueue[id]![connId]![seq]!);
+      _packetQueue[id]![connId]!.remove(seq);
+
+      // Update the sequence number accordingly
+      _sequenceNumbers[id]![connId] = seq;
+    }
+
     return true;
   }
 
@@ -162,19 +228,27 @@ class SharedWarp {
       _subs[id] = <int, StreamSubscription>{};
     }
 
+    int seq = 1;
     _subs[id]![connId] = socket.listen(
-      (packet) => sendPacketToClient(id, connId, packet),
+      (packet) {
+        sendPacketToClient(id, connId, packet, seq);
+        seq++;
+      },
       onDone: () => removeClientFromWarp(id),
+      onError: (e) {
+        sendLog("error reading stream $e");
+      },
       cancelOnError: true,
     );
   }
 
   /// Send a packet to a client through the server.
-  Future<void> sendPacketToClient(String id, int connId, Uint8List bytes) async {
+  Future<void> sendPacketToClient(String id, int connId, Uint8List bytes, int seq) async {
     final event = await spaceConnector.sendActionAndWait(ServerAction("wp_send_back", {
       "w": this.id, // The parameter called "id" almost got me here xd
       "t": id,
       "c": connId,
+      "s": seq,
       "p": base64Encode(encryptSymmetricBytes(bytes, SpacesController.key!)),
     }));
 
@@ -215,13 +289,18 @@ class SharedWarp {
     }
     _subs.remove(id);
     _sockets.remove(id);
+
+    // Remove from the controller
+    Get.find<WarpController>().sharedWarps.remove(id);
   }
 
   /// Stop the Warp completely.
   ///
   /// Disconnects all clients + tells the server about the closure.
-  void stop() {
-    spaceConnector.sendAction(ServerAction("wp_end", id));
+  void stop({bool action = true}) {
+    if (action) {
+      spaceConnector.sendAction(ServerAction("wp_end", id));
+    }
 
     // Disconnect all clients
     for (var map in _sockets.values) {
@@ -257,9 +336,16 @@ class ConnectedWarp {
   /// All the sockets that are currently connected to the local server
   final _sockets = <int, Socket>{};
 
+  // All sequence related stuff for jitter buffering (can happen cause server)
+  final _sequenceNumbers = <int, int>{};
+  final _packetQueue = <int, Map<int, Uint8List>>{};
+
   /// Start the server for proxying the connection.
   Future<void> startServer() async {
-    server = await ServerSocket.bind("localhost", goalPort, shared: false);
+    server = await ServerSocket.bind(InternetAddress.loopbackIPv4, goalPort, shared: false);
+
+    sendLog("bound server on ${server!.address.toString()} ${server!.port}");
+
     server!.listen(
       (socket) {
         // Increment the connection count and take current count as new identifier for this connection
@@ -268,11 +354,13 @@ class ConnectedWarp {
         connectionCount++;
 
         // Listen to all packets from the socket
+        int seq = 0;
         StreamSubscription? sub;
         sub = socket.listen(
           (packet) async {
             // Forward the bytes to the server
-            final result = await forwardBytesToHost(currentId, packet);
+            seq++;
+            final result = await forwardBytesToHost(currentId, packet, seq);
             if (!result) {
               disconnectFromWarp();
             }
@@ -281,18 +369,25 @@ class ConnectedWarp {
             sub?.cancel();
             _sockets.remove(currentId);
           },
+          onError: (e) {
+            sendLog("disconnected cause $e");
+          },
           cancelOnError: true,
         );
       },
       onDone: () => disconnectFromWarp(),
+      onError: (e) {
+        sendLog("warp ended cause $e");
+      },
       cancelOnError: true,
     );
   }
 
   /// Send bytes to the host server.
-  Future<bool> forwardBytesToHost(int connId, Uint8List bytes) async {
+  Future<bool> forwardBytesToHost(int connId, Uint8List bytes, int seq) async {
     final event = await spaceConnector.sendActionAndWait(ServerAction("wp_send_to", {
       "w": id,
+      "s": seq,
       "c": connId,
       "p": base64Encode(encryptSymmetricBytes(bytes, SpacesController.key!)),
     }));
@@ -303,26 +398,58 @@ class ConnectedWarp {
   }
 
   /// Forward a packet to a socket connected to the local server by their connection id
-  Future<bool> forwardPacketToSocket(int connId, Uint8List bytes) async {
+  Future<bool> forwardPacketToSocket(int connId, Uint8List bytes, int seq) async {
     if (_sockets[connId] == null) {
       return false;
+    }
+    if (_packetQueue[connId] == null) {
+      _packetQueue[connId] = <int, Uint8List>{};
+      _sequenceNumbers[connId] = seq - 1;
+    }
+
+    // Make sure it's the right sequence number
+    if (seq != _sequenceNumbers[connId]! + 1) {
+      _packetQueue[connId]![seq] = bytes;
+      sendLog("packet queue (conn)");
+      return true;
+    } else {
+      _sequenceNumbers[connId] = seq;
     }
 
     // Forward the packet
     _sockets[connId]!.add(bytes);
 
+    // Check the queue for more packets after the current one
+    while (_packetQueue[connId]![seq + 1] != null) {
+      seq++;
+
+      // Send the packet in the queue
+      _sockets[connId]!.add(_packetQueue[connId]![seq]!);
+      _packetQueue[connId]!.remove(seq);
+
+      // Update the sequence number accordingly
+      _sequenceNumbers[connId] = seq;
+    }
     return true;
   }
 
   /// Disconnect from the Warp and close the local server.
-  void disconnectFromWarp() {
-    spaceConnector.sendAction(ServerAction("wp_disconnect", id));
+  void disconnectFromWarp({bool action = true}) {
+    if (action) {
+      spaceConnector.sendAction(ServerAction("wp_disconnect", id));
+    }
     onDisconnect();
   }
 
   /// Called when the user gets disconnected.
   void onDisconnect() {
+    for (var socket in _sockets.values) {
+      socket.close();
+    }
     server?.close();
+
+    // Remove from the controller
+    Get.find<WarpController>().activeWarps.remove(id);
   }
 }
 
@@ -336,6 +463,8 @@ class WarpShareContainer {
 
   /// The person sharing the Warp.
   final Friend account;
+
+  final loading = false.obs;
 
   WarpShareContainer({
     required this.id,

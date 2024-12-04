@@ -42,6 +42,7 @@ class WarpList extends StatelessWidget {
                   if (warp.account.id == StatusController.ownAddress) {
                     return;
                   }
+                  controller.connectToWarp(warp);
                 },
                 child: Padding(
                   padding: EdgeInsets.all(defaultSpacing),
@@ -57,7 +58,8 @@ class WarpList extends StatelessWidget {
                       Visibility(
                         visible: warp.account.id != StatusController.ownAddress,
                         child: LoadingIconButton(
-                          onTap: () {},
+                          loading: warp.loading,
+                          onTap: () => controller.connectToWarp(warp),
                           extra: 5,
                           icon: Icons.add,
                         ),

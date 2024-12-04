@@ -5,6 +5,7 @@ import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
 class WarpListener {
@@ -36,7 +37,7 @@ class WarpListener {
 
       // Decrypt the content and forward
       final decrypted = decryptSymmetricBytes(base64Decode(event.data["p"]), SpacesController.key!);
-      warp.forwardPacketToSocket(event.data["c"], decrypted);
+      warp.forwardPacketToSocket(event.data["c"], decrypted, event.data["s"]);
     });
 
     // Listen for packets meant for the local server (current client -> hoster)
@@ -49,7 +50,7 @@ class WarpListener {
 
       // Decrypt the content and handle receiving
       final decrypted = decryptSymmetricBytes(base64Decode(event.data["p"]), SpacesController.key!);
-      warp.receivePacketFromClient(event.data["s"], event.data["c"], decrypted);
+      warp.receivePacketFromClient(event.data["s"], event.data["c"], decrypted, event.data["sq"]);
     });
 
     // Listen for clients disconnecting from the shared server (as hoster)
