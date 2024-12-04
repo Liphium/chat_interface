@@ -83,9 +83,18 @@ class WarpController extends GetxController {
 
     // Use the port that's been scanned above to start a socket for the Warp
     final warp = ConnectedWarp(container.id, container.port, currentPort, container.account);
+    await warp.startServer();
+
+    // Add the Warp to the list of active ones
     activeWarps[warp.id] = warp;
 
     loading = false;
+  }
+
+  /// Completely disconnect a Warp
+  void disconnectWarp(ConnectedWarp warp) {
+    warp.disconnectFromWarp();
+    activeWarps.remove(warp.id);
   }
 
   /// This method gets called when a Warp ends according to the server.
@@ -115,27 +124,31 @@ class SharedWarp {
   SharedWarp(this.id, this.port);
 
   /// All the current connections coming from clients
-  final _sockets = <String, Socket>{};
-  final _subs = <String, StreamSubscription>{};
+  final _sockets = <String, Map<int, Socket>>{};
+  final _subs = <String, Map<int, StreamSubscription>>{};
 
   /// Send a packet from a client to the Warp.
   ///
   /// This will also open a new connection to the server in case there isn't one yet (for this client).
-  Future<bool> receivePacketFromClient(String id, Uint8List bytes) async {
-    // Check if there is a connection already
+  Future<bool> receivePacketFromClient(String id, int connId, Uint8List bytes) async {
     if (_sockets[id] == null) {
+      _sockets[id] = <int, Socket>{};
+    }
+
+    // Check if there is a connection already
+    if (_sockets[id]![connId] == null) {
       // Create a new connection to the local server
       try {
         final socket = await Socket.connect("localhost", port);
-        registerListener(id, socket);
-        _sockets[id] = socket;
+        registerListener(id, connId, socket);
+        _sockets[id]![connId] = socket;
       } catch (e) {
         return false;
       }
     }
 
     // Send the packet to the socket
-    final socket = _sockets[id]!;
+    final socket = _sockets[id]![connId]!;
     socket.add(bytes);
     return true;
   }
@@ -144,19 +157,24 @@ class SharedWarp {
   ///
   /// This method will take all those packets and send them back to the other client
   /// through the server.
-  void registerListener(String id, Socket socket) {
-    _subs[id] = socket.listen(
-      (packet) => sendPacketToClient(id, packet),
+  void registerListener(String id, int connId, Socket socket) {
+    if (_subs[id] == null) {
+      _subs[id] = <int, StreamSubscription>{};
+    }
+
+    _subs[id]![connId] = socket.listen(
+      (packet) => sendPacketToClient(id, connId, packet),
       onDone: () => removeClientFromWarp(id),
       cancelOnError: true,
     );
   }
 
   /// Send a packet to a client through the server.
-  Future<void> sendPacketToClient(String id, Uint8List bytes) async {
+  Future<void> sendPacketToClient(String id, int connId, Uint8List bytes) async {
     final event = await spaceConnector.sendActionAndWait(ServerAction("wp_send_back", {
       "w": this.id, // The parameter called "id" almost got me here xd
       "t": id,
+      "c": connId,
       "p": base64Encode(encryptSymmetricBytes(bytes, SpacesController.key!)),
     }));
 
@@ -185,8 +203,16 @@ class SharedWarp {
   ///
   /// This stops the client's connection to the local server.
   void handleDisconnect(String id) {
-    _subs[id]?.cancel();
-    _sockets[id]?.close();
+    if (_subs[id] != null) {
+      for (var sub in _subs[id]!.values) {
+        sub.cancel();
+      }
+    }
+    if (_sockets[id] != null) {
+      for (var socket in _sockets[id]!.values) {
+        socket.close();
+      }
+    }
     _subs.remove(id);
     _sockets.remove(id);
   }
@@ -198,8 +224,10 @@ class SharedWarp {
     spaceConnector.sendAction(ServerAction("wp_end", id));
 
     // Disconnect all clients
-    for (var socket in _sockets.values) {
-      socket.close();
+    for (var map in _sockets.values) {
+      for (var socket in map.values) {
+        socket.close();
+      }
     }
   }
 }
@@ -226,6 +254,9 @@ class ConnectedWarp {
   /// The counter keeping track of the current connection number (for forwarding more efficiently)
   int connectionCount = 1;
 
+  /// All the sockets that are currently connected to the local server
+  final _sockets = <int, Socket>{};
+
   /// Start the server for proxying the connection.
   Future<void> startServer() async {
     server = await ServerSocket.bind("localhost", goalPort, shared: false);
@@ -233,6 +264,7 @@ class ConnectedWarp {
       (socket) {
         // Increment the connection count and take current count as new identifier for this connection
         final currentId = connectionCount;
+        _sockets[currentId] = socket;
         connectionCount++;
 
         // Listen to all packets from the socket
@@ -245,7 +277,10 @@ class ConnectedWarp {
               disconnectFromWarp();
             }
           },
-          onDone: () => sub?.cancel(),
+          onDone: () {
+            sub?.cancel();
+            _sockets.remove(currentId);
+          },
           cancelOnError: true,
         );
       },
@@ -267,9 +302,26 @@ class ConnectedWarp {
     return true;
   }
 
+  /// Forward a packet to a socket connected to the local server by their connection id
+  Future<bool> forwardPacketToSocket(int connId, Uint8List bytes) async {
+    if (_sockets[connId] == null) {
+      return false;
+    }
+
+    // Forward the packet
+    _sockets[connId]!.add(bytes);
+
+    return true;
+  }
+
   /// Disconnect from the Warp and close the local server.
   void disconnectFromWarp() {
     spaceConnector.sendAction(ServerAction("wp_disconnect", id));
+    onDisconnect();
+  }
+
+  /// Called when the user gets disconnected.
+  void onDisconnect() {
     server?.close();
   }
 }
