@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
-import 'package:chat_interface/pages/spaces/warp/warp_manager_window.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -112,7 +112,7 @@ class _SpaceControlsState extends State<SpaceControls> {
                       loading: false.obs,
                       background: true,
                       padding: defaultSpacing,
-                      onTap: () => showModal(WarpManagerWindow()),
+                      onTap: () => Get.find<WarpController>().open(),
                       icon: Icons.cyclone,
                       iconSize: 28,
                     ),

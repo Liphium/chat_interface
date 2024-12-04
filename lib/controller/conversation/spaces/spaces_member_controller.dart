@@ -1,7 +1,6 @@
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -9,6 +8,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 class SpaceMemberController extends GetxController {
   SecureKey? key;
   final membersLoading = false.obs;
+  // Client ID -> SpaceMember
   final members = <String, SpaceMember>{}.obs;
   // This is for caching only the account ids for message decryption
   final memberIds = <String, LPHAddress>{}; // Client id -> Account id
@@ -19,14 +19,10 @@ class SpaceMemberController extends GetxController {
     final membersFound = <String>[];
 
     // id = encryptedId:clientId
-    // muted = bool
-    // deafened = bool
     for (var member in members) {
-      final args = member["id"].split(":");
-      final decrypted = decryptSymmetric(args[0], key!);
+      final clientId = member["id"];
+      final decrypted = decryptSymmetric(member["data"], key!);
       final address = LPHAddress.from(decrypted);
-      final clientId = args[1];
-      sendLog("$decrypted:$clientId");
       if (address == StatusController.ownAddress) {
         SpaceMemberController.ownId = clientId;
       }
@@ -38,8 +34,6 @@ class SpaceMemberController extends GetxController {
           Get.find<FriendController>().friends[address] ??
               (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
           clientId,
-          member["muted"],
-          member["deafened"],
         );
       }
 
@@ -70,14 +64,10 @@ class SpaceMember {
   final String id;
   final Friend friend;
 
+  // We'll just keep this here for when Lightwire is finished
   final isSpeaking = false.obs;
   final isMuted = false.obs;
   final isDeafened = false.obs;
-  final isVideo = false.obs;
-  final isScreenshare = false.obs;
 
-  SpaceMember(this.friend, this.id, bool muted, bool deafened) {
-    isMuted.value = muted;
-    isDeafened.value = deafened;
-  }
+  SpaceMember(this.friend, this.id);
 }

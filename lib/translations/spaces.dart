@@ -20,11 +20,17 @@ class SpacesTranslations extends Translations {
               'Spaces is Liphium\'s version of a temporary gathering where you can do all kinds of things with your friends. Click the arrow in the bottom right to open the chat. Click "Tabletop" in the tab selector right above this text to enjoy our Tabletop emulator for playing card games. Have fun!',
 
           // Warp
-          'spaces.warp.title': 'Warp',
-          'spaces.warp.desc': 'Warp is Liphium\'s way to share stuff like Minecraft servers and more. You\'ll need the server\'s port though.',
-          'spaces.warp.share': 'Share a port',
-          'spaces.warp.item.account': '@name is sharing..',
-          'spaces.warp.empty': 'No shared ports found.',
+          'warp.title': 'Warp',
+          'warp.desc': 'Warp is Liphium\'s way to share stuff like Minecraft servers and more. You\'ll need the server\'s port though.',
+          'warp.share': 'Create a Warp',
+
+          // Translations for currently connected Warps
+          'warp.connected.title': 'Currently connected',
+          'warp.connected.item': '@origin > @goal',
+
+          // Translations for Warps that are listed
+          'warp.list.sharing': '@name is sharing..',
+          'warp.list.empty': 'No shared ports found.',
 
           // Game hub
           'game.lobby': 'Ready to start. (@count/@max)',
