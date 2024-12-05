@@ -151,6 +151,9 @@ class SharedWarp {
   /// All the current connections coming from clients
   final _sockets = <String, Map<int, Socket>>{};
 
+  /// Completers to make sure packets aren't sent before the socket is connected
+  final _completers = <String, Map<int, Completer<bool>>>{};
+
   // All the subscriptions made for the sockets (they need to be cancelled on disconnect)
   final _subs = <String, Map<int, StreamSubscription>>{};
 
@@ -163,8 +166,11 @@ class SharedWarp {
   /// This will also open a new connection to the server in case there isn't one yet (for this client).
   Future<bool> receivePacketFromClient(String id, int connId, Uint8List bytes, int seq) async {
     if (_sockets[id] == null) {
+      sendLog("reset");
+
       // Initialize the socket storage and completers
       _sockets[id] = <int, Socket>{};
+      _completers[id] = <int, Completer<bool>>{};
 
       // Initialize jitter buffering with correct values
       _packetQueue[id] = <int, Map<int, Uint8List>>{};
@@ -172,26 +178,41 @@ class SharedWarp {
     }
 
     // Check if there is a connection already
-    if (_sequenceNumbers[id]![connId] == null) {
-      _sequenceNumbers[id]![connId] = seq - 1;
+    if (_sockets[id]![connId] == null) {
+      // Make sure other packets wait
+      _sequenceNumbers[id]![connId] = 0;
+      final completer = Completer<bool>();
+      _completers[id]![connId] = completer;
 
       // Create a new connection to the local server
       try {
         final socket = await Socket.connect("localhost", port);
         registerListener(id, connId, socket);
         _sockets[id]![connId] = socket;
+        completer.complete(true);
       } catch (e) {
         sendLog("couldn't connect to local server: $e");
+        completer.complete(false);
         return false;
       }
     }
+
+    // Check if there is a completer to wait for
+    if (_completers[id]![connId] != null) {
+      final result = await _completers[id]![connId]!.future;
+      if (!result) {
+        return false;
+      }
+    }
+
+    sendLog("received $connId $seq ${_sequenceNumbers[id]![connId]!}");
 
     // Check what the last sequence number was
     if (seq != _sequenceNumbers[id]![connId]! + 1) {
       if (_packetQueue[id]![connId] == null) {
         _packetQueue[id]![connId] = <int, Uint8List>{};
       }
-      sendLog("packet queue (share)");
+      sendLog("packet queue $connId (share)");
 
       // Add the packet to the packet queue for now
       _packetQueue[id]![connId]![seq] = bytes;
@@ -203,6 +224,7 @@ class SharedWarp {
     // Send the packet to the socket
     final socket = _sockets[id]![connId]!;
     socket.add(bytes);
+    sendLog("sending $connId $seq");
 
     // Check if there is a packet after it in the sequence queue
     while (_packetQueue[id]![connId]?[seq + 1] != null) {
@@ -211,6 +233,8 @@ class SharedWarp {
       // Send the packet to the socket and remove it from the queue
       socket.add(_packetQueue[id]![connId]![seq]!);
       _packetQueue[id]![connId]!.remove(seq);
+
+      sendLog("sending pq $connId $seq");
 
       // Update the sequence number accordingly
       _sequenceNumbers[id]![connId] = seq;
@@ -234,9 +258,8 @@ class SharedWarp {
         sendPacketToClient(id, connId, packet, seq);
         seq++;
       },
-      onDone: () => removeClientFromWarp(id),
       onError: (e) {
-        sendLog("error reading stream $e");
+        removeClientFromWarp(id);
       },
       cancelOnError: true,
     );
@@ -287,6 +310,8 @@ class SharedWarp {
         socket.close();
       }
     }
+    _sequenceNumbers.remove(id);
+    _packetQueue.remove(id);
     _subs.remove(id);
     _sockets.remove(id);
 
@@ -404,7 +429,7 @@ class ConnectedWarp {
     }
     if (_packetQueue[connId] == null) {
       _packetQueue[connId] = <int, Uint8List>{};
-      _sequenceNumbers[connId] = seq - 1;
+      _sequenceNumbers[connId] = 0;
     }
 
     // Make sure it's the right sequence number
