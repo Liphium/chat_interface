@@ -35,7 +35,8 @@ abstract class MessageProvider {
     lastMessage = null;
 
     // Make sure the message is fit for the bottom
-    if (message.createdAt.isBefore(messages[0].createdAt)) {
+    if (messages.isNotEmpty && message.createdAt.isBefore(messages[0].createdAt)) {
+      sendLog("TODO: Reload the message list");
       return;
     }
 

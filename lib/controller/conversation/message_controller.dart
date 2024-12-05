@@ -149,7 +149,6 @@ class MessageController extends GetxController {
 
   /// Store a message in the local database.
   void _storeInLocalDatabase(Conversation conversation, Message message, {(String, String)? part}) {
-    sendLog("message has been inserted.");
     db.into(db.message).insertOnConflictUpdate(
           MessageData(
             id: message.id,

@@ -5,7 +5,6 @@ import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
 class WarpListener {
