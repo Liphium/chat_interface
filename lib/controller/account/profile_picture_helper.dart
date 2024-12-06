@@ -48,12 +48,19 @@ class ProfileHelper {
       friend.updateDisplayName(displayName);
     }
 
+    sendLog("downloading ${friend.name}");
+
     // Check if there is a profile picture
-    if (json["profile"]["picture"] == null) {
+    if ((json["profile"]["container"] ?? "") == "") {
+      sendLog("no pfp found");
       // Remove the current profile picture
       await friend.updateProfilePicture(null);
       return null;
     }
+
+    // Decrypt the profile picture data
+    final containerJson = jsonDecode(decryptSymmetric(json["container"], friend.keyStorage.profileKey));
+    final container = Get.find<AttachmentController>().fromJson(StorageType.permanent, containerJson);
 
     String? oldPictureId;
     String? oldPath;
@@ -61,18 +68,11 @@ class ProfileHelper {
       if (oldProfile.pictureContainer != "") {
         oldPictureId = jsonDecode(fromDbEncrypted(oldProfile.pictureContainer))["i"];
         oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
-        if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
+        if (container.id == oldPictureId && oldPath != null) {
+          sendLog("see no difference");
           return null; // Nothing changed
         }
       }
-    }
-
-    // Decrypt the profile picture data
-    final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey));
-    final container = Get.find<AttachmentController>().fromJson(StorageType.permanent, containerJson);
-
-    if (container.id != json["profile"]["picture"]) {
-      return null;
     }
 
     // Delete the old profile picture file (in case it exists)
@@ -81,8 +81,9 @@ class ProfileHelper {
     }
 
     // Download the file
-    final success = await Get.find<AttachmentController>().downloadAttachment(container, popups: false);
+    final success = await Get.find<AttachmentController>().downloadAttachment(container, popups: false, trustPopups: true);
     if (!success) {
+      sendLog("download failed");
       return null;
     }
 
@@ -90,6 +91,8 @@ class ProfileHelper {
     if (oldProfile != null) {
       await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id.encode()))).go();
     }
+
+    sendLog("downloaded");
 
     // Save the profile picture data
     await friend.updateProfilePicture(container);

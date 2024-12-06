@@ -308,8 +308,10 @@ class Friend {
   /// Load the profile picture of this friend
   Future<void> loadProfilePicture() async {
     if (unknown) {
+      sendLog("this guy is unknown");
       return;
     }
+    sendLog("loading profile pic $name");
     profilePictureUsages++;
 
     if (DateTime.now().difference(lastProfilePictureUpdate).inSeconds >= 60) {

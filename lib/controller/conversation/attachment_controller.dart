@@ -95,7 +95,13 @@ class AttachmentController extends GetxController {
   }
 
   /// Download an attachment
-  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true, bool ignoreLimit = true}) async {
+  Future<bool> downloadAttachment(
+    AttachmentContainer container, {
+    bool retry = false,
+    bool popups = true,
+    bool trustPopups = true,
+    bool ignoreLimit = true,
+  }) async {
     if (container.downloading.value) return true;
     if (container.downloaded.value) return true;
     if (container.attachmentType != AttachmentContainerType.file) return false;
@@ -109,7 +115,7 @@ class AttachmentController extends GetxController {
 
     // Check if the domain is trusted or ask the user to add a new one to the list of trusted providers if needed
     if (!await TrustedLinkHelper.isLinkTrusted(container.url)) {
-      if (!popups) {
+      if (!popups && !trustPopups) {
         container.errorHappened(true);
         return false;
       }

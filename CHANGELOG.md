@@ -4,9 +4,17 @@
 
 ## Currently in dev
 
+### Architecture changes and new features
+
 - This release of Liphium is compatible with protocol v7
-- Added a max length attribute to the SSR renderer for input fields (now being used by the server)
+- Added Warp in Spaces: A way to share ports (and with that Minecraft servers) over Liphium
 - Made the startup of the app significantly faster by reducing the amount of server interactions
+- Messages are now stored in the local database to make loading them even faster
+- Added automatic layering to Tabletop to make playing card games with card stacking easier
+
+### Minor fixes and updates
+
+- Added a max length attribute to the SSR renderer for input fields (now being used by the server)
 - Made the app startup seem faster by first loading local data
 - Fixed a bug where the profile picture wouldn't load (because of the new attachment container schema)
 - Made the profile picture selector more stable with smaller images
@@ -17,8 +25,8 @@
 - Made the updater more reliable by having it always download and start the latest version
 - Optimized Zap chunking size to perform better on faster internet connections
 - Fixed a bug where Zap wouldn't show progress when receiving a file
-- Added automatic layering to Tabletop to make playing card games with card stacking easier
 - Updated the version of the package used to open files using native apps
+- Decreased the amount of data needed for profile pictures (now only the container)
 
 ## 0.5.2
 
