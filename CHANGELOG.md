@@ -25,6 +25,7 @@
 - Made the updater more reliable by having it always download and start the latest version
 - Optimized Zap chunking size to perform better on faster internet connections
 - Fixed a bug where Zap wouldn't show progress when receiving a file
+- Fixed a bug where a file sent over Zap would not match the size of the original file due to an optimization error
 - Updated the version of the package used to open files using native apps
 - Decreased the amount of data needed for profile pictures (now only the container)
 

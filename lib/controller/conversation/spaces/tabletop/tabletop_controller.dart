@@ -58,6 +58,7 @@ class TabletopController extends GetxController {
     hoveringObjects.clear();
     inventory.clear();
     objects.clear();
+    objectOrder.clear();
     cursors.clear();
 
     _ticker?.cancel();
@@ -142,10 +143,12 @@ class TabletopController extends GetxController {
 
     // Send mouse position if available
     if (_lastMousePos != mousePos) {
+      /*
       spaceConnector.sendAction(ServerAction("tc_move", <String, dynamic>{
         "x": mousePos.dx,
         "y": mousePos.dy,
       }));
+      */
     }
 
     _lastMousePos = mousePos;
@@ -157,11 +160,13 @@ class TabletopController extends GetxController {
       return;
     }
 
+    /*
     if (cursors[id] == null) {
       cursors[id] = TabletopCursor(id, position, TabletopSettings.getCursorColor(hue: hue));
     } else {
       cursors[id]!.move(position);
     }
+    */
   }
 
   /// Create a new object

@@ -59,6 +59,7 @@ class ErrorTranslations extends Translations {
           'group.data_too_long':
               'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
           'zap.no_save_location': 'Please select a save location for your file to use Zap.',
+          'zap.already_exists': 'This file already exists. Please choose a different place to store this file.',
           'zap.error': 'Zap Error',
 
           // Settings

@@ -22,7 +22,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
@@ -40,7 +39,6 @@ class ZapShareController extends GetxController {
   String? transactionToken;
   String? uploadToken;
   String? filePath;
-  XDirectory? chunksDir;
   SecureKey? key;
   StreamSubscription<Uint8List>? partSubscription;
 
@@ -117,14 +115,6 @@ class ZapShareController extends GetxController {
     waiting.value = true;
     uploading = true;
     sending = 0;
-
-    // Generate chunks dir
-    var tempPath = await getTemporaryDirectory();
-    final tempDir = XDirectory(path.join(tempPath.path, "liphium"));
-    await tempDir.create();
-    chunksDir = await tempDir.createTemp("zapzap");
-    await chunksDir!.create();
-    sendLog(chunksDir!.path);
 
     // If there are more files than one, put them into an archive (TODO: Implement)
     step.value = "chat.zapshare.compressing".tr;
@@ -212,6 +202,7 @@ class ZapShareController extends GetxController {
       uploaded = false;
       final success = await _sendActualFilePart(currentlySending);
       if (!success) {
+        sendLog("upload failed, retrying..");
         // Retry in case of an error and wait a little bit
         currentlySending--;
         tries++;
@@ -234,7 +225,10 @@ class ZapShareController extends GetxController {
     final file = XFile(filePath!);
     final stream = file.openRead((chunk - 1) * chunkSize, chunk * chunkSize);
     var currentIndex = 0;
-    final toEncrypt = Uint8List(chunkSize);
+
+    // Calculate the size of the next chunk to prefill the list (optimization)
+    final fileSize = await file.length();
+    final Uint8List toEncrypt = chunk * chunkSize >= fileSize ? Uint8List(fileSize - (chunk - 1) * chunkSize) : Uint8List(chunkSize);
 
     // Send the chunk once done
     final completer = Completer<bool>();
@@ -327,17 +321,7 @@ class ZapShareController extends GetxController {
     filePath = null;
     zapperStarted = false;
     uploadToken = null;
-    if (chunksDir != null) {
-      Timer.periodic(2000.ms, (timer) async {
-        try {
-          await chunksDir?.delete(recursive: true);
-          chunksDir = null;
-          timer.cancel();
-        } catch (e) {
-          sendLog("couldn't delete chunk directory: $e");
-        }
-      });
-    }
+
     resetControllerState();
   }
 
@@ -373,6 +357,12 @@ class ZapShareController extends GetxController {
     final FileSaveLocation? receiveFile = await getSaveLocation(suggestedName: container.fileName);
     if (receiveFile == null) {
       showErrorPopup("error", "zap.no_save_location".tr);
+      return;
+    }
+
+    // Make sure this location doesn't already have a different file with that name
+    if (await doesFileExist(XFile(receiveFile.path))) {
+      showErrorPopup("error", "zap.already_exists".tr);
       return;
     }
 

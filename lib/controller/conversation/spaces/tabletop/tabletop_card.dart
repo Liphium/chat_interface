@@ -171,14 +171,13 @@ class CardObject extends TableObject {
 
   @override
   Future<void> handleData(String data) async {
-    sendLog("handling data");
     // Download attached container
     final json = jsonDecode(data);
     flipped = json["flip"] ?? false;
     flipAnimation.setValue(flipped ? 1 : 0);
 
     // Check if it's the same object and ignore to prevent flickering
-    if (container?.id == json["id"]) {
+    if (container?.id != json["id"]) {
       return;
     }
 
