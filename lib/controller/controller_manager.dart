@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/account/friends/requests_controller.da
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/message_search_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
@@ -25,6 +26,7 @@ void initializeControllers() {
   Get.put(UnknownController());
   Get.put(AttachmentController());
   Get.put(ConversationController());
+  Get.put(MessageSearchController());
 
   // Account controls
   Get.put(RequestController());

@@ -233,7 +233,8 @@ class ConversationMessageProvider extends MessageProvider {
     final messageQuery = db.select(db.message)
       ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
       ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(time)))
-      ..orderBy([(u) => OrderingTerm.desc(u.createdAt)]);
+      ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+      ..limit(10);
     final messages = await messageQuery.get();
 
     // If there are no messages on the client, check for them on the server
@@ -272,7 +273,8 @@ class ConversationMessageProvider extends MessageProvider {
     final messageQuery = db.select(db.message)
       ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
       ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(time)))
-      ..orderBy([(u) => OrderingTerm.asc(u.createdAt)]);
+      ..orderBy([(u) => OrderingTerm.asc(u.createdAt)])
+      ..limit(10);
     final messages = await messageQuery.get();
 
     // If there are no messages, check if there are some on the server
@@ -353,7 +355,7 @@ class ConversationMessageProvider extends MessageProvider {
     // Process all messages
     final list = <Message>[];
     for (var data in messages) {
-      final message = decryptFromLocalDatabase(data, databaseKey);
+      final (message, _) = decryptFromLocalDatabase(data, databaseKey);
 
       // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
       if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
@@ -378,7 +380,9 @@ class ConversationMessageProvider extends MessageProvider {
   }
 
   /// Decrypt a message from the local database.
-  static Message decryptFromLocalDatabase(MessageData data, SecureKey key, {Sodium? sodium}) {
+  ///
+  /// Returns message and conversation found in the local database.
+  static (Message, String) decryptFromLocalDatabase(MessageData data, SecureKey key, {Sodium? sodium}) {
     // Create a new base message
     final message = Message(
       id: data.id,
@@ -397,13 +401,13 @@ class ConversationMessageProvider extends MessageProvider {
     if (message.senderToken == MessageController.systemSender) {
       message.type = MessageType.system;
       message.loadContent();
-      return message;
+      return (message, data.conversation);
     }
 
     // Load the type, attachments, answer, .. from the content json
     message.loadContent();
 
-    return message;
+    return (message, data.conversation);
   }
 
   @override
