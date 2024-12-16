@@ -29,6 +29,8 @@ class MessageController extends GetxController {
   AttachmentContainer? hoveredAttachment;
   static LPHAddress systemSender = LPHAddress("liphium.com", "6969");
 
+  final showSearch = false.obs;
+  final hideSidebar = false.obs;
   final loaded = false.obs;
   final currentOpenType = OpenTabType.conversation.obs;
   final currentProvider = Rx<ConversationMessageProvider?>(null);

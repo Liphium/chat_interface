@@ -64,6 +64,7 @@ class ChatPageTranslations extends Translations {
           'chat.message': 'Say something',
           'chat.members': '@count members',
           'chat.start_space': 'Start a private Space',
+          'chat.search': 'Search this conversation',
           'chat.invite_to_space': 'Invite to Space',
           'conversations.leave': 'Leave conversation',
           'conversations.leave.text':

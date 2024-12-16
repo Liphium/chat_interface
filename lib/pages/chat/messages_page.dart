@@ -1,7 +1,9 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
+import 'package:chat_interface/pages/chat/components/conversations/message_bar_mobile.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/util/platform_callback.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,7 +29,19 @@ class _MessagesPageMobileState extends State<MessagesPageMobile> {
       },
       child: Scaffold(
         backgroundColor: theme.colorScheme.inverseSurface,
-        body: MessageFeed(),
+        body: Column(
+          children: [
+            // Render the message bar for mobile
+            DevicePadding(
+              top: true,
+              padding: const EdgeInsets.all(0),
+              child: MobileMessageBar(conversation: Get.find<MessageController>().currentProvider.value!.conversation),
+            ),
+
+            // Render the actual message feed
+            MessageFeed(),
+          ],
+        ),
       ),
     );
   }

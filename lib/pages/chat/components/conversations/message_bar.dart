@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
@@ -58,36 +59,51 @@ class _MessageBarState extends State<MessageBar> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            //* Conversation label
-            Material(
-              key: _infoKey,
-              color: Get.theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(defaultSpacing),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(defaultSpacing),
-                hoverColor: Get.theme.hoverColor,
-                onTap: () {
-                  showModal(ConversationInfoPage(
-                    conversation: widget.conversation,
-                    position: ContextMenuData.fromKey(_infoKey, below: true),
-                    showMembers: false,
-                  ));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: elementSpacing,
-                    horizontal: defaultSpacing,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
-                      horizontalSpacing(defaultSpacing),
-                      Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
-                          style: Theme.of(context).textTheme.titleMedium),
-                    ],
+            // Make sure the arrow doesn't shift the conversation label into the middle
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Show a hide sidebar icon for more focus on the current conversation
+                Obx(
+                  () => LoadingIconButton(
+                    onTap: () => Get.find<MessageController>().hideSidebar.toggle(),
+                    icon: Get.find<MessageController>().hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                   ),
                 ),
-              ),
+                horizontalSpacing(elementSpacing),
+
+                // Render the label of the conversation
+                Material(
+                  key: _infoKey,
+                  color: Get.theme.colorScheme.onInverseSurface,
+                  borderRadius: BorderRadius.circular(defaultSpacing),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    hoverColor: Get.theme.hoverColor,
+                    onTap: () {
+                      showModal(ConversationInfoPage(
+                        conversation: widget.conversation,
+                        position: ContextMenuData.fromKey(_infoKey, below: true),
+                        showMembers: false,
+                      ));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: elementSpacing,
+                        horizontal: defaultSpacing,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                          horizontalSpacing(defaultSpacing),
+                          Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
+                              style: Theme.of(context).textTheme.titleMedium),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             //* Conversation actions
@@ -136,6 +152,7 @@ class _MessageBarState extends State<MessageBar> {
                     },
                   ),
 
+                // Only show launch button in case supported
                 if (areSpacesSupported)
                   LoadingIconButton(
                     icon: Icons.rocket_launch,
@@ -148,12 +165,19 @@ class _MessageBarState extends State<MessageBar> {
                     },
                   ),
 
-                //* Invite people
+                // Search the entire conversation
+                LoadingIconButton(
+                  onTap: () => Get.find<MessageController>().showSearch.toggle(),
+                  icon: Icons.search,
+                  iconSize: 27,
+                  tooltip: "chat.search".tr,
+                ),
+
+                // Invite people to the Space
                 ConversationAddButton(
                   conversation: widget.conversation,
                   loading: callLoading,
                 ),
-                horizontalSpacing(elementSpacing),
 
                 Visibility(
                   visible: widget.conversation.isGroup,
