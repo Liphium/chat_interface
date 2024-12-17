@@ -35,6 +35,24 @@ class MessageController extends GetxController {
   final currentOpenType = OpenTabType.conversation.obs;
   final currentProvider = Rx<ConversationMessageProvider?>(null);
 
+  void toggleSearchView() {
+    showSearch.toggle();
+    if (Get.width <= 1200) {
+      if (showSearch.value) {
+        hideSidebar.value = true;
+      } else {
+        hideSidebar.value = false;
+      }
+    }
+  }
+
+  void toggleSidebar() {
+    hideSidebar.toggle();
+    if (Get.width <= 1200 && showSearch.value) {
+      showSearch.value = false;
+    }
+  }
+
   /// Unselect a conversation (when id is set, the current conversation will only be closed if it has that id)
   void unselectConversation({LPHAddress? id}) {
     if (id != null && currentProvider.value?.conversation.id != id) {

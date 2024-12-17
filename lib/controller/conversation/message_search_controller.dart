@@ -12,13 +12,24 @@ class MessageSearchController extends GetxController {
   final results = <Message>[].obs;
 
   // Data for the message search algorithm
+  bool _finished = false;
   bool _restart = false;
   int _lastTime = 0;
   Timer? _searchTimer;
+  int neededMessages = 10;
 
-  void search() {
+  void search({bool increment = false}) {
     _searchTimer?.cancel();
-    _restart = true;
+    if (increment) {
+      if (_finished) {
+        return;
+      }
+      neededMessages += 10;
+      _restart = false;
+    } else {
+      neededMessages = 10;
+      _restart = true;
+    }
     bool working = false;
     _searchTimer = Timer.periodic(
       Duration(milliseconds: 50),
@@ -77,10 +88,16 @@ class MessageSearchController extends GetxController {
           results.value = found;
         } else {
           results.addAll(found);
+
+          // Check if the algorithm should be stopped for now
+          if (results.length >= neededMessages) {
+            timer.cancel();
+          }
         }
 
         // Check if fetching can be stopped
         if (messages.length < 100) {
+          _finished = true;
           timer.cancel();
         }
 

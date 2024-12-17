@@ -66,7 +66,7 @@ class _MessageBarState extends State<MessageBar> {
                 // Show a hide sidebar icon for more focus on the current conversation
                 Obx(
                   () => LoadingIconButton(
-                    onTap: () => Get.find<MessageController>().hideSidebar.toggle(),
+                    onTap: () => Get.find<MessageController>().toggleSidebar(),
                     icon: Get.find<MessageController>().hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                   ),
                 ),
@@ -166,11 +166,17 @@ class _MessageBarState extends State<MessageBar> {
                   ),
 
                 // Search the entire conversation
-                LoadingIconButton(
-                  onTap: () => Get.find<MessageController>().showSearch.toggle(),
-                  icon: Icons.search,
-                  iconSize: 27,
-                  tooltip: "chat.search".tr,
+                Obx(
+                  () => IconButton(
+                    iconSize: 27,
+                    icon: Icon(Icons.search,
+                        color: Get.find<MessageController>().showSearch.value
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface),
+                    onPressed: () {
+                      Get.find<MessageController>().toggleSearchView();
+                    },
+                  ),
                 ),
 
                 // Invite people to the Space
