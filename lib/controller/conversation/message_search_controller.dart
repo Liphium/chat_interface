@@ -54,6 +54,11 @@ class MessageSearchController extends GetxController {
         for (var message in messages) {
           final (processed, conversation) = ConversationMessageProvider.decryptFromLocalDatabase(message, databaseKey);
 
+          // Maybe remove this limitation in the future?
+          if (processed.type != MessageType.text) {
+            continue;
+          }
+
           bool fail = false;
           for (var filter in filters) {
             if (!filter.matches(processed, conversation: conversation)) {

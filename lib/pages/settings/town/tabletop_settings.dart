@@ -6,7 +6,7 @@ import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_zap_renderer.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';

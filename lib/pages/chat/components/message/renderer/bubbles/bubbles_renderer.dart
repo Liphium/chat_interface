@@ -2,10 +2,10 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_renderer.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_space_renderer.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/system_message_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_zap_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_message_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_space_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_system_renderer.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';

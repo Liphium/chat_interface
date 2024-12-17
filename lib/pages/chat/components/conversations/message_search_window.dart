@@ -1,5 +1,9 @@
+import 'dart:math';
+
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_search_controller.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/material/material_message_renderer.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -18,11 +22,12 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
 
   @override
   Widget build(BuildContext context) {
+    final friendController = Get.find<FriendController>();
     final searchController = Get.find<MessageSearchController>();
 
     return Container(
       color: Get.theme.colorScheme.onInverseSurface,
-      padding: EdgeInsets.symmetric(vertical: defaultSpacing, horizontal: sectionSpacing),
+      padding: EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing + elementSpacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -47,10 +52,33 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
           Obx(() {
             return ListView.builder(
               shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
               itemCount: searchController.results.length,
               itemBuilder: (context, index) {
                 final message = searchController.results[index];
-                return Text("${message.senderAddress.id} wrote ${message.content} on ${message.createdAt}");
+                final friend = friendController.friends[message.senderAddress];
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: defaultSpacing),
+                  child: Material(
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    color: Get.theme.colorScheme.inverseSurface,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(defaultSpacing),
+                      onTap: () => {},
+                      child: Padding(
+                        padding: const EdgeInsets.all(defaultSpacing),
+                        child: MaterialMessageRenderer(
+                          message: message,
+                          provider: null,
+                          senderAddress: message.senderAddress,
+                          sender: friend,
+                          overwritePadding: 0,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
               },
             );
           })

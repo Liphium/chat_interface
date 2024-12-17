@@ -4,7 +4,7 @@ import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/audio_attachment_player.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_zap_renderer.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
