@@ -27,6 +27,10 @@ bool isMobileMode() {
   return Get.width < 800 || Get.height < 500;
 }
 
+double fittedIconSize(double size) {
+  return Get.mediaQuery.textScaler.scale(size);
+}
+
 Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) async {
   if (isMobileMode()) {
     if (Get.mediaQuery.viewInsets.bottom > 0) {
@@ -153,12 +157,24 @@ class DevicePadding extends StatelessWidget {
       var extraBottom = Get.mediaQuery.padding.bottom;
       var extraRight = Get.mediaQuery.padding.right;
       var extraLeft = Get.mediaQuery.padding.left;
-      finalPadding = EdgeInsets.only(
-        top: top ? extraTop + padding.top : padding.top,
-        bottom: top ? extraBottom + padding.bottom : padding.bottom,
-        right: top ? extraRight + padding.right : padding.right,
-        left: top ? extraLeft + padding.left : padding.left,
-      );
+
+      // On iOS Apple adds padding to the bottom and top by themselves, because of this, we can safely
+      // ignore the extra padding the user specifies.
+      if (GetPlatform.isIOS) {
+        finalPadding = EdgeInsets.only(
+          top: top ? extraTop : padding.top,
+          bottom: bottom ? extraBottom : padding.bottom,
+          right: right ? extraRight + padding.right : padding.right,
+          left: left ? extraLeft + padding.left : padding.left,
+        );
+      } else {
+        finalPadding = EdgeInsets.only(
+          top: top ? extraTop + padding.top : padding.top,
+          bottom: bottom ? extraBottom + padding.bottom : padding.bottom,
+          right: right ? extraRight + padding.right : padding.right,
+          left: left ? extraLeft + padding.left : padding.left,
+        );
+      }
     }
 
     return Padding(

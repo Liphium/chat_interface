@@ -1,3 +1,4 @@
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,12 +29,11 @@ class UniversalAppBar extends StatelessWidget {
         ),
         child: Row(
           children: [
-            IconButton(
-              onPressed: () => Get.back(),
-              icon: Icon(
-                Icons.arrow_back,
-                color: Get.theme.colorScheme.onPrimary,
-              ),
+            LoadingIconButton(
+              onTap: () => Get.back(),
+              iconSize: fittedIconSize(24),
+              icon: Icons.arrow_back,
+              color: Get.theme.colorScheme.onPrimary,
             ),
             horizontalSpacing(defaultSpacing),
             Text(

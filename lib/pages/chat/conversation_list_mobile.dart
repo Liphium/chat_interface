@@ -23,17 +23,17 @@ class _SidebarState extends State<ConversationListMobile> {
       ),
 
       //* Sidebar content
-      child: DevicePadding(
-        top: true,
-        padding: const EdgeInsets.all(0),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // A header to just cover up some space for now
-                Container(
-                  color: Get.theme.colorScheme.primaryContainer,
+      child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // A header to just cover up some space for now
+              Container(
+                color: Get.theme.colorScheme.primaryContainer,
+                child: DevicePadding(
+                  top: true,
+                  padding: const EdgeInsets.all(0),
                   child: Padding(
                     padding: const EdgeInsets.all(defaultSpacing * 1.5),
                     child: Row(
@@ -48,37 +48,37 @@ class _SidebarState extends State<ConversationListMobile> {
                     ),
                   ),
                 ),
+              ),
 
-                // Conversation list and the profile
-                Expanded(
-                  child: SafeArea(
-                    top: false,
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                      child: SidebarConversationList(query: "".obs),
-                    ),
+              // Conversation list and the profile
+              Expanded(
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                    child: SidebarConversationList(query: "".obs),
                   ),
                 ),
-              ],
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.all(defaultSpacing * 1.5),
-                child: LoadingIconButton(
-                  onTap: () => showModal(ConversationAddWindow(position: ContextMenuData.fromPosition(Offset.zero))),
-                  icon: Icons.group_add,
-                  iconSize: 28,
-                  extra: 24,
-                  background: true,
-                  backgroundColor: Get.theme.colorScheme.primary,
-                  color: Get.theme.colorScheme.onPrimary,
-                ),
               ),
-            )
-          ],
-        ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.all(defaultSpacing * 1.5),
+              child: LoadingIconButton(
+                onTap: () => showModal(ConversationAddWindow(position: ContextMenuData.fromPosition(Offset.zero))),
+                icon: Icons.group_add,
+                iconSize: 28,
+                extra: 24,
+                background: true,
+                backgroundColor: Get.theme.colorScheme.primary,
+                color: Get.theme.colorScheme.onPrimary,
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

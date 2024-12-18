@@ -59,6 +59,9 @@ class _ChatPageState extends State<ChatPageMobile> {
                 color: Get.theme.colorScheme.primaryContainer,
               ),
               child: DevicePadding(
+                bottom: true,
+                right: true,
+                left: true,
                 padding: EdgeInsets.symmetric(vertical: defaultSpacing * 1.5),
                 child: Column(
                   children: [
@@ -75,7 +78,6 @@ class _ChatPageState extends State<ChatPageMobile> {
                         message: Get.find<ConnectionController>().error,
                       ),
                     ),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [

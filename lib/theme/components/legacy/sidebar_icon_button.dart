@@ -73,8 +73,11 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: sectionSpacing),
-              child:
-                  Icon(widget.icon, color: widget.selected.value == widget.index ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface),
+              child: Icon(
+                widget.icon,
+                color: widget.selected.value == widget.index ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,
+                size: fittedIconSize(24),
+              ),
             ),
           ),
         ),

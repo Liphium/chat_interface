@@ -10,7 +10,7 @@ PODS:
     - Flutter
   - just_audio (0.0.1):
     - Flutter
-  - open_app_file (3.2.2):
+  - open_file_ios (0.0.1):
     - Flutter
   - pasteboard (0.0.1):
     - Flutter
@@ -50,7 +50,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/ios`)
-  - open_app_file (from `.symlinks/plugins/open_app_file/ios`)
+  - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
   - pasteboard (from `.symlinks/plugins/pasteboard/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -75,8 +75,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
   just_audio:
     :path: ".symlinks/plugins/just_audio/ios"
-  open_app_file:
-    :path: ".symlinks/plugins/open_app_file/ios"
+  open_file_ios:
+    :path: ".symlinks/plugins/open_file_ios/ios"
   pasteboard:
     :path: ".symlinks/plugins/pasteboard/ios"
   path_provider_foundation:
@@ -97,7 +97,7 @@ SPEC CHECKSUMS:
   flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
-  open_app_file: 205f73051668bfbd68356005fef8a62e620f0a77
+  open_file_ios: 461db5853723763573e140de3193656f91990d9e
   pasteboard: 982969ebaa7c78af3e6cc7761e8f5e77565d9ce0
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
