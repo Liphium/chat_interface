@@ -401,6 +401,31 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
     super.dispose();
   }
 
+  Future<void> createDeck() async {
+    _loading.value = true;
+    _errorText.value = "";
+    if (_nameController.text.length < 3) {
+      _errorText.value = "decks.dialog.name.error".tr;
+      _loading.value = false;
+      return;
+    }
+
+    if (widget.deck != null) {
+      widget.deck!.name = _nameController.text;
+      final res = await widget.deck!.save();
+      if (res) {
+        Get.back(result: widget.deck);
+      }
+      return;
+    } else {
+      final deck = TabletopDeck(_nameController.text);
+      final res = await deck.save();
+      if (res) {
+        Get.back(result: deck);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _nameController.text = widget.deck?.name ?? "";
@@ -415,6 +440,8 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
             hintText: "decks.dialog.name.placeholder".tr,
             controller: _nameController,
             maxLength: Constants.normalNameLimit,
+            autofocus: true,
+            onSubmitted: (t) => createDeck(),
           ),
           verticalSpacing(defaultSpacing),
           AnimatedErrorContainer(
@@ -424,30 +451,7 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
           ),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
-            onTap: () async {
-              _loading.value = true;
-              _errorText.value = "";
-              if (_nameController.text.length < 3) {
-                _errorText.value = "decks.dialog.name.error".tr;
-                _loading.value = false;
-                return;
-              }
-
-              if (widget.deck != null) {
-                widget.deck!.name = _nameController.text;
-                final res = await widget.deck!.save();
-                if (res) {
-                  Get.back(result: widget.deck);
-                }
-                return;
-              } else {
-                final deck = TabletopDeck(_nameController.text);
-                final res = await deck.save();
-                if (res) {
-                  Get.back(result: deck);
-                }
-              }
-            },
+            onTap: () => createDeck(),
             builder: () => Center(
               child: SizedBox(
                 height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,

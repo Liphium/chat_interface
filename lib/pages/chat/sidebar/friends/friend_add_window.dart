@@ -23,6 +23,15 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
     super.dispose();
   }
 
+  void sendRequest() {
+    if (requestsLoading.value || friendsVaultRefreshing.value) {
+      return;
+    }
+    newFriendRequest(_name.text, (message) {
+      Get.back();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return DialogBase(
@@ -42,15 +51,13 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
           FJTextField(
             controller: _name,
             hintText: 'friends.name_placeholder'.tr,
+            autofocus: true,
+            onSubmitted: (t) => sendRequest(),
           ),
           verticalSpacing(defaultSpacing),
           Obx(
             () => FJElevatedLoadingButton(
-              onTap: () {
-                newFriendRequest(_name.text, (message) {
-                  Get.back();
-                });
-              },
+              onTap: () => sendRequest(),
               label: 'friends.add.button'.tr,
               loading: (requestsLoading.value || friendsVaultRefreshing.value).obs,
             ),
@@ -58,11 +65,5 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
         ],
       ),
     );
-  }
-
-  void doAction() {
-    newFriendRequest(_name.text, (message) {
-      Get.back();
-    });
   }
 }

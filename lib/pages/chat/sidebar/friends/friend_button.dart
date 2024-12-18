@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -61,16 +62,20 @@ class _FriendButtonState extends State<FriendButton> {
               Builder(builder: (context) {
                 if (Get.find<SpacesController>().inSpace.value) {
                   return IconButton(
-                    icon: Icon(Icons.add_call, color: Theme.of(context).colorScheme.onPrimary),
+                    icon: Icon(Icons.forward_to_inbox, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: () {
-                      final conversation = Get.find<ConversationController>()
-                          .conversations
-                          .values
-                          .where((element) => !element.isGroup && element.members.values.any((mem) => mem.address == widget.friend.id));
-                      if (conversation.isNotEmpty) {
-                        Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation.first));
-                        Get.back();
+                      // Check if there even is a conversation with the guy
+                      final conversation = Get.find<ConversationController>().conversations.values.toList().firstWhereOrNull(
+                            (c) => c.members.values.any((m) => m.address == widget.friend.id),
+                          );
+                      if (conversation == null) {
+                        showErrorPopup("error", "profile.conversation_not_found".tr);
+                        return;
                       }
+
+                      // Invite the user to the current space
+                      Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation));
+                      Get.back();
                     },
                   );
                 }
@@ -78,13 +83,18 @@ class _FriendButtonState extends State<FriendButton> {
                 return IconButton(
                   icon: Icon(Icons.call, color: Theme.of(context).colorScheme.onPrimary),
                   onPressed: () {
-                    final conversation = Get.find<ConversationController>().conversations.values.where(
-                          (element) => !element.isGroup && element.members.values.any((m) => m.address == widget.friend.id),
+                    // Check if there even is a conversation with the guy
+                    final conversation = Get.find<ConversationController>().conversations.values.toList().firstWhereOrNull(
+                          (c) => c.members.values.any((m) => m.address == widget.friend.id),
                         );
-                    if (conversation.isNotEmpty) {
-                      Get.find<SpacesController>().createAndConnect(ConversationMessageProvider(conversation.first));
-                      Get.back();
+                    if (conversation == null) {
+                      showErrorPopup("error", "profile.conversation_not_found".tr);
+                      return;
                     }
+
+                    // Invite the user to the current space
+                    Get.find<SpacesController>().createAndConnect(ConversationMessageProvider(conversation));
+                    Get.back();
                   },
                 );
               }),
