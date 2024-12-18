@@ -168,7 +168,6 @@ abstract class MessageProvider {
     for (var message in loadedMessages) {
       message.heightCallback = true;
     }
-    sendLog(loadedMessages.length);
     loadedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Sort to prevent weird order
     messages.insertAll(0, loadedMessages);
 

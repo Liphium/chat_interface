@@ -6,6 +6,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/messages_page.dart';
@@ -255,8 +256,14 @@ class ConversationMessageProvider extends MessageProvider {
       ..limit(10);
     final messages = await messageQuery.get();
 
-    // If there are no messages on the client, check for them on the server
+    // If there are no messages, check for them on the server
     if (messages.isEmpty) {
+      // Check if the user is even connected to the server (to make sure offline retrieval works)
+      if (!Get.find<ConnectionController>().connected.value) {
+        // Act like the top has been reached
+        return (null, false);
+      }
+
       // Load messages from the server
       final json = await postNodeJSON("/conversations/message/list_before", {
         "token": conversation.token.toMap(),
@@ -297,6 +304,12 @@ class ConversationMessageProvider extends MessageProvider {
 
     // If there are no messages, check if there are some on the server
     if (messages.isEmpty) {
+      // Check if the user is even connected to the server (to make sure offline retrieval works)
+      if (!Get.find<ConnectionController>().connected.value) {
+        // Act like the bottom has been reached
+        return (null, false);
+      }
+
       // Load the messages from the server
       final json = await postNodeJSON("/conversations/message/list_after", {
         "token": conversation.token.toMap(),
@@ -336,6 +349,12 @@ class ConversationMessageProvider extends MessageProvider {
       ..limit(1);
     final message = await messageQuery.getSingleOrNull();
     if (message == null) {
+      // Check if the user is even connected to the server (to make sure offline retrieval works)
+      if (!Get.find<ConnectionController>().connected.value) {
+        // Act like the message doesn't exist
+        return null;
+      }
+
       // Get the message from the server
       final json = await postNodeJSON("/conversations/message/get", {
         "token": conversation.token.toMap(),

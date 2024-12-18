@@ -107,101 +107,107 @@ class _MessageBarState extends State<MessageBar> {
             ),
 
             //* Conversation actions
-            Row(
-              children: [
-                //* Zap share
-                if (widget.conversation.type == model.ConversationType.directMessage && isDirectorySupported)
-                  Stack(
-                    key: _zapShareKey,
-                    children: [
-                      IconButton(
-                        onPressed: () async {
-                          await zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
-                        },
-                        icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
-                        tooltip: "chat.zapshare".tr,
-                      ),
-                      IgnorePointer(
-                        child: SizedBox(
-                          width: 48 - defaultSpacing,
-                          height: 48 - defaultSpacing,
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Obx(
-                              () => CircularProgressIndicator(
-                                value: zapShareController.waiting.value ? null : zapShareController.progress.value.clamp(0, 1),
-                                strokeWidth: 3,
-                                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
+            Obx(() {
+              final error = widget.conversation.error.value != null;
+
+              return Row(
+                children: [
+                  //* Zap share
+                  if (widget.conversation.type == model.ConversationType.directMessage && isDirectorySupported && !error)
+                    Stack(
+                      key: _zapShareKey,
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            await zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
+                          },
+                          icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
+                          tooltip: "chat.zapshare".tr,
+                        ),
+                        IgnorePointer(
+                          child: SizedBox(
+                            width: 48 - defaultSpacing,
+                            height: 48 - defaultSpacing,
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Obx(
+                                () => CircularProgressIndicator(
+                                  value: zapShareController.waiting.value ? null : zapShareController.progress.value.clamp(0, 1),
+                                  strokeWidth: 3,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      )
-                    ],
-                  ),
+                        )
+                      ],
+                    ),
 
-                if (Get.find<SpacesController>().inSpace.value && areSpacesSupported)
-                  LoadingIconButton(
-                    icon: Icons.forward_to_inbox,
-                    iconSize: 27,
-                    loading: callLoading,
-                    tooltip: "chat.invite_to_space".tr,
-                    onTap: () {
-                      final controller = Get.find<SpacesController>();
-                      controller.inviteToCall(widget.provider);
-                    },
-                  ),
+                  if (Get.find<SpacesController>().inSpace.value && areSpacesSupported && !error)
+                    LoadingIconButton(
+                      icon: Icons.forward_to_inbox,
+                      iconSize: 27,
+                      loading: callLoading,
+                      tooltip: "chat.invite_to_space".tr,
+                      onTap: () {
+                        final controller = Get.find<SpacesController>();
+                        controller.inviteToCall(widget.provider);
+                      },
+                    ),
 
-                // Only show launch button in case supported
-                if (areSpacesSupported)
-                  LoadingIconButton(
-                    icon: Icons.rocket_launch,
-                    iconSize: 27,
-                    loading: callLoading,
-                    tooltip: "chat.start_space".tr,
-                    onTap: () {
-                      final controller = Get.find<SpacesController>();
-                      controller.createAndConnect(widget.provider);
-                    },
-                  ),
+                  // Only show launch button in case supported
+                  if (areSpacesSupported && !error)
+                    LoadingIconButton(
+                      icon: Icons.rocket_launch,
+                      iconSize: 27,
+                      loading: callLoading,
+                      tooltip: "chat.start_space".tr,
+                      onTap: () {
+                        final controller = Get.find<SpacesController>();
+                        controller.createAndConnect(widget.provider);
+                      },
+                    ),
 
-                // Search the entire conversation
-                Obx(
-                  () => IconButton(
-                    iconSize: 27,
-                    icon: Icon(Icons.search,
-                        color: Get.find<MessageController>().showSearch.value
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onSurface),
-                    onPressed: () {
-                      Get.find<MessageController>().toggleSearchView();
-                    },
-                  ),
-                ),
-
-                // Invite people to the Space
-                ConversationAddButton(
-                  conversation: widget.conversation,
-                  loading: callLoading,
-                ),
-
-                Visibility(
-                  visible: widget.conversation.isGroup,
-                  child: Obx(
+                  // Search the entire conversation
+                  Obx(
                     () => IconButton(
                       iconSize: 27,
-                      icon: Icon(Icons.group,
-                          color: controller.settings[AppSettings.showGroupMembers]!.value.value
+                      icon: Icon(Icons.search,
+                          color: Get.find<MessageController>().showSearch.value
                               ? Theme.of(context).colorScheme.onPrimary
                               : Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
-                        controller.settings[AppSettings.showGroupMembers]!.setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
+                        Get.find<MessageController>().toggleSearchView();
                       },
                     ),
                   ),
-                ),
-              ],
-            ),
+
+                  // Give the user the ability to add people to a conversation
+                  if (!error)
+                    ConversationAddButton(
+                      conversation: widget.conversation,
+                      loading: callLoading,
+                    ),
+
+                  Visibility(
+                    visible: widget.conversation.isGroup,
+                    child: Obx(
+                      () => IconButton(
+                        iconSize: 27,
+                        icon: Icon(Icons.group,
+                            color: controller.settings[AppSettings.showGroupMembers]!.value.value
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurface),
+                        onPressed: () {
+                          controller.settings[AppSettings.showGroupMembers]!
+                              .setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
           ],
         ),
       ),

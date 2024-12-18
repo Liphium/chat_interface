@@ -65,113 +65,111 @@ class _MessageFeedState extends State<MessageFeed> {
         );
       }
 
-      return Expanded(
-        child: Row(
-          children: [
-            Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Column(
-                  children: [
-                    //* Message list
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          //* Messages
-                          Center(
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200,
-                              ),
-                              child: Obx(
-                                () {
-                                  if (!controller.loaded.value) {
-                                    return const SizedBox();
-                                  }
+      return Row(
+        children: [
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                children: [
+                  //* Message list
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        //* Messages
+                        Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200,
+                            ),
+                            child: Obx(
+                              () {
+                                if (!controller.loaded.value) {
+                                  return const SizedBox();
+                                }
 
-                                  return MessageList(
-                                    key: ValueKey(controller.currentProvider.value!.conversation.id),
-                                    provider: controller.currentProvider.value!,
-                                    overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
-                                  );
-                                },
-                              ),
+                                return MessageList(
+                                  key: ValueKey(controller.currentProvider.value!.conversation.id),
+                                  provider: controller.currentProvider.value!,
+                                  overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
+                                );
+                              },
                             ),
                           ),
+                        ),
 
-                          //* Animated loading indicator
-                          Align(
-                            alignment: Alignment.topCenter,
-                            child: Obx(
-                              () => Animate(
-                                effects: [
-                                  FadeEffect(
-                                    curve: Curves.ease,
-                                    duration: 250.ms,
-                                  ),
-                                ],
-                                target: controller.currentProvider.value!.newMessagesLoading.value ? 1 : 0,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(defaultSpacing),
-                                  child: Material(
-                                    elevation: 3.0,
-                                    color: Get.theme.colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(defaultSpacing),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(defaultSpacing),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(
-                                            width: Get.textTheme.labelMedium!.fontSize! * 1.5,
-                                            height: Get.textTheme.labelMedium!.fontSize! * 1.5,
-                                            child: CircularProgressIndicator(
-                                              color: Get.theme.colorScheme.onPrimary,
-                                              strokeWidth: 3,
-                                            ),
+                        //* Animated loading indicator
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: Obx(
+                            () => Animate(
+                              effects: [
+                                FadeEffect(
+                                  curve: Curves.ease,
+                                  duration: 250.ms,
+                                ),
+                              ],
+                              target: controller.currentProvider.value!.newMessagesLoading.value ? 1 : 0,
+                              child: Padding(
+                                padding: const EdgeInsets.all(defaultSpacing),
+                                child: Material(
+                                  elevation: 3.0,
+                                  color: Get.theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(defaultSpacing),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(defaultSpacing),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: Get.textTheme.labelMedium!.fontSize! * 1.5,
+                                          height: Get.textTheme.labelMedium!.fontSize! * 1.5,
+                                          child: CircularProgressIndicator(
+                                            color: Get.theme.colorScheme.onPrimary,
+                                            strokeWidth: 3,
                                           ),
-                                          horizontalSpacing(defaultSpacing),
-                                          Text("loading".tr, style: Get.textTheme.labelMedium),
-                                        ],
-                                      ),
+                                        ),
+                                        horizontalSpacing(defaultSpacing),
+                                        Text("loading".tr, style: Get.textTheme.labelMedium),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                  ),
 
-                    //* Message input
-                    SelectionContainer.disabled(
-                      child: controller.currentProvider.value!.conversation.borked
-                          ? const SizedBox.shrink()
-                          : MessageInput(
-                              draft: controller.currentProvider.value!.conversation.id.encode(),
-                              provider: controller.currentProvider.value!,
-                            ),
-                    )
-                  ],
-                ),
+                  //* Message input
+                  SelectionContainer.disabled(
+                    child: controller.currentProvider.value!.conversation.borked
+                        ? const SizedBox.shrink()
+                        : MessageInput(
+                            draft: controller.currentProvider.value!.conversation.id.encode(),
+                            provider: controller.currentProvider.value!,
+                          ),
+                  )
+                ],
               ),
             ),
-            Obx(() {
-              final visible = settingController.settings[AppSettings.showGroupMembers]!.value.value;
-              return Visibility(
-                visible: controller.currentProvider.value!.conversation.isGroup && visible,
-                child: Container(
-                  color: Get.theme.colorScheme.onInverseSurface,
-                  width: 300,
-                  child: ConversationMembers(
-                    conversation: controller.currentProvider.value!.conversation,
-                  ),
+          ),
+          Obx(() {
+            final visible = settingController.settings[AppSettings.showGroupMembers]!.value.value;
+            return Visibility(
+              visible: controller.currentProvider.value!.conversation.isGroup && visible,
+              child: Container(
+                color: Get.theme.colorScheme.onInverseSurface,
+                width: 300,
+                child: ConversationMembers(
+                  conversation: controller.currentProvider.value!.conversation,
                 ),
-              );
-            })
-          ],
-        ),
+              ),
+            );
+          })
+        ],
       );
     });
   }

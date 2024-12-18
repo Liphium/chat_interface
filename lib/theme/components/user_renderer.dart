@@ -26,12 +26,6 @@ class _UserAvatarState extends State<UserAvatar> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    getFriend().disposeProfilePicture();
-    super.dispose();
-  }
-
   Friend getFriend() {
     if (widget.user != null) {
       return widget.user!;

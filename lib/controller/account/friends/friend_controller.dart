@@ -271,7 +271,6 @@ class Friend {
   }
 
   //* Profile picture
-  var profilePictureUsages = 0;
   AttachmentContainer? profilePicture;
   final profilePictureImage = Rx<ui.Image?>(null);
   bool profilePictureDataNull = false;
@@ -308,22 +307,25 @@ class Friend {
   /// Load the profile picture of this friend
   Future<void> loadProfilePicture() async {
     if (unknown) {
-      sendLog("this guy is unknown");
       return;
     }
-    sendLog("loading profile pic $name");
-    profilePictureUsages++;
 
-    if (DateTime.now().difference(lastProfilePictureUpdate).inSeconds >= 60) {
+    // Check if we should check for changes to the profile picture
+    if (DateTime.now().difference(lastProfilePictureUpdate).inMinutes >= 5) {
       lastProfilePictureUpdate = DateTime.now();
 
+      // Query the server for updates
       final result = await ProfileHelper.downloadProfilePicture(this);
       if (result != null) {
         return;
       }
+
+      // Set the profile picture image to null to make it reload
+      profilePictureDataNull = false;
+      profilePictureImage.value = null;
     }
 
-    // Return if images is already loaded
+    // Return if image is already loaded
     if (profilePictureImage.value != null || profilePictureDataNull) return;
 
     // Load the image
@@ -336,6 +338,7 @@ class Friend {
 
     // Check if there is a profile picture
     if (data.pictureContainer == "") {
+      profilePictureDataNull = true;
       return;
     }
 
@@ -350,16 +353,6 @@ class Friend {
     }
 
     profilePictureImage.value = await ProfileHelper.loadImageFromBytes(await profilePicture!.file!.readAsBytes());
-  }
-
-  void disposeProfilePicture() {
-    profilePictureUsages--;
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (profilePictureUsages <= 0) {
-        profilePictureImage.value = null;
-        profilePicture = null;
-      }
-    });
   }
 
   //* Remove friend

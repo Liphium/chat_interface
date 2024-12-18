@@ -133,7 +133,9 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                                 child: Row(
                                   children: [
                                     // Render the chat messages
-                                    MessageFeed(),
+                                    Expanded(
+                                      child: MessageFeed(),
+                                    ),
 
                                     // Render the search window
                                     SelectionContainer.disabled(

@@ -63,7 +63,6 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                 if (controller.currentProvider.value == null) {
                   return;
                 }
-                sendLog(controller.currentProvider.value!.messages.length);
                 searchController.filters.value = [
                   ConversationFilter(controller.currentProvider.value!.conversation.id.encode()),
                   ContentFilter(query),
