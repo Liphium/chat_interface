@@ -9,6 +9,7 @@ import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -131,10 +132,14 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Avatar of the message sender with a tooltip to know their name
+                // Avatar of the message sender
                 Tooltip(
                   message: sender.displayName.value,
-                  child: UserAvatar(id: sender.id, size: 34),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(100),
+                    onTap: () => showModal(Profile(friend: sender)),
+                    child: UserAvatar(id: sender.id, size: 34),
+                  ),
                 ),
                 horizontalSpacing(defaultSpacing),
 

@@ -615,6 +615,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.0"
+  indexed_list_view:
+    dependency: "direct main"
+    description:
+      name: indexed_list_view
+      sha256: "68777adb830e839801ef7910a857796166576e8b47fe98002dbf65fe9d274fcd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   integration_test:
     dependency: "direct dev"
     description: flutter

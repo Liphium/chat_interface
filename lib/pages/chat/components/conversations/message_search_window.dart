@@ -3,7 +3,6 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_search_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/material/material_message_renderer.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +22,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
   @override
   void initState() {
     _controller.addListener(checkForScrollChanges);
+    Get.find<MessageSearchController>().currentFocus = _focus;
     super.initState();
   }
 

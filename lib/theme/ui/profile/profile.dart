@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -53,7 +54,7 @@ class ProfileDefaults {
       ),
       if (Get.find<SpacesController>().inSpace.value)
         ProfileAction(
-          icon: Icons.add_call,
+          icon: Icons.forward_to_inbox,
           label: 'friends.invite_to_space'.tr,
           loading: false.obs,
           onTap: (f, l) => {},
@@ -173,11 +174,30 @@ class _ProfileState extends State<Profile> {
               ),
             ),
 
-            //* Call button
+            // Start space button
             LoadingIconButton(
               loading: false.obs,
-              onTap: () => {},
-              icon: Icons.call,
+              onTap: () {
+                final controller = Get.find<ConversationController>();
+
+                // Check if there even is a conversation with the guy
+                final conversation = controller.conversations.values.toList().firstWhereOrNull(
+                      (c) => c.members.values.any((m) => m.address == widget.friend.id),
+                    );
+                if (conversation == null) {
+                  showErrorPopup("error", "profile.conversation_not_found".tr);
+                  return;
+                }
+
+                // Make sure to invite the guy in case the current user is in a space
+                if (Get.find<SpacesController>().inSpace.value) {
+                  Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation));
+                } else {
+                  Get.find<SpacesController>().createAndConnect(ConversationMessageProvider(conversation));
+                }
+                Get.back();
+              },
+              icon: Get.find<SpacesController>().inSpace.value ? Icons.forward_to_inbox : Icons.rocket_launch,
             )
           ],
         ),
