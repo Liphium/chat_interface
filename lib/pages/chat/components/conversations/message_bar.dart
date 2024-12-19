@@ -7,12 +7,11 @@ import 'package:chat_interface/controller/conversation/zap_share_controller.dart
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
-import 'package:chat_interface/pages/chat/conversation_info_page.dart';
+import 'package:chat_interface/pages/chat/components/conversations/conversation_info_window.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +82,7 @@ class _MessageBarState extends State<MessageBar> {
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: Get.theme.hoverColor,
                     onTap: () {
-                      showModal(ConversationInfoPage(
+                      showModal(ConversationInfoWindow(
                         conversation: widget.conversation,
                         position: ContextMenuData.fromKey(_infoKey, below: true),
                         showMembers: false,

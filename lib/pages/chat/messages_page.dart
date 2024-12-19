@@ -39,7 +39,11 @@ class _MessagesPageMobileState extends State<MessagesPageMobile> {
             ),
 
             // Render the actual message feed
-            MessageFeed(),
+            Expanded(
+              child: MessageFeed(
+                rectInput: true,
+              ),
+            ),
           ],
         ),
       ),

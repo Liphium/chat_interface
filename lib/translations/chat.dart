@@ -55,6 +55,9 @@ class ChatPageTranslations extends Translations {
           // Conversations
           'conversation.error': 'Conversation loading error',
           'conversations.different_town': 'Conversation takes place outside of your town (@town).',
+          'conversation.info.encrypted':
+              'This conversation is end-to-end encrypted with the chat history decryptable by all members (both current and past).',
+          'conversation.info.town': 'This conversation is hosted on @town.',
           'conversations.placeholder': 'Search',
           'conversations.create': 'Create conversation',
           'conversations.name': 'Conversation name',

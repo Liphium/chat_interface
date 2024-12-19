@@ -43,7 +43,7 @@ dependencies:
     path: ./liphium_bridge
   web_socket: ">=0.1.6 <1.0.0"
   flutter_secure_storage: ">=9.2.2 <10.0.0"
-  open_file: ^3.5.10
+  open_file: ">=3.5.10 <4.0.0"
 
 dev_dependencies:
   flutter_test:

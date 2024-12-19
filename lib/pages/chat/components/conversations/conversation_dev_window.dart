@@ -7,16 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-class ConversationInfoWindow extends StatefulWidget {
+class ConversationDevWindow extends StatefulWidget {
   final Conversation conversation;
 
-  const ConversationInfoWindow({super.key, required this.conversation});
+  const ConversationDevWindow({super.key, required this.conversation});
 
   @override
-  State<ConversationInfoWindow> createState() => _ConversationAddWindowState();
+  State<ConversationDevWindow> createState() => _ConversationAddWindowState();
 }
 
-class _ConversationAddWindowState extends State<ConversationInfoWindow> {
+class _ConversationAddWindowState extends State<ConversationDevWindow> {
   final messageDeletionLoading = false.obs;
 
   @override

@@ -43,7 +43,7 @@ class _SidebarState extends State<ConversationListMobile> {
                           child: Image.asset("assets/tray/icon_linux.png"),
                         ),
                         horizontalSpacing(defaultSpacing * 1.5),
-                        Text("Liphium", style: Get.textTheme.labelLarge)
+                        Text("Liphium", style: Get.textTheme.labelLarge),
                       ],
                     ),
                   ),

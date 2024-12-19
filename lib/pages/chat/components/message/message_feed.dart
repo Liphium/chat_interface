@@ -11,10 +11,12 @@ import 'package:get/get.dart';
 
 class MessageFeed extends StatefulWidget {
   final double? overwritePadding;
+  final bool rectInput;
 
   const MessageFeed({
     super.key,
     this.overwritePadding,
+    this.rectInput = false,
   });
 
   @override
@@ -148,6 +150,7 @@ class _MessageFeedState extends State<MessageFeed> {
                     child: controller.currentProvider.value!.conversation.borked
                         ? const SizedBox.shrink()
                         : MessageInput(
+                            rectangle: widget.rectInput,
                             draft: controller.currentProvider.value!.conversation.id.encode(),
                             provider: controller.currentProvider.value!,
                           ),

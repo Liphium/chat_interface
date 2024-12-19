@@ -8,6 +8,7 @@ class GeneralTranslations extends Translations {
           // Actions
           'connect': 'Connect',
           'learn_more': 'Learn more',
+          'dev.details': 'Developer details',
           'offline': 'Offline',
           'loading': 'Loading..',
           'preparing': 'Preparing..',

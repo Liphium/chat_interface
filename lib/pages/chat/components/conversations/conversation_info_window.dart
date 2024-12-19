@@ -10,12 +10,12 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ConversationInfoPage extends StatefulWidget {
+class ConversationInfoWindow extends StatefulWidget {
   final bool showMembers;
   final ContextMenuData position;
   final Conversation conversation;
 
-  const ConversationInfoPage({
+  const ConversationInfoWindow({
     super.key,
     required this.position,
     required this.conversation,
@@ -23,10 +23,10 @@ class ConversationInfoPage extends StatefulWidget {
   });
 
   @override
-  State<ConversationInfoPage> createState() => _ConversationInfoPageState();
+  State<ConversationInfoWindow> createState() => _ConversationInfoWindowState();
 }
 
-class _ConversationInfoPageState extends State<ConversationInfoPage> {
+class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
   // Loading states
   final deleteLoading = false.obs;
 
@@ -108,7 +108,7 @@ class _ConversationInfoPageState extends State<ConversationInfoPage> {
           ProfileButton(
             icon: Icons.developer_mode,
             label: "For developers",
-            onTap: () => showModal(ConversationInfoWindow(conversation: widget.conversation)),
+            onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
             loading: false.obs,
           ),
           verticalSpacing(sectionSpacing),

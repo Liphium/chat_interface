@@ -62,6 +62,8 @@ class ErrorTranslations extends Translations {
           'zap.no_save_location': 'Please select a save location for your file to use Zap.',
           'zap.already_exists': 'This file already exists. Please choose a different place to store this file.',
           'zap.error': 'Zap Error',
+          'zap.no_mobile':
+              'Zap is currently not supported on mobile. We still have some things we need to figure out. Please wait until the app gets a little more stable. We\'ll announce once we have an estimated time when Zap will be available.',
 
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',

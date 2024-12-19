@@ -30,12 +30,14 @@ class MessageInput extends StatefulWidget {
   final String draft;
   final MessageProvider provider;
   final bool secondary;
+  final bool rectangle;
 
   const MessageInput({
     super.key,
     required this.draft,
     required this.provider,
     this.secondary = false,
+    this.rectangle = false,
   });
 
   @override
@@ -251,7 +253,11 @@ class _MessageInputState extends State<MessageInput> {
     };
 
     // Build actual widget
-    final padding = isMobileMode() ? defaultSpacing : sectionSpacing;
+    final double padding = widget.rectangle
+        ? 0
+        : isMobileMode()
+            ? defaultSpacing
+            : sectionSpacing;
     return Padding(
       padding: EdgeInsets.only(right: padding, left: padding, bottom: padding),
       child: Column(
@@ -262,9 +268,9 @@ class _MessageInputState extends State<MessageInput> {
             actions: actionsMap,
             child: Material(
               color: widget.secondary ? theme.colorScheme.inverseSurface : theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
+              borderRadius: BorderRadius.circular(defaultSpacing * (widget.rectangle ? 0 : 1.5)),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: defaultSpacing,
                   vertical: elementSpacing,
                 ),
