@@ -9,6 +9,7 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_text.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:flutter/foundation.dart';
@@ -142,12 +143,10 @@ class TabletopController extends GetxController {
 
     // Send mouse position if available
     if (_lastMousePos != mousePos) {
-      /*
       spaceConnector.sendAction(ServerAction("tc_move", <String, dynamic>{
         "x": mousePos.dx,
         "y": mousePos.dy,
       }));
-      */
     }
 
     _lastMousePos = mousePos;
@@ -159,13 +158,11 @@ class TabletopController extends GetxController {
       return;
     }
 
-    /*
     if (cursors[id] == null) {
       cursors[id] = TabletopCursor(id, position, TabletopSettings.getCursorColor(hue: hue));
     } else {
       cursors[id]!.move(position);
     }
-    */
   }
 
   /// Create a new object
