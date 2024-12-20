@@ -22,7 +22,6 @@ class BubblesLiveshareMessageRenderer extends StatefulWidget {
   final bool self;
   final Friend? sender;
   final bool mobileLayout;
-  final double? overwritePadding;
 
   const BubblesLiveshareMessageRenderer({
     super.key,
@@ -31,7 +30,6 @@ class BubblesLiveshareMessageRenderer extends StatefulWidget {
     this.self = false,
     this.sender,
     this.mobileLayout = false,
-    this.overwritePadding,
   });
 
   @override
@@ -125,7 +123,6 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
           child: Padding(
             padding: EdgeInsets.symmetric(
               vertical: elementSpacing,
-              horizontal: widget.overwritePadding ?? (widget.mobileLayout ? defaultSpacing : sectionSpacing),
             ),
             child: Row(
               textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
@@ -278,7 +275,6 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                 height: 30,
                 child: CircularProgressIndicator(
                   color: Get.theme.colorScheme.onPrimary,
-                  value: controller.progress.value,
                 ),
               );
             }

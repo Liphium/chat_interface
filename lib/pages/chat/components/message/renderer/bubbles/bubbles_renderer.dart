@@ -24,7 +24,6 @@ class BubblesRenderer extends StatefulWidget {
 
   // Design of the bubbles
   final bool mobileLayout;
-  final double? overwritePadding;
 
   const BubblesRenderer({
     super.key,
@@ -33,7 +32,6 @@ class BubblesRenderer extends StatefulWidget {
     required this.provider,
     this.message,
     this.mobileLayout = false,
-    this.overwritePadding,
   });
 
   @override
@@ -149,7 +147,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
           last: last,
           sender: self ? Friend.me() : sender,
           mobileLayout: widget.mobileLayout,
-          overwritePadding: widget.overwritePadding,
         );
 
       case MessageType.call:
@@ -161,7 +158,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
           last: last,
           sender: self ? Friend.me() : sender,
           mobileLayout: widget.mobileLayout,
-          overwritePadding: widget.overwritePadding,
         );
 
       case MessageType.liveshare:
@@ -172,7 +168,6 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
           self: self,
           sender: self ? Friend.me() : sender,
           mobileLayout: widget.mobileLayout,
-          overwritePadding: widget.overwritePadding,
         );
 
       case MessageType.system:
@@ -234,6 +229,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                     ),
                   ),
                   if (!widget.mobileLayout) renderOverlay(self, message),
+                  if (widget.mobileLayout && !GetPlatform.isMobile) renderOverlay(self, message)
                 ],
               ),
             ),
@@ -284,6 +280,9 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         height: 34,
         child: Visibility(
           visible: hovering.value,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
           child: Row(
             children: [
               LoadingIconButton(

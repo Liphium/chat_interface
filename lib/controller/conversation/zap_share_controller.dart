@@ -83,7 +83,7 @@ class ZapShareController extends GetxController {
 
   /// Open the window for zap share for a conversation
   Future<void> openWindow(Conversation conversation, ContextMenuData data) async {
-    if (!GetPlatform.isMobile) {
+    if (GetPlatform.isMobile) {
       showErrorPopup("error", "zap.no_mobile".tr);
       return;
     }

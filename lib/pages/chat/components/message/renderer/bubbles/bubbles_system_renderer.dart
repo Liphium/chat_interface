@@ -34,7 +34,6 @@ class _MessageRendererState extends State<BubblesSystemMessageRenderer> {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: elementSpacing,
-          horizontal: sectionSpacing,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
+import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -34,22 +35,26 @@ class _MessageListState extends State<MessageList> {
         return Obx(() {
           return ScrollConfiguration(
             behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-            child: ListView.builder(
-              itemCount: widget.provider.messages.length + 2,
-              reverse: true,
-              controller: _scrollController,
-              addAutomaticKeepAlives: false,
-              addRepaintBoundaries: false,
-              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-              itemBuilder: (context, index) {
-                return BubblesRenderer(
-                  index: index,
-                  controller: _scrollController,
-                  provider: widget.provider,
-                  mobileLayout: constraints.maxWidth <= 800,
-                  overwritePadding: widget.overwritePadding,
-                );
-              },
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.overwritePadding ?? (constraints.maxWidth <= 800 ? defaultSpacing : sectionSpacing),
+              ),
+              child: ListView.builder(
+                itemCount: widget.provider.messages.length + 2,
+                reverse: true,
+                controller: _scrollController,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: false,
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                itemBuilder: (context, index) {
+                  return BubblesRenderer(
+                    index: index,
+                    controller: _scrollController,
+                    provider: widget.provider,
+                    mobileLayout: constraints.maxWidth <= 800,
+                  );
+                },
+              ),
             ),
           );
         });

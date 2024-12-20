@@ -21,7 +21,6 @@ class BubblesMessageRenderer extends StatefulWidget {
   final bool last;
   final Friend? sender;
   final bool mobileLayout;
-  final double? overwritePadding;
 
   const BubblesMessageRenderer({
     super.key,
@@ -32,7 +31,6 @@ class BubblesMessageRenderer extends StatefulWidget {
     this.last = false,
     this.sender,
     this.mobileLayout = false,
-    this.overwritePadding,
   });
 
   @override
@@ -71,7 +69,6 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
           child: Padding(
             padding: EdgeInsets.symmetric(
               vertical: elementSpacing,
-              horizontal: widget.overwritePadding ?? (widget.mobileLayout ? defaultSpacing : sectionSpacing),
             ),
             child: Row(
               textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
