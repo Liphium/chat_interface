@@ -46,11 +46,27 @@ class MessageSearchController extends GetxController {
         }
         working = true;
 
+        // Check if there is a conversation filter
+        final convFilter = filters.firstWhereOrNull((f) => f is ConversationFilter) as ConversationFilter?;
+
         // Grab all the messages from the list using the offset
-        final messageQuery = db.select(db.message)
-          ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(_lastTime)))
-          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-          ..limit(100);
+        // Make sure to only search in the current conversation in case there is a conversation filter
+        final SimpleSelectStatement<$MessageTable, MessageData> messageQuery;
+        if (convFilter != null) {
+          messageQuery = db.select(db.message)
+            ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(_lastTime)))
+            ..where((tbl) => tbl.conversation.equals(convFilter.conversationId))
+            ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+            ..limit(100);
+        } else {
+          messageQuery = db.select(db.message)
+            ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(_lastTime)))
+            ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+            ..limit(100);
+        }
+
+        // Make sure to only search in the current conversation in case there is a conversation filter
+        if (convFilter != null) {}
         final messages = await messageQuery.get();
 
         // If there are no messages, cancel the timer

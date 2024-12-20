@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_info_mobile.dart';
-import 'package:chat_interface/pages/chat/components/conversations/conversation_info_window.dart';
+import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
+import 'package:chat_interface/pages/chat/components/conversations/conversation_members_page.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -40,9 +41,8 @@ class _MessageBarState extends State<MobileMessageBar> {
     return Material(
       color: Get.theme.colorScheme.onInverseSurface,
       child: InkWell(
-        onTap: () => Get.to(ConversationInfoWindow(
+        onTap: () => Get.to(ConversationMembersPage(
           conversation: widget.conversation,
-          position: const ContextMenuData(Offset(0, 0), false, false),
         )),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),

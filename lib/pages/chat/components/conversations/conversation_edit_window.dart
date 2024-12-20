@@ -1,6 +1,5 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_dev_window.dart';
-import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ConversationInfoWindow extends StatefulWidget {
-  final bool showMembers;
   final ContextMenuData position;
   final Conversation conversation;
 
@@ -19,7 +17,6 @@ class ConversationInfoWindow extends StatefulWidget {
     super.key,
     required this.position,
     required this.conversation,
-    this.showMembers = true,
   });
 
   @override
@@ -48,51 +45,6 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Visibility(
-            visible: widget.showMembers,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "chat.members".trParams({"count": widget.conversation.members.length.toString()}),
-                  style: Get.theme.textTheme.bodyMedium,
-                ),
-                verticalSpacing(defaultSpacing),
-                Column(
-                  children: List.generate(widget.conversation.members.length, (index) {
-                    final member = widget.conversation.members.values.elementAt(index).getFriend();
-                    return Padding(
-                      padding: EdgeInsets.only(top: index == 0 ? 0 : elementSpacing),
-                      child: Material(
-                        color: Get.theme.colorScheme.inverseSurface,
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          onTap: () => showModal(Profile(friend: member)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(defaultSpacing),
-                            child: UserRenderer(id: member.id),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-                verticalSpacing(sectionSpacing),
-              ],
-            ),
-          ),
-          Visibility(
-            visible: widget.showMembers,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: defaultSpacing),
-              child: Text(
-                "Actions",
-                style: Get.theme.textTheme.bodyMedium,
-              ),
-            ),
-          ),
           Visibility(
             visible: widget.conversation.isGroup,
             child: Padding(
