@@ -5,6 +5,7 @@ import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
@@ -264,6 +265,11 @@ abstract class MessageProvider {
     String message,
     String answer,
   ) async {
+    // Check if there is a connection before doing this
+    if (!Get.find<ConnectionController>().connected.value) {
+      return "error.no_connection".tr;
+    }
+
     if (message.isEmpty && attachments.isEmpty) {
       return 'error.message.empty'.tr;
     }
@@ -391,9 +397,9 @@ class Message {
   Message? answerMessage;
 
   /// Extracts and decrypts the attachments
-  Future<bool> initAttachments(MessageProvider provider) async {
+  Future<bool> initAttachments(MessageProvider? provider) async {
     //* Load answer
-    if (answer != "") {
+    if (answer != "" && provider != null) {
       final message = await provider.loadMessageFromServer(answer, init: false);
       answerMessage = message;
     } else {

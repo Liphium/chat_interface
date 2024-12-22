@@ -6,6 +6,8 @@ class ErrorTranslations extends Translations {
         //* English US
         'en_US': {
           'error': 'Error',
+          'error.no_connection':
+              'There was an error while connecting to the server. Please make sure you are connected to the internet and have a stable connection to your town.',
           'render.error': 'Elements of type @type aren\'t supported.',
           'server.not_found': 'The server couldn\'t be reached. Make sure you have the right domain.',
           'error.network': 'Seems like you are offline. Please try to check the connection of your device.',

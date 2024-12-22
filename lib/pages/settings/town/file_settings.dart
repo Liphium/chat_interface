@@ -34,11 +34,16 @@ class FileSettings {
   ];
 
   // File types for auto download
-  /// Doesn't include gifs
-  static const List<String> staticImageTypes = ["png", "jpg", "jpeg", "webp", "bmp", "wbmp"];
+  static const List<String> staticImageTypes = ["png", "jpg", "jpeg", "webp", "bmp", "wbmp"]; // Everything except GIF
   static const List<String> imageTypes = ["png", "jpg", "jpeg", "webp", "bmp", "wbmp", "gif"];
   static const List<String> videoTypes = ["mp4", "avi", "mkv"];
   static const List<String> audioTypes = ["mp3", "mov", "wav", "ogg"];
+
+  /// Checks if the file passed in is a audio, video or image file with the types above
+  static bool isMediaFile(String name) {
+    final ext = path.extension(name).toLowerCase();
+    return imageTypes.contains(ext) || audioTypes.contains(ext) || videoTypes.contains(ext);
+  }
 
   static void addSettings(SettingController controller) {
     controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, isWeb ? false : true);
@@ -106,52 +111,55 @@ class FileSettingsPage extends StatelessWidget {
             ),
           ),
           verticalSpacing(defaultSpacing),
-          Wrap(
-            spacing: defaultSpacing,
-            children: [
-              FJElevatedButton(
-                onTap: () async {
-                  final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_${StatusController.ownAccountId}");
-                  unawaited(OpenFile.open(cacheFolder));
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
-                    horizontalSpacing(defaultSpacing),
-                    Text("settings.file.cache.open_cache".tr, style: Get.textTheme.labelLarge),
-                  ],
+          Visibility(
+            visible: !GetPlatform.isMobile,
+            child: Wrap(
+              spacing: defaultSpacing,
+              children: [
+                FJElevatedButton(
+                  onTap: () async {
+                    final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_${StatusController.ownAccountId}");
+                    unawaited(OpenFile.open(cacheFolder));
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
+                      horizontalSpacing(defaultSpacing),
+                      Text("settings.file.cache.open_cache".tr, style: Get.textTheme.labelLarge),
+                    ],
+                  ),
                 ),
-              ),
-              FJElevatedButton(
-                onTap: () async {
-                  final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_${StatusController.ownAccountId}");
-                  unawaited(OpenFile.open(fileFolder));
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
-                    horizontalSpacing(defaultSpacing),
-                    Text("settings.file.cache.open_saved_files".tr, style: Get.textTheme.labelLarge),
-                  ],
+                FJElevatedButton(
+                  onTap: () async {
+                    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_${StatusController.ownAccountId}");
+                    unawaited(OpenFile.open(fileFolder));
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
+                      horizontalSpacing(defaultSpacing),
+                      Text("settings.file.cache.open_saved_files".tr, style: Get.textTheme.labelLarge),
+                    ],
+                  ),
                 ),
-              ),
-              FJElevatedButton(
-                onTap: () async {
-                  final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_${StatusController.ownAccountId}");
-                  unawaited(OpenFile.open(fileFolder));
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
-                    horizontalSpacing(defaultSpacing),
-                    Text("settings.file.cache.open_files".tr, style: Get.textTheme.labelLarge),
-                  ],
+                FJElevatedButton(
+                  onTap: () async {
+                    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_${StatusController.ownAccountId}");
+                    unawaited(OpenFile.open(fileFolder));
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
+                      horizontalSpacing(defaultSpacing),
+                      Text("settings.file.cache.open_files".tr, style: Get.textTheme.labelLarge),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           verticalSpacing(sectionSpacing + defaultSpacing),
 

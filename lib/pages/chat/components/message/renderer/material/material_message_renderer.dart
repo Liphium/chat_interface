@@ -69,7 +69,6 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
           },
           child: Padding(
             padding: EdgeInsets.symmetric(
-              vertical: elementSpacing,
               horizontal: widget.overwritePadding ?? (widget.mobileLayout ? defaultSpacing : sectionSpacing),
             ),
             child: Column(
@@ -167,7 +166,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
       padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
       child: Material(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color: widget.self ? Get.theme.colorScheme.onPrimary.withOpacity(0.2) : Get.theme.colorScheme.inverseSurface,
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withAlpha(40) : Get.theme.colorScheme.inverseSurface,
         child: InkWell(
           borderRadius: BorderRadius.circular(defaultSpacing),
           onTap: () => widget.provider!.scrollToMessage(widget.message.answer),
@@ -210,29 +209,26 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
     return SelectionContainer.disabled(
       child: Visibility(
         visible: widget.message.attachmentsRenderer.isNotEmpty,
-        child: Padding(
-          padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(widget.message.attachmentsRenderer.length, (index) {
-              final container = widget.message.attachmentsRenderer[index];
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(widget.message.attachmentsRenderer.length, (index) {
+            final container = widget.message.attachmentsRenderer[index];
 
-              if (container.width != null && container.height != null) {
-                return Padding(
-                  padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                  child: ImageAttachmentRenderer(
-                    image: container,
-                    hoverCheck: true,
-                  ),
-                );
-              }
-
+            if (container.width != null && container.height != null) {
               return Padding(
-                padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
+                padding: EdgeInsets.only(top: elementSpacing),
+                child: ImageAttachmentRenderer(
+                  image: container,
+                  hoverCheck: true,
+                ),
               );
-            }).toList(),
-          ),
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(top: elementSpacing),
+              child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
+            );
+          }).toList(),
         ),
       ),
     );

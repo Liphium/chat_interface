@@ -274,7 +274,7 @@ class ZapShareController extends GetxController {
         }
 
         if (res.statusCode != 200) {
-          sendLog("Failed to send chunk $chunk");
+          sendLog("Failed to send chunk $chunk ${res.statusCode} ${res.statusMessage}");
           completer.complete(false);
           return;
         }

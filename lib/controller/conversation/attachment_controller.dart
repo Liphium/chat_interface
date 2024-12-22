@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
@@ -36,6 +37,14 @@ class AttachmentController extends GetxController {
     Uint8List? bytes,
     String? fileName,
   }) async {
+    // Check if there is a connection before doing this
+    if (!Get.find<ConnectionController>().connected.value) {
+      if (popups) {
+        showErrorPopup("error", "error.no_connection".tr);
+      }
+      return FileUploadResponse("error.no_connection".tr, null);
+    }
+
     bytes ??= await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
@@ -77,17 +86,21 @@ class AttachmentController extends GetxController {
 
     // Copy the file into the local cache
     if (!isWeb) {
-      final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
-      await fileUtil.write(XFile(filePath), bytes);
+      // Only copy the file if it's a media file (other file types don't really matter because they aren't displayed)
+      if (FileSettings.isMediaFile(name)) {
+        final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
+        await fileUtil.write(XFile(filePath), bytes);
+      }
     }
     final container = AttachmentContainer(
-      type,
-      json["id"],
-      containerNameNull ? null : fileName ?? path.basename(data.file.path),
-      json["url"],
-      key,
+      storageType: type,
+      id: json["id"],
+      fileName: containerNameNull ? null : fileName ?? path.basename(data.file.path),
+      size: await data.file.length(),
+      url: json["url"],
+      key: key,
     );
-    sendLog("SENT ATTACHMENT: ${container.id}");
+    sendLog("UPLOADED ATTACHMENT: ${container.id}");
     container.downloaded.value = true;
     attachments[container.id] = container;
 
@@ -105,6 +118,14 @@ class AttachmentController extends GetxController {
     if (container.downloading.value) return true;
     if (container.downloaded.value) return true;
     if (container.attachmentType != AttachmentContainerType.file) return false;
+
+    // Check if there is a connection before doing this
+    if (!Get.find<ConnectionController>().connected.value) {
+      if (popups) {
+        showErrorPopup("error", "error.no_connection".tr);
+      }
+      return false;
+    }
 
     if (await container.existsLocally() && !retry) {
       sendLog("already exists ${container.name} ${container.id}");
@@ -189,6 +210,14 @@ class AttachmentController extends GetxController {
 
   /// Delete a file based on a path and an id
   Future<bool> deleteFileFromPath(String id, XFile? file, {popup = false}) async {
+    // Check if there is a connection before doing this
+    if (!Get.find<ConnectionController>().connected.value) {
+      if (popup) {
+        showErrorPopup("error", "error.no_connection".tr);
+      }
+      return false;
+    }
+
     if (file != null) {
       await fileUtil.delete(file);
     }
@@ -325,11 +354,12 @@ class AttachmentController extends GetxController {
 
     // Create a container and cache it immediately
     container = AttachmentContainer(
-      type,
-      json["i"],
-      json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
-      json["u"],
-      unpackageSymmetricKey(json["k"], sodium),
+      storageType: type,
+      id: json["i"],
+      fileName: json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
+      size: json["s"] ?? -1,
+      url: json["u"],
+      key: unpackageSymmetricKey(json["k"], sodium),
     );
     container.width = json["w"];
     container.height = json["h"];
@@ -369,6 +399,7 @@ class AttachmentContainer {
   final String id;
   final String? fileName;
   final String url;
+  final int size;
   int? width;
   int? height;
   final SecureKey? key;
@@ -396,7 +427,14 @@ class AttachmentContainer {
     return true;
   }
 
-  AttachmentContainer(this.storageType, this.id, this.fileName, this.url, this.key) {
+  AttachmentContainer({
+    required this.storageType,
+    required this.id,
+    required this.fileName,
+    required this.size,
+    required this.url,
+    required this.key,
+  }) {
     setAttachmentType();
     if (attachmentType == AttachmentContainerType.file) {
       file = XFile(path.join(AttachmentController.getFilePathForType(storageType), id));
@@ -445,7 +483,15 @@ class AttachmentContainer {
     return size;
   }
 
-  AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
+  AttachmentContainer.remoteImage(String url)
+      : this(
+          storageType: StorageType.cache,
+          id: "",
+          fileName: "",
+          size: 0,
+          url: url,
+          key: null,
+        );
 
   String toAttachment() {
     switch (attachmentType) {
@@ -481,6 +527,7 @@ class AttachmentContainer {
     return <String, dynamic>{
       "i": id,
       if (fileName != null) "n": fileName!,
+      if (size != -1) "s": size,
       "u": url,
       "k": packageSymmetricKey(key!),
       if (width != null) "w": width,

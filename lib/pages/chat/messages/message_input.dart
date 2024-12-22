@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
+import 'package:chat_interface/pages/status/error/offline_hider.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -170,6 +172,12 @@ class _MessageInputState extends State<MessageInput> {
     final actionsMap = {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) async {
+          // Check if there is a connection before doing this
+          if (!Get.find<ConnectionController>().connected.value) {
+            showErrorPopup("error", "error.no_connection".tr);
+            return;
+          }
+
           // Do emoji suggestion instead when pressing enter
           if (_emojiSuggestions.isNotEmpty) {
             doEmojiSuggestion(_emojiSuggestions[0].emoji);
@@ -484,16 +492,20 @@ class _MessageInputState extends State<MessageInput> {
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),
-                        horizontalSpacing(elementSpacing),
-                        LoadingIconButton(
-                          onTap: () => {},
-                          onTapContext: (context) {
-                            Actions.invoke(context, const SendIntent());
-                          },
-                          icon: Icons.send,
-                          color: theme.colorScheme.tertiary,
-                          loading: loading,
-                        )
+                        OfflineHider(
+                          axis: Axis.horizontal,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.only(left: elementSpacing),
+                          child: LoadingIconButton(
+                            onTap: () => {},
+                            onTapContext: (context) {
+                              Actions.invoke(context, const SendIntent());
+                            },
+                            icon: Icons.send,
+                            color: theme.colorScheme.tertiary,
+                            loading: loading,
+                          ),
+                        ),
                       ],
                     ),
                   ],

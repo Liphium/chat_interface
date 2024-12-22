@@ -9,6 +9,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/status/error/offline_hider.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -112,61 +113,94 @@ class _MessageBarState extends State<MessageBar> {
 
               return Row(
                 children: [
-                  //* Zap share
-                  if (widget.conversation.type == model.ConversationType.directMessage && isDirectorySupported && !error)
-                    Stack(
-                      key: _zapShareKey,
+                  // Put all online actions in a separate row to make them be hidden when not connected
+                  OfflineHider(
+                    axis: Axis.horizontal,
+                    alignment: Alignment.center,
+                    child: Row(
                       children: [
-                        IconButton(
-                          onPressed: () async {
-                            await zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
-                          },
-                          icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
-                          tooltip: "chat.zapshare".tr,
-                        ),
-                        IgnorePointer(
-                          child: SizedBox(
-                            width: 48 - defaultSpacing,
-                            height: 48 - defaultSpacing,
-                            child: Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: Obx(
-                                () => CircularProgressIndicator(
-                                  value: zapShareController.waiting.value ? null : zapShareController.progress.value.clamp(0, 1),
-                                  strokeWidth: 3,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
-                                ),
+                        //* Zap share
+                        if (widget.conversation.type == model.ConversationType.directMessage && isDirectorySupported && !error)
+                          Stack(
+                            key: _zapShareKey,
+                            children: [
+                              IconButton(
+                                onPressed: () async {
+                                  await zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
+                                },
+                                icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
+                                tooltip: "chat.zapshare".tr,
                               ),
+                              IgnorePointer(
+                                child: SizedBox(
+                                  width: 48 - defaultSpacing,
+                                  height: 48 - defaultSpacing,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2.0),
+                                    child: Obx(
+                                      () => CircularProgressIndicator(
+                                        value: zapShareController.waiting.value ? null : zapShareController.progress.value.clamp(0, 1),
+                                        strokeWidth: 3,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+
+                        if (Get.find<SpacesController>().inSpace.value && areSpacesSupported && !error)
+                          LoadingIconButton(
+                            icon: Icons.forward_to_inbox,
+                            iconSize: 27,
+                            loading: callLoading,
+                            tooltip: "chat.invite_to_space".tr,
+                            onTap: () {
+                              final controller = Get.find<SpacesController>();
+                              controller.inviteToCall(widget.provider);
+                            },
+                          ),
+
+                        // Only show launch button in case supported
+                        if (areSpacesSupported && !error)
+                          LoadingIconButton(
+                            icon: Icons.rocket_launch,
+                            iconSize: 27,
+                            loading: callLoading,
+                            tooltip: "chat.start_space".tr,
+                            onTap: () {
+                              final controller = Get.find<SpacesController>();
+                              controller.createAndConnect(widget.provider);
+                            },
+                          ),
+
+                        // Give the user the ability to add people to a conversation
+                        if (!error)
+                          ConversationAddButton(
+                            conversation: widget.conversation,
+                            loading: callLoading,
+                          ),
+
+                        Visibility(
+                          visible: widget.conversation.isGroup,
+                          child: Obx(
+                            () => IconButton(
+                              iconSize: 27,
+                              icon: Icon(Icons.group,
+                                  color: controller.settings[AppSettings.showGroupMembers]!.value.value
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSurface),
+                              onPressed: () {
+                                controller.settings[AppSettings.showGroupMembers]!
+                                    .setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
+                              },
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
-
-                  if (Get.find<SpacesController>().inSpace.value && areSpacesSupported && !error)
-                    LoadingIconButton(
-                      icon: Icons.forward_to_inbox,
-                      iconSize: 27,
-                      loading: callLoading,
-                      tooltip: "chat.invite_to_space".tr,
-                      onTap: () {
-                        final controller = Get.find<SpacesController>();
-                        controller.inviteToCall(widget.provider);
-                      },
-                    ),
-
-                  // Only show launch button in case supported
-                  if (areSpacesSupported && !error)
-                    LoadingIconButton(
-                      icon: Icons.rocket_launch,
-                      iconSize: 27,
-                      loading: callLoading,
-                      tooltip: "chat.start_space".tr,
-                      onTap: () {
-                        final controller = Get.find<SpacesController>();
-                        controller.createAndConnect(widget.provider);
-                      },
-                    ),
+                  ),
 
                   // Search the entire conversation
                   Obx(
@@ -182,30 +216,6 @@ class _MessageBarState extends State<MessageBar> {
                           Get.find<MessageSearchController>().currentFocus!.requestFocus();
                         }
                       },
-                    ),
-                  ),
-
-                  // Give the user the ability to add people to a conversation
-                  if (!error)
-                    ConversationAddButton(
-                      conversation: widget.conversation,
-                      loading: callLoading,
-                    ),
-
-                  Visibility(
-                    visible: widget.conversation.isGroup,
-                    child: Obx(
-                      () => IconButton(
-                        iconSize: 27,
-                        icon: Icon(Icons.group,
-                            color: controller.settings[AppSettings.showGroupMembers]!.value.value
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.onSurface),
-                        onPressed: () {
-                          controller.settings[AppSettings.showGroupMembers]!
-                              .setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
-                        },
-                      ),
                     ),
                   ),
                 ],

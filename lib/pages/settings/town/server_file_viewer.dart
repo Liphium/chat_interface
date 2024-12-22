@@ -190,64 +190,71 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                           borderRadius: BorderRadius.circular(10),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing),
-                            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    extensionMap[extension] ?? Icons.insert_drive_file,
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    size: 30,
-                                  ),
-                                  horizontalSpacing(defaultSpacing),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Row(
                                     children: [
-                                      Text(file.name, style: Get.theme.textTheme.labelMedium),
-                                      Text(formatFileSize(file.size), style: Get.theme.textTheme.bodyMedium),
+                                      Icon(
+                                        extensionMap[extension] ?? Icons.insert_drive_file,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        size: 30,
+                                      ),
+                                      horizontalSpacing(defaultSpacing),
+                                      Flexible(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(file.name, style: Get.theme.textTheme.labelMedium),
+                                            Text(formatFileSize(file.size), style: Get.theme.textTheme.bodyMedium),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
 
-                              //* File actions
-                              Row(
-                                children: [
-                                  Icon(
-                                    file.path == null ? Icons.cloud_off : Icons.cloud_done,
-                                    color: Get.theme.colorScheme.onPrimary,
-                                  ),
-                                  horizontalSpacing(defaultSpacing + elementSpacing),
-                                  if (file.path != null)
-                                    IconButton(
-                                      onPressed: () => OpenFile.open(file.path!),
-                                      icon: const Icon(Icons.launch),
+                                //* File actions
+                                Row(
+                                  children: [
+                                    Icon(
+                                      file.path == null ? Icons.cloud_off : Icons.cloud_done,
+                                      color: Get.theme.colorScheme.onPrimary,
                                     ),
-                                  LoadingIconButton(
-                                    loading: file.deleteLoading,
-                                    onTap: () async {
-                                      if (file.deleteLoading.value) {
-                                        return;
-                                      }
-                                      file.deleteLoading.value = true;
+                                    horizontalSpacing(defaultSpacing + elementSpacing),
+                                    if (file.path != null)
+                                      IconButton(
+                                        onPressed: () => OpenFile.open(file.path!),
+                                        icon: const Icon(Icons.launch),
+                                      ),
+                                    LoadingIconButton(
+                                      loading: file.deleteLoading,
+                                      onTap: () async {
+                                        if (file.deleteLoading.value) {
+                                          return;
+                                        }
+                                        file.deleteLoading.value = true;
 
-                                      // Make a request to the server
-                                      final success = await Get.find<AttachmentController>().deleteFileFromPath(
-                                        file.id,
-                                        file.path != null ? XFile(file.path!) : null,
-                                        popup: true,
-                                      );
-                                      if (!success) {
-                                        file.path = null;
-                                      }
+                                        // Make a request to the server
+                                        final success = await Get.find<AttachmentController>().deleteFileFromPath(
+                                          file.id,
+                                          file.path != null ? XFile(file.path!) : null,
+                                          popup: true,
+                                        );
+                                        if (!success) {
+                                          file.path = null;
+                                        }
 
-                                      // Play the deleted animation
-                                      file.deleted.value = true;
-                                    },
-                                    icon: Icons.delete,
-                                  ),
-                                ],
-                              )
-                            ]),
+                                        // Play the deleted animation
+                                        file.deleted.value = true;
+                                      },
+                                      icon: Icons.delete,
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),

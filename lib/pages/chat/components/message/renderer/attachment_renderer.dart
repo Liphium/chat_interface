@@ -230,7 +230,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                 Flexible(
                   child: Obx(
                     () => Text(
-                      !widget.container.error.value ? formatFileSize(1000) : 'file.not_uploaded'.tr,
+                      !widget.container.error.value ? formatFileSize(widget.container.size) : 'file.not_uploaded'.tr,
                       style: Get.theme.textTheme.bodyMedium,
                     ),
                   ),

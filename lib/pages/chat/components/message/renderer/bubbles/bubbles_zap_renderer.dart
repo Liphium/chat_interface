@@ -310,6 +310,10 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
 }
 
 String formatFileSize(int fileSize) {
+  if (fileSize <= 0) {
+    return "file.unknown_size".tr;
+  }
+
   if (fileSize < 1024) {
     return "file.bytes".trParams({"count": fileSize.toString()});
   }

@@ -101,6 +101,11 @@ class MessageSearchController extends GetxController {
           }
         }
 
+        // Initialize all the attachments on the messages
+        for (var msg in found) {
+          await msg.initAttachments(null);
+        }
+
         // Add all found results to the list
         if (wasRestart) {
           results.value = found;
@@ -158,17 +163,17 @@ class ContentFilter extends MessageFilter {
   @override
   bool matches(Message message, {String? conversation}) {
     // Split the search query into words
-    final searchWords = content.split(RegExp(r'\s+'));
+    final searchWords = content.toLowerCase().split(RegExp(r'\s+'));
 
     // Check if all words in the search query are found in the content
-    final contentWords = message.content.split(RegExp(r'\s+'));
+    final contentWords = message.content.toLowerCase().split(RegExp(r'\s+'));
     if (searchWords.every((word) => contentWords.any((contentWord) => contentWord.contains(word)))) {
       return true;
     }
 
     // Check if all words in the search query are found in any attachment
     for (var attachment in message.attachments) {
-      final attachmentWords = attachment.split(RegExp(r'\s+'));
+      final attachmentWords = attachment.toLowerCase().split(RegExp(r'\s+'));
       if (searchWords.every((word) => attachmentWords.any((attachmentWord) => attachmentWord.contains(word)))) {
         return true;
       }

@@ -4,6 +4,7 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_conversations.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/pages/status/error/offline_hider.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
@@ -94,37 +95,48 @@ class _SidebarState extends State<Sidebar> {
                                   cursorColor: Get.theme.colorScheme.onPrimary,
                                 ),
                               ),
-                              horizontalSpacing(defaultSpacing * 0.5),
-                              Visibility(
-                                visible: areSpacesSupported,
-                                child: IconButton(
-                                  key: _addSpaceKey,
-                                  onPressed: () {
-                                    if (isWeb) {
-                                      Get.dialog(UpgradeWindow());
-                                      return;
-                                    }
 
-                                    //* Open space add window
-                                    final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
-                                    showModal(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                                  },
-                                  icon: Icon(Icons.rocket_launch, color: Get.theme.colorScheme.onPrimary),
+                              // Put all of the buttons into a row so we can disable them when offline
+                              OfflineHider(
+                                axis: Axis.horizontal,
+                                alignment: Alignment.center,
+                                child: Row(
+                                  children: [
+                                    horizontalSpacing(defaultSpacing * 0.5),
+                                    Visibility(
+                                      visible: areSpacesSupported,
+                                      child: IconButton(
+                                        key: _addSpaceKey,
+                                        onPressed: () {
+                                          if (isWeb) {
+                                            Get.dialog(UpgradeWindow());
+                                            return;
+                                          }
+
+                                          //* Open space add window
+                                          final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
+                                          showModal(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                                        },
+                                        icon: Icon(Icons.rocket_launch, color: Get.theme.colorScheme.onPrimary),
+                                      ),
+                                    ),
+                                    horizontalSpacing(defaultSpacing * 0.5),
+                                    IconButton(
+                                      key: _addConvKey,
+                                      onPressed: () {
+                                        final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
+
+                                        //* Open conversation add window
+                                        showModal(ConversationAddWindow(
+                                          position:
+                                              ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
+                                        ));
+                                      },
+                                      icon: Icon(Icons.chat_bubble, color: Get.theme.colorScheme.onPrimary),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              horizontalSpacing(defaultSpacing * 0.5),
-                              IconButton(
-                                key: _addConvKey,
-                                onPressed: () {
-                                  final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
-
-                                  //* Open conversation add window
-                                  showModal(ConversationAddWindow(
-                                    position: ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
-                                  ));
-                                },
-                                icon: Icon(Icons.chat_bubble, color: Get.theme.colorScheme.onPrimary),
-                              ),
+                              )
                             ],
                           ),
                         ),

@@ -133,6 +133,7 @@ class ChatPageTranslations extends Translations {
           'download.folder': 'Download into folder',
           'download.app': 'Download into app',
           'image.loading': 'Image is loading..',
+          'file.unknown_size': 'Unknown size',
           'file.bytes': '@count B',
           'file.kilobytes': '@count KB',
           'file.megabytes': '@count MB',

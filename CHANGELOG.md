@@ -11,6 +11,7 @@
 - Made the startup of the app significantly faster by reducing the amount of server interactions
 - Messages are now stored in the local database to make loading them even faster
 - Added automatic layering to Tabletop to make playing card games with card stacking easier
+- Conversation search is now available directly inside every conversation
 
 ### Minor fixes and updates
 
@@ -28,6 +29,8 @@
 - Fixed a bug where a file sent over Zap would not match the size of the original file due to an optimization error
 - Updated the version of the package used to open files using native apps
 - Decreased the amount of data needed for profile pictures (now only the container)
+- Only media files will be copied over into the Liphium's file because others can stay on the server
+- Added a hide animation for buttons that only work when you're online (they will hide when offline to make it clear they don't work)
 
 ## 0.5.2
 

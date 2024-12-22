@@ -80,6 +80,11 @@ class TrustedLinkHelper {
       return false;
     }
 
+    // Make sure the thing is actually a domain
+    if (url.trim() == "") {
+      return true;
+    }
+
     // Trust if it's the own server
     if (basePath.contains(url)) {
       return true;
