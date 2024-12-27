@@ -5,10 +5,11 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_cursor.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_text.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_card.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_cursor.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_deck.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_inventory.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_text.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -26,7 +27,7 @@ class TabletopController extends GetxController {
   bool cancelledHolding = false;
 
   List<TableObject> hoveringObjects = [];
-  final inventory = <CardObject>[].obs;
+  InventoryObject? inventory;
   final objectOrder = <int, String>{};
   int maxOrder = 0;
   final objects = <String, TableObject>{};
@@ -36,7 +37,6 @@ class TabletopController extends GetxController {
   static const tickRate = 20;
   Timer? _ticker;
   Offset? _lastMousePos;
-  int inventoryHoverIndex = -1;
   Offset mousePos = const Offset(0, 0);
   Offset mousePosUnmodified = const Offset(0, 0);
   Offset globalCanvasPosition = const Offset(0, 0);
@@ -56,7 +56,7 @@ class TabletopController extends GetxController {
     heldObject = null;
     movingAllowed = true;
     hoveringObjects.clear();
-    inventory.clear();
+    inventory = null;
     objects.clear();
     objectOrder.clear();
     cursors.clear();
@@ -65,7 +65,6 @@ class TabletopController extends GetxController {
     _ticker = null;
 
     _lastMousePos = null;
-    inventoryHoverIndex = -1;
 
     mousePos = const Offset(0, 0);
     mousePosUnmodified = const Offset(0, 0);
@@ -171,13 +170,12 @@ class TabletopController extends GetxController {
     switch (type) {
       case TableObjectType.text:
         object = TextObject(id, order, location, size);
-        break;
       case TableObjectType.deck:
         object = DeckObject(id, order, location, size);
-        break;
       case TableObjectType.card:
         object = CardObject(id, order, location, size);
-        break;
+      case TableObjectType.inventory:
+        object = InventoryObject(id, order, location, size);
     }
     object.rotate(rotation);
     object.decryptData(data);
@@ -205,10 +203,19 @@ class TabletopController extends GetxController {
   }
 
   /// Set the order of an object
-  void setOrder(String object, int newOrder) {
+  void setOrder(String object, int newOrder, {bool removeOld = false}) {
     if (newOrder > maxOrder) {
       maxOrder = newOrder;
     }
+
+    // Remove the object id from the old layer if desired by the server
+    if (newOrder == -1) {
+      final obj = objects[object]!;
+      objectOrder.remove(obj.order);
+      return;
+    }
+
+    // Set the new layer of the object
     objectOrder[newOrder] = object;
     objects[object]!.order = newOrder;
   }
@@ -225,7 +232,11 @@ class TabletopController extends GetxController {
       }
 
       // Check if the object is hovered
-      final object = this.objects[objectId]!;
+      final object = this.objects[objectId];
+      if (object == null) {
+        objectOrder.remove(i);
+        continue;
+      }
       final rect = Rect.fromLTWH(object.location.dx, object.location.dy, object.size.width, object.size.height);
       if (rect.contains(location) && !typesFound.contains(object.type)) {
         objects.add(object);
@@ -243,7 +254,7 @@ class TabletopController extends GetxController {
       currentlyExists = false;
       object.inventory = false;
       object.positionOverwrite = false;
-      inventory.remove(object);
+      inventory?.remove(object);
     } else {
       currentlyExists = objects.containsKey(object.id);
     }
@@ -304,12 +315,27 @@ class TabletopController extends GetxController {
     heldObject = null;
     movingAllowed = false;
   }
+
+  /// Gets the inventory or creates it on the table (in case needed).
+  Future<InventoryObject?> getOrCreateInventory() async {
+    if (inventory == null) {
+      final object = InventoryObject("", -1, mousePos, Size(200, 200));
+      if (await object.sendAdd()) {
+        inventory = object;
+      } else {
+        sendLog("couldn't create inventory, something went wrong");
+      }
+    }
+
+    return inventory;
+  }
 }
 
 enum TableObjectType {
   text(Icons.text_fields, "Text"),
   deck(Icons.filter_none, "Deck"),
-  card(Icons.image, "Card", creatable: false);
+  card(Icons.image, "Card", creatable: false),
+  inventory(Icons.business_center, "Inventory", creatable: false);
 
   final IconData icon;
   final String label;
@@ -517,8 +543,6 @@ abstract class TableObject {
           showErrorPopup("error", event.data["message"]);
           return;
         }
-
-        sendLog(event.data);
 
         if (event.data["direct"]) {
           callback();

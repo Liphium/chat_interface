@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_deck.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -118,7 +118,7 @@ class CardObject extends TableObject {
 
       // Show that the card is about to be dropped
       if (controller.heldObject == this && controller.hoveringObjects.any((element) => element is DeckObject)) {
-        paint.color = Colors.white.withOpacity(0.5);
+        paint.color = Colors.white.withAlpha(120);
       }
 
       if (image == null) {
@@ -209,10 +209,8 @@ class CardObject extends TableObject {
 
   @override
   void runAction(TabletopController controller) {
-    sendLog("run action");
     if (inventory) {
-      flipped = !flipped;
-      flipAnimation.setValue(flipped ? 0 : 1);
+      setFlipped(!flipped);
     } else {
       queue(() async {
         flipped = !flipped;
@@ -222,6 +220,12 @@ class CardObject extends TableObject {
         }
       });
     }
+  }
+
+  void setFlipped(bool newFlipped, {bool animation = true}) {
+    flipped = newFlipped;
+    final double newValue = newFlipped ? 1 : 0;
+    flipAnimation.setValue(newValue, from: animation ? null : newValue);
   }
 
   @override
@@ -260,15 +264,15 @@ class CardObject extends TableObject {
     ];
   }
 
-  void intoInventory(TabletopController controller, {int? index}) {
+  Future<void> intoInventory(TabletopController controller, {int? index}) async {
     final localPos = TabletopView.worldToLocalPos(location, controller.canvasZoom, controller.canvasOffset, controller);
     positionX.setRealValue(localPos.dx);
     positionY.setRealValue(localPos.dy);
     sendRemove();
     if (index != null) {
-      controller.inventory.insert(index, this);
+      controller.inventory!.add(this, index: index);
     } else {
-      controller.inventory.add(this);
+      (await controller.getOrCreateInventory())?.add(this);
     }
   }
 }

@@ -47,13 +47,17 @@ void setupTabletopListeners() {
       // Set new order for the first object
       var objectId = event.data["o"];
       var newOrder = (event.data["or"] as num).toInt();
-      controller.setOrder(objectId, newOrder);
+      controller.setOrder(objectId, newOrder, removeOld: true);
+
+      sendLog("order changed for $objectId to $newOrder");
 
       // Set new order for the second object
       if (event.data["lo"] != null) {
         objectId = event.data["lo"];
         newOrder = (event.data["lor"] as num).toInt();
         controller.setOrder(objectId, newOrder);
+
+        sendLog("second order for $objectId to $newOrder");
       }
     },
   );

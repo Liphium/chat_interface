@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_deck.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -180,8 +180,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
                 final obj = tableController.heldObject;
                 if (obj != null && obj is CardObject) {
-                  if (tableController.inventoryHoverIndex != -1) {
-                    obj.intoInventory(tableController, index: tableController.inventoryHoverIndex);
+                  if (tableController.inventory != null && tableController.inventory?.inventoryHoverIndex != -1) {
+                    obj.intoInventory(tableController, index: tableController.inventory?.inventoryHoverIndex);
                   } else if (tableController.hoveringObjects.any((element) => element is DeckObject)) {
                     final deck = tableController.hoveringObjects.firstWhere((element) => element is DeckObject) as DeckObject;
                     deck.addCard(obj);

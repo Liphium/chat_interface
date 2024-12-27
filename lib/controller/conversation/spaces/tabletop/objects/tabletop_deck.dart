@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_card.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
@@ -172,9 +172,9 @@ class DeckObject extends TableObject {
       final result = await modifyData();
       if (!result) return;
       if (obj == null) return;
-      obj.positionX.setRealValue(controller.mousePosUnmodified.dx - (obj.size.width / 2) * controller.canvasZoom);
-      obj.positionY.setRealValue(controller.mousePosUnmodified.dy - (obj.size.height / 2) * controller.canvasZoom);
-      controller.inventory.add(obj);
+      obj.positionX.setRealValue(location.dx);
+      obj.positionY.setRealValue(location.dy);
+      (await controller.getOrCreateInventory())?.add(obj);
     });
   }
 

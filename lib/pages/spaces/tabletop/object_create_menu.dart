@@ -1,6 +1,7 @@
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_inventory.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_text.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_deck.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_text.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -46,11 +47,12 @@ class _ObjectCreateMenuState extends State<ObjectCreateMenu> {
                         case TableObjectType.text:
                           Get.back();
                           object = await Get.dialog(TextObjectCreationWindow(location: widget.location));
-                          break;
                         case TableObjectType.deck:
                           Get.back();
                           object = await Get.dialog(DeckObjectCreationWindow(location: widget.location));
-                          break;
+                        case TableObjectType.inventory:
+                          Get.back();
+                          object = InventoryObject("", 0, widget.location, Size(200, 200));
                         default:
                           break;
                       }
