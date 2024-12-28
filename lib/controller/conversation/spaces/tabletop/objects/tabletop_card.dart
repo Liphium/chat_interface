@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_inventory.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_deck.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
@@ -20,8 +21,10 @@ class CardObject extends TableObject {
   bool inventory = false;
   ui.Image? image;
   Size? imageSize;
+  Offset? lastPosition;
   bool flipped = false;
-  final flipAnimation = AnimatedDouble(0, duration: 750);
+  bool inventoryFlip = false;
+  final flipAnimation = AnimatedDouble(-1, duration: 750);
 
   CardObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.card);
 
@@ -121,6 +124,29 @@ class CardObject extends TableObject {
         paint.color = Colors.white.withAlpha(120);
       }
 
+      // Check if the thing should be flipped in case moved and next to an inventory
+      if ((lastPosition != location || lastPosition == null) && !inventory) {
+        final center = location + Offset(size.width / 2, size.height / 2);
+        bool found = false;
+        for (var object in controller.objects.values) {
+          if (object is InventoryObject && controller.inventory != object) {
+            if (object.getInventoryRect().contains(center)) {
+              found = true;
+            }
+          }
+        }
+        inventoryFlip = found;
+      }
+      lastPosition = location;
+
+      // Set the new value of the flipped animation
+      if (flipAnimation.realValue == -1) {
+        // Initialize with actual flip state and don't animate it
+        flipAnimation.setRealValue(flipped || inventoryFlip ? 1 : 0);
+      } else {
+        flipAnimation.setValue(flipped || inventoryFlip ? 1 : 0);
+      }
+
       if (image == null) {
         canvas.clipRRect(RRect.fromRectAndRadius(imageRect, Radius.circular(ui ? sectionSpacing : sectionSpacing * 2)));
         canvas.drawRect(
@@ -174,7 +200,6 @@ class CardObject extends TableObject {
     // Download attached container
     final json = jsonDecode(data);
     flipped = json["flip"] ?? false;
-    flipAnimation.setValue(flipped ? 1 : 0);
 
     // Check if it's the same object and ignore to prevent flickering
     if (container?.id != json["id"]) {
@@ -224,8 +249,6 @@ class CardObject extends TableObject {
 
   void setFlipped(bool newFlipped, {bool animation = true}) {
     flipped = newFlipped;
-    final double newValue = newFlipped ? 1 : 0;
-    flipAnimation.setValue(newValue, from: animation ? null : newValue);
   }
 
   @override

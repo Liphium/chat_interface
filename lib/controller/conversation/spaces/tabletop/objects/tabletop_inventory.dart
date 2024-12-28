@@ -16,12 +16,26 @@ class InventoryObject extends TableObject {
   /// All cards currently in the inventory.
   final _cards = <CardObject>[];
 
-  // The radius of the profile picture
-  final profilePicRadius = 100;
+  // Constants for the rendering
+  static const double profilePicRadius = 100;
+  static const double strokeWidth = 16;
+  static const double spacing = 32;
 
-  // The width and height of the biggest card
-  final width = AnimatedDouble(500);
-  final height = AnimatedDouble(500);
+  // The width and height of the inventory
+  final width = AnimatedDouble(0);
+  final height = AnimatedDouble(0);
+
+  /// Get the entire rect that the inventory is inside of
+  Rect getInventoryRect({DateTime? now}) {
+    final fullWidth = now != null ? width.value(now) : width.realValue;
+    final fullHeight = now != null ? height.value(now) : height.realValue;
+    return Rect.fromLTWH(
+      location.dx - fullWidth / 2 + size.width / 2 - strokeWidth,
+      location.dy - fullHeight - strokeWidth,
+      fullWidth + strokeWidth * 2,
+      fullHeight + size.height / 2 + strokeWidth,
+    );
+  }
 
   int inventoryHoverIndex = -1;
 
@@ -31,23 +45,52 @@ class InventoryObject extends TableObject {
   void render(Canvas canvas, Offset location, TabletopController controller) {
     final now = DateTime.now();
     final ownInventory = controller.inventory == this;
+    final color = ownInventory ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface;
 
     // Draw a placeholder for the profile picture
-    canvas.drawCircle(location + Offset(100, 100), 100, Paint()..color = Colors.white);
+    canvas.drawCircle(location + Offset(100, 100), 100, Paint()..color = color);
 
     // Prerender pass
     double totalWidth = 0;
+    double biggestHeight = 0;
     int index = 0;
     for (var object in _cards) {
-      totalWidth += object.size.width + (index == 0 ? 0 : 32);
+      totalWidth += object.size.width + (index == 0 ? 0 : spacing);
+      if (object.size.height > biggestHeight) {
+        biggestHeight = object.size.height;
+      }
       index++;
     }
     scale.setValue(1);
+    width.setValue(totalWidth + spacing * 2);
+    height.setValue(biggestHeight + spacing * 2);
     double counterWidth = totalWidth;
+
+    // Draw the background
+    final backRect = getInventoryRect(now: now);
+    final backPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawRRect(RRect.fromRectAndRadius(backRect, Radius.circular(32)), backPaint);
 
     // Render pass
     for (var object in _cards) {
       if (object.downloaded) {
+        // Dragging behavior
+        var calcX = location.dx + profilePicRadius + totalWidth / 2 - counterWidth;
+        final calcY = location.dy - 32 - object.size.height;
+
+        // Draw the card and update positions
+        object.positionOverwrite = true;
+        if (controller.hoveringObjects.contains(this) || object.positionX.lastValue == 0) {
+          object.positionX.setRealValue(calcX);
+          object.positionY.setRealValue(calcY);
+        } else {
+          object.positionX.setValue(calcX);
+          object.positionY.setValue(calcY);
+        }
+
         final x = object.positionX.value(now);
         final y = object.positionY.value(now);
         final rect = Rect.fromLTWH(
@@ -72,26 +115,12 @@ class InventoryObject extends TableObject {
         }
         object.setFlipped(!ownInventory);
 
-        // Dragging behavior
-        var calcX = location.dx + profilePicRadius + totalWidth / 2 - counterWidth;
-        final calcY = location.dy - 32 - rect.height;
-
-        // Draw the card and update positions
-        object.positionOverwrite = true;
-        if (controller.hoveringObjects.contains(this) || object.positionX.lastValue == 0) {
-          object.positionX.setRealValue(calcX);
-          object.positionY.setRealValue(calcY);
-        } else {
-          object.positionX.setValue(calcX);
-          object.positionY.setValue(calcY);
-        }
-
         final cardLocation = Offset(x, y);
         TabletopPainter.preDraw(canvas, cardLocation, object, now);
         object.renderCard(canvas, Offset(x, y), controller, rect, false);
         TabletopPainter.postDraw(canvas);
 
-        counterWidth -= rect.width + 32;
+        counterWidth -= rect.width + spacing;
       }
     }
   }

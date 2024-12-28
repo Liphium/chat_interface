@@ -192,6 +192,11 @@ class TabletopController extends GetxController {
     }
     objectOrder[object.order] = object.id;
     objects[object.id] = object;
+
+    // Set as inventory if it has the same id
+    if (object.id == inventory?.id) {
+      inventory = object as InventoryObject;
+    }
   }
 
   /// Remove an object from the list
