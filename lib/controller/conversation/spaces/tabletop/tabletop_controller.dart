@@ -229,7 +229,7 @@ class TabletopController extends GetxController {
   List<TableObject> raycast(Offset location) {
     final objects = <TableObject>[];
     final typesFound = <TableObjectType>[];
-    for (var i = maxOrder; i > 0; i--) {
+    for (var i = 1; i <= maxOrder; i++) {
       // Get the object at the current drawing layer
       final objectId = objectOrder[i];
       if (objectId == null) {
