@@ -89,7 +89,12 @@ class DeckObject extends TableObject {
     );
     textPainter.layout();
     textPainter.paint(
-        canvas, Offset(rect.left + rect.width / 2 - textPainter.size.width / 2, rect.top + rect.height / 2 - textPainter.size.height / 2));
+      canvas,
+      Offset(
+        rect.left + rect.width / 2 - textPainter.size.width / 2,
+        rect.top + rect.height / 2 - textPainter.size.height / 2,
+      ),
+    );
   }
 
   @override

@@ -113,7 +113,7 @@ class TabletopPainter extends CustomPainter {
 
     final now = DateTime.now();
     controller.hoveringObjects = controller.raycast(mousePosition);
-    for (var i = 1; i <= controller.maxOrder; i++) {
+    for (var i in controller.orderSorted) {
       // Get the object at the current drawing layer
       final objectId = controller.objectOrder[i];
       if (objectId == null) {

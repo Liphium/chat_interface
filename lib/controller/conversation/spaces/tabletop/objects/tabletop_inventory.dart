@@ -26,14 +26,14 @@ class InventoryObject extends TableObject {
   final height = AnimatedDouble(0);
 
   /// Get the entire rect that the inventory is inside of
-  Rect getInventoryRect({DateTime? now}) {
+  Rect getInventoryRect({DateTime? now, Offset? base, double? invisRangeX, double? invisRangeY}) {
     final fullWidth = now != null ? width.value(now) : width.realValue;
     final fullHeight = now != null ? height.value(now) : height.realValue;
     return Rect.fromLTWH(
-      location.dx - fullWidth / 2 + size.width / 2 - strokeWidth,
-      location.dy - fullHeight - strokeWidth,
-      fullWidth + strokeWidth * 2,
-      fullHeight + size.height / 2 + strokeWidth,
+      (base ?? location).dx - fullWidth / 2 + size.width / 2 - strokeWidth - (invisRangeX ?? 0),
+      (base ?? location).dy - fullHeight - strokeWidth - (invisRangeY ?? 0),
+      fullWidth + strokeWidth * 2 + (invisRangeX ?? 0) * 2,
+      fullHeight + size.height / 2 + strokeWidth + (invisRangeY ?? 0) * 2,
     );
   }
 
@@ -61,93 +61,121 @@ class InventoryObject extends TableObject {
       }
       index++;
     }
+
+    // Add extra width if the inventory is hovered
+    if (controller.heldObject != null && ownInventory) {
+      if (inventoryHoverIndex != -1) {
+        totalWidth += controller.heldObject!.size.width + spacing;
+      }
+
+      if (_cards.isEmpty) {
+        biggestHeight = controller.heldObject!.size.height;
+      }
+    }
+
     scale.setValue(1);
     width.setValue(totalWidth + spacing * 2);
     height.setValue(biggestHeight + spacing * 2);
     double counterWidth = totalWidth;
 
     // Draw the background
-    final backRect = getInventoryRect(now: now);
+    final backRect = getInventoryRect(now: now, base: location);
     final backPaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
     canvas.drawRRect(RRect.fromRectAndRadius(backRect, Radius.circular(32)), backPaint);
 
+    // Check if the general inventory is hovered
+    final bool inventoryHovered = backRect.contains(controller.mousePos) && controller.heldObject != null && controller.heldObject != this;
+    if (inventoryHovered) {
+      inventoryHoverIndex = 0;
+    } else {
+      inventoryHoverIndex = -1;
+    }
+
     // Render pass
     for (var object in _cards) {
-      if (object.downloaded) {
-        // Dragging behavior
-        var calcX = location.dx + profilePicRadius + totalWidth / 2 - counterWidth;
-        final calcY = location.dy - 32 - object.size.height;
+      // Dragging behavior
+      var calcX = location.dx + profilePicRadius + totalWidth / 2 - counterWidth;
+      final calcY = location.dy - 32 - object.size.height;
 
-        // Draw the card and update positions
-        object.positionOverwrite = true;
-        if (controller.hoveringObjects.contains(this) || object.positionX.lastValue == 0) {
-          object.positionX.setRealValue(calcX);
-          object.positionY.setRealValue(calcY);
-        } else {
-          object.positionX.setValue(calcX);
-          object.positionY.setValue(calcY);
-        }
-
-        final x = object.positionX.value(now);
-        final y = object.positionY.value(now);
-        final rect = Rect.fromLTWH(
-          x,
-          y,
-          object.size.width,
-          object.size.height,
-        );
-
-        // Tell the controller about the hover state
-        if (ownInventory) {
-          final hovered = rect.contains(controller.mousePos) && controller.heldObject == null;
-          if (hovered && !controller.hoveringObjects.contains(object)) {
-            controller.hoveringObjects.insert(0, object);
-          } else if (!hovered && controller.hoveringObjects.contains(object)) {
-            controller.hoveringObjects.remove(object);
-          }
-          object.inventory = true;
-          if (!hovered) {
-            object.scale.setValue(1);
-          }
-        }
-        object.setFlipped(!ownInventory);
-
-        final cardLocation = Offset(x, y);
-        TabletopPainter.preDraw(canvas, cardLocation, object, now);
-        object.renderCard(canvas, Offset(x, y), controller, rect, false);
-        TabletopPainter.postDraw(canvas);
-
-        counterWidth -= rect.width + spacing;
+      // If the inventory is hovered, check if hover index should be incremented
+      if (calcX + object.size.width <= controller.mousePos.dx && inventoryHovered) {
+        inventoryHoverIndex++;
+      } else if (inventoryHovered) {
+        calcX += controller.heldObject!.size.width + spacing;
       }
+
+      // Draw the card and update positions
+      object.positionOverwrite = true;
+      if (controller.hoveringObjects.contains(this) || location != this.location || object.positionX.lastValue == 0) {
+        object.positionX.setRealValue(calcX);
+        object.positionY.setRealValue(calcY);
+      } else {
+        object.positionX.setValue(calcX);
+        object.positionY.setValue(calcY);
+      }
+
+      final x = object.positionX.value(now);
+      final y = object.positionY.value(now);
+      final rect = Rect.fromLTWH(
+        x,
+        y,
+        object.size.width,
+        object.size.height,
+      );
+
+      // Tell the controller about the hover state
+      if (ownInventory) {
+        final hovered = rect.contains(controller.mousePos) && controller.heldObject == null;
+        if (hovered && !controller.hoveringObjects.contains(object)) {
+          controller.hoveringObjects.insert(0, object);
+        } else if (!hovered && controller.hoveringObjects.contains(object)) {
+          controller.hoveringObjects.remove(object);
+        }
+        object.inventory = true;
+        if (!hovered) {
+          object.scale.setValue(1);
+        }
+      }
+      object.setFlipped(!ownInventory);
+
+      final cardLocation = Offset(x, y);
+      TabletopPainter.preDraw(canvas, cardLocation, object, now);
+      object.renderCard(canvas, Offset(x, y), controller, rect, false);
+      TabletopPainter.postDraw(canvas);
+
+      counterWidth -= rect.width + spacing;
     }
   }
 
   /// Add a card to the inventory
   void add(CardObject card, {int? index}) {
-    queue(() async {
-      // Insert the card into the inventory
-      if (index == null) {
-        _cards.add(card);
-      } else {
-        _cards.insert(index, card);
-      }
+    // Insert the card into the inventory
+    if (index == null) {
+      _cards.add(card);
+    } else {
+      _cards.insert(index, card);
+    }
 
+    // Reset the card
+    card.id = "";
+    card.flipped = false;
+
+    queue(() async {
       // Send the new data to the server
-      // TODO: We should properly put out some kind of error message here
       await modifyData();
     });
   }
 
   /// Remove a card from the inventory
   void remove(CardObject card) {
-    queue(() async {
-      _cards.remove(card);
+    // Deletion has to be done here so the position of the card isn't reset
+    _cards.remove(card);
 
+    queue(() async {
       // Send the new data to the server
-      // TODO: We should properly put out some kind of error message here
       await modifyData();
     });
   }

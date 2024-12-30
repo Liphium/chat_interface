@@ -7,7 +7,6 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_inventory.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/conversation/spaces/tabletop/objects/tabletop_deck.dart';
-import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -130,7 +129,7 @@ class CardObject extends TableObject {
         bool found = false;
         for (var object in controller.objects.values) {
           if (object is InventoryObject && controller.inventory != object) {
-            if (object.getInventoryRect().contains(center)) {
+            if (object.getInventoryRect(invisRangeX: size.width / 2, invisRangeY: size.height / 2).contains(center)) {
               found = true;
             }
           }
@@ -288,9 +287,8 @@ class CardObject extends TableObject {
   }
 
   Future<void> intoInventory(TabletopController controller, {int? index}) async {
-    final localPos = TabletopView.worldToLocalPos(location, controller.canvasZoom, controller.canvasOffset, controller);
-    positionX.setRealValue(localPos.dx);
-    positionY.setRealValue(localPos.dy);
+    positionX.setRealValue(location.dx);
+    positionY.setRealValue(location.dy);
     sendRemove();
     if (index != null) {
       controller.inventory!.add(this, index: index);

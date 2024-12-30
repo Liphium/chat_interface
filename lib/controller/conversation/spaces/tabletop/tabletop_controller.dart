@@ -28,8 +28,8 @@ class TabletopController extends GetxController {
 
   List<TableObject> hoveringObjects = [];
   InventoryObject? inventory;
+  final orderSorted = <int>[];
   final objectOrder = <int, String>{};
-  int maxOrder = 0;
   final objects = <String, TableObject>{};
   final cursors = <String, TabletopCursor>{}.obs; // Other users cursors
 
@@ -41,8 +41,8 @@ class TabletopController extends GetxController {
   Offset mousePosUnmodified = const Offset(0, 0);
   Offset globalCanvasPosition = const Offset(0, 0);
 
-  // Position of the hint
-  final hints = <String, Offset>{};
+  // Developer options
+  final disableCursorSending = false.obs;
 
   // Movement of the canvas
   Offset canvasOffset = const Offset(0, 0);
@@ -69,8 +69,6 @@ class TabletopController extends GetxController {
     mousePos = const Offset(0, 0);
     mousePosUnmodified = const Offset(0, 0);
     globalCanvasPosition = const Offset(0, 0);
-
-    hints.clear();
 
     canvasOffset = const Offset(0, 0);
     canvasZoom = 0.5;
@@ -141,7 +139,7 @@ class TabletopController extends GetxController {
     }
 
     // Send mouse position if available
-    if (_lastMousePos != mousePos) {
+    if (_lastMousePos != mousePos && !disableCursorSending.value) {
       spaceConnector.sendAction(ServerAction("tc_move", <String, dynamic>{
         "x": mousePos.dx,
         "y": mousePos.dy,
@@ -187,9 +185,9 @@ class TabletopController extends GetxController {
     if (object.id == "" || object.order == 0) {
       return;
     }
-    if (object.order > maxOrder) {
-      maxOrder = object.order;
-    }
+
+    // Insert the object
+    addNewOrder(object.order);
     objectOrder[object.order] = object.id;
     objects[object.id] = object;
 
@@ -199,28 +197,45 @@ class TabletopController extends GetxController {
     }
   }
 
+  /// Add a new order to the sorted order list.
+  void addNewOrder(int newOrder) {
+    int index = 0;
+    for (var order in orderSorted) {
+      if (newOrder < order) {
+        break;
+      }
+      index++;
+    }
+    orderSorted.insert(index, newOrder);
+  }
+
   /// Remove an object from the list
   void removeObject({TableObject? object, String? id}) {
-    final obj = objects.remove(id ?? object?.id);
-    if (obj != null) {
-      objectOrder.remove(obj.order);
+    objects.remove(id ?? object?.id);
+    if (objectOrder[object?.order ?? -1] != null) {
+      objectOrder.remove(object?.order);
     }
   }
 
   /// Set the order of an object
   void setOrder(String object, int newOrder, {bool removeOld = false}) {
-    if (newOrder > maxOrder) {
-      maxOrder = newOrder;
-    }
-
     // Remove the object id from the old layer if desired by the server
     if (newOrder == -1) {
       final obj = objects[object]!;
       objectOrder.remove(obj.order);
+      orderSorted.remove(obj.order);
       return;
     }
 
-    // Set the new layer of the object
+    // Remove the old order
+    final obj = objects[object];
+    if (obj != null) {
+      objectOrder.remove(obj.order);
+      orderSorted.remove(obj.order);
+    }
+
+    // Set the new order of the object
+    addNewOrder(newOrder);
     objectOrder[newOrder] = object;
     objects[object]!.order = newOrder;
   }
@@ -229,9 +244,10 @@ class TabletopController extends GetxController {
   List<TableObject> raycast(Offset location) {
     final objects = <TableObject>[];
     final typesFound = <TableObjectType>[];
-    for (var i = 1; i <= maxOrder; i++) {
+    final ordersToRemove = <int>[];
+    for (var order in orderSorted.reversed) {
       // Get the object at the current drawing layer
-      final objectId = objectOrder[i];
+      final objectId = objectOrder[order];
       if (objectId == null) {
         continue;
       }
@@ -239,7 +255,7 @@ class TabletopController extends GetxController {
       // Check if the object is hovered
       final object = this.objects[objectId];
       if (object == null) {
-        objectOrder.remove(i);
+        ordersToRemove.add(order);
         continue;
       }
       final rect = Rect.fromLTWH(object.location.dx, object.location.dy, object.size.width, object.size.height);
@@ -248,6 +264,13 @@ class TabletopController extends GetxController {
         typesFound.add(object.type);
       }
     }
+
+    // Remove all of the orders that have to be removed
+    for (var order in ordersToRemove) {
+      objectOrder.remove(order);
+      orderSorted.remove(order);
+    }
+
     return objects;
   }
 
@@ -273,8 +296,9 @@ class TabletopController extends GetxController {
     // add the object to the table if it doesn't exist
     if (!currentlyExists) {
       // Give it a start location
-      final x = mousePos.dx - object.size.width / 2;
-      final y = mousePos.dy - object.size.height / 2;
+      final now = DateTime.now();
+      final x = object.positionX.value(now);
+      final y = object.positionY.value(now);
       object.location = Offset(x, y);
 
       // Add the object to the table
@@ -307,9 +331,8 @@ class TabletopController extends GetxController {
     if (heldObject == null) return;
 
     // Notify the server of the unselection when there was no error
-    if (!error) {
-      heldObject!.unselect();
-    } else {
+    heldObject!.unselect();
+    if (error) {
       sendLog("error and lagback");
       // Reset the position in case it was an error
       heldObject!.location = originalHeldObjectPosition!;
@@ -365,6 +388,8 @@ abstract class TableObject {
   DateTime? _lastMove;
   Offset? _lastLocation;
   Offset location;
+  bool deleted = false;
+  bool added = false;
 
   // Modifiers
   bool positionOverwrite = false;
@@ -457,6 +482,11 @@ abstract class TableObject {
 
   /// Add a new object
   Future<bool> sendAdd() {
+    deleted = false;
+    if (added) {
+      sendLog("WHAT DA HELL");
+    }
+    added = true;
     final completer = Completer<bool>();
 
     // Send to the server
@@ -489,6 +519,8 @@ abstract class TableObject {
 
   /// Remove an object
   void sendRemove() {
+    deleted = true;
+    added = false;
     spaceConnector.sendAction(ServerAction("tobj_delete", id));
   }
 
@@ -501,7 +533,7 @@ abstract class TableObject {
       handler: (event) {
         if (!event.data["success"]) {
           showErrorPopup("error", event.data["message"]);
-          sendLog("can't modify rn");
+          sendLog("can't select rn");
           completer.complete(false);
           return;
         }
@@ -515,18 +547,21 @@ abstract class TableObject {
   /// Start a modification process (data)
   Future<bool> unselect() {
     final completer = Completer<bool>();
-
-    spaceConnector.sendAction(
-      ServerAction("tobj_unselect", id),
-      handler: (event) {
-        if (!event.data["success"]) {
-          sendLog("can't modify rn");
-          completer.complete(false);
-          return;
-        }
-        completer.complete(true);
-      },
-    );
+    if (deleted) {
+      completer.complete(false);
+    } else {
+      spaceConnector.sendAction(
+        ServerAction("tobj_unselect", id),
+        handler: (event) {
+          if (!event.data["success"]) {
+            sendLog("can't unselect rn");
+            completer.complete(false);
+            return;
+          }
+          completer.complete(true);
+        },
+      );
+    }
 
     return completer.future;
   }
