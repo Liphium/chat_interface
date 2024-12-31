@@ -8,8 +8,14 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class MessageList extends StatefulWidget {
   final MessageProvider provider;
   final double? overwritePadding;
+  final double heightMultiplier;
 
-  const MessageList({super.key, required this.provider, this.overwritePadding});
+  const MessageList({
+    super.key,
+    required this.provider,
+    this.overwritePadding,
+    this.heightMultiplier = 1,
+  });
 
   @override
   State<MessageList> createState() => _MessageListState();
@@ -52,6 +58,7 @@ class _MessageListState extends State<MessageList> {
                     controller: _scrollController,
                     provider: widget.provider,
                     mobileLayout: constraints.maxWidth <= 800,
+                    heightMultiplier: widget.heightMultiplier,
                   );
                 },
               ),

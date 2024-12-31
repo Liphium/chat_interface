@@ -13,8 +13,6 @@ import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_
 import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -45,6 +43,7 @@ class SpacesController extends GetxController {
   final chatOpen = true.obs;
   final hideSidebar = false.obs;
   final fullScreen = false.obs;
+  final sidebarTabType = SpaceSidebarTabType.chat.index.obs;
 
   void toggleFullScreen() {
     fullScreen.toggle();
@@ -181,7 +180,6 @@ class SpacesController extends GetxController {
         "setup",
         {
           "data": encryptSymmetric(StatusController.ownAddress.encode(), key!),
-          "color": Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue() as double,
         },
       ),
       handler: (event) async {
@@ -237,6 +235,14 @@ enum SpaceTabType {
   final String name;
 
   const SpaceTabType(this.name);
+}
+
+enum SpaceSidebarTabType {
+  chat("spaces.sidebar.chat"),
+  members("spaces.sidebar.members");
+
+  final String name;
+  const SpaceSidebarTabType(this.name);
 }
 
 class SpaceInfo {

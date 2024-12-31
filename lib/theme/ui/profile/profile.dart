@@ -57,7 +57,21 @@ class ProfileDefaults {
           icon: Icons.forward_to_inbox,
           label: 'friends.invite_to_space'.tr,
           loading: false.obs,
-          onTap: (f, l) => {},
+          onTap: (friend, l) {
+            final controller = Get.find<ConversationController>();
+
+            // Check if there even is a conversation with the guy
+            final conversation = controller.conversations.values.toList().firstWhereOrNull(
+                  (c) => c.members.values.any((m) => m.address == friend.id),
+                );
+            if (conversation == null) {
+              showErrorPopup("error", "profile.conversation_not_found".tr);
+              return;
+            }
+
+            Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation));
+            Get.back();
+          },
         ),
       ProfileAction(
         icon: Icons.person_remove,

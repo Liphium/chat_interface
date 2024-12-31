@@ -21,6 +21,7 @@ class BubblesRenderer extends StatefulWidget {
   final Message? message;
   final MessageProvider provider;
   final AutoScrollController controller;
+  final double heightMultiplier;
 
   // Design of the bubbles
   final bool mobileLayout;
@@ -32,6 +33,7 @@ class BubblesRenderer extends StatefulWidget {
     required this.provider,
     this.message,
     this.mobileLayout = false,
+    this.heightMultiplier = 1.0,
   });
 
   @override
@@ -73,7 +75,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
       return Obx(() {
         final loading = widget.provider.newMessagesLoading.value;
         return SizedBox(
-          height: Get.height,
+          height: Get.height * widget.heightMultiplier,
           child: Visibility(
             visible: !loading,
             child: Center(

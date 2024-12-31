@@ -143,6 +143,7 @@ class TabletopController extends GetxController {
       spaceConnector.sendAction(ServerAction("tc_move", <String, dynamic>{
         "x": mousePos.dx,
         "y": mousePos.dy,
+        "c": TabletopSettings.getHue(),
       }));
     }
 
@@ -156,8 +157,11 @@ class TabletopController extends GetxController {
     }
 
     if (cursors[id] == null) {
-      cursors[id] = TabletopCursor(id, position, TabletopSettings.getCursorColor(hue: hue));
+      cursors[id] = TabletopCursor(id, position, hue);
     } else {
+      if (cursors[id]!.hue.value != hue) {
+        cursors[id]!.hue.value = hue;
+      }
       cursors[id]!.move(position);
     }
   }

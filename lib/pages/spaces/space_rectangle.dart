@@ -4,6 +4,7 @@ import 'package:chat_interface/controller/conversation/spaces/spaces_controller.
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_controls.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_info_tab.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_members_tab.dart';
 import 'package:chat_interface/pages/spaces/widgets/spaces_message_feed.dart';
 import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -28,6 +29,12 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
   final _tabs = [
     const SpaceInfoTab(),
     const TabletopView(),
+  ];
+
+  // Sidebar tabs
+  final _sidebarTabs = [
+    const SpacesMessageFeed(),
+    const SpaceMembersTab(),
   ];
 
   @override
@@ -87,8 +94,8 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
                                 colors: [
-                                  Colors.black.withOpacity(0),
-                                  Colors.black.withOpacity(0.2),
+                                  Colors.black.withAlpha(0),
+                                  Colors.black.withAlpha(70),
                                 ],
                               ),
                             ),
@@ -147,8 +154,8 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
                                 colors: [
-                                  Colors.black.withOpacity(0.2),
-                                  Colors.black.withOpacity(0),
+                                  Colors.black.withAlpha(70),
+                                  Colors.black.withAlpha(0),
                                 ],
                               ),
                             ),
@@ -185,7 +192,30 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                   child: Container(
                     color: Get.theme.colorScheme.onInverseSurface,
                     width: 380,
-                    child: SpacesMessageFeed(),
+                    child: Column(
+                      children: [
+                        Container(
+                          color: Get.theme.colorScheme.primaryContainer,
+                          padding: const EdgeInsets.all(defaultSpacing),
+                          child: Center(
+                            child: LPHTabElement(
+                              tabs: SpaceSidebarTabType.values.map((e) => e.name.tr).toList(),
+                              onTabSwitch: (el) {
+                                final type = SpaceSidebarTabType.values.firstWhereOrNull((t) => t.name.tr == el);
+                                if (type == null) {
+                                  return;
+                                }
+                                controller.sidebarTabType.value = type.index;
+                              },
+                              selected: controller.sidebarTabType,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Obx(() => _sidebarTabs[controller.sidebarTabType.value]),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               )

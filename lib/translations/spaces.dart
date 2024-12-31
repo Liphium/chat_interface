@@ -13,6 +13,8 @@ class SpacesTranslations extends Translations {
           'spaces.toggle_people': 'Toggle showing people',
           'spaces.tab.space': 'Space',
           'spaces.tab.table': 'Tabletop',
+          'spaces.sidebar.chat': 'Chat',
+          'spaces.sidebar.members': 'Members',
 
           // Welcome screen
           'spaces.welcome': 'Welcome to this Space!',

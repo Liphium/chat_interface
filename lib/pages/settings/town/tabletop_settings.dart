@@ -57,6 +57,10 @@ class TabletopSettings {
     hue ??= Get.find<SettingController>().settings[cursorHue]!.getValue();
     return HSLColor.fromAHSL(1.0, hue! * 360, themeHSL.saturation, themeHSL.lightness).toColor();
   }
+
+  static double getHue() {
+    return Get.find<SettingController>().settings[cursorHue]!.getValue();
+  }
 }
 
 class TabletopSettingsPage extends StatefulWidget {

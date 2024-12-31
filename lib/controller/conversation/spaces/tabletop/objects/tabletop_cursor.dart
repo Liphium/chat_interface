@@ -1,5 +1,7 @@
 import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class TabletopCursor {
   String clientId;
@@ -7,9 +9,11 @@ class TabletopCursor {
   DateTime? _lastMove;
   Offset? _lastLocation;
   Offset location;
-  Color color;
+  final hue = 0.0.obs;
 
-  TabletopCursor(this.clientId, this.location, this.color);
+  TabletopCursor(this.clientId, this.location, double hue) {
+    this.hue.value = hue;
+  }
 
   Offset interpolatedLocation(DateTime now) {
     if (_lastMove == null || _lastLocation == null) {
@@ -33,7 +37,7 @@ class TabletopCursor {
     }
 
     final paint = Paint()
-      ..color = color
+      ..color = TabletopSettings.getCursorColor(hue: hue.value)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(interpolatedLocation(DateTime.now()), 10, paint);
   }

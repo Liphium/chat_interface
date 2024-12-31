@@ -50,7 +50,7 @@ class MessageListener {
         }
 
         // Unpack all of the messages in an isolate
-        final messages = await unpackMessagesInIsolate(conversation, event.data["msgs"]);
+        final messages = await unpackMessagesInIsolate(conversation, event.data["msgs"], includeSystemMessages: true);
 
         // Remove all messages with more than 5 attachments
         messages.removeWhere((msg) {
@@ -111,7 +111,7 @@ class MessageListener {
   /// the signature is ran in the main isolate due to constraints with libsodium.
   ///
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
-  static Future<List<Message>> unpackMessagesInIsolate(Conversation conversation, List<dynamic> json) async {
+  static Future<List<Message>> unpackMessagesInIsolate(Conversation conversation, List<dynamic> json, {bool includeSystemMessages = false}) async {
     // Unpack the messages in an isolate (in a separate thread yk)
     final copy = Conversation.copyWithoutKey(conversation);
     final loadedMessages = await sodiumLib.runIsolated(
@@ -127,7 +127,7 @@ class MessageListener {
           );
 
           // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
-          if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
+          if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false && !includeSystemMessages) {
             continue;
           }
 

@@ -145,7 +145,11 @@ class MessageController extends GetxController {
 
     // Handle system messages
     if (message.type == MessageType.system) {
-      SystemMessages.messages[message.content]?.handle(message, currentProvider.value!);
+      if (currentProvider.value?.conversation.id == conversation.id) {
+        SystemMessages.messages[message.content]?.handle(message, currentProvider.value!);
+      } else {
+        SystemMessages.messages[message.content]?.handle(message, ConversationMessageProvider(conversation));
+      }
 
       // Check if message should be stored
       if (SystemMessages.messages[message.content]?.store ?? false) {

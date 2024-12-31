@@ -10,6 +10,7 @@ import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class SpaceControls extends StatefulWidget {
@@ -76,8 +77,25 @@ class _SpaceControlsState extends State<SpaceControls> {
                   children: [
                     // Tabletop rotation button
                     Obx(
-                      () => Visibility(
-                        visible: Get.find<SpacesController>().currentTab.value == SpaceTabType.table.index,
+                      () => Animate(
+                        effects: [
+                          ExpandEffect(
+                            customHeightFactor: 1,
+                            curve: Curves.ease,
+                            duration: 250.ms,
+                            axis: Axis.horizontal,
+                            alignment: Alignment.center,
+                          ),
+                          FadeEffect(
+                            duration: 250.ms,
+                          ),
+                          ScaleEffect(
+                            duration: 250.ms,
+                            curve: Curves.ease,
+                          ),
+                        ],
+                        onInit: (ac) => ac.value = controller.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        target: controller.currentTab.value == SpaceTabType.table.index ? 1 : 0,
                         child: Padding(
                           padding: const EdgeInsets.only(right: defaultSpacing),
                           child: LoadingIconButton(
