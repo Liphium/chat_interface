@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:get/get.dart';
 
 class WarpListener {

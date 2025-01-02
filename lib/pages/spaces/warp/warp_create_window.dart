@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
+import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';

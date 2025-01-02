@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_controls.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_info_tab.dart';

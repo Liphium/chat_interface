@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/spaces/spaces_message_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

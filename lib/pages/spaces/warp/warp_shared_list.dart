@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/spaces/warp_controller.dart';
+import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

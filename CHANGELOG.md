@@ -12,6 +12,7 @@
 - Messages are now stored in the local database to make loading them even faster
 - Added automatic layering to Tabletop to make playing card games with card stacking easier
 - Conversation search is now available directly inside every conversation
+- Support for the new Spaces decentralization
 
 ### Minor fixes and updates
 

@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

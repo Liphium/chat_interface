@@ -3,8 +3,8 @@ import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/connection/spaces/space_message_listener.dart';
 import 'package:chat_interface/connection/spaces/tabletop_listener.dart';
 import 'package:chat_interface/connection/spaces/warp_listener.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:get/get.dart';
@@ -16,7 +16,7 @@ Connector spaceConnector = Connector();
 Future<bool> createSpaceConnection(String domain, String token) async {
   return await spaceConnector.connect("${isHttps ? "wss://" : "ws://"}$domain/gateway", token, restart: false, onDone: ((error) {
     if (error) {
-      showErrorPopup("error", "spaces.connection_error");
+      showErrorPopup("error", "spaces.connection_error".tr);
     }
     Get.find<SpacesController>().leaveCall(error: error);
   }));

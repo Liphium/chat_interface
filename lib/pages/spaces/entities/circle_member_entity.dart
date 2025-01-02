@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

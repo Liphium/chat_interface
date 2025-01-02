@@ -167,7 +167,7 @@ Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {S
 
 /// Post request to any server (with Through Cloudflare Protection)
 Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body,
-    {String defaultError = "server.error", String? token}) async {
+    {String defaultError = "server.error", String? token, bool noApiVersion = false}) async {
   // Try to get the server public key
   if (serverPublicKeys[server] == null) {
     final result = await grabServerPublicURL(server);
@@ -180,7 +180,8 @@ Future<Map<String, dynamic>> postAddress(String server, String path, Map<String,
   }
 
   // Do the request
-  return _postTCP(serverPublicKeys[server]!, serverPath(server, path).toString(), body, defaultError: defaultError, token: token);
+  return _postTCP(serverPublicKeys[server]!, serverPath(server, path, noApiVersion: noApiVersion).toString(), body,
+      defaultError: defaultError, token: token);
 }
 
 /// Post request to any server (with Through Cloudflare Protection)

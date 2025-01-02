@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/spaces/ringing_manager.dart';
+import 'package:chat_interface/controller/spaces/ringing_manager.dart';
 import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
