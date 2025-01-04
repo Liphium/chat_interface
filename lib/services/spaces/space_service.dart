@@ -17,12 +17,13 @@ class SpaceService {
   static Future<String?> connectToSpace(String domain, String spaceId, SecureKey key) async {
     // Ask the server for a join token
     final spaceJson = await postAddress(
-      domain,
-      "/join",
+      "${nodeProtocol()}$domain",
+      "/enc/join",
       {
         "id": spaceId,
       },
       noApiVersion: true,
+      checkProtocol: false,
     );
     if (!spaceJson["success"]) {
       return spaceJson["error"];
@@ -40,23 +41,28 @@ class SpaceService {
   /// Create a new space (returns an error if there was one)
   static Future<(SpaceConnectionContainer?, String?)> createSpace() async {
     // Get a connection token for Spaces (required to create a new space)
-    final json = await postAuthorizedJSON("/node/connect", <String, dynamic>{
-      "tag": appTagSpaces,
-      "token": refreshToken,
-      "extra": "",
-    });
+    final json = await postAuthorizedJSON(
+      "/node/connect",
+      <String, dynamic>{
+        "tag": appTagSpaces,
+        "token": refreshToken,
+        "extra": "",
+      },
+      checkProtocol: false,
+    );
     if (!json["success"]) {
       return (null, json["error"] as String);
     }
 
     // Send a request to the space node for creating a new space
     final spaceJson = await postAddress(
-      json["domain"],
-      "/create",
+      "${nodeProtocol()}${json["domain"]}",
+      "/enc/create",
       {
         "token": json["token"],
       },
       noApiVersion: true,
+      checkProtocol: false,
     );
     if (!spaceJson["success"]) {
       return (null, spaceJson["error"] as String);
@@ -70,7 +76,7 @@ class SpaceService {
     }
 
     // Return a connection container for the space
-    final container = SpaceConnectionContainer(json["domain"], spaceJson["id"], key, null);
+    final container = SpaceConnectionContainer(json["domain"], spaceJson["space"], key, null);
     return (container, null);
   }
 
@@ -82,6 +88,9 @@ class SpaceService {
     if (!result) {
       return "server.error".tr;
     }
+
+    // Make everything ready
+    Get.find<SpacesController>().onConnect(spaceId, key);
 
     // Send the server all the data required for setup
     final toSign = "$spaceId:$clientId:${StatusController.ownAddress.encode()}";
@@ -95,8 +104,6 @@ class SpaceService {
     if (!event.data["success"]) {
       return event.data["message"];
     }
-
-    Get.find<SpacesController>().onConnect(spaceId, key);
 
     return null;
   }

@@ -14,6 +14,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
@@ -121,6 +122,8 @@ class SpacesController extends GetxController {
 
   /// Function called by the space service to tell this controller about the connection
   void onConnect(String spaceId, SecureKey spaceKey) {
+    sendLog("connected");
+
     // Load information from space container
     id.value = spaceId;
     key = spaceKey;
@@ -134,6 +137,9 @@ class SpacesController extends GetxController {
 
     // Reset everything on the table
     Get.find<TabletopController>().resetControllerState();
+
+    // Initialize the member controller
+    Get.find<SpaceMemberController>().onConnect(spaceKey);
 
     connected.value = true;
     inSpace.value = true;
