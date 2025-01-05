@@ -1,14 +1,11 @@
-import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/components/lph_tab_element.dart';
-import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class CategoryData {
   final String name;
