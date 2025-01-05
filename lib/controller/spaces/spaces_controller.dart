@@ -189,7 +189,7 @@ enum SpaceTabType {
 
 enum SpaceSidebarTabType {
   chat("spaces.sidebar.chat"),
-  members("spaces.sidebar.members");
+  people("spaces.sidebar.people");
 
   final String name;
   const SpaceSidebarTabType(this.name);

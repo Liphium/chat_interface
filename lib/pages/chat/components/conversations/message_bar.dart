@@ -13,11 +13,13 @@ import 'package:chat_interface/pages/status/error/offline_hider.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class MessageBar extends StatefulWidget {
   final Conversation conversation;
@@ -217,6 +219,15 @@ class _MessageBarState extends State<MessageBar> {
                         }
                       },
                     ),
+                  ),
+
+                  LoadingIconButton(
+                    icon: Icons.help,
+                    iconSize: 27,
+                    tooltip: "help".tr,
+                    onTap: () {
+                      launchUrlString(Constants.docsBase);
+                    },
                   ),
                 ],
               );

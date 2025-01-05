@@ -103,7 +103,6 @@ class ChatPageTranslations extends Translations {
 
           // Message menu
           'message.info': 'Info',
-          'message.reverify': 'Reverify message',
           'message.reply': 'Reply',
           'message.reply.text': 'Reply to @name',
           'message.copy': 'Copy content',

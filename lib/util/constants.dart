@@ -33,4 +33,9 @@ class Constants {
   // Limits
   static const int normalNameLimit = 50;
   static const int maxDecks = 10;
+
+  // Documentation
+  static const String docsAdminBase = "https://docs.liphium.com";
+  static const String docsBase = "https://liphium.com/docs";
+  static const String docsUsageFAQ = "https://liphium.com/docs/usage/faq";
 }

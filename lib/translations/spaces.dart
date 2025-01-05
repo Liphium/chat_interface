@@ -14,7 +14,8 @@ class SpacesTranslations extends Translations {
           'spaces.tab.space': 'Space',
           'spaces.tab.table': 'Tabletop',
           'spaces.sidebar.chat': 'Chat',
-          'spaces.sidebar.members': 'Members',
+          'spaces.sidebar.people': 'People',
+          'spaces.member.not_verified': 'Identity could not be verified.',
 
           // Welcome screen
           'spaces.welcome': 'Welcome to this Space!',

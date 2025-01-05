@@ -13,6 +13,9 @@ class TownSettingTranslations extends Translations {
           'settings.town.address.desc': 'This address can be used to add you as a friend by people outside of your town.',
           'settings.town.address.copied': 'Your address has been copied. Anyone can use it add you as a friend.',
           'settings.town.settings': 'Town settings',
+          'settings.town.help': 'Get help with your town setup',
+          'settings.town.help.desc':
+              'Have any questions about your town or just want to read a little bit about the interals of Liphium? You can find all of it in our documentation for contributors & town admins. Everything like how to set up a town and even how some of Liphium works can be found there. You\'ll also find migration guides and more there as well.',
 
           // Admin accounts page
           'settings.accounts.count': 'Accounts created (@count)',

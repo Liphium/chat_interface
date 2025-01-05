@@ -62,6 +62,18 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                             ),
                           ),
                           horizontalSpacing(defaultSpacing),
+                          Obx(
+                            () => Visibility(
+                              visible: !member.verified.value,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: defaultSpacing),
+                                child: Tooltip(
+                                  message: "spaces.member.not_verified".tr,
+                                  child: Icon(Icons.warning, color: Get.theme.colorScheme.secondaryContainer),
+                                ),
+                              ),
+                            ),
+                          ),
                           Obx(() {
                             var hue = tableController.cursors[member.id]?.hue;
 

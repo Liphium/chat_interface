@@ -1,3 +1,4 @@
+import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
@@ -241,7 +242,8 @@ class SpacesMessageProvider extends MessageProvider {
     if (json["sr"] == MessageController.systemSender.encode()) {
       account = MessageController.systemSender;
     } else {
-      account = members[json["sr"]] ?? LPHAddress("left", "liphium.com");
+      key ??= SpacesController.key!;
+      account = LPHAddress.from(decryptSymmetric(json["sr"] as String, key, sodium));
     }
     var message = Message(
       id: json["id"],

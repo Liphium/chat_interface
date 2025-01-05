@@ -93,10 +93,9 @@ class SpaceService {
     Get.find<SpacesController>().onConnect(spaceId, key);
 
     // Send the server all the data required for setup
-    final toSign = "$spaceId:$clientId:${StatusController.ownAddress.encode()}";
     final event = await spaceConnector.sendActionAndWait(msg.ServerAction("setup", {
       "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
-      "signature": signMessage(signatureKeyPair.secretKey, toSign),
+      "signature": signMessage(signatureKeyPair.secretKey, craftSignature(spaceId, clientId, StatusController.ownAddress.encode())),
     }));
     if (event == null) {
       return "server.error".tr;
@@ -106,5 +105,9 @@ class SpaceService {
     }
 
     return null;
+  }
+
+  static String craftSignature(String spaceId, String clientId, String address) {
+    return "$spaceId:$clientId:$address}";
   }
 }

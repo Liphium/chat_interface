@@ -1,6 +1,11 @@
+import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/services/spaces/space_service.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -18,7 +23,6 @@ class SpaceMemberController extends GetxController {
     final statusController = Get.find<StatusController>();
     final membersFound = <String>[];
 
-    // id = encryptedId:clientId
     for (var member in members) {
       final clientId = member["id"];
       final decrypted = decryptSymmetric(member["data"], key!);
@@ -35,6 +39,7 @@ class SpaceMemberController extends GetxController {
               (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
           clientId,
         );
+        this.members[clientId]!.verifySignature(member["sign"]);
       }
 
       // Cache the account id
@@ -68,6 +73,27 @@ class SpaceMember {
   final isSpeaking = false.obs;
   final isMuted = false.obs;
   final isDeafened = false.obs;
+  final verified = true.obs;
 
   SpaceMember(this.friend, this.id);
+
+  Future<void> verifySignature(String signature) async {
+    // Load the guy's profile
+    final profile = await Get.find<UnknownController>().loadUnknownProfile(friend.id);
+    if (profile == null) {
+      verified.value = false;
+      sendLog("couldn't find profile: identity of space member is uncertain");
+      return;
+    }
+
+    // Verify the signature
+    try {
+      final message = SpaceService.craftSignature(Get.find<SpacesController>().id.value, id, friend.id.encode());
+      verified.value = checkSignature(signature, profile.signatureKey, message);
+      sendLog("space member verified: ${verified.value}");
+    } catch (e) {
+      sendLog("error with verifying space signature: $e");
+      verified.value = false;
+    }
+  }
 }

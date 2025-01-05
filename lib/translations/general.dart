@@ -58,6 +58,7 @@ class GeneralTranslations extends Translations {
           'page_switcher': 'Page @count/@max',
           'rank': 'Rank',
           'liphium_address': 'Your Liphium address',
+          'help': 'Help & resources',
 
           // Spaces
           'spaces.not_supported': 'Not supported',

@@ -169,10 +169,10 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
   Response? res;
   final authTag = base64Encode(encryptRSA(aesKey, key));
 
-  sendLog("wtf");
-
   try {
-    sendLog(url);
+    if (isDebug) {
+      sendLog("request to $url");
+    }
     res = await post(
       Uri.parse(url),
       headers: <String, String>{
