@@ -132,7 +132,7 @@ class KeySetup extends ConnectionStep {
       // Generate the key pairs for key sync exchange
       encryptionKeyPair = generateAsymmetricKeyPair();
       signatureKeyPair = generateSignatureKeyPair();
-      signature = getRandomString(6);
+      signature = getRandomString(8);
 
       // Insert all the values
       await setEncryptedValue("key_sync_pub", packagePublicKey(encryptionKeyPair.publicKey));
