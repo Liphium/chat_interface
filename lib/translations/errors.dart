@@ -57,6 +57,7 @@ class ErrorTranslations extends Translations {
           'file.too_large': 'The maximum file size is @1MB.',
           'file.too_many': 'You can\'t attach more than 5 files to a message.',
           'file.unsafe': 'The provider of this file (@domain) isn\'t trusted.',
+          'file.no_save_location': 'Please select a save location for your file.',
           'chat.add_file': 'Attach a file',
           'message.delete_error': 'Couldn\'t delete message. Please try again later.',
           'group.data_too_long':

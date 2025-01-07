@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -20,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio_rs;
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
@@ -101,7 +103,7 @@ class AttachmentController extends GetxController {
       key: key,
     );
     sendLog("UPLOADED ATTACHMENT: ${container.id}");
-    container.downloaded.value = true;
+    container.downloaded.value = FileSettings.isMediaFile(name);
     attachments[container.id] = container;
 
     return FileUploadResponse("success", container);
@@ -164,10 +166,23 @@ class AttachmentController extends GetxController {
       return false;
     }
 
-    final size = json["file"]["size"] / 1000.0 / 1000.0; // Convert to MB
+    final size = json["file"]["size"] / 1024.0 / 1024.0; // Convert to MB
     if (size > maxSize && !ignoreLimit) {
-      container.errorHappened(false);
+      container.downloadFailed();
       return false;
+    }
+
+    // Check if the file should be saved to a directory instead of the cache
+    FileSaveLocation? location;
+    if (!isWeb && !FileSettings.isMediaFile(container.id)) {
+      container.percentage.value = 0;
+      // Let the user choose a location
+      location = await getSaveLocation(suggestedName: container.fileName);
+      if (location == null) {
+        showErrorPopup("error", "file.no_save_location".tr);
+        container.downloadFailed();
+        return false;
+      }
     }
 
     // Download and show progress
@@ -191,12 +206,19 @@ class AttachmentController extends GetxController {
     final decrypted = decryptSymmetricBytes(res.data!, container.key!);
     container.file = XFile(container.file!.path, bytes: decrypted);
     if (!isWeb) {
-      await fileUtil.write(container.file!, decrypted);
+      if (location != null) {
+        await fileUtil.write(XFile(location.path), decrypted);
+      } else {
+        await fileUtil.write(container.file!, decrypted);
+      }
     }
 
     container.downloading.value = false;
     container.error.value = false;
-    container.downloaded.value = true;
+    container.downloaded.value = location == null;
+    if (location != null) {
+      unawaited(OpenFile.open(path.dirname(location.path)));
+    }
     if (!isWeb) {
       await cleanUpCache();
     }
@@ -417,6 +439,13 @@ class AttachmentContainer {
   void errorHappened(bool unsafe) {
     error.value = true;
     unsafeLocation.value = unsafe;
+    downloading.value = false;
+    downloaded.value = false;
+  }
+
+  void downloadFailed() {
+    error.value = false;
+    unsafeLocation.value = false;
     downloading.value = false;
     downloaded.value = false;
   }

@@ -32,6 +32,8 @@
 - Decreased the amount of data needed for profile pictures (now only the container)
 - Only media files will be copied over into the Liphium's file because others can stay on the server
 - Added a hide animation for buttons that only work when you're online (they will hide when offline to make it clear they don't work)
+- Non-media files are no longer cached when uploaded (because they aren't displayed)
+- When downloading a non-media file (like a zip file) you will now be asked for a save location
 
 ## 0.5.2
 
