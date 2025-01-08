@@ -122,14 +122,6 @@ class AttachmentController extends GetxController {
     if (container.downloaded.value) return true;
     if (container.attachmentType != AttachmentContainerType.file) return false;
 
-    // Check if there is a connection before doing this
-    if (!Get.find<ConnectionController>().connected.value) {
-      if (popups) {
-        showErrorPopup("error", "error.no_connection".tr);
-      }
-      return false;
-    }
-
     if (await container.existsLocally() && !retry) {
       sendLog("already exists ${container.name} ${container.id}");
       return true;

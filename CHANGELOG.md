@@ -34,6 +34,7 @@
 - Added a hide animation for buttons that only work when you're online (they will hide when offline to make it clear they don't work)
 - Non-media files are no longer cached when uploaded (because they aren't displayed)
 - When downloading a non-media file (like a zip file) you will now be asked for a save location
+- You are now asked if you want to also delete attachments when deleting a message
 
 ## 0.5.2
 

@@ -151,18 +151,16 @@ abstract class MessageProvider {
     final firstMessage = messages.first;
     final time = firstMessage.createdAt.millisecondsSinceEpoch;
 
-    // Make sure this isn't a message that has returned no messages before
+    // Make sure we're not requesting the same messages again
     if (lastMessage == time) {
       newMessagesLoading.value = false;
       return true;
     }
+    lastMessage = time;
 
     // Process the messages
     final (loadedMessages, error) = await loadMessagesAfter(time);
     if (error || loadedMessages == null) {
-      if (loadedMessages == null) {
-        lastMessage = time;
-      }
       newMessagesLoading.value = false;
       return true;
     }

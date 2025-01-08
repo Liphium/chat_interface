@@ -73,7 +73,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     // This is needed for jump to message
     if (widget.index == widget.provider.messages.length + 1) {
       return Obx(() {
-        final loading = widget.provider.newMessagesLoading.value;
+        final loading = widget.provider.newMessagesLoading.value && widget.provider.messages.isEmpty;
         return SizedBox(
           height: Get.height * widget.heightMultiplier,
           child: Visibility(

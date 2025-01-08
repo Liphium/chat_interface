@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -200,9 +203,28 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   if (messageDeletionLoading.value) return;
                   messageDeletionLoading.value = true;
 
-                  // Check if the message is sent by the current user
-                  if (StatusController.ownAddress == widget.message.senderAddress) {
-                    // Check if there are files
+                  // Check if the message is sent by the current user to ask for file deletions
+                  if (StatusController.ownAddress == widget.message.senderAddress && widget.message.attachments.isNotEmpty) {
+                    await showConfirmPopup(
+                      ConfirmWindow(
+                        title: "message.delete.attachments".tr,
+                        text: "message.delete.attachments.desc".tr,
+                        onConfirm: () async {
+                          for (var attachment in widget.message.attachments) {
+                            // Parse the container
+                            final json = jsonDecode(attachment);
+                            final path = await AttachmentController.getFilePathFor(json["i"]);
+
+                            // Delete the file (also locally in case needed)
+                            await Get.find<AttachmentController>().deleteFileFromPath(
+                              json["i"],
+                              path == null ? null : XFile(path),
+                              popup: true,
+                            );
+                          }
+                        },
+                      ),
+                    );
                   }
 
                   // Delete message

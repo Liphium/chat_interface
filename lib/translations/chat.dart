@@ -117,6 +117,8 @@ class ChatPageTranslations extends Translations {
           'message.info.copy_sender': 'Copy sender ID',
           'message.info.read_old': 'Read old message',
           'message.empty': 'An empty message.',
+          'message.delete.attachments': 'Should the attachments be deleted?',
+          'message.delete.attachments.desc': 'Do you want to also delete all of the files attached to this message?',
 
           // Conversation info
           'conversation.info.version': 'Conversation version: @version',
