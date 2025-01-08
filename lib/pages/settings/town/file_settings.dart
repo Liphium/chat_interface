@@ -10,6 +10,7 @@ import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,7 +42,8 @@ class FileSettings {
 
   /// Checks if the file passed in is a audio, video or image file with the types above
   static bool isMediaFile(String name) {
-    final ext = path.extension(name).toLowerCase();
+    final ext = path.extension(name).substring(1).toLowerCase();
+    sendLog("Extension of $name: $ext");
     return imageTypes.contains(ext) || audioTypes.contains(ext) || videoTypes.contains(ext);
   }
 

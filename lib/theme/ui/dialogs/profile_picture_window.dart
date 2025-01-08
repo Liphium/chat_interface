@@ -157,7 +157,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                       ),
                     ),
                   );
-                  final cutFile = XFile(".cut-${widget.file.name}");
+                  final cutFile = XFile("cut-${widget.file.name}");
                   final res = await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name, bytes: image);
                   if (!res) {
                     uploading.value = false;

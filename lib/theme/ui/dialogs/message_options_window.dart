@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -198,6 +199,11 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   // Set and check loading state
                   if (messageDeletionLoading.value) return;
                   messageDeletionLoading.value = true;
+
+                  // Check if the message is sent by the current user
+                  if (StatusController.ownAddress == widget.message.senderAddress) {
+                    // Check if there are files
+                  }
 
                   // Delete message
                   final result = await widget.message.delete(widget.provider!);

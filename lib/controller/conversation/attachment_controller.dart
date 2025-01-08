@@ -58,7 +58,7 @@ class AttachmentController extends GetxController {
       "name": name,
       "tag": tag,
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
-      "extension": path.basename(data.file.path).split(".").last
+      "extension": path.extension(data.file.path).substring(1)
     });
 
     final res = await dio.post(
@@ -89,21 +89,22 @@ class AttachmentController extends GetxController {
     // Copy the file into the local cache
     if (!isWeb) {
       // Only copy the file if it's a media file (other file types don't really matter because they aren't displayed)
-      if (FileSettings.isMediaFile(name)) {
+      if (FileSettings.isMediaFile(json["id"])) {
         final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
         await fileUtil.write(XFile(filePath), bytes);
+        sendLog("wrote file to $filePath");
       }
     }
     final container = AttachmentContainer(
       storageType: type,
       id: json["id"],
       fileName: containerNameNull ? null : fileName ?? path.basename(data.file.path),
-      size: await data.file.length(),
+      size: bytes.length,
       url: json["url"],
       key: key,
     );
     sendLog("UPLOADED ATTACHMENT: ${container.id}");
-    container.downloaded.value = FileSettings.isMediaFile(name);
+    container.downloaded.value = FileSettings.isMediaFile(json["id"]);
     attachments[container.id] = container;
 
     return FileUploadResponse("success", container);

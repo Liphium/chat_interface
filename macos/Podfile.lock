@@ -17,7 +17,7 @@ PODS:
     - FlutterMacOS
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - sodium_libs (3.3.1):
+  - "sodium_libs (3.4.1+2)":
     - Flutter
     - FlutterMacOS
   - sqlite3 (3.47.2):
@@ -106,7 +106,7 @@ SPEC CHECKSUMS:
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   screen_retriever_macos: 776e0fa5d42c6163d2bf772d22478df4b302b161
-  sodium_libs: 730e9011e8b115a6862aafb2cf12236eb94fc601
+  sodium_libs: 4a81757edfdea3152b0d38e0a9a450c8f9bf7070
   sqlite3: 7559e33dae4c78538df563795af3a86fc887ee71
   sqlite3_flutter_libs: 58ae36c0dd086395d066b4fe4de9cdca83e717b3
   tray_manager: 9064e219c56d75c476e46b9a21182087930baf90
