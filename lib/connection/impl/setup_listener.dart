@@ -61,9 +61,9 @@ void subscribeToConversation(ConversationToken token, {StatusController? control
 }
 
 Future<void> _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
-  // Get the maximum value of the currently synchronized messages
-  final max = db.message.createdAt.max();
-  final query = db.selectOnly(db.message)..addColumns([max]);
+  // Get the maximum value of the conversation update timestamps
+  final max = db.conversation.updatedAt.max();
+  final query = db.selectOnly(db.conversation)..addColumns([max]);
   final maxValue = await query.map((row) => row.read(max)).getSingleOrNull();
 
   connector.sendAction(
