@@ -87,7 +87,9 @@ flutter:
 msix_config:
   display_name: Liphium
   publisher_display_name: Liphium
-  identity_name: com.liphium.chat
+  identity_name: 48954Liphium.Liphium
+  publisher: CN=B310BA81-A904-41E8-A2E7-51F88B7F2773
   msix_version: 1.0.0.0
-  logo_path: C:/Users/thisi/OneDrive/Bilder/Logos/chat.png
-  capabilities: internetClient, microphone, webcam
+  logo_path: ./assets/tray/icon_linux.png
+  capabilities: microphone, webcam, internetClientServer
+  windows_build_args: --release --dart-define CHECK_VERSION=false --dart-define DEBUG_MODE=false
