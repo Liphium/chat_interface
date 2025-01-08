@@ -431,12 +431,21 @@ abstract class TableObject {
   }
 
   void newRotation(double rot) {
-    // TODO: handle error when rotation fails
     queue(() async {
-      spaceConnector.sendAction(ServerAction("tobj_rotate", <String, dynamic>{
+      final event = await spaceConnector.sendActionAndWait(ServerAction("tobj_rotate", <String, dynamic>{
         "id": id,
         "r": rot,
       }));
+      currentlyModifying = false;
+
+      // Check if there was an error with the rotation
+      if (event == null) {
+        sendLog("error with object rotation: no response");
+        return;
+      }
+      if (!event.data["success"]) {
+        sendLog("error with object rotation: ${event.data["message"]}");
+      }
     });
   }
 

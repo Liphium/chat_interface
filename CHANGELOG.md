@@ -35,6 +35,7 @@
 - Non-media files are no longer cached when uploaded (because they aren't displayed)
 - When downloading a non-media file (like a zip file) you will now be asked for a save location
 - You are now asked if you want to also delete attachments when deleting a message
+- Fixed Tabletop objects not being rotatable after first rotation
 
 ## 0.5.2
 
