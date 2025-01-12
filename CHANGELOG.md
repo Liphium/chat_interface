@@ -36,6 +36,8 @@
 - When downloading a non-media file (like a zip file) you will now be asked for a save location
 - You are now asked if you want to also delete attachments when deleting a message
 - Fixed Tabletop objects not being rotatable after first rotation
+- Fixed slow load times when decentralized conversations are unreachable
+- Fixed a setup bug that would break the local database
 
 ## 0.5.2
 

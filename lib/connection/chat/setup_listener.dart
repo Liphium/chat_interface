@@ -8,6 +8,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:drift/drift.dart';
 
@@ -57,10 +58,10 @@ void subscribeToConversation(ConversationToken token, {StatusController? control
   final tokens = <Map<String, dynamic>>[token.toMap()];
 
   // Subscribe
-  unawaited(_sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, startup: false, deletions: deletions));
+  unawaited(_sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, deletions: deletions));
 }
 
-Future<void> _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {bool startup = true, deletions = false}) async {
+Future<void> _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {deletions = false}) async {
   // Get the maximum value of the conversation update timestamps
   final max = db.conversation.updatedAt.max();
   final query = db.selectOnly(db.conversation)..addColumns([max]);
@@ -79,10 +80,10 @@ Future<void> _sub(String status, String statusData, List<Map<String, dynamic>> t
     }
     Get.find<StatusController>().statusLoading.value = false;
     Get.find<ConversationController>().finishedLoading(
+      basePath,
       event.data["info"],
       deletions ? (event.data["missing"] ?? []) : [],
-      event.data["errors"] ?? [],
-      overwriteReads: startup,
+      false,
     );
   });
 }

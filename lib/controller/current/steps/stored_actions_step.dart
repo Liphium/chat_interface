@@ -1,4 +1,4 @@
-import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
+import 'package:chat_interface/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/util/web.dart';
 

@@ -77,7 +77,7 @@ class ConnectionController extends GetxController {
 
       // If a restart is requested, restart the setup
       if (result.restart) {
-        _restart();
+        restart();
         return;
       }
 
@@ -108,7 +108,7 @@ class ConnectionController extends GetxController {
     }
   }
 
-  void _restart() {
+  void restart() {
     tasksRan = false;
 
     // Reset all data from the tasks before the restart

@@ -25,7 +25,7 @@ const secureStorage = FlutterSecureStorage(
 );
 
 class InstanceSetup extends Setup {
-  InstanceSetup() : super('loading.instance', true);
+  InstanceSetup() : super('loading.instance', false);
 
   @override
   Future<Widget?> load() async {

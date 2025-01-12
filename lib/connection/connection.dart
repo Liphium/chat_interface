@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:chat_interface/connection/chat/conversation_listener.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/connection/impl/live_share_listener.dart';
-import 'package:chat_interface/connection/impl/message_listener.dart';
-import 'package:chat_interface/connection/impl/status_listener.dart';
-import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
+import 'package:chat_interface/connection/chat/live_share_listener.dart';
+import 'package:chat_interface/connection/chat/message_listener.dart';
+import 'package:chat_interface/connection/chat/status_listener.dart';
+import 'package:chat_interface/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
@@ -23,7 +24,7 @@ import 'package:pointycastle/export.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:web_socket/web_socket.dart';
 
-import 'impl/setup_listener.dart';
+import 'chat/setup_listener.dart';
 import 'messaging.dart';
 
 int nodeId = 0;
@@ -290,6 +291,7 @@ Future<bool> startConnection(String node, String connectionToken) async {
   setupStoredActionListener();
   setupStatusListener();
   MessageListener.setupMessageListener();
+  ConversationListener.setupListeners();
   setupLiveshareListening();
 
   // Add listeners for Spaces (unrelated to chat node)

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -52,6 +53,11 @@ String authorizationValue() {
 /// Get the path to your own server
 String ownServer(String path) {
   return '$basePath/$apiVersion$path';
+}
+
+/// Checks if two servers are the same
+bool isSameServer(String path1, String path2) {
+  return TrustedLinkHelper.extractDomain(path1) == TrustedLinkHelper.extractDomain(path2);
 }
 
 /// Class to deal with addresses for users

@@ -27,7 +27,7 @@ class ProfileHelper {
     // Get old profile picture
     final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id.encode()))).getSingleOrNull();
 
-    final json = await postAuthorizedJSON("/account/profile/get", <String, dynamic>{
+    final json = await postAddress(friend.id.server, "/account/profile/get", <String, dynamic>{
       "id": friend.id.id,
     });
 

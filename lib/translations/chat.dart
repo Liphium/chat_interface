@@ -23,6 +23,7 @@ class ChatPageTranslations extends Translations {
           'profile.friends': 'Friends',
           'profile.files': 'Files',
           'profile.test': "Test something (DON'T CLICK)",
+          'profile.retry': 'Local restart',
 
           // Friends
           'friends': 'Friends',

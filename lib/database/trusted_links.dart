@@ -110,11 +110,11 @@ class TrustedLinkHelper {
     return true;
   }
 
-  /// Extract between the first "//" and the first "/" to get the domain
+  /// Minify a domain/url to it's bare minimum
   static String extractDomain(String url) {
     final args = url.split("/");
     if (args.length < 3) {
-      return "";
+      return args[0];
     }
     return args[2];
   }
@@ -122,7 +122,14 @@ class TrustedLinkHelper {
 
 /// Method for testing the thing
 void main() {
-  final testCases = ["http://domain.com", "http://www.domain.co.uk", "http://something.domain.com", "http://some.some.some.domain.com/hello_world"];
+  final testCases = [
+    "domain.com",
+    "http://domain.com",
+    "http://www.domain.co.uk",
+    "http://something.domain.com",
+    "http://some.some.some.domain.com/hello_world",
+    "hello.domain.com/something"
+  ];
   for (var testCase in testCases) {
     sendLog(TrustedLinkHelper.extractDomain(testCase));
   }

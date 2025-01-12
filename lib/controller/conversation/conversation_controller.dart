@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/impl/setup_listener.dart';
-import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
+import 'package:chat_interface/connection/chat/setup_listener.dart';
+import 'package:chat_interface/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -106,13 +106,15 @@ class ConversationController extends GetxController {
     }
   }
 
-  /// Called when a subscription is finished to make sure conversations are properly sorted and up to date
+  /// Called when a subscription is finished to make sure conversations are properly sorted and up to date.
+  ///
+  /// Called later for all conversations from other servers since they are streamed in after.
   Future<void> finishedLoading(
+    String server,
     Map<String, dynamic> conversationInfo,
     List<dynamic> deleted,
-    List<dynamic> error, {
-    bool overwriteReads = true,
-  }) async {
+    bool error,
+  ) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
 
@@ -131,14 +133,18 @@ class ConversationController extends GetxController {
 
     // Update all the conversations
     for (var conversation in conversations.values) {
+      if (!isSameServer(conversation.id.server, server)) {
+        continue;
+      }
+
       // Get conversation info
       final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
-      final lastRead = (info["r"] ?? 0) as int;
       final version = (info["v"] ?? 0) as int;
       conversation.notificationCount.value = (info["n"] ?? 0) as int;
+      conversation.readAt.value = (info["r"] ?? 0) as int;
 
       // Set an error if there is one
-      if (error.contains(conversation.id.server)) {
+      if (error) {
         conversation.error.value = "other.server.error".tr;
       }
 
@@ -147,12 +153,6 @@ class ConversationController extends GetxController {
       if (conversation.lastVersion != version) {
         sendLog("conversation version updated");
         await conversation.fetchData();
-      }
-
-      if (overwriteReads) {
-        conversation.readAt.value = lastRead;
-      } else if (lastRead != 0) {
-        conversation.readAt.value = lastRead;
       }
     }
 
