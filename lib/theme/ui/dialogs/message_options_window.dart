@@ -1,6 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_info_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -11,14 +17,14 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:pasteboard/pasteboard.dart';
 
 class MessageOptionsWindow extends StatefulWidget {
   final ContextMenuData data;
   final bool self;
   final Message message;
-  final MessageProvider provider;
+  final MessageProvider? provider;
   final List<ProfileButton>? extra;
 
   const MessageOptionsWindow({
@@ -57,18 +63,26 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 child: button,
               ),
           if (widget.extra != null) verticalSpacing(elementSpacing),
-          ProfileButton(
-            icon: Icons.info,
-            label: "message.info".tr,
-            onTap: () {
-              Get.back();
-              Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider));
-            },
-            loading: false.obs,
-          ),
+
+          // Render the message info in case there is a message provider
+          if (widget.provider != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.info,
+                label: "message.info".tr,
+                onTap: () {
+                  Get.back();
+                  Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider!));
+                },
+                loading: false.obs,
+              ),
+            ),
+
+          // Only show a copy button in case there is text
           if (widget.message.type == MessageType.text && widget.message.content != "")
             Padding(
-              padding: const EdgeInsets.only(top: elementSpacing),
+              padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(
                 icon: Icons.copy,
                 label: "message.copy".tr,
@@ -79,9 +93,11 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 loading: false.obs,
               ),
             ),
+
+          // Only show the save to button in case there is an attachment
           if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
             Padding(
-              padding: const EdgeInsets.only(top: elementSpacing),
+              padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(
                 icon: Icons.cloud_download,
                 label: "message.save_to".tr,
@@ -106,9 +122,11 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 loading: false.obs,
               ),
             ),
+
+          // Only show the open button in case there is an attachment
           if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
             Padding(
-              padding: const EdgeInsets.only(top: elementSpacing),
+              padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(
                 icon: Icons.launch,
                 label: "message.open".tr,
@@ -121,15 +139,17 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
                   // Open the file with the default app
                   final attachment = widget.message.attachmentsRenderer[0];
-                  OpenAppFile.open(attachment.file!.path);
+                  unawaited(OpenFile.open(attachment.file!.path));
                   Get.back();
                 },
                 loading: false.obs,
               ),
             ),
+
+          // Only show the copy button in case it is an attachment (and no mobile cause doesn't work there)
           if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value && isDesktopPlatform())
             Padding(
-              padding: const EdgeInsets.only(top: elementSpacing),
+              padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(
                 icon: Icons.content_copy,
                 label: "message.copy_file".tr,
@@ -141,7 +161,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 loading: false.obs,
               ),
             ),
-          verticalSpacing(elementSpacing),
+
+          // Give the user an option to open the sender's profile
           ProfileButton(
             icon: Icons.person,
             label: "message.profile".tr,
@@ -151,6 +172,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             },
             loading: false.obs,
           ),
+
+          // Give the user an option to reply in case it's a text message
           if (widget.message.type == MessageType.text)
             Padding(
               padding: const EdgeInsets.only(top: elementSpacing),
@@ -164,7 +187,10 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 loading: false.obs,
               ),
             ),
-          if (widget.self)
+
+          // Offer the option to delete in case it's the current user and there is a provider that can
+          // actually manage to get the message deleted.
+          if (widget.self && widget.provider != null)
             Padding(
               padding: const EdgeInsets.only(top: defaultSpacing),
               child: ProfileButton(
@@ -177,8 +203,32 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   if (messageDeletionLoading.value) return;
                   messageDeletionLoading.value = true;
 
+                  // Check if the message is sent by the current user to ask for file deletions
+                  if (StatusController.ownAddress == widget.message.senderAddress && widget.message.attachments.isNotEmpty) {
+                    await showConfirmPopup(
+                      ConfirmWindow(
+                        title: "message.delete.attachments".tr,
+                        text: "message.delete.attachments.desc".tr,
+                        onConfirm: () async {
+                          for (var attachment in widget.message.attachments) {
+                            // Parse the container
+                            final json = jsonDecode(attachment);
+                            final path = await AttachmentController.getFilePathFor(json["i"]);
+
+                            // Delete the file (also locally in case needed)
+                            await Get.find<AttachmentController>().deleteFileFromPath(
+                              json["i"],
+                              path == null ? null : XFile(path),
+                              popup: true,
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  }
+
                   // Delete message
-                  final result = await widget.message.delete(widget.provider);
+                  final result = await widget.message.delete(widget.provider!);
                   messageDeletionLoading.value = false;
                   if (result != null) {
                     showErrorPopup("error", result);

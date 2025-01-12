@@ -22,8 +22,6 @@ import 'package:sodium_libs/sodium_libs.dart';
 
 import '../../../pages/status/setup/setup_manager.dart';
 
-late SecureKey vaultKey;
-late SecureKey profileKey;
 late KeyPair asymmetricKeyPair;
 late KeyPair signatureKeyPair;
 
@@ -32,11 +30,16 @@ class KeySetup extends ConnectionStep {
 
   @override
   Future<SetupResponse> load() async {
-    // Get keys from the server
-    final pubBody = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});
+    // Get the public key from the server (to check if keys are still the same)
+    var res = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});
+
+    // Get keys from the local database (or an empty string)
+    var publicKey = await retrieveEncryptedValue("public_key");
     var privateKey = await retrieveEncryptedValue("private_key");
 
-    if (!pubBody["success"]) {
+    // If there is no public key on the server, generate new keys
+    if (!res["success"]) {
+      // Generate new keys
       final signatureKeyPair = generateSignatureKeyPair();
       final pair = generateAsymmetricKeyPair();
 
@@ -48,7 +51,7 @@ class KeySetup extends ConnectionStep {
       final genVaultKey = randomSymmetricKey();
 
       // Set public key on the server
-      var res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{
+      res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{
         "key": packagedPub,
       });
       if (!res["success"]) {
@@ -77,48 +80,33 @@ class KeySetup extends ConnectionStep {
       privateKey = packagedPriv;
       await setEncryptedValue("private_key", packagedPriv);
       await setEncryptedValue("public_key", packagedPub);
-      pubBody["key"] = packagedPub;
+      publicKey = packagedPub;
 
       // Set the signature keys
       await setEncryptedValue("signature_private_key", packagedSignaturePriv);
       await setEncryptedValue("signature_public_key", packagedSignaturePub);
     } else {
-      if (privateKey == null) {
+      // Open key synchronization if there are no local keys
+      if (publicKey == null || privateKey == null) {
         final res = await openKeySynchronization();
         return SetupResponse(
-          retryConnection: true,
+          restart: true,
           error: res,
         );
       }
-    }
 
-    // Check if the public keys match
-    var publicKey = await retrieveEncryptedValue("public_key");
-    if (publicKey == null) {
-      return SetupResponse(error: "server.error");
-    }
-    if (pubBody["key"] != publicKey) {
-      final res = await openKeySynchronization();
-      return SetupResponse(
-        retryConnection: true,
-        error: res,
-      );
-    }
+      // Check if the key is the same as on the server
+      if (res["key"] != publicKey) {
+        final res = await openKeySynchronization();
+        return SetupResponse(
+          restart: true,
+          error: res,
+        );
+      }
 
-    // Grab profile key from server
-    final json = await postAuthorizedJSON("/account/keys/encrypted", <String, dynamic>{});
-    if (!json["success"]) {
-      return SetupResponse(error: json["error"]);
+      // Set local key pair
+      asymmetricKeyPair = toKeyPair(publicKey, privateKey);
     }
-
-    asymmetricKeyPair = toKeyPair(pubBody["key"], privateKey);
-    final vaultInfo = ServerStoredInfo.untransform(json["vault"]);
-    final profileInfo = ServerStoredInfo.untransform(json["profile"]);
-    if (profileInfo.error || vaultInfo.error) {
-      return SetupResponse(error: "keys.invalid");
-    }
-    profileKey = unpackageSymmetricKey(profileInfo.text);
-    vaultKey = unpackageSymmetricKey(vaultInfo.text);
 
     // Grab signature key from client database
     final signaturePrivateKey = await retrieveEncryptedValue("signature_private_key");
@@ -126,7 +114,6 @@ class KeySetup extends ConnectionStep {
     if (signaturePrivateKey == null || signaturePublicKey == null) {
       return SetupResponse(error: "key.error");
     }
-
     signatureKeyPair = toKeyPair(signaturePublicKey, signaturePrivateKey);
 
     return SetupResponse();
@@ -145,7 +132,7 @@ class KeySetup extends ConnectionStep {
       // Generate the key pairs for key sync exchange
       encryptionKeyPair = generateAsymmetricKeyPair();
       signatureKeyPair = generateSignatureKeyPair();
-      signature = getRandomString(6);
+      signature = getRandomString(8);
 
       // Insert all the values
       await setEncryptedValue("key_sync_pub", packagePublicKey(encryptionKeyPair.publicKey));
@@ -178,7 +165,7 @@ class KeySetup extends ConnectionStep {
     }
 
     // Go to the key setup page
-    Get.dialog(
+    unawaited(Get.dialog(
       KeySetupPage(
         signature: signature,
         signatureKeyPair: signatureKeyPair,
@@ -186,7 +173,7 @@ class KeySetup extends ConnectionStep {
         exists: json["exists"],
       ),
       barrierDismissible: false,
-    );
+    ));
     return completer.future;
   }
 }
@@ -298,11 +285,11 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
               return;
             }
 
-            widget.controller.transitionTo(KeyCodePage(
+            unawaited(widget.controller.transitionTo(KeyCodePage(
               encryptionKeyPair: widget.encryptionKeyPair,
               signatureKeyPair: widget.signatureKeyPair,
               signature: widget.signature,
-            ));
+            )));
           },
           label: "key.sync.ask_device".tr,
         ),

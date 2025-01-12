@@ -20,10 +20,10 @@ class SettingSelectionMobile extends StatelessWidget {
         //* Sidebar buttons
         return Padding(
           padding: EdgeInsets.only(
-            top: index == 0 ? defaultSpacing : 0,
+            top: index == 0 && Get.mediaQuery.padding.top == 0 ? defaultSpacing : 0,
             bottom: index == SettingLabel.values.length - 1 ? defaultSpacing : sectionSpacing * 2,
-            left: defaultSpacing,
-            right: defaultSpacing,
+            left: defaultSpacing * 1.5,
+            right: defaultSpacing * 1.5,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

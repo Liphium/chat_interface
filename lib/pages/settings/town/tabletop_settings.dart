@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_decks.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_zap_renderer.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
@@ -44,10 +45,10 @@ class TabletopSettings {
   }
 
   /// Initialize the cursor hue to make sure it's actually randomized by default
-  static void initSettings() async {
+  static Future<void> initSettings() async {
     final val = await (db.setting.select()..where((tbl) => tbl.key.equals(cursorHue))).getSingleOrNull();
     if (val == null) {
-      Get.find<SettingController>().settings[cursorHue]!.setValue(Random().nextDouble());
+      await Get.find<SettingController>().settings[cursorHue]!.setValue(Random().nextDouble());
     }
   }
 
@@ -55,6 +56,10 @@ class TabletopSettings {
     final themeHSL = HSLColor.fromColor(Get.theme.colorScheme.onPrimary);
     hue ??= Get.find<SettingController>().settings[cursorHue]!.getValue();
     return HSLColor.fromAHSL(1.0, hue! * 360, themeHSL.saturation, themeHSL.lightness).toColor();
+  }
+
+  static double getHue() {
+    return Get.find<SettingController>().settings[cursorHue]!.getValue();
   }
 }
 
@@ -221,7 +226,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
     super.initState();
   }
 
-  void getDecksFromServer() async {
+  Future<void> getDecksFromServer() async {
     final decks = await TabletopDecks.listDecks();
     if (decks == null) {
       _error.value = true;
@@ -273,7 +278,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                     showErrorPopup("error", "decks.limit_reached".tr);
                     return;
                   }
-                  final result = await Get.dialog(const DeckCreationWindow());
+                  final result = await showModal(const DeckCreationWindow());
                   if (result is TabletopDeck) {
                     _decks.add(result);
                   }
@@ -327,7 +332,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            Get.dialog(DeckCreationWindow(deck: deck)).then((value) {
+                            showModal(DeckCreationWindow(deck: deck))?.then((value) {
                               if (value is TabletopDeck) {
                                 deck.name = value.name;
                                 _loading.value = true;
@@ -353,7 +358,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                         ),
                         horizontalSpacing(defaultSpacing),
                         FJElevatedButton(
-                          onTap: () => Get.dialog(DeckCardsWindow(deck: deck)),
+                          onTap: () => showModal(DeckCardsWindow(deck: deck)),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -400,10 +405,36 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
     super.dispose();
   }
 
+  Future<void> createDeck() async {
+    _loading.value = true;
+    _errorText.value = "";
+    if (_nameController.text.length < 3) {
+      _errorText.value = "decks.dialog.name.error".tr;
+      _loading.value = false;
+      return;
+    }
+
+    if (widget.deck != null) {
+      widget.deck!.name = _nameController.text;
+      final res = await widget.deck!.save();
+      if (res) {
+        Get.back(result: widget.deck);
+      }
+      return;
+    } else {
+      final deck = TabletopDeck(_nameController.text);
+      final res = await deck.save();
+      if (res) {
+        Get.back(result: deck);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _nameController.text = widget.deck?.name ?? "";
     return DialogBase(
+      title: const [],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -413,6 +444,8 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
             hintText: "decks.dialog.name.placeholder".tr,
             controller: _nameController,
             maxLength: Constants.normalNameLimit,
+            autofocus: true,
+            onSubmitted: (t) => createDeck(),
           ),
           verticalSpacing(defaultSpacing),
           AnimatedErrorContainer(
@@ -422,30 +455,7 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
           ),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
-            onTap: () async {
-              _loading.value = true;
-              _errorText.value = "";
-              if (_nameController.text.length < 3) {
-                _errorText.value = "decks.dialog.name.error".tr;
-                _loading.value = false;
-                return;
-              }
-
-              if (widget.deck != null) {
-                widget.deck!.name = _nameController.text;
-                final res = await widget.deck!.save();
-                if (res) {
-                  Get.back(result: widget.deck);
-                }
-                return;
-              } else {
-                final deck = TabletopDeck(_nameController.text);
-                final res = await deck.save();
-                if (res) {
-                  Get.back(result: deck);
-                }
-              }
-            },
+            onTap: () => createDeck(),
             builder: () => Center(
               child: SizedBox(
                 height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
@@ -493,6 +503,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
+      title: const [],
       maxWidth: 800,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -598,7 +609,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                               child: IconButton(
                                 onPressed: () async {
                                   widget.deck.cards.remove(card);
-                                  Get.find<AttachmentController>().deleteFile(card);
+                                  unawaited(Get.find<AttachmentController>().deleteFile(card));
                                   final result = await widget.deck.save();
                                   if (!result) {
                                     showErrorPopup("error", "server.error".tr);
@@ -701,7 +712,7 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
     super.initState();
   }
 
-  void startFileUploading() async {
+  Future<void> startFileUploading() async {
     final controller = Get.find<AttachmentController>();
     _current.value = 0;
     for (var file in widget.files) {

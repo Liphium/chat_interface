@@ -50,7 +50,7 @@ class _SSRFetcherState extends State<SSRFetcher> {
         error.value = !json["success"];
         await Future.delayed(const Duration(milliseconds: 500)); // To show the user what's going on
         if (json["success"]) {
-          widget.ssr.handleSSRResponse(widget.path, json);
+          unawaited(widget.ssr.handleSSRResponse(widget.path, json));
           timer.cancel();
         }
       },

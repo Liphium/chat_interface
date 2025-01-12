@@ -29,6 +29,26 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
     super.dispose();
   }
 
+  Future<void> save() async {
+    if (_loading.value) return;
+    _loading.value = true;
+    _errorText.value = "";
+
+    final json = await postAuthorizedJSON("/account/settings/change_name", {
+      "name": _usernameController.text,
+    });
+
+    if (!json["success"]) {
+      _errorText.value = json["error"].toString().tr;
+      _loading.value = false;
+      return;
+    }
+
+    Get.find<StatusController>().name.value = _usernameController.text;
+    _loading.value = false;
+    Get.back();
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<StatusController>();
@@ -47,6 +67,8 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
             hintText: 'placeholder.username'.tr,
             controller: _usernameController,
             maxLength: 16,
+            autofocus: true,
+            onSubmitted: (t) => save(),
           ),
           verticalSpacing(defaultSpacing),
           AnimatedErrorContainer(
@@ -56,25 +78,7 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
           ),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
-            onTap: () async {
-              if (_loading.value) return;
-              _loading.value = true;
-              _errorText.value = "";
-
-              final json = await postAuthorizedJSON("/account/settings/change_name", {
-                "name": _usernameController.text,
-              });
-
-              if (!json["success"]) {
-                _errorText.value = json["error"].toString().tr;
-                _loading.value = false;
-                return;
-              }
-
-              controller.name.value = _usernameController.text;
-              _loading.value = false;
-              Get.back();
-            },
+            onTap: () => save(),
             child: Center(child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
           )
         ],

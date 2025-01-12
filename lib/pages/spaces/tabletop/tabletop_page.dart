@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_deck.dart';
+import 'package:chat_interface/controller/spaces/tabletop/objects/tabletop_card.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/objects/tabletop_deck.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -11,7 +11,6 @@ import 'package:chat_interface/pages/spaces/tabletop/object_context_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/object_create_menu.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_painter.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -104,17 +103,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               onPointerDown: (event) {
                 if (event.buttons == 2) {
                   if (tableController.hoveringObjects.isNotEmpty) {
-                    final screenWidth = Get.mediaQuery.size.width;
-                    final screenHeight = Get.mediaQuery.size.height;
-
-                    // Convert local to global position
-                    final globalPos = Offset(
-                      event.localPosition.dx + (screenWidth - context.size!.width),
-                      event.localPosition.dy + (screenHeight - context.size!.height),
-                    );
-
                     Get.dialog(ObjectContextMenu(
-                      data: ContextMenuData.fromPosition(globalPos),
+                      data: ContextMenuData.fromPosition(Offset(event.position.dx, event.position.dy)),
                       object: tableController.hoveringObjects.first,
                     ));
                     moved = true;
@@ -160,8 +150,6 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     } else {
                       moved = true;
 
-                      sendLog("hiii");
-
                       // Start holding the object
                       tableController.startHoldingObject(tableController.hoveringObjects.last);
                     }
@@ -176,16 +164,16 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
               //* Handle when a mouse button is no longer pressed
               onPointerUp: (event) {
+                tableController.cancelledHolding = false;
                 if (tableController.hoveringObjects.isNotEmpty && !moved && tableController.heldObject == null && event.buttons == 0) {
                   tableController.hoveringObjects.first.runAction(tableController);
                   return;
                 }
-                sendLog(tableController.inventoryHoverIndex);
 
                 final obj = tableController.heldObject;
                 if (obj != null && obj is CardObject) {
-                  if (tableController.inventoryHoverIndex != -1) {
-                    obj.intoInventory(tableController, index: tableController.inventoryHoverIndex);
+                  if (tableController.inventory != null && tableController.inventory?.inventoryHoverIndex != -1) {
+                    obj.intoInventory(tableController, index: tableController.inventory?.inventoryHoverIndex);
                   } else if (tableController.hoveringObjects.any((element) => element is DeckObject)) {
                     final deck = tableController.hoveringObjects.firstWhere((element) => element is DeckObject) as DeckObject;
                     deck.addCard(obj);
@@ -198,19 +186,6 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               onPointerSignal: (event) {
                 if (event is PointerScrollEvent) {
                   final scrollDelta = event.scrollDelta.dy / 500 * -1;
-
-                  // Check if hover scale should be applied
-                  if (tableController.hoveringObjects.isNotEmpty) {
-                    for (var object in tableController.hoveringObjects) {
-                      var current = object.scale.realValue;
-                      current += scrollDelta * 2;
-                      current = clampDouble(current, 1, 5);
-                      object.scale.setValue(current);
-                      object.scale.lastValue = object.scale.value(DateTime.now());
-                    }
-                    return;
-                  }
-
                   if (tableController.canvasZoom + scrollDelta < 0.1) {
                     return;
                   }

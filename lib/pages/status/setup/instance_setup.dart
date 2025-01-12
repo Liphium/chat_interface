@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
@@ -23,7 +25,7 @@ const secureStorage = FlutterSecureStorage(
 );
 
 class InstanceSetup extends Setup {
-  InstanceSetup() : super('loading.instance', true);
+  InstanceSetup() : super('loading.instance', false);
 
   @override
   Future<Widget?> load() async {
@@ -116,11 +118,11 @@ Future<String?> setupInstance(String name, {bool next = false}) async {
   }
 
   // Enable logging for the current instance
-  LogManager.enableLogging();
+  await LogManager.enableLogging();
 
   // Open the next setup page
   if (next) {
-    setupManager.next(open: true);
+    unawaited(setupManager.next(open: true));
   }
 
   return null;
@@ -135,7 +137,7 @@ Future<bool> _migrateFieldToEncryption(String field) async {
 
   // Encrypt the value and put it back into the database
   final encrypted = encryptSymmetric(value.value, databaseKey);
-  db.setting.insertOnConflictUpdate(SettingData(key: field, value: encrypted));
+  await db.setting.insertOnConflictUpdate(SettingData(key: field, value: encrypted));
 
   return true;
 }

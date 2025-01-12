@@ -1,4 +1,5 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'dart:async';
+
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/policy_setup.dart';
@@ -54,25 +55,24 @@ class SetupManager {
 
   void retry() {
     current = -1;
-    Get.find<FriendController>().onReload();
+    db.close();
     if (controller == null) {
       Get.offAll(const SetupPage());
     } else {
       controller!.transitionTo(const SetupLoadingWidget());
       next(open: false);
     }
-    db.close();
   }
 
-  void next({bool open = true}) async {
+  Future<void> next({bool open = true}) async {
     if (_steps.isEmpty) return;
     setupFinished = false;
 
     if (open) {
       if (controller != null) {
-        controller!.transitionTo(const SetupLoadingWidget());
+        unawaited(controller!.transitionTo(const SetupLoadingWidget()));
       } else {
-        Get.offAll(const SetupPage());
+        unawaited(Get.offAll(const SetupPage()));
       }
     }
 
@@ -80,7 +80,7 @@ class SetupManager {
     if (current < _steps.length) {
       final setup = _steps[current];
       if (setup.executed && setup.once) {
-        next(open: false);
+        unawaited(next(open: false));
         return;
       }
 
@@ -100,12 +100,12 @@ class SetupManager {
       }
 
       if (ready != null) {
-        controller!.transitionTo(ready);
+        unawaited(controller!.transitionTo(ready));
         return;
       }
 
       setup.executed = true;
-      next(open: false);
+      unawaited(next(open: false));
     } else {
       // Finish the setup and go to the chat page
       setupFinished = true;
@@ -113,8 +113,9 @@ class SetupManager {
       if (controller != null) {
         await controller!.transitionComplete;
       }
-      Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500));
-      Get.find<ConnectionController>().tryConnection();
+      controller = null;
+      unawaited(Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500)));
+      unawaited(Get.find<ConnectionController>().tryConnection());
     }
   }
 

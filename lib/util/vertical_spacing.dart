@@ -27,9 +27,31 @@ bool isMobileMode() {
   return Get.width < 800 || Get.height < 500;
 }
 
-Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) {
+double fittedIconSize(double size) {
+  return Get.mediaQuery.textScaler.scale(size);
+}
+
+Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) async {
   if (isMobileMode()) {
-    return Get.to<T>(widget);
+    if (Get.mediaQuery.viewInsets.bottom > 0) {
+      await Future.delayed(300.ms);
+    }
+
+    return showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      context: Get.context!,
+      builder: (context) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom),
+              child: widget,
+            );
+          },
+        );
+      },
+    );
   } else {
     return Get.dialog(widget);
   }
@@ -104,4 +126,60 @@ class ReverseExpandEffect extends CustomEffect {
             );
           },
         );
+}
+
+class DevicePadding extends StatelessWidget {
+  final bool top;
+  final bool bottom;
+  final bool left;
+  final bool right;
+
+  final EdgeInsets padding;
+  final Widget? child;
+
+  const DevicePadding({
+    super.key,
+    this.top = false,
+    this.bottom = false,
+    this.left = false,
+    this.right = false,
+    required this.padding,
+    this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    var finalPadding = padding;
+
+    // Check if there is device padding
+    if (Get.mediaQuery.padding != EdgeInsets.zero) {
+      var extraTop = Get.mediaQuery.padding.top;
+      var extraBottom = Get.mediaQuery.padding.bottom;
+      var extraRight = Get.mediaQuery.padding.right;
+      var extraLeft = Get.mediaQuery.padding.left;
+
+      // On iOS Apple adds padding to the bottom and top by themselves, because of this, we can safely
+      // ignore the extra padding the user specifies.
+      if (GetPlatform.isIOS) {
+        finalPadding = EdgeInsets.only(
+          top: top ? extraTop : padding.top,
+          bottom: bottom ? extraBottom : padding.bottom,
+          right: right ? extraRight + padding.right : padding.right,
+          left: left ? extraLeft + padding.left : padding.left,
+        );
+      } else {
+        finalPadding = EdgeInsets.only(
+          top: top ? extraTop + padding.top : padding.top,
+          bottom: bottom ? extraBottom + padding.bottom : padding.bottom,
+          right: right ? extraRight + padding.right : padding.right,
+          left: left ? extraLeft + padding.left : padding.left,
+        );
+      }
+    }
+
+    return Padding(
+      padding: finalPadding,
+      child: child,
+    );
+  }
 }

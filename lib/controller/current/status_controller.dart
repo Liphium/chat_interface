@@ -4,12 +4,12 @@ import 'dart:io';
 
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/impl/setup_listener.dart';
+import 'package:chat_interface/connection/chat/setup_listener.dart';
 import 'package:chat_interface/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -105,7 +105,7 @@ class StatusController extends GetxController {
     // Secret: Enable new social features experiment
     if (message == "liphium.social") {
       message = "activated";
-      Get.find<SettingController>().settings[DataSettings.socialFeatures]!.setValue(true);
+      await Get.find<SettingController>().settings[DataSettings.socialFeatures]!.setValue(true);
     }
 
     // Validate the status to make sure everything is fine
@@ -129,9 +129,9 @@ class StatusController extends GetxController {
   }
 
   // Log out of this account
-  void logOut({deleteEverything = false, deleteFiles = false}) async {
+  Future<void> logOut({deleteEverything = false, deleteFiles = false}) async {
     // Delete the session information
-    db.setting.deleteWhere((tbl) => tbl.key.equals("profile"));
+    await db.setting.deleteWhere((tbl) => tbl.key.equals("profile"));
 
     // Delete all data
     if (deleteEverything) {

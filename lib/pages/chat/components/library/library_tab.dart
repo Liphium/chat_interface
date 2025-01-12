@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -32,7 +33,7 @@ class _LibraryTabState extends State<LibraryTab> {
   BigInt lastDate = BigInt.from(0);
   final _show = false.obs;
 
-  void loadMoreItems() async {
+  Future<void> loadMoreItems() async {
     // Make sure to start from the top again when a new filter is set
     if (widget.filter != _lastFilter) {
       lastDate = BigInt.from(0);
@@ -88,7 +89,7 @@ class _LibraryTabState extends State<LibraryTab> {
 
   @override
   Widget build(BuildContext context) {
-    loadMoreItems();
+    unawaited(loadMoreItems());
 
     return Obx(() {
       if (!_show.value) {

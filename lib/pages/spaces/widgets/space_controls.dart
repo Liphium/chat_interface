@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/spaces/call_page.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
@@ -9,6 +10,7 @@ import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class SpaceControls extends StatefulWidget {
@@ -74,19 +76,42 @@ class _SpaceControlsState extends State<SpaceControls> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Tabletop rotation button
-                    LoadingIconButton(
-                      key: tabletopKey,
-                      background: true,
-                      padding: defaultSpacing,
-                      loading: Get.find<TabletopController>().loading,
-                      onTap: () {
-                        Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
-                      },
-                      icon: Icons.crop_rotate,
-                      iconSize: 28,
+                    Obx(
+                      () => Animate(
+                        effects: [
+                          ExpandEffect(
+                            customHeightFactor: 1,
+                            curve: Curves.ease,
+                            duration: 250.ms,
+                            axis: Axis.horizontal,
+                            alignment: Alignment.center,
+                          ),
+                          FadeEffect(
+                            duration: 250.ms,
+                          ),
+                          ScaleEffect(
+                            duration: 250.ms,
+                            curve: Curves.ease,
+                          ),
+                        ],
+                        onInit: (ac) => ac.value = controller.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        target: controller.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: defaultSpacing),
+                          child: LoadingIconButton(
+                            key: tabletopKey,
+                            background: true,
+                            padding: defaultSpacing,
+                            loading: Get.find<TabletopController>().loading,
+                            onTap: () {
+                              Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+                            },
+                            icon: Icons.crop_rotate,
+                            iconSize: 28,
+                          ),
+                        ),
+                      ),
                     ),
-
-                    horizontalSpacing(defaultSpacing),
 
                     // Full screen button
                     LoadingIconButton(
@@ -95,6 +120,18 @@ class _SpaceControlsState extends State<SpaceControls> {
                       padding: defaultSpacing,
                       onTap: () => controller.toggleFullScreen(),
                       icon: controller.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
+                      iconSize: 28,
+                    ),
+
+                    horizontalSpacing(defaultSpacing),
+
+                    // Warp manager button
+                    LoadingIconButton(
+                      loading: false.obs,
+                      background: true,
+                      padding: defaultSpacing,
+                      onTap: () => Get.find<WarpController>().open(),
+                      icon: Icons.cyclone,
                       iconSize: 28,
                     ),
 

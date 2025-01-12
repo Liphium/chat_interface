@@ -21,8 +21,9 @@ class ProfilePictureWindow extends StatefulWidget {
 }
 
 class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
+  double minScale = 0;
   double maxScale = 0;
-  final scaleFactor = (1 / 0.15625).obs;
+  final scaleFactor = 1.0.obs;
   final moveX = 0.0.obs;
   final moveY = 0.0.obs;
 
@@ -35,16 +36,16 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
     initImage();
   }
 
-  void initImage() async {
+  Future<void> initImage() async {
     final image = await ProfileHelper.loadImage(widget.file.path);
     if (image == null) return;
 
     // Calculate the scale factor to fit the image into the window
     if (image.width < image.height) {
-      scaleFactor.value = 1 / (300 / image.width);
+      scaleFactor.value = 1.0 / (300.0 / image.width.toDouble());
       maxScale = scaleFactor.value;
     } else {
-      scaleFactor.value = 1 / (300 / image.height);
+      scaleFactor.value = 1.0 / (300.0 / image.height.toDouble());
       maxScale = scaleFactor.value;
     }
 
@@ -92,7 +93,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                     child: FJSlider(
                       value: (maxScale - scaleFactor.value) + 0.5,
                       min: 0.5,
-                      max: maxScale,
+                      max: maxScale + 0.45,
                       onChanged: (val) {
                         scaleFactor.value = (maxScale - val) + 0.5;
                       },
@@ -156,8 +157,8 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                       ),
                     ),
                   );
-                  final cutFile = XFile(".cut-${widget.file.name}", bytes: image);
-                  final res = await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name);
+                  final cutFile = XFile("cut-${widget.file.name}");
+                  final res = await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name, bytes: image);
                   if (!res) {
                     uploading.value = false;
                     sendLog("kinda didn't work");

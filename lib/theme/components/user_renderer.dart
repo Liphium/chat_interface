@@ -26,12 +26,6 @@ class _UserAvatarState extends State<UserAvatar> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    getFriend().disposeProfilePicture();
-    super.dispose();
-  }
-
   Friend getFriend() {
     if (widget.user != null) {
       return widget.user!;
@@ -59,13 +53,14 @@ class _UserAvatarState extends State<UserAvatar> {
             );
           }
 
+          final cuttedDisplayName = friend.displayName.value.substring(0, 1);
           return ClipOval(
             child: Container(
               color: Get.theme.colorScheme.primaryContainer,
               child: SelectionContainer.disabled(
                 child: Center(
                   child: Text(
-                    friend.displayName.value.substring(0, 1),
+                    cuttedDisplayName,
                     style: Get.theme.textTheme.labelMedium!.copyWith(
                       fontSize: (widget.size ?? 45) * 0.5,
                       fontWeight: FontWeight.bold,

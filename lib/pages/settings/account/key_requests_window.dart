@@ -6,6 +6,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
@@ -60,7 +61,7 @@ class KeyRequest {
     };
   }
 
-  void updateStatus(bool delete, Function() success) async {
+  Future<void> updateStatus(bool delete, Function() success) async {
     // Make the payload
     late final String payload;
     if (delete) {
@@ -125,7 +126,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
     super.dispose();
   }
 
-  void requestKeyRequests() async {
+  Future<void> requestKeyRequests() async {
     loading.value = true;
 
     // Get the key synchronization requests from the server

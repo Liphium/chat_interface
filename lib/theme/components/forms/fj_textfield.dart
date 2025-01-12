@@ -50,15 +50,23 @@ class FJTextField extends StatefulWidget {
 }
 
 class _FJTextFieldState extends State<FJTextField> {
-  final _node = FocusNode();
+  late FocusNode _node;
   final _focus = false.obs;
+
+  @override
+  void initState() {
+    if (widget.focusNode == null) {
+      _node = FocusNode();
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    _node.addListener(() {
-      _focus.value = _node.hasFocus;
+    (widget.focusNode ?? _node).addListener(() {
+      _focus.value = (widget.focusNode ?? _node).hasFocus;
     });
 
     return Obx(
@@ -115,9 +123,9 @@ class _FJTextFieldState extends State<FJTextField> {
                     onTap: () => _focus.value = true,
                     onTapOutside: (event) {
                       widget.onTapOutside?.call(event);
-                      _node.unfocus();
+                      (widget.focusNode ?? _node).unfocus();
                     },
-                    focusNode: _node,
+                    focusNode: (widget.focusNode ?? _node),
                     onChanged: widget.onChange,
                     inputFormatters: widget.inputFormatters,
                     onSubmitted: widget.onSubmitted,

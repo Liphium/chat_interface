@@ -6,8 +6,6 @@ import 'package:get/get.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
-bool _isTrayInitalized = false;
-
 class CloseToTray extends StatefulWidget {
   final Widget child;
 
@@ -38,6 +36,8 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
   @override
   void dispose() {
     if (isDesktopPlatform()) {
+      trayManager.destroy();
+      windowManager.setPreventClose(false);
       windowManager.removeListener(this);
       trayManager.removeListener(this);
     }
@@ -45,11 +45,7 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
   }
 
   /// Adds Liphium to the tray
-  void initTray() async {
-    if (_isTrayInitalized) {
-      return;
-    }
-    _isTrayInitalized = true;
+  Future<void> initTray() async {
     await trayManager.setIcon(Platform.isWindows
         ? "assets/tray/icon_windows.ico"
         : Platform.isMacOS
@@ -80,20 +76,24 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
 
   // Show the app when the tray icon is clicked
   @override
-  void onTrayIconMouseDown() async {
+  Future<void> onTrayIconMouseDown() async {
     await windowManager.show();
   }
 
   // Make sure the context menu opens when the tray icon is clicked
   @override
-  void onTrayIconRightMouseDown() async {
+  Future<void> onTrayIconRightMouseDown() async {
     await trayManager.popUpContextMenu();
   }
 
   @override
-  void onWindowClose() async {
-    await windowManager.setPreventClose(true);
-    await windowManager.hide();
+  Future<void> onWindowClose() async {
+    if (isDebug) {
+      exit(0);
+    } else {
+      await windowManager.setPreventClose(true);
+      await windowManager.hide();
+    }
   }
 
   @override

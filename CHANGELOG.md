@@ -2,6 +2,43 @@
 
 - On every release, update `sqlite3.wasm` in the web folder to the latest version.
 
+## Currently in dev
+
+### Architecture changes and new features
+
+- This release of Liphium is compatible with protocol v7
+- Added Warp in Spaces: A way to share ports (and with that Minecraft servers) over Liphium
+- Made the startup of the app significantly faster by reducing the amount of server interactions
+- Messages are now stored in the local database to make loading them even faster
+- Added automatic layering to Tabletop to make playing card games with card stacking easier
+- Conversation search is now available directly inside every conversation
+- Support for the new Spaces decentralization
+
+### Minor fixes and updates
+
+- Added a max length attribute to the SSR renderer for input fields (now being used by the server)
+- Made the app startup seem faster by first loading local data
+- Fixed a bug where the profile picture wouldn't load (because of the new attachment container schema)
+- Made the profile picture selector more stable with smaller images
+- Profile pictures that couldn't be found no longer show error popups
+- The chat in Spaces is now open by default
+- Made the protocol version error specify which version is out of date (client or server)
+- The Zap requests and Spaces invites are now embedded into the message itself to make relation more clear
+- Made the updater more reliable by having it always download and start the latest version
+- Optimized Zap chunking size to perform better on faster internet connections
+- Fixed a bug where Zap wouldn't show progress when receiving a file
+- Fixed a bug where a file sent over Zap would not match the size of the original file due to an optimization error
+- Updated the version of the package used to open files using native apps
+- Decreased the amount of data needed for profile pictures (now only the container)
+- Only media files will be copied over into the Liphium's file because others can stay on the server
+- Added a hide animation for buttons that only work when you're online (they will hide when offline to make it clear they don't work)
+- Non-media files are no longer cached when uploaded (because they aren't displayed)
+- When downloading a non-media file (like a zip file) you will now be asked for a save location
+- You are now asked if you want to also delete attachments when deleting a message
+- Fixed Tabletop objects not being rotatable after first rotation
+- Fixed slow load times when decentralized conversations are unreachable
+- Fixed a setup bug that would break the local database
+
 ## 0.5.2
 
 - Liphium is now one-instanced meaning you won't have to look for that pesky tray icon again :)

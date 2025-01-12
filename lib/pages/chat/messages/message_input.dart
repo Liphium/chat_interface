@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/components/library/library_window.dart';
 import 'package:chat_interface/pages/chat/messages/message_formatter.dart';
+import 'package:chat_interface/pages/status/error/offline_hider.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -30,12 +32,14 @@ class MessageInput extends StatefulWidget {
   final String draft;
   final MessageProvider provider;
   final bool secondary;
+  final bool rectangle;
 
   const MessageInput({
     super.key,
     required this.draft,
     required this.provider,
     this.secondary = false,
+    this.rectangle = false,
   });
 
   @override
@@ -103,7 +107,9 @@ class _MessageInputState extends State<MessageInput> {
     }
     MessageSendHelper.currentDraft.value = MessageSendHelper.drafts[newDraft] ?? MessageDraft(newDraft, "");
     _message.text = MessageSendHelper.currentDraft.value!.message;
-    _inputFocus.requestFocus();
+    if (!isMobileMode()) {
+      _inputFocus.requestFocus();
+    }
   }
 
   void resetCurrentDraft() {
@@ -166,6 +172,12 @@ class _MessageInputState extends State<MessageInput> {
     final actionsMap = {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) async {
+          // Check if there is a connection before doing this
+          if (!Get.find<ConnectionController>().connected.value) {
+            showErrorPopup("error", "error.no_connection".tr);
+            return;
+          }
+
           // Do emoji suggestion instead when pressing enter
           if (_emojiSuggestions.isNotEmpty) {
             doEmojiSuggestion(_emojiSuggestions[0].emoji);
@@ -249,7 +261,11 @@ class _MessageInputState extends State<MessageInput> {
     };
 
     // Build actual widget
-    final padding = isMobileMode() ? defaultSpacing : sectionSpacing;
+    final double padding = widget.rectangle
+        ? 0
+        : isMobileMode()
+            ? defaultSpacing
+            : sectionSpacing;
     return Padding(
       padding: EdgeInsets.only(right: padding, left: padding, bottom: padding),
       child: Column(
@@ -260,9 +276,9 @@ class _MessageInputState extends State<MessageInput> {
             actions: actionsMap,
             child: Material(
               color: widget.secondary ? theme.colorScheme.inverseSurface : theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(defaultSpacing * 1.5),
+              borderRadius: BorderRadius.circular(defaultSpacing * (widget.rectangle ? 0 : 1.5)),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: defaultSpacing,
                   vertical: elementSpacing,
                 ),
@@ -406,7 +422,7 @@ class _MessageInputState extends State<MessageInput> {
                         IconButton(
                           onPressed: () async {
                             if (isWeb) {
-                              Get.dialog(UpgradeWindow());
+                              unawaited(Get.dialog(UpgradeWindow()));
                               return;
                             }
 
@@ -418,7 +434,7 @@ class _MessageInputState extends State<MessageInput> {
                             if (result == null) {
                               return;
                             }
-                            MessageSendHelper.addFile(result);
+                            await MessageSendHelper.addFile(result);
                           },
                           icon: const Icon(Icons.add),
                           color: theme.colorScheme.tertiary,
@@ -428,7 +444,7 @@ class _MessageInputState extends State<MessageInput> {
                         horizontalSpacing(defaultSpacing),
                         Expanded(
                           child: FocusableActionDetector(
-                            autofocus: true,
+                            autofocus: !isMobileMode(),
                             actions: actionsMap,
                             shortcuts: {
                               LogicalKeySet(LogicalKeyboardKey.enter): const SendIntent(),
@@ -453,6 +469,9 @@ class _MessageInputState extends State<MessageInput> {
                                 onAppPrivateCommand: (action, data) {
                                   sendLog("app private command");
                                 },
+                                onTapOutside: (event) {
+                                  _inputFocus.unfocus();
+                                },
                                 cursorColor: theme.colorScheme.tertiary,
                                 style: theme.textTheme.labelLarge,
                                 controller: _message,
@@ -464,23 +483,29 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         IconButton(
                           key: _libraryKey,
-                          onPressed: () => showModal(LibraryWindow(
-                            data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
-                            provider: widget.provider,
-                          )),
+                          onPressed: () => showModal(
+                            LibraryWindow(
+                              data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
+                              provider: widget.provider,
+                            ),
+                          ),
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),
-                        horizontalSpacing(elementSpacing),
-                        LoadingIconButton(
-                          onTap: () => {},
-                          onTapContext: (context) {
-                            Actions.invoke(context, const SendIntent());
-                          },
-                          icon: Icons.send,
-                          color: theme.colorScheme.tertiary,
-                          loading: loading,
-                        )
+                        OfflineHider(
+                          axis: Axis.horizontal,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.only(left: elementSpacing),
+                          child: LoadingIconButton(
+                            onTap: () => {},
+                            onTapContext: (context) {
+                              Actions.invoke(context, const SendIntent());
+                            },
+                            icon: Icons.send,
+                            color: theme.colorScheme.tertiary,
+                            loading: loading,
+                          ),
+                        ),
                       ],
                     ),
                   ],

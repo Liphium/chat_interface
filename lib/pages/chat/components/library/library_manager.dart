@@ -5,8 +5,8 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/controller/current/steps/key_step.dart';
-import 'package:chat_interface/controller/current/steps/vault_step.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
+import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';

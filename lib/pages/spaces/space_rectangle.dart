@@ -1,9 +1,12 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_controls.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_info_tab.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_members_tab.dart';
 import 'package:chat_interface/pages/spaces/widgets/spaces_message_feed.dart';
+import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -21,6 +24,18 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
   final hovered = true.obs;
   Timer? timer;
   final GlobalKey tabletopKey = GlobalKey();
+
+  // Space tabs
+  final _tabs = [
+    const SpaceInfoTab(),
+    const TabletopView(),
+  ];
+
+  // Sidebar tabs
+  final _sidebarTabs = [
+    const SpacesMessageFeed(),
+    const SpaceMembersTab(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +69,69 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
               Expanded(
                 child: Stack(
                   children: [
-                    const TabletopView(),
+                    Obx(() {
+                      return _tabs[Get.find<SpacesController>().currentTab.value];
+                    }),
+
+                    //* Tab
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Obx(
+                        () => Animate(
+                          effects: [
+                            FadeEffect(
+                              duration: 150.ms,
+                              end: 0.0,
+                              begin: 1.0,
+                            )
+                          ],
+                          target: hovered.value || controlsHovered.value ? 0 : 1,
+                          child: Container(
+                            width: double.infinity,
+                            // Create a gradient on this container from bottom to top
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withAlpha(0),
+                                  Colors.black.withAlpha(70),
+                                ],
+                              ),
+                            ),
+
+                            child: MouseRegion(
+                              onEnter: (event) => controlsHovered.value = true,
+                              onExit: (event) => controlsHovered.value = false,
+                              child: Center(
+                                heightFactor: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: sectionSpacing),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Get.theme.colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(defaultSpacing),
+                                    ),
+                                    padding: EdgeInsets.all(elementSpacing),
+                                    child: LPHTabElement(
+                                      tabs: SpaceTabType.values.map((e) => e.name.tr).toList(),
+                                      onTabSwitch: (el) {
+                                        final type = SpaceTabType.values.firstWhereOrNull((t) => t.name.tr == el);
+                                        if (type == null) {
+                                          return;
+                                        }
+                                        Get.find<SpacesController>().switchToTabAndChange(type);
+                                      },
+                                      selected: Get.find<SpacesController>().currentTab,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
                     //* Controls
                     Align(
@@ -77,8 +154,8 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
                                 colors: [
-                                  Colors.black.withOpacity(0.2),
-                                  Colors.black.withOpacity(0),
+                                  Colors.black.withAlpha(70),
+                                  Colors.black.withAlpha(0),
                                 ],
                               ),
                             ),
@@ -115,7 +192,30 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                   child: Container(
                     color: Get.theme.colorScheme.onInverseSurface,
                     width: 380,
-                    child: SpacesMessageFeed(),
+                    child: Column(
+                      children: [
+                        Container(
+                          color: Get.theme.colorScheme.primaryContainer,
+                          padding: const EdgeInsets.all(defaultSpacing),
+                          child: Center(
+                            child: LPHTabElement(
+                              tabs: SpaceSidebarTabType.values.map((e) => e.name.tr).toList(),
+                              onTabSwitch: (el) {
+                                final type = SpaceSidebarTabType.values.firstWhereOrNull((t) => t.name.tr == el);
+                                if (type == null) {
+                                  return;
+                                }
+                                controller.sidebarTabType.value = type.index;
+                              },
+                              selected: controller.sidebarTabType,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Obx(() => _sidebarTabs[controller.sidebarTabType.value]),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               )

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -10,6 +12,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,11 +27,11 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
   final remoteActionTesting = false.obs;
 
   /// Perform a remote action test with any instance server
-  void remoteActionTest(String server) async {
+  Future<void> remoteActionTest(String server) async {
     remoteActionTesting.value = true;
 
     // Make the post request to the test endpoint
-    final json = await postAddress(server, "/node/remote/send", {
+    final json = await postAddress(server, "/node/actions/send", {
       "app_tag": appTag,
       "action": "ping",
       "data": {
@@ -53,7 +56,6 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
       title: [
         Text("Developer info", style: Get.theme.textTheme.labelLarge),
       ],
-      mobilePage: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,6 +66,15 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           verticalSpacing(elementSpacing),
           Text("Current account: ${StatusController.ownAddress.encode()}", style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
+          ProfileButton(
+            icon: Icons.launch,
+            label: 'Local database viewer',
+            onTap: () async {
+              unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
+            },
+            loading: false.obs,
+          ),
+          verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.delete,
             label: "Delete all conversations (local)",
@@ -82,6 +93,13 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             icon: Icons.delete,
             label: "Delete all friends (local)",
             onTap: () => db.friend.deleteAll(),
+            loading: false.obs,
+          ),
+          verticalSpacing(elementSpacing),
+          ProfileButton(
+            icon: Icons.delete,
+            label: "Delete all messages (local)",
+            onTap: () => db.message.deleteAll(),
             loading: false.obs,
           ),
           verticalSpacing(elementSpacing),

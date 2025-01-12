@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
+import 'package:chat_interface/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/controller/current/steps/friends_step.dart';
+import 'package:chat_interface/controller/current/tasks/friend_sync_task.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
@@ -70,7 +71,7 @@ class RequestController extends GetxController {
 final requestsLoading = false.obs;
 
 /// Send a new friend request to an account by name
-void newFriendRequest(String name, Function(String) success) async {
+Future<void> newFriendRequest(String name, Function(String) success) async {
   requestsLoading.value = true;
 
   final controller = Get.find<StatusController>();
@@ -106,7 +107,7 @@ void newFriendRequest(String name, Function(String) success) async {
     }),
     onConfirm: () async {
       declined = false;
-      sendFriendRequest(controller, profile!.name, profile.displayName, profile.id, profile.publicKey, profile.signatureKey, success);
+      await sendFriendRequest(controller, profile!.name, profile.displayName, profile.id, profile.publicKey, profile.signatureKey, success);
     },
     onDecline: () {
       declined = true;
@@ -118,7 +119,7 @@ void newFriendRequest(String name, Function(String) success) async {
 }
 
 /// Send a friend request to an account
-void sendFriendRequest(
+Future<void> sendFriendRequest(
   StatusController controller,
   String name,
   String displayName,
@@ -159,7 +160,7 @@ void sendFriendRequest(
   if (requestSent != null) {
     final result = await Get.find<FriendController>().addFromRequest(requestSent);
     if (result) {
-      requestController.deleteRequest(requestSent);
+      await requestController.deleteRequest(requestSent);
     } else {
       showErrorPopup("error", "requests.error".tr);
     }
@@ -262,23 +263,23 @@ class Request {
   }
 
   // Decline friend request
-  void ignore() async {
+  Future<void> ignore() async {
     // Delete from friends vault
     await FriendsVault.remove(vaultId);
 
     // Delete from requests
     final requestController = Get.find<RequestController>();
-    requestController.deleteRequest(this);
+    await requestController.deleteRequest(this);
   }
 
   // Cancel friend request (only for sent requests)
-  void cancel() async {
+  Future<void> cancel() async {
     // Delete from friends vault
     await FriendsVault.remove(vaultId);
 
     // Delete from sent requests
     final requestController = Get.find<RequestController>();
-    requestController.deleteSentRequest(this);
+    await requestController.deleteSentRequest(this);
   }
 
   void save(bool self) {

@@ -29,6 +29,28 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
     super.dispose();
   }
 
+  /// Save the display name
+  Future<void> save() async {
+    final controller = Get.find<StatusController>();
+    if (_loading.value) return;
+    _loading.value = true;
+    _errorText.value = "";
+
+    final json = await postAuthorizedJSON("/account/settings/change_display_name", {
+      "name": _displayNameController.text,
+    });
+
+    if (!json["success"]) {
+      _errorText.value = json["error"].toString().tr;
+      _loading.value = false;
+      return;
+    }
+
+    controller.displayName.value = _displayNameController.text;
+    _loading.value = false;
+    Get.back();
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<StatusController>();
@@ -47,6 +69,8 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
             hintText: 'placeholder.display_name'.tr,
             controller: _displayNameController,
             maxLength: 16,
+            autofocus: true,
+            onSubmitted: (t) => save(),
           ),
           verticalSpacing(defaultSpacing),
           AnimatedErrorContainer(
@@ -56,25 +80,7 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
           ),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
-            onTap: () async {
-              if (_loading.value) return;
-              _loading.value = true;
-              _errorText.value = "";
-
-              final json = await postAuthorizedJSON("/account/settings/change_display_name", {
-                "name": _displayNameController.text,
-              });
-
-              if (!json["success"]) {
-                _errorText.value = json["error"].toString().tr;
-                _loading.value = false;
-                return;
-              }
-
-              controller.displayName.value = _displayNameController.text;
-              _loading.value = false;
-              Get.back();
-            },
+            onTap: () => save(),
             child: Center(child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
           )
         ],

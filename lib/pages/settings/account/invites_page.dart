@@ -23,7 +23,7 @@ class _InvitesPageState extends State<InvitesPage> {
     loadData();
   }
 
-  void loadData() async {
+  Future<void> loadData() async {
     loading.value = true;
 
     final json = await postAuthorizedJSON("/account/invite/get_all", <String, dynamic>{});
@@ -49,7 +49,7 @@ class _InvitesPageState extends State<InvitesPage> {
   final generateLoading = false.obs;
 
   /// Generate a new invite code
-  void generateNewInvite() async {
+  Future<void> generateNewInvite() async {
     generateLoading.value = true;
 
     final json = await postAuthorizedJSON("/account/invite/generate", <String, dynamic>{});
@@ -60,7 +60,7 @@ class _InvitesPageState extends State<InvitesPage> {
     }
 
     showErrorPopup("success", "settings.invites.generated".tr);
-    Clipboard.setData(ClipboardData(text: json["invite"]));
+    await Clipboard.setData(ClipboardData(text: json["invite"]));
 
     count.value -= 1;
     invites.insert(0, json["invite"]);

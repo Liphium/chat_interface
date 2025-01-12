@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';

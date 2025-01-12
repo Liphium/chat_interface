@@ -1,14 +1,17 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
+import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
+import 'package:chat_interface/pages/chat/components/conversations/message_search_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/components/townsquare/townsquare_page.dart';
-import 'package:chat_interface/pages/chat/conversation_page.dart';
+import 'package:chat_interface/pages/chat/messages_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/pages/spaces/space_rectangle.dart';
 import 'package:chat_interface/theme/desktop_widgets.dart';
 import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 Widget getChatPage() {
@@ -44,6 +47,8 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<MessageController>();
+
     return Scaffold(
       backgroundColor: Get.theme.colorScheme.inverseSurface,
       body: CloseToTray(
@@ -56,19 +61,39 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
               final controller = Get.find<MessageController>();
               if (controller.currentProvider.value != null) {
                 Get.off(const ChatPageMobile());
-                Get.to(ConversationPage(provider: controller.currentProvider.value!));
+                Get.to(MessagesPageMobile(provider: controller.currentProvider.value!));
               } else {
                 Get.off(const ChatPageMobile());
               }
             },
             child: Row(
               children: [
-                const SelectionContainer.disabled(
-                  child: SizedBox(
-                    width: 350,
-                    child: Sidebar(),
+                // Render the sidebar (with an animation when it's hidden/shown)
+                SelectionContainer.disabled(
+                  child: Obx(
+                    () => Animate(
+                      effects: [
+                        ExpandEffect(
+                          curve: Curves.easeInOut,
+                          duration: 250.ms,
+                          axis: Axis.horizontal,
+                          alignment: Alignment.centerRight,
+                        ),
+                        FadeEffect(
+                          duration: 250.ms,
+                        )
+                      ],
+                      onInit: (ac) => ac.value = controller.hideSidebar.value ? 0 : 1,
+                      target: controller.hideSidebar.value ? 0 : 1,
+                      child: SizedBox(
+                        width: 350,
+                        child: Sidebar(),
+                      ),
+                    ),
                   ),
                 ),
+
+                // Render the conversation/space/other stuff
                 Expanded(
                   child: Obx(
                     () {
@@ -91,7 +116,56 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                             );
                           }
 
-                          return MessageFeed();
+                          return Column(
+                            children: [
+                              // Render the message bar for desktop
+                              DevicePadding(
+                                top: true,
+                                padding: const EdgeInsets.all(0),
+                                child: MessageBar(
+                                  conversation: controller.currentProvider.value!.conversation,
+                                  provider: controller.currentProvider.value!,
+                                ),
+                              ),
+
+                              // Render the message feed + search sidebar
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    // Render the chat messages
+                                    Expanded(
+                                      child: MessageFeed(),
+                                    ),
+
+                                    // Render the search window
+                                    SelectionContainer.disabled(
+                                      child: Obx(
+                                        () => Animate(
+                                          effects: [
+                                            ExpandEffect(
+                                              curve: Curves.easeInOut,
+                                              duration: 250.ms,
+                                              axis: Axis.horizontal,
+                                              alignment: Alignment.centerLeft,
+                                            ),
+                                            FadeEffect(
+                                              duration: 250.ms,
+                                            )
+                                          ],
+                                          onInit: (ac) => ac.value = controller.showSearch.value ? 1 : 0,
+                                          target: controller.showSearch.value ? 1 : 0,
+                                          child: SizedBox(
+                                            width: 350,
+                                            child: MessageSearchWindow(),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
                         default:
                           return const SpaceRectangle();
                       }

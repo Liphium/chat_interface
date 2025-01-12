@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:chat_interface/connection/connection.dart';
 import 'package:chat_interface/connection/encryption/aes.dart';
 import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -54,6 +55,11 @@ String ownServer(String path) {
   return '$basePath/$apiVersion$path';
 }
 
+/// Checks if two servers are the same
+bool isSameServer(String path1, String path2) {
+  return TrustedLinkHelper.extractDomain(path1) == TrustedLinkHelper.extractDomain(path2);
+}
+
 /// Class to deal with addresses for users
 class LPHAddress {
   final String server;
@@ -103,10 +109,10 @@ String serverPath(String server, String path, {bool noApiVersion = false}) {
 }
 
 /// Grab the public key from the server
-Future<String?> grabServerPublicKey({String defaultError = "server.error"}) async {
+Future<String?> grabServerPublicURL(String server, {String defaultError = "server.error", bool checkProtocol = true}) async {
   final Response res;
   try {
-    res = await post(Uri.parse(serverPath(basePath, "/pub", noApiVersion: true)));
+    res = await post(Uri.parse(serverPath(server, "/pub", noApiVersion: true)));
   } catch (e) {
     return "error.network".tr;
   }
@@ -116,34 +122,13 @@ Future<String?> grabServerPublicKey({String defaultError = "server.error"}) asyn
 
   final json = jsonDecode(res.body);
 
-  // Check the protocol version
-  if (json["protocol_version"] != protocolVersion) {
-    return "protocol.error".tr;
+  // Check the protocol versioncheckProtocol
+  if (checkProtocol && json["protocol_version"] > protocolVersion) {
+    return "protocol.error.client".tr;
   }
 
-  serverPublicKey = unpackageRSAPublicKey(json['pub']);
-  sendLog("RETRIEVED SERVER PUBLIC KEY: $serverPublicKey");
-
-  return null;
-}
-
-/// Grab the public key from the server
-Future<String?> grabServerPublicURL(String server, {String defaultError = "server.error"}) async {
-  final Response res;
-  try {
-    res = await post(Uri.parse(serverPath(server, "/pub", noApiVersion: true)));
-  } catch (e) {
-    return "error.network";
-  }
-  if (res.statusCode != 200) {
-    return defaultError;
-  }
-
-  final json = jsonDecode(res.body);
-
-  // Check the protocol version
-  if (json["protocol_version"] != protocolVersion) {
-    return "protocol.error";
+  if (checkProtocol && json["protocol_version"] < protocolVersion) {
+    return "protocol.error.server".tr;
   }
 
   serverPublicKeys[server] = unpackageRSAPublicKey(json['pub']);
@@ -153,16 +138,22 @@ Future<String?> grabServerPublicURL(String server, {String defaultError = "serve
 }
 
 /// Post request to node-backend (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> postJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error", String? token}) {
-  return postAddress(basePath, path, body, defaultError: defaultError, token: token);
+Future<Map<String, dynamic>> postJSON(
+  String path,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+  String? token,
+  bool checkProtocol = true,
+}) {
+  return postAddress(basePath, path, body, defaultError: defaultError, token: token, checkProtocol: checkProtocol);
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
 Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body,
-    {String defaultError = "server.error", String? token}) async {
+    {String defaultError = "server.error", String? token, bool noApiVersion = false, bool checkProtocol = true}) async {
   // Try to get the server public key
   if (serverPublicKeys[server] == null) {
-    final result = await grabServerPublicURL(server);
+    final result = await grabServerPublicURL(server, checkProtocol: checkProtocol);
     if (result != null) {
       return {
         "success": false,
@@ -172,7 +163,8 @@ Future<Map<String, dynamic>> postAddress(String server, String path, Map<String,
   }
 
   // Do the request
-  return _postTCP(serverPublicKeys[server]!, serverPath(server, path).toString(), body, defaultError: defaultError, token: token);
+  return _postTCP(serverPublicKeys[server]!, serverPath(server, path, noApiVersion: noApiVersion).toString(), body,
+      defaultError: defaultError, token: token);
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
@@ -182,7 +174,11 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
   final aesBase64 = base64Encode(aesKey);
   Response? res;
   final authTag = base64Encode(encryptRSA(aesKey, key));
+
   try {
+    if (isDebug) {
+      sendLog("request to $url");
+    }
     res = await post(
       Uri.parse(url),
       headers: <String, String>{
@@ -217,8 +213,8 @@ Future<Map<String, dynamic>> postAuthJSON(String path, Map<String, dynamic> body
 }
 
 // Post request to node-backend with session token (new)
-Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic> body) async {
-  return postJSON(path, body, token: sessionToken);
+Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic> body, {bool checkProtocol = true}) async {
+  return postJSON(path, body, token: sessionToken, checkProtocol: checkProtocol);
 }
 
 // Post request to chat-node with any token (node needs to be connected already) (new)
@@ -247,13 +243,13 @@ Future<Map<String, dynamic>> postAny(String url, Map<String, dynamic> body, {Str
       ),
     );
     if (res.statusCode != 200) {
-      return <String, dynamic>{"success": false, "error": defaultError};
+      return <String, dynamic>{"success": false, "error": defaultError.tr};
     }
 
     return res.data;
   } catch (e) {
     e.printError();
-    return <String, dynamic>{"success": false, "error": defaultError};
+    return <String, dynamic>{"success": false, "error": defaultError.tr};
   }
 }
 

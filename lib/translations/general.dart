@@ -6,7 +6,9 @@ class GeneralTranslations extends Translations {
         //* English US
         'en_US': {
           // Actions
+          'connect': 'Connect',
           'learn_more': 'Learn more',
+          'dev.details': 'Developer details',
           'offline': 'Offline',
           'loading': 'Loading..',
           'preparing': 'Preparing..',
@@ -56,6 +58,11 @@ class GeneralTranslations extends Translations {
           'page_switcher': 'Page @count/@max',
           'rank': 'Rank',
           'liphium_address': 'Your Liphium address',
+          'help': 'Help & resources',
+
+          // Spaces
+          'spaces.not_supported': 'Not supported',
+          'spaces.not_supported.desc': 'We\'re sorry for the inconvenience, but as of now Spaces is only available on Desktop as a preview.',
 
           // Placeholder
           'placeholder.domain': 'example.com',

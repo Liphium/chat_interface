@@ -4,7 +4,7 @@ import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/audio_attachment_player.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_zap_renderer.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
@@ -16,7 +16,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
 
 class AttachmentRenderer extends StatefulWidget {
@@ -230,7 +230,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                 Flexible(
                   child: Obx(
                     () => Text(
-                      !widget.container.error.value ? formatFileSize(1000) : 'file.not_uploaded'.tr,
+                      !widget.container.error.value ? formatFileSize(widget.container.size) : 'file.not_uploaded'.tr,
                       style: Get.theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -265,7 +265,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             if (widget.container.downloaded.value) {
               return IconButton(
                 onPressed: () async {
-                  final result = await OpenAppFile.open(widget.container.file!.path);
+                  final result = await OpenFile.open(widget.container.file!.path);
                   if (result.type == ResultType.error) {
                     showErrorPopup("error", result.message);
                   }
@@ -276,7 +276,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
 
             return IconButton(
               onPressed: () {
-                Get.find<AttachmentController>().downloadAttachment(widget.container, ignoreLimit: true);
+                Get.find<AttachmentController>().downloadAttachment(widget.container);
               },
               icon: const Icon(Icons.download),
             );

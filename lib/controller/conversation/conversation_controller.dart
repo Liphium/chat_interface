@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:chat_interface/connection/encryption/hash.dart';
 import 'package:chat_interface/connection/encryption/signatures.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/impl/setup_listener.dart';
-import 'package:chat_interface/connection/impl/stored_actions_listener.dart';
+import 'package:chat_interface/connection/chat/setup_listener.dart';
+import 'package:chat_interface/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/controller/current/steps/vault_step.dart';
+import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/constants.dart';
@@ -33,10 +33,6 @@ class ConversationController extends GetxController {
 
   /// Add a conversation to the cache
   Future<bool> add(Conversation conversation, {loadMembers = true}) async {
-    // Insert into cache
-    _insertToOrder(conversation.id);
-    conversations[conversation.id] = conversation;
-
     // Load members from the database
     if (conversation.members.isEmpty && loadMembers) {
       final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id.encode()))).get();
@@ -46,13 +42,17 @@ class ConversationController extends GetxController {
       }
     }
 
+    // Insert into cache
+    _insertToOrder(conversation.id);
+    conversations[conversation.id] = conversation;
+
     return true;
   }
 
   /// Add a new conversation and refresh members (also subscribes)
   Future<bool> addFromVault(Conversation conversation) async {
     // Insert it into cache
-    add(conversation, loadMembers: false);
+    await add(conversation, loadMembers: false);
 
     // Insert into database
     conversation.save(saveMembers: false);
@@ -106,8 +106,15 @@ class ConversationController extends GetxController {
     }
   }
 
-  /// Called when a subscription is finished to make sure conversations are properly sorted and up to date
-  void finishedLoading(Map<String, dynamic> conversationInfo, List<dynamic> deleted, List<dynamic> error, {bool overwriteReads = true}) async {
+  /// Called when a subscription is finished to make sure conversations are properly sorted and up to date.
+  ///
+  /// Called later for all conversations from other servers since they are streamed in after.
+  Future<void> finishedLoading(
+    String server,
+    Map<String, dynamic> conversationInfo,
+    List<dynamic> deleted,
+    bool error,
+  ) async {
     // Sort the conversations
     order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
 
@@ -121,19 +128,23 @@ class ConversationController extends GetxController {
     }
     for (var key in toRemove) {
       sendLog("deleting $key");
-      controller.conversations[key]!.delete(popup: false);
+      await controller.conversations[key]!.delete(popup: false);
     }
 
     // Update all the conversations
     for (var conversation in conversations.values) {
+      if (!isSameServer(conversation.id.server, server)) {
+        continue;
+      }
+
       // Get conversation info
       final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
-      final lastRead = (info["r"] ?? 0) as int;
       final version = (info["v"] ?? 0) as int;
       conversation.notificationCount.value = (info["n"] ?? 0) as int;
+      conversation.readAt.value = (info["r"] ?? 0) as int;
 
       // Set an error if there is one
-      if (error.contains(conversation.id.server)) {
+      if (error) {
         conversation.error.value = "other.server.error".tr;
       }
 
@@ -142,12 +153,6 @@ class ConversationController extends GetxController {
       if (conversation.lastVersion != version) {
         sendLog("conversation version updated");
         await conversation.fetchData();
-      }
-
-      if (overwriteReads) {
-        conversation.readAt.value = lastRead;
-      } else if (lastRead != 0) {
-        conversation.readAt.value = lastRead;
       }
     }
 
@@ -304,7 +309,7 @@ class Conversation {
       });
 
   // Delete conversation from vault and database
-  void delete({bool request = true, bool popup = true}) async {
+  Future<void> delete({bool request = true, bool popup = true}) async {
     final err = await removeFromVault(vaultId);
     if (err != null) {
       sendLog("Error deleting conversation from vault: $err");
@@ -324,8 +329,8 @@ class Conversation {
       }
     }
 
-    db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
-    db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
+    await db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
+    await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
     Get.find<MessageController>().unselectConversation(id: id);
     Get.find<ConversationController>().removeConversation(id);
   }
@@ -383,7 +388,7 @@ class Conversation {
     // Load the members into the database
     for (var currentMember in this.members.values) {
       if (!members.containsKey(currentMember.tokenId)) {
-        db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
+        await db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
       }
     }
 

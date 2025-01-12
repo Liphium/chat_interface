@@ -2,7 +2,7 @@ import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_zap_renderer.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -12,7 +12,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class ServerFileViewer extends StatefulWidget {
@@ -51,7 +51,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
     super.initState();
   }
 
-  void getStorageData() async {
+  Future<void> getStorageData() async {
     final json = await postAuthorizedJSON("/account/files/storage", {});
     if (!json["success"]) {
       storageLine.value = json["error"];
@@ -63,7 +63,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
     });
   }
 
-  void goToPage(int page) async {
+  Future<void> goToPage(int page) async {
     // Set the current page
     if (pageLoading.value) {
       return;
@@ -190,64 +190,71 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                           borderRadius: BorderRadius.circular(10),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing),
-                            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    extensionMap[extension] ?? Icons.insert_drive_file,
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    size: 30,
-                                  ),
-                                  horizontalSpacing(defaultSpacing),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Row(
                                     children: [
-                                      Text(file.name, style: Get.theme.textTheme.labelMedium),
-                                      Text(formatFileSize(file.size), style: Get.theme.textTheme.bodyMedium),
+                                      Icon(
+                                        extensionMap[extension] ?? Icons.insert_drive_file,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        size: 30,
+                                      ),
+                                      horizontalSpacing(defaultSpacing),
+                                      Flexible(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(file.name, style: Get.theme.textTheme.labelMedium),
+                                            Text(formatFileSize(file.size), style: Get.theme.textTheme.bodyMedium),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
 
-                              //* File actions
-                              Row(
-                                children: [
-                                  Icon(
-                                    file.path == null ? Icons.cloud_off : Icons.cloud_done,
-                                    color: Get.theme.colorScheme.onPrimary,
-                                  ),
-                                  horizontalSpacing(defaultSpacing + elementSpacing),
-                                  if (file.path != null)
-                                    IconButton(
-                                      onPressed: () => OpenAppFile.open(file.path!),
-                                      icon: const Icon(Icons.launch),
+                                //* File actions
+                                Row(
+                                  children: [
+                                    Icon(
+                                      file.path == null ? Icons.cloud_off : Icons.cloud_done,
+                                      color: Get.theme.colorScheme.onPrimary,
                                     ),
-                                  LoadingIconButton(
-                                    loading: file.deleteLoading,
-                                    onTap: () async {
-                                      if (file.deleteLoading.value) {
-                                        return;
-                                      }
-                                      file.deleteLoading.value = true;
+                                    horizontalSpacing(defaultSpacing + elementSpacing),
+                                    if (file.path != null)
+                                      IconButton(
+                                        onPressed: () => OpenFile.open(file.path!),
+                                        icon: const Icon(Icons.launch),
+                                      ),
+                                    LoadingIconButton(
+                                      loading: file.deleteLoading,
+                                      onTap: () async {
+                                        if (file.deleteLoading.value) {
+                                          return;
+                                        }
+                                        file.deleteLoading.value = true;
 
-                                      // Make a request to the server
-                                      final success = await Get.find<AttachmentController>().deleteFileFromPath(
-                                        file.id,
-                                        file.path != null ? XFile(file.path!) : null,
-                                        popup: true,
-                                      );
-                                      if (!success) {
-                                        file.path = null;
-                                      }
+                                        // Make a request to the server
+                                        final success = await Get.find<AttachmentController>().deleteFileFromPath(
+                                          file.id,
+                                          file.path != null ? XFile(file.path!) : null,
+                                          popup: true,
+                                        );
+                                        if (!success) {
+                                          file.path = null;
+                                        }
 
-                                      // Play the deleted animation
-                                      file.deleted.value = true;
-                                    },
-                                    icon: Icons.delete,
-                                  ),
-                                ],
-                              )
-                            ]),
+                                        // Play the deleted animation
+                                        file.deleted.value = true;
+                                      },
+                                      icon: Icons.delete,
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),

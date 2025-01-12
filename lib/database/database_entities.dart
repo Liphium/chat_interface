@@ -18,6 +18,20 @@ class Conversation extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
+class Message extends Table {
+  TextColumn get id => text()();
+  TextColumn get content => text()();
+  TextColumn get senderToken => text()();
+  TextColumn get senderAddress => text()();
+  Int64Column get createdAt => int64()();
+  TextColumn get conversation => text()();
+  BoolColumn get edited => boolean()();
+  BoolColumn get verified => boolean()();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
 class Member extends Table {
   TextColumn get id => text()();
   TextColumn get conversationId => text().nullable()();

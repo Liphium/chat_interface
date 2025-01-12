@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/pages/spaces/entities/circle_member_entity.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

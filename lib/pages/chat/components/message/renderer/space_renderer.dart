@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_container.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/theme/components/duration_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -16,6 +17,7 @@ class SpaceRenderer extends StatefulWidget {
   final bool pollNewData;
   final bool clickable;
   final bool sidebar;
+  final Color? background;
   final SpaceConnectionContainer container;
 
   const SpaceRenderer({
@@ -26,6 +28,7 @@ class SpaceRenderer extends StatefulWidget {
     this.pollNewData = false,
     this.clickable = false,
     this.sidebar = false,
+    this.background,
   });
 
   @override
@@ -52,7 +55,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
     super.initState();
   }
 
-  void loadState() async {
+  Future<void> loadState() async {
     _info.value = await widget.container.getInfo(timer: widget.pollNewData);
     _sub = widget.container.info.listen((info) {
       if (widget.container.cancelled) {
@@ -80,7 +83,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
           return Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(defaultSpacing),
-              color: Get.theme.colorScheme.primaryContainer,
+              color: widget.background ?? Get.theme.colorScheme.primaryContainer,
             ),
             padding: const EdgeInsets.all(defaultSpacing),
             child: SizedBox(
@@ -109,9 +112,12 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         verticalSpacing(elementSpacing),
-                        Text(
-                          "#${widget.container.roomId}",
-                          style: Get.theme.textTheme.bodySmall,
+                        Flexible(
+                          child: Text(
+                            "#${widget.container.roomId}",
+                            style: Get.theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
@@ -129,7 +135,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
           return Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(defaultSpacing),
-              color: Get.theme.colorScheme.primaryContainer,
+              color: widget.background ?? Get.theme.colorScheme.primaryContainer,
             ),
             padding: const EdgeInsets.all(defaultSpacing),
             child: SizedBox(
@@ -152,6 +158,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                         Text(
                           "#${widget.container.roomId}",
                           style: Get.theme.textTheme.bodySmall,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -167,11 +174,12 @@ class _SpaceRendererState extends State<SpaceRenderer> {
         final renderAmount = min(info.friends.length, 3);
 
         return Material(
-          color: widget.sidebar
-              ? Get.theme.colorScheme.primary.withAlpha(100)
-              : widget.clickable
-                  ? Get.theme.colorScheme.primaryContainer
-                  : Colors.transparent,
+          color: widget.background ??
+              (widget.sidebar
+                  ? Get.theme.colorScheme.primary.withAlpha(100)
+                  : widget.clickable
+                      ? Get.theme.colorScheme.primaryContainer
+                      : Colors.transparent),
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: InkWell(
             borderRadius: BorderRadius.circular(defaultSpacing),
@@ -195,14 +203,6 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                 children: [
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      /* Info is buggy, so removed for now
-                      Visibility(
-                        visible: info.title.isNotEmpty,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: defaultSpacing),
-                          child: Text(info.title, style: Get.theme.textTheme.labelLarge),
-                        ),
-                      ),*/
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -210,7 +210,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                             visible: renderAmount > 0,
                             child: Flexible(
                               child: SizedBox(
-                                width: 40 + 25 * (renderAmount - 1),
+                                width: 44 + 25 * (renderAmount - 1),
                                 height: 44,
                                 child: Stack(
                                   children: List.generate(renderAmount, (index) {
@@ -219,10 +219,11 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                                       child: Tooltip(
                                         message: info.friends[index].displayName.value,
                                         child: SizedBox(
-                                          width: 40,
-                                          height: 40,
+                                          width: 44,
+                                          height: 44,
                                           child: UserAvatar(
                                             id: info.friends[index].id,
+                                            size: 44,
                                           ),
                                         ),
                                       ),

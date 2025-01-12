@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 class MemberController extends GetxController {
   final members = <Member>[].obs;
 
-  void loadConversation(RxBool loading, String id) async {
+  Future<void> loadConversation(RxBool loading, String id) async {
     loading.value = true;
 
     final membersDb = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(id))).get();

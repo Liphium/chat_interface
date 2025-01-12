@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -6,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
@@ -19,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio_rs;
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
@@ -33,9 +36,18 @@ class AttachmentController extends GetxController {
     String tag, {
     popups = true,
     bool containerNameNull = false,
+    Uint8List? bytes,
     String? fileName,
   }) async {
-    final bytes = await data.file.readAsBytes();
+    // Check if there is a connection before doing this
+    if (!Get.find<ConnectionController>().connected.value) {
+      if (popups) {
+        showErrorPopup("error", "error.no_connection".tr);
+      }
+      return FileUploadResponse("error.no_connection".tr, null);
+    }
+
+    bytes ??= await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
     final name = encryptSymmetric(fileName ?? path.basename(data.file.path), key);
@@ -46,7 +58,7 @@ class AttachmentController extends GetxController {
       "name": name,
       "tag": tag,
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
-      "extension": path.basename(data.file.path).split(".").last
+      "extension": path.extension(data.file.path).substring(1)
     });
 
     final res = await dio.post(
@@ -76,25 +88,36 @@ class AttachmentController extends GetxController {
 
     // Copy the file into the local cache
     if (!isWeb) {
-      final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
-      fileUtil.write(XFile(filePath), bytes);
+      // Only copy the file if it's a media file (other file types don't really matter because they aren't displayed)
+      if (FileSettings.isMediaFile(json["id"])) {
+        final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
+        await fileUtil.write(XFile(filePath), bytes);
+        sendLog("wrote file to $filePath");
+      }
     }
     final container = AttachmentContainer(
-      type,
-      json["id"],
-      containerNameNull ? null : fileName ?? path.basename(data.file.path),
-      json["url"],
-      key,
+      storageType: type,
+      id: json["id"],
+      fileName: containerNameNull ? null : fileName ?? path.basename(data.file.path),
+      size: bytes.length,
+      url: json["url"],
+      key: key,
     );
-    sendLog("SENT ATTACHMENT: ${container.id}");
-    container.downloaded.value = true;
+    sendLog("UPLOADED ATTACHMENT: ${container.id}");
+    container.downloaded.value = FileSettings.isMediaFile(json["id"]);
     attachments[container.id] = container;
 
     return FileUploadResponse("success", container);
   }
 
   /// Download an attachment
-  Future<bool> downloadAttachment(AttachmentContainer container, {bool retry = false, bool popups = true, bool ignoreLimit = false}) async {
+  Future<bool> downloadAttachment(
+    AttachmentContainer container, {
+    bool retry = false,
+    bool popups = true,
+    bool trustPopups = true,
+    bool ignoreLimit = true,
+  }) async {
     if (container.downloading.value) return true;
     if (container.downloaded.value) return true;
     if (container.attachmentType != AttachmentContainerType.file) return false;
@@ -108,7 +131,7 @@ class AttachmentController extends GetxController {
 
     // Check if the domain is trusted or ask the user to add a new one to the list of trusted providers if needed
     if (!await TrustedLinkHelper.isLinkTrusted(container.url)) {
-      if (!popups) {
+      if (!popups && !trustPopups) {
         container.errorHappened(true);
         return false;
       }
@@ -136,10 +159,23 @@ class AttachmentController extends GetxController {
       return false;
     }
 
-    final size = json["file"]["size"] / 1000.0 / 1000.0; // Convert to MB
+    final size = json["file"]["size"] / 1024.0 / 1024.0; // Convert to MB
     if (size > maxSize && !ignoreLimit) {
-      container.errorHappened(false);
+      container.downloadFailed();
       return false;
+    }
+
+    // Check if the file should be saved to a directory instead of the cache
+    FileSaveLocation? location;
+    if (!isWeb && !FileSettings.isMediaFile(container.id)) {
+      container.percentage.value = 0;
+      // Let the user choose a location
+      location = await getSaveLocation(suggestedName: container.fileName);
+      if (location == null) {
+        showErrorPopup("error", "file.no_save_location".tr);
+        container.downloadFailed();
+        return false;
+      }
     }
 
     // Download and show progress
@@ -163,14 +199,21 @@ class AttachmentController extends GetxController {
     final decrypted = decryptSymmetricBytes(res.data!, container.key!);
     container.file = XFile(container.file!.path, bytes: decrypted);
     if (!isWeb) {
-      await fileUtil.write(container.file!, decrypted);
+      if (location != null) {
+        await fileUtil.write(XFile(location.path), decrypted);
+      } else {
+        await fileUtil.write(container.file!, decrypted);
+      }
     }
 
     container.downloading.value = false;
     container.error.value = false;
-    container.downloaded.value = true;
+    container.downloaded.value = location == null;
+    if (location != null) {
+      unawaited(OpenFile.open(path.dirname(location.path)));
+    }
     if (!isWeb) {
-      cleanUpCache();
+      await cleanUpCache();
     }
     return true;
   }
@@ -182,8 +225,16 @@ class AttachmentController extends GetxController {
 
   /// Delete a file based on a path and an id
   Future<bool> deleteFileFromPath(String id, XFile? file, {popup = false}) async {
+    // Check if there is a connection before doing this
+    if (!Get.find<ConnectionController>().connected.value) {
+      if (popup) {
+        showErrorPopup("error", "error.no_connection".tr);
+      }
+      return false;
+    }
+
     if (file != null) {
-      fileUtil.delete(file);
+      await fileUtil.delete(file);
     }
     attachments.remove(id);
 
@@ -203,9 +254,7 @@ class AttachmentController extends GetxController {
   }
 
   /// Clean the cache until the size is below the max cache size
-  void cleanUpCache() async {
-    // TODO: Test this stuff properly
-
+  Future<void> cleanUpCache() async {
     // Move into isolate in the future?
     final cacheType = Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue();
     if (cacheType == 0) return;
@@ -242,7 +291,7 @@ class AttachmentController extends GetxController {
   static String _pathTemporary = "";
   static String _pathPermanent = "";
 
-  static void initFilePath(String accountId) async {
+  static Future<void> initFilePath(String accountId) async {
     if (!isWeb) {
       // Init folder for cached files
       final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
@@ -320,11 +369,12 @@ class AttachmentController extends GetxController {
 
     // Create a container and cache it immediately
     container = AttachmentContainer(
-      type,
-      json["i"],
-      json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
-      json["u"],
-      unpackageSymmetricKey(json["k"], sodium),
+      storageType: type,
+      id: json["i"],
+      fileName: json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
+      size: json["s"] ?? -1,
+      url: json["u"],
+      key: unpackageSymmetricKey(json["k"], sodium),
     );
     container.width = json["w"];
     container.height = json["h"];
@@ -364,6 +414,7 @@ class AttachmentContainer {
   final String id;
   final String? fileName;
   final String url;
+  final int size;
   int? width;
   int? height;
   final SecureKey? key;
@@ -385,13 +436,27 @@ class AttachmentContainer {
     downloaded.value = false;
   }
 
+  void downloadFailed() {
+    error.value = false;
+    unsafeLocation.value = false;
+    downloading.value = false;
+    downloaded.value = false;
+  }
+
   Future<bool> init() async {
     unsafeLocation.value = !(await TrustedLinkHelper.isLinkTrusted(url));
     sendLog("TRUSTED ${unsafeLocation.value} $url");
     return true;
   }
 
-  AttachmentContainer(this.storageType, this.id, this.fileName, this.url, this.key) {
+  AttachmentContainer({
+    required this.storageType,
+    required this.id,
+    required this.fileName,
+    required this.size,
+    required this.url,
+    required this.key,
+  }) {
     setAttachmentType();
     if (attachmentType == AttachmentContainerType.file) {
       file = XFile(path.join(AttachmentController.getFilePathForType(storageType), id));
@@ -440,7 +505,15 @@ class AttachmentContainer {
     return size;
   }
 
-  AttachmentContainer.remoteImage(String url) : this(StorageType.cache, "", "", url, null);
+  AttachmentContainer.remoteImage(String url)
+      : this(
+          storageType: StorageType.cache,
+          id: "",
+          fileName: "",
+          size: 0,
+          url: url,
+          key: null,
+        );
 
   String toAttachment() {
     switch (attachmentType) {
@@ -466,7 +539,7 @@ class AttachmentContainer {
     return doesFileExist(file!);
   }
 
-  void initDownloadState() async {
+  Future<void> initDownloadState() async {
     if (await existsLocally()) {
       downloaded.value = true;
     }
@@ -476,6 +549,7 @@ class AttachmentContainer {
     return <String, dynamic>{
       "i": id,
       if (fileName != null) "n": fileName!,
+      if (size != -1) "s": size,
       "u": url,
       "k": packageSymmetricKey(key!),
       if (width != null) "w": width,

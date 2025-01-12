@@ -2,10 +2,10 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_liveshare_renderer.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_renderer.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/message_space_renderer.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/system_message_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_zap_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_message_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_space_renderer.dart';
+import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_system_renderer.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -21,6 +21,10 @@ class BubblesRenderer extends StatefulWidget {
   final Message? message;
   final MessageProvider provider;
   final AutoScrollController controller;
+  final double heightMultiplier;
+
+  // Design of the bubbles
+  final bool mobileLayout;
 
   const BubblesRenderer({
     super.key,
@@ -28,6 +32,8 @@ class BubblesRenderer extends StatefulWidget {
     required this.controller,
     required this.provider,
     this.message,
+    this.mobileLayout = false,
+    this.heightMultiplier = 1.0,
   });
 
   @override
@@ -66,37 +72,39 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
     // This is needed for jump to message
     if (widget.index == widget.provider.messages.length + 1) {
-      if (widget.provider.newMessagesLoading.value) {
-        return const SizedBox();
-      }
-
-      return SizedBox(
-        height: Get.height,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 500),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: sectionSpacing),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "chat.welcome.title".tr,
-                    style: Get.theme.textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
+      return Obx(() {
+        final loading = widget.provider.newMessagesLoading.value && widget.provider.messages.isEmpty;
+        return SizedBox(
+          height: Get.height * widget.heightMultiplier,
+          child: Visibility(
+            visible: !loading,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 500),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: sectionSpacing),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "chat.welcome.title".tr,
+                        style: Get.theme.textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      verticalSpacing(sectionSpacing),
+                      Text(
+                        "chat.welcome.desc".tr,
+                        style: Get.theme.textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      )
+                    ],
                   ),
-                  verticalSpacing(sectionSpacing),
-                  Text(
-                    "chat.welcome.desc".tr,
-                    style: Get.theme.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  )
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
+      });
     }
 
     // Just for spacing above the input and a loading indicator
@@ -140,15 +148,18 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
           self: self,
           last: last,
           sender: self ? Friend.me() : sender,
+          mobileLayout: widget.mobileLayout,
         );
 
       case MessageType.call:
         renderer = BubblesSpaceMessageRenderer(
           key: ValueKey(message.id),
           message: message,
+          provider: widget.provider,
           self: self,
           last: last,
           sender: self ? Friend.me() : sender,
+          mobileLayout: widget.mobileLayout,
         );
 
       case MessageType.liveshare:
@@ -157,8 +168,8 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
           message: message,
           provider: widget.provider,
           self: self,
-          last: last,
           sender: self ? Friend.me() : sender,
+          mobileLayout: widget.mobileLayout,
         );
 
       case MessageType.system:
@@ -166,6 +177,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
           key: ValueKey(message.id),
           message: message,
           provider: widget.provider,
+          mobileLayout: widget.mobileLayout,
         );
     }
 
@@ -218,44 +230,8 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                       child: renderer,
                     ),
                   ),
-                  Obx(
-                    () => SizedBox(
-                      height: 34,
-                      child: Visibility(
-                        visible: hovering.value,
-                        child: Row(
-                          children: [
-                            LoadingIconButton(
-                              key: contextMenuKey,
-                              iconSize: 22,
-                              extra: 4,
-                              padding: 4,
-                              onTap: () {
-                                Get.dialog(
-                                  MessageOptionsWindow(
-                                    data: ContextMenuData.fromKey(contextMenuKey),
-                                    self: self,
-                                    message: message,
-                                    provider: widget.provider,
-                                  ),
-                                );
-                              },
-                              icon: Icons.more_horiz,
-                            ),
-                            LoadingIconButton(
-                              iconSize: 22,
-                              extra: 4,
-                              padding: 4,
-                              onTap: () {
-                                MessageSendHelper.addReplyToCurrentDraft(message);
-                              },
-                              icon: Icons.reply,
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  if (!widget.mobileLayout) renderOverlay(self, message),
+                  if (widget.mobileLayout && !GetPlatform.isMobile) renderOverlay(self, message)
                 ],
               ),
             ),
@@ -298,5 +274,49 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     }
 
     return messageWidget;
+  }
+
+  Widget renderOverlay(bool self, Message message) {
+    return Obx(
+      () => SizedBox(
+        height: 34,
+        child: Visibility(
+          visible: hovering.value,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          child: Row(
+            children: [
+              LoadingIconButton(
+                key: contextMenuKey,
+                iconSize: 22,
+                extra: 4,
+                padding: 4,
+                onTap: () {
+                  Get.dialog(
+                    MessageOptionsWindow(
+                      data: ContextMenuData.fromKey(contextMenuKey),
+                      self: true,
+                      message: message,
+                      provider: widget.provider,
+                    ),
+                  );
+                },
+                icon: Icons.more_horiz,
+              ),
+              LoadingIconButton(
+                iconSize: 22,
+                extra: 4,
+                padding: 4,
+                onTap: () {
+                  MessageSendHelper.addReplyToCurrentDraft(message);
+                },
+                icon: Icons.reply,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

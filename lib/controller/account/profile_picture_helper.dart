@@ -8,7 +8,7 @@ import 'package:chat_interface/controller/conversation/attachment_controller.dar
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/controller/current/steps/key_step.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -27,7 +27,7 @@ class ProfileHelper {
     // Get old profile picture
     final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id.encode()))).getSingleOrNull();
 
-    final json = await postAuthorizedJSON("/account/profile/get", <String, dynamic>{
+    final json = await postAddress(friend.id.server, "/account/profile/get", <String, dynamic>{
       "id": friend.id.id,
     });
 
@@ -48,31 +48,31 @@ class ProfileHelper {
       friend.updateDisplayName(displayName);
     }
 
-    // Check if there is a profile picture
-    if (json["profile"]["picture"] == null) {
-      // Remove the current profile picture
-      friend.updateProfilePicture(null);
-      return null;
-    }
+    sendLog("downloading ${friend.name}");
 
-    String? oldPictureId;
-    String? oldPath;
-    if (oldProfile != null) {
-      if (oldProfile.pictureContainer != "") {
-        oldPictureId = jsonDecode(fromDbEncrypted(oldProfile.pictureContainer))["id"];
-        oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
-        if (json["profile"]["picture"] == oldPictureId && oldPath != null) {
-          return null; // Nothing changed
-        }
-      }
+    // Check if there is a profile picture
+    if ((json["profile"]["container"] ?? "") == "") {
+      sendLog("no pfp found");
+      // Remove the current profile picture
+      await friend.updateProfilePicture(null);
+      return null;
     }
 
     // Decrypt the profile picture data
     final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey));
     final container = Get.find<AttachmentController>().fromJson(StorageType.permanent, containerJson);
 
-    if (container.id != json["profile"]["picture"]) {
-      return null;
+    String? oldPictureId;
+    String? oldPath;
+    if (oldProfile != null) {
+      if (oldProfile.pictureContainer != "") {
+        oldPictureId = jsonDecode(fromDbEncrypted(oldProfile.pictureContainer))["i"];
+        oldPath = await AttachmentController.getFilePathFor(oldPictureId!);
+        if (container.id == oldPictureId && oldPath != null) {
+          sendLog("see no difference");
+          return null; // Nothing changed
+        }
+      }
     }
 
     // Delete the old profile picture file (in case it exists)
@@ -81,8 +81,9 @@ class ProfileHelper {
     }
 
     // Download the file
-    final success = await Get.find<AttachmentController>().downloadAttachment(container);
+    final success = await Get.find<AttachmentController>().downloadAttachment(container, popups: false, trustPopups: true);
     if (!success) {
+      sendLog("download failed");
       return null;
     }
 
@@ -91,16 +92,23 @@ class ProfileHelper {
       await (db.profile.delete()..where((tbl) => tbl.id.equals(friend.id.encode()))).go();
     }
 
+    sendLog("downloaded");
+
     // Save the profile picture data
-    friend.updateProfilePicture(container);
+    await friend.updateProfilePicture(container);
 
     return json["profile"]["id"];
   }
 
   /// Upload a profile picture to the server and set it as the current profile picture
-  static Future<bool> uploadProfilePicture(XFile file, String originalName) async {
+  static Future<bool> uploadProfilePicture(XFile file, String originalName, {Uint8List? bytes}) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(UploadData(file), StorageType.permanent, Constants.fileAppDataTag);
+    final response = await Get.find<AttachmentController>().uploadFile(
+      UploadData(file),
+      StorageType.permanent,
+      Constants.fileAppDataTag,
+      bytes: bytes,
+    );
     if (response.container == null) {
       showErrorPopup("error", response.message);
       return false;
@@ -118,7 +126,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
+    await Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
 
     return true;
   }
@@ -132,7 +140,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(null);
+    await Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(null);
     return true;
   }
 

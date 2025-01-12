@@ -1,5 +1,5 @@
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_card.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/objects/tabletop_card.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';

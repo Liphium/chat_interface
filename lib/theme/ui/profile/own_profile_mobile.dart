@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
@@ -46,8 +46,11 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
     _status.text = controller.status.value;
     statusMessage.value = controller.status.value;
 
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing * 1.5),
+    return DevicePadding(
+      top: true,
+      right: true,
+      left: true,
+      padding: EdgeInsets.all(defaultSpacing * 1.5),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

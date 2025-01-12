@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:chat_interface/connection/spaces/space_connection.dart';
-import 'package:chat_interface/controller/conversation/spaces/spaces_member_controller.dart';
-import 'package:chat_interface/controller/conversation/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +13,8 @@ void setupTabletopListeners() {
     for (var obj in event.data["obj"]) {
       controller.addObject(controller.newObject(
         TableObjectType.values[obj["t"]],
-        obj["id"],
+        obj["id"] as String,
+        obj["o"] as int,
         Offset((obj["x"] as num).toDouble(), (obj["y"] as num).toDouble()),
         Size((obj["w"] as num).toDouble(), (obj["h"] as num).toDouble()),
         (obj["r"] as num).toDouble(),
@@ -31,12 +32,23 @@ void setupTabletopListeners() {
     controller.addObject(controller.newObject(
       TableObjectType.values[event.data["type"]],
       event.data["id"],
+      event.data["o"],
       Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
       Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble()),
       (event.data["r"] as num).toDouble(),
       event.data["data"],
     ));
   });
+
+  // Listen for a new order of an object
+  spaceConnector.listen(
+    "tobj_order",
+    (event) {
+      var objectId = event.data["o"];
+      var newOrder = (event.data["or"] as num).toInt();
+      controller.setOrder(objectId, newOrder);
+    },
+  );
 
   // Listen for cursor movements
   spaceConnector.listen("tc_moved", (event) {

@@ -7,8 +7,8 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 
-class ProfileSetup extends ConnectionStep {
-  ProfileSetup() : super('loading.profile');
+class RefreshTokenStep extends ConnectionStep {
+  RefreshTokenStep() : super('loading.profile');
 
   @override
   Future<SetupResponse> load() async {

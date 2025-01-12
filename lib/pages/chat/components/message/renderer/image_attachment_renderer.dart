@@ -79,7 +79,7 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                 child: Center(
                   child: IconButton(
                     onPressed: () {
-                      Get.find<AttachmentController>().downloadAttachment(widget.image, ignoreLimit: true);
+                      Get.find<AttachmentController>().downloadAttachment(widget.image);
                     },
                     icon: const Icon(Icons.download, size: 40),
                   ),

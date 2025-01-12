@@ -21,8 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
-import 'package:open_app_file/open_app_file.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
@@ -40,11 +39,10 @@ class ZapShareController extends GetxController {
   String? transactionToken;
   String? uploadToken;
   String? filePath;
-  XDirectory? chunksDir;
   SecureKey? key;
   StreamSubscription<Uint8List>? partSubscription;
 
-  static const chunkSize = 512 * 1024;
+  static const chunkSize = 1024 * 1024;
 
   bool isRunning() {
     return currentReceiver.value != null || currentConversation.value != null || waiting.value;
@@ -84,10 +82,15 @@ class ZapShareController extends GetxController {
   }
 
   /// Open the window for zap share for a conversation
-  void openWindow(Conversation conversation, ContextMenuData data) async {
+  Future<void> openWindow(Conversation conversation, ContextMenuData data) async {
+    if (GetPlatform.isMobile) {
+      showErrorPopup("error", "zap.no_mobile".tr);
+      return;
+    }
+
     // If Zap is already doing something, show a menu
     if (isRunning()) {
-      Get.dialog(ZapShareWindow(data: data, conversation: conversation));
+      unawaited(Get.dialog(ZapShareWindow(data: data, conversation: conversation)));
       return;
     }
 
@@ -98,12 +101,12 @@ class ZapShareController extends GetxController {
     }
 
     // Start the transaction
-    newTransaction(conversation.otherMember.id, conversation.id, [file]);
+    unawaited(newTransaction(conversation.otherMember.id, conversation.id, [file]));
   }
 
   //* Everything about sending starts here
 
-  void newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
+  Future<void> newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
     if (files.length > 1) {
       sendLog("zapping multiple files is currently not supported");
       return;
@@ -117,14 +120,6 @@ class ZapShareController extends GetxController {
     waiting.value = true;
     uploading = true;
     sending = 0;
-
-    // Generate chunks dir
-    var tempPath = await getTemporaryDirectory();
-    final tempDir = XDirectory(path.join(tempPath.path, "liphium"));
-    await tempDir.create();
-    chunksDir = await tempDir.createTemp("zapzap");
-    await chunksDir!.create();
-    sendLog(chunksDir!.path);
 
     // If there are more files than one, put them into an archive (TODO: Implement)
     step.value = "chat.zapshare.compressing".tr;
@@ -170,7 +165,7 @@ class ZapShareController extends GetxController {
   bool zapperStarted = false;
 
   /// Zap deamon
-  void _startZapper(int start, int end) async {
+  Future<void> _startZapper(int start, int end) async {
     if (zapperStarted) {
       return;
     }
@@ -212,6 +207,7 @@ class ZapShareController extends GetxController {
       uploaded = false;
       final success = await _sendActualFilePart(currentlySending);
       if (!success) {
+        sendLog("upload failed, retrying..");
         // Retry in case of an error and wait a little bit
         currentlySending--;
         tries++;
@@ -234,7 +230,10 @@ class ZapShareController extends GetxController {
     final file = XFile(filePath!);
     final stream = file.openRead((chunk - 1) * chunkSize, chunk * chunkSize);
     var currentIndex = 0;
-    final toEncrypt = Uint8List(chunkSize);
+
+    // Calculate the size of the next chunk to prefill the list (optimization)
+    final fileSize = await file.length();
+    final Uint8List toEncrypt = chunk * chunkSize >= fileSize ? Uint8List(fileSize - (chunk - 1) * chunkSize) : Uint8List(chunkSize);
 
     // Send the chunk once done
     final completer = Completer<bool>();
@@ -275,7 +274,7 @@ class ZapShareController extends GetxController {
         }
 
         if (res.statusCode != 200) {
-          sendLog("Failed to send chunk $chunk");
+          sendLog("Failed to send chunk $chunk ${res.statusCode} ${res.statusMessage}");
           completer.complete(false);
           return;
         }
@@ -297,7 +296,7 @@ class ZapShareController extends GetxController {
   int sending = 0;
 
   /// Called for every file part sending request by the server
-  void onFilePartRequest(Event event) async {
+  Future<void> onFilePartRequest(Event event) async {
     if (!isRunning()) {
       sendLog("why would the server ask for parts when zap share isn't even running :smug:");
       return;
@@ -311,11 +310,11 @@ class ZapShareController extends GetxController {
     currentEndPart = end;
 
     // Start the zapper (in case it isn't started yet)
-    _startZapper(start, end);
+    unawaited(_startZapper(start, end));
   }
 
   /// Called when a transaction is ended (only when sending)
-  void onTransactionEnd() async {
+  Future<void> onTransactionEnd() async {
     waiting.value = false;
     uploading = false;
     progress.value = 0.0;
@@ -327,24 +326,14 @@ class ZapShareController extends GetxController {
     filePath = null;
     zapperStarted = false;
     uploadToken = null;
-    if (chunksDir != null) {
-      Timer.periodic(2000.ms, (timer) async {
-        try {
-          await chunksDir?.delete(recursive: true);
-          chunksDir = null;
-          timer.cancel();
-        } catch (e) {
-          sendLog("couldn't delete chunk directory: $e");
-        }
-      });
-    }
+
     resetControllerState();
   }
 
   //* Everything about receiving starts here
 
   /// Join a transaction with a given ID and token + start listening for parts
-  void joinTransaction(LPHAddress conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
+  Future<void> joinTransaction(LPHAddress conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
@@ -373,6 +362,12 @@ class ZapShareController extends GetxController {
     final FileSaveLocation? receiveFile = await getSaveLocation(suggestedName: container.fileName);
     if (receiveFile == null) {
       showErrorPopup("error", "zap.no_save_location".tr);
+      return;
+    }
+
+    // Make sure this location doesn't already have a different file with that name
+    if (await doesFileExist(XFile(receiveFile.path))) {
+      showErrorPopup("error", "zap.already_exists".tr);
       return;
     }
 
@@ -441,6 +436,7 @@ class ZapShareController extends GetxController {
               if (currentChunk < maxChunk) {
                 currentChunk++;
                 progress.value = currentChunk / endPart;
+                currentPart.value = currentChunk;
                 waiting = false;
               } else {
                 await Future.delayed(10.ms); // To prevent infinite spinning
@@ -485,7 +481,7 @@ class ZapShareController extends GetxController {
             }
 
             // Tell the server the part was successfully received
-            _tellReceived(
+            unawaited(_tellReceived(
               container.url,
               container.id,
               container.token,
@@ -494,12 +490,12 @@ class ZapShareController extends GetxController {
                 completed = complete;
                 if (completed) {
                   sendLog("download with zap completed, opening final folder..");
-                  OpenAppFile.open(path.dirname(receiveFile.path));
-                  partSubscription?.cancel();
+                  unawaited(OpenFile.open(path.dirname(receiveFile.path)));
+                  await partSubscription?.cancel();
                 }
               },
               onError: () => sendLog("error"),
-            );
+            ));
           }
         }
       },
@@ -508,12 +504,12 @@ class ZapShareController extends GetxController {
       },
       cancelOnError: true,
       onDone: () async {
-        onTransactionEnd();
+        await onTransactionEnd();
       },
     );
   }
 
-  void _tellReceived(String url, String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
+  Future<void> _tellReceived(String url, String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
     // Send receive confirmation
     final res = await dio.post(
       "${nodeProtocol()}$url/liveshare/received",

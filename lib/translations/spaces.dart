@@ -11,9 +11,41 @@ class SpacesTranslations extends Translations {
           'spaces.sharing_other_device': 'Sharing with friends',
           'spaces.count': '@count members',
           'spaces.toggle_people': 'Toggle showing people',
+          'spaces.tab.space': 'Space',
           'spaces.tab.table': 'Tabletop',
-          'spaces.tab.people': 'People',
-          'spaces.tab.cinema': 'Cinema',
+          'spaces.sidebar.chat': 'Chat',
+          'spaces.sidebar.people': 'People',
+          'spaces.member.not_verified': 'Identity could not be verified.',
+
+          // Welcome screen
+          'spaces.welcome': 'Welcome to this Space!',
+          'spaces.welcome.desc':
+              'Spaces is Liphium\'s version of a temporary gathering where you can do all kinds of things with your friends. Click the arrow in the bottom right to open the chat. Click "Tabletop" in the tab selector right above this text to enjoy our Tabletop emulator for playing card games. Have fun!',
+
+          // Warp
+          'warp.title': 'Warp',
+          'warp.desc': 'Warp is Liphium\'s way to share stuff like Minecraft servers and more. You\'ll need the server\'s port though.',
+          'warp.share': 'Create a Warp',
+
+          // Translations for the Warp creation window
+          'warp.create.title': 'Create a Warp',
+          'warp.create.desc':
+              'When you create a Warp, that port on your system will be accessible to all people and devices in the Space. Please make sure to not share important stuff.',
+          'warp.port.placeholder': '25565 (default MC port)',
+          'warp.create.button': 'Share this port',
+          'warp.error.port_invalid': 'A port can only be between 1024 and 65535, no higher and no lower.',
+          'warp.error.port_not_used': 'This port can\'t be shared because there is no server on it.',
+
+          // Translations for currently shared Warps
+          'warp.shared.title': 'Shared Warps',
+
+          // Translations for currently connected Warps
+          'warp.connected.title': 'Connected Warps',
+          'warp.connected.item': '@origin > @goal',
+
+          // Translations for Warps that are listed
+          'warp.list.sharing': '@name is sharing..',
+          'warp.list.empty': 'No shared Warps found.',
 
           // Game hub
           'game.lobby': 'Ready to start. (@count/@max)',

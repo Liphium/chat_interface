@@ -44,7 +44,7 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
               Expanded(
                 child: FJElevatedButton(
                   onTap: () async {
-                    Get.find<StatusController>().logOut(deleteEverything: true, deleteFiles: _deleteFiles.value);
+                    await Get.find<StatusController>().logOut(deleteEverything: true, deleteFiles: _deleteFiles.value);
                   },
                   child: Center(child: Text("yes".tr, style: Get.theme.textTheme.labelLarge)),
                 ),

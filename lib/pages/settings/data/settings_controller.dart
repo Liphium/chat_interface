@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
@@ -9,7 +10,6 @@ import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/security/trusted_links_settings.dart';
 import 'package:chat_interface/pages/settings/settings_page_desktop.dart';
-import 'package:chat_interface/pages/settings/settings_page_mobile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:get/get.dart';
 
@@ -23,7 +23,7 @@ class SettingController extends GetxController {
 
   static void openSettingsPage() {
     if (isMobileMode()) {
-      Get.to(const SettingsPageMobile());
+      Get.offAll(ChatPageMobile(selected: 3));
     } else {
       Get.to(const SettingsPageDesktop());
     }

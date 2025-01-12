@@ -6,6 +6,8 @@ class ErrorTranslations extends Translations {
         //* English US
         'en_US': {
           'error': 'Error',
+          'error.no_connection':
+              'There was an error while connecting to the server. Please make sure you are connected to the internet and have a stable connection to your town.',
           'render.error': 'Elements of type @type aren\'t supported.',
           'server.not_found': 'The server couldn\'t be reached. Make sure you have the right domain.',
           'error.network': 'Seems like you are offline. Please try to check the connection of your device.',
@@ -28,10 +30,13 @@ class ErrorTranslations extends Translations {
           'invalid.method': 'This is incorrect. Please try again.',
           'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
           'password.incorrect': 'Your password is incorrect. Please try again.',
-          'protocol.error':
+          'protocol.error.server':
               'The town you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that town to update to the latest version.',
+          'protocol.error.client':
+              'The town you are trying to connect to runs a more up to date version of Liphium. Please update your app to make sure everything works fine.',
           'spaces.not.setup': 'Spaces is not supported in your town. Please contact the owners of this town and ask them to set up Spaces.',
           'not.supported': 'This feature is not supported on this platform.',
+          'profile.conversation_not_found': 'You are not in a conversation with this person. Please create one first.',
 
           // Friends
           'request.self': 'Are you trying to add yourself as a friend?',
@@ -52,12 +57,16 @@ class ErrorTranslations extends Translations {
           'file.too_large': 'The maximum file size is @1MB.',
           'file.too_many': 'You can\'t attach more than 5 files to a message.',
           'file.unsafe': 'The provider of this file (@domain) isn\'t trusted.',
+          'file.no_save_location': 'Please select a save location for your file.',
           'chat.add_file': 'Attach a file',
           'message.delete_error': 'Couldn\'t delete message. Please try again later.',
           'group.data_too_long':
               'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
           'zap.no_save_location': 'Please select a save location for your file to use Zap.',
+          'zap.already_exists': 'This file already exists. Please choose a different place to store this file.',
           'zap.error': 'Zap Error',
+          'zap.no_mobile':
+              'Zap is currently not supported on mobile. We still have some things we need to figure out. Please wait until the app gets a little more stable. We\'ll announce once we have an estimated time when Zap will be available.',
 
           // Settings
           'profile_picture.not_uploaded': 'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',

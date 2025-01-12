@@ -1,18 +1,25 @@
-import 'package:chat_interface/controller/conversation/spaces/spaces_controller.dart';
+import 'dart:async';
+
+import 'package:chat_interface/controller/current/connection_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/developer_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class OwnProfile extends StatefulWidget {
   final ContextMenuData position;
@@ -270,18 +277,43 @@ class _ProfileState extends State<OwnProfile> {
           ),
           verticalSpacing(elementSpacing),
 
-          //* Hide profile
+          // For debug only database viewer
+          if (isDebug)
+            Padding(
+              padding: const EdgeInsets.only(bottom: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.hardware,
+                label: 'profile.test'.tr,
+                onTap: () async {
+                  testLoading.value = true;
+                  unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
+                  testLoading.value = false;
+                },
+                loading: testLoading,
+              ),
+            ),
+
+          // For debug only retry button
+          if (isDebug)
+            Padding(
+              padding: const EdgeInsets.only(bottom: elementSpacing),
+              child: ProfileButton(
+                icon: Icons.restart_alt,
+                label: 'profile.retry'.tr,
+                onTap: () async {
+                  Get.find<ConnectionController>().restart();
+                },
+                loading: testLoading,
+              ),
+            ),
+
+          // Help & resources button
           ProfileButton(
-            icon: Icons.hardware,
-            label: 'profile.test'.tr,
-            onTap: () async {
-              testLoading.value = true;
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db)));
-              testLoading.value = false;
-            },
-            loading: testLoading,
+            icon: Icons.launch,
+            label: 'help'.tr,
+            onTap: () => launchUrlString(Constants.docsBase),
+            loading: false.obs,
           ),
-          verticalSpacing(elementSpacing),
         ],
       ),
     );

@@ -107,6 +107,7 @@ class _SSRRendererState extends State<SSRRenderer> {
         controller: controller,
         obscureText: json["hidden"],
         hintText: json["placeholder"],
+        maxLength: json["max"],
         onChange: (value) {
           widget.ssr.currentInputValues[json["name"]] = value;
         },

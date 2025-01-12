@@ -19,7 +19,7 @@ class TrustedLinkSettings {
 
   static const trustModes = [
     SelectableItem("links.trust_mode.all", Icons.share),
-    SelectableItem("links.trust_mode.list", Icons.sort, experimental: true),
+    SelectableItem("links.trust_mode.list", Icons.sort),
     SelectableItem("links.trust_mode.none", Icons.close),
   ];
 
@@ -45,7 +45,7 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
     loadTrusted();
   }
 
-  void loadTrusted() async {
+  Future<void> loadTrusted() async {
     _trusted.value = await db.trustedLink.select().get();
   }
 
@@ -90,7 +90,7 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
             onTap: () async {
               final result = await showModal(const TrustedLinkCreationWindow());
               final data = TrustedLinkData(domain: result);
-              db.trustedLink.insertOnConflictUpdate(data);
+              await db.trustedLink.insertOnConflictUpdate(data);
               _trusted.add(data);
             },
             child: Text("links.trusted_list.add".tr, style: Get.theme.textTheme.labelLarge),
