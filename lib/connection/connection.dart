@@ -77,6 +77,7 @@ class Connector {
     }
     _connected = true;
 
+    // Send the first request for authentication
     connection!.sendText(jsonEncode({
       "token": token,
       "attachments": base64Encode(encryptedKey),
