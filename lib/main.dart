@@ -30,25 +30,6 @@ const bool isWeb = kIsWeb || kIsWasm;
 const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
 const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
 
-// Authentication types
-enum AuthType {
-  password(0, "password"),
-  totp(1, "totp"),
-  recoveryCode(2, "recoveryCode"),
-  passkey(3, "passkey");
-
-  final int id;
-  final String name;
-
-  const AuthType(this.id, this.name);
-
-  static AuthType fromId(int id) {
-    return AuthType.values.firstWhere((element) => element.id == id);
-  }
-}
-
-const liveKitURL = "";
-
 Future<bool> initSodium() async {
   sodiumLib = await SodiumInit.init();
   return true;
