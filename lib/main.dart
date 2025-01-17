@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -86,10 +85,6 @@ Future<void> initApp(List<String> args) async {
   // Wait for it to be finished
   await Future.delayed(100.ms);
 
-  if (isDebug) {
-    await encryptionTest();
-  }
-
   // Initialize controllers
   initializeControllers();
 
@@ -112,19 +107,4 @@ bool isDesktopPlatform() {
     return false;
   }
   return GetPlatform.isDesktop;
-}
-
-Future<bool> encryptionTest() async {
-  final bob = generateAsymmetricKeyPair();
-  final alice = generateAsymmetricKeyPair();
-
-  const message = "Hello world!";
-  final encrypted = encryptAsymmetricAuth(bob.publicKey, alice.secretKey, message);
-
-  // This should throw an exception
-  final result = decryptAsymmetricAuth(bob.publicKey, bob.secretKey, encrypted);
-  if (!result.success) {
-    sendLog("Authenticated encryption works!");
-  }
-  return true;
 }
