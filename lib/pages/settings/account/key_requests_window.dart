@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/signatures.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/hash.dart';
+import 'package:chat_interface/util/encryption/signatures.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';

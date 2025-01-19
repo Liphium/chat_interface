@@ -1,4 +1,4 @@
-import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';

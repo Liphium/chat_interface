@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/aes.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/util/encryption/aes.dart';
+import 'package:chat_interface/util/encryption/rsa.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
@@ -50,6 +50,10 @@ String authorizationValue() {
   return "Bearer $sessionToken";
 }
 
+String localeString(Locale locale) {
+  return "${locale.languageCode}_${locale.countryCode ?? "US"}";
+}
+
 /// Get the path to your own server
 String ownServer(String path) {
   return '$basePath/$apiVersion$path';
@@ -92,7 +96,11 @@ class LPHAddress {
   // Needed for hashCode to work
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is LPHAddress && runtimeType == other.runtimeType && server == other.server && id == other.id;
+      identical(this, other) ||
+      other is LPHAddress &&
+          runtimeType == other.runtimeType &&
+          TrustedLinkHelper.extractDomain(server) == TrustedLinkHelper.extractDomain(other.server) &&
+          id == other.id;
 
   // So it works properly with HashMaps
   @override
@@ -149,25 +157,6 @@ Future<Map<String, dynamic>> postJSON(
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body,
-    {String defaultError = "server.error", String? token, bool noApiVersion = false, bool checkProtocol = true}) async {
-  // Try to get the server public key
-  if (serverPublicKeys[server] == null) {
-    final result = await grabServerPublicURL(server, checkProtocol: checkProtocol);
-    if (result != null) {
-      return {
-        "success": false,
-        "error": result,
-      };
-    }
-  }
-
-  // Do the request
-  return _postTCP(serverPublicKeys[server]!, serverPath(server, path, noApiVersion: noApiVersion).toString(), body,
-      defaultError: defaultError, token: token);
-}
-
-/// Post request to any server (with Through Cloudflare Protection)
 Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, dynamic> body,
     {String defaultError = "server.error", String? token}) async {
   final aesKey = randomAESKey();
@@ -203,8 +192,23 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
   return jsonDecode(utf8.decode(decryptAES(res.bodyBytes, aesBase64)));
 }
 
-String localeString(Locale locale) {
-  return "${locale.languageCode}_${locale.countryCode ?? "US"}";
+/// Post request to any server (with Through Cloudflare Protection)
+Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body,
+    {String defaultError = "server.error", String? token, bool noApiVersion = false, bool checkProtocol = true}) async {
+  // Try to get the server public key
+  if (serverPublicKeys[server] == null) {
+    final result = await grabServerPublicURL(server, checkProtocol: checkProtocol);
+    if (result != null) {
+      return {
+        "success": false,
+        "error": result,
+      };
+    }
+  }
+
+  // Do the request
+  return _postTCP(serverPublicKeys[server]!, serverPath(server, path, noApiVersion: noApiVersion).toString(), body,
+      defaultError: defaultError, token: token);
 }
 
 // Post request to node-backend with any token (new)

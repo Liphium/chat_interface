@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/connection/connection.dart' as cn;
+import 'package:chat_interface/services/connection/connection.dart' as cn;
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';

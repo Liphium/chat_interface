@@ -1,8 +1,8 @@
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/messaging.dart';
-import 'package:chat_interface/connection/spaces/space_message_listener.dart';
-import 'package:chat_interface/connection/spaces/tabletop_listener.dart';
-import 'package:chat_interface/connection/spaces/warp_listener.dart';
+import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/services/connection/messaging.dart';
+import 'package:chat_interface/services/connection/spaces/space_message_listener.dart';
+import 'package:chat_interface/services/connection/spaces/tabletop_listener.dart';
+import 'package:chat_interface/services/connection/spaces/warp_listener.dart';
 import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/main.dart';

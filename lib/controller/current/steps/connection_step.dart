@@ -1,4 +1,4 @@
-import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 

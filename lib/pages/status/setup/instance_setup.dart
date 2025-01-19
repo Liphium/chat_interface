@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/database/database_init_stub.dart'

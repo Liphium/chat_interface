@@ -11,6 +11,8 @@ class ErrorTranslations extends Translations {
           'render.error': 'Elements of type @type aren\'t supported.',
           'server.not_found': 'The server couldn\'t be reached. Make sure you have the right domain.',
           'error.network': 'Seems like you are offline. Please try to check the connection of your device.',
+          'error.untrusted_server':
+              'This action couldn\'t be completed because @domain isn\'t trusted. Check your settings if you want to trust this server.',
           'server.error': 'Something went wrong on the server, please try again later.',
           'other.server.error':
               'It seems like the town this conversation is hosted on is currently down. Please try again later. We\'ll automatically try restoring a connection.',
@@ -52,6 +54,7 @@ class ErrorTranslations extends Translations {
           'conversations.error': 'Conversation error',
           'conversations.amount': 'You have reached the maximum amount of @amount conversations. Please delete old ones to create more.',
           'conversations.name.length': 'The conversation name you specified is longer than allowed. Please use less than @length characters.',
+          'conversation.delete_error': 'You can\'t delete this conversation yet. Please try again later.',
           'error.not_delete_conversation': 'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
           'file.not_uploaded': 'File not found.',
           'file.too_large': 'The maximum file size is @1MB.',

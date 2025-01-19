@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -30,7 +33,13 @@ class ProfileDefaults {
 
   static Function(Friend, RxBool) openAction = (Friend friend, RxBool loading) async {
     loading.value = true;
-    await openDirectMessage(friend);
+    final (conv, error) = await ConversationService.openDirectMessage(friend);
+    if (conv != null) {
+      unawaited(Get.find<MessageController>().selectConversation(conv));
+    }
+    if (error != null) {
+      showErrorPopup("error", error);
+    }
     loading.value = false;
     Get.back();
   };

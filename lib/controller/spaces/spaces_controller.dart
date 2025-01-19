@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/services/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
@@ -14,7 +14,6 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
@@ -121,11 +120,10 @@ class SpacesController extends GetxController {
   }
 
   /// Function called by the space service to tell this controller about the connection
-  void onConnect(String spaceId, SecureKey spaceKey) {
-    sendLog("connected");
-
+  void onConnect(String server, String spaceId, SecureKey spaceKey) {
     // Load information from space container
     id.value = spaceId;
+    currentDomain = server;
     key = spaceKey;
     switchToTab(SpaceTabType.space);
     sidebarTabType.value = SpaceSidebarTabType.chat.index;
@@ -218,6 +216,7 @@ class SpaceInfo {
     exists = true;
 
     final controller = Get.find<FriendController>();
+
     for (var member in members) {
       final friend = controller.friends[member];
       if (friend != null) friends.add(friend);

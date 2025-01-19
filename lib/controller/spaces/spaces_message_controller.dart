@@ -1,8 +1,8 @@
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/services/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/controller/spaces/ringing_manager.dart';
 import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';

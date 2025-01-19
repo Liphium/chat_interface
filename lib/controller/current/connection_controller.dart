@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/connection/connection.dart';
+import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/controller/current/steps/connection_step.dart';
 import 'package:chat_interface/controller/current/tasks/friend_sync_task.dart';

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/chat/stored_actions_listener.dart';
+import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';

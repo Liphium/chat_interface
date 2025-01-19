@@ -4,6 +4,11 @@
 
 ## Currently in dev
 
+- Fixed that you couldn't invite people to a Space
+- Fixed same addresses sometimes not being recognized
+
+## 0.6.0
+
 ### Architecture changes and new features
 
 - This release of Liphium is compatible with protocol v7

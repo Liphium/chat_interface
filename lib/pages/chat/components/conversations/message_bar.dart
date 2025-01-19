@@ -10,6 +10,7 @@ import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/status/error/offline_hider.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -296,9 +297,9 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
 
               // Add the people to the conversation
               for (var friend in finalList) {
-                final res = await addToConversation(widget.conversation, friend);
-                if (!res) {
-                  showErrorPopup("error", "server.error".tr);
+                final error = await ConversationService.addToConversation(widget.conversation, friend);
+                if (error != null) {
+                  showErrorPopup("error", error);
                   return null;
                 }
               }

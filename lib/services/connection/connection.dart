@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/connection/chat/conversation_listener.dart';
-import 'package:chat_interface/connection/encryption/aes.dart';
-import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
-import 'package:chat_interface/connection/chat/live_share_listener.dart';
-import 'package:chat_interface/connection/chat/message_listener.dart';
-import 'package:chat_interface/connection/chat/status_listener.dart';
-import 'package:chat_interface/connection/chat/stored_actions_listener.dart';
-import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'package:chat_interface/services/connection/chat/conversation_listener.dart';
+import 'package:chat_interface/util/encryption/aes.dart';
+import 'package:chat_interface/util/encryption/hash.dart';
+import 'package:chat_interface/util/encryption/rsa.dart';
+import 'package:chat_interface/services/connection/chat/live_share_listener.dart';
+import 'package:chat_interface/services/connection/chat/message_listener.dart';
+import 'package:chat_interface/services/connection/chat/status_listener.dart';
+import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
+import 'package:chat_interface/services/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';

@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/chat/setup_listener.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
@@ -16,8 +16,8 @@ import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 
-import '../../controller/current/status_controller.dart';
-import '../../util/logging_framework.dart';
+import '../../../controller/current/status_controller.dart';
+import '../../../util/logging_framework.dart';
 
 part 'stored_actions_util.dart';
 
@@ -233,7 +233,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     ),
     members,
   );
-  subscribeToConversation(convToken, deletions: false);
+  ConversationService.subscribeToConversation(convToken, deletions: false);
 
   return true;
 }

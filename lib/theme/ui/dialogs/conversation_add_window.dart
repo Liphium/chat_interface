@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -38,35 +42,40 @@ class ConversationAddWindow extends StatefulWidget {
   @override
   State<ConversationAddWindow> createState() => _ConversationAddWindowState();
 
+  /// Create a conversation using a list of friends.
+  ///
+  /// Name is optional as it's not required for direct messages.
   static Future<String?> createConversationAction(List<Friend> friends, String? name) async {
+    // Make sure the selection is valid
     if (friends.isEmpty) {
       return "choose.members".tr;
     }
-
     if (friends.length > specialConstants[Constants.specialConstantMaxConversationMembers]!) {
       return "choose.members".tr;
     }
-
     if (name == null && friends.length > 1) {
       return "enter.name".tr;
     }
-
     if (name!.isEmpty && friends.length > 1) {
       return "enter.name".tr;
     }
-
     if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]! && friends.length > 1) {
       return "too.long".trParams({"limit": specialConstants["max_conversation_name_length"].toString()});
     }
 
-    var result = false;
+    // Open a group or direct message based on the amount of people in it
+    String? error;
     if (friends.length == 1) {
-      result = await openDirectMessage(friends.first);
+      Conversation? conv;
+      (conv, error) = await ConversationService.openDirectMessage(friends.first);
+      if (conv != null) {
+        unawaited(Get.find<MessageController>().selectConversation(conv));
+      }
     } else {
-      result = await openGroupConversation(friends, name);
+      error = await ConversationService.openGroupConversation(friends, name);
     }
 
-    return result ? null : "server.error".tr;
+    return error;
   }
 }
 

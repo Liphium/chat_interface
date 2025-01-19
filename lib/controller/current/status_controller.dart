@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/chat/setup_listener.dart';
-import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
@@ -121,7 +121,7 @@ class StatusController extends GetxController {
         if (type != null) this.type.value = type;
 
         // Send the new status
-        subscribeToConversations(controller: this);
+        ConversationService.subscribeToConversations(controller: this);
       }
     });
 

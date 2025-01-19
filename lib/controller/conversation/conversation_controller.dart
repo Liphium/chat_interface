@@ -1,19 +1,12 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/signatures.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/chat/setup_listener.dart';
-import 'package:chat_interface/connection/chat/stored_actions_listener.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
-import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
-import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
@@ -22,8 +15,6 @@ import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 import 'member_controller.dart';
-
-part 'conversation_actions.dart';
 
 class ConversationController extends GetxController {
   final loaded = false.obs;
@@ -58,37 +49,23 @@ class ConversationController extends GetxController {
     conversation.save(saveMembers: false);
 
     // Subscribe to conversation
-    subscribeToConversation(conversation.token);
+    ConversationService.subscribeToConversation(conversation.token);
 
     return true;
   }
 
   /// Add a conversation to the cache and local database (after created)
   Future<bool> addCreated(Conversation conversation, List<Member> members, {Member? admin}) async {
+    // Cache the conversation
     conversations[conversation.id] = conversation;
     _insertToOrder(conversation.id);
 
+    // Add all the members to this conversation
     for (var member in members) {
       conversation.addMember(member);
     }
     if (admin != null) {
       conversation.addMember(admin);
-    }
-
-    // Add to vault
-    final vaultId = await addToVault(Constants.vaultConversationTag, conversation.toJson());
-    if (vaultId == null) {
-      // TODO: refresh the vault or something
-      sendLog("COULDNT STORE IN VAULT; SOMETHING WENT WRONG");
-      return false;
-    }
-    conversation.vaultId = vaultId;
-    sendLog("STORED IN VAULT: $vaultId");
-
-    // Store in database
-    await db.conversation.insertOnConflictUpdate(conversation.entity);
-    for (var member in conversation.members.values) {
-      await db.member.insertOnConflictUpdate(member.toData(conversation.id));
     }
 
     return true;
@@ -310,29 +287,23 @@ class Conversation {
 
   // Delete conversation from vault and database
   Future<void> delete({bool request = true, bool popup = true}) async {
-    final err = await removeFromVault(vaultId);
-    if (err != null) {
-      sendLog("Error deleting conversation from vault: $err");
-      if (popup) showErrorPopup("error".tr, "error.not_delete_conversation".tr);
+    // Check if the vault id has been synchronized yet
+    if (vaultId == "") {
+      if (popup) {
+        showErrorPopup("error", "conversation.delete_error".tr);
+      }
+      sendLog("ERROR: Can't delete conversation yet: no vault id");
       return;
     }
 
-    if (request) {
-      final json = await postNodeJSON("/conversations/leave", {
-        "token": token.toMap(),
-      });
-
-      if (!json["success"]) {
-        sendLog("Error deleting conversation from vault: ${json["error"]}");
-        if (popup) showErrorPopup("error".tr, "error.not_delete_conversation".tr);
-        // Don't return here, should remove from the local vault regardless
+    // Delete the conversation
+    final error = await ConversationService.delete(id, vaultId: vaultId, token: token);
+    if (error != null) {
+      if (popup) {
+        showErrorPopup("error", error);
       }
+      sendLog("ERROR: Can't delete conversation: $error");
     }
-
-    await db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
-    await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
-    Get.find<MessageController>().unselectConversation(id: id);
-    Get.find<ConversationController>().removeConversation(id);
   }
 
   /// Save the entire conversation to the local database.

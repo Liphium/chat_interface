@@ -11,30 +11,30 @@ Future<bool> deleteStoredAction(String id) async {
   return true;
 }
 
-Future<bool> sendAuthenticatedStoredAction(Friend friend, Map<String, dynamic> payload) async {
+/// Send an authenticated stored action to a friend.
+///
+/// Returns an error if there was one.
+Future<String?> sendAuthenticatedStoredAction(Friend friend, Map<String, dynamic> payload) async {
   // Set the sender
   payload["s"] = StatusController.ownAddress.encode();
 
   // Make sure the server is trusted
   if (!await TrustedLinkHelper.askToAddIfNotAdded(friend.id.server)) {
-    sendLog("COULDN'T SEND STORED ACTION: domain not trusted");
-    return false;
+    return "error.untrusted_server".trParams({"domain": friend.id.server});
   }
 
-  // Send stored action
+  // Send the authenticated stored action
   final json = await postAddress(friend.id.server, "/account/stored_actions/send_auth", <String, dynamic>{
     "account": friend.id.id,
-    // actual data (safe from replay attacks thanks to sequence numbers)
+    // actual data (safe from replay attacks thanks to sequence numbers and the sender saving the last receive time)
     "payload": AsymmetricSequencedInfo.builder(jsonEncode(payload), DateTime.now().millisecondsSinceEpoch).finish(friend.keyStorage.publicKey),
     "key": friend.keyStorage.storedActionKey,
   });
-
   if (!json["success"]) {
-    sendLog("couldn't send stored action: ${json["error"]}");
-    return false;
+    return json["error"];
   }
 
-  return true;
+  return null;
 }
 
 /// Send a stored action to someone using their address (returns null when successful)
