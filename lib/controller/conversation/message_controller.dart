@@ -135,11 +135,7 @@ class MessageController extends GetxController {
         }
       } else {
         // Store normal type of message
-        if (currentProvider.value!.messages.isNotEmpty && currentProvider.value!.messages[0].id != message.id) {
-          unawaited(currentProvider.value!.addMessageToBottom(message));
-        } else if (currentProvider.value!.messages.isEmpty) {
-          unawaited(currentProvider.value!.addMessageToBottom(message));
-        }
+        unawaited(currentProvider.value!.addMessageToBottom(message));
       }
     }
 

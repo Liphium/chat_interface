@@ -1,5 +1,5 @@
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/services/connection/spaces/space_connection.dart';
+import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
@@ -41,11 +41,7 @@ class SpacesMessageController extends GetxController {
       }
     } else {
       // Store normal type of message
-      if (provider.messages.isNotEmpty && provider.messages[0].id != message.id) {
-        provider.addMessageToBottom(message);
-      } else if (provider.messages.isEmpty) {
-        provider.addMessageToBottom(message);
-      }
+      provider.addMessageToBottom(message);
     }
 
     // Handle system messages

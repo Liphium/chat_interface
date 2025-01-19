@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';

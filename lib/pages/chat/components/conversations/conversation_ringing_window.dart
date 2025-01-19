@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/spaces/ringing_manager.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';

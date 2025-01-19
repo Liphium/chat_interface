@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:chat_interface/services/connection/spaces/space_connection.dart';
+import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/util/logging_framework.dart';

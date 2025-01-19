@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -82,5 +81,42 @@ class SpaceConnectionContainer extends ShareContainer {
     // Return the proper info
     info.value = SpaceInfo.fromJson(this, body);
     return info.value!;
+  }
+}
+
+class SpaceInfo {
+  late bool exists;
+  bool error = false;
+  late DateTime start;
+  final List<Friend> friends = [];
+  late final List<LPHAddress> members;
+
+  SpaceInfo(this.start, this.members) {
+    error = false;
+    exists = true;
+    final controller = Get.find<FriendController>();
+    for (var member in members) {
+      final friend = controller.friends[member];
+      if (friend != null) friends.add(friend);
+    }
+  }
+
+  SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
+    start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
+    members = List<LPHAddress>.from(json["members"].map((e) => LPHAddress.from(decryptSymmetric(e, container.key))));
+    exists = true;
+
+    final controller = Get.find<FriendController>();
+
+    for (var member in members) {
+      final friend = controller.friends[member];
+      if (friend != null) friends.add(friend);
+    }
+  }
+
+  SpaceInfo.notLoaded({bool wasError = false}) {
+    exists = false;
+    error = wasError;
+    members = [];
   }
 }

@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
-import 'package:chat_interface/services/connection/spaces/space_connection.dart';
+import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/pages/spaces/warp/warp_manager_window.dart';

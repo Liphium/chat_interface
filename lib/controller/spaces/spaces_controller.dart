@@ -1,49 +1,46 @@
 import 'dart:async';
 
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/services/connection/spaces/space_connection.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
 import 'package:chat_interface/util/popups.dart';
-import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:window_manager/window_manager.dart';
 
 bool areSpacesSupported = !isWeb && !GetPlatform.isMobile;
 
-class SpacesController extends GetxController {
+class SpacesController {
   //* Call status
-  final inSpace = false.obs;
-  final spaceLoading = false.obs;
-  final connected = false.obs;
-  final start = DateTime.now().obs;
-  final currentTab = SpaceTabType.space.index.obs;
-  int _prevTab = SpaceTabType.space.index;
+  static final spaceLoading = signal(false);
+  static final connected = signal(false);
+  static final start = signal(DateTime.now());
+  static final currentTab = signal(SpaceTabType.space.index);
+  static int _prevTab = SpaceTabType.space.index;
 
   //* Space information
-  static String? currentDomain;
-  final id = "".obs;
+  static String? domain;
+  static String? id;
   static SecureKey? key;
 
   //* Call layout
-  final chatOpen = true.obs;
-  final hideSidebar = false.obs;
-  final fullScreen = false.obs;
-  final sidebarTabType = SpaceSidebarTabType.chat.index.obs;
+  static final chatOpen = signal(true);
+  static final hideSidebar = signal(false);
+  static final fullScreen = signal(false);
+  static final sidebarTabType = signal(SpaceSidebarTabType.chat.index);
 
-  void toggleFullScreen() {
-    fullScreen.toggle();
+  /// Toggle full screen in the Space
+  static void toggleFullScreen() {
+    fullScreen.value = !fullScreen.value;
     if (fullScreen.value) {
       windowManager.setFullScreen(true);
     } else {
@@ -52,13 +49,13 @@ class SpacesController extends GetxController {
   }
 
   /// Switch to a tab programatically
-  void switchToTabAndChange(SpaceTabType type) {
+  static void switchToTabAndChange(SpaceTabType type) {
     currentTab.value = type.index;
     switchToTab(type);
   }
 
   /// Event that is called after the tab switch was done through the selector
-  void switchToTab(SpaceTabType type) {
+  static void switchToTab(SpaceTabType type) {
     if (type.index == _prevTab) {
       return;
     }
@@ -76,7 +73,7 @@ class SpacesController extends GetxController {
   }
 
   /// Create a space (publish says whether or not it should be published through status)
-  Future<void> createSpace(bool publish) async {
+  static Future<void> createSpace(bool publish) async {
     spaceLoading.value = true;
     final (container, error) = await SpaceService.createSpace();
     spaceLoading.value = false;
@@ -90,7 +87,8 @@ class SpacesController extends GetxController {
     }
   }
 
-  Future<void> createAndConnect(MessageProvider provider) async {
+  /// Create a space and connect to it (with sending an invite to the message provider)
+  static Future<void> createAndConnect(MessageProvider provider) async {
     if (!areSpacesSupported) {
       showNotSupported();
       return;
@@ -108,7 +106,7 @@ class SpacesController extends GetxController {
     unawaited(provider.sendMessage(spaceLoading, MessageType.call, [], container!.toInviteJson(), ""));
   }
 
-  Future<void> join(SpaceConnectionContainer container) async {
+  static Future<void> join(SpaceConnectionContainer container) async {
     spaceLoading.value = true;
 
     // Connect to a Space
@@ -120,10 +118,10 @@ class SpacesController extends GetxController {
   }
 
   /// Function called by the space service to tell this controller about the connection
-  void onConnect(String server, String spaceId, SecureKey spaceKey) {
+  static void onConnect(String server, String spaceId, SecureKey spaceKey) {
     // Load information from space container
-    id.value = spaceId;
-    currentDomain = server;
+    id = spaceId;
+    domain = server;
     key = spaceKey;
     switchToTab(SpaceTabType.space);
     sidebarTabType.value = SpaceSidebarTabType.chat.index;
@@ -140,35 +138,34 @@ class SpacesController extends GetxController {
     Get.find<SpaceMemberController>().onConnect(spaceKey);
 
     connected.value = true;
-    inSpace.value = true;
     chatOpen.value = true;
   }
 
-  void showNotSupported() {
+  static void showNotSupported() {
     showErrorPopup("spaces.not_supported", "spaces.not_supported.desc".tr);
   }
 
-  void inviteToCall(MessageProvider provider) {
-    provider.sendMessage(spaceLoading, MessageType.call, [], getContainer().toInviteJson(), "");
+  static void inviteToCall(MessageProvider provider) {
+    provider.sendMessage(false.obs, MessageType.call, [], getContainer().toInviteJson(), "");
   }
 
-  SpaceConnectionContainer getContainer() {
-    return SpaceConnectionContainer(currentDomain!, id.value, key!, null);
+  /// Get a [SpaceConnectionContainer] for the current Space.
+  static SpaceConnectionContainer getContainer() {
+    return SpaceConnectionContainer(domain!, id!, key!, null);
   }
 
-  Future<void> leaveCall({error = false}) async {
-    inSpace.value = false;
+  /// Leave the space.
+  static Future<void> leaveSpace({error = false}) async {
+    // Disconnect from the space
+    SpaceConnection.disconnect();
+
+    // Update the state to reflect the change
     connected.value = false;
-    id.value = "";
-    spaceConnector.disconnect();
+    id = null;
+    key = null;
+    domain = null;
 
-    // Tell other controllers about it
-    Get.find<StatusController>().stopSharing();
-    Get.find<SpaceMemberController>().onDisconnect();
-    Get.find<TabletopController>().resetControllerState();
-    Get.find<WarpController>().resetControllerState();
-    Get.find<SpacesMessageController>().clearProvider();
-
+    // Show an error if there was one
     if (!error) {
       unawaited(Get.offAll(getChatPage(), transition: Transition.fadeIn));
       Get.find<MessageController>().openTab(OpenTabType.conversation);
@@ -191,41 +188,4 @@ enum SpaceSidebarTabType {
 
   final String name;
   const SpaceSidebarTabType(this.name);
-}
-
-class SpaceInfo {
-  late bool exists;
-  bool error = false;
-  late DateTime start;
-  final List<Friend> friends = [];
-  late final List<LPHAddress> members;
-
-  SpaceInfo(this.start, this.members) {
-    error = false;
-    exists = true;
-    final controller = Get.find<FriendController>();
-    for (var member in members) {
-      final friend = controller.friends[member];
-      if (friend != null) friends.add(friend);
-    }
-  }
-
-  SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
-    start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
-    members = List<LPHAddress>.from(json["members"].map((e) => LPHAddress.from(decryptSymmetric(e, container.key))));
-    exists = true;
-
-    final controller = Get.find<FriendController>();
-
-    for (var member in members) {
-      final friend = controller.friends[member];
-      if (friend != null) friends.add(friend);
-    }
-  }
-
-  SpaceInfo.notLoaded({bool wasError = false}) {
-    exists = false;
-    error = wasError;
-    members = [];
-  }
 }
