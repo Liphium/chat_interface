@@ -4,7 +4,6 @@ import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
-import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -37,6 +36,11 @@ class SpacesController {
   static final hideSidebar = signal(false);
   static final fullScreen = signal(false);
   static final sidebarTabType = signal(SpaceSidebarTabType.chat.index);
+
+  /// Update the start time for the Space
+  static void updateStartDate(DateTime newStart) {
+    start.value = newStart;
+  }
 
   /// Toggle full screen in the Space
   static void toggleFullScreen() {
@@ -103,7 +107,7 @@ class SpacesController {
       return;
     }
 
-    unawaited(provider.sendMessage(spaceLoading, MessageType.call, [], container!.toInviteJson(), ""));
+    unawaited(provider.sendMessage(false.obs, MessageType.call, [], container!.toInviteJson(), ""));
   }
 
   static Future<void> join(SpaceConnectionContainer container) async {
@@ -133,9 +137,6 @@ class SpacesController {
 
     // Reset everything on the table
     Get.find<TabletopController>().resetControllerState();
-
-    // Initialize the member controller
-    Get.find<SpaceMemberController>().onConnect(spaceKey);
 
     connected.value = true;
     chatOpen.value = true;

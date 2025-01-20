@@ -6,10 +6,10 @@ import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/connection/spaces/space_message_listener.dart';
 import 'package:chat_interface/services/connection/spaces/tabletop_listener.dart';
-import 'package:chat_interface/services/connection/spaces/warp_listener.dart';
 import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/services/spaces/warp/warp_service.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:get/get.dart';
 
@@ -26,20 +26,16 @@ class SpaceConnection {
       }
 
       // Tell all controllers about the leaving of the space
-      Get.find<SpacesController>().leaveCall(error: error);
       Get.find<StatusController>().stopSharing();
-      Get.find<SpaceMemberController>().onDisconnect();
       Get.find<TabletopController>().resetControllerState();
-      Get.find<WarpController>().resetControllerState();
+      SpacesController.leaveSpace(error: error);
+      WarpController.resetControllerState();
+      SpaceMemberController.onDisconnect();
       Get.find<SpacesMessageController>().clearProvider();
     }));
 
     // Setup all the listeners for the connector
     setupSpaceListeners();
-
-    if (success) {
-      // Tell all controllers about the start of a space
-    }
 
     return success;
   }
@@ -57,15 +53,12 @@ class SpaceConnection {
 
     setupTabletopListeners();
     setupSpaceMessageListeners();
-    WarpListener.setupWarpListeners();
+    WarpService.setupWarpListeners(spaceConnector!);
   }
 
   /// Sends the room data to all controllers
   static void _handleRoomData(Event event) {
-    final controller = Get.find<SpacesController>();
-    controller.start.value = DateTime.fromMillisecondsSinceEpoch(event.data["start"]);
-
-    // Update members
-    Get.find<SpaceMemberController>().onMembersChanged(event.data["members"]);
+    SpacesController.updateStartDate(DateTime.fromMillisecondsSinceEpoch(event.data["start"]));
+    SpaceMemberController.onMembersChanged(event.data["members"]);
   }
 }

@@ -16,6 +16,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals.dart';
 
 class TabletopController extends GetxController {
   final loading = false.obs;
@@ -31,7 +32,7 @@ class TabletopController extends GetxController {
   final orderSorted = <int>[];
   final objectOrder = <int, String>{};
   final objects = <String, TableObject>{};
-  final cursors = <String, TabletopCursor>{}.obs; // Other users cursors
+  final cursors = signal(<String, TabletopCursor>{}); // Other users cursors
 
   /// The rate at which the table is updated (to the server)
   static const tickRate = 20;
@@ -59,7 +60,7 @@ class TabletopController extends GetxController {
     inventory = null;
     objects.clear();
     objectOrder.clear();
-    cursors.clear();
+    cursors.value = <String, TabletopCursor>{};
 
     _ticker?.cancel();
     _ticker = null;
@@ -78,7 +79,7 @@ class TabletopController extends GetxController {
   /// Called when the tabletop tab is opened (to receive events again)
   void openTableTab() {
     loading.value = true;
-    spaceConnector.sendAction(
+    SpaceConnection.spaceConnector!.sendAction(
       ServerAction("table_enable", <String, dynamic>{}),
       handler: (event) {
         loading.value = false;
@@ -102,9 +103,9 @@ class TabletopController extends GetxController {
     objectOrder.clear();
     _ticker?.cancel();
     hoveringObjects.clear();
-    cursors.clear();
+    cursors.value = <String, TabletopCursor>{};
     loading.value = true;
-    spaceConnector.sendAction(
+    SpaceConnection.spaceConnector!.sendAction(
       ServerAction("table_disable", <String, dynamic>{}),
       handler: (event) {
         loading.value = false;
@@ -122,7 +123,7 @@ class TabletopController extends GetxController {
     // Send the location of the held object
     if (heldObject != null) {
       if (movingAllowed) {
-        spaceConnector.sendAction(
+        SpaceConnection.spaceConnector!.sendAction(
           ServerAction("tobj_move", <String, dynamic>{
             "id": heldObject!.id,
             "x": heldObject!.location.dx,
@@ -140,7 +141,7 @@ class TabletopController extends GetxController {
 
     // Send mouse position if available
     if (_lastMousePos != mousePos && !disableCursorSending.value) {
-      spaceConnector.sendAction(ServerAction("tc_move", <String, dynamic>{
+      SpaceConnection.spaceConnector!.sendAction(ServerAction("tc_move", <String, dynamic>{
         "x": mousePos.dx,
         "y": mousePos.dy,
         "c": TabletopSettings.getHue(),
@@ -155,15 +156,18 @@ class TabletopController extends GetxController {
     if (id == SpaceMemberController.ownId) {
       return;
     }
-
-    if (cursors[id] == null) {
-      cursors[id] = TabletopCursor(id, position, hue);
+    final currentCursors = cursors.value;
+    if (currentCursors[id] == null) {
+      currentCursors[id] = TabletopCursor(id, position, hue);
     } else {
-      if (cursors[id]!.hue.value != hue) {
-        cursors[id]!.hue.value = hue;
+      if (currentCursors[id]!.hue.value != hue) {
+        currentCursors[id]!.hue.value = hue;
       }
-      cursors[id]!.move(position);
+      currentCursors[id]!.move(position);
     }
+
+    // Update the signal
+    cursors.value = currentCursors;
   }
 
   /// Create a new object
@@ -432,7 +436,7 @@ abstract class TableObject {
 
   void newRotation(double rot) {
     queue(() async {
-      final event = await spaceConnector.sendActionAndWait(ServerAction("tobj_rotate", <String, dynamic>{
+      final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("tobj_rotate", <String, dynamic>{
         "id": id,
         "r": rot,
       }));
@@ -503,7 +507,7 @@ abstract class TableObject {
     final completer = Completer<bool>();
 
     // Send to the server
-    spaceConnector.sendAction(
+    SpaceConnection.spaceConnector!.sendAction(
       ServerAction("tobj_create", <String, dynamic>{
         "x": location.dx,
         "y": location.dy,

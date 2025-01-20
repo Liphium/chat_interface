@@ -1,3 +1,5 @@
+import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/util/encryption/signatures.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
@@ -90,10 +92,15 @@ class SpaceService {
     }
 
     // Make everything ready
-    Get.find<SpacesController>().onConnect(server, spaceId, key);
+    SpacesController.onConnect(server, spaceId, key);
+
+    // Open the screen
+    Get.find<MessageController>().unselectConversation();
+    Get.find<MessageController>().openTab(OpenTabType.space);
+    Get.find<SpacesMessageController>().open();
 
     // Send the server all the data required for setup
-    final event = await SpaceConnection.spaceConnector.sendActionAndWait(msg.ServerAction("setup", {
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(msg.ServerAction("setup", {
       "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
       "signature": signMessage(signatureKeyPair.secretKey, craftSignature(spaceId, clientId, StatusController.ownAddress.encode())),
     }));
