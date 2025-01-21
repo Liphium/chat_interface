@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/spaces/tabletop/objects/tabletop_card.dart';
+import 'package:chat_interface/pages/spaces/tabletop/objects/tabletop_card.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_decks.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/services/spaces/tabletop/tabletop_object.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

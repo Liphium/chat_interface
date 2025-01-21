@@ -1,14 +1,16 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/conversation/system_messages.dart';
+import 'package:chat_interface/controller/spaces/ringing_manager.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
-import 'package:chat_interface/controller/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
+import 'package:chat_interface/services/spaces/space_message_provider.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:get/get.dart';
@@ -36,6 +38,9 @@ class SpacesController {
   static final hideSidebar = signal(false);
   static final fullScreen = signal(false);
   static final sidebarTabType = signal(SpaceSidebarTabType.chat.index);
+
+  // Spaces messaging
+  static SpacesMessageProvider provider = SpacesMessageProvider();
 
   /// Update the start time for the Space
   static void updateStartDate(DateTime newStart) {
@@ -66,12 +71,12 @@ class SpacesController {
 
     // If the previous tab was the table, disconnect from the event stream
     if (_prevTab == SpaceTabType.table.index) {
-      Get.find<TabletopController>().closeTableTab();
+      TabletopController.closeTableTab();
     }
 
     // If the current tab is a table tab, connect to the event stream
     if (type == SpaceTabType.table) {
-      Get.find<TabletopController>().openTableTab();
+      TabletopController.openTableTab();
     }
     _prevTab = currentTab.value;
   }
@@ -133,10 +138,9 @@ class SpacesController {
     // Open the screen
     Get.find<MessageController>().unselectConversation();
     Get.find<MessageController>().openTab(OpenTabType.space);
-    Get.find<SpacesMessageController>().open();
 
-    // Reset everything on the table
-    Get.find<TabletopController>().resetControllerState();
+    // Load the first messages of the Space chat
+    provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 
     connected.value = true;
     chatOpen.value = true;
@@ -166,10 +170,36 @@ class SpacesController {
     key = null;
     domain = null;
 
+    // Reset the message provider
+    provider = SpacesMessageProvider();
+
     // Show an error if there was one
     if (!error) {
       unawaited(Get.offAll(getChatPage(), transition: Transition.fadeIn));
       Get.find<MessageController>().openTab(OpenTabType.conversation);
+    }
+  }
+
+  /// Add a message to the Spaces chat.
+  ///
+  /// Also plays a notification sound if desired by the user.
+  static void addMessage(Message message) {
+    // Play a notification sound when a new message arrives
+    RingingManager.playNotificationSound();
+
+    // Check if it is a system message and if it should be rendered or not
+    if (message.type == MessageType.system) {
+      if (SystemMessages.messages[message.content]?.render == true) {
+        provider.addMessageToBottom(message);
+      }
+    } else {
+      // Store normal type of message
+      provider.addMessageToBottom(message);
+    }
+
+    // Handle system messages
+    if (message.type == MessageType.system) {
+      SystemMessages.messages[message.content]?.handle(message, provider);
     }
   }
 }

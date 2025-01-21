@@ -61,7 +61,7 @@ class ProfileDefaults {
         onTap: openAction,
         loading: friend.openConversationLoading,
       ),
-      if (Get.find<SpacesController>().inSpace.value)
+      if (SpacesController.connected.value)
         ProfileAction(
           icon: Icons.forward_to_inbox,
           label: 'friends.invite_to_space'.tr,
@@ -78,7 +78,7 @@ class ProfileDefaults {
               return;
             }
 
-            Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation));
+            SpacesController.inviteToCall(ConversationMessageProvider(conversation));
             Get.back();
           },
         ),
@@ -213,14 +213,14 @@ class _ProfileState extends State<Profile> {
                 }
 
                 // Make sure to invite the guy in case the current user is in a space
-                if (Get.find<SpacesController>().inSpace.value) {
-                  Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation));
+                if (SpacesController.connected.value) {
+                  SpacesController.inviteToCall(ConversationMessageProvider(conversation));
                 } else {
-                  Get.find<SpacesController>().createAndConnect(ConversationMessageProvider(conversation));
+                  SpacesController.createAndConnect(ConversationMessageProvider(conversation));
                 }
                 Get.back();
               },
-              icon: Get.find<SpacesController>().inSpace.value ? Icons.forward_to_inbox : Icons.rocket_launch,
+              icon: SpacesController.connected.value ? Icons.forward_to_inbox : Icons.rocket_launch,
             )
           ],
         ),

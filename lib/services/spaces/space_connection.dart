@@ -1,14 +1,13 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_message_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
-import 'package:chat_interface/services/connection/spaces/space_message_listener.dart';
-import 'package:chat_interface/services/connection/spaces/tabletop_listener.dart';
 import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/services/spaces/space_message_service.dart';
+import 'package:chat_interface/services/spaces/tabletop/tabletop_service.dart';
 import 'package:chat_interface/services/spaces/warp/warp_service.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:get/get.dart';
@@ -27,11 +26,10 @@ class SpaceConnection {
 
       // Tell all controllers about the leaving of the space
       Get.find<StatusController>().stopSharing();
-      Get.find<TabletopController>().resetControllerState();
+      TabletopController.resetControllerState();
       SpacesController.leaveSpace(error: error);
       WarpController.resetControllerState();
       SpaceMemberController.onDisconnect();
-      Get.find<SpacesMessageController>().clearProvider();
     }));
 
     // Setup all the listeners for the connector
@@ -51,8 +49,8 @@ class SpaceConnection {
     spaceConnector!.listen("room_data", (event) => _handleRoomData(event)); // Sent on change
     spaceConnector!.listen("room_info", (event) => _handleRoomData(event)); // Sent on join
 
-    setupTabletopListeners();
-    setupSpaceMessageListeners();
+    TabletopService.setupTabletopListeners(spaceConnector!);
+    SpaceMessageService.setupSpaceMessageListeners(spaceConnector!);
     WarpService.setupWarpListeners(spaceConnector!);
   }
 

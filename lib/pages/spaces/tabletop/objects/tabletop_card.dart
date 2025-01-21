@@ -4,9 +4,10 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/spaces/tabletop/objects/tabletop_inventory.dart';
+import 'package:chat_interface/pages/spaces/tabletop/objects/tabletop_inventory.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/controller/spaces/tabletop/objects/tabletop_deck.dart';
+import 'package:chat_interface/pages/spaces/tabletop/objects/tabletop_deck.dart';
+import 'package:chat_interface/services/spaces/tabletop/tabletop_object.dart';
 import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';

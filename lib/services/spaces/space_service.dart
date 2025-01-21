@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_message_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/util/encryption/signatures.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
@@ -93,11 +93,11 @@ class SpaceService {
 
     // Make everything ready
     SpacesController.onConnect(server, spaceId, key);
+    TabletopController.resetControllerState();
 
     // Open the screen
     Get.find<MessageController>().unselectConversation();
     Get.find<MessageController>().openTab(OpenTabType.space);
-    Get.find<SpacesMessageController>().open();
 
     // Send the server all the data required for setup
     final event = await SpaceConnection.spaceConnector!.sendActionAndWait(msg.ServerAction("setup", {

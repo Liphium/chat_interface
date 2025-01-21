@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/services/spaces/tabletop/tabletop_object.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';

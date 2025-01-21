@@ -17,7 +17,7 @@ class SpaceMemberController {
   static final members = signal(<String, SpaceMember>{});
 
   // This is for caching only the account ids for message decryption
-  static final _memberIds = <String, LPHAddress>{}; // Client id -> Account id
+  static final memberIds = <String, LPHAddress>{}; // Client id -> Account id
   static String _ownId = "";
 
   /// Parse a member list and add it to the members map.
@@ -47,7 +47,7 @@ class SpaceMemberController {
         }
 
         // Cache the account id
-        _memberIds[clientId] = address;
+        memberIds[clientId] = address;
       }
 
       // Remove everyone who left the space
