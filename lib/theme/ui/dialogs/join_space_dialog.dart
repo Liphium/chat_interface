@@ -1,5 +1,5 @@
-import 'package:chat_interface/controller/spaces/space_container.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -31,7 +31,7 @@ class _JoinSpaceDialogState extends State<JoinSpaceDialog> {
             children: [
               FJElevatedButton(
                   onTap: () {
-                    Get.find<SpacesController>().join(widget.container);
+                    SpaceController.join(widget.container);
                     Get.back();
                   },
                   smallCorners: true,

@@ -4,8 +4,8 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -19,6 +19,7 @@ import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SidebarConversationList extends StatefulWidget {
   final RxString query;
@@ -38,7 +39,6 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ConversationController>();
-    final spacesController = Get.find<SpacesController>();
     final messageController = Get.find<MessageController>();
     final friendController = Get.find<FriendController>();
 
@@ -313,8 +313,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                           final container = content as SpaceConnectionContainer;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: elementSpacing),
-                            child: Obx(
-                              () => Animate(
+                            child: Watch(
+                              (context) => Animate(
                                 effects: [
                                   ExpandEffect(
                                     duration: 250.ms,
@@ -323,7 +323,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                     alignment: Alignment.topLeft,
                                   ),
                                 ],
-                                target: spacesController.id.value == container.roomId ? 0.0 : 1.0,
+                                target: SpaceController.id.value == container.roomId ? 0.0 : 1.0,
                                 child: SpaceRenderer(
                                   container: container,
                                   pollNewData: true,

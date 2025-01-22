@@ -5,6 +5,7 @@ import 'package:chat_interface/util/web.dart';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals.dart';
 
 class TabletopDecks {
   static Future<List<TabletopDeck>?> listDecks() async {
@@ -29,8 +30,8 @@ class TabletopDeck {
   String? vaultId;
   String name;
   List<dynamic> encodedCards = [];
-  final cards = <AttachmentContainer>[].obs;
-  final amounts = <String, int>{}.obs; // Map of card id to amount
+  final cards = signal(<AttachmentContainer>[]);
+  final amounts = signal(<String, int>{}); // Map of card id to amount
 
   TabletopDeck(this.name, {this.vaultId});
 
@@ -52,9 +53,9 @@ class TabletopDeck {
   /// Add the deck to the vault
   Future<bool> save() async {
     final encodedCards = <Map<String, dynamic>>[];
-    for (var card in cards) {
+    for (var card in cards.peek()) {
       final json = card.toJson();
-      json["amount"] = amounts[card.id] ?? 1;
+      json["amount"] = amounts.peek()[card.id] ?? 1;
       encodedCards.add(json);
     }
     final payload = jsonEncode({
@@ -79,13 +80,13 @@ class TabletopDeck {
     for (var card in encodedCards) {
       final type = await AttachmentController.checkLocations(card['i'], usecase, types: [StorageType.permanent, StorageType.cache]);
       final container = controller.fromJson(type, card);
-      amounts[container.id] = card['a'] ?? 1;
+      amounts.value[container.id] = card['a'] ?? 1;
       final result = await controller.downloadAttachment(container);
       if (!result || container.error.value) {
         removed = true;
         continue;
       }
-      cards.add(container);
+      cards.value.add(container);
     }
 
     // Save the deck in case cards have been removed because they don't exist anymore
@@ -98,7 +99,7 @@ class TabletopDeck {
   Future<bool> delete() async {
     // Delete all cards
     final controller = Get.find<AttachmentController>();
-    for (var card in cards) {
+    for (var card in cards.peek()) {
       await controller.deleteFile(card);
     }
 

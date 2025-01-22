@@ -254,6 +254,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.7"
+  dart_webrtc:
+    dependency: transitive
+    description:
+      name: dart_webrtc
+      sha256: e65506edb452148220efab53d8d2f8bb9d827bd8bcd53cf3a3e6df70b27f3d86
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.10"
   db_viewer:
     dependency: transitive
     description:
@@ -514,6 +522,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_webrtc:
+    dependency: "direct main"
+    description:
+      name: flutter_webrtc
+      sha256: e82ffd0d0b79621c5554eed73509d7f5bd286d57fef29a573846785c65237fb1
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.5+hotfix.2"
   freezed:
     dependency: "direct dev"
     description:
@@ -995,6 +1011,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.5"
+  platform_detect:
+    dependency: transitive
+    description:
+      name: platform_detect
+      sha256: a62f99417fc4fa2d099ce0ccdbb1bd3977920f2a64292c326271f049d4bc3a4f
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -1019,6 +1043,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
+  preact_signals:
+    dependency: transitive
+    description:
+      name: preact_signals
+      sha256: a5b445796a02244b85fa43d79a7030fbfbbb08f7c48277ee93c636140a8fb2e0
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.8.3"
   process:
     dependency: transitive
     description:
@@ -1171,6 +1203,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.2"
+  signals:
+    dependency: "direct main"
+    description:
+      name: signals
+      sha256: "85225d03e71720b6fff62a8296ba7328a3e363d1ffbb9f3a85efaa05d9e85e67"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.2"
+  signals_core:
+    dependency: transitive
+    description:
+      name: signals_core
+      sha256: "5668ff1fb953fe48c88b03d50d43c5fe128cd7c831b932a4157f5f6be868b80f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.2"
+  signals_flutter:
+    dependency: transitive
+    description:
+      name: signals_flutter
+      sha256: "66b36ed0b5961cc7d8d0606813bc3fd66758dc1728cbfcffef0d2a97c7a706a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -1187,12 +1243,11 @@ packages:
   sodium_libs:
     dependency: "direct main"
     description:
-      path: "packages/sodium_libs"
-      ref: "49ddd98a700785e51b78b22c191bf645de1edfc8"
-      resolved-ref: "49ddd98a700785e51b78b22c191bf645de1edfc8"
-      url: "https://github.com/Skycoder42/libsodium_dart_bindings.git"
-    source: git
-    version: "3.4.2"
+      name: sodium_libs
+      sha256: "8d3af5baa9a2d8983febe67df77bd80248753e81d89436ffe023eae92d86f45a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.4.3"
   source_gen:
     dependency: transitive
     description:
@@ -1505,6 +1560,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  webrtc_interface:
+    dependency: transitive
+    description:
+      name: webrtc_interface
+      sha256: abec3ab7956bd5ac539cf34a42fa0c82ea26675847c0966bb85160400eea9388
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   win32:
     dependency: transitive
     description:

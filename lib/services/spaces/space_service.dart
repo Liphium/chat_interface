@@ -1,10 +1,12 @@
+import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/util/encryption/signatures.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/services/connection/spaces/space_connection.dart';
+import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
@@ -83,17 +85,22 @@ class SpaceService {
   /// Returns an error if there was one
   static Future<String?> _connectToRoom(String server, String token, String clientId, String spaceId, SecureKey key) async {
     // Connect to space node
-    final result = await createSpaceConnection(server, token);
+    final result = await SpaceConnection.createSpaceConnection(server, token);
     sendLog("COULD CONNECT TO SPACE NODE");
     if (!result) {
       return "server.error".tr;
     }
 
     // Make everything ready
-    Get.find<SpacesController>().onConnect(server, spaceId, key);
+    SpaceController.onConnect(server, spaceId, key);
+    TabletopController.resetControllerState();
+
+    // Open the screen
+    Get.find<MessageController>().unselectConversation();
+    Get.find<MessageController>().openTab(OpenTabType.space);
 
     // Send the server all the data required for setup
-    final event = await spaceConnector.sendActionAndWait(msg.ServerAction("setup", {
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(msg.ServerAction("setup", {
       "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
       "signature": signMessage(signatureKeyPair.secretKey, craftSignature(spaceId, clientId, StatusController.ownAddress.encode())),
     }));

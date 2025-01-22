@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
@@ -12,6 +12,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SpaceControls extends StatefulWidget {
   const SpaceControls({super.key});
@@ -38,7 +39,6 @@ class _SpaceControlsState extends State<SpaceControls> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Get.theme;
-    final controller = Get.find<SpacesController>();
 
     return Center(
       heightFactor: 1,
@@ -52,19 +52,33 @@ class _SpaceControlsState extends State<SpaceControls> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Obx(
-              () => LoadingIconButton(
+            Watch(
+              (context) => LoadingIconButton(
                 background: true,
                 loading: false.obs,
                 onTap: () {
-                  controller.hideSidebar.toggle();
-                  if (controller.hideSidebar.value) {
-                    Get.offAll(const CallPage(), transition: Transition.fadeIn);
+                  SpaceController.hideSidebar.value = !SpaceController.hideSidebar.peek();
+                  if (SpaceController.hideSidebar.value) {
+                    popAllAndPush(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const CallPage();
+                        },
+                      ),
+                    );
                   } else {
-                    Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
+                    popAllAndPush(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const ChatPageDesktop();
+                        },
+                      ),
+                    );
                   }
                 },
-                icon: controller.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
+                icon: SpaceController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                 iconSize: 30,
               ),
             ),
@@ -76,8 +90,8 @@ class _SpaceControlsState extends State<SpaceControls> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Tabletop rotation button
-                    Obx(
-                      () => Animate(
+                    Watch(
+                      (context) => Animate(
                         effects: [
                           ExpandEffect(
                             customHeightFactor: 1,
@@ -94,15 +108,15 @@ class _SpaceControlsState extends State<SpaceControls> {
                             curve: Curves.ease,
                           ),
                         ],
-                        onInit: (ac) => ac.value = controller.currentTab.value == SpaceTabType.table.index ? 1 : 0,
-                        target: controller.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        onInit: (ac) => ac.value = SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        target: SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
                         child: Padding(
                           padding: const EdgeInsets.only(right: defaultSpacing),
-                          child: LoadingIconButton(
+                          child: LoadingIconButtonSignal(
                             key: tabletopKey,
                             background: true,
                             padding: defaultSpacing,
-                            loading: Get.find<TabletopController>().loading,
+                            loading: TabletopController.loading,
                             onTap: () {
                               Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
                             },
@@ -113,13 +127,12 @@ class _SpaceControlsState extends State<SpaceControls> {
                       ),
                     ),
 
-                    // Full screen button
+                    // Full screen button (no reactivity needed cause refresh of the screen happens anyway)
                     LoadingIconButton(
-                      loading: false.obs,
                       background: true,
                       padding: defaultSpacing,
-                      onTap: () => controller.toggleFullScreen(),
-                      icon: controller.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
+                      onTap: () => SpaceController.toggleFullScreen(),
+                      icon: SpaceController.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
                       iconSize: 28,
                     ),
 
@@ -127,10 +140,9 @@ class _SpaceControlsState extends State<SpaceControls> {
 
                     // Warp manager button
                     LoadingIconButton(
-                      loading: false.obs,
                       background: true,
                       padding: defaultSpacing,
-                      onTap: () => Get.find<WarpController>().open(),
+                      onTap: () => WarpController.open(),
                       icon: Icons.cyclone,
                       iconSize: 28,
                     ),
@@ -141,8 +153,7 @@ class _SpaceControlsState extends State<SpaceControls> {
                     LoadingIconButton(
                       background: true,
                       padding: defaultSpacing,
-                      loading: false.obs,
-                      onTap: () => controller.leaveCall(),
+                      onTap: () => SpaceController.leaveSpace(),
                       icon: Icons.call_end,
                       color: theme.colorScheme.error,
                       iconSize: 28,
@@ -152,13 +163,13 @@ class _SpaceControlsState extends State<SpaceControls> {
               ],
             ),
             const Spacer(),
-            Obx(
-              () {
+            Watch(
+              (context) {
                 return LoadingIconButton(
                   loading: false.obs,
                   background: true,
-                  onTap: () => controller.chatOpen.toggle(),
-                  icon: controller.chatOpen.value ? Icons.arrow_forward : Icons.arrow_back,
+                  onTap: () => SpaceController.chatOpen.value = !SpaceController.chatOpen.peek(),
+                  icon: SpaceController.chatOpen.value ? Icons.arrow_forward : Icons.arrow_back,
                   iconSize: 30,
                 );
               },

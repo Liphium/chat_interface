@@ -4,9 +4,10 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/spaces/tabletop/objects/tabletop_inventory.dart';
+import 'package:chat_interface/pages/spaces/tabletop/objects/tabletop_inventory.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
-import 'package:chat_interface/controller/spaces/tabletop/objects/tabletop_deck.dart';
+import 'package:chat_interface/pages/spaces/tabletop/objects/tabletop_deck.dart';
+import 'package:chat_interface/services/spaces/tabletop/tabletop_object.dart';
 import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -102,12 +103,12 @@ class CardObject extends TableObject {
   }
 
   @override
-  void render(Canvas canvas, Offset location, TabletopController controller) {
+  void render(Canvas canvas, Offset location) {
     final imageRect = Rect.fromLTWH(location.dx, location.dy, size.width, size.height);
-    renderCard(canvas, location, controller, imageRect, false);
+    renderCard(canvas, location, imageRect, false);
   }
 
-  void renderCard(Canvas canvas, Offset location, TabletopController controller, Rect imageRect, bool ui) {
+  void renderCard(Canvas canvas, Offset location, Rect imageRect, bool ui) {
     if (error) {
       final paint = Paint()..color = Colors.red;
       canvas.drawRect(Rect.fromLTWH(location.dx, location.dy, size.width, size.height), paint);
@@ -119,7 +120,7 @@ class CardObject extends TableObject {
       final paint = Paint()..color = Colors.white;
 
       // Show that the card is about to be dropped
-      if (controller.heldObject == this && controller.hoveringObjects.any((element) => element is DeckObject)) {
+      if (TabletopController.heldObject == this && TabletopController.hoveringObjects.any((element) => element is DeckObject)) {
         paint.color = Colors.white.withAlpha(120);
       }
 
@@ -127,8 +128,8 @@ class CardObject extends TableObject {
       if ((lastPosition != location || lastPosition == null) && !inventory) {
         final center = location + Offset(size.width / 2, size.height / 2);
         bool found = false;
-        for (var object in controller.objects.values) {
-          if (object is InventoryObject && controller.inventory != object) {
+        for (var object in TabletopController.objects.values) {
+          if (object is InventoryObject && TabletopController.inventory != object) {
             if (object.getInventoryRect(invisRangeX: size.width / 2, invisRangeY: size.height / 2).contains(center)) {
               found = true;
             }
@@ -232,7 +233,7 @@ class CardObject extends TableObject {
   }
 
   @override
-  void runAction(TabletopController controller) {
+  void runAction() {
     if (inventory) {
       setFlipped(!flipped);
     } else {
@@ -258,7 +259,7 @@ class CardObject extends TableObject {
           icon: Icons.login,
           label: 'Put into inventory',
           onTap: (controller) {
-            intoInventory(controller);
+            intoInventory();
           },
         ),
       ContextMenuAction(
@@ -286,14 +287,14 @@ class CardObject extends TableObject {
     ];
   }
 
-  Future<void> intoInventory(TabletopController controller, {int? index}) async {
+  Future<void> intoInventory({int? index}) async {
     positionX.setRealValue(location.dx);
     positionY.setRealValue(location.dy);
     sendRemove();
     if (index != null) {
-      controller.inventory!.add(this, index: index);
+      TabletopController.inventory!.add(this, index: index);
     } else {
-      (await controller.getOrCreateInventory())?.add(this);
+      (await TabletopController.getOrCreateInventory())?.add(this);
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/services/spaces/tabletop/tabletop_object.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
@@ -8,6 +9,7 @@ import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class TextObject extends TableObject {
   static const fontSizeMultiplier = 2;
@@ -25,7 +27,7 @@ class TextObject extends TableObject {
   }
 
   @override
-  void render(Canvas canvas, Offset location, TabletopController controller) {
+  void render(Canvas canvas, Offset location) {
     final realFontSize = fontSize.value(DateTime.now()) * fontSizeMultiplier;
     var textSpan = TextSpan(
       text: text,
@@ -104,10 +106,10 @@ class TextObjectCreationWindow extends StatefulWidget {
   State<TextObjectCreationWindow> createState() => _TextObjectCreationWindowState();
 }
 
-class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> {
-  final fontSize = 16.0.obs;
+class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> with SignalsMixin {
+  final fontSize = signal(16.0);
   final _textController = TextEditingController();
-  final _text = "".obs;
+  final _text = signal("");
 
   @override
   void initState() {
@@ -132,8 +134,8 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> {
             onChange: (value) => _text.value = value,
           ),
           verticalSpacing(defaultSpacing),
-          Obx(
-            () => FJSliderWithInput(
+          Watch(
+            (context) => FJSliderWithInput(
               min: 16,
               max: 48,
               value: fontSize.value,
@@ -142,7 +144,7 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> {
             ),
           ),
           verticalSpacing(defaultSpacing),
-          Obx(() => Text(_text.value, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: fontSize.value))),
+          Watch((context) => Text(_text.value, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: fontSize.value))),
           verticalSpacing(defaultSpacing),
           FJElevatedButton(
             onTap: () {

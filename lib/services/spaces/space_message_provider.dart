@@ -1,64 +1,22 @@
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/services/connection/spaces/space_connection.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/services/connection/messaging.dart';
-import 'package:chat_interface/controller/spaces/ringing_manager.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/services/connection/messaging.dart';
+import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
-class SpacesMessageController extends GetxController {
-  SpacesMessageProvider provider = SpacesMessageProvider();
-
-  /// Clear the chat log for the provider (aka reset the provider).
-  void clearProvider() {
-    provider = SpacesMessageProvider();
-  }
-
-  /// Called when the space is started to load the first messages.
-  void open() {
-    provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
-  }
-
-  /// Add a message to the Spaces chat.
-  ///
-  /// Also plays a notification sound if desired by the user.
-  void addMessage(Message message) {
-    // Play a notification sound when a new message arrives
-    RingingManager.playNotificationSound();
-
-    // Check if it is a system message and if it should be rendered or not
-    if (message.type == MessageType.system) {
-      if (SystemMessages.messages[message.content]?.render == true) {
-        provider.addMessageToBottom(message);
-      }
-    } else {
-      // Store normal type of message
-      if (provider.messages.isNotEmpty && provider.messages[0].id != message.id) {
-        provider.addMessageToBottom(message);
-      } else if (provider.messages.isEmpty) {
-        provider.addMessageToBottom(message);
-      }
-    }
-
-    // Handle system messages
-    if (message.type == MessageType.system) {
-      SystemMessages.messages[message.content]?.handle(message, provider);
-    }
-  }
-}
-
 class SpacesMessageProvider extends MessageProvider {
   @override
   Future<Message?> loadMessageFromServer(String id, {bool init = true}) async {
-    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_get", id));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_get", id));
     if (event == null) {
       return null;
     }
@@ -69,7 +27,7 @@ class SpacesMessageProvider extends MessageProvider {
   @override
   Future<(List<Message>?, bool)> loadMessagesAfter(int time) async {
     // Load the messages from the server using the list_before endpoint
-    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_list_after", time));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_list_after", time));
     if (event == null) {
       sendLog("something went wrong");
       return (null, true);
@@ -96,7 +54,7 @@ class SpacesMessageProvider extends MessageProvider {
     sendLog("load messages before");
 
     // Load messages from the server
-    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_list_before", time));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_list_before", time));
     if (event == null) {
       sendLog("nothing");
       return (null, true);
@@ -120,7 +78,7 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   Future<String?> deleteMessage(Message message) async {
-    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_delete", message.id));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_delete", message.id));
     if (event == null) {
       return "server.error".tr;
     }
@@ -144,7 +102,7 @@ class SpacesMessageProvider extends MessageProvider {
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
   Future<List<Message>> _processMessages(List<dynamic> json) async {
     // Unpack the messages in an isolate (in a separate thread yk)
-    final members = Get.find<SpaceMemberController>().memberIds;
+    final members = SpaceMemberController.memberIds;
     final loadedMessages = await sodiumLib.runIsolated(
       (sodium, keys, pairs) async {
         // Process all messages
@@ -173,7 +131,7 @@ class SpacesMessageProvider extends MessageProvider {
         // Return the list to the main isolate
         return list;
       },
-      secureKeys: [SpacesController.key!],
+      secureKeys: [SpaceController.key!],
     );
 
     // Init the attachments on all messages and verify signatures
@@ -194,7 +152,7 @@ class SpacesMessageProvider extends MessageProvider {
   /// For the future also: TODO: Unpack the signature in a different isolate
   static Future<Message> unpackMessageInIsolate(Map<String, dynamic> json) async {
     // Run an isolate to parse the message
-    final (message, info) = await _extractMessageIsolate(json, Get.find<SpaceMemberController>().memberIds, SpacesController.key!);
+    final (message, info) = await _extractMessageIsolate(json, SpaceMemberController.memberIds, SpaceController.key!);
 
     // Verify the signature
     if (info != null) {
@@ -237,12 +195,12 @@ class SpacesMessageProvider extends MessageProvider {
     Sodium? sodium,
   }) {
     // Convert to message
-    members ??= Get.find<SpaceMemberController>().memberIds;
+    members ??= SpaceMemberController.memberIds;
     LPHAddress account;
     if (json["sr"] == MessageController.systemSender.encode()) {
       account = MessageController.systemSender;
     } else {
-      key ??= SpacesController.key!;
+      key ??= SpaceController.key!;
       account = LPHAddress.from(decryptSymmetric(json["sr"] as String, key, sodium));
     }
     var message = Message(
@@ -268,7 +226,7 @@ class SpacesMessageProvider extends MessageProvider {
     }
 
     // Decrypt content and check signature
-    key ??= SpacesController.key!;
+    key ??= SpaceController.key!;
     final info = SymmetricSequencedInfo.extract(message.content, key, sodium);
     message.content = info.text;
     message.loadContent();
@@ -278,12 +236,12 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   SecureKey encryptionKey() {
-    return SpacesController.key!;
+    return SpaceController.key!;
   }
 
   @override
   Future<(String, int)?> getTimestamp() async {
-    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_timestamp", {}));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_timestamp", {}));
     if (event == null) {
       return null;
     }
@@ -294,7 +252,7 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   Future<String?> handleMessageSend(String timeToken, String data) async {
-    final event = await spaceConnector.sendActionAndWait(ServerAction("msg_send", {
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_send", {
       "token": timeToken,
       "data": data,
     }));

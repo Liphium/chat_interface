@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_switch.dart';
@@ -93,7 +95,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButton(
             onTap: () async {
-              Get.find<SpacesController>().createSpace(public.value);
+              unawaited(SpaceController.createSpace(public.value));
               Get.back();
             },
             label: "create".tr,

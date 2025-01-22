@@ -3,65 +3,74 @@ import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
+import 'package:signals/signals_flutter.dart';
 
-class SpaceMemberController extends GetxController {
-  SecureKey? key;
-  final membersLoading = false.obs;
+class SpaceMemberController {
+  static final membersLoading = signal(false);
+
   // Client ID -> SpaceMember
-  final members = <String, SpaceMember>{}.obs;
-  // This is for caching only the account ids for message decryption
-  final memberIds = <String, LPHAddress>{}; // Client id -> Account id
-  static String ownId = "";
+  static final members = mapSignal(<String, SpaceMember>{});
 
-  void onMembersChanged(List<dynamic> members) {
+  // This is for caching only the account ids for message decryption
+  static final memberIds = <String, LPHAddress>{}; // Client id -> Account id
+  static String _ownId = "";
+
+  /// Parse a member list and add it to the members map.
+  static void onMembersChanged(List<dynamic> newMembers) {
     final statusController = Get.find<StatusController>();
     final membersFound = <String>[];
 
-    for (var member in members) {
-      final clientId = member["id"];
-      final decrypted = decryptSymmetric(member["data"], key!);
-      final address = LPHAddress.from(decrypted);
-      if (address == StatusController.ownAddress) {
-        SpaceMemberController.ownId = clientId;
+    // Start a batch to make sure members only updates after all the changes have been made
+    batch(() {
+      for (var member in newMembers) {
+        final clientId = member["id"];
+        final decrypted = decryptSymmetric(member["data"], SpaceController.key!);
+        final address = LPHAddress.from(decrypted);
+        if (address == StatusController.ownAddress) {
+          _ownId = clientId;
+        }
+        membersFound.add(clientId);
+
+        // Add the member to the list if they're not in it yet
+        if (members[clientId] == null) {
+          members[clientId] = SpaceMember(
+            Get.find<FriendController>().friends[address] ??
+                (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
+            clientId,
+          );
+          members[clientId]!.verifySignature(member["sign"]);
+        }
+
+        // Cache the account id
+        memberIds[clientId] = address;
       }
-      membersFound.add(clientId);
 
-      // Add the member to the list if they're not in it yet
-      if (this.members[clientId] == null) {
-        this.members[clientId] = SpaceMember(
-          Get.find<FriendController>().friends[address] ??
-              (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
-          clientId,
-        );
-        this.members[clientId]!.verifySignature(member["sign"]);
-      }
+      // Remove everyone who left the space
+      members.removeWhere((key, value) => !membersFound.contains(key));
+    });
 
-      // Cache the account id
-      memberIds[clientId] = address;
-    }
-
-    // Remove everyone who left the space
-    this.members.removeWhere((key, value) => !membersFound.contains(key));
+    // Update the signals
     membersLoading.value = false;
   }
 
-  Future<void> onConnect(SecureKey key) async {
-    this.key = key;
+  /// Get the id of the current client
+  static String getOwnId() {
+    return _ownId;
   }
 
-  void onDisconnect() {
+  /// Get the Space member for a client id
+  static SpaceMember? getMember(String clientId) {
+    return members.peek()[clientId];
+  }
+
+  static void onDisconnect() {
     membersLoading.value = true;
     members.clear();
-  }
-
-  bool isLocalDeafened() {
-    return members[ownId]!.isDeafened.value;
   }
 }
 
@@ -70,10 +79,10 @@ class SpaceMember {
   final Friend friend;
 
   // We'll just keep this here for when Lightwire is finished
-  final isSpeaking = false.obs;
-  final isMuted = false.obs;
-  final isDeafened = false.obs;
-  final verified = true.obs;
+  final isSpeaking = signal(false);
+  final isMuted = signal(false);
+  final isDeafened = signal(false);
+  final verified = signal(true);
 
   SpaceMember(this.friend, this.id);
 
@@ -88,7 +97,7 @@ class SpaceMember {
 
     // Verify the signature
     try {
-      final message = SpaceService.craftSignature(Get.find<SpacesController>().id.value, id, friend.id.encode());
+      final message = SpaceService.craftSignature(SpaceController.id.value!, id, friend.id.encode());
       verified.value = checkSignature(signature, profile.signatureKey, message);
       sendLog("space member verified: ${verified.value}");
     } catch (e) {

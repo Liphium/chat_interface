@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class CircleMemberEntity extends StatefulWidget {
   final SpaceMember member;
@@ -22,8 +23,8 @@ class _MemberEntityState extends State<CircleMemberEntity> {
       padding: EdgeInsets.only(bottom: widget.bottomPadding, right: widget.rightPadding),
       child: Stack(
         children: [
-          Obx(
-            () => Container(
+          Watch(
+            (context) => Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -41,8 +42,8 @@ class _MemberEntityState extends State<CircleMemberEntity> {
           ),
 
           //* Muted indicator
-          Obx(
-            () => Visibility(
+          Watch(
+            (context) => Visibility(
               visible: widget.member.isMuted.value,
               child: Positioned(
                 right: 0,
@@ -72,8 +73,8 @@ class _MemberEntityState extends State<CircleMemberEntity> {
           ),
 
           //* Deafened indicator
-          Obx(
-            () => Visibility(
+          Watch(
+            (context) => Visibility(
               visible: widget.member.isDeafened.value,
               child: Positioned(
                 right: 0,

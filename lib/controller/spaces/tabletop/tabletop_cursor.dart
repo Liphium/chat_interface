@@ -1,7 +1,7 @@
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class TabletopCursor {
   String clientId;
@@ -9,7 +9,7 @@ class TabletopCursor {
   DateTime? _lastMove;
   Offset? _lastLocation;
   Offset location;
-  final hue = 0.0.obs;
+  final hue = signal(0.0);
 
   TabletopCursor(this.clientId, this.location, double hue) {
     this.hue.value = hue;

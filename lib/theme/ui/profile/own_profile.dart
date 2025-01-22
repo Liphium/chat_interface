@@ -1,13 +1,12 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/current/connection_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/developer_window.dart';
@@ -114,14 +113,13 @@ class _ProfileState extends State<OwnProfile> {
               );
             }
 
-            final spacesController = Get.find<SpacesController>();
-            if (spacesController.connected.value) {
+            if (SpaceController.connected.value) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
                 child: ProfileButton(
                   icon: Icons.start,
                   label: 'profile.start_sharing'.tr,
-                  onTap: () => controller.share(spacesController.getContainer()),
+                  onTap: () => controller.share(SpaceController.getContainer()),
                   loading: false.obs,
                 ),
               );

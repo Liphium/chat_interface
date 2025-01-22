@@ -63,8 +63,8 @@ class _WarpCreateWindowState extends State<WarpCreateWindow> {
               _error.value = "";
 
               // Convert the port to an actual port number
-              final port = int.parse(_port.text);
-              if (port < 1024 || port > 65535) {
+              final port = int.tryParse(_port.text);
+              if (port == null || port < 1024 || port > 65535) {
                 _loading.value = false;
                 _error.value = "warp.error.port_invalid".tr;
                 return;
@@ -80,7 +80,7 @@ class _WarpCreateWindowState extends State<WarpCreateWindow> {
               }
 
               // Create the warp on the server
-              final error = await Get.find<WarpController>().createWarp(port);
+              final error = await WarpController.createWarp(port);
               _loading.value = false;
               _error.value = error ?? "";
               if (error == null) {

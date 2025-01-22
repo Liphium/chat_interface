@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
@@ -147,14 +147,13 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
               );
             }
 
-            final spacesController = Get.find<SpacesController>();
-            if (spacesController.connected.value) {
+            if (SpaceController.connected.value) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
                 child: ProfileButton(
                   icon: Icons.start,
                   label: 'profile.start_sharing'.tr,
-                  onTap: () => controller.share(spacesController.getContainer()),
+                  onTap: () => controller.share(SpaceController.getContainer()),
                   loading: false.obs,
                 ),
               );

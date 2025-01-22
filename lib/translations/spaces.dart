@@ -35,6 +35,7 @@ class SpacesTranslations extends Translations {
           'warp.create.button': 'Share this port',
           'warp.error.port_invalid': 'A port can only be between 1024 and 65535, no higher and no lower.',
           'warp.error.port_not_used': 'This port can\'t be shared because there is no server on it.',
+          'warp.error.port_already_shared': 'You are already sharing this port.',
 
           // Translations for currently shared Warps
           'warp.shared.title': 'Shared Warps',

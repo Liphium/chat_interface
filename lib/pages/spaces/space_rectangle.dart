@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_page.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_controls.dart';
 import 'package:chat_interface/pages/spaces/widgets/space_info_tab.dart';
@@ -11,6 +11,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SpaceRectangle extends StatefulWidget {
   const SpaceRectangle({super.key});
@@ -19,9 +20,9 @@ class SpaceRectangle extends StatefulWidget {
   State<SpaceRectangle> createState() => _SpaceRectangleState();
 }
 
-class _SpaceRectangleState extends State<SpaceRectangle> {
-  final controlsHovered = false.obs;
-  final hovered = true.obs;
+class _SpaceRectangleState extends State<SpaceRectangle> with SignalsMixin {
+  final controlsHovered = signal(true);
+  final hovered = signal(true);
   Timer? timer;
   final GlobalKey tabletopKey = GlobalKey();
 
@@ -41,11 +42,11 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
   Widget build(BuildContext context) {
     return Hero(
       tag: "call",
-      child: buildRectangle(Get.find()),
+      child: buildRectangle(),
     );
   }
 
-  Widget buildRectangle(SpacesController controller) {
+  Widget buildRectangle() {
     return Container(
       color: Get.theme.colorScheme.inverseSurface,
       child: LayoutBuilder(builder: (context, constraints) {
@@ -69,15 +70,15 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
               Expanded(
                 child: Stack(
                   children: [
-                    Obx(() {
-                      return _tabs[Get.find<SpacesController>().currentTab.value];
+                    Watch((context) {
+                      return _tabs[SpaceController.currentTab.value];
                     }),
 
                     //* Tab
                     Align(
                       alignment: Alignment.topCenter,
-                      child: Obx(
-                        () => Animate(
+                      child: Watch(
+                        (context) => Animate(
                           effects: [
                             FadeEffect(
                               duration: 150.ms,
@@ -113,16 +114,16 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                                       borderRadius: BorderRadius.circular(defaultSpacing),
                                     ),
                                     padding: EdgeInsets.all(elementSpacing),
-                                    child: LPHTabElement(
+                                    child: LPHTabElementSignal(
                                       tabs: SpaceTabType.values.map((e) => e.name.tr).toList(),
                                       onTabSwitch: (el) {
                                         final type = SpaceTabType.values.firstWhereOrNull((t) => t.name.tr == el);
                                         if (type == null) {
                                           return;
                                         }
-                                        Get.find<SpacesController>().switchToTabAndChange(type);
+                                        SpaceController.switchToTabAndChange(type);
                                       },
-                                      selected: Get.find<SpacesController>().currentTab,
+                                      selected: SpaceController.currentTab,
                                     ),
                                   ),
                                 ),
@@ -136,8 +137,8 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                     //* Controls
                     Align(
                       alignment: Alignment.bottomCenter,
-                      child: Obx(
-                        () => Animate(
+                      child: Watch(
+                        (context) => Animate(
                           effects: [
                             FadeEffect(
                               duration: 150.ms,
@@ -174,8 +175,8 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
               ),
 
               // The chat sidebar
-              Obx(
-                () => Animate(
+              Watch(
+                (context) => Animate(
                   effects: [
                     ExpandEffect(
                       curve: Curves.easeInOut,
@@ -187,8 +188,8 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                       duration: 250.ms,
                     )
                   ],
-                  onInit: (ac) => ac.value = controller.chatOpen.value ? 1 : 0,
-                  target: controller.chatOpen.value ? 1 : 0,
+                  onInit: (ac) => ac.value = SpaceController.chatOpen.value ? 1 : 0,
+                  target: SpaceController.chatOpen.value ? 1 : 0,
                   child: Container(
                     color: Get.theme.colorScheme.onInverseSurface,
                     width: 380,
@@ -198,21 +199,21 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                           color: Get.theme.colorScheme.primaryContainer,
                           padding: const EdgeInsets.all(defaultSpacing),
                           child: Center(
-                            child: LPHTabElement(
+                            child: LPHTabElementSignal(
                               tabs: SpaceSidebarTabType.values.map((e) => e.name.tr).toList(),
                               onTabSwitch: (el) {
                                 final type = SpaceSidebarTabType.values.firstWhereOrNull((t) => t.name.tr == el);
                                 if (type == null) {
                                   return;
                                 }
-                                controller.sidebarTabType.value = type.index;
+                                SpaceController.sidebarTabType.value = type.index;
                               },
-                              selected: controller.sidebarTabType,
+                              selected: SpaceController.sidebarTabType,
                             ),
                           ),
                         ),
                         Expanded(
-                          child: Obx(() => _sidebarTabs[controller.sidebarTabType.value]),
+                          child: Watch((context) => _sidebarTabs[SpaceController.sidebarTabType.value]),
                         ),
                       ],
                     ),
