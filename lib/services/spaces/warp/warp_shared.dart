@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';

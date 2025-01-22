@@ -178,6 +178,10 @@ class SpaceController {
     key = null;
     domain = null;
 
+    // Reset the tab
+    currentTab.value = SpaceTabType.space.index;
+    _prevTab = SpaceTabType.space.index;
+
     // Reset the message provider
     provider = SpacesMessageProvider();
 

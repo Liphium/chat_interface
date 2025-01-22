@@ -3,7 +3,7 @@ import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.da
 import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/services/spaces/space_message_service.dart';
@@ -34,6 +34,9 @@ class SpaceConnection {
 
     // Setup all the listeners for the connector
     setupSpaceListeners();
+
+    // Set up everything for the connection
+    TabletopController.resetControllerState();
 
     return success;
   }

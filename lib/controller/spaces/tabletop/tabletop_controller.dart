@@ -13,7 +13,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:signals/signals.dart';
+import 'package:signals/signals_flutter.dart';
 
 class TabletopController {
   static final loading = signal(false);
@@ -154,13 +154,13 @@ class TabletopController {
       return;
     }
     batch(() {
-      if (cursors.value[id] == null) {
-        cursors.value[id] = TabletopCursor(id, position, hue);
+      if (cursors[id] == null) {
+        cursors[id] = TabletopCursor(id, position, hue);
       } else {
-        if (cursors.value[id]!.hue.value != hue) {
-          cursors.value[id]!.hue.value = hue;
+        if (cursors[id]!.hue.value != hue) {
+          cursors[id]!.hue.value = hue;
         }
-        cursors.value[id]!.move(position);
+        cursors[id]!.move(position);
       }
     });
   }

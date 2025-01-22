@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/spaces/space_message_provider.dart';
 import 'package:chat_interface/util/logging_framework.dart';

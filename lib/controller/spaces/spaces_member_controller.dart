@@ -3,12 +3,12 @@ import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
-import 'package:signals/signals.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SpaceMemberController {
   static final membersLoading = signal(false);
@@ -37,8 +37,8 @@ class SpaceMemberController {
         membersFound.add(clientId);
 
         // Add the member to the list if they're not in it yet
-        if (members.value[clientId] == null) {
-          members.value[clientId] = SpaceMember(
+        if (members[clientId] == null) {
+          members[clientId] = SpaceMember(
             Get.find<FriendController>().friends[address] ??
                 (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
             clientId,
@@ -51,7 +51,7 @@ class SpaceMemberController {
       }
 
       // Remove everyone who left the space
-      members.value.removeWhere((key, value) => !membersFound.contains(key));
+      members.removeWhere((key, value) => !membersFound.contains(key));
     });
 
     // Update the signals
@@ -65,7 +65,7 @@ class SpaceMemberController {
 
   /// Get the Space member for a client id
   static SpaceMember? getMember(String clientId) {
-    return members.value[clientId];
+    return members.peek()[clientId];
   }
 
   static void onDisconnect() {

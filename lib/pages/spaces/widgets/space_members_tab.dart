@@ -26,10 +26,10 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
         child: Watch(
           (context) => ListView.builder(
             shrinkWrap: true,
-            itemCount: SpaceMemberController.members.value.length,
+            itemCount: SpaceMemberController.members.length,
             itemBuilder: (context, index) {
               final GlobalKey listKey = GlobalKey();
-              final member = SpaceMemberController.members.value.values.elementAt(index);
+              final member = SpaceMemberController.members.values.elementAt(index);
 
               return Padding(
                 key: listKey,
@@ -73,7 +73,7 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                             ),
                           ),
                           Watch((context) {
-                            var hue = TabletopController.cursors.value[member.id]?.hue;
+                            var hue = TabletopController.cursors[member.id]?.hue;
 
                             // Don't render a color in case there isn't one
                             if (hue == null && StatusController.ownAddress != member.friend.id) {
