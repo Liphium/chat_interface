@@ -6,6 +6,10 @@
 
 - Fixed that you couldn't invite people to a Space
 - Fixed same addresses sometimes not being recognized
+- Rewrote the code behind Spaces to be more readable and maintainable
+    - It now uses [signals](https://pub.dev/packages/signals) instead of GetX
+    - It's now devided into services and controllers for a better overview
+    - Tabletop's architecture still needs to be improved
 
 ## 0.6.0
 
