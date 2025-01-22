@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:signals/signals_flutter.dart';
 
 class TabletopSettings {
   static const String framerate = "tabletop.framerate";
@@ -320,9 +321,9 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
                       children: [
                         Text(deck.name, style: Get.theme.textTheme.labelLarge),
                         verticalSpacing(elementSpacing),
-                        Obx(
-                          () => Text(
-                            "decks.cards".trParams({"count": deck.cards.length.toString()}),
+                        Watch(
+                          (context) => Text(
+                            "decks.cards".trParams({"count": deck.cards.value.length.toString()}),
                             style: Get.theme.textTheme.bodyMedium,
                           ),
                         ),
@@ -542,11 +543,11 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                   }
 
                   // Save to the vault
-                  widget.deck.cards.addAll(response);
+                  widget.deck.cards.value.addAll(response);
 
                   // Set the amount for all of them to 1
                   for (var card in response) {
-                    widget.deck.amounts[card.id] = 1;
+                    widget.deck.amounts.value[card.id] = 1;
                   }
 
                   final res = await widget.deck.save();
@@ -573,8 +574,8 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
           Flexible(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 700),
-              child: Obx(() {
-                if (widget.deck.cards.isEmpty) {
+              child: Watch((context) {
+                if (widget.deck.cards.value.isEmpty) {
                   return Text(
                     "decks.cards.empty".tr,
                     style: Get.theme.textTheme.bodyMedium,
@@ -584,11 +585,11 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                 return SingleChildScrollView(
                   child: GridView.builder(
                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200),
-                    itemCount: widget.deck.cards.length,
+                    itemCount: widget.deck.cards.value.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      final card = widget.deck.cards[index];
-                      final file = widget.deck.cards[index].file!;
+                      final card = widget.deck.cards.value[index];
+                      final file = widget.deck.cards.value[index].file!;
                       return Stack(
                         children: [
                           Padding(
@@ -608,7 +609,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                               ),
                               child: IconButton(
                                 onPressed: () async {
-                                  widget.deck.cards.remove(card);
+                                  widget.deck.cards.value.remove(card);
                                   unawaited(Get.find<AttachmentController>().deleteFile(card));
                                   final result = await widget.deck.save();
                                   if (!result) {
@@ -651,17 +652,17 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                                     IconButton(
                                       onPressed: () async {
                                         changed = true;
-                                        if ((widget.deck.amounts[card.id] ?? 1) == 1) {
+                                        if ((widget.deck.amounts.value[card.id] ?? 1) == 1) {
                                           return;
                                         }
-                                        widget.deck.amounts[card.id] = (widget.deck.amounts[card.id] ?? 1) - 1;
+                                        widget.deck.amounts.value[card.id] = (widget.deck.amounts.value[card.id] ?? 1) - 1;
                                       },
                                       icon: const Icon(Icons.remove),
                                     ),
                                     horizontalSpacing(elementSpacing),
-                                    Obx(
-                                      () => Text(
-                                        widget.deck.amounts[card.id].toString(),
+                                    Watch(
+                                      (context) => Text(
+                                        widget.deck.amounts.value[card.id].toString(),
                                         style: Get.theme.textTheme.labelLarge,
                                       ),
                                     ),
@@ -669,7 +670,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                                     IconButton(
                                       onPressed: () async {
                                         changed = true;
-                                        widget.deck.amounts[card.id] = (widget.deck.amounts[card.id] ?? 1) + 1;
+                                        widget.deck.amounts.value[card.id] = (widget.deck.amounts.value[card.id] ?? 1) + 1;
                                       },
                                       icon: const Icon(Icons.add),
                                     ),

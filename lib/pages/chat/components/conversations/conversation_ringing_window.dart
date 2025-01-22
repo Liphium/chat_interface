@@ -89,7 +89,7 @@ class ConversationRingingWindowState extends State<ConversationRingingWindow> {
                       onPressed: () {
                         Get.back();
                         RingingManager.stopRingtone();
-                        Get.find<SpacesController>().join(widget.container);
+                        SpaceController.join(widget.container);
                       },
                       color: Get.theme.colorScheme.secondary,
                     ),

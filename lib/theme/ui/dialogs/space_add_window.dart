@@ -95,7 +95,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButton(
             onTap: () async {
-              unawaited(SpacesController.createSpace(public.value));
+              unawaited(SpaceController.createSpace(public.value));
               Get.back();
             },
             label: "create".tr,

@@ -12,6 +12,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class DeckObject extends TableObject {
   /// Card ID -> Card data
@@ -29,9 +30,9 @@ class DeckObject extends TableObject {
 
   factory DeckObject.createFromDeck(Offset location, TabletopDeck deck) {
     final obj = DeckObject("", 0, location, const Size(500, 500));
-    for (var card in deck.cards) {
+    for (var card in deck.cards.peek()) {
       obj.cards[card.id] = card;
-      for (int i = 0; i < (deck.amounts[card.id] ?? 1); i++) {
+      for (int i = 0; i < (deck.amounts.peek()[card.id] ?? 1); i++) {
         obj.cardOrder.add(card.id);
       }
     }
@@ -42,7 +43,7 @@ class DeckObject extends TableObject {
   }
 
   @override
-  void render(Canvas canvas, Offset location, TabletopController controller) {
+  void render(Canvas canvas, Offset location) {
     // Draw a stack
     final now = DateTime.now();
     final currentWidth = width.value(now);
@@ -153,12 +154,12 @@ class DeckObject extends TableObject {
   }
 
   @override
-  void runAction(TabletopController controller) {
-    drawCardIntoInventory(controller);
+  void runAction() {
+    drawCardIntoInventory();
   }
 
   /// Draw a card from the deck into the inventory
-  Future<void> drawCardIntoInventory(TabletopController controller) async {
+  Future<void> drawCardIntoInventory() async {
     if (cardOrder.isEmpty) {
       return;
     }
@@ -173,14 +174,14 @@ class DeckObject extends TableObject {
       }
 
       // Download the card and do all the other magic required for this
-      final obj = await CardObject.downloadCard(container, controller.mousePos);
+      final obj = await CardObject.downloadCard(container, TabletopController.mousePos);
       setWidthAndHeight();
       final result = await modifyData();
       if (!result) return;
       if (obj == null) return;
       obj.positionX.setRealValue(location.dx);
       obj.positionY.setRealValue(location.dy);
-      (await controller.getOrCreateInventory())?.add(obj);
+      (await TabletopController.getOrCreateInventory())?.add(obj);
     });
   }
 
@@ -259,7 +260,7 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      child: Obx(() {
+      child: Watch((context) {
         if (_loading.value) {
           return CircularProgressIndicator(
             color: Get.theme.colorScheme.onPrimary,
@@ -298,7 +299,7 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     child: InkWell(
                       onTap: () {
-                        if (deck.cards.any((card) => card.width == null || card.height == null)) {
+                        if (deck.cards.peek().any((card) => card.width == null || card.height == null)) {
                           showErrorPopup("error", "tabletop.object.deck.incompatible".tr);
                           return;
                         }
@@ -316,9 +317,9 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
                               children: [
                                 Text(deck.name, style: Get.theme.textTheme.labelLarge),
                                 verticalSpacing(elementSpacing),
-                                Obx(
-                                  () => Text(
-                                    "decks.cards".trParams({"count": deck.cards.length.toString()}),
+                                Watch(
+                                  (context) => Text(
+                                    "decks.cards".trParams({"count": deck.cards.value.length.toString()}),
                                     style: Get.theme.textTheme.bodyMedium,
                                   ),
                                 ),

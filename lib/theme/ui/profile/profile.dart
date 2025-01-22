@@ -61,7 +61,7 @@ class ProfileDefaults {
         onTap: openAction,
         loading: friend.openConversationLoading,
       ),
-      if (SpacesController.connected.value)
+      if (SpaceController.connected.value)
         ProfileAction(
           icon: Icons.forward_to_inbox,
           label: 'friends.invite_to_space'.tr,
@@ -78,7 +78,7 @@ class ProfileDefaults {
               return;
             }
 
-            SpacesController.inviteToCall(ConversationMessageProvider(conversation));
+            SpaceController.inviteToCall(ConversationMessageProvider(conversation));
             Get.back();
           },
         ),
@@ -213,14 +213,14 @@ class _ProfileState extends State<Profile> {
                 }
 
                 // Make sure to invite the guy in case the current user is in a space
-                if (SpacesController.connected.value) {
-                  SpacesController.inviteToCall(ConversationMessageProvider(conversation));
+                if (SpaceController.connected.value) {
+                  SpaceController.inviteToCall(ConversationMessageProvider(conversation));
                 } else {
-                  SpacesController.createAndConnect(ConversationMessageProvider(conversation));
+                  SpaceController.createAndConnect(ConversationMessageProvider(conversation));
                 }
                 Get.back();
               },
-              icon: SpacesController.connected.value ? Icons.forward_to_inbox : Icons.rocket_launch,
+              icon: SpaceController.connected.value ? Icons.forward_to_inbox : Icons.rocket_launch,
             )
           ],
         ),

@@ -59,9 +59,7 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
               label: "tabletop.match_viewport".tr,
               loading: false.obs,
               onTap: () {
-                final controller = Get.find<TabletopController>();
-                sendLog(controller.canvasRotation.value);
-                widget.object.newRotation(-Get.find<TabletopController>().canvasRotation.value);
+                widget.object.newRotation(-TabletopController.canvasRotation.value);
                 Get.back();
               },
             ),

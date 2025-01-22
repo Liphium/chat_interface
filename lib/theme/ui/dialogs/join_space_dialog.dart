@@ -31,7 +31,7 @@ class _JoinSpaceDialogState extends State<JoinSpaceDialog> {
             children: [
               FJElevatedButton(
                   onTap: () {
-                    SpacesController.join(widget.container);
+                    SpaceController.join(widget.container);
                     Get.back();
                   },
                   smallCorners: true,

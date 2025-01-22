@@ -89,7 +89,7 @@ class ConnectedWarp {
       "w": id,
       "s": seq,
       "c": connId,
-      "p": base64Encode(encryptSymmetricBytes(bytes, SpacesController.key!)),
+      "p": base64Encode(encryptSymmetricBytes(bytes, SpaceController.key!)),
     }));
     if (event == null || !event.data["success"]) {
       return false;

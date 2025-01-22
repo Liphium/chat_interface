@@ -43,9 +43,9 @@ class InventoryObject extends TableObject {
   InventoryObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.inventory);
 
   @override
-  void render(Canvas canvas, Offset location, TabletopController controller) {
+  void render(Canvas canvas, Offset location) {
     final now = DateTime.now();
-    final ownInventory = controller.inventory == this;
+    final ownInventory = TabletopController.inventory == this;
     final color = ownInventory ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface;
 
     // Draw a placeholder for the profile picture
@@ -64,13 +64,13 @@ class InventoryObject extends TableObject {
     }
 
     // Add extra width if the inventory is hovered
-    if (controller.heldObject != null && ownInventory) {
+    if (TabletopController.heldObject != null && ownInventory) {
       if (inventoryHoverIndex != -1) {
-        totalWidth += controller.heldObject!.size.width + spacing;
+        totalWidth += TabletopController.heldObject!.size.width + spacing;
       }
 
       if (_cards.isEmpty) {
-        biggestHeight = controller.heldObject!.size.height;
+        biggestHeight = TabletopController.heldObject!.size.height;
       }
     }
 
@@ -88,7 +88,8 @@ class InventoryObject extends TableObject {
     canvas.drawRRect(RRect.fromRectAndRadius(backRect, Radius.circular(32)), backPaint);
 
     // Check if the general inventory is hovered
-    final bool inventoryHovered = backRect.contains(controller.mousePos) && controller.heldObject != null && controller.heldObject != this;
+    final bool inventoryHovered =
+        backRect.contains(TabletopController.mousePos) && TabletopController.heldObject != null && TabletopController.heldObject != this;
     if (inventoryHovered) {
       inventoryHoverIndex = 0;
     } else {
@@ -102,15 +103,15 @@ class InventoryObject extends TableObject {
       final calcY = location.dy - 32 - object.size.height;
 
       // If the inventory is hovered, check if hover index should be incremented
-      if (calcX + object.size.width <= controller.mousePos.dx && inventoryHovered) {
+      if (calcX + object.size.width <= TabletopController.mousePos.dx && inventoryHovered) {
         inventoryHoverIndex++;
       } else if (inventoryHovered) {
-        calcX += controller.heldObject!.size.width + spacing;
+        calcX += TabletopController.heldObject!.size.width + spacing;
       }
 
       // Draw the card and update positions
       object.positionOverwrite = true;
-      if (controller.hoveringObjects.contains(this) || location != this.location || object.positionX.lastValue == 0) {
+      if (TabletopController.hoveringObjects.contains(this) || location != this.location || object.positionX.lastValue == 0) {
         object.positionX.setRealValue(calcX);
         object.positionY.setRealValue(calcY);
       } else {
@@ -129,11 +130,11 @@ class InventoryObject extends TableObject {
 
       // Tell the controller about the hover state
       if (ownInventory) {
-        final hovered = rect.contains(controller.mousePos) && controller.heldObject == null;
-        if (hovered && !controller.hoveringObjects.contains(object)) {
-          controller.hoveringObjects.insert(0, object);
-        } else if (!hovered && controller.hoveringObjects.contains(object)) {
-          controller.hoveringObjects.remove(object);
+        final hovered = rect.contains(TabletopController.mousePos) && TabletopController.heldObject == null;
+        if (hovered && !TabletopController.hoveringObjects.contains(object)) {
+          TabletopController.hoveringObjects.insert(0, object);
+        } else if (!hovered && TabletopController.hoveringObjects.contains(object)) {
+          TabletopController.hoveringObjects.remove(object);
         }
         object.inventory = true;
         if (!hovered) {
@@ -144,7 +145,7 @@ class InventoryObject extends TableObject {
 
       final cardLocation = Offset(x, y);
       TabletopPainter.preDraw(canvas, cardLocation, object, now);
-      object.renderCard(canvas, Offset(x, y), controller, rect, false);
+      object.renderCard(canvas, Offset(x, y), rect, false);
       TabletopPainter.postDraw(canvas);
 
       counterWidth -= rect.width + spacing;
@@ -210,7 +211,7 @@ class InventoryObject extends TableObject {
       if (obj == null) {
         continue;
       }
-      obj.setFlipped(Get.find<TabletopController>().inventory != this, animation: false);
+      obj.setFlipped(TabletopController.inventory != this, animation: false);
 
       // Insert the card at the index where it was not found
       _cards.insert(index, obj);
@@ -229,22 +230,21 @@ class InventoryObject extends TableObject {
 
   @override
   List<ContextMenuAction> getContextMenuAdditions() {
-    final controller = Get.find<TabletopController>();
     return [
-      if (controller.inventory == this)
+      if (TabletopController.inventory == this)
         ContextMenuAction(
           icon: Icons.logout,
           label: "Disown",
           onTap: (controller) {
-            controller.inventory = null;
+            TabletopController.inventory = null;
           },
         ),
-      if (controller.inventory != this)
+      if (TabletopController.inventory != this)
         ContextMenuAction(
           icon: Icons.login,
           label: "Make own",
           onTap: (controller) {
-            controller.inventory = this;
+            TabletopController.inventory = this;
           },
         )
     ];

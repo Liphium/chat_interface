@@ -131,7 +131,7 @@ class SpacesMessageProvider extends MessageProvider {
         // Return the list to the main isolate
         return list;
       },
-      secureKeys: [SpacesController.key!],
+      secureKeys: [SpaceController.key!],
     );
 
     // Init the attachments on all messages and verify signatures
@@ -152,7 +152,7 @@ class SpacesMessageProvider extends MessageProvider {
   /// For the future also: TODO: Unpack the signature in a different isolate
   static Future<Message> unpackMessageInIsolate(Map<String, dynamic> json) async {
     // Run an isolate to parse the message
-    final (message, info) = await _extractMessageIsolate(json, SpaceMemberController.memberIds, SpacesController.key!);
+    final (message, info) = await _extractMessageIsolate(json, SpaceMemberController.memberIds, SpaceController.key!);
 
     // Verify the signature
     if (info != null) {
@@ -200,7 +200,7 @@ class SpacesMessageProvider extends MessageProvider {
     if (json["sr"] == MessageController.systemSender.encode()) {
       account = MessageController.systemSender;
     } else {
-      key ??= SpacesController.key!;
+      key ??= SpaceController.key!;
       account = LPHAddress.from(decryptSymmetric(json["sr"] as String, key, sodium));
     }
     var message = Message(
@@ -226,7 +226,7 @@ class SpacesMessageProvider extends MessageProvider {
     }
 
     // Decrypt content and check signature
-    key ??= SpacesController.key!;
+    key ??= SpaceController.key!;
     final info = SymmetricSequencedInfo.extract(message.content, key, sodium);
     message.content = info.text;
     message.loadContent();
@@ -236,7 +236,7 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   SecureKey encryptionKey() {
-    return SpacesController.key!;
+    return SpaceController.key!;
   }
 
   @override

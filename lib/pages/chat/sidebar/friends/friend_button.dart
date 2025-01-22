@@ -8,6 +8,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class FriendButton extends StatefulWidget {
   final Rx<Offset> position;
@@ -58,9 +59,10 @@ class _FriendButtonState extends State<FriendButton> {
                 ],
               ),
 
-              //* Friend actions
-              Builder(builder: (context) {
-                if (Get.find<SpacesController>().inSpace.value) {
+              // All the things that can be done with the friend
+              Watch((context) {
+                // If connected to a Space, add a button to send them an invite
+                if (SpaceController.connected.value) {
                   return IconButton(
                     icon: Icon(Icons.forward_to_inbox, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: () {
@@ -74,14 +76,15 @@ class _FriendButtonState extends State<FriendButton> {
                       }
 
                       // Invite the user to the current space
-                      Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation));
+                      SpaceController.inviteToCall(ConversationMessageProvider(conversation));
                       Get.back();
                     },
                   );
                 }
 
+                // Otherwise just add a call button
                 return IconButton(
-                  icon: Icon(Icons.call, color: Theme.of(context).colorScheme.onPrimary),
+                  icon: Icon(Icons.rocket_launch, color: Theme.of(context).colorScheme.onPrimary),
                   onPressed: () {
                     // Check if there even is a conversation with the guy
                     final conversation = Get.find<ConversationController>().conversations.values.toList().firstWhereOrNull(
@@ -93,7 +96,7 @@ class _FriendButtonState extends State<FriendButton> {
                     }
 
                     // Invite the user to the current space
-                    Get.find<SpacesController>().createAndConnect(ConversationMessageProvider(conversation));
+                    SpaceController.createAndConnect(ConversationMessageProvider(conversation));
                     Get.back();
                   },
                 );

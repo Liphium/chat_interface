@@ -143,7 +143,7 @@ class SharedWarp {
       "t": id,
       "c": connId,
       "s": seq,
-      "p": base64Encode(encryptSymmetricBytes(bytes, SpacesController.key!)),
+      "p": base64Encode(encryptSymmetricBytes(bytes, SpaceController.key!)),
     }));
 
     // Remove the client from the warp in case the response from the server is invalid (or there was an error)

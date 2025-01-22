@@ -41,7 +41,7 @@ class WarpService {
       }
 
       // Decrypt the content and forward
-      final decrypted = decryptSymmetricBytes(base64Decode(event.data["p"]), SpacesController.key!);
+      final decrypted = decryptSymmetricBytes(base64Decode(event.data["p"]), SpaceController.key!);
       warp.forwardPacketToSocket(event.data["c"], decrypted, event.data["s"]);
     });
 
@@ -54,7 +54,7 @@ class WarpService {
       }
 
       // Decrypt the content and handle receiving
-      final decrypted = decryptSymmetricBytes(base64Decode(event.data["p"]), SpacesController.key!);
+      final decrypted = decryptSymmetricBytes(base64Decode(event.data["p"]), SpaceController.key!);
       warp.receivePacketFromClient(event.data["s"], event.data["c"], decrypted, event.data["sq"]);
     });
 

@@ -20,6 +20,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MessageBar extends StatefulWidget {
@@ -153,17 +154,22 @@ class _MessageBarState extends State<MessageBar> {
                             ],
                           ),
 
-                        if (Get.find<SpacesController>().inSpace.value && areSpacesSupported && !error)
-                          LoadingIconButton(
-                            icon: Icons.forward_to_inbox,
-                            iconSize: 27,
-                            loading: callLoading,
-                            tooltip: "chat.invite_to_space".tr,
-                            onTap: () {
-                              final controller = Get.find<SpacesController>();
-                              controller.inviteToCall(widget.provider);
-                            },
-                          ),
+                        // Render an invite button in case the user is currently in a Space
+                        Watch((context) {
+                          if (SpaceController.connected.value && areSpacesSupported && !error) {
+                            return LoadingIconButton(
+                              icon: Icons.forward_to_inbox,
+                              iconSize: 27,
+                              loading: callLoading,
+                              tooltip: "chat.invite_to_space".tr,
+                              onTap: () {
+                                SpaceController.inviteToCall(widget.provider);
+                              },
+                            );
+                          }
+
+                          return const SizedBox();
+                        }),
 
                         // Only show launch button in case supported
                         if (areSpacesSupported && !error)
@@ -173,8 +179,7 @@ class _MessageBarState extends State<MessageBar> {
                             loading: callLoading,
                             tooltip: "chat.start_space".tr,
                             onTap: () {
-                              final controller = Get.find<SpacesController>();
-                              controller.createAndConnect(widget.provider);
+                              SpaceController.createAndConnect(widget.provider);
                             },
                           ),
 

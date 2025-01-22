@@ -14,13 +14,13 @@ import 'package:chat_interface/services/spaces/space_message_provider.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:get/get.dart';
-import 'package:signals/signals.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:window_manager/window_manager.dart';
 
 bool areSpacesSupported = !isWeb && !GetPlatform.isMobile;
 
-class SpacesController {
+class SpaceController {
   //* Call status
   static final spaceLoading = signal(false);
   static final connected = signal(false);
@@ -30,7 +30,7 @@ class SpacesController {
 
   //* Space information
   static String? domain;
-  static String? id;
+  static final id = signal<String?>(null);
   static SecureKey? key;
 
   //* Call layout
@@ -129,11 +129,8 @@ class SpacesController {
   /// Function called by the space service to tell this controller about the connection
   static void onConnect(String server, String spaceId, SecureKey spaceKey) {
     // Load information from space container
-    id = spaceId;
     domain = server;
     key = spaceKey;
-    switchToTab(SpaceTabType.space);
-    sidebarTabType.value = SpaceSidebarTabType.chat.index;
 
     // Open the screen
     Get.find<MessageController>().unselectConversation();
@@ -142,8 +139,17 @@ class SpacesController {
     // Load the first messages of the Space chat
     provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 
-    connected.value = true;
-    chatOpen.value = true;
+    // Update all the state in one go
+    batch(() {
+      // Set all the state in the controller required for the UI
+      connected.value = true;
+      chatOpen.value = true;
+      id.value = spaceId;
+
+      // Switch to the proper tab for the space
+      switchToTab(SpaceTabType.space);
+      sidebarTabType.value = SpaceSidebarTabType.chat.index;
+    });
   }
 
   static void showNotSupported() {
@@ -156,7 +162,7 @@ class SpacesController {
 
   /// Get a [SpaceConnectionContainer] for the current Space.
   static SpaceConnectionContainer getContainer() {
-    return SpaceConnectionContainer(domain!, id!, key!, null);
+    return SpaceConnectionContainer(domain!, id.value!, key!, null);
   }
 
   /// Leave the space.
@@ -165,8 +171,10 @@ class SpacesController {
     SpaceConnection.disconnect();
 
     // Update the state to reflect the change
-    connected.value = false;
-    id = null;
+    batch(() {
+      connected.value = false;
+      id.value = null;
+    });
     key = null;
     domain = null;
 

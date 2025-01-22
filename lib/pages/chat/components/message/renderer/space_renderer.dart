@@ -190,7 +190,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                         title: "join.space".tr,
                         text: "join.space.popup".tr,
                         onConfirm: () {
-                          Get.find<SpacesController>().join(widget.container);
+                          SpaceController.join(widget.container);
                         },
                       ),
                     );

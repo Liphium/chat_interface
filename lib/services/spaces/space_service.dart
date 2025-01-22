@@ -92,7 +92,7 @@ class SpaceService {
     }
 
     // Make everything ready
-    SpacesController.onConnect(server, spaceId, key);
+    SpaceController.onConnect(server, spaceId, key);
     TabletopController.resetControllerState();
 
     // Open the screen

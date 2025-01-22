@@ -113,13 +113,13 @@ class _ProfileState extends State<OwnProfile> {
               );
             }
 
-            if (SpacesController.connected.value) {
+            if (SpaceController.connected.value) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
                 child: ProfileButton(
                   icon: Icons.start,
                   label: 'profile.start_sharing'.tr,
-                  onTap: () => controller.share(SpacesController.getContainer()),
+                  onTap: () => controller.share(SpaceController.getContainer()),
                   loading: false.obs,
                 ),
               );

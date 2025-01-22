@@ -27,7 +27,7 @@ class SpaceConnection {
       // Tell all controllers about the leaving of the space
       Get.find<StatusController>().stopSharing();
       TabletopController.resetControllerState();
-      SpacesController.leaveSpace(error: error);
+      SpaceController.leaveSpace(error: error);
       WarpController.resetControllerState();
       SpaceMemberController.onDisconnect();
     }));
@@ -56,7 +56,7 @@ class SpaceConnection {
 
   /// Sends the room data to all controllers
   static void _handleRoomData(Event event) {
-    SpacesController.updateStartDate(DateTime.fromMillisecondsSinceEpoch(event.data["start"]));
+    SpaceController.updateStartDate(DateTime.fromMillisecondsSinceEpoch(event.data["start"]));
     SpaceMemberController.onMembersChanged(event.data["members"]);
   }
 }

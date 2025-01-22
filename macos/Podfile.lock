@@ -5,6 +5,9 @@ PODS:
     - FlutterMacOS
   - flutter_secure_storage_macos (6.1.1):
     - FlutterMacOS
+  - flutter_webrtc (0.12.2):
+    - FlutterMacOS
+    - WebRTC-SDK (= 125.6422.06)
   - FlutterMacOS (1.0.0)
   - just_audio (0.0.1):
     - FlutterMacOS
@@ -43,6 +46,7 @@ PODS:
     - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
+  - WebRTC-SDK (125.6422.06)
   - window_manager (0.2.0):
     - FlutterMacOS
 
@@ -50,6 +54,7 @@ DEPENDENCIES:
   - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
   - flutter_secure_storage_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos`)
+  - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - just_audio (from `Flutter/ephemeral/.symlinks/plugins/just_audio/macos`)
   - open_file_mac (from `Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos`)
@@ -65,6 +70,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - sqlite3
+    - WebRTC-SDK
 
 EXTERNAL SOURCES:
   audio_session:
@@ -73,6 +79,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos
   flutter_secure_storage_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos
+  flutter_webrtc:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   just_audio:
@@ -100,6 +108,7 @@ SPEC CHECKSUMS:
   audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
   file_selector_macos: cc3858c981fe6889f364731200d6232dac1d812d
   flutter_secure_storage_macos: 59459653abe1adb92abbc8ea747d79f8d19866c9
+  flutter_webrtc: 53c9e1285ab32dfb58afb1e1471416a877e23d7a
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   just_audio: 9b67ca7b97c61cfc9784ea23cd8cc55eb226d489
   open_file_mac: 0e554648e2a87ce59e9438e3e5ca3e552e90d89a
@@ -111,6 +120,7 @@ SPEC CHECKSUMS:
   sqlite3_flutter_libs: 58ae36c0dd086395d066b4fe4de9cdca83e717b3
   tray_manager: 9064e219c56d75c476e46b9a21182087930baf90
   url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
+  WebRTC-SDK: 79942c006ea64f6fb48d7da8a4786dfc820bc1db
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 
 PODFILE CHECKSUM: 236401fc2c932af29a9fcf0e97baeeb2d750d367

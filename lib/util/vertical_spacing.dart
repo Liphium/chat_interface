@@ -27,6 +27,12 @@ bool isMobileMode() {
   return Get.width < 800 || Get.height < 500;
 }
 
+void popAllAndPush<T>(BuildContext context, Route<T> route) {
+  final nav = Navigator.of(context);
+  nav.popUntil((_) => true);
+  nav.push(route);
+}
+
 double fittedIconSize(double size) {
   return Get.mediaQuery.textScaler.scale(size);
 }

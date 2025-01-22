@@ -100,7 +100,7 @@ abstract class TableObject {
 
   /// DONT OVERWRITE THIS METHOD
   void decryptData(String data) {
-    handleData(decryptSymmetric(data, SpacesController.key!));
+    handleData(decryptSymmetric(data, SpaceController.key!));
   }
 
   /// NEVER CALL THIS METHOD WITH ENCRYPTED DATA
@@ -112,14 +112,14 @@ abstract class TableObject {
   }
 
   String encryptedData() {
-    return encryptSymmetric(getData(), SpacesController.key!);
+    return encryptSymmetric(getData(), SpaceController.key!);
   }
 
   /// Render with rotation and scale applied (used for movable objects)
-  void render(Canvas canvas, Offset location, TabletopController controller) {}
+  void render(Canvas canvas, Offset location) {}
 
   /// Called when the object is clicked
-  void runAction(TabletopController controller) {}
+  void runAction() {}
 
   /// Called when the object is right clicked
   List<ContextMenuAction> getContextMenuAdditions() {

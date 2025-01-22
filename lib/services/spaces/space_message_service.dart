@@ -8,7 +8,7 @@ class SpaceMessageService {
     // Listen for deletions
     connector.listen("msg", (event) async {
       // Make sure we're actually in a space right now
-      if (!SpacesController.connected.value || SpacesController.key == null) {
+      if (!SpaceController.connected.value || SpaceController.key == null) {
         sendLog("WARNING: received space message even though not in space");
         return;
       }
@@ -23,7 +23,7 @@ class SpaceMessageService {
       }
 
       // Tell the controller about the message
-      SpacesController.addMessage(message);
+      SpaceController.addMessage(message);
     });
   }
 }

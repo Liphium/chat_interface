@@ -17,6 +17,7 @@ import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SidebarProfile extends StatefulWidget {
   const SidebarProfile({super.key});
@@ -30,7 +31,6 @@ class _SidebarProfileState extends State<SidebarProfile> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<SpacesController>();
     final statusController = Get.find<StatusController>();
     ThemeData theme = Theme.of(context);
 
@@ -48,75 +48,80 @@ class _SidebarProfileState extends State<SidebarProfile> {
               width: constraints.maxWidth,
               child: Column(
                 children: [
-                  Obx(() {
-                    if (!controller.inSpace.value) {
+                  Watch((context) {
+                    if (!SpaceController.connected.value) {
                       // Render an embed letting the user know he's in a call on another device
-                      if (statusController.ownContainer.value != null && statusController.ownContainer.value is SpaceConnectionContainer) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
-                          child: Row(
-                            children: [
-                              Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
-                              horizontalSpacing(defaultSpacing),
-                              Text("spaces.sharing_other_device".tr, style: Get.theme.textTheme.bodyMedium),
-                              const Spacer(),
-                              LoadingIconButton(
-                                onTap: () => Get.find<SpacesController>().join(statusController.ownContainer.value! as SpaceConnectionContainer),
-                                icon: Icons.login,
-                                extra: defaultSpacing,
-                                iconSize: 25,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ],
-                          ),
-                        );
-                      }
+                      return Obx(() {
+                        if (statusController.ownContainer.value != null && statusController.ownContainer.value is SpaceConnectionContainer) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                            child: Row(
+                              children: [
+                                Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+                                horizontalSpacing(defaultSpacing),
+                                Text("spaces.sharing_other_device".tr, style: Get.theme.textTheme.bodyMedium),
+                                const Spacer(),
+                                LoadingIconButton(
+                                  onTap: () => SpaceController.join(statusController.ownContainer.value! as SpaceConnectionContainer),
+                                  icon: Icons.login,
+                                  extra: defaultSpacing,
+                                  iconSize: 25,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
 
-                      return const SizedBox.shrink();
+                        return const SizedBox();
+                      });
                     }
-                    final shown = Get.find<MessageController>().currentProvider.value == null;
 
-                    return Column(
-                      children: [
-                        Material(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
-                          child: InkWell(
-                            onTap: () {
-                              final controller = Get.find<MessageController>();
-                              controller.unselectConversation();
-                              controller.currentOpenType.value = OpenTabType.space;
-                            },
-                            splashColor: theme.hoverColor,
-                            hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
+                    return Obx(() {
+                      final shown = Get.find<MessageController>().currentProvider.value == null;
+
+                      return Column(
+                        children: [
+                          Material(
                             borderRadius: BorderRadius.circular(defaultSpacing),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
-                              child: Row(
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
-                                    ],
-                                  ),
-                                  horizontalSpacing(defaultSpacing),
-                                  const Spacer(),
-                                  LoadingIconButton(
-                                    padding: 0,
-                                    extra: 10,
-                                    iconSize: 25,
-                                    onTap: () => Get.dialog(const SpaceInfoWindow()),
-                                    icon: Icons.info,
-                                  ),
-                                ],
+                            color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
+                            child: InkWell(
+                              onTap: () {
+                                final controller = Get.find<MessageController>();
+                                controller.unselectConversation();
+                                controller.currentOpenType.value = OpenTabType.space;
+                              },
+                              splashColor: theme.hoverColor,
+                              hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                                child: Row(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+                                      ],
+                                    ),
+                                    horizontalSpacing(defaultSpacing),
+                                    const Spacer(),
+                                    LoadingIconButton(
+                                      padding: 0,
+                                      extra: 10,
+                                      iconSize: 25,
+                                      onTap: () => Get.dialog(const SpaceInfoWindow()),
+                                      icon: Icons.info,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        verticalSpacing(defaultSpacing),
-                      ],
-                    );
+                          verticalSpacing(defaultSpacing),
+                        ],
+                      );
+                    });
                   }),
 
                   //* Actual profile

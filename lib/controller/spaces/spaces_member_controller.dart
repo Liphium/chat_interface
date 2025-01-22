@@ -14,7 +14,7 @@ class SpaceMemberController {
   static final membersLoading = signal(false);
 
   // Client ID -> SpaceMember
-  static final members = signal(<String, SpaceMember>{});
+  static final members = mapSignal(<String, SpaceMember>{});
 
   // This is for caching only the account ids for message decryption
   static final memberIds = <String, LPHAddress>{}; // Client id -> Account id
@@ -29,7 +29,7 @@ class SpaceMemberController {
     batch(() {
       for (var member in newMembers) {
         final clientId = member["id"];
-        final decrypted = decryptSymmetric(member["data"], SpacesController.key!);
+        final decrypted = decryptSymmetric(member["data"], SpaceController.key!);
         final address = LPHAddress.from(decrypted);
         if (address == StatusController.ownAddress) {
           _ownId = clientId;
@@ -43,7 +43,7 @@ class SpaceMemberController {
                 (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
             clientId,
           );
-          members.value[clientId]!.verifySignature(member["sign"]);
+          members[clientId]!.verifySignature(member["sign"]);
         }
 
         // Cache the account id
@@ -70,7 +70,7 @@ class SpaceMemberController {
 
   static void onDisconnect() {
     membersLoading.value = true;
-    members.value = <String, SpaceMember>{};
+    members.clear();
   }
 }
 
@@ -79,10 +79,10 @@ class SpaceMember {
   final Friend friend;
 
   // We'll just keep this here for when Lightwire is finished
-  final isSpeaking = false.obs;
-  final isMuted = false.obs;
-  final isDeafened = false.obs;
-  final verified = true.obs;
+  final isSpeaking = signal(false);
+  final isMuted = signal(false);
+  final isDeafened = signal(false);
+  final verified = signal(true);
 
   SpaceMember(this.friend, this.id);
 
@@ -97,7 +97,7 @@ class SpaceMember {
 
     // Verify the signature
     try {
-      final message = SpaceService.craftSignature(SpacesController.id!, id, friend.id.encode());
+      final message = SpaceService.craftSignature(SpaceController.id.value!, id, friend.id.encode());
       verified.value = checkSignature(signature, profile.signatureKey, message);
       sendLog("space member verified: ${verified.value}");
     } catch (e) {

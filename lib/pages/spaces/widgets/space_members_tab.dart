@@ -7,6 +7,7 @@ import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SpaceMembersTab extends StatefulWidget {
   const SpaceMembersTab({super.key});
@@ -18,20 +19,17 @@ class SpaceMembersTab extends StatefulWidget {
 class _SpaceMembersTabState extends State<SpaceMembersTab> {
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<SpaceMemberController>();
-    final tableController = Get.find<TabletopController>();
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: defaultSpacing),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
-        child: Obx(
-          () => ListView.builder(
+        child: Watch(
+          (context) => ListView.builder(
             shrinkWrap: true,
-            itemCount: controller.members.length,
+            itemCount: SpaceMemberController.members.value.length,
             itemBuilder: (context, index) {
               final GlobalKey listKey = GlobalKey();
-              final member = controller.members.values.elementAt(index);
+              final member = SpaceMemberController.members.value.values.elementAt(index);
 
               return Padding(
                 key: listKey,
@@ -62,8 +60,8 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                             ),
                           ),
                           horizontalSpacing(defaultSpacing),
-                          Obx(
-                            () => Visibility(
+                          Watch(
+                            (context) => Visibility(
                               visible: !member.verified.value,
                               child: Padding(
                                 padding: const EdgeInsets.only(right: defaultSpacing),
@@ -74,8 +72,8 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                               ),
                             ),
                           ),
-                          Obx(() {
-                            var hue = tableController.cursors[member.id]?.hue;
+                          Watch((context) {
+                            var hue = TabletopController.cursors.value[member.id]?.hue;
 
                             // Don't render a color in case there isn't one
                             if (hue == null && StatusController.ownAddress != member.friend.id) {

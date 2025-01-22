@@ -29,7 +29,7 @@ class TabletopController {
   static final orderSorted = <int>[];
   static final objectOrder = <int, String>{};
   static final objects = <String, TableObject>{};
-  static final cursors = signal(<String, TabletopCursor>{}); // Other users cursors
+  static final cursors = mapSignal(<String, TabletopCursor>{}); // Other users cursors
 
   /// The rate at which the table is updated (to the server)
   static const tickRate = 20;
@@ -57,7 +57,7 @@ class TabletopController {
     inventory = null;
     objects.clear();
     objectOrder.clear();
-    cursors.value = <String, TabletopCursor>{};
+    cursors.clear();
 
     _ticker?.cancel();
     _ticker = null;
@@ -100,7 +100,7 @@ class TabletopController {
     objectOrder.clear();
     _ticker?.cancel();
     hoveringObjects.clear();
-    cursors.value = <String, TabletopCursor>{};
+    cursors.clear();
     loading.value = true;
     SpaceConnection.spaceConnector!.sendAction(
       ServerAction("table_disable", <String, dynamic>{}),
@@ -153,18 +153,16 @@ class TabletopController {
     if (id == SpaceMemberController.getOwnId()) {
       return;
     }
-    final currentCursors = cursors.value;
-    if (currentCursors[id] == null) {
-      currentCursors[id] = TabletopCursor(id, position, hue);
-    } else {
-      if (currentCursors[id]!.hue.value != hue) {
-        currentCursors[id]!.hue.value = hue;
+    batch(() {
+      if (cursors.value[id] == null) {
+        cursors.value[id] = TabletopCursor(id, position, hue);
+      } else {
+        if (cursors.value[id]!.hue.value != hue) {
+          cursors.value[id]!.hue.value = hue;
+        }
+        cursors.value[id]!.move(position);
       }
-      currentCursors[id]!.move(position);
-    }
-
-    // Update the signal
-    cursors.value = currentCursors;
+    });
   }
 
   /// Add an object to the list
@@ -332,7 +330,7 @@ class TabletopController {
   }
 
   /// Gets the inventory or creates it on the table (in case needed).
-  Future<InventoryObject?> getOrCreateInventory() async {
+  static Future<InventoryObject?> getOrCreateInventory() async {
     if (inventory == null) {
       final object = InventoryObject("", -1, mousePos, Size(200, 200));
       if (await object.sendAdd()) {

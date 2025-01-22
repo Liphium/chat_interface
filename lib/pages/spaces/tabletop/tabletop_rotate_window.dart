@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
 
+import 'package:signals/signals_flutter.dart';
+
 class TabletopRotateWindow extends StatefulWidget {
   final ContextMenuData data;
 
@@ -19,8 +21,6 @@ class TabletopRotateWindow extends StatefulWidget {
 class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
   @override
   Widget build(BuildContext context) {
-    final tableController = Get.find<TabletopController>();
-
     return SlidingWindowBase(
       title: const [], // Only for mobile (sort of)
       position: widget.data,
@@ -29,11 +29,11 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("Rotation", style: Get.theme.textTheme.labelLarge),
-          Obx(
-            () => FJSliderWithInput(
-              value: tableController.canvasRotation.value,
+          Watch(
+            (context) => FJSliderWithInput(
+              value: TabletopController.canvasRotation.value,
               onChanged: (value) {
-                rotateTable(value, tableController);
+                rotateTable(value);
               },
               min: 0,
               max: 2 * math.pi,
@@ -49,7 +49,7 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
                 borderRadius: BorderRadius.circular(defaultSpacing),
                 color: Get.theme.colorScheme.inverseSurface,
                 child: InkWell(
-                  onTap: () => rotateTable(math.pi / 2 * (index + 1), tableController),
+                  onTap: () => rotateTable(math.pi / 2 * (index + 1)),
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: Padding(
                     padding: const EdgeInsets.all(defaultSpacing),
@@ -70,14 +70,22 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
     );
   }
 
-  void rotateTable(double value, TabletopController tableController) {
-    final canvasWidth = Get.width - tableController.globalCanvasPosition.dx;
-    final canvasHeight = Get.height - tableController.globalCanvasPosition.dy;
+  void rotateTable(double value) {
+    final canvasWidth = Get.width - TabletopController.globalCanvasPosition.dx;
+    final canvasHeight = Get.height - TabletopController.globalCanvasPosition.dy;
     final center = Offset(canvasWidth / 2, canvasHeight / 2);
-    final focalPoint = TabletopView.localToWorldPos(center, tableController.canvasZoom, tableController.canvasOffset, tableController);
-    tableController.canvasRotation.value = value;
-    final newFocalPoint = TabletopView.localToWorldPos(center, tableController.canvasZoom, tableController.canvasOffset, tableController);
+    final focalPoint = TabletopView.localToWorldPos(
+      center,
+      TabletopController.canvasZoom,
+      TabletopController.canvasOffset,
+    );
+    TabletopController.canvasRotation.value = value;
+    final newFocalPoint = TabletopView.localToWorldPos(
+      center,
+      TabletopController.canvasZoom,
+      TabletopController.canvasOffset,
+    );
 
-    tableController.canvasOffset -= focalPoint - newFocalPoint;
+    TabletopController.canvasOffset -= focalPoint - newFocalPoint;
   }
 }
