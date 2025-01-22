@@ -41,6 +41,11 @@ class WarpController {
 
   /// Create a Warp using the port it should share.
   static Future<String?> createWarp(int port) async {
+    // Check if the port is already being shared
+    if (sharedWarps.peek().values.any((sw) => sw.port == port)) {
+      return "warp.error.port_already_shared".tr;
+    }
+
     // Create a Warp using the service
     final (error, warp) = await WarpService.createWarp(port);
     if (error != null) {

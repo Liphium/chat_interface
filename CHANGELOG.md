@@ -10,6 +10,9 @@
     - It now uses [signals](https://pub.dev/packages/signals) instead of GetX
     - It's now devided into services and controllers for a better overview
     - Tabletop's architecture still needs to be improved
+- Fixed Warp crashing when sharing invalid ports
+- Fixed Warp allowing to share already shared ports
+- Fixed being able to add accounts that are already friends as a friend
 
 ## 0.6.0
 

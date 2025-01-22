@@ -98,6 +98,13 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
     return;
   }
 
+  // Make sure the person is not already a friend
+  if (Get.find<FriendController>().friends.keys.any((a) => a == profile!.id)) {
+    showErrorPopup("request.friend.exists", "request.friend.exists.text".tr);
+    requestsLoading.value = false;
+    return;
+  }
+
   //* Prompt with confirm popup
   var declined = true;
   await showConfirmPopup(ConfirmWindow(

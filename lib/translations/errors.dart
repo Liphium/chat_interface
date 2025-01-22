@@ -41,6 +41,8 @@ class ErrorTranslations extends Translations {
           'profile.conversation_not_found': 'You are not in a conversation with this person. Please create one first.',
 
           // Friends
+          'request.friend.exists': 'Already added',
+          'request.friend.exists.text': 'If you want more friends you can\'t just add the same person, that\'s not how this works.',
           'request.self': 'Are you trying to add yourself as a friend?',
           'request.self.text': "I know you're lonely, but you can't be your own friend. Sorry.",
           'requests.already.exists': 'Already sent',
