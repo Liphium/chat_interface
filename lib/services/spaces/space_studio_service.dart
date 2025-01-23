@@ -10,19 +10,19 @@ class SpaceStudioService {
   /// Connect to Studio (Liphium's WebRTC SFU integrated into Spaces)
   ///
   /// Returns a new WebRTC connection and an error if there was one.
-  static Future<(RTCPeerConnection?, String?)> connectToStudio() async {
+  static Future<String?> connectToStudio() async {
     // Make sure we are connected to a Space
     if (!SpaceController.connected.peek() || SpaceConnection.spaceConnector == null) {
-      return (null, "error.connection".tr);
+      return "error.connection".tr;
     }
 
     // Get all the info needed for a WebRTC connection from the server
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("sf_info", {}));
+    var event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("sf_info", {}));
     if (event == null) {
-      return (null, "server.error".tr);
+      return "server.error".tr;
     }
     if (!event.data["success"]) {
-      return (null, event.data["message"] as String);
+      return event.data["message"] as String;
     }
 
     // Create a connection and generate an offer
@@ -51,7 +51,7 @@ class SpaceStudioService {
       onTimeout: () => false,
     );
     if (!success) {
-      return (null, "error.studio.rtc".trParams({"code": "1"}));
+      return "error.studio.rtc".trParams({"code": "100"});
     }
 
     // Add all the required transceivers
@@ -76,7 +76,20 @@ class SpaceStudioService {
 
     // Create an offer for the server
     final offer = await peer.createOffer({});
+    await peer.setLocalDescription(offer);
 
-    return (null, null);
+    // Send the offer to the server
+    event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_join", offer.toMap()));
+    if (event == null) {
+      return "error.studio.rtp".trParams({"code": "200"});
+    }
+    if (!event.data["success"]) {
+      return event.data["message"] as String;
+    }
+
+    // Accept the offer from the server
+    await peer.setRemoteDescription(RTCSessionDescription(event.data["sdp"], event.data["type"]));
+
+    return null;
   }
 }
