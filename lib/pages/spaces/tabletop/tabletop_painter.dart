@@ -145,13 +145,15 @@ class TabletopPainter extends CustomPainter {
   }
 
   /// Apply the nessecary scaling and rotation for object drawing (called before object rendering)
-  static void preDraw(Canvas canvas, Offset location, TableObject object, DateTime now) {
+  static void preDraw(Canvas canvas, Offset location, TableObject object, DateTime now, {bool rotation = true}) {
     final scale = object.scale.value(now);
     canvas.save();
     final focalX = location.dx + object.size.width / 2;
     final focalY = location.dy + object.size.height / 2;
     canvas.translate(focalX, focalY);
-    canvas.rotate(object.rotation.value(now));
+    if (rotation) {
+      canvas.rotate(object.rotation.value(now));
+    }
     canvas.scale(scale);
     canvas.translate(-focalX, -focalY);
   }

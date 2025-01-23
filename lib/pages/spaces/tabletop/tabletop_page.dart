@@ -56,11 +56,11 @@ class TabletopView extends StatefulWidget {
   }
 }
 
-class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin {
+class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin, SignalsMixin {
   bool moved = false;
   final GlobalKey _key = GlobalKey();
 
-  final updater = false.obs;
+  final updater = signal(false);
   Timer? timer;
 
   @override

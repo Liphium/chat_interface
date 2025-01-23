@@ -144,8 +144,8 @@ class InventoryObject extends TableObject {
       object.setFlipped(!ownInventory);
 
       final cardLocation = Offset(x, y);
-      TabletopPainter.preDraw(canvas, cardLocation, object, now);
-      object.renderCard(canvas, Offset(x, y), rect, false);
+      TabletopPainter.preDraw(canvas, cardLocation, object, now, rotation: false);
+      object.renderCard(canvas, Offset(x, y), rect);
       TabletopPainter.postDraw(canvas);
 
       counterWidth -= rect.width + spacing;

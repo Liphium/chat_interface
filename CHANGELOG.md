@@ -13,6 +13,8 @@
 - Fixed Warp crashing when sharing invalid ports
 - Fixed Warp allowing to share already shared ports
 - Fixed being able to add accounts that are already friends as a friend
+- Fixed cards in rotated inventories having an incorrect rotation
+- Fixed not creating a new inventory when the old one has been deleted
 
 ## 0.6.0
 
