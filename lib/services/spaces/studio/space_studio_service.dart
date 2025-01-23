@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
+import 'package:chat_interface/services/spaces/studio/space_studio_connection.dart';
 import 'package:get/get.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -10,19 +11,19 @@ class SpaceStudioService {
   /// Connect to Studio (Liphium's WebRTC SFU integrated into Spaces)
   ///
   /// Returns a new WebRTC connection and an error if there was one.
-  static Future<String?> connectToStudio() async {
+  static Future<(StudioConnection?, String?)> connectToStudio() async {
     // Make sure we are connected to a Space
     if (!SpaceController.connected.peek() || SpaceConnection.spaceConnector == null) {
-      return "error.connection".tr;
+      return (null, "error.connection".tr);
     }
 
     // Get all the info needed for a WebRTC connection from the server
     var event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("sf_info", {}));
     if (event == null) {
-      return "server.error".tr;
+      return (null, "server.error".tr);
     }
     if (!event.data["success"]) {
-      return event.data["message"] as String;
+      return (null, event.data["message"] as String);
     }
 
     // Create a connection and generate an offer
@@ -51,7 +52,7 @@ class SpaceStudioService {
       onTimeout: () => false,
     );
     if (!success) {
-      return "error.studio.rtc".trParams({"code": "100"});
+      return (null, "error.studio.rtc".trParams({"code": "100"}));
     }
 
     // Add all the required transceivers
@@ -81,15 +82,15 @@ class SpaceStudioService {
     // Send the offer to the server
     event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_join", offer.toMap()));
     if (event == null) {
-      return "error.studio.rtp".trParams({"code": "200"});
+      return (null, "error.studio.rtp".trParams({"code": "200"}));
     }
     if (!event.data["success"]) {
-      return event.data["message"] as String;
+      return (null, event.data["message"] as String);
     }
 
     // Accept the offer from the server
     await peer.setRemoteDescription(RTCSessionDescription(event.data["sdp"], event.data["type"]));
 
-    return null;
+    return (StudioConnection(peer), null);
   }
 }
