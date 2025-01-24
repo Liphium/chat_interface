@@ -9,7 +9,6 @@ import 'package:chat_interface/services/connection/chat/live_share_listener.dart
 import 'package:chat_interface/services/connection/chat/message_listener.dart';
 import 'package:chat_interface/services/connection/chat/status_listener.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
-import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
@@ -219,6 +218,11 @@ class Connector {
       showErrorPopup("error", "error.network".tr);
       sendLog("TRIED TO SEND ACTION WHILE NOT CONNECTED: ${action.action}");
       return null;
+    }
+
+    // Send a confirmation in debug mode
+    if (isDebug) {
+      sendLog("[$url] sending: ${action.action}");
     }
 
     // Generate a valid response id

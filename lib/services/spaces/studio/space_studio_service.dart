@@ -18,7 +18,7 @@ class SpaceStudioService {
     }
 
     // Get all the info needed for a WebRTC connection from the server
-    var event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("sf_info", {}));
+    var event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_info", {}));
     if (event == null) {
       return (null, "server.error".tr);
     }
@@ -37,31 +37,11 @@ class SpaceStudioService {
       ],
     });
 
-    // Wait for one candidate to be gathered and then generate an offer
-    // TODO: Improve the handling of this in the future using trickle-ice
-    final completer = Completer<bool>();
-    peer.onIceCandidate = (candidate) {
-      if (candidate.candidate != null) {
-        completer.complete(true);
-      }
-    };
-
-    // Cancel the connection attempt in case it can't be completed quickly enough
-    final success = await completer.future.timeout(
-      Duration(seconds: 10),
-      onTimeout: () => false,
-    );
-    if (!success) {
-      return (null, "error.studio.rtc".trParams({"code": "100"}));
-    }
+    // Create a data channel for pipes
+    final studioConn = StudioConnection(peer);
+    await studioConn.createPipesChannel();
 
     // Add all the required transceivers
-    await peer.addTransceiver(
-      kind: RTCRtpMediaType.RTCRtpMediaTypeData,
-      init: RTCRtpTransceiverInit(
-        direction: TransceiverDirection.SendRecv,
-      ),
-    );
     await peer.addTransceiver(
       kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
       init: RTCRtpTransceiverInit(
@@ -76,8 +56,29 @@ class SpaceStudioService {
     );
 
     // Create an offer for the server
-    final offer = await peer.createOffer({});
+    final offer = await peer.createOffer({
+      "offerToReceiveAudio": true,
+      "offerToReceiveVideo": true,
+    });
     await peer.setLocalDescription(offer);
+
+    // Wait for one candidate to be gathered and then generate an offer
+    // TODO: Improve the handling of this in the future using trickle-ice
+    final completer = Completer<bool>();
+    peer.onIceCandidate = (candidate) {
+      if (candidate.candidate != null && !completer.isCompleted) {
+        completer.complete(true);
+      }
+    };
+
+    // Cancel the connection attempt in case it can't be completed quickly enough
+    final success = await completer.future.timeout(
+      Duration(seconds: 10),
+      onTimeout: () => false,
+    );
+    if (!success) {
+      return (null, "error.studio.rtc".trParams({"code": "100"}));
+    }
 
     // Send the offer to the server
     event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_join", offer.toMap()));
@@ -89,8 +90,8 @@ class SpaceStudioService {
     }
 
     // Accept the offer from the server
-    await peer.setRemoteDescription(RTCSessionDescription(event.data["sdp"], event.data["type"]));
+    await peer.setRemoteDescription(RTCSessionDescription(event.data["answer"]["sdp"], event.data["answer"]["type"]));
 
-    return (StudioConnection(peer), null);
+    return (studioConn, null);
   }
 }
