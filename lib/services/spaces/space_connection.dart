@@ -7,6 +7,7 @@ import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/services/spaces/space_message_service.dart';
+import 'package:chat_interface/services/spaces/studio/space_studio_service.dart';
 import 'package:chat_interface/services/spaces/tabletop/tabletop_service.dart';
 import 'package:chat_interface/services/spaces/warp/warp_service.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -52,6 +53,7 @@ class SpaceConnection {
     spaceConnector!.listen("room_data", (event) => _handleRoomData(event)); // Sent on change
     spaceConnector!.listen("room_info", (event) => _handleRoomData(event)); // Sent on join
 
+    SpaceStudioService.setupStudioHandlers(spaceConnector!);
     TabletopService.setupTabletopListeners(spaceConnector!);
     SpaceMessageService.setupSpaceMessageListeners(spaceConnector!);
     WarpService.setupWarpListeners(spaceConnector!);

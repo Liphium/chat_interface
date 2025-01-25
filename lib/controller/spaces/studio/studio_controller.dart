@@ -1,9 +1,13 @@
 import 'package:chat_interface/services/spaces/studio/space_studio_connection.dart';
 import 'package:chat_interface/services/spaces/studio/space_studio_service.dart';
 import 'package:chat_interface/util/popups.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SpaceStudioController {
   static StudioConnection? _connection;
+
+  // State for the UI
+  static final connected = signal(false);
 
   /// Connect to Studio.
   ///
@@ -18,14 +22,23 @@ class SpaceStudioController {
 
     // Set all the state
     _connection = connection;
+    connected.value = true;
   }
 
   static void resetControllerState() {
     _connection = null;
+    connected.value = false;
   }
 
   /// Called by the service when Studio gets disconnected.
   static void handleDisconnect() {
     resetControllerState();
+  }
+
+  /// Get the connection to Studio.
+  ///
+  /// Should only be accessed by services.
+  static StudioConnection? getConnection() {
+    return _connection;
   }
 }

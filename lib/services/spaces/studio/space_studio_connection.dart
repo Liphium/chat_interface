@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/spaces/space_studio_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -43,7 +43,7 @@ class StudioConnection {
         ..ordered = false,
     );
 
-    // Start a timer to send messages since there is currently only the keepalive channel
+    // Start a timer to send messages over this channel (just for keeping the connection)
     final timer = Timer.periodic(
       Duration(seconds: 2),
       (timer) {

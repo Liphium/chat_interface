@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/studio/space_studio_connection.dart';
@@ -41,20 +42,6 @@ class SpaceStudioService {
     final studioConn = StudioConnection(peer);
     await studioConn.createPipesChannel();
 
-    // Add all the required transceivers
-    await peer.addTransceiver(
-      kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      init: RTCRtpTransceiverInit(
-        direction: TransceiverDirection.SendRecv,
-      ),
-    );
-    await peer.addTransceiver(
-      kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
-      init: RTCRtpTransceiverInit(
-        direction: TransceiverDirection.SendRecv,
-      ),
-    );
-
     // Create an offer for the server
     final offer = await peer.createOffer({
       "offerToReceiveAudio": true,
@@ -94,4 +81,7 @@ class SpaceStudioService {
 
     return (studioConn, null);
   }
+
+  /// Register all event handlers needed for Studio.
+  static void setupStudioHandlers(Connector connector) {}
 }
