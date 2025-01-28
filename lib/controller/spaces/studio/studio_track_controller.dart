@@ -1,4 +1,5 @@
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:signals/signals_flutter.dart';
 
 class StudioTrackController {
@@ -19,6 +20,8 @@ class StudioTrackController {
       return;
     }
 
+    sendLog("new track: ${track.id}");
+
     // Register as a new track
     tracks[track.id] = track;
   }
@@ -26,6 +29,11 @@ class StudioTrackController {
   /// Delete a track from the controller.
   static void deleteTrack(String id) {
     tracks.remove(id);
+  }
+
+  /// Reset all of the controller state
+  static void handleDisconnect() {
+    tracks.clear();
   }
 }
 

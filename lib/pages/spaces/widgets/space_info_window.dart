@@ -49,7 +49,7 @@ class SpaceInfoWindow extends StatelessWidget {
             icon: Icons.launch,
             label: "Connect to Studio",
             onTap: () {
-              SpaceStudioController.connectToStudio();
+              StudioController.connectToStudio();
               Get.back();
             },
             loading: false.obs,

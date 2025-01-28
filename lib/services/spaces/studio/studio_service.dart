@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
-import 'package:chat_interface/services/spaces/studio/space_studio_connection.dart';
+import 'package:chat_interface/services/spaces/studio/studio_connection.dart';
 import 'package:get/get.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-class SpaceStudioService {
+class StudioService {
   /// Connect to Studio (Liphium's WebRTC SFU integrated into Spaces)
   ///
   /// Returns a new WebRTC connection and an error if there was one.
@@ -83,5 +84,26 @@ class SpaceStudioService {
   }
 
   /// Register all event handlers needed for Studio.
-  static void setupStudioHandlers(Connector connector) {}
+  static void setupStudioHandlers(Connector connector) {
+    // Handle track updates
+    connector.listen("st_tr_update", (event) {
+      // Convert to a track
+      final track = StudioTrack(
+        id: event.data["track"],
+        publisher: event.data["sender"],
+        paused: event.data["paused"],
+        channels: event.data["channels"],
+        subscribers: event.data["subs"],
+      );
+
+      // Tell the controller about the updated track
+      StudioTrackController.updateOrRegisterTrack(track);
+    });
+
+    // Handle track deletion
+    connector.listen("st_tr_deleted", (event) {
+      // Tell the controller about the deleted track
+      StudioTrackController.deleteTrack(event.data["track"]);
+    });
+  }
 }

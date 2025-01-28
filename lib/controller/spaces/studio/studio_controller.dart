@@ -1,20 +1,23 @@
-import 'package:chat_interface/services/spaces/studio/space_studio_connection.dart';
-import 'package:chat_interface/services/spaces/studio/space_studio_service.dart';
+import 'package:chat_interface/services/spaces/studio/studio_connection.dart';
+import 'package:chat_interface/services/spaces/studio/studio_service.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:signals/signals_flutter.dart';
 
-class SpaceStudioController {
+class StudioController {
   static StudioConnection? _connection;
 
   // State for the UI
   static final connected = signal(false);
+
+  // Media controls
+  static final videoEnabled = signal(false);
 
   /// Connect to Studio.
   ///
   /// Returns an error if there was one.
   static Future<void> connectToStudio() async {
     // Connect to Studio using the service
-    final (connection, error) = await SpaceStudioService.connectToStudio();
+    final (connection, error) = await StudioService.connectToStudio();
     if (error != null) {
       showErrorPopup("error", error);
       return;
@@ -28,6 +31,7 @@ class SpaceStudioController {
   static void resetControllerState() {
     _connection = null;
     connected.value = false;
+    videoEnabled.value = false;
   }
 
   /// Called by the service when Studio gets disconnected.
