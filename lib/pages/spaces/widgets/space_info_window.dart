@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/pages/spaces/widgets/video_preview.dart';
 import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
@@ -51,6 +52,15 @@ class SpaceInfoWindow extends StatelessWidget {
             onTap: () {
               StudioController.connectToStudio();
               Get.back();
+            },
+            loading: false.obs,
+          ),
+          verticalSpacing(elementSpacing),
+          ProfileButton(
+            icon: Icons.play_arrow,
+            label: "Try video track",
+            onTap: () {
+              Get.dialog(VideoPreview());
             },
             loading: false.obs,
           ),

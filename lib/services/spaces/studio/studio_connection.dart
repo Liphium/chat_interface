@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/services/spaces/studio/studio_track_publisher.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class StudioConnection {
   final RTCPeerConnection _peer;
-
-  // Tracks the connection is publishing
-  MediaStream? _localStream;
+  late final StudioTrackPublisher _publisher;
 
   StudioConnection(this._peer) {
     // Create all the required listeners on the peer
@@ -36,6 +35,9 @@ class StudioConnection {
       }
       ..onDataChannel = _handleDataChannel
       ..onTrack = _handleNewTrack;
+
+    // Create the publisher to manage all the tracks
+    _publisher = StudioTrackPublisher(this);
   }
 
   /// Create the default data channel used for pipes (but for now only keepalive packets)
@@ -86,44 +88,13 @@ class StudioConnection {
     sendLog("studio: received new track: ${event.track.kind ?? "no type found"}");
   }
 
-  // Create a new video track
-  void createVideoTrack() async {
-    final media = await mediaDevices.getUserMedia(_getMediaConstraints(audio: false));
-    if (_localStream != null) {
-      // Remove all the existing video tracks
-      for (var track in _localStream!.getVideoTracks()) {
-        try {
-          await _localStream!.removeTrack(track);
-        } catch (e) {
-          sendLog("error: couldn't stop local track: $e");
-        }
-        await track.stop();
-      }
-
-      // Add all the new tracks
-      for (var track in media.getVideoTracks()) {
-        await _localStream!.addTrack(track);
-      }
-    } else {
-      _localStream = media;
-    }
+  /// Get the underlying RTC connection
+  RTCPeerConnection getPeer() {
+    return _peer;
   }
 
-  /// Media constraints for video and audio tracks
-  Map<String, dynamic> _getMediaConstraints({bool audio = true, bool video = true}) {
-    return {
-      'audio': audio ? true : false,
-      'video': video
-          ? {
-              'mandatory': {
-                'minWidth': '640',
-                'minHeight': '480',
-                'minFrameRate': '30',
-              },
-              'facingMode': 'user',
-              'optional': [],
-            }
-          : false,
-    };
+  /// Get the underlying Track publisher
+  StudioTrackPublisher getPublisher() {
+    return _publisher;
   }
 }
