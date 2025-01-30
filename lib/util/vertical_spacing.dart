@@ -29,7 +29,7 @@ bool isMobileMode() {
 
 void popAllAndPush<T>(BuildContext context, Route<T> route) {
   final nav = Navigator.of(context);
-  nav.popUntil((_) => true);
+  nav.popUntil((_) => false);
   nav.push(route);
 }
 
