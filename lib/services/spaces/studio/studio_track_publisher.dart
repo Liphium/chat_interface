@@ -11,8 +11,6 @@ class StudioTrackPublisher {
   /// The local stream that has all the tracks inside of it
   MediaStream? _stream;
 
-  /// The sender sending the track to the server
-
   /// Create a video track for the camera
   Future<void> createCameraTrack() async {
     final media = await mediaDevices.getUserMedia(_getMediaConstraints(audio: false));
