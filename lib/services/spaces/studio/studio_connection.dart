@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/services/connection/messaging.dart';
+import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/studio/studio_track_publisher.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -21,9 +23,7 @@ class StudioConnection {
           StudioTrackController.handleDisconnect();
         }
       }
-      ..onRenegotiationNeeded = () {
-        sendLog("renegotiation needed, not sure what do here yet");
-      }
+      ..onRenegotiationNeeded = _handleRenegotiation
       ..onSignalingState = (state) {
         sendLog("studio: new signaling state: $state");
       }
@@ -81,6 +81,38 @@ class StudioConnection {
       ..onMessage = (msg) {
         sendLog("studio: received ${msg.text} from server");
       };
+  }
+
+  /// Handle the renegotiation
+  ///
+  /// TODO: This should be the way we always negotiate with the server
+  Future<void> _handleRenegotiation() async {
+    if ((_peer.connectionState ?? RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) !=
+        RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
+      return;
+    }
+    sendLog("studio: renegotiating with the server..");
+
+    // Create a new offer
+    final offer = await _peer.createOffer({
+      "offerToReceiveAudio": true,
+      "offerToReceiveVideo": true,
+    });
+    await _peer.setLocalDescription(offer);
+
+    // Send the server the new offer
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_reneg", offer.toMap()));
+    if (event == null) {
+      sendLog("studio: renegotiation failed, disconnect would be good probably");
+      return;
+    }
+    if (!event.data["success"]) {
+      sendLog("studio: renegotiation failed cause of ${event.data["message"]}, disconnect would be good probably");
+      return;
+    }
+
+    // Set new answer as remote description
+    await _peer.setRemoteDescription(RTCSessionDescription(event.data["answer"]["sdp"], event.data["answer"]["type"]));
   }
 
   /// Handle a new track

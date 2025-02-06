@@ -19,6 +19,18 @@ class MediaProfile {
   final int bitrate;
 
   MediaProfile(this.type, this.width, this.height, this.framerate, this.bitrate);
+
+  /// Convert the media profile to a constraints map readable by the getUserMedia function
+  Map<String, dynamic> toConstraints() => {
+        "width": width,
+        "height": height,
+        "maxFrameRate": framerate,
+      };
+
+  @override
+  String toString() {
+    return 'MediaProfile{type: $type, width: $width, height: $height, framerate: $framerate, bitrate: $bitrate}';
+  }
 }
 
 class MediaProfiles {
@@ -60,4 +72,37 @@ class MediaProfiles {
     MediaProfileType.motion: motionMediaProfiles,
     MediaProfileType.balanced: balancedMediaProfiles,
   };
+
+  // Parameters to configure the algorithm
+
+  /// How much of the available bitrate is available as wiggleroom to see if a higher profile can be chosen
+  static const _wiggleRoom = 0.2;
+
+  /// How much bandwidth a track should try to use of the total bandwidth
+  static const _bandwidthUsage = 0.2;
+
+  /// What bandwidth will be used as a fallback in case the available bandwidth can't be determined
+  static const _fallbackBandwidth = 4 * _kbps;
+
+  /// Determine a fitting media profile for a [MediaProfileType] and the bandwidth available for sharing.
+  static MediaProfile determineMediaProfile(MediaProfileType type, int? availableBandwidth) {
+    final availableProfiles = profiles[type]!;
+
+    // Calculate bandwidth amount that can be used
+    final usableBandwidth = availableBandwidth == null ? _fallbackBandwidth : availableBandwidth * _bandwidthUsage;
+    final bandwidthWiggle = availableBandwidth == null ? 0 : availableBandwidth * _wiggleRoom;
+
+    // Find the nearest to the current bandwidth + wiggle room
+    MediaProfile? max;
+    for (var profile in availableProfiles) {
+      if (profile.bitrate <= usableBandwidth + bandwidthWiggle) {
+        max = profile;
+      }
+    }
+
+    // Set the profile to the lowest in case nothing could be found
+    max ??= availableProfiles[0];
+
+    return max;
+  }
 }

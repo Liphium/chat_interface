@@ -1,10 +1,13 @@
+import 'package:chat_interface/services/spaces/studio/media_profile.dart';
 import 'package:chat_interface/services/spaces/studio/studio_connection.dart';
+import 'package:chat_interface/services/spaces/studio/studio_track.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class StudioTrackPublisher {
   /// The connection this track publisher is related to
   final StudioConnection _connection;
+  final List<PublishedStudioTrack> _tracks = [];
 
   StudioTrackPublisher(this._connection);
 
@@ -13,7 +16,14 @@ class StudioTrackPublisher {
 
   /// Create a video track for the camera
   Future<void> createCameraTrack() async {
-    final media = await mediaDevices.getUserMedia(_getMediaConstraints(audio: false));
+    // Determine a good quality for the camera
+    final bandwidth = await determineBandwidth();
+    final profile = MediaProfiles.determineMediaProfile(MediaProfileType.balanced, bandwidth);
+
+    sendLog("using profile $profile");
+
+    // Get the actual user's stream
+    final media = await mediaDevices.getUserMedia(_getMediaConstraints(video: profile));
     if (_stream != null) {
       // Remove all the existing video tracks
       for (var track in _stream!.getVideoTracks()) {
@@ -40,43 +50,52 @@ class StudioTrackPublisher {
     }
 
     // Create the transceiver
-    final track = media.getVideoTracks()[0];
-    await _connection.getPeer().addTransceiver(
-          track: track,
+    final videoTrack = media.getVideoTracks()[0];
+    final transceiver = await _connection.getPeer().addTransceiver(
+          track: videoTrack,
           kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
           init: RTCRtpTransceiverInit(
             direction: TransceiverDirection.SendOnly,
             sendEncodings: [
               RTCRtpEncoding(
-                rid: "d",
-                active: true,
-              ),
+                rid: "h",
+                maxBitrate: profile.bitrate,
+              )
             ],
           ),
         );
 
-    // Add the track to the connection
-    await _connection.getPeer().addTrack(track);
+    // A renegotiation is now likely required
 
-    // Start all the tracks
-    sendLog(media.getVideoTracks().length);
+    _tracks.add(PublishedStudioTrack(transceiver, media));
   }
 
   /// Media constraints for video and audio tracks
-  Map<String, dynamic> _getMediaConstraints({bool audio = true, bool video = true}) {
+  Map<String, dynamic> _getMediaConstraints({bool audio = false, MediaProfile? video}) {
     return {
       'audio': audio ? true : false,
-      'video': video
+      'video': video != null
           ? {
-              'mandatory': {
-                'minWidth': '640',
-                'minHeight': '480',
-                'minFrameRate': '30',
-              },
+              'mandatory': video.toConstraints(),
               'facingMode': 'user',
-              'optional': [],
             }
           : false,
     };
+  }
+
+  /// Determine the available bandwidth of the user by getting the stats of the connection
+  Future<int?> determineBandwidth() async {
+    // Try to read it from the stats
+    final stats = await _connection.getPeer().getStats();
+    for (var stat in stats) {
+      if (stat.type == "candidate-pair") {
+        if (stat.values.containsKey("availableOutgoingBitrate")) {
+          return stat.values["availableOutgoingBitrate"];
+        }
+      }
+    }
+
+    // Return null if non existent
+    return null;
   }
 }

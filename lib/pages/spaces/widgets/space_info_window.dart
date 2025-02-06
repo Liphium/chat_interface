@@ -60,7 +60,7 @@ class SpaceInfoWindow extends StatelessWidget {
             icon: Icons.play_arrow,
             label: "Try video track",
             onTap: () {
-              Get.dialog(VideoPreview());
+              StudioController.getConnection()!.getPublisher().createCameraTrack();
             },
             loading: false.obs,
           ),
