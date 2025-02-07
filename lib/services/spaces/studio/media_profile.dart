@@ -85,7 +85,7 @@ class MediaProfiles {
   static const _fallbackBandwidth = 4 * _kbps;
 
   /// Determine a fitting media profile for a [MediaProfileType] and the bandwidth available for sharing.
-  static MediaProfile determineMediaProfile(MediaProfileType type, int? availableBandwidth) {
+  static MediaProfile determineMediaProfile(MediaProfileType type, double? availableBandwidth) {
     final availableProfiles = profiles[type]!;
 
     // Calculate bandwidth amount that can be used

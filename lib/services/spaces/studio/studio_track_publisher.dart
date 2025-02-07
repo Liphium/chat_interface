@@ -7,7 +7,8 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 class StudioTrackPublisher {
   /// The connection this track publisher is related to
   final StudioConnection _connection;
-  final List<PublishedStudioTrack> _tracks = [];
+
+  final List<RTCRtpTransceiver> transceivers = [];
 
   StudioTrackPublisher(this._connection);
 
@@ -49,25 +50,40 @@ class StudioTrackPublisher {
       return;
     }
 
-    // Create the transceiver
+    // Add the video track
     final videoTrack = media.getVideoTracks()[0];
+    final encodings = [
+      RTCRtpEncoding(
+        active: true,
+        rid: "f",
+        maxBitrate: profile.bitrate,
+        scaleResolutionDownBy: 1,
+      ),
+      RTCRtpEncoding(
+        active: false,
+        rid: "h",
+        maxBitrate: (profile.bitrate / 2).toInt(),
+        scaleResolutionDownBy: 2,
+      ),
+      RTCRtpEncoding(
+        active: false,
+        rid: "q",
+        maxBitrate: (profile.bitrate / 4).toInt(),
+        scaleResolutionDownBy: 4,
+      ),
+    ];
+
+    // Create the transceiver for simulcasting
     final transceiver = await _connection.getPeer().addTransceiver(
           track: videoTrack,
           kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
           init: RTCRtpTransceiverInit(
             direction: TransceiverDirection.SendOnly,
-            sendEncodings: [
-              RTCRtpEncoding(
-                rid: "h",
-                maxBitrate: profile.bitrate,
-              )
-            ],
+            streams: [media],
+            sendEncodings: encodings,
           ),
         );
-
-    // A renegotiation is now likely required
-
-    _tracks.add(PublishedStudioTrack(transceiver, media));
+    transceivers.add(transceiver);
   }
 
   /// Media constraints for video and audio tracks
@@ -84,7 +100,7 @@ class StudioTrackPublisher {
   }
 
   /// Determine the available bandwidth of the user by getting the stats of the connection
-  Future<int?> determineBandwidth() async {
+  Future<double?> determineBandwidth() async {
     // Try to read it from the stats
     final stats = await _connection.getPeer().getStats();
     for (var stat in stats) {

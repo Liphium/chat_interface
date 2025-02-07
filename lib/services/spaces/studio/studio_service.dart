@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
@@ -90,10 +91,12 @@ class StudioService {
       // Convert to a track
       final track = StudioTrack(
         id: event.data["track"],
-        publisher: event.data["sender"],
+        publisher: SpaceMemberController.members[event.data["sender"]]!,
         paused: event.data["paused"],
-        channels: event.data["channels"],
-        subscribers: event.data["subs"],
+        channels: List<String>.generate(event.data["channels"].length, (index) {
+          return event.data["channels"][index] as String;
+        }),
+        subscribers: event.data["subs"] ?? [],
       );
 
       // Tell the controller about the updated track
