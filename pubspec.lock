@@ -526,10 +526,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_webrtc
-      sha256: e82ffd0d0b79621c5554eed73509d7f5bd286d57fef29a573846785c65237fb1
+      sha256: e917067abeef2400e6a7a03db53a6e1418551e54809f18ab80447ac323eb77e4
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.5+hotfix.2"
+    version: "0.12.8"
   freezed:
     dependency: "direct dev"
     description:
@@ -1244,10 +1244,10 @@ packages:
     dependency: "direct main"
     description:
       name: sodium_libs
-      sha256: "8d3af5baa9a2d8983febe67df77bd80248753e81d89436ffe023eae92d86f45a"
+      sha256: "4e5d96a7805369dd51b24975a9072c51433466ae5716a33cff70316a14d97af9"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.3"
+    version: "3.4.3+1"
   source_gen:
     dependency: transitive
     description:
@@ -1564,10 +1564,10 @@ packages:
     dependency: transitive
     description:
       name: webrtc_interface
-      sha256: abec3ab7956bd5ac539cf34a42fa0c82ea26675847c0966bb85160400eea9388
+      sha256: "10fc6dc0ac16f909f5e434c18902415211d759313c87261f1e4ec5b4f6a04c26"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   win32:
     dependency: transitive
     description:
