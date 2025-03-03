@@ -1,6 +1,5 @@
 import 'package:chat_interface/services/spaces/studio/media_profile.dart';
 import 'package:chat_interface/services/spaces/studio/studio_connection.dart';
-import 'package:chat_interface/services/spaces/studio/studio_track.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
