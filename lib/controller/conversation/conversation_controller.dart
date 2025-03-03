@@ -286,7 +286,7 @@ class Conversation {
       });
 
   // Delete conversation from vault and database
-  Future<void> delete({bool request = true, bool popup = true}) async {
+  Future<void> delete({bool leaveRequest = true, bool popup = true}) async {
     // Check if the vault id has been synchronized yet
     if (vaultId == "") {
       if (popup) {
@@ -297,7 +297,7 @@ class Conversation {
     }
 
     // Delete the conversation
-    final error = await ConversationService.delete(id, vaultId: vaultId, token: token);
+    final error = await ConversationService.delete(id, vaultId: vaultId, token: leaveRequest ? token : null);
     if (error != null) {
       if (popup) {
         showErrorPopup("error", error);

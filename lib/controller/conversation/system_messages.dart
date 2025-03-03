@@ -194,7 +194,7 @@ class SystemMessages {
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           if (LPHAddress.from(msg.attachments[0]) == StatusController.ownAddress) {
-            provider.conversation.delete(popup: false, request: false);
+            provider.conversation.delete(popup: false);
           }
         }
       },

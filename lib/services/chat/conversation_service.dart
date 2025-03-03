@@ -187,7 +187,7 @@ class ConversationService {
   /// Deletion from the local database and cache will always happen.
   ///
   /// Returns an error if there was one.
-  static Future<String?> delete(LPHAddress id, {String? vaultId, ConversationToken? token}) async {
+  static Future<String?> delete(LPHAddress id, {String? vaultId, ConversationToken? token, bool deleteLocal = true}) async {
     // Remove the conversation from the vault (if desired)
     if (vaultId != null) {
       final err = await removeFromVault(vaultId);
@@ -211,8 +211,10 @@ class ConversationService {
     // Remove the conversation from the local database
     await db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
     await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
-    Get.find<MessageController>().unselectConversation(id: id);
-    Get.find<ConversationController>().removeConversation(id);
+    if (deleteLocal) {
+      Get.find<MessageController>().unselectConversation(id: id);
+      Get.find<ConversationController>().removeConversation(id);
+    }
     return null;
   }
 

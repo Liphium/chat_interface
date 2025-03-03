@@ -1,18 +1,9 @@
-import 'dart:convert';
-
+import 'package:chat_interface/services/chat/conversation_vault_target.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
-import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
-import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart';
-import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 part 'vault_actions.dart';
@@ -20,39 +11,97 @@ part 'vault_actions.dart';
 class VaultSyncTask extends SynchronizationTask {
   VaultSyncTask() : super("loading.vault", const Duration(seconds: 30));
 
+  // All vault targets (everything that needs sync from the server vault)
+  final List<VaultTarget> targets = [
+    ConversationVaultTarget(),
+  ];
+
   @override
   Future<String?> init() async {
-    // Load conversations from the database
-    final conversationController = Get.find<ConversationController>();
-    final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
-    for (var conversation in conversations) {
-      await conversationController.add(Conversation.fromData(conversation));
+    // Initialize all vault targets
+    for (var target in targets) {
+      target.init();
     }
     return null;
   }
 
   @override
   Future<String?> refresh() async {
-    // Refresh the regular vault (conversations and stuff)
-    var error = await refreshVault();
-    if (error != null) {
-      return error;
+    // Get the latest versions of all the targets
+    Map<String, int> versionMap = {};
+    for (var target in targets) {
+      versionMap[target.tag] = await target.getLatestVersion();
     }
 
-    // Refresh the library (gifs, saved images, etc.)
-    error = await LibraryManager.refreshEntries();
-    return error;
+    // Synchronize using the endpoint from the server
+    final json = await postAuthorizedJSON("/account/vault/sync", {
+      "tags": versionMap,
+    });
+    if (!json["success"]) {
+      return json["error"];
+    }
+
+    // Parse all of the entries
+    final (deleted, newEntries) = await sodiumLib.runIsolated((sodium, keys, pairs) {
+      // Sort the entries into deleted ones and new ones per tag
+      var deleted = <String, List<String>>{};
+      var newEntries = <String, List<VaultEntry>>{};
+      for (var unparsedEntry in json["entries"]) {
+        final entry = VaultEntry.fromJson(unparsedEntry);
+        if (unparsedEntry["deleted"] == true) {
+          // Create a new deleted list or add if list already there
+          if (deleted[entry.tag] == null) {
+            deleted[entry.tag] = [entry.id];
+          } else {
+            deleted[entry.tag]!.add(entry.id);
+          }
+        } else {
+          // Decrypt payload and add to list of new entries
+          entry.payload = decryptSymmetric(entry.payload, keys[0], sodium);
+          if (deleted[entry.tag] == null) {
+            newEntries[entry.tag] = [entry];
+          } else {
+            newEntries[entry.tag]!.add(entry);
+          }
+        }
+      }
+
+      // Return both lists to the outside
+      return (deleted, newEntries);
+    }, secureKeys: [vaultKey]);
+
+    // Notify the vault targets about the changes
+    for (var target in targets) {
+      target.processEntries(deleted[target.tag] ?? [], newEntries[target.tag] ?? []);
+    }
+
+    return null;
   }
 
   @override
   void onRestart() {}
 }
 
+abstract class VaultTarget {
+  final String tag;
+
+  VaultTarget(this.tag);
+
+  /// Called on intialization by the vault sync task
+  void init() {}
+
+  /// Get the latest version of the vault tag
+  Future<int> getLatestVersion();
+
+  /// Called when the vault is refreshed with the new entries and the deleted ones
+  void processEntries(List<String> deleted, List<VaultEntry> newEntries);
+}
+
 class VaultEntry {
   final String id;
   final String tag;
   final String account;
-  final String payload;
+  String payload;
   final int updatedAt;
   bool error = false;
 
@@ -65,61 +114,4 @@ class VaultEntry {
         updatedAt = json["updated_at"];
 
   String decryptedPayload([SecureKey? key, Sodium? sodium]) => decryptSymmetric(payload, key ?? vaultKey, sodium);
-}
-
-// Returns an error string (null if successful)
-Future<String?> refreshVault() async {
-  // Load conversations
-  final json = await postAuthorizedJSON("/account/vault/list", <String, dynamic>{
-    "after": 0, // Unix
-    "tag": Constants.vaultConversationTag,
-  });
-  if (!json["success"]) {
-    return json["error"];
-  }
-
-  sendLog("loading..");
-  sendLog(json["entries"].length);
-
-  // Run decryption and decoding in a separate isolate
-  final (conversations, ids) = await sodiumLib.runIsolated((sodium, keys, pairs) {
-    var list = <Conversation>[];
-    var ids = <LPHAddress>[];
-    for (var unparsedEntry in json["entries"]) {
-      final entry = VaultEntry.fromJson(unparsedEntry);
-      final decrypted = decryptSymmetric(entry.payload, keys[0], sodium);
-      final decoded = jsonDecode(decrypted);
-      final conv = Conversation.fromJson(decoded, entry.id);
-      list.add(conv);
-      ids.add(conv.id);
-    }
-
-    return (list, ids);
-  }, secureKeys: [vaultKey]);
-
-  // Delete all old conversations in the cache
-  final messageController = Get.find<MessageController>();
-  final controller = Get.find<ConversationController>();
-  controller.conversations.removeWhere((id, conv) {
-    final remove = !ids.contains(id);
-    if (remove) {
-      controller.order.remove(id);
-      messageController.unselectConversation(id: id);
-    }
-    return remove;
-  });
-
-  // Add all new conversations
-  for (var conversation in conversations) {
-    if (controller.conversations[conversation.id] == null) {
-      await controller.addFromVault(conversation);
-    }
-  }
-
-  // Delete all old conversations from the database
-  final stringIds = ids.map((id) => id.encode());
-  await db.conversation.deleteWhere((tbl) => tbl.id.isNotIn(stringIds));
-  await db.member.deleteWhere((tbl) => tbl.conversationId.isNotIn(stringIds));
-
-  return null;
 }

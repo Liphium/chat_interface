@@ -24,7 +24,7 @@ class Database extends _$Database {
   Database(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -32,6 +32,20 @@ class Database extends _$Database {
       onUpgrade: stepByStep(
         from1To2: (m, schema) async {
           await m.createTable(schema.message);
+        },
+        from2To3: (m, schema) async {
+          // Add new columns for new vault sync
+          await m.addColumn(schema.conversation, schema.conversation.vaultVersion);
+          await m.addColumn(schema.friend, schema.friend.vaultVersion);
+          await m.addColumn(schema.libraryEntry, schema.libraryEntry.version);
+
+          // Add indexes to some tables for improved performance
+          await m.createIndex(schema.idxConversationVaultVersion);
+          await m.createIndex(schema.idxConversationUpdated);
+          await m.createIndex(schema.idxFriendsUpdated);
+          await m.createIndex(schema.idxLibraryEntryCreated);
+          await m.createIndex(schema.idxLibraryEntryVersion);
+          await m.createIndex(schema.idxMessageCreated);
         },
       ),
     );

@@ -3,9 +3,12 @@ import 'package:drift/drift.dart';
 
 enum ConversationType { directMessage, group }
 
+@TableIndex(name: "idx_conversation_vault_version", columns: {#vaultVersion})
+@TableIndex(name: "idx_conversation_updated", columns: {#updatedAt})
 class Conversation extends Table {
   TextColumn get id => text()();
   TextColumn get vaultId => text()();
+  Int64Column get vaultVersion => int64()();
   IntColumn get type => intEnum<ConversationType>()();
   TextColumn get data => text()();
   TextColumn get token => text()();
@@ -18,6 +21,7 @@ class Conversation extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_message_created", columns: {#createdAt})
 class Message extends Table {
   TextColumn get id => text()();
   TextColumn get content => text()();
@@ -44,11 +48,13 @@ class Member extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_friends_updated", columns: {#updatedAt})
 class Friend extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get displayName => text()();
   TextColumn get vaultId => text()();
+  Int64Column get vaultVersion => int64()();
   TextColumn get keys => text()();
   Int64Column get updatedAt => int64()();
 
@@ -56,8 +62,11 @@ class Friend extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_library_entry_created", columns: {#createdAt})
+@TableIndex(name: "idx_library_entry_version", columns: {#version})
 class LibraryEntry extends Table {
   TextColumn get id => text()();
+  Int64Column get version => int64()();
   IntColumn get type => intEnum<LibraryEntryType>()();
   Int64Column get createdAt => int64()();
   TextColumn get data => text()();
