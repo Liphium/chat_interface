@@ -63,7 +63,7 @@ class TabletopDeck {
       "cards": encodedCards,
     });
     if (vaultId != null) {
-      return updateVault(vaultId!, payload);
+      return updateVault(Constants.vaultDeckTag, vaultId!, payload);
     }
     final id = await addToVault(Constants.vaultDeckTag, payload);
     if (id == null) {

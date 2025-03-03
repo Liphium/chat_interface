@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/database/trusted_links.dart';
@@ -202,7 +203,6 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
 
   // Activate the token from the request
   final token = jsonDecode(actionJson["token"]);
-  sendLog(token);
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"token": token});
   if (!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
@@ -211,29 +211,24 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   token["token"] = json["token"]; // Set new token (from activation request)
 
   final key = unpackageSymmetricKey(actionJson["key"]);
-  final members = <Member>[];
-  for (var memberData in json["members"]) {
-    sendLog(memberData);
-    final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-    members.add(Member(LPHAddress.from(memberData["id"]), memberContainer.id, MemberRole.fromValue(memberData["rank"])));
-  }
 
-  final container = ConversationContainer.decrypt(json["data"], key);
-  final convToken = ConversationToken.fromJson(token);
-  await Get.find<ConversationController>().addCreated(
-    Conversation(
-      LPHAddress.from(actionJson["id"]),
-      "",
-      model.ConversationType.values[json["type"]],
-      convToken,
-      container,
-      packageSymmetricKey(key),
-      0,
-      DateTime.now().millisecondsSinceEpoch,
-    ),
-    members,
+  final conversation = Conversation(
+    LPHAddress.from(actionJson["id"]),
+    "",
+    0,
+    model.ConversationType.values[json["type"]],
+    ConversationToken.fromJson(token),
+    ConversationContainer.decrypt(json["data"], key),
+    packageSymmetricKey(key),
+    0,
+    DateTime.now().millisecondsSinceEpoch,
   );
-  ConversationService.subscribeToConversation(convToken, deletions: false);
+
+  // Add to vault
+  final vaultId = await addToVault(Constants.vaultConversationTag, conversation.toJson());
+  if (vaultId == null) {
+    sendLog("WARNING: Conversation couldn't be added to vault");
+  }
 
   return true;
 }

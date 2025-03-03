@@ -1,9 +1,12 @@
-import 'package:chat_interface/services/chat/conversation_vault_target.dart';
+import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 part 'vault_actions.dart';
@@ -13,7 +16,8 @@ class VaultSyncTask extends SynchronizationTask {
 
   // All vault targets (everything that needs sync from the server vault)
   final List<VaultTarget> targets = [
-    ConversationVaultTarget(),
+    ConversationService(),
+    LibraryManager(),
   ];
 
   @override
@@ -78,6 +82,17 @@ class VaultSyncTask extends SynchronizationTask {
     return null;
   }
 
+  /// Called by vault_actions when a new entry is added or updated
+  void onUpdateOrInsert(String tag, VaultEntry entry) {
+    final target = targets.firstWhereOrNull((target) => target.tag == tag);
+    if (target == null) {
+      return;
+    }
+
+    // Let the target process the new entry
+    target.processEntries([], [entry]);
+  }
+
   @override
   void onRestart() {}
 }
@@ -101,14 +116,16 @@ class VaultEntry {
   final String id;
   final String tag;
   final String account;
+  final int version;
   String payload;
   final int updatedAt;
   bool error = false;
 
-  VaultEntry(this.id, this.tag, this.account, this.payload, this.updatedAt);
+  VaultEntry(this.id, this.tag, this.version, this.account, this.payload, this.updatedAt);
   VaultEntry.fromJson(Map<String, dynamic> json)
       : id = json["id"],
         tag = json["tag"],
+        version = json["version"],
         account = json["account"],
         payload = json["payload"],
         updatedAt = json["updated_at"];

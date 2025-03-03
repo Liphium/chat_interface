@@ -14,7 +14,7 @@ Future<String?> removeFromVault(String id) async {
 
 /// Add a new entry to the vault (payload is encrypted with the public key of the account in the function).
 ///
-/// Returns the vault id in case the request was successful.
+/// Returns an error in case there was one.
 Future<String?> addToVault(String tag, String payload) async {
   final encryptedPayload = encryptSymmetric(payload, vaultKey);
 
@@ -23,14 +23,27 @@ Future<String?> addToVault(String tag, String payload) async {
     "payload": encryptedPayload,
   });
   if (!json["success"]) {
-    return null;
+    return json["error"];
   }
 
-  return json["id"];
+  // Notify the vault sync task about the new entry
+  ConnectionController.vaultSyncTask.onUpdateOrInsert(
+    tag,
+    VaultEntry(
+      json["id"],
+      tag,
+      json["version"],
+      StatusController.ownAccountId,
+      payload,
+      0,
+    ),
+  );
+
+  return null;
 }
 
 /// Update an entry in the vault (payload is encrypted with the public key of the account in the function)
-Future<bool> updateVault(String id, String payload) async {
+Future<bool> updateVault(String tag, String id, String payload) async {
   final encryptedPayload = encryptSymmetric(payload, vaultKey);
 
   final json = await postAuthorizedJSON("/account/vault/update", <String, dynamic>{
@@ -40,6 +53,19 @@ Future<bool> updateVault(String id, String payload) async {
   if (!json["success"]) {
     return false;
   }
+
+  // Notify the vault sync task about the new entry
+  ConnectionController.vaultSyncTask.onUpdateOrInsert(
+    tag,
+    VaultEntry(
+      id,
+      tag,
+      json["version"],
+      StatusController.ownAccountId,
+      payload,
+      0,
+    ),
+  );
 
   return true;
 }

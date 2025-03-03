@@ -215,6 +215,7 @@ class Friend {
 
   FriendData entity() => FriendData(
         id: id.encode(),
+        vaultVersion: BigInt.from(0), // TODO: Implement vault sync for friends
         name: dbEncrypted(name),
         displayName: dbEncrypted(displayName.value),
         vaultId: dbEncrypted(vaultId),

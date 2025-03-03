@@ -24,7 +24,7 @@ class LibraryManager extends VaultTarget {
     // Add all new entries
     final list = <LibraryEntry>[];
     for (var entry in newEntries) {
-      final libraryEntry = LibraryEntry.fromJson(entry.id, jsonDecode(entry.payload));
+      final libraryEntry = LibraryEntry.fromJson(entry.id, entry.version, jsonDecode(entry.payload));
       list.add(libraryEntry);
       await db.libraryEntry.insertOnConflictUpdate(libraryEntry.entity);
     }
@@ -63,6 +63,7 @@ class LibraryManager extends VaultTarget {
         final size = await _calculateImageDimension(Image.memory(await container.file!.readAsBytes()));
         entry = LibraryEntry(
           "",
+          0,
           LibraryEntryType.fromFileName(container.file!.path),
           jsonEncode(container.toJson()),
           DateTime.now(),
@@ -74,6 +75,7 @@ class LibraryManager extends VaultTarget {
         final size = await _calculateImageDimension(Image.network(container.url));
         entry = LibraryEntry(
           "",
+          0,
           LibraryEntryType.fromFileName(container.url),
           container.url,
           DateTime.now(),
@@ -124,18 +126,20 @@ class LibraryManager extends VaultTarget {
 
 class LibraryEntry {
   String id;
+  int version;
   final LibraryEntryType type;
   final String data;
   final DateTime createdAt;
   final int width;
   final int height;
 
-  LibraryEntry(this.id, this.type, this.data, this.createdAt, this.width, this.height);
+  LibraryEntry(this.id, this.version, this.type, this.data, this.createdAt, this.width, this.height);
 
   /// Get a library entry from the local database object
   LibraryEntry.fromData(LibraryEntryData data)
       : this(
           data.id,
+          data.version.toInt(),
           data.type,
           data.data,
           DateTime.fromMillisecondsSinceEpoch(data.createdAt.toInt()),
@@ -145,6 +149,7 @@ class LibraryEntry {
 
   LibraryEntryData get entity => LibraryEntryData(
         id: id,
+        version: BigInt.from(version),
         type: type,
         createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
         data: data,
@@ -164,9 +169,10 @@ class LibraryEntry {
   }
 
   /// Create a LibraryEntry from a JSON map
-  factory LibraryEntry.fromJson(String id, Map<String, dynamic> json) {
+  factory LibraryEntry.fromJson(String id, int version, Map<String, dynamic> json) {
     return LibraryEntry(
       id,
+      version,
       LibraryEntryType.values[json['type']],
       json['data'],
       DateTime.fromMillisecondsSinceEpoch(json['created_at']),

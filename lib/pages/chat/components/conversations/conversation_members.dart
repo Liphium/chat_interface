@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -37,7 +38,7 @@ class ConversationMembers extends StatelessWidget {
               ),
               LoadingIconButton(
                 loading: conversation.membersLoading,
-                onTap: () => conversation.fetchData(),
+                onTap: () => ConversationService.fetchNewestVersion(conversation),
                 icon: Icons.refresh,
               ),
             ],
