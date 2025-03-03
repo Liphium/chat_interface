@@ -1,6 +1,7 @@
 import 'package:chat_interface/database/database.steps.dart';
 import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/database/trusted_links.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart';
 
 part 'database.g.dart';
@@ -35,6 +36,7 @@ class Database extends _$Database {
         },
         from2To3: (m, schema) async {
           // Add new columns for new vault sync
+          sendLog(schema.conversation.vaultVersion.clientDefault);
           await m.addColumn(schema.conversation, schema.conversation.vaultVersion);
           await m.addColumn(schema.friend, schema.friend.vaultVersion);
           await m.addColumn(schema.libraryEntry, schema.libraryEntry.version);

@@ -17,7 +17,9 @@ class Conversation extends Table
       type: DriftSqlType.string, requiredDuringInsert: true);
   late final GeneratedColumn<BigInt> vaultVersion = GeneratedColumn<BigInt>(
       'vault_version', aliasedName, false,
-      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+      type: DriftSqlType.bigInt,
+      requiredDuringInsert: false,
+      defaultValue: Constant(BigInt.from(0)));
   late final GeneratedColumn<int> type = GeneratedColumn<int>(
       'type', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
@@ -284,7 +286,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   ConversationCompanion.insert({
     required String id,
     required String vaultId,
-    required BigInt vaultVersion,
+    this.vaultVersion = const Value.absent(),
     required int type,
     required String data,
     required String token,
@@ -295,7 +297,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         vaultId = Value(vaultId),
-        vaultVersion = Value(vaultVersion),
         type = Value(type),
         data = Value(data),
         token = Value(token),
@@ -1195,7 +1196,9 @@ class Friend extends Table with TableInfo<Friend, FriendData> {
       type: DriftSqlType.string, requiredDuringInsert: true);
   late final GeneratedColumn<BigInt> vaultVersion = GeneratedColumn<BigInt>(
       'vault_version', aliasedName, false,
-      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+      type: DriftSqlType.bigInt,
+      requiredDuringInsert: false,
+      defaultValue: Constant(BigInt.from(0)));
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
       'keys', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
@@ -1393,7 +1396,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     required String name,
     required String displayName,
     required String vaultId,
-    required BigInt vaultVersion,
+    this.vaultVersion = const Value.absent(),
     required String keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
@@ -1401,7 +1404,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
         name = Value(name),
         displayName = Value(displayName),
         vaultId = Value(vaultId),
-        vaultVersion = Value(vaultVersion),
         keys = Value(keys),
         updatedAt = Value(updatedAt);
   static Insertable<FriendData> custom({
@@ -2385,7 +2387,9 @@ class LibraryEntry extends Table
       type: DriftSqlType.string, requiredDuringInsert: true);
   late final GeneratedColumn<BigInt> version = GeneratedColumn<BigInt>(
       'version', aliasedName, false,
-      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+      type: DriftSqlType.bigInt,
+      requiredDuringInsert: false,
+      defaultValue: Constant(BigInt.from(0)));
   late final GeneratedColumn<int> type = GeneratedColumn<int>(
       'type', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
@@ -2587,7 +2591,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   });
   LibraryEntryCompanion.insert({
     required String id,
-    required BigInt version,
+    this.version = const Value.absent(),
     required int type,
     required BigInt createdAt,
     required String data,
@@ -2595,7 +2599,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     required int height,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        version = Value(version),
         type = Value(type),
         createdAt = Value(createdAt),
         data = Value(data),

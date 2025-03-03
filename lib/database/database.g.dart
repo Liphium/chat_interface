@@ -25,7 +25,9 @@ class $ConversationTable extends Conversation
   @override
   late final GeneratedColumn<BigInt> vaultVersion = GeneratedColumn<BigInt>(
       'vault_version', aliasedName, false,
-      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+      type: DriftSqlType.bigInt,
+      requiredDuringInsert: false,
+      defaultValue: Constant(BigInt.from(0)));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<ConversationType, int> type =
@@ -103,8 +105,6 @@ class $ConversationTable extends Conversation
           _vaultVersionMeta,
           vaultVersion.isAcceptableOrUnknown(
               data['vault_version']!, _vaultVersionMeta));
-    } else if (isInserting) {
-      context.missing(_vaultVersionMeta);
     }
     context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('data')) {
@@ -384,7 +384,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   ConversationCompanion.insert({
     required String id,
     required String vaultId,
-    required BigInt vaultVersion,
+    this.vaultVersion = const Value.absent(),
     required ConversationType type,
     required String data,
     required String token,
@@ -395,7 +395,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         vaultId = Value(vaultId),
-        vaultVersion = Value(vaultVersion),
         type = Value(type),
         data = Value(data),
         token = Value(token),
@@ -1457,7 +1456,9 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   @override
   late final GeneratedColumn<BigInt> vaultVersion = GeneratedColumn<BigInt>(
       'vault_version', aliasedName, false,
-      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+      type: DriftSqlType.bigInt,
+      requiredDuringInsert: false,
+      defaultValue: Constant(BigInt.from(0)));
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
@@ -1512,8 +1513,6 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           _vaultVersionMeta,
           vaultVersion.isAcceptableOrUnknown(
               data['vault_version']!, _vaultVersionMeta));
-    } else if (isInserting) {
-      context.missing(_vaultVersionMeta);
     }
     if (data.containsKey('keys')) {
       context.handle(
@@ -1713,7 +1712,7 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     required String name,
     required String displayName,
     required String vaultId,
-    required BigInt vaultVersion,
+    this.vaultVersion = const Value.absent(),
     required String keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
@@ -1721,7 +1720,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
         name = Value(name),
         displayName = Value(displayName),
         vaultId = Value(vaultId),
-        vaultVersion = Value(vaultVersion),
         keys = Value(keys),
         updatedAt = Value(updatedAt);
   static Insertable<FriendData> custom({
@@ -2871,7 +2869,9 @@ class $LibraryEntryTable extends LibraryEntry
   @override
   late final GeneratedColumn<BigInt> version = GeneratedColumn<BigInt>(
       'version', aliasedName, false,
-      type: DriftSqlType.bigInt, requiredDuringInsert: true);
+      type: DriftSqlType.bigInt,
+      requiredDuringInsert: false,
+      defaultValue: Constant(BigInt.from(0)));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<LibraryEntryType, int> type =
@@ -2920,8 +2920,6 @@ class $LibraryEntryTable extends LibraryEntry
     if (data.containsKey('version')) {
       context.handle(_versionMeta,
           version.isAcceptableOrUnknown(data['version']!, _versionMeta));
-    } else if (isInserting) {
-      context.missing(_versionMeta);
     }
     context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
@@ -3138,7 +3136,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   });
   LibraryEntryCompanion.insert({
     required String id,
-    required BigInt version,
+    this.version = const Value.absent(),
     required LibraryEntryType type,
     required BigInt createdAt,
     required String data,
@@ -3146,7 +3144,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     required int height,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        version = Value(version),
         type = Value(type),
         createdAt = Value(createdAt),
         data = Value(data),
@@ -3296,7 +3293,7 @@ typedef $$ConversationTableCreateCompanionBuilder = ConversationCompanion
     Function({
   required String id,
   required String vaultId,
-  required BigInt vaultVersion,
+  Value<BigInt> vaultVersion,
   required ConversationType type,
   required String data,
   required String token,
@@ -3498,7 +3495,7 @@ class $$ConversationTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String vaultId,
-            required BigInt vaultVersion,
+            Value<BigInt> vaultVersion = const Value.absent(),
             required ConversationType type,
             required String data,
             required String token,
@@ -4028,7 +4025,7 @@ typedef $$FriendTableCreateCompanionBuilder = FriendCompanion Function({
   required String name,
   required String displayName,
   required String vaultId,
-  required BigInt vaultVersion,
+  Value<BigInt> vaultVersion,
   required String keys,
   required BigInt updatedAt,
   Value<int> rowid,
@@ -4183,7 +4180,7 @@ class $$FriendTableTableManager extends RootTableManager<
             required String name,
             required String displayName,
             required String vaultId,
-            required BigInt vaultVersion,
+            Value<BigInt> vaultVersion = const Value.absent(),
             required String keys,
             required BigInt updatedAt,
             Value<int> rowid = const Value.absent(),
@@ -4821,7 +4818,7 @@ typedef $$TrustedLinkTableProcessedTableManager = ProcessedTableManager<
 typedef $$LibraryEntryTableCreateCompanionBuilder = LibraryEntryCompanion
     Function({
   required String id,
-  required BigInt version,
+  Value<BigInt> version,
   required LibraryEntryType type,
   required BigInt createdAt,
   required String data,
@@ -4983,7 +4980,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             required String id,
-            required BigInt version,
+            Value<BigInt> version = const Value.absent(),
             required LibraryEntryType type,
             required BigInt createdAt,
             required String data,

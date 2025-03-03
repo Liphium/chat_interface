@@ -685,7 +685,7 @@ class Shape10 extends i0.VersionedTable {
 
 i1.GeneratedColumn<BigInt> _column_28(String aliasedName) =>
     i1.GeneratedColumn<BigInt>('vault_version', aliasedName, false,
-        type: i1.DriftSqlType.bigInt);
+        type: i1.DriftSqlType.bigInt, defaultValue: Constant(BigInt.from(0)));
 
 class Shape11 extends i0.VersionedTable {
   Shape11({required super.source, required super.alias}) : super.aliased();
@@ -725,7 +725,7 @@ class Shape12 extends i0.VersionedTable {
 
 i1.GeneratedColumn<BigInt> _column_29(String aliasedName) =>
     i1.GeneratedColumn<BigInt>('version', aliasedName, false,
-        type: i1.DriftSqlType.bigInt);
+        type: i1.DriftSqlType.bigInt, defaultValue: Constant(BigInt.from(0)));
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,

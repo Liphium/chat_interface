@@ -8,7 +8,7 @@ enum ConversationType { directMessage, group }
 class Conversation extends Table {
   TextColumn get id => text()();
   TextColumn get vaultId => text()();
-  Int64Column get vaultVersion => int64()();
+  Int64Column get vaultVersion => int64().withDefault(Constant(BigInt.from(0)))();
   IntColumn get type => intEnum<ConversationType>()();
   TextColumn get data => text()();
   TextColumn get token => text()();
@@ -54,7 +54,7 @@ class Friend extends Table {
   TextColumn get name => text()();
   TextColumn get displayName => text()();
   TextColumn get vaultId => text()();
-  Int64Column get vaultVersion => int64()();
+  Int64Column get vaultVersion => int64().withDefault(Constant(BigInt.from(0)))();
   TextColumn get keys => text()();
   Int64Column get updatedAt => int64()();
 
@@ -66,7 +66,7 @@ class Friend extends Table {
 @TableIndex(name: "idx_library_entry_version", columns: {#version})
 class LibraryEntry extends Table {
   TextColumn get id => text()();
-  Int64Column get version => int64()();
+  Int64Column get version => int64().withDefault(Constant(BigInt.from(0)))();
   IntColumn get type => intEnum<LibraryEntryType>()();
   Int64Column get createdAt => int64()();
   TextColumn get data => text()();
