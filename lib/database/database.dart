@@ -45,6 +45,8 @@ class Database extends _$Database {
           await m.createIndex(schema.idxConversationVaultVersion);
           await m.createIndex(schema.idxConversationUpdated);
           await m.createIndex(schema.idxFriendsUpdated);
+          await m.createIndex(schema.idxFriendsVersion);
+          await m.createIndex(schema.idxRequestVersion);
           await m.createIndex(schema.idxLibraryEntryCreated);
           await m.createIndex(schema.idxLibraryEntryVersion);
           await m.createIndex(schema.idxMessageCreated);

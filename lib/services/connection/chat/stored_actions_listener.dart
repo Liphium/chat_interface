@@ -175,6 +175,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     json["name"],
     json["dname"],
     "",
+    0,
     KeyStorage(publicKey, signaturePub, profileKey, json["sa"]),
     DateTime.now().millisecondsSinceEpoch,
   );

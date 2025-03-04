@@ -49,6 +49,7 @@ class Member extends Table {
 }
 
 @TableIndex(name: "idx_friends_updated", columns: {#updatedAt})
+@TableIndex(name: "idx_friends_version", columns: {#vaultVersion})
 class Friend extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
@@ -103,12 +104,14 @@ class Profile extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_request_version", columns: {#vaultVersion})
 class Request extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get displayName => text()();
   BoolColumn get self => boolean()(); // Whether the request is sent by the current user
   TextColumn get vaultId => text()();
+  Int64Column get version => int64().withDefault(Constant(BigInt.from(0)))();
   TextColumn get keys => text()();
   Int64Column get updatedAt => int64()();
 

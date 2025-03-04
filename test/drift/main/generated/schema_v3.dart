@@ -1518,6 +1518,11 @@ class Request extends Table with TableInfo<Request, RequestData> {
   late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
       'vault_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<BigInt> version = GeneratedColumn<BigInt>(
+      'version', aliasedName, false,
+      type: DriftSqlType.bigInt,
+      requiredDuringInsert: false,
+      defaultValue: Constant(BigInt.from(0)));
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
       'keys', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
@@ -1526,7 +1531,7 @@ class Request extends Table with TableInfo<Request, RequestData> {
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, displayName, self, vaultId, keys, updatedAt];
+      [id, name, displayName, self, vaultId, version, keys, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1548,6 +1553,8 @@ class Request extends Table with TableInfo<Request, RequestData> {
           .read(DriftSqlType.bool, data['${effectivePrefix}self'])!,
       vaultId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
+      version: attachedDatabase.typeMapping
+          .read(DriftSqlType.bigInt, data['${effectivePrefix}version'])!,
       keys: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -1567,6 +1574,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   final String displayName;
   final bool self;
   final String vaultId;
+  final BigInt version;
   final String keys;
   final BigInt updatedAt;
   const RequestData(
@@ -1575,6 +1583,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       required this.displayName,
       required this.self,
       required this.vaultId,
+      required this.version,
       required this.keys,
       required this.updatedAt});
   @override
@@ -1585,6 +1594,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     map['display_name'] = Variable<String>(displayName);
     map['self'] = Variable<bool>(self);
     map['vault_id'] = Variable<String>(vaultId);
+    map['version'] = Variable<BigInt>(version);
     map['keys'] = Variable<String>(keys);
     map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
@@ -1597,6 +1607,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       displayName: Value(displayName),
       self: Value(self),
       vaultId: Value(vaultId),
+      version: Value(version),
       keys: Value(keys),
       updatedAt: Value(updatedAt),
     );
@@ -1611,6 +1622,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       displayName: serializer.fromJson<String>(json['displayName']),
       self: serializer.fromJson<bool>(json['self']),
       vaultId: serializer.fromJson<String>(json['vaultId']),
+      version: serializer.fromJson<BigInt>(json['version']),
       keys: serializer.fromJson<String>(json['keys']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
@@ -1624,6 +1636,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       'displayName': serializer.toJson<String>(displayName),
       'self': serializer.toJson<bool>(self),
       'vaultId': serializer.toJson<String>(vaultId),
+      'version': serializer.toJson<BigInt>(version),
       'keys': serializer.toJson<String>(keys),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
@@ -1635,6 +1648,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
           String? displayName,
           bool? self,
           String? vaultId,
+          BigInt? version,
           String? keys,
           BigInt? updatedAt}) =>
       RequestData(
@@ -1643,6 +1657,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
         displayName: displayName ?? this.displayName,
         self: self ?? this.self,
         vaultId: vaultId ?? this.vaultId,
+        version: version ?? this.version,
         keys: keys ?? this.keys,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -1654,6 +1669,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
           data.displayName.present ? data.displayName.value : this.displayName,
       self: data.self.present ? data.self.value : this.self,
       vaultId: data.vaultId.present ? data.vaultId.value : this.vaultId,
+      version: data.version.present ? data.version.value : this.version,
       keys: data.keys.present ? data.keys.value : this.keys,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -1667,6 +1683,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
           ..write('displayName: $displayName, ')
           ..write('self: $self, ')
           ..write('vaultId: $vaultId, ')
+          ..write('version: $version, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1674,8 +1691,8 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, displayName, self, vaultId, keys, updatedAt);
+  int get hashCode => Object.hash(
+      id, name, displayName, self, vaultId, version, keys, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1685,6 +1702,7 @@ class RequestData extends DataClass implements Insertable<RequestData> {
           other.displayName == this.displayName &&
           other.self == this.self &&
           other.vaultId == this.vaultId &&
+          other.version == this.version &&
           other.keys == this.keys &&
           other.updatedAt == this.updatedAt);
 }
@@ -1695,6 +1713,7 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   final Value<String> displayName;
   final Value<bool> self;
   final Value<String> vaultId;
+  final Value<BigInt> version;
   final Value<String> keys;
   final Value<BigInt> updatedAt;
   final Value<int> rowid;
@@ -1704,6 +1723,7 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     this.displayName = const Value.absent(),
     this.self = const Value.absent(),
     this.vaultId = const Value.absent(),
+    this.version = const Value.absent(),
     this.keys = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1714,6 +1734,7 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     required String displayName,
     required bool self,
     required String vaultId,
+    this.version = const Value.absent(),
     required String keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
@@ -1730,6 +1751,7 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     Expression<String>? displayName,
     Expression<bool>? self,
     Expression<String>? vaultId,
+    Expression<BigInt>? version,
     Expression<String>? keys,
     Expression<BigInt>? updatedAt,
     Expression<int>? rowid,
@@ -1740,6 +1762,7 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
       if (displayName != null) 'display_name': displayName,
       if (self != null) 'self': self,
       if (vaultId != null) 'vault_id': vaultId,
+      if (version != null) 'version': version,
       if (keys != null) 'keys': keys,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -1752,6 +1775,7 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
       Value<String>? displayName,
       Value<bool>? self,
       Value<String>? vaultId,
+      Value<BigInt>? version,
       Value<String>? keys,
       Value<BigInt>? updatedAt,
       Value<int>? rowid}) {
@@ -1761,6 +1785,7 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
       displayName: displayName ?? this.displayName,
       self: self ?? this.self,
       vaultId: vaultId ?? this.vaultId,
+      version: version ?? this.version,
       keys: keys ?? this.keys,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -1785,6 +1810,9 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     if (vaultId.present) {
       map['vault_id'] = Variable<String>(vaultId.value);
     }
+    if (version.present) {
+      map['version'] = Variable<BigInt>(version.value);
+    }
     if (keys.present) {
       map['keys'] = Variable<String>(keys.value);
     }
@@ -1805,6 +1833,7 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
           ..write('displayName: $displayName, ')
           ..write('self: $self, ')
           ..write('vaultId: $vaultId, ')
+          ..write('version: $version, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -2714,6 +2743,10 @@ class DatabaseAtV3 extends GeneratedDatabase {
       'CREATE INDEX idx_message_created ON message (created_at)');
   late final Index idxFriendsUpdated = Index('idx_friends_updated',
       'CREATE INDEX idx_friends_updated ON friend (updated_at)');
+  late final Index idxFriendsVersion = Index('idx_friends_version',
+      'CREATE INDEX idx_friends_version ON friend (vault_version)');
+  late final Index idxRequestVersion = Index(
+      'idx_request_version', 'CREATE INDEX idx_request_version ON request ()');
   late final Index idxLibraryEntryCreated = Index('idx_library_entry_created',
       'CREATE INDEX idx_library_entry_created ON library_entry (created_at)');
   late final Index idxLibraryEntryVersion = Index('idx_library_entry_version',
@@ -2737,6 +2770,8 @@ class DatabaseAtV3 extends GeneratedDatabase {
         idxConversationUpdated,
         idxMessageCreated,
         idxFriendsUpdated,
+        idxFriendsVersion,
+        idxRequestVersion,
         idxLibraryEntryCreated,
         idxLibraryEntryVersion
       ];

@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:chat_interface/main.dart';
+import 'package:chat_interface/services/chat/friends_service.dart';
+import 'package:chat_interface/services/chat/requests_service.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/util/encryption/hash.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
@@ -24,7 +27,7 @@ import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
-part 'friends_vault.dart';
+part '../../../services/chat/friends_vault.dart';
 
 class FriendController extends GetxController {
   final friends = <LPHAddress, Friend>{}.obs;
@@ -66,9 +69,6 @@ class FriendController extends GetxController {
     request.displayName = guy.displayName;
     request.name = guy.name;
 
-    // Remove from requests controller
-    await Get.find<RequestController>().deleteSentRequest(request);
-
     // Remove request from server
     final friendsVault = await FriendsVault.remove(request.vaultId);
     if (!friendsVault) {
@@ -78,7 +78,7 @@ class FriendController extends GetxController {
 
     // Add friend to vault
     final id = await FriendsVault.store(
-      request.friend.toStoredPayload(),
+      request.friend,
       lastPacket: request.updatedAt,
       errorPopup: true,
       prefix: "friend",
@@ -96,10 +96,11 @@ class FriendController extends GetxController {
     return true;
   }
 
-  void add(Friend friend) {
-    friends[friend.id] = friend;
-    if (friend.id != StatusController.ownAddress) {
-      db.friend.insertOnConflictUpdate(friend.entity());
+  void addOrUpdate(Friend friend) {
+    if (friends[friend.id] != null) {
+      friends[friend.id]!.copyFrom(friend);
+    } else {
+      friends[friend.id] = friend;
     }
   }
 
@@ -121,6 +122,7 @@ class Friend {
   LPHAddress id;
   String name;
   String vaultId;
+  int vaultVersion;
   KeyStorage keyStorage;
   bool unknown;
   Timer? _timer;
@@ -140,13 +142,13 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, String displayName, this.vaultId, this.keyStorage, this.updatedAt, {this.unknown = false}) {
+  Friend(this.id, this.name, String displayName, this.vaultId, this.vaultVersion, this.keyStorage, this.updatedAt, {this.unknown = false}) {
     this.displayName.value = displayName;
   }
 
   /// The friend for a system component (used in system messages for members)
   factory Friend.system() {
-    return Friend(LPHAddress(basePath, "system"), "system", "system", "", KeyStorage.empty(), 0);
+    return Friend(LPHAddress(basePath, "system"), "system", "system", "", 0, KeyStorage.empty(), 0);
   }
 
   /// Own account as a friend (used to make implementations simpler)
@@ -157,6 +159,7 @@ class Friend {
       controller.name.value,
       controller.displayName.value,
       "",
+      0,
       KeyStorage.empty(),
       0,
     );
@@ -168,7 +171,7 @@ class Friend {
     if (address.id.length >= 5) {
       shownId = address.id.substring(0, 5);
     }
-    final friend = Friend(address, "lph-$shownId", "lph-$shownId", "", KeyStorage.empty(), 0);
+    final friend = Friend(address, "lph-$shownId", "lph-$shownId", "", 0, KeyStorage.empty(), 0);
     friend.unknown = true;
     return friend;
   }
@@ -180,18 +183,20 @@ class Friend {
       fromDbEncrypted(data.name),
       fromDbEncrypted(data.displayName),
       fromDbEncrypted(data.vaultId),
+      data.vaultVersion.toInt(),
       KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
       data.updatedAt.toInt(),
     );
   }
 
   /// Convert a json to a friend (used for friends vault)
-  factory Friend.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
+  factory Friend.fromStoredPayload(String id, int version, int updatedAt, Map<String, dynamic> json) {
     return Friend(
       LPHAddress.from(json["id"]),
       json["name"],
       json["dname"],
-      "",
+      id,
+      version,
       KeyStorage.fromJson(json),
       updatedAt,
     );
@@ -208,6 +213,16 @@ class Friend {
     reqPayload.addAll(keyStorage.toJson());
 
     return jsonEncode(reqPayload);
+  }
+
+  void copyFrom(Friend friend) {
+    id = friend.id;
+    vaultId = friend.vaultId;
+    vaultVersion = friend.vaultVersion;
+    keyStorage = friend.keyStorage;
+    displayName.value = friend.displayName.value;
+    name = friend.name;
+    updatedAt = friend.updatedAt;
   }
 
   // Check if vault id is known (this would require a restart of the app)
