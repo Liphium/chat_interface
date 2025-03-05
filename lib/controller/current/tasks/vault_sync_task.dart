@@ -8,7 +8,6 @@ import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/main.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -59,7 +58,6 @@ class VaultSyncTask extends SynchronizationTask {
 
         // Increment the version of the tag in case increased
         if (entry.version > versionMap[entry.tag]!) {
-          sendLog("new version: ${entry.version}");
           versionMap[entry.tag] = entry.version;
         }
 
@@ -73,7 +71,7 @@ class VaultSyncTask extends SynchronizationTask {
         } else {
           // Decrypt payload and add to list of new entries
           entry.payload = decryptSymmetric(entry.payload, keys[0], sodium);
-          if (deleted[entry.tag] == null) {
+          if (newEntries[entry.tag] == null) {
             newEntries[entry.tag] = [entry];
           } else {
             newEntries[entry.tag]!.add(entry);
@@ -84,8 +82,6 @@ class VaultSyncTask extends SynchronizationTask {
       // Return both lists to the outside
       return (deleted, newEntries, versionMap);
     }, secureKeys: [vaultKey]);
-
-    sendLog("new versions: $newVersions");
 
     // Save all the new versions
     for (var target in targets) {

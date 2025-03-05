@@ -91,12 +91,16 @@ class ConversationService extends VaultTarget {
 
   @override
   Future<void> processEntries(List<String> deleted, List<VaultEntry> newEntries) async {
+    sendLog("processing");
+
     // Add all the new conversations to the vault
     final messageController = Get.find<MessageController>();
     final controller = Get.find<ConversationController>();
     for (var entry in newEntries) {
       final conv = Conversation.fromJson(jsonDecode(entry.payload), entry.id);
-      await ConversationService.updateOrInsertFromVault(conv);
+      if (controller.conversations[conv.id] == null) {
+        await ConversationService.insertFromVault(conv);
+      }
     }
 
     // Delete everything that's been deleted from the vault on the server
@@ -325,7 +329,7 @@ class ConversationService extends VaultTarget {
   ///
   /// Inserts it into the database or updates it.
   /// Subscribes to the conversation.
-  static Future<bool> updateOrInsertFromVault(Conversation conversation) async {
+  static Future<bool> insertFromVault(Conversation conversation) async {
     // Insert it into cache
     await Get.find<ConversationController>().add(conversation, loadMembers: false);
 

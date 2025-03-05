@@ -173,18 +173,26 @@ abstract class SynchronizationTask {
 
   /// Starts the task.
   Future<void> start() async {
+    Future<void> runner() async {
+      if (loading.value) {
+        return;
+      }
+      loading.value = true;
+      final result = await refresh();
+      if (result != null) {
+        sendLog("task $name finished with error: $result");
+      }
+      loading.value = false;
+    }
+
+    // Run it after being initialized
+    unawaited(runner());
+
+    // Run the thing every now and then
     _timer = Timer.periodic(
       frequency,
       (timer) async {
-        if (loading.value) {
-          return;
-        }
-        loading.value = true;
-        final result = await refresh();
-        if (result != null) {
-          sendLog("task $name finished with error: $result");
-        }
-        loading.value = false;
+        unawaited(runner());
       },
     );
   }
