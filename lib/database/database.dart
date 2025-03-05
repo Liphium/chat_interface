@@ -1,7 +1,6 @@
 import 'package:chat_interface/database/database.steps.dart';
 import 'package:chat_interface/database/database_entities.dart';
 import 'package:chat_interface/database/trusted_links.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart';
 
 part 'database.g.dart';
