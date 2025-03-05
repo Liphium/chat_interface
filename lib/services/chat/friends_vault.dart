@@ -200,8 +200,8 @@ class FriendsVault {
       }
 
       // Add to the list of deleted ids when it was deleted
-      if (data["deleted"]) {
-        deleted.add(data["id"]);
+      if (friend["deleted"]) {
+        deleted.add(friend["id"]);
         continue;
       }
 

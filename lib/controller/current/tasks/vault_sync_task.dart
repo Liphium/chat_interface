@@ -8,6 +8,7 @@ import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -49,7 +50,7 @@ class VaultSyncTask extends SynchronizationTask {
     }
 
     // Parse all of the entries
-    final (deleted, newEntries) = await sodiumLib.runIsolated((sodium, keys, pairs) {
+    final (deleted, newEntries, newVersions) = await sodiumLib.runIsolated((sodium, keys, pairs) {
       // Sort the entries into deleted ones and new ones per tag
       var deleted = <String, List<String>>{};
       var newEntries = <String, List<VaultEntry>>{};
@@ -58,6 +59,7 @@ class VaultSyncTask extends SynchronizationTask {
 
         // Increment the version of the tag in case increased
         if (entry.version > versionMap[entry.tag]!) {
+          sendLog("new version: ${entry.version}");
           versionMap[entry.tag] = entry.version;
         }
 
@@ -80,12 +82,14 @@ class VaultSyncTask extends SynchronizationTask {
       }
 
       // Return both lists to the outside
-      return (deleted, newEntries);
+      return (deleted, newEntries, versionMap);
     }, secureKeys: [vaultKey]);
+
+    sendLog("new versions: $newVersions");
 
     // Save all the new versions
     for (var target in targets) {
-      unawaited(VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, versionMap[target.tag]!));
+      unawaited(VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, newVersions[target.tag]!));
     }
 
     // Notify the vault targets about the changes
