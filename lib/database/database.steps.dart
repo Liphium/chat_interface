@@ -454,16 +454,12 @@ final class Schema3 extends i0.VersionedSchema {
     profile,
     trustedLink,
     libraryEntry,
-    idxConversationVaultVersion,
     idxConversationUpdated,
     idxMessageCreated,
     idxFriendsUpdated,
-    idxFriendsVersion,
-    idxRequestVersion,
     idxLibraryEntryCreated,
-    idxLibraryEntryVersion,
   ];
-  late final Shape10 conversation = Shape10(
+  late final Shape0 conversation = Shape0(
       source: i0.VersionedTable(
         entityName: 'conversation',
         withoutRowId: false,
@@ -474,7 +470,6 @@ final class Schema3 extends i0.VersionedSchema {
         columns: [
           _column_0,
           _column_1,
-          _column_28,
           _column_2,
           _column_3,
           _column_4,
@@ -539,7 +534,7 @@ final class Schema3 extends i0.VersionedSchema {
         attachedDatabase: database,
       ),
       alias: null);
-  late final Shape11 friend = Shape11(
+  late final Shape4 friend = Shape4(
       source: i0.VersionedTable(
         entityName: 'friend',
         withoutRowId: false,
@@ -552,14 +547,13 @@ final class Schema3 extends i0.VersionedSchema {
           _column_20,
           _column_21,
           _column_1,
-          _column_28,
           _column_22,
           _column_7,
         ],
         attachedDatabase: database,
       ),
       alias: null);
-  late final Shape12 request = Shape12(
+  late final Shape5 request = Shape5(
       source: i0.VersionedTable(
         entityName: 'request',
         withoutRowId: false,
@@ -573,7 +567,6 @@ final class Schema3 extends i0.VersionedSchema {
           _column_21,
           _column_23,
           _column_1,
-          _column_29,
           _column_22,
           _column_7,
         ],
@@ -627,7 +620,7 @@ final class Schema3 extends i0.VersionedSchema {
         attachedDatabase: database,
       ),
       alias: null);
-  late final Shape13 libraryEntry = Shape13(
+  late final Shape9 libraryEntry = Shape9(
       source: i0.VersionedTable(
         entityName: 'library_entry',
         withoutRowId: false,
@@ -637,7 +630,6 @@ final class Schema3 extends i0.VersionedSchema {
         ],
         columns: [
           _column_0,
-          _column_29,
           _column_2,
           _column_12,
           _column_3,
@@ -647,111 +639,14 @@ final class Schema3 extends i0.VersionedSchema {
         attachedDatabase: database,
       ),
       alias: null);
-  final i1.Index idxConversationVaultVersion = i1.Index(
-      'idx_conversation_vault_version',
-      'CREATE INDEX idx_conversation_vault_version ON conversation (vault_version)');
   final i1.Index idxConversationUpdated = i1.Index('idx_conversation_updated',
       'CREATE INDEX idx_conversation_updated ON conversation (updated_at)');
   final i1.Index idxMessageCreated = i1.Index('idx_message_created',
       'CREATE INDEX idx_message_created ON message (created_at)');
   final i1.Index idxFriendsUpdated = i1.Index('idx_friends_updated',
       'CREATE INDEX idx_friends_updated ON friend (updated_at)');
-  final i1.Index idxFriendsVersion = i1.Index('idx_friends_version',
-      'CREATE INDEX idx_friends_version ON friend (vault_version)');
-  final i1.Index idxRequestVersion = i1.Index(
-      'idx_request_version', 'CREATE INDEX idx_request_version ON request ()');
   final i1.Index idxLibraryEntryCreated = i1.Index('idx_library_entry_created',
       'CREATE INDEX idx_library_entry_created ON library_entry (created_at)');
-  final i1.Index idxLibraryEntryVersion = i1.Index('idx_library_entry_version',
-      'CREATE INDEX idx_library_entry_version ON library_entry (version)');
-}
-
-class Shape10 extends i0.VersionedTable {
-  Shape10({required super.source, required super.alias}) : super.aliased();
-  i1.GeneratedColumn<String> get id =>
-      columnsByName['id']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get vaultId =>
-      columnsByName['vault_id']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<BigInt> get vaultVersion =>
-      columnsByName['vault_version']! as i1.GeneratedColumn<BigInt>;
-  i1.GeneratedColumn<int> get type =>
-      columnsByName['type']! as i1.GeneratedColumn<int>;
-  i1.GeneratedColumn<String> get data =>
-      columnsByName['data']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get token =>
-      columnsByName['token']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get key =>
-      columnsByName['key']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<BigInt> get lastVersion =>
-      columnsByName['last_version']! as i1.GeneratedColumn<BigInt>;
-  i1.GeneratedColumn<BigInt> get updatedAt =>
-      columnsByName['updated_at']! as i1.GeneratedColumn<BigInt>;
-  i1.GeneratedColumn<BigInt> get readAt =>
-      columnsByName['read_at']! as i1.GeneratedColumn<BigInt>;
-}
-
-i1.GeneratedColumn<BigInt> _column_28(String aliasedName) =>
-    i1.GeneratedColumn<BigInt>('vault_version', aliasedName, false,
-        type: i1.DriftSqlType.bigInt, defaultValue: Constant(BigInt.from(0)));
-
-class Shape11 extends i0.VersionedTable {
-  Shape11({required super.source, required super.alias}) : super.aliased();
-  i1.GeneratedColumn<String> get id =>
-      columnsByName['id']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get name =>
-      columnsByName['name']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get displayName =>
-      columnsByName['display_name']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get vaultId =>
-      columnsByName['vault_id']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<BigInt> get vaultVersion =>
-      columnsByName['vault_version']! as i1.GeneratedColumn<BigInt>;
-  i1.GeneratedColumn<String> get keys =>
-      columnsByName['keys']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<BigInt> get updatedAt =>
-      columnsByName['updated_at']! as i1.GeneratedColumn<BigInt>;
-}
-
-class Shape12 extends i0.VersionedTable {
-  Shape12({required super.source, required super.alias}) : super.aliased();
-  i1.GeneratedColumn<String> get id =>
-      columnsByName['id']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get name =>
-      columnsByName['name']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get displayName =>
-      columnsByName['display_name']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<bool> get self =>
-      columnsByName['self']! as i1.GeneratedColumn<bool>;
-  i1.GeneratedColumn<String> get vaultId =>
-      columnsByName['vault_id']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<BigInt> get version =>
-      columnsByName['version']! as i1.GeneratedColumn<BigInt>;
-  i1.GeneratedColumn<String> get keys =>
-      columnsByName['keys']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<BigInt> get updatedAt =>
-      columnsByName['updated_at']! as i1.GeneratedColumn<BigInt>;
-}
-
-i1.GeneratedColumn<BigInt> _column_29(String aliasedName) =>
-    i1.GeneratedColumn<BigInt>('version', aliasedName, false,
-        type: i1.DriftSqlType.bigInt, defaultValue: Constant(BigInt.from(0)));
-
-class Shape13 extends i0.VersionedTable {
-  Shape13({required super.source, required super.alias}) : super.aliased();
-  i1.GeneratedColumn<String> get id =>
-      columnsByName['id']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<BigInt> get version =>
-      columnsByName['version']! as i1.GeneratedColumn<BigInt>;
-  i1.GeneratedColumn<int> get type =>
-      columnsByName['type']! as i1.GeneratedColumn<int>;
-  i1.GeneratedColumn<BigInt> get createdAt =>
-      columnsByName['created_at']! as i1.GeneratedColumn<BigInt>;
-  i1.GeneratedColumn<String> get data =>
-      columnsByName['data']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<int> get width =>
-      columnsByName['width']! as i1.GeneratedColumn<int>;
-  i1.GeneratedColumn<int> get height =>
-      columnsByName['height']! as i1.GeneratedColumn<int>;
 }
 
 i0.MigrationStepWithVersion migrationSteps({

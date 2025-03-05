@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/services/chat/friends_service.dart';
 import 'package:chat_interface/services/chat/requests_service.dart';
+import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
@@ -71,7 +71,6 @@ class Friend {
   LPHAddress id;
   String name;
   String vaultId;
-  int vaultVersion;
   KeyStorage keyStorage;
   bool unknown;
   Timer? _timer;
@@ -91,13 +90,13 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
 
-  Friend(this.id, this.name, String displayName, this.vaultId, this.vaultVersion, this.keyStorage, this.updatedAt, {this.unknown = false}) {
+  Friend(this.id, this.name, String displayName, this.vaultId, this.keyStorage, this.updatedAt, {this.unknown = false}) {
     this.displayName.value = displayName;
   }
 
   /// The friend for a system component (used in system messages for members)
   factory Friend.system() {
-    return Friend(LPHAddress(basePath, "system"), "system", "system", "", 0, KeyStorage.empty(), 0);
+    return Friend(LPHAddress(basePath, "system"), "system", "system", "", KeyStorage.empty(), 0);
   }
 
   /// Own account as a friend (used to make implementations simpler)
@@ -108,7 +107,6 @@ class Friend {
       controller.name.value,
       controller.displayName.value,
       "",
-      0,
       KeyStorage.empty(),
       0,
     );
@@ -120,7 +118,7 @@ class Friend {
     if (address.id.length >= 5) {
       shownId = address.id.substring(0, 5);
     }
-    final friend = Friend(address, "lph-$shownId", "lph-$shownId", "", 0, KeyStorage.empty(), 0);
+    final friend = Friend(address, "lph-$shownId", "lph-$shownId", "", KeyStorage.empty(), 0);
     friend.unknown = true;
     return friend;
   }
@@ -132,20 +130,18 @@ class Friend {
       fromDbEncrypted(data.name),
       fromDbEncrypted(data.displayName),
       fromDbEncrypted(data.vaultId),
-      data.vaultVersion.toInt(),
       KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
       data.updatedAt.toInt(),
     );
   }
 
   /// Convert a json to a friend (used for friends vault)
-  factory Friend.fromStoredPayload(String id, int version, int updatedAt, Map<String, dynamic> json) {
+  factory Friend.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
     return Friend(
       LPHAddress.from(json["id"]),
       json["name"],
       json["dname"],
       id,
-      version,
       KeyStorage.fromJson(json),
       updatedAt,
     );
@@ -168,7 +164,6 @@ class Friend {
   void copyFrom(Friend friend) {
     id = friend.id;
     vaultId = friend.vaultId;
-    vaultVersion = friend.vaultVersion;
     keyStorage = friend.keyStorage;
     displayName.value = friend.displayName.value;
     name = friend.name;
@@ -177,7 +172,7 @@ class Friend {
 
   /// Copy this friend for editing.
   Friend copy() {
-    return Friend(id, name, displayName.value, vaultId, vaultVersion, keyStorage, updatedAt);
+    return Friend(id, name, displayName.value, vaultId, keyStorage, updatedAt);
   }
 
   // Check if vault id is known (this would require a restart of the app)
@@ -185,7 +180,6 @@ class Friend {
 
   FriendData entity() => FriendData(
         id: id.encode(),
-        vaultVersion: BigInt.from(0), // TODO: Implement vault sync for friends
         name: dbEncrypted(name),
         displayName: dbEncrypted(displayName.value),
         vaultId: dbEncrypted(vaultId),

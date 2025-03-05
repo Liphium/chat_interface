@@ -3,12 +3,10 @@ import 'package:drift/drift.dart';
 
 enum ConversationType { directMessage, group }
 
-@TableIndex(name: "idx_conversation_vault_version", columns: {#vaultVersion})
 @TableIndex(name: "idx_conversation_updated", columns: {#updatedAt})
 class Conversation extends Table {
   TextColumn get id => text()();
   TextColumn get vaultId => text()();
-  Int64Column get vaultVersion => int64().withDefault(Constant(BigInt.from(0)))();
   IntColumn get type => intEnum<ConversationType>()();
   TextColumn get data => text()();
   TextColumn get token => text()();
@@ -49,13 +47,11 @@ class Member extends Table {
 }
 
 @TableIndex(name: "idx_friends_updated", columns: {#updatedAt})
-@TableIndex(name: "idx_friends_version", columns: {#vaultVersion})
 class Friend extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get displayName => text()();
   TextColumn get vaultId => text()();
-  Int64Column get vaultVersion => int64().withDefault(Constant(BigInt.from(0)))();
   TextColumn get keys => text()();
   Int64Column get updatedAt => int64()();
 
@@ -64,10 +60,8 @@ class Friend extends Table {
 }
 
 @TableIndex(name: "idx_library_entry_created", columns: {#createdAt})
-@TableIndex(name: "idx_library_entry_version", columns: {#version})
 class LibraryEntry extends Table {
   TextColumn get id => text()();
-  Int64Column get version => int64().withDefault(Constant(BigInt.from(0)))();
   IntColumn get type => intEnum<LibraryEntryType>()();
   Int64Column get createdAt => int64()();
   TextColumn get data => text()();
@@ -104,14 +98,12 @@ class Profile extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@TableIndex(name: "idx_request_version", columns: {#vaultVersion})
 class Request extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get displayName => text()();
   BoolColumn get self => boolean()(); // Whether the request is sent by the current user
   TextColumn get vaultId => text()();
-  Int64Column get version => int64().withDefault(Constant(BigInt.from(0)))();
   TextColumn get keys => text()();
   Int64Column get updatedAt => int64()();
 

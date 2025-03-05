@@ -13,8 +13,7 @@ class FriendsVault {
 
     // Call the related vault update event
     request.vaultId = entry!.$1;
-    request.vaultVersion = entry.$2;
-    await updateFromVaultUpdate(FriendVaultUpdate([], [], [request], [], []));
+    await updateFromVaultUpdate(FriendVaultUpdate(entry.$2, [], [], [request], [], []));
     return null;
   }
 
@@ -30,8 +29,7 @@ class FriendsVault {
 
     // Call the related vault update event
     request.vaultId = entry!.$1;
-    request.vaultVersion = entry.$2;
-    await updateFromVaultUpdate(FriendVaultUpdate([], [], [], [request], []));
+    await updateFromVaultUpdate(FriendVaultUpdate(entry.$2, [], [], [], [request], []));
     return null;
   }
 
@@ -61,13 +59,13 @@ class FriendsVault {
   /// Returns an error if there was one.
   static Future<String?> updateFriend(Friend friend) async {
     // Store the request in the vault
-    final (error, entry) = await _update(friend.vaultId, friend.toStoredPayload());
+    final (error, version) = await _update(friend.vaultId, friend.toStoredPayload());
     if (error != null) {
       return error;
     }
 
     // Call the related vault update event
-    await updateFromVaultUpdate(FriendVaultUpdate([], [friend.vaultId], [], [], [friend]));
+    await updateFromVaultUpdate(FriendVaultUpdate(version!, [], [friend.vaultId], [], [], [friend]));
     return null;
   }
 
@@ -105,7 +103,7 @@ class FriendsVault {
     }
 
     // Update the local vault
-    await updateFromVaultUpdate(FriendVaultUpdate([vaultId], [], [], [], []));
+    await updateFromVaultUpdate(FriendVaultUpdate(json["version"], [vaultId], [], [], [], []));
     return null;
   }
 
@@ -160,17 +158,12 @@ class FriendsVault {
     }
 
     // Get the latest version
-    final friendMax = db.friend.vaultVersion.max();
-    final friendQuery = db.selectOnly(db.conversation)..addColumns([friendMax]);
-    final friendMaxVersion = await friendQuery.map((row) => row.read(friendMax)).getSingleOrNull() ?? BigInt.from(0);
-    final requestMax = db.request.version.max();
-    final requestQuery = db.selectOnly(db.conversation)..addColumns([requestMax]);
-    final requestMaxVersion = await requestQuery.map((row) => row.read(requestMax)).getSingleOrNull() ?? BigInt.from(0);
+    final version = await VaultVersioningService.retrieveVersion(VaultVersioningService.vaultTypeFriend, "");
 
     friendsVaultRefreshing.value = true;
     // Load friends from vault
     final json = await postAuthorizedJSON("/account/friends/sync", <String, dynamic>{
-      "version": max(friendMaxVersion.toInt(), requestMaxVersion.toInt()),
+      "version": version,
     });
     if (!json["success"]) {
       friendsVaultRefreshing.value = false;
@@ -179,7 +172,7 @@ class FriendsVault {
 
     // Parse the JSON (in different isolate)
     final res = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) => _parseFriends(json, sodium, keys[0]),
+      (sodium, keys, pairs) => _parseFriends(version, json, sodium, keys[0]),
       secureKeys: [vaultKey],
     );
 
@@ -191,7 +184,7 @@ class FriendsVault {
   }
 
   /// Parse a response from the server vault sync to a friend vault update
-  static Future<FriendVaultUpdate> _parseFriends(Map<String, dynamic> json, Sodium sodium, SecureKey key) async {
+  static Future<FriendVaultUpdate> _parseFriends(int currentVersion, Map<String, dynamic> json, Sodium sodium, SecureKey key) async {
     final deleted = <String>[];
     final friendVaultIds = <String>[];
     final friends = <Friend>[];
@@ -200,6 +193,11 @@ class FriendsVault {
     for (var friend in json["friends"]) {
       final decrypted = decryptSymmetric(friend["friend"], key, sodium);
       final data = jsonDecode(decrypted);
+
+      // Set the new version
+      if (friend["version"] > currentVersion) {
+        currentVersion = friend["version"];
+      }
 
       // Add to the list of deleted ids when it was deleted
       if (data["deleted"]) {
@@ -210,24 +208,27 @@ class FriendsVault {
       // Check if request or friend
       if (data["rq"]) {
         if (data["self"]) {
-          final rq = Request.fromStoredPayload(friend["id"], friend["version"], friend["updated_at"], data);
+          final rq = Request.fromStoredPayload(friend["id"], friend["updated_at"], data);
           requestsSent.add(rq);
         } else {
-          final rq = Request.fromStoredPayload(friend["id"], friend["version"], friend["updated_at"], data);
+          final rq = Request.fromStoredPayload(friend["id"], friend["updated_at"], data);
           requests.add(rq);
         }
       } else {
-        final fr = Friend.fromStoredPayload(friend["id"], friend["version"], friend["updated_at"], data);
+        final fr = Friend.fromStoredPayload(friend["id"], friend["updated_at"], data);
         friends.add(fr);
         friendVaultIds.add(friend["id"]);
       }
     }
 
-    return FriendVaultUpdate(deleted, friendVaultIds, requests, requestsSent, friends);
+    return FriendVaultUpdate(currentVersion, deleted, friendVaultIds, requests, requestsSent, friends);
   }
 
   /// Update the local vault using a server friends vault update
   static Future<void> updateFromVaultUpdate(FriendVaultUpdate update) async {
+    // Change the version to the one in the update
+    await VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeFriend, "", update.newVersion);
+
     // Update the requests
     final controller = Get.find<RequestController>();
     for (var request in update.requests) {
@@ -278,6 +279,8 @@ class FriendsVault {
 }
 
 class FriendVaultUpdate {
+  final int newVersion;
+
   final List<String> deleted;
   final List<String> friendVaultIds;
 
@@ -285,7 +288,7 @@ class FriendVaultUpdate {
   final List<Request> requestsSent;
   final List<Friend> friends;
 
-  FriendVaultUpdate(this.deleted, this.friendVaultIds, this.requests, this.requestsSent, this.friends);
+  FriendVaultUpdate(this.newVersion, this.deleted, this.friendVaultIds, this.requests, this.requestsSent, this.friends);
 }
 
 /// Class for storing all keys for a friend

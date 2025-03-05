@@ -20,14 +20,6 @@ class $ConversationTable extends Conversation
   late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
       'vault_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _vaultVersionMeta =
-      const VerificationMeta('vaultVersion');
-  @override
-  late final GeneratedColumn<BigInt> vaultVersion = GeneratedColumn<BigInt>(
-      'vault_version', aliasedName, false,
-      type: DriftSqlType.bigInt,
-      requiredDuringInsert: false,
-      defaultValue: Constant(BigInt.from(0)));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<ConversationType, int> type =
@@ -67,18 +59,8 @@ class $ConversationTable extends Conversation
       'read_at', aliasedName, false,
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        vaultId,
-        vaultVersion,
-        type,
-        data,
-        token,
-        key,
-        lastVersion,
-        updatedAt,
-        readAt
-      ];
+  List<GeneratedColumn> get $columns =>
+      [id, vaultId, type, data, token, key, lastVersion, updatedAt, readAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -99,12 +81,6 @@ class $ConversationTable extends Conversation
           vaultId.isAcceptableOrUnknown(data['vault_id']!, _vaultIdMeta));
     } else if (isInserting) {
       context.missing(_vaultIdMeta);
-    }
-    if (data.containsKey('vault_version')) {
-      context.handle(
-          _vaultVersionMeta,
-          vaultVersion.isAcceptableOrUnknown(
-              data['vault_version']!, _vaultVersionMeta));
     }
     context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('data')) {
@@ -158,8 +134,6 @@ class $ConversationTable extends Conversation
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       vaultId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
-      vaultVersion: attachedDatabase.typeMapping
-          .read(DriftSqlType.bigInt, data['${effectivePrefix}vault_version'])!,
       type: $ConversationTable.$convertertype.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
@@ -191,7 +165,6 @@ class ConversationData extends DataClass
     implements Insertable<ConversationData> {
   final String id;
   final String vaultId;
-  final BigInt vaultVersion;
   final ConversationType type;
   final String data;
   final String token;
@@ -202,7 +175,6 @@ class ConversationData extends DataClass
   const ConversationData(
       {required this.id,
       required this.vaultId,
-      required this.vaultVersion,
       required this.type,
       required this.data,
       required this.token,
@@ -215,7 +187,6 @@ class ConversationData extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['vault_id'] = Variable<String>(vaultId);
-    map['vault_version'] = Variable<BigInt>(vaultVersion);
     {
       map['type'] =
           Variable<int>($ConversationTable.$convertertype.toSql(type));
@@ -233,7 +204,6 @@ class ConversationData extends DataClass
     return ConversationCompanion(
       id: Value(id),
       vaultId: Value(vaultId),
-      vaultVersion: Value(vaultVersion),
       type: Value(type),
       data: Value(data),
       token: Value(token),
@@ -250,7 +220,6 @@ class ConversationData extends DataClass
     return ConversationData(
       id: serializer.fromJson<String>(json['id']),
       vaultId: serializer.fromJson<String>(json['vaultId']),
-      vaultVersion: serializer.fromJson<BigInt>(json['vaultVersion']),
       type: $ConversationTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
       data: serializer.fromJson<String>(json['data']),
@@ -267,7 +236,6 @@ class ConversationData extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'vaultId': serializer.toJson<String>(vaultId),
-      'vaultVersion': serializer.toJson<BigInt>(vaultVersion),
       'type': serializer
           .toJson<int>($ConversationTable.$convertertype.toJson(type)),
       'data': serializer.toJson<String>(data),
@@ -282,7 +250,6 @@ class ConversationData extends DataClass
   ConversationData copyWith(
           {String? id,
           String? vaultId,
-          BigInt? vaultVersion,
           ConversationType? type,
           String? data,
           String? token,
@@ -293,7 +260,6 @@ class ConversationData extends DataClass
       ConversationData(
         id: id ?? this.id,
         vaultId: vaultId ?? this.vaultId,
-        vaultVersion: vaultVersion ?? this.vaultVersion,
         type: type ?? this.type,
         data: data ?? this.data,
         token: token ?? this.token,
@@ -306,9 +272,6 @@ class ConversationData extends DataClass
     return ConversationData(
       id: data.id.present ? data.id.value : this.id,
       vaultId: data.vaultId.present ? data.vaultId.value : this.vaultId,
-      vaultVersion: data.vaultVersion.present
-          ? data.vaultVersion.value
-          : this.vaultVersion,
       type: data.type.present ? data.type.value : this.type,
       data: data.data.present ? data.data.value : this.data,
       token: data.token.present ? data.token.value : this.token,
@@ -325,7 +288,6 @@ class ConversationData extends DataClass
     return (StringBuffer('ConversationData(')
           ..write('id: $id, ')
           ..write('vaultId: $vaultId, ')
-          ..write('vaultVersion: $vaultVersion, ')
           ..write('type: $type, ')
           ..write('data: $data, ')
           ..write('token: $token, ')
@@ -338,15 +300,14 @@ class ConversationData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, vaultId, vaultVersion, type, data, token,
-      key, lastVersion, updatedAt, readAt);
+  int get hashCode => Object.hash(
+      id, vaultId, type, data, token, key, lastVersion, updatedAt, readAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationData &&
           other.id == this.id &&
           other.vaultId == this.vaultId &&
-          other.vaultVersion == this.vaultVersion &&
           other.type == this.type &&
           other.data == this.data &&
           other.token == this.token &&
@@ -359,7 +320,6 @@ class ConversationData extends DataClass
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<String> id;
   final Value<String> vaultId;
-  final Value<BigInt> vaultVersion;
   final Value<ConversationType> type;
   final Value<String> data;
   final Value<String> token;
@@ -371,7 +331,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   const ConversationCompanion({
     this.id = const Value.absent(),
     this.vaultId = const Value.absent(),
-    this.vaultVersion = const Value.absent(),
     this.type = const Value.absent(),
     this.data = const Value.absent(),
     this.token = const Value.absent(),
@@ -384,7 +343,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   ConversationCompanion.insert({
     required String id,
     required String vaultId,
-    this.vaultVersion = const Value.absent(),
     required ConversationType type,
     required String data,
     required String token,
@@ -405,7 +363,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   static Insertable<ConversationData> custom({
     Expression<String>? id,
     Expression<String>? vaultId,
-    Expression<BigInt>? vaultVersion,
     Expression<int>? type,
     Expression<String>? data,
     Expression<String>? token,
@@ -418,7 +375,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (vaultId != null) 'vault_id': vaultId,
-      if (vaultVersion != null) 'vault_version': vaultVersion,
       if (type != null) 'type': type,
       if (data != null) 'data': data,
       if (token != null) 'token': token,
@@ -433,7 +389,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   ConversationCompanion copyWith(
       {Value<String>? id,
       Value<String>? vaultId,
-      Value<BigInt>? vaultVersion,
       Value<ConversationType>? type,
       Value<String>? data,
       Value<String>? token,
@@ -445,7 +400,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     return ConversationCompanion(
       id: id ?? this.id,
       vaultId: vaultId ?? this.vaultId,
-      vaultVersion: vaultVersion ?? this.vaultVersion,
       type: type ?? this.type,
       data: data ?? this.data,
       token: token ?? this.token,
@@ -465,9 +419,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     }
     if (vaultId.present) {
       map['vault_id'] = Variable<String>(vaultId.value);
-    }
-    if (vaultVersion.present) {
-      map['vault_version'] = Variable<BigInt>(vaultVersion.value);
     }
     if (type.present) {
       map['type'] =
@@ -502,7 +453,6 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
     return (StringBuffer('ConversationCompanion(')
           ..write('id: $id, ')
           ..write('vaultId: $vaultId, ')
-          ..write('vaultVersion: $vaultVersion, ')
           ..write('type: $type, ')
           ..write('data: $data, ')
           ..write('token: $token, ')
@@ -1451,14 +1401,6 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
       'vault_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _vaultVersionMeta =
-      const VerificationMeta('vaultVersion');
-  @override
-  late final GeneratedColumn<BigInt> vaultVersion = GeneratedColumn<BigInt>(
-      'vault_version', aliasedName, false,
-      type: DriftSqlType.bigInt,
-      requiredDuringInsert: false,
-      defaultValue: Constant(BigInt.from(0)));
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
@@ -1472,7 +1414,7 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, displayName, vaultId, vaultVersion, keys, updatedAt];
+      [id, name, displayName, vaultId, keys, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1508,12 +1450,6 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
     } else if (isInserting) {
       context.missing(_vaultIdMeta);
     }
-    if (data.containsKey('vault_version')) {
-      context.handle(
-          _vaultVersionMeta,
-          vaultVersion.isAcceptableOrUnknown(
-              data['vault_version']!, _vaultVersionMeta));
-    }
     if (data.containsKey('keys')) {
       context.handle(
           _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
@@ -1543,8 +1479,6 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           .read(DriftSqlType.string, data['${effectivePrefix}display_name'])!,
       vaultId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
-      vaultVersion: attachedDatabase.typeMapping
-          .read(DriftSqlType.bigInt, data['${effectivePrefix}vault_version'])!,
       keys: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -1563,7 +1497,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   final String name;
   final String displayName;
   final String vaultId;
-  final BigInt vaultVersion;
   final String keys;
   final BigInt updatedAt;
   const FriendData(
@@ -1571,7 +1504,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       required this.name,
       required this.displayName,
       required this.vaultId,
-      required this.vaultVersion,
       required this.keys,
       required this.updatedAt});
   @override
@@ -1581,7 +1513,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     map['name'] = Variable<String>(name);
     map['display_name'] = Variable<String>(displayName);
     map['vault_id'] = Variable<String>(vaultId);
-    map['vault_version'] = Variable<BigInt>(vaultVersion);
     map['keys'] = Variable<String>(keys);
     map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
@@ -1593,7 +1524,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       name: Value(name),
       displayName: Value(displayName),
       vaultId: Value(vaultId),
-      vaultVersion: Value(vaultVersion),
       keys: Value(keys),
       updatedAt: Value(updatedAt),
     );
@@ -1607,7 +1537,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       name: serializer.fromJson<String>(json['name']),
       displayName: serializer.fromJson<String>(json['displayName']),
       vaultId: serializer.fromJson<String>(json['vaultId']),
-      vaultVersion: serializer.fromJson<BigInt>(json['vaultVersion']),
       keys: serializer.fromJson<String>(json['keys']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
@@ -1620,7 +1549,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       'name': serializer.toJson<String>(name),
       'displayName': serializer.toJson<String>(displayName),
       'vaultId': serializer.toJson<String>(vaultId),
-      'vaultVersion': serializer.toJson<BigInt>(vaultVersion),
       'keys': serializer.toJson<String>(keys),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
@@ -1631,7 +1559,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
           String? name,
           String? displayName,
           String? vaultId,
-          BigInt? vaultVersion,
           String? keys,
           BigInt? updatedAt}) =>
       FriendData(
@@ -1639,7 +1566,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
         name: name ?? this.name,
         displayName: displayName ?? this.displayName,
         vaultId: vaultId ?? this.vaultId,
-        vaultVersion: vaultVersion ?? this.vaultVersion,
         keys: keys ?? this.keys,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -1650,9 +1576,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
       displayName:
           data.displayName.present ? data.displayName.value : this.displayName,
       vaultId: data.vaultId.present ? data.vaultId.value : this.vaultId,
-      vaultVersion: data.vaultVersion.present
-          ? data.vaultVersion.value
-          : this.vaultVersion,
       keys: data.keys.present ? data.keys.value : this.keys,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -1665,7 +1588,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
           ..write('name: $name, ')
           ..write('displayName: $displayName, ')
           ..write('vaultId: $vaultId, ')
-          ..write('vaultVersion: $vaultVersion, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1673,8 +1595,8 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, displayName, vaultId, vaultVersion, keys, updatedAt);
+  int get hashCode =>
+      Object.hash(id, name, displayName, vaultId, keys, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1683,7 +1605,6 @@ class FriendData extends DataClass implements Insertable<FriendData> {
           other.name == this.name &&
           other.displayName == this.displayName &&
           other.vaultId == this.vaultId &&
-          other.vaultVersion == this.vaultVersion &&
           other.keys == this.keys &&
           other.updatedAt == this.updatedAt);
 }
@@ -1693,7 +1614,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   final Value<String> name;
   final Value<String> displayName;
   final Value<String> vaultId;
-  final Value<BigInt> vaultVersion;
   final Value<String> keys;
   final Value<BigInt> updatedAt;
   final Value<int> rowid;
@@ -1702,7 +1622,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     this.name = const Value.absent(),
     this.displayName = const Value.absent(),
     this.vaultId = const Value.absent(),
-    this.vaultVersion = const Value.absent(),
     this.keys = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1712,7 +1631,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     required String name,
     required String displayName,
     required String vaultId,
-    this.vaultVersion = const Value.absent(),
     required String keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
@@ -1727,7 +1645,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     Expression<String>? name,
     Expression<String>? displayName,
     Expression<String>? vaultId,
-    Expression<BigInt>? vaultVersion,
     Expression<String>? keys,
     Expression<BigInt>? updatedAt,
     Expression<int>? rowid,
@@ -1737,7 +1654,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
       if (name != null) 'name': name,
       if (displayName != null) 'display_name': displayName,
       if (vaultId != null) 'vault_id': vaultId,
-      if (vaultVersion != null) 'vault_version': vaultVersion,
       if (keys != null) 'keys': keys,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -1749,7 +1665,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
       Value<String>? name,
       Value<String>? displayName,
       Value<String>? vaultId,
-      Value<BigInt>? vaultVersion,
       Value<String>? keys,
       Value<BigInt>? updatedAt,
       Value<int>? rowid}) {
@@ -1758,7 +1673,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
       name: name ?? this.name,
       displayName: displayName ?? this.displayName,
       vaultId: vaultId ?? this.vaultId,
-      vaultVersion: vaultVersion ?? this.vaultVersion,
       keys: keys ?? this.keys,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -1780,9 +1694,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
     if (vaultId.present) {
       map['vault_id'] = Variable<String>(vaultId.value);
     }
-    if (vaultVersion.present) {
-      map['vault_version'] = Variable<BigInt>(vaultVersion.value);
-    }
     if (keys.present) {
       map['keys'] = Variable<String>(keys.value);
     }
@@ -1802,7 +1713,6 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
           ..write('name: $name, ')
           ..write('displayName: $displayName, ')
           ..write('vaultId: $vaultId, ')
-          ..write('vaultVersion: $vaultVersion, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -1846,14 +1756,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
       'vault_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _versionMeta =
-      const VerificationMeta('version');
-  @override
-  late final GeneratedColumn<BigInt> version = GeneratedColumn<BigInt>(
-      'version', aliasedName, false,
-      type: DriftSqlType.bigInt,
-      requiredDuringInsert: false,
-      defaultValue: Constant(BigInt.from(0)));
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
@@ -1867,7 +1769,7 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, displayName, self, vaultId, version, keys, updatedAt];
+      [id, name, displayName, self, vaultId, keys, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1909,10 +1811,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
     } else if (isInserting) {
       context.missing(_vaultIdMeta);
     }
-    if (data.containsKey('version')) {
-      context.handle(_versionMeta,
-          version.isAcceptableOrUnknown(data['version']!, _versionMeta));
-    }
     if (data.containsKey('keys')) {
       context.handle(
           _keysMeta, keys.isAcceptableOrUnknown(data['keys']!, _keysMeta));
@@ -1944,8 +1842,6 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
           .read(DriftSqlType.bool, data['${effectivePrefix}self'])!,
       vaultId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}vault_id'])!,
-      version: attachedDatabase.typeMapping
-          .read(DriftSqlType.bigInt, data['${effectivePrefix}version'])!,
       keys: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -1965,7 +1861,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   final String displayName;
   final bool self;
   final String vaultId;
-  final BigInt version;
   final String keys;
   final BigInt updatedAt;
   const RequestData(
@@ -1974,7 +1869,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       required this.displayName,
       required this.self,
       required this.vaultId,
-      required this.version,
       required this.keys,
       required this.updatedAt});
   @override
@@ -1985,7 +1879,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     map['display_name'] = Variable<String>(displayName);
     map['self'] = Variable<bool>(self);
     map['vault_id'] = Variable<String>(vaultId);
-    map['version'] = Variable<BigInt>(version);
     map['keys'] = Variable<String>(keys);
     map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
@@ -1998,7 +1891,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       displayName: Value(displayName),
       self: Value(self),
       vaultId: Value(vaultId),
-      version: Value(version),
       keys: Value(keys),
       updatedAt: Value(updatedAt),
     );
@@ -2013,7 +1905,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       displayName: serializer.fromJson<String>(json['displayName']),
       self: serializer.fromJson<bool>(json['self']),
       vaultId: serializer.fromJson<String>(json['vaultId']),
-      version: serializer.fromJson<BigInt>(json['version']),
       keys: serializer.fromJson<String>(json['keys']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
@@ -2027,7 +1918,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
       'displayName': serializer.toJson<String>(displayName),
       'self': serializer.toJson<bool>(self),
       'vaultId': serializer.toJson<String>(vaultId),
-      'version': serializer.toJson<BigInt>(version),
       'keys': serializer.toJson<String>(keys),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
@@ -2039,7 +1929,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
           String? displayName,
           bool? self,
           String? vaultId,
-          BigInt? version,
           String? keys,
           BigInt? updatedAt}) =>
       RequestData(
@@ -2048,7 +1937,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
         displayName: displayName ?? this.displayName,
         self: self ?? this.self,
         vaultId: vaultId ?? this.vaultId,
-        version: version ?? this.version,
         keys: keys ?? this.keys,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -2060,7 +1948,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
           data.displayName.present ? data.displayName.value : this.displayName,
       self: data.self.present ? data.self.value : this.self,
       vaultId: data.vaultId.present ? data.vaultId.value : this.vaultId,
-      version: data.version.present ? data.version.value : this.version,
       keys: data.keys.present ? data.keys.value : this.keys,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2074,7 +1961,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
           ..write('displayName: $displayName, ')
           ..write('self: $self, ')
           ..write('vaultId: $vaultId, ')
-          ..write('version: $version, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2082,8 +1968,8 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, displayName, self, vaultId, version, keys, updatedAt);
+  int get hashCode =>
+      Object.hash(id, name, displayName, self, vaultId, keys, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2093,7 +1979,6 @@ class RequestData extends DataClass implements Insertable<RequestData> {
           other.displayName == this.displayName &&
           other.self == this.self &&
           other.vaultId == this.vaultId &&
-          other.version == this.version &&
           other.keys == this.keys &&
           other.updatedAt == this.updatedAt);
 }
@@ -2104,7 +1989,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   final Value<String> displayName;
   final Value<bool> self;
   final Value<String> vaultId;
-  final Value<BigInt> version;
   final Value<String> keys;
   final Value<BigInt> updatedAt;
   final Value<int> rowid;
@@ -2114,7 +1998,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     this.displayName = const Value.absent(),
     this.self = const Value.absent(),
     this.vaultId = const Value.absent(),
-    this.version = const Value.absent(),
     this.keys = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2125,7 +2008,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     required String displayName,
     required bool self,
     required String vaultId,
-    this.version = const Value.absent(),
     required String keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
@@ -2142,7 +2024,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     Expression<String>? displayName,
     Expression<bool>? self,
     Expression<String>? vaultId,
-    Expression<BigInt>? version,
     Expression<String>? keys,
     Expression<BigInt>? updatedAt,
     Expression<int>? rowid,
@@ -2153,7 +2034,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
       if (displayName != null) 'display_name': displayName,
       if (self != null) 'self': self,
       if (vaultId != null) 'vault_id': vaultId,
-      if (version != null) 'version': version,
       if (keys != null) 'keys': keys,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -2166,7 +2046,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
       Value<String>? displayName,
       Value<bool>? self,
       Value<String>? vaultId,
-      Value<BigInt>? version,
       Value<String>? keys,
       Value<BigInt>? updatedAt,
       Value<int>? rowid}) {
@@ -2176,7 +2055,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
       displayName: displayName ?? this.displayName,
       self: self ?? this.self,
       vaultId: vaultId ?? this.vaultId,
-      version: version ?? this.version,
       keys: keys ?? this.keys,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -2201,9 +2079,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
     if (vaultId.present) {
       map['vault_id'] = Variable<String>(vaultId.value);
     }
-    if (version.present) {
-      map['version'] = Variable<BigInt>(version.value);
-    }
     if (keys.present) {
       map['keys'] = Variable<String>(keys.value);
     }
@@ -2224,7 +2099,6 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
           ..write('displayName: $displayName, ')
           ..write('self: $self, ')
           ..write('vaultId: $vaultId, ')
-          ..write('version: $version, ')
           ..write('keys: $keys, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -2900,14 +2774,6 @@ class $LibraryEntryTable extends LibraryEntry
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _versionMeta =
-      const VerificationMeta('version');
-  @override
-  late final GeneratedColumn<BigInt> version = GeneratedColumn<BigInt>(
-      'version', aliasedName, false,
-      type: DriftSqlType.bigInt,
-      requiredDuringInsert: false,
-      defaultValue: Constant(BigInt.from(0)));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<LibraryEntryType, int> type =
@@ -2937,7 +2803,7 @@ class $LibraryEntryTable extends LibraryEntry
       type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, version, type, createdAt, data, width, height];
+      [id, type, createdAt, data, width, height];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2952,10 +2818,6 @@ class $LibraryEntryTable extends LibraryEntry
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
-    }
-    if (data.containsKey('version')) {
-      context.handle(_versionMeta,
-          version.isAcceptableOrUnknown(data['version']!, _versionMeta));
     }
     context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
@@ -2993,8 +2855,6 @@ class $LibraryEntryTable extends LibraryEntry
     return LibraryEntryData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      version: attachedDatabase.typeMapping
-          .read(DriftSqlType.bigInt, data['${effectivePrefix}version'])!,
       type: $LibraryEntryTable.$convertertype.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
@@ -3021,7 +2881,6 @@ class $LibraryEntryTable extends LibraryEntry
 class LibraryEntryData extends DataClass
     implements Insertable<LibraryEntryData> {
   final String id;
-  final BigInt version;
   final LibraryEntryType type;
   final BigInt createdAt;
   final String data;
@@ -3029,7 +2888,6 @@ class LibraryEntryData extends DataClass
   final int height;
   const LibraryEntryData(
       {required this.id,
-      required this.version,
       required this.type,
       required this.createdAt,
       required this.data,
@@ -3039,7 +2897,6 @@ class LibraryEntryData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['version'] = Variable<BigInt>(version);
     {
       map['type'] =
           Variable<int>($LibraryEntryTable.$convertertype.toSql(type));
@@ -3054,7 +2911,6 @@ class LibraryEntryData extends DataClass
   LibraryEntryCompanion toCompanion(bool nullToAbsent) {
     return LibraryEntryCompanion(
       id: Value(id),
-      version: Value(version),
       type: Value(type),
       createdAt: Value(createdAt),
       data: Value(data),
@@ -3068,7 +2924,6 @@ class LibraryEntryData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LibraryEntryData(
       id: serializer.fromJson<String>(json['id']),
-      version: serializer.fromJson<BigInt>(json['version']),
       type: $LibraryEntryTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
@@ -3082,7 +2937,6 @@ class LibraryEntryData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'version': serializer.toJson<BigInt>(version),
       'type': serializer
           .toJson<int>($LibraryEntryTable.$convertertype.toJson(type)),
       'createdAt': serializer.toJson<BigInt>(createdAt),
@@ -3094,7 +2948,6 @@ class LibraryEntryData extends DataClass
 
   LibraryEntryData copyWith(
           {String? id,
-          BigInt? version,
           LibraryEntryType? type,
           BigInt? createdAt,
           String? data,
@@ -3102,7 +2955,6 @@ class LibraryEntryData extends DataClass
           int? height}) =>
       LibraryEntryData(
         id: id ?? this.id,
-        version: version ?? this.version,
         type: type ?? this.type,
         createdAt: createdAt ?? this.createdAt,
         data: data ?? this.data,
@@ -3112,7 +2964,6 @@ class LibraryEntryData extends DataClass
   LibraryEntryData copyWithCompanion(LibraryEntryCompanion data) {
     return LibraryEntryData(
       id: data.id.present ? data.id.value : this.id,
-      version: data.version.present ? data.version.value : this.version,
       type: data.type.present ? data.type.value : this.type,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       data: data.data.present ? data.data.value : this.data,
@@ -3125,7 +2976,6 @@ class LibraryEntryData extends DataClass
   String toString() {
     return (StringBuffer('LibraryEntryData(')
           ..write('id: $id, ')
-          ..write('version: $version, ')
           ..write('type: $type, ')
           ..write('createdAt: $createdAt, ')
           ..write('data: $data, ')
@@ -3136,14 +2986,12 @@ class LibraryEntryData extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, version, type, createdAt, data, width, height);
+  int get hashCode => Object.hash(id, type, createdAt, data, width, height);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LibraryEntryData &&
           other.id == this.id &&
-          other.version == this.version &&
           other.type == this.type &&
           other.createdAt == this.createdAt &&
           other.data == this.data &&
@@ -3153,7 +3001,6 @@ class LibraryEntryData extends DataClass
 
 class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   final Value<String> id;
-  final Value<BigInt> version;
   final Value<LibraryEntryType> type;
   final Value<BigInt> createdAt;
   final Value<String> data;
@@ -3162,7 +3009,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   final Value<int> rowid;
   const LibraryEntryCompanion({
     this.id = const Value.absent(),
-    this.version = const Value.absent(),
     this.type = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.data = const Value.absent(),
@@ -3172,7 +3018,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   });
   LibraryEntryCompanion.insert({
     required String id,
-    this.version = const Value.absent(),
     required LibraryEntryType type,
     required BigInt createdAt,
     required String data,
@@ -3187,7 +3032,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
         height = Value(height);
   static Insertable<LibraryEntryData> custom({
     Expression<String>? id,
-    Expression<BigInt>? version,
     Expression<int>? type,
     Expression<BigInt>? createdAt,
     Expression<String>? data,
@@ -3197,7 +3041,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (version != null) 'version': version,
       if (type != null) 'type': type,
       if (createdAt != null) 'created_at': createdAt,
       if (data != null) 'data': data,
@@ -3209,7 +3052,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
 
   LibraryEntryCompanion copyWith(
       {Value<String>? id,
-      Value<BigInt>? version,
       Value<LibraryEntryType>? type,
       Value<BigInt>? createdAt,
       Value<String>? data,
@@ -3218,7 +3060,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
       Value<int>? rowid}) {
     return LibraryEntryCompanion(
       id: id ?? this.id,
-      version: version ?? this.version,
       type: type ?? this.type,
       createdAt: createdAt ?? this.createdAt,
       data: data ?? this.data,
@@ -3233,9 +3074,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
-    }
-    if (version.present) {
-      map['version'] = Variable<BigInt>(version.value);
     }
     if (type.present) {
       map['type'] =
@@ -3263,7 +3101,6 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   String toString() {
     return (StringBuffer('LibraryEntryCompanion(')
           ..write('id: $id, ')
-          ..write('version: $version, ')
           ..write('type: $type, ')
           ..write('createdAt: $createdAt, ')
           ..write('data: $data, ')
@@ -3288,23 +3125,14 @@ abstract class _$Database extends GeneratedDatabase {
   late final $ProfileTable profile = $ProfileTable(this);
   late final $TrustedLinkTable trustedLink = $TrustedLinkTable(this);
   late final $LibraryEntryTable libraryEntry = $LibraryEntryTable(this);
-  late final Index idxConversationVaultVersion = Index(
-      'idx_conversation_vault_version',
-      'CREATE INDEX idx_conversation_vault_version ON conversation (vault_version)');
   late final Index idxConversationUpdated = Index('idx_conversation_updated',
       'CREATE INDEX idx_conversation_updated ON conversation (updated_at)');
   late final Index idxMessageCreated = Index('idx_message_created',
       'CREATE INDEX idx_message_created ON message (created_at)');
   late final Index idxFriendsUpdated = Index('idx_friends_updated',
       'CREATE INDEX idx_friends_updated ON friend (updated_at)');
-  late final Index idxFriendsVersion = Index('idx_friends_version',
-      'CREATE INDEX idx_friends_version ON friend (vault_version)');
-  late final Index idxRequestVersion = Index(
-      'idx_request_version', 'CREATE INDEX idx_request_version ON request ()');
   late final Index idxLibraryEntryCreated = Index('idx_library_entry_created',
       'CREATE INDEX idx_library_entry_created ON library_entry (created_at)');
-  late final Index idxLibraryEntryVersion = Index('idx_library_entry_version',
-      'CREATE INDEX idx_library_entry_version ON library_entry (version)');
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3320,14 +3148,10 @@ abstract class _$Database extends GeneratedDatabase {
         profile,
         trustedLink,
         libraryEntry,
-        idxConversationVaultVersion,
         idxConversationUpdated,
         idxMessageCreated,
         idxFriendsUpdated,
-        idxFriendsVersion,
-        idxRequestVersion,
-        idxLibraryEntryCreated,
-        idxLibraryEntryVersion
+        idxLibraryEntryCreated
       ];
 }
 
@@ -3335,7 +3159,6 @@ typedef $$ConversationTableCreateCompanionBuilder = ConversationCompanion
     Function({
   required String id,
   required String vaultId,
-  Value<BigInt> vaultVersion,
   required ConversationType type,
   required String data,
   required String token,
@@ -3349,7 +3172,6 @@ typedef $$ConversationTableUpdateCompanionBuilder = ConversationCompanion
     Function({
   Value<String> id,
   Value<String> vaultId,
-  Value<BigInt> vaultVersion,
   Value<ConversationType> type,
   Value<String> data,
   Value<String> token,
@@ -3374,9 +3196,6 @@ class $$ConversationTableFilterComposer
 
   ColumnFilters<String> get vaultId => $composableBuilder(
       column: $table.vaultId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<BigInt> get vaultVersion => $composableBuilder(
-      column: $table.vaultVersion, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<ConversationType, ConversationType, int>
       get type => $composableBuilder(
@@ -3417,10 +3236,6 @@ class $$ConversationTableOrderingComposer
   ColumnOrderings<String> get vaultId => $composableBuilder(
       column: $table.vaultId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<BigInt> get vaultVersion => $composableBuilder(
-      column: $table.vaultVersion,
-      builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<int> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnOrderings(column));
 
@@ -3457,9 +3272,6 @@ class $$ConversationTableAnnotationComposer
 
   GeneratedColumn<String> get vaultId =>
       $composableBuilder(column: $table.vaultId, builder: (column) => column);
-
-  GeneratedColumn<BigInt> get vaultVersion => $composableBuilder(
-      column: $table.vaultVersion, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<ConversationType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
@@ -3511,7 +3323,6 @@ class $$ConversationTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> vaultId = const Value.absent(),
-            Value<BigInt> vaultVersion = const Value.absent(),
             Value<ConversationType> type = const Value.absent(),
             Value<String> data = const Value.absent(),
             Value<String> token = const Value.absent(),
@@ -3524,7 +3335,6 @@ class $$ConversationTableTableManager extends RootTableManager<
               ConversationCompanion(
             id: id,
             vaultId: vaultId,
-            vaultVersion: vaultVersion,
             type: type,
             data: data,
             token: token,
@@ -3537,7 +3347,6 @@ class $$ConversationTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String vaultId,
-            Value<BigInt> vaultVersion = const Value.absent(),
             required ConversationType type,
             required String data,
             required String token,
@@ -3550,7 +3359,6 @@ class $$ConversationTableTableManager extends RootTableManager<
               ConversationCompanion.insert(
             id: id,
             vaultId: vaultId,
-            vaultVersion: vaultVersion,
             type: type,
             data: data,
             token: token,
@@ -4067,7 +3875,6 @@ typedef $$FriendTableCreateCompanionBuilder = FriendCompanion Function({
   required String name,
   required String displayName,
   required String vaultId,
-  Value<BigInt> vaultVersion,
   required String keys,
   required BigInt updatedAt,
   Value<int> rowid,
@@ -4077,7 +3884,6 @@ typedef $$FriendTableUpdateCompanionBuilder = FriendCompanion Function({
   Value<String> name,
   Value<String> displayName,
   Value<String> vaultId,
-  Value<BigInt> vaultVersion,
   Value<String> keys,
   Value<BigInt> updatedAt,
   Value<int> rowid,
@@ -4102,9 +3908,6 @@ class $$FriendTableFilterComposer extends Composer<_$Database, $FriendTable> {
 
   ColumnFilters<String> get vaultId => $composableBuilder(
       column: $table.vaultId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<BigInt> get vaultVersion => $composableBuilder(
-      column: $table.vaultVersion, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get keys => $composableBuilder(
       column: $table.keys, builder: (column) => ColumnFilters(column));
@@ -4133,10 +3936,6 @@ class $$FriendTableOrderingComposer extends Composer<_$Database, $FriendTable> {
   ColumnOrderings<String> get vaultId => $composableBuilder(
       column: $table.vaultId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<BigInt> get vaultVersion => $composableBuilder(
-      column: $table.vaultVersion,
-      builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get keys => $composableBuilder(
       column: $table.keys, builder: (column) => ColumnOrderings(column));
 
@@ -4164,9 +3963,6 @@ class $$FriendTableAnnotationComposer
 
   GeneratedColumn<String> get vaultId =>
       $composableBuilder(column: $table.vaultId, builder: (column) => column);
-
-  GeneratedColumn<BigInt> get vaultVersion => $composableBuilder(
-      column: $table.vaultVersion, builder: (column) => column);
 
   GeneratedColumn<String> get keys =>
       $composableBuilder(column: $table.keys, builder: (column) => column);
@@ -4202,7 +3998,6 @@ class $$FriendTableTableManager extends RootTableManager<
             Value<String> name = const Value.absent(),
             Value<String> displayName = const Value.absent(),
             Value<String> vaultId = const Value.absent(),
-            Value<BigInt> vaultVersion = const Value.absent(),
             Value<String> keys = const Value.absent(),
             Value<BigInt> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -4212,7 +4007,6 @@ class $$FriendTableTableManager extends RootTableManager<
             name: name,
             displayName: displayName,
             vaultId: vaultId,
-            vaultVersion: vaultVersion,
             keys: keys,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -4222,7 +4016,6 @@ class $$FriendTableTableManager extends RootTableManager<
             required String name,
             required String displayName,
             required String vaultId,
-            Value<BigInt> vaultVersion = const Value.absent(),
             required String keys,
             required BigInt updatedAt,
             Value<int> rowid = const Value.absent(),
@@ -4232,7 +4025,6 @@ class $$FriendTableTableManager extends RootTableManager<
             name: name,
             displayName: displayName,
             vaultId: vaultId,
-            vaultVersion: vaultVersion,
             keys: keys,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -4262,7 +4054,6 @@ typedef $$RequestTableCreateCompanionBuilder = RequestCompanion Function({
   required String displayName,
   required bool self,
   required String vaultId,
-  Value<BigInt> version,
   required String keys,
   required BigInt updatedAt,
   Value<int> rowid,
@@ -4273,7 +4064,6 @@ typedef $$RequestTableUpdateCompanionBuilder = RequestCompanion Function({
   Value<String> displayName,
   Value<bool> self,
   Value<String> vaultId,
-  Value<BigInt> version,
   Value<String> keys,
   Value<BigInt> updatedAt,
   Value<int> rowid,
@@ -4301,9 +4091,6 @@ class $$RequestTableFilterComposer extends Composer<_$Database, $RequestTable> {
 
   ColumnFilters<String> get vaultId => $composableBuilder(
       column: $table.vaultId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<BigInt> get version => $composableBuilder(
-      column: $table.version, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get keys => $composableBuilder(
       column: $table.keys, builder: (column) => ColumnFilters(column));
@@ -4336,9 +4123,6 @@ class $$RequestTableOrderingComposer
   ColumnOrderings<String> get vaultId => $composableBuilder(
       column: $table.vaultId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<BigInt> get version => $composableBuilder(
-      column: $table.version, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get keys => $composableBuilder(
       column: $table.keys, builder: (column) => ColumnOrderings(column));
 
@@ -4369,9 +4153,6 @@ class $$RequestTableAnnotationComposer
 
   GeneratedColumn<String> get vaultId =>
       $composableBuilder(column: $table.vaultId, builder: (column) => column);
-
-  GeneratedColumn<BigInt> get version =>
-      $composableBuilder(column: $table.version, builder: (column) => column);
 
   GeneratedColumn<String> get keys =>
       $composableBuilder(column: $table.keys, builder: (column) => column);
@@ -4408,7 +4189,6 @@ class $$RequestTableTableManager extends RootTableManager<
             Value<String> displayName = const Value.absent(),
             Value<bool> self = const Value.absent(),
             Value<String> vaultId = const Value.absent(),
-            Value<BigInt> version = const Value.absent(),
             Value<String> keys = const Value.absent(),
             Value<BigInt> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -4419,7 +4199,6 @@ class $$RequestTableTableManager extends RootTableManager<
             displayName: displayName,
             self: self,
             vaultId: vaultId,
-            version: version,
             keys: keys,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -4430,7 +4209,6 @@ class $$RequestTableTableManager extends RootTableManager<
             required String displayName,
             required bool self,
             required String vaultId,
-            Value<BigInt> version = const Value.absent(),
             required String keys,
             required BigInt updatedAt,
             Value<int> rowid = const Value.absent(),
@@ -4441,7 +4219,6 @@ class $$RequestTableTableManager extends RootTableManager<
             displayName: displayName,
             self: self,
             vaultId: vaultId,
-            version: version,
             keys: keys,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -4875,7 +4652,6 @@ typedef $$TrustedLinkTableProcessedTableManager = ProcessedTableManager<
 typedef $$LibraryEntryTableCreateCompanionBuilder = LibraryEntryCompanion
     Function({
   required String id,
-  Value<BigInt> version,
   required LibraryEntryType type,
   required BigInt createdAt,
   required String data,
@@ -4886,7 +4662,6 @@ typedef $$LibraryEntryTableCreateCompanionBuilder = LibraryEntryCompanion
 typedef $$LibraryEntryTableUpdateCompanionBuilder = LibraryEntryCompanion
     Function({
   Value<String> id,
-  Value<BigInt> version,
   Value<LibraryEntryType> type,
   Value<BigInt> createdAt,
   Value<String> data,
@@ -4906,9 +4681,6 @@ class $$LibraryEntryTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<BigInt> get version => $composableBuilder(
-      column: $table.version, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<LibraryEntryType, LibraryEntryType, int>
       get type => $composableBuilder(
@@ -4940,9 +4712,6 @@ class $$LibraryEntryTableOrderingComposer
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<BigInt> get version => $composableBuilder(
-      column: $table.version, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<int> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnOrderings(column));
 
@@ -4970,9 +4739,6 @@ class $$LibraryEntryTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<BigInt> get version =>
-      $composableBuilder(column: $table.version, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<LibraryEntryType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
@@ -5017,7 +4783,6 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
               $$LibraryEntryTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<BigInt> version = const Value.absent(),
             Value<LibraryEntryType> type = const Value.absent(),
             Value<BigInt> createdAt = const Value.absent(),
             Value<String> data = const Value.absent(),
@@ -5027,7 +4792,6 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
           }) =>
               LibraryEntryCompanion(
             id: id,
-            version: version,
             type: type,
             createdAt: createdAt,
             data: data,
@@ -5037,7 +4801,6 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             required String id,
-            Value<BigInt> version = const Value.absent(),
             required LibraryEntryType type,
             required BigInt createdAt,
             required String data,
@@ -5047,7 +4810,6 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
           }) =>
               LibraryEntryCompanion.insert(
             id: id,
-            version: version,
             type: type,
             createdAt: createdAt,
             data: data,

@@ -119,7 +119,6 @@ class ConversationController extends GetxController {
 class Conversation {
   final LPHAddress id;
   String vaultId;
-  int vaultVersion;
   final model.ConversationType type;
   final ConversationToken token;
   ConversationContainer container;
@@ -140,15 +139,14 @@ class Conversation {
   final membersLoading = false.obs;
   final members = <LPHAddress, Member>{}.obs; // Token ID -> Member
 
-  Conversation(this.id, this.vaultId, this.vaultVersion, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
+  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
-  Conversation.fromJson(Map<String, dynamic> json, String vaultId, int vaultVersion)
+  Conversation.fromJson(Map<String, dynamic> json, String vaultId)
       : this(
           LPHAddress.from(json["id"]),
           vaultId,
-          vaultVersion,
           model.ConversationType.values[json["type"]],
           ConversationToken.fromJson(json["token"]),
           ConversationContainer.fromJson(json["data"]),
@@ -160,7 +158,6 @@ class Conversation {
       : this(
           LPHAddress.from(data.id),
           fromDbEncrypted(data.vaultId),
-          data.vaultVersion.toInt(),
           data.type,
           ConversationToken.fromJson(jsonDecode(fromDbEncrypted(data.token))),
           ConversationContainer.fromJson(jsonDecode(fromDbEncrypted(data.data))),
@@ -177,7 +174,6 @@ class Conversation {
     final conv = Conversation(
       conversation.id,
       conversation.vaultId,
-      conversation.vaultVersion,
       conversation.type,
       conversation.token,
       conversation.container,
@@ -237,7 +233,6 @@ class Conversation {
     return ConversationData(
       id: id.encode(),
       vaultId: dbEncrypted(vaultId),
-      vaultVersion: BigInt.from(vaultVersion),
       type: type,
       data: dbEncrypted(jsonEncode(container.toJson())),
       token: dbEncrypted(token.toJson()),

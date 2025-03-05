@@ -125,12 +125,11 @@ class Request {
   String name;
   String displayName;
   String vaultId;
-  int vaultVersion;
   int updatedAt;
   KeyStorage keyStorage;
   final loading = false.obs;
 
-  Request(this.id, this.name, this.displayName, this.vaultId, this.vaultVersion, this.keyStorage, this.updatedAt);
+  Request(this.id, this.name, this.displayName, this.vaultId, this.keyStorage, this.updatedAt);
 
   /// Get a request from the database object.
   factory Request.fromEntity(RequestData data) {
@@ -139,20 +138,18 @@ class Request {
       fromDbEncrypted(data.name),
       fromDbEncrypted(data.displayName),
       fromDbEncrypted(data.vaultId),
-      data.version.toInt(),
       KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
       data.updatedAt.toInt(),
     );
   }
 
   /// Get a request from a stored payload in the database.
-  factory Request.fromStoredPayload(String id, int version, int updatedAt, Map<String, dynamic> json) {
+  factory Request.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
     return Request(
       LPHAddress.from(json["id"]),
       json["name"],
       json["display_name"],
       "",
-      0,
       KeyStorage.fromJson(json),
       updatedAt,
     );
@@ -189,7 +186,6 @@ class Request {
         name: dbEncrypted(name),
         displayName: dbEncrypted(displayName),
         vaultId: dbEncrypted(vaultId),
-        version: BigInt.from(vaultVersion),
         keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
         self: self,
         updatedAt: BigInt.from(updatedAt),
@@ -201,13 +197,12 @@ class Request {
     name = request.name;
     displayName = request.displayName;
     vaultId = request.vaultId;
-    vaultVersion = request.vaultVersion;
     updatedAt = request.updatedAt;
     keyStorage = request.keyStorage;
   }
 
   /// Convert a request to a friend (for when the request is accepted)
-  Friend get friend => Friend(id, name, displayName, vaultId, vaultVersion, keyStorage, updatedAt);
+  Friend get friend => Friend(id, name, displayName, vaultId, keyStorage, updatedAt);
 
   /// Accept the friend request.
   ///

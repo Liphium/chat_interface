@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
@@ -34,7 +37,7 @@ class VaultSyncTask extends SynchronizationTask {
     // Get the latest versions of all the targets
     Map<String, int> versionMap = {};
     for (var target in targets) {
-      versionMap[target.tag] = await target.getLatestVersion();
+      versionMap[target.tag] = await VaultVersioningService.retrieveVersion(VaultVersioningService.vaultTypeGeneral, target.tag);
     }
 
     // Synchronize using the endpoint from the server
@@ -52,6 +55,12 @@ class VaultSyncTask extends SynchronizationTask {
       var newEntries = <String, List<VaultEntry>>{};
       for (var unparsedEntry in json["entries"]) {
         final entry = VaultEntry.fromJson(unparsedEntry);
+
+        // Increment the version of the tag in case increased
+        if (entry.version > versionMap[entry.tag]!) {
+          versionMap[entry.tag] = entry.version;
+        }
+
         if (unparsedEntry["deleted"] == true) {
           // Create a new deleted list or add if list already there
           if (deleted[entry.tag] == null) {
@@ -73,6 +82,11 @@ class VaultSyncTask extends SynchronizationTask {
       // Return both lists to the outside
       return (deleted, newEntries);
     }, secureKeys: [vaultKey]);
+
+    // Save all the new versions
+    for (var target in targets) {
+      unawaited(VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, versionMap[target.tag]!));
+    }
 
     // Notify the vault targets about the changes
     for (var target in targets) {
@@ -104,9 +118,6 @@ abstract class VaultTarget {
 
   /// Called on intialization by the vault sync task
   void init() {}
-
-  /// Get the latest version of the vault tag
-  Future<int> getLatestVersion();
 
   /// Called when the vault is refreshed with the new entries and the deleted ones
   void processEntries(List<String> deleted, List<VaultEntry> newEntries);

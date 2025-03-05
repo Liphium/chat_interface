@@ -81,17 +81,6 @@ class ConversationService extends VaultTarget {
   ConversationService() : super(Constants.vaultConversationTag);
 
   @override
-  Future<int> getLatestVersion() async {
-    // Get the latest conersation entry version
-    final max = db.conversation.vaultVersion.max();
-    final query = db.selectOnly(db.conversation)..addColumns([max]);
-    final maxValue = await query.map((row) => row.read(max)).getSingleOrNull();
-
-    // Return zero in case nothing has been stored yet
-    return maxValue?.toInt() ?? 0;
-  }
-
-  @override
   Future<void> init() async {
     final conversationController = Get.find<ConversationController>();
     final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
@@ -106,7 +95,7 @@ class ConversationService extends VaultTarget {
     final messageController = Get.find<MessageController>();
     final controller = Get.find<ConversationController>();
     for (var entry in newEntries) {
-      final conv = Conversation.fromJson(jsonDecode(entry.payload), entry.id, entry.version);
+      final conv = Conversation.fromJson(jsonDecode(entry.payload), entry.id);
       await ConversationService.updateOrInsertFromVault(conv);
     }
 
@@ -130,7 +119,7 @@ class ConversationService extends VaultTarget {
     // Check if the conversation already exists
     final conversation = Get.find<ConversationController>().conversations.values.firstWhere(
           (element) => element.type == model.ConversationType.directMessage && element.members.values.any((element) => element.address == friend.id),
-          orElse: () => Conversation(LPHAddress.error(), "", 0, model.ConversationType.directMessage, ConversationToken(LPHAddress.error(), ""),
+          orElse: () => Conversation(LPHAddress.error(), "", model.ConversationType.directMessage, ConversationToken(LPHAddress.error(), ""),
               ConversationContainer(""), "", 0, 0),
         );
     if (!conversation.id.isError()) {
@@ -181,7 +170,7 @@ class ConversationService extends VaultTarget {
     // Put together the information all other members need
     final packagedKey = packageSymmetricKey(conversationKey);
     final convId = LPHAddress.from(body["conversation"]);
-    final conversation = Conversation(convId, "", 0, model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
+    final conversation = Conversation(convId, "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
         conversationContainer, packagedKey, 0, DateTime.now().millisecondsSinceEpoch);
 
     // Send all other members their information and credentials

@@ -69,7 +69,6 @@ class RequestsService {
         account.name,
         account.displayName,
         "",
-        0,
         KeyStorage(
           account.publicKey,
           account.signatureKey,

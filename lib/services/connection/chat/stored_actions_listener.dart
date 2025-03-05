@@ -183,7 +183,6 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     json["name"],
     json["dname"],
     "",
-    0,
     KeyStorage(account.publicKey, account.signatureKey, profileKey, json["sa"]),
     DateTime.now().millisecondsSinceEpoch,
   );
@@ -220,7 +219,6 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   final conversation = Conversation(
     LPHAddress.from(actionJson["id"]),
     "",
-    0,
     model.ConversationType.values[json["type"]],
     ConversationToken.fromJson(token),
     ConversationContainer.decrypt(json["data"], key),
