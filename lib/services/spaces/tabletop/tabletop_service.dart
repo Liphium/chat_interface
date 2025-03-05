@@ -5,7 +5,6 @@ import 'package:chat_interface/pages/spaces/tabletop/objects/tabletop_deck.dart'
 import 'package:chat_interface/pages/spaces/tabletop/objects/tabletop_inventory.dart';
 import 'package:chat_interface/pages/spaces/tabletop/objects/tabletop_text.dart';
 import 'package:chat_interface/services/connection/connection.dart';
-import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/tabletop/tabletop_object.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';

@@ -11,7 +11,6 @@ import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -193,22 +192,6 @@ class Friend {
         keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
         updatedAt: BigInt.from(updatedAt),
       );
-
-  // Update in database
-  Future<bool> update() async {
-    if (id == StatusController.ownAddress || unknown) {
-      return false;
-    }
-    await FriendsVault.remove(vaultId);
-    final result = await FriendsVault.store(toStoredPayload());
-    if (result == null) {
-      sendLog("FRIEND CONFLICT: Couldn't update in vault!");
-      return true;
-    }
-    vaultId = result;
-    await db.friend.insertOnConflictUpdate(entity());
-    return true;
-  }
 
   //* Status
   final status = "".obs;

@@ -129,8 +129,8 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   }
 
   // Query the guy
-  final guy = await Get.find<UnknownController>().loadUnknownProfile(address);
-  if (guy == null) {
+  final account = await Get.find<UnknownController>().loadUnknownProfile(address);
+  if (account == null) {
     sendLog("invalid friend request: couldn't find sender");
     return false;
   }
@@ -138,31 +138,28 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   // Check the signature and stuff
   final statusController = Get.find<StatusController>();
   final signedMessage = statusController.name.value;
-  final result = decryptAsymmetricAuth(guy.publicKey, asymmetricKeyPair.secretKey, json["s"]);
+  final result = decryptAsymmetricAuth(account.publicKey, asymmetricKeyPair.secretKey, json["s"]);
   if (!result.success || result.message != signedMessage) {
     sendLog("invalid friend request: invalid signature");
     return true;
   }
 
-  // Set name and display name from the server
-  final displayName = guy.displayName;
-  final name = guy.name;
-
-  // Check if the current account already sent this account a friend request (-> add friend)
+  // Add as a friend in case there is an existing request that was sent by the current client
   final requestController = Get.find<RequestController>();
   var request = requestController.requestsSent[address];
-
   if (request != null) {
     // This request doesn't have the right key storage yet
-    request.keyStorage.publicKey = guy.publicKey;
-    request.keyStorage.signatureKey = guy.signatureKey;
+    request.keyStorage.publicKey = account.publicKey;
+    request.keyStorage.signatureKey = account.signatureKey;
     request.keyStorage.profileKeyPacked = json["pf"];
     request.keyStorage.unpackedProfileKey = unpackageSymmetricKey(json["pf"]);
     request.keyStorage.storedActionKey = json["sa"];
 
-    // Add friend
-    final controller = Get.find<FriendController>();
-    await controller.addFromRequest(request);
+    // Add friend to the vault
+    final error = await FriendsVault.updateFriend(request.friend);
+    if (error != null) {
+      sendLog("couldn't accept friend request: $error");
+    }
 
     return true;
   }
@@ -187,19 +184,15 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     json["dname"],
     "",
     0,
-    KeyStorage(guy.publicKey, guy.signatureKey, profileKey, json["sa"]),
+    KeyStorage(account.publicKey, account.signatureKey, profileKey, json["sa"]),
     DateTime.now().millisecondsSinceEpoch,
   );
 
-  final vaultId = await FriendsVault.store(request.toStoredPayload(false));
-  if (vaultId == null) {
-    sendLog("couldn't store in vault: something happened");
-    return true;
+  // Store the friend in the vault
+  final error = await FriendsVault.storeReceivedRequest(request);
+  if (error != null) {
+    sendLog("couldn't store in vault: $error");
   }
-
-  // Add friend request
-  request.vaultId = vaultId;
-  Get.find<RequestController>().addRequest(request);
 
   return true;
 }

@@ -36,16 +36,11 @@ class ProfileHelper {
       return null;
     }
 
-    // Check if there is a new name (also handled by the profile endpoint)
-    if (json["name"] != friend.name) {
+    // Check if there is a new name or a new display name
+    if (json["name"] != friend.name || json["display_name"] != friend.displayName.value) {
       friend.name = json["name"];
-      await friend.update();
-    }
-
-    // Check if there is a new display name
-    final displayName = json["display_name"];
-    if (displayName != friend.displayName.value) {
-      friend.updateDisplayName(displayName);
+      friend.displayName.value = json["display_name"];
+      await FriendsVault.updateFriend(friend);
     }
 
     sendLog("downloading ${friend.name}");

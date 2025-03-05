@@ -9,7 +9,6 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
@@ -39,12 +38,11 @@ class RequestsService {
     }
 
     // Encrypt friend request
-    final controller = Get.find<StatusController>();
     final payload = storedAction("fr_rq", <String, dynamic>{
       "ad": StatusController.ownAddress.encode(),
-      "s": encryptAsymmetricAuth(account.publicKey, asymmetricKeyPair.secretKey, account.name),
       "pf": packageSymmetricKey(profileKey),
       "sa": storedActionKey,
+      "s": encryptAsymmetricAuth(account.publicKey, asymmetricKeyPair.secretKey, account.name),
     });
 
     // Send stored action
@@ -57,6 +55,7 @@ class RequestsService {
     final requestController = Get.find<RequestController>();
     final requestReceived = requestController.requests[account.id];
     if (requestReceived != null) {
+      // Make the request a friend in the vault
       final error = await FriendsVault.updateFriend(requestReceived.friend);
       if (error != null) {
         return (error, null);
@@ -64,29 +63,32 @@ class RequestsService {
 
       return (null, "request.accepted".tr);
     } else {
-      // Save friend request in own vault
-      var request =
-          Request(address, name, displayName, "", 0, KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
-      final vaultId = await FriendsVault.store(
-        request.toStoredPayload(true),
-        errorPopup: true,
-        prefix: "request",
+      // Create the request
+      final request = Request(
+        account.id,
+        account.name,
+        account.displayName,
+        "",
+        0,
+        KeyStorage(
+          account.publicKey,
+          account.signatureKey,
+          profileKey,
+          "",
+        ),
+        DateTime.now().millisecondsSinceEpoch,
       );
 
-      if (vaultId == null) {
+      // Store the request in the friends vault
+      final error = await FriendsVault.storeSentRequest(
+        request,
+      );
+      if (error != null) {
         requestsLoading.value = false;
-        return;
+        return (error, null);
       }
 
-      // This had me in a mental breakdown, but then I ended up fixing it in 10 minutes LMFAO
-      request.vaultId = vaultId;
-
-      RequestController requestController = Get.find();
-      requestController.addSentRequest(request);
       return (null, "request.sent".tr);
     }
-
-    requestsLoading.value = false;
-    return;
   }
 }

@@ -237,7 +237,9 @@ class FriendsVault {
     }
 
     // Remove all requests and also the ones that aren't requests anymore (a friend could've been upgraded)
-    controller.requests.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
+    if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
+      controller.requests.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
+    }
 
     for (var request in update.requestsSent) {
       if (controller.requestsSent[request.id] == null) {
@@ -246,10 +248,14 @@ class FriendsVault {
     }
 
     // Remove all requests and also the ones that aren't requests anymore (a friend could've been upgraded)
-    controller.requestsSent.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
+    if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
+      controller.requestsSent.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
+    }
 
     // Delete all deleted requests from the database
-    await db.request.deleteWhere((t) => t.vaultId.isIn(update.deleted) | t.vaultId.isIn(update.friendVaultIds));
+    if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
+      await db.request.deleteWhere((t) => t.vaultId.isIn(update.deleted) | t.vaultId.isIn(update.friendVaultIds));
+    }
 
     // Push friends
     final friendController = Get.find<FriendController>();
@@ -258,12 +264,16 @@ class FriendsVault {
         FriendsService.onVaultUpdate(friend);
       }
     }
-    friendController.friends.removeWhere(
-      (id, fr) => update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress,
-    );
+    if (update.deleted.isNotEmpty) {
+      friendController.friends.removeWhere(
+        (id, fr) => update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress,
+      );
+    }
 
     // Delete all deleted friends from the database
-    await db.friend.deleteWhere((t) => t.vaultId.isIn(update.deleted)); // Remove the other ones that aren't there
+    if (update.deleted.isNotEmpty) {
+      await db.friend.deleteWhere((t) => t.vaultId.isIn(update.deleted)); // Remove the other ones that aren't there
+    }
   }
 }
 

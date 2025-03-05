@@ -9,7 +9,6 @@ import 'package:chat_interface/services/connection/chat/live_share_listener.dart
 import 'package:chat_interface/services/connection/chat/message_listener.dart';
 import 'package:chat_interface/services/connection/chat/status_listener.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
-import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
