@@ -21,7 +21,6 @@ import 'package:chat_interface/database/database_entities.dart' as dbe;
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
@@ -45,55 +44,6 @@ class FriendController extends GetxController {
 
   void reset() {
     friends.clear();
-  }
-
-  // Add friend (also sends data to server vault)
-  Future<bool> addFromRequest(Request request) async {
-    sendLog("adding friend from request ${request.friend.id}");
-
-    // Query the guy
-    final guy = await Get.find<UnknownController>().loadUnknownProfile(request.id);
-    if (guy == null) {
-      sendLog("friend request is invalid cause couldn't find sender");
-      return false;
-    }
-
-    // Check if the guy in the request has the same name and stuff (in base64 cause otherwise it doesn't work, thanks dart)
-    if (base64Encode(request.keyStorage.publicKey) != base64Encode(guy.publicKey) ||
-        base64Encode(guy.signatureKey) != base64Encode(request.keyStorage.signatureKey)) {
-      sendLog("friend request has invalid keys");
-      return false;
-    }
-
-    // Set name and display name from the server
-    request.displayName = guy.displayName;
-    request.name = guy.name;
-
-    // Remove request from server
-    final friendsVault = await FriendsVault.remove(request.vaultId);
-    if (!friendsVault) {
-      add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
-      return false;
-    }
-
-    // Add friend to vault
-    final id = await FriendsVault.store(
-      request.friend,
-      lastPacket: request.updatedAt,
-      errorPopup: true,
-      prefix: "friend",
-    );
-
-    // Don't add if something failed
-    if (id == null) {
-      return false;
-    }
-
-    // Add friend to database with vault id
-    request.vaultId = id;
-    add(request.friend);
-
-    return true;
   }
 
   void addOrUpdate(Friend friend) {
@@ -215,6 +165,7 @@ class Friend {
     return jsonEncode(reqPayload);
   }
 
+  /// Copy of all of the values from another friend into this one.
   void copyFrom(Friend friend) {
     id = friend.id;
     vaultId = friend.vaultId;
@@ -223,6 +174,11 @@ class Friend {
     displayName.value = friend.displayName.value;
     name = friend.name;
     updatedAt = friend.updatedAt;
+  }
+
+  /// Copy this friend for editing.
+  Friend copy() {
+    return Friend(id, name, displayName.value, vaultId, vaultVersion, keyStorage, updatedAt);
   }
 
   // Check if vault id is known (this would require a restart of the app)

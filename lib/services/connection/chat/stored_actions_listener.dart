@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
@@ -127,16 +128,25 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     return true;
   }
 
+  // Query the guy
+  final guy = await Get.find<UnknownController>().loadUnknownProfile(address);
+  if (guy == null) {
+    sendLog("invalid friend request: couldn't find sender");
+    return false;
+  }
+
   // Check the signature and stuff
-  final publicKey = unpackagePublicKey(json["pub"]);
-  final signaturePub = unpackagePublicKey(json["sg"]);
   final statusController = Get.find<StatusController>();
   final signedMessage = statusController.name.value;
-  final result = decryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, json["s"]);
+  final result = decryptAsymmetricAuth(guy.publicKey, asymmetricKeyPair.secretKey, json["s"]);
   if (!result.success || result.message != signedMessage) {
     sendLog("invalid friend request: invalid signature");
     return true;
   }
+
+  // Set name and display name from the server
+  final displayName = guy.displayName;
+  final name = guy.name;
 
   // Check if the current account already sent this account a friend request (-> add friend)
   final requestController = Get.find<RequestController>();
@@ -144,7 +154,8 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 
   if (request != null) {
     // This request doesn't have the right key storage yet
-    request.keyStorage.publicKey = publicKey;
+    request.keyStorage.publicKey = guy.publicKey;
+    request.keyStorage.signatureKey = guy.signatureKey;
     request.keyStorage.profileKeyPacked = json["pf"];
     request.keyStorage.unpackedProfileKey = unpackageSymmetricKey(json["pf"]);
     request.keyStorage.storedActionKey = json["sa"];
@@ -176,7 +187,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     json["dname"],
     "",
     0,
-    KeyStorage(publicKey, signaturePub, profileKey, json["sa"]),
+    KeyStorage(guy.publicKey, guy.signatureKey, profileKey, json["sa"]),
     DateTime.now().millisecondsSinceEpoch,
   );
 

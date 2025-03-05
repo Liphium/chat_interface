@@ -1,32 +1,112 @@
 part of '../../controller/account/friends/friend_controller.dart';
 
 class FriendsVault {
-  /// Store friend in vault (returns id of the friend in the vault if successful)
-  static Future<String?> store(Friend friend, {errorPopup = false, prefix = "", lastPacket = 0}) async {
-    final payload = encryptSymmetric(friend.toStoredPayload(), vaultKey);
-
-    final json = await postAuthorizedJSON("/account/friends/add", <String, dynamic>{
-      "payload": payload,
-      "receive_date": encryptDate(DateTime.fromMillisecondsSinceEpoch(lastPacket)),
-    });
-
-    if (!json["success"]) {
-      if (errorPopup) {
-        showErrorPopup("error", json["error"]);
-      }
-      return null;
+  /// Store a received request in the vault.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> storeReceivedRequest(Request request) async {
+    // Store the request in the vault
+    final (error, entry) = await _store(request.toStoredPayload(false));
+    if (error != null) {
+      return error;
     }
 
-    return json["id"];
+    // Call the related vault update event
+    request.vaultId = entry!.$1;
+    request.vaultVersion = entry.$2;
+    await updateFromVaultUpdate(FriendVaultUpdate([], [], [request], [], []));
+    return null;
   }
 
-  /// Remove friend from vault (returns true if successful)
-  static Future<bool> remove(String id, {errorPopup = false}) async {
-    final json = await postAuthorizedJSON("/account/friends/remove", <String, dynamic>{
-      "id": id,
+  /// Store a sent request in the vault.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> storeSentRequest(Request request) async {
+    // Store the request in the vault
+    final (error, entry) = await _store(request.toStoredPayload(true));
+    if (error != null) {
+      return error;
+    }
+
+    // Call the related vault update event
+    request.vaultId = entry!.$1;
+    request.vaultVersion = entry.$2;
+    await updateFromVaultUpdate(FriendVaultUpdate([], [], [], [request], []));
+    return null;
+  }
+
+  /// Helper method for storing things in the friends vault.
+  ///
+  /// The first element is an error if there was one.
+  /// The second element is a tuple of vault id and version in case successful.
+  static Future<(String?, (String, int)?)> _store(String data) async {
+    // Encrypt the friend for the vault
+    final payload = encryptSymmetric(data, vaultKey);
+
+    // Add the friend to the vault
+    final json = await postAuthorizedJSON("/account/friends/add", <String, dynamic>{
+      "payload": payload,
+      "receive_date": encryptDate(DateTime.fromMillisecondsSinceEpoch(0)),
     });
 
-    return json["success"] as bool;
+    // Check if there was an error
+    if (!json["success"]) {
+      return (json["error"] as String, null);
+    }
+    return (null, (json["id"] as String, (json["version"] as num).toInt()));
+  }
+
+  /// Update a friend in the vault.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> updateFriend(Friend friend) async {
+    // Store the request in the vault
+    final (error, entry) = await _update(friend.vaultId, friend.toStoredPayload());
+    if (error != null) {
+      return error;
+    }
+
+    // Call the related vault update event
+    await updateFromVaultUpdate(FriendVaultUpdate([], [friend.vaultId], [], [], [friend]));
+    return null;
+  }
+
+  /// Helper method for updating things in the friends vault.
+  ///
+  /// The first element is an error if there was one.
+  /// The second element is the new version in case successsful.
+  static Future<(String?, int?)> _update(String id, String data) async {
+    // Encrypt the friend for the vault
+    final payload = encryptSymmetric(data, vaultKey);
+
+    // Add the friend to the vault
+    final json = await postAuthorizedJSON("/account/friends/update", <String, dynamic>{
+      "id": id,
+      "payload": payload,
+    });
+
+    // Check if there was an error
+    if (!json["success"]) {
+      return (json["error"] as String, null);
+    }
+    return (null, (json["version"] as num).toInt());
+  }
+
+  /// Remove friend from vault.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> remove(String vaultId) async {
+    // Remove the friend from the server vault
+    final json = await postAuthorizedJSON("/account/friends/remove", <String, dynamic>{
+      "id": vaultId,
+    });
+    if (!json["success"]) {
+      return json["error"];
+    }
+
+    // Update the local vault
+    await updateFromVaultUpdate(FriendVaultUpdate([vaultId], [], [], [], []));
+    return null;
   }
 
   /// Encrypt a date with server-side information

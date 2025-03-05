@@ -1,3 +1,4 @@
+import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/current/tasks/friend_sync_task.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
@@ -24,7 +25,7 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
   }
 
   void sendRequest() {
-    if (requestsLoading.value || friendsVaultRefreshing.value) {
+    if (requestsLoading.value || FriendsVault.friendsVaultRefreshing.value) {
       return;
     }
     newFriendRequest(_name.text, (message) {
