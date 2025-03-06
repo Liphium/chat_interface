@@ -4,61 +4,30 @@ import 'dart:convert';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart';
-import 'package:chat_interface/main.dart';
-import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/popups.dart';
-import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class LibraryManager {
-  /// Load all new entries from the server
-  static Future<String?> refreshEntries() async {
-    // Get everything from the server after the date
-    final json = await postAuthorizedJSON("/account/vault/list", {
-      "after": 0,
-      "tag": Constants.vaultLibraryTag,
-    });
+class LibraryManager extends VaultTarget {
+  LibraryManager() : super(Constants.vaultLibraryTag);
 
-    // Check if there is an error
-    if (!json["success"]) {
-      return json["error"];
+  @override
+  Future<void> processEntries(List<String> deleted, List<VaultEntry> newEntries) async {
+    // Add all new entries
+    final list = <LibraryEntry>[];
+    for (var entry in newEntries) {
+      final libraryEntry = LibraryEntry.fromJson(entry.id, entry.version, jsonDecode(entry.payload));
+      list.add(libraryEntry);
+      await db.libraryEntry.insertOnConflictUpdate(libraryEntry.entity);
     }
-
-    // Parse all the vault entries in an isolate
-    final (parsed, ids) = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) {
-        final list = <LibraryEntry>[];
-        final ids = <String>[];
-        for (var entryJson in json["entries"]) {
-          final entry = VaultEntry.fromJson(entryJson);
-          final libraryEntry = LibraryEntry.fromJson(entry.id, jsonDecode(entry.decryptedPayload(keys[0], sodium)));
-          list.add(libraryEntry);
-          ids.add(entry.id);
-        }
-
-        return (list, ids);
-      },
-      secureKeys: [vaultKey],
-    );
 
     // Delete all library entries that aren't in the local database anymore
-    await db.libraryEntry.deleteWhere((tbl) => tbl.id.isNotIn(ids));
+    await db.libraryEntry.deleteWhere((tbl) => tbl.id.isIn(deleted));
 
-    // Check if there are any
-    if (parsed.isEmpty || ids.isEmpty) {
-      return null;
-    }
-
-    // Add all of them to the database
-    for (var entry in parsed) {
-      await db.libraryEntry.insertOnConflictUpdate(entry.entity);
-    }
-
-    return null;
+    return;
   }
 
   /// Remove a library entry from the library
@@ -69,9 +38,6 @@ class LibraryManager {
       showErrorPopup("error", error);
       return false;
     }
-
-    // Remove from the local database
-    await db.libraryEntry.deleteWhere((tbl) => tbl.id.equals(entry.id));
 
     return true;
   }
@@ -117,15 +83,11 @@ class LibraryManager {
     }
 
     // Add entry to server vault
-    final id = await addToVault(Constants.vaultLibraryTag, jsonEncode(entry.toJson()));
-    if (id == null) {
-      showErrorPopup("error", "server.error".tr);
+    final (error, _) = await addToVault(Constants.vaultLibraryTag, jsonEncode(entry.toJson()));
+    if (error != null) {
+      showErrorPopup("error", error);
       return false;
     }
-
-    // Add to local database as well
-    entry.id = id;
-    await db.libraryEntry.insertOnConflictUpdate(entry.entity);
     return true;
   }
 
@@ -169,7 +131,7 @@ class LibraryEntry {
           data.height,
         );
 
-  get entity => LibraryEntryData(
+  LibraryEntryData get entity => LibraryEntryData(
         id: id,
         type: type,
         createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
@@ -190,7 +152,7 @@ class LibraryEntry {
   }
 
   /// Create a LibraryEntry from a JSON map
-  factory LibraryEntry.fromJson(String id, Map<String, dynamic> json) {
+  factory LibraryEntry.fromJson(String id, int version, Map<String, dynamic> json) {
     return LibraryEntry(
       id,
       LibraryEntryType.values[json['type']],

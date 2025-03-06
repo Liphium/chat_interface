@@ -3125,6 +3125,14 @@ abstract class _$Database extends GeneratedDatabase {
   late final $ProfileTable profile = $ProfileTable(this);
   late final $TrustedLinkTable trustedLink = $TrustedLinkTable(this);
   late final $LibraryEntryTable libraryEntry = $LibraryEntryTable(this);
+  late final Index idxConversationUpdated = Index('idx_conversation_updated',
+      'CREATE INDEX idx_conversation_updated ON conversation (updated_at)');
+  late final Index idxMessageCreated = Index('idx_message_created',
+      'CREATE INDEX idx_message_created ON message (created_at)');
+  late final Index idxFriendsUpdated = Index('idx_friends_updated',
+      'CREATE INDEX idx_friends_updated ON friend (updated_at)');
+  late final Index idxLibraryEntryCreated = Index('idx_library_entry_created',
+      'CREATE INDEX idx_library_entry_created ON library_entry (created_at)');
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3139,7 +3147,11 @@ abstract class _$Database extends GeneratedDatabase {
         unknownProfile,
         profile,
         trustedLink,
-        libraryEntry
+        libraryEntry,
+        idxConversationUpdated,
+        idxMessageCreated,
+        idxFriendsUpdated,
+        idxLibraryEntryCreated
       ];
 }
 

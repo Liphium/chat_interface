@@ -1,18 +1,11 @@
 import 'dart:convert';
 
-import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
+import 'package:chat_interface/services/chat/requests_service.dart';
 import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/controller/current/tasks/friend_sync_task.dart';
-import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
-import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -41,14 +34,20 @@ class RequestController extends GetxController {
     return true;
   }
 
-  void addSentRequest(Request request) {
-    requestsSent[request.id] = request;
-    db.request.insertOnConflictUpdate(request.entity(true));
+  void addSentRequestOrUpdate(Request request) {
+    if (requestsSent[request.id] != null) {
+      requestsSent[request.id]!.copyFrom(request);
+    } else {
+      requestsSent[request.id] = request;
+    }
   }
 
-  void addRequest(Request request) {
-    requests[request.id] = request;
-    db.request.insertOnConflictUpdate(request.entity(false));
+  void addRequestOrUpdate(Request request) {
+    if (requests[request.id] != null) {
+      requests[request.id]!.copyFrom(request);
+    } else {
+      requests[request.id] = request;
+    }
   }
 
   Future<bool> deleteSentRequest(Request request, {removal = true}) async {
@@ -105,111 +104,34 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
     return;
   }
 
-  //* Prompt with confirm popup
-  var declined = true;
+  // Ask the user if they really want to send the friend requests (mostly cause of security concerns)
   await showConfirmPopup(ConfirmWindow(
     title: "request.confirm.title".tr,
     text: "request.confirm.text".trParams(<String, String>{
       "username": "${profile.displayName} (${profile.name})",
     }),
     onConfirm: () async {
-      declined = false;
-      await sendFriendRequest(controller, profile!.name, profile.displayName, profile.id, profile.publicKey, profile.signatureKey, success);
+      await RequestsService.sendOrAcceptFriendRequest(profile!);
     },
-    onDecline: () {
-      declined = true;
-    },
+    onDecline: () {},
   ));
-
-  requestsLoading.value = !declined;
-  return;
-}
-
-/// Send a friend request to an account
-Future<void> sendFriendRequest(
-  StatusController controller,
-  String name,
-  String displayName,
-  LPHAddress address,
-  Uint8List publicKey,
-  Uint8List signatureKey,
-  Function(String) success,
-) async {
-  if (friendsVaultRefreshing.value) {
-    requestsLoading.value = false;
-    return;
-  }
-
-  // Encrypt friend request
-  sendLog("OWN STORED ACTION KEY: $storedActionKey");
-  final payload = storedAction("fr_rq", <String, dynamic>{
-    "ad": StatusController.ownAddress.encode(),
-    "name": controller.name.value,
-    "dname": controller.displayName.value,
-    "s": encryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, name),
-    "pub": packagePublicKey(asymmetricKeyPair.publicKey),
-    "sg": packagePublicKey(signatureKeyPair.publicKey),
-    "pf": packageSymmetricKey(profileKey),
-    "sa": storedActionKey,
-  });
-
-  // Send stored action
-  final result = await sendStoredAction(address, publicKey, payload);
-  if (result != null) {
-    showErrorPopup("error", result);
-    requestsLoading.value = false;
-    return;
-  }
-
-  // Accept friend request if there is one from the other user
-  final requestController = Get.find<RequestController>();
-  final requestSent = requestController.requests[address];
-  if (requestSent != null) {
-    final result = await Get.find<FriendController>().addFromRequest(requestSent);
-    if (result) {
-      await requestController.deleteRequest(requestSent);
-    } else {
-      showErrorPopup("error", "requests.error".tr);
-    }
-    success("request.accepted");
-  } else {
-    // Save friend request in own vault
-    var request = Request(address, name, displayName, "", KeyStorage(publicKey, signatureKey, profileKey, ""), DateTime.now().millisecondsSinceEpoch);
-    final vaultId = await FriendsVault.store(
-      request.toStoredPayload(true),
-      errorPopup: true,
-      prefix: "request",
-    );
-
-    if (vaultId == null) {
-      requestsLoading.value = false;
-      return;
-    }
-
-    // This had me in a mental breakdown, but then I ended up fixing it in 10 minutes LMFAO
-    request.vaultId = vaultId;
-
-    RequestController requestController = Get.find();
-    requestController.addSentRequest(request);
-    success("request.sent");
-  }
 
   requestsLoading.value = false;
   return;
 }
 
 class Request {
-  final LPHAddress id;
+  LPHAddress id;
   String name;
   String displayName;
   String vaultId;
   int updatedAt;
-  final KeyStorage keyStorage;
+  KeyStorage keyStorage;
   final loading = false.obs;
 
   Request(this.id, this.name, this.displayName, this.vaultId, this.keyStorage, this.updatedAt);
 
-  /// Get a request from the database object
+  /// Get a request from the database object.
   factory Request.fromEntity(RequestData data) {
     return Request(
       LPHAddress.from(data.id),
@@ -221,8 +143,8 @@ class Request {
     );
   }
 
-  /// Get a request from a stored payload in the database
-  factory Request.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
+  /// Get a request from a stored payload in the database.
+  factory Request.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
     return Request(
       LPHAddress.from(json["id"]),
       json["name"],
@@ -233,7 +155,7 @@ class Request {
     );
   }
 
-  // Convert to a payload for the friends vault (on the server)
+  /// Convert to a payload for the friends vault (on the server).
   String toStoredPayload(bool self) {
     final reqPayload = <String, dynamic>{
       "rq": true,
@@ -247,7 +169,18 @@ class Request {
     return jsonEncode(reqPayload);
   }
 
-  /// Convert a request object to the equivalent database object
+  /// Convert the request to an unknown account (for accepting the friend request).
+  UnknownAccount toUnknownAccount() {
+    return UnknownAccount(
+      id,
+      name,
+      displayName,
+      keyStorage.signatureKey,
+      keyStorage.publicKey,
+    );
+  }
+
+  /// Convert a request object to the equivalent database object.
   RequestData entity(bool self) => RequestData(
         id: id.encode(),
         name: dbEncrypted(name),
@@ -258,38 +191,32 @@ class Request {
         updatedAt: BigInt.from(updatedAt),
       );
 
+  /// Copy all data from another request into this one.
+  void copyFrom(Request request) {
+    id = request.id;
+    name = request.name;
+    displayName = request.displayName;
+    vaultId = request.vaultId;
+    updatedAt = request.updatedAt;
+    keyStorage = request.keyStorage;
+  }
+
   /// Convert a request to a friend (for when the request is accepted)
   Friend get friend => Friend(id, name, displayName, vaultId, keyStorage, updatedAt);
 
-  // Accept friend request
-  void accept(Function(String) success) {
+  /// Accept the friend request.
+  ///
+  /// The first element is an error if there was one.
+  /// The second element is what happened if successfull (request.accepted, or sth else).
+  Future<(String?, String?)> accept() async {
     // Send a request to the same guy (this thing will detect that the request already exist and then add him, this avoids code duplication)
-    sendFriendRequest(Get.find<StatusController>(), name, displayName, id, keyStorage.publicKey, keyStorage.signatureKey, (msg) async {
-      success(msg);
-    });
+    return RequestsService.sendOrAcceptFriendRequest(toUnknownAccount());
   }
 
-  // Decline friend request
-  Future<void> ignore() async {
-    // Delete from friends vault
-    await FriendsVault.remove(vaultId);
-
-    // Delete from requests
-    final requestController = Get.find<RequestController>();
-    await requestController.deleteRequest(this);
-  }
-
-  // Cancel friend request (only for sent requests)
-  Future<void> cancel() async {
-    // Delete from friends vault
-    await FriendsVault.remove(vaultId);
-
-    // Delete from sent requests
-    final requestController = Get.find<RequestController>();
-    await requestController.deleteSentRequest(this);
-  }
-
-  void save(bool self) {
-    db.request.insertOnConflictUpdate(entity(self));
+  /// Delete a friend request.
+  ///
+  /// Returns an error if there was one.
+  Future<String?> delete() async {
+    return FriendsVault.remove(vaultId);
   }
 }

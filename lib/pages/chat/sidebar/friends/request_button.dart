@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _RequestButtonState extends State<RequestButton> {
     final children = <Widget>[
       IconButton(
         icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
-        onPressed: () => widget.self ? widget.request.cancel() : widget.request.ignore(),
+        onPressed: () => widget.request.delete(),
       )
     ];
 
@@ -38,12 +39,15 @@ class _RequestButtonState extends State<RequestButton> {
           loading: requestLoading,
           icon: Icons.check,
           color: Get.theme.colorScheme.onPrimary,
-          onTap: () {
+          onTap: () async {
             requestLoading.value = true;
-            widget.request.accept((p0) {
-              sendLog("Request accepted");
-              requestLoading.value = false;
-            });
+            final (error, result) = await widget.request.accept();
+            if (error != null) {
+              showErrorPopup("error", error);
+              return;
+            }
+            sendLog(result);
+            requestLoading.value = false;
           },
         ),
       );

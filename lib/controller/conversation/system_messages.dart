@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friends/friend_controller.dart
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,7 +26,7 @@ class SystemMessages {
       },
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          provider.conversation.fetchData();
+          ConversationService.fetchNewestVersion(provider.conversation);
         }
       },
     ),
@@ -45,7 +46,7 @@ class SystemMessages {
       },
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          provider.conversation.fetchData();
+          ConversationService.fetchNewestVersion(provider.conversation);
         }
       },
     ),
@@ -65,7 +66,7 @@ class SystemMessages {
       },
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          provider.conversation.fetchData();
+          ConversationService.fetchNewestVersion(provider.conversation);
         }
       },
     ),
@@ -86,7 +87,7 @@ class SystemMessages {
       },
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          provider.conversation.fetchData();
+          ConversationService.fetchNewestVersion(provider.conversation);
         }
       },
     ),
@@ -105,7 +106,7 @@ class SystemMessages {
       },
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          provider.conversation.fetchData();
+          ConversationService.fetchNewestVersion(provider.conversation);
         }
       },
     ),
@@ -125,7 +126,7 @@ class SystemMessages {
       },
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          provider.conversation.fetchData();
+          ConversationService.fetchNewestVersion(provider.conversation);
         }
       },
     ),
@@ -145,7 +146,7 @@ class SystemMessages {
       },
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          provider.conversation.fetchData();
+          ConversationService.fetchNewestVersion(provider.conversation);
         }
       },
     ),
@@ -166,7 +167,7 @@ class SystemMessages {
       },
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          provider.conversation.fetchData();
+          ConversationService.fetchNewestVersion(provider.conversation);
         }
       },
     ),
@@ -194,7 +195,7 @@ class SystemMessages {
       handler: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           if (LPHAddress.from(msg.attachments[0]) == StatusController.ownAddress) {
-            provider.conversation.delete(popup: false, request: false);
+            provider.conversation.delete(popup: false);
           }
         }
       },

@@ -1,3 +1,4 @@
+// dart format width=80
 import 'package:drift/internal/versioned_schema.dart' as i0;
 import 'package:drift/drift.dart' as i1;
 import 'package:drift/drift.dart'; // ignore_for_file: type=lint,unused_import
@@ -438,8 +439,219 @@ i1.GeneratedColumn<int> _column_26(String aliasedName) =>
 i1.GeneratedColumn<int> _column_27(String aliasedName) =>
     i1.GeneratedColumn<int>('height', aliasedName, false,
         type: i1.DriftSqlType.int);
+
+final class Schema3 extends i0.VersionedSchema {
+  Schema3({required super.database}) : super(version: 3);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    conversation,
+    message,
+    member,
+    setting,
+    friend,
+    request,
+    unknownProfile,
+    profile,
+    trustedLink,
+    libraryEntry,
+    idxConversationUpdated,
+    idxMessageCreated,
+    idxFriendsUpdated,
+    idxLibraryEntryCreated,
+  ];
+  late final Shape0 conversation = Shape0(
+      source: i0.VersionedTable(
+        entityName: 'conversation',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_1,
+          _column_2,
+          _column_3,
+          _column_4,
+          _column_5,
+          _column_6,
+          _column_7,
+          _column_8,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape1 message = Shape1(
+      source: i0.VersionedTable(
+        entityName: 'message',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_9,
+          _column_10,
+          _column_11,
+          _column_12,
+          _column_13,
+          _column_14,
+          _column_15,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape2 member = Shape2(
+      source: i0.VersionedTable(
+        entityName: 'member',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_16,
+          _column_17,
+          _column_18,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape3 setting = Shape3(
+      source: i0.VersionedTable(
+        entityName: 'setting',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY("key")',
+        ],
+        columns: [
+          _column_5,
+          _column_19,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape4 friend = Shape4(
+      source: i0.VersionedTable(
+        entityName: 'friend',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_20,
+          _column_21,
+          _column_1,
+          _column_22,
+          _column_7,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape5 request = Shape5(
+      source: i0.VersionedTable(
+        entityName: 'request',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_20,
+          _column_21,
+          _column_23,
+          _column_1,
+          _column_22,
+          _column_7,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape6 unknownProfile = Shape6(
+      source: i0.VersionedTable(
+        entityName: 'unknown_profile',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_20,
+          _column_21,
+          _column_22,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape7 profile = Shape7(
+      source: i0.VersionedTable(
+        entityName: 'profile',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_24,
+          _column_3,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape8 trustedLink = Shape8(
+      source: i0.VersionedTable(
+        entityName: 'trusted_link',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(domain)',
+        ],
+        columns: [
+          _column_25,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  late final Shape9 libraryEntry = Shape9(
+      source: i0.VersionedTable(
+        entityName: 'library_entry',
+        withoutRowId: false,
+        isStrict: false,
+        tableConstraints: [
+          'PRIMARY KEY(id)',
+        ],
+        columns: [
+          _column_0,
+          _column_2,
+          _column_12,
+          _column_3,
+          _column_26,
+          _column_27,
+        ],
+        attachedDatabase: database,
+      ),
+      alias: null);
+  final i1.Index idxConversationUpdated = i1.Index('idx_conversation_updated',
+      'CREATE INDEX idx_conversation_updated ON conversation (updated_at)');
+  final i1.Index idxMessageCreated = i1.Index('idx_message_created',
+      'CREATE INDEX idx_message_created ON message (created_at)');
+  final i1.Index idxFriendsUpdated = i1.Index('idx_friends_updated',
+      'CREATE INDEX idx_friends_updated ON friend (updated_at)');
+  final i1.Index idxLibraryEntryCreated = i1.Index('idx_library_entry_created',
+      'CREATE INDEX idx_library_entry_created ON library_entry (created_at)');
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -448,6 +660,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from1To2(migrator, schema);
         return 2;
+      case 2:
+        final schema = Schema3(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from2To3(migrator, schema);
+        return 3;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -456,8 +673,10 @@ i0.MigrationStepWithVersion migrationSteps({
 
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
 }) =>
     i0.VersionedSchema.stepByStepHelper(
         step: migrationSteps(
       from1To2: from1To2,
+      from2To3: from2To3,
     ));

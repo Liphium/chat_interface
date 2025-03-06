@@ -77,7 +77,44 @@ class ConversationContainer {
 /// The prefix for the conversation name used for all direct messages
 const directMessagePrefix = "DM_";
 
-class ConversationService {
+class ConversationService extends VaultTarget {
+  ConversationService() : super(Constants.vaultConversationTag);
+
+  @override
+  Future<void> init() async {
+    final conversationController = Get.find<ConversationController>();
+    final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
+    for (var conversation in conversations) {
+      await conversationController.add(Conversation.fromData(conversation));
+    }
+  }
+
+  @override
+  Future<void> processEntries(List<String> deleted, List<VaultEntry> newEntries) async {
+    sendLog("processing");
+
+    // Add all the new conversations to the vault
+    final messageController = Get.find<MessageController>();
+    final controller = Get.find<ConversationController>();
+    for (var entry in newEntries) {
+      final conv = Conversation.fromJson(jsonDecode(entry.payload), entry.id);
+      if (controller.conversations[conv.id] == null) {
+        await ConversationService.insertFromVault(conv);
+      }
+    }
+
+    // Delete everything that's been deleted from the vault on the server
+    controller.conversations.removeWhere((id, conv) {
+      if (deleted.contains(conv.vaultId)) {
+        ConversationService.delete(id, vaultId: conv.vaultId, deleteLocal: false);
+        controller.order.remove(id);
+        messageController.unselectConversation(id: id);
+        return true;
+      }
+      return false;
+    });
+  }
+
   /// Open a direct message with a friend.
   ///
   /// The conversation is not null if there is one already.
@@ -135,12 +172,10 @@ class ConversationService {
     }
 
     // Put together the information all other members need
-    final conversationController = Get.find<ConversationController>();
     final packagedKey = packageSymmetricKey(conversationKey);
     final convId = LPHAddress.from(body["conversation"]);
     final conversation = Conversation(convId, "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
         conversationContainer, packagedKey, 0, DateTime.now().millisecondsSinceEpoch);
-    final members = <Member>[];
 
     // Send all other members their information and credentials
     for (var friend in friends) {
@@ -153,28 +188,12 @@ class ConversationService {
         unawaited(delete(convId, token: conversation.token));
         return error;
       }
-      members.add(Member(token.id, friend.id, MemberRole.user));
     }
-
-    // Store the conversation in the database and subscribe
-    await conversationController.addCreated(
-      conversation,
-      members,
-      admin: Member(conversation.token.id, StatusController.ownAddress, MemberRole.admin),
-    );
-    subscribeToConversation(conversation.token, deletions: false);
 
     // Add to vault
-    final vaultId = await addToVault(Constants.vaultConversationTag, conversation.toJson());
-    if (vaultId == null) {
-      sendLog("WARNING: Conversation couldn't be added to vault");
-    }
-    conversation.vaultId = vaultId ?? "";
-
-    // Store in database
-    await db.conversation.insertOnConflictUpdate(conversation.entity);
-    for (var member in conversation.members.values) {
-      await db.member.insertOnConflictUpdate(member.toData(conversation.id));
+    final (error, _) = await addToVault(Constants.vaultConversationTag, conversation.toJson());
+    if (error != null) {
+      sendLog("WARNING: Conversation couldn't be added to vault: $error");
     }
 
     return null;
@@ -187,7 +206,7 @@ class ConversationService {
   /// Deletion from the local database and cache will always happen.
   ///
   /// Returns an error if there was one.
-  static Future<String?> delete(LPHAddress id, {String? vaultId, ConversationToken? token}) async {
+  static Future<String?> delete(LPHAddress id, {String? vaultId, ConversationToken? token, bool deleteLocal = true}) async {
     // Remove the conversation from the vault (if desired)
     if (vaultId != null) {
       final err = await removeFromVault(vaultId);
@@ -211,8 +230,10 @@ class ConversationService {
     // Remove the conversation from the local database
     await db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
     await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
-    Get.find<MessageController>().unselectConversation(id: id);
-    Get.find<ConversationController>().removeConversation(id);
+    if (deleteLocal) {
+      Get.find<MessageController>().unselectConversation(id: id);
+      Get.find<ConversationController>().removeConversation(id);
+    }
     return null;
   }
 
@@ -302,5 +323,90 @@ class ConversationService {
         false,
       );
     });
+  }
+
+  /// Add a new conversation to the cache from the vault.
+  ///
+  /// Inserts it into the database or updates it.
+  /// Subscribes to the conversation.
+  static Future<bool> insertFromVault(Conversation conversation) async {
+    // Insert it into cache
+    await Get.find<ConversationController>().add(conversation, loadMembers: false);
+
+    // Insert into database
+    saveToDatabase(conversation, saveMembers: false);
+
+    // Subscribe to conversation
+    ConversationService.subscribeToConversation(conversation.token);
+
+    return true;
+  }
+
+  /// Fetch all data about a conversation from the server and update it in the local database.
+  ///
+  /// Also compares the current version with the new version that was sent and doesn't refresh
+  /// in case it's not nessecary.
+  static Future<bool> fetchNewestVersion(Conversation conversation) async {
+    if (conversation.membersLoading.value) {
+      return false;
+    }
+
+    // Get the data from the server
+    conversation.membersLoading.value = true;
+    final json = await postNodeJSON("/conversations/data", {
+      "token": conversation.token.toMap(),
+    });
+
+    if (!json["success"]) {
+      sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING ${json["error"]}");
+      return false;
+    }
+
+    // Make sure there are changes worth pulling
+    if (conversation.lastVersion == json["version"]) {
+      return true;
+    }
+
+    // Update to the latest version
+    conversation.lastVersion = json["version"];
+
+    // Update the container
+    conversation.container = ConversationContainer.decrypt(json["data"], conversation.key);
+    conversation.containerSub.value = conversation.container;
+
+    // Update the members
+    final members = <LPHAddress, Member>{};
+    for (var memberData in json["members"]) {
+      sendLog(memberData);
+      final memberContainer = MemberContainer.decrypt(memberData["data"], conversation.key);
+      final address = LPHAddress.from(memberData["id"]);
+      members[address] = Member(address, memberContainer.id, MemberRole.fromValue(memberData["rank"]));
+    }
+
+    // Load the members into the database
+    for (var currentMember in conversation.members.values) {
+      if (!members.containsKey(currentMember.tokenId)) {
+        await db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
+      }
+    }
+
+    // Set the members and save the conversation
+    conversation.members.value = members;
+    conversation.membersLoading.value = false;
+    saveToDatabase(conversation);
+
+    return true;
+  }
+
+  /// Save a conversation to the local database.
+  ///
+  /// By default members are also overwritten. Can be disabled by setting `saveMembers` to `false`.
+  static void saveToDatabase(Conversation conversation, {saveMembers = true}) {
+    db.conversation.insertOnConflictUpdate(conversation.entity);
+    if (saveMembers) {
+      for (var member in conversation.members.values) {
+        db.member.insertOnConflictUpdate(member.toData(conversation.id));
+      }
+    }
   }
 }

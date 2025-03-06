@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 
 enum ConversationType { directMessage, group }
 
+@TableIndex(name: "idx_conversation_updated", columns: {#updatedAt})
 class Conversation extends Table {
   TextColumn get id => text()();
   TextColumn get vaultId => text()();
@@ -18,6 +19,7 @@ class Conversation extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_message_created", columns: {#createdAt})
 class Message extends Table {
   TextColumn get id => text()();
   TextColumn get content => text()();
@@ -44,6 +46,7 @@ class Member extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_friends_updated", columns: {#updatedAt})
 class Friend extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
@@ -56,6 +59,7 @@ class Friend extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_library_entry_created", columns: {#createdAt})
 class LibraryEntry extends Table {
   TextColumn get id => text()();
   IntColumn get type => intEnum<LibraryEntryType>()();

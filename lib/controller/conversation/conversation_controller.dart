@@ -40,37 +40,6 @@ class ConversationController extends GetxController {
     return true;
   }
 
-  /// Add a new conversation and refresh members (also subscribes)
-  Future<bool> addFromVault(Conversation conversation) async {
-    // Insert it into cache
-    await add(conversation, loadMembers: false);
-
-    // Insert into database
-    conversation.save(saveMembers: false);
-
-    // Subscribe to conversation
-    ConversationService.subscribeToConversation(conversation.token);
-
-    return true;
-  }
-
-  /// Add a conversation to the cache and local database (after created)
-  Future<bool> addCreated(Conversation conversation, List<Member> members, {Member? admin}) async {
-    // Cache the conversation
-    conversations[conversation.id] = conversation;
-    _insertToOrder(conversation.id);
-
-    // Add all the members to this conversation
-    for (var member in members) {
-      conversation.addMember(member);
-    }
-    if (admin != null) {
-      conversation.addMember(admin);
-    }
-
-    return true;
-  }
-
   void updateMessageRead(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
     (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode())))
         .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
@@ -126,10 +95,8 @@ class ConversationController extends GetxController {
       }
 
       // Check if the current version of the conversation is up to date
-      sendLog("version ${conversation.id} client: ${conversation.lastVersion}, server: $version");
       if (conversation.lastVersion != version) {
-        sendLog("conversation version updated");
-        await conversation.fetchData();
+        await ConversationService.fetchNewestVersion(conversation);
       }
     }
 
@@ -286,7 +253,7 @@ class Conversation {
       });
 
   // Delete conversation from vault and database
-  Future<void> delete({bool request = true, bool popup = true}) async {
+  Future<void> delete({bool leaveRequest = true, bool popup = true}) async {
     // Check if the vault id has been synchronized yet
     if (vaultId == "") {
       if (popup) {
@@ -297,77 +264,12 @@ class Conversation {
     }
 
     // Delete the conversation
-    final error = await ConversationService.delete(id, vaultId: vaultId, token: token);
+    final error = await ConversationService.delete(id, vaultId: vaultId, token: leaveRequest ? token : null);
     if (error != null) {
       if (popup) {
         showErrorPopup("error", error);
       }
       sendLog("ERROR: Can't delete conversation: $error");
     }
-  }
-
-  /// Save the entire conversation to the local database.
-  ///
-  /// By default members are also overwritten. Can be disabled by setting `saveMembers` to `false`.
-  void save({saveMembers = true}) {
-    db.conversation.insertOnConflictUpdate(entity);
-    if (saveMembers) {
-      for (var member in members.values) {
-        db.member.insertOnConflictUpdate(member.toData(id));
-      }
-    }
-  }
-
-  /// Fetch all data about a conversation from the server and update it in the local database.
-  ///
-  /// Also compares the current version with the new version that was sent and doesn't refresh
-  /// in case it's not nessecary. Can be disabled by setting `refreshAnyway` to `false`.
-  Future<bool> fetchData() async {
-    if (membersLoading.value) {
-      return false;
-    }
-
-    // Get the data from the server
-    membersLoading.value = true;
-    final json = await postNodeJSON("/conversations/data", {
-      "token": token.toMap(),
-    });
-
-    if (!json["success"]) {
-      sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING ${json["error"]}");
-      // TODO: Add to some sort of error collection
-      return false;
-    }
-
-    // Update to the latest version
-    sendLog("PULLED VERSION ${json["version"]}");
-    lastVersion = json["version"];
-
-    // Update the container
-    container = ConversationContainer.decrypt(json["data"], key);
-    containerSub.value = container;
-
-    // Update the members
-    final members = <LPHAddress, Member>{};
-    for (var memberData in json["members"]) {
-      sendLog(memberData);
-      final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-      final address = LPHAddress.from(memberData["id"]);
-      members[address] = Member(address, memberContainer.id, MemberRole.fromValue(memberData["rank"]));
-    }
-
-    // Load the members into the database
-    for (var currentMember in this.members.values) {
-      if (!members.containsKey(currentMember.tokenId)) {
-        await db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
-      }
-    }
-
-    // Set the members and save the conversation
-    this.members.value = members;
-    membersLoading.value = false;
-    save();
-
-    return true;
   }
 }

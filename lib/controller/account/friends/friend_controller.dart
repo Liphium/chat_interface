@@ -2,13 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
+import 'package:chat_interface/main.dart';
+import 'package:chat_interface/services/chat/friends_service.dart';
+import 'package:chat_interface/services/chat/requests_service.dart';
+import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/util/encryption/hash.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -18,13 +20,12 @@ import 'package:chat_interface/database/database_entities.dart' as dbe;
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
-import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
-part 'friends_vault.dart';
+part '../../../services/chat/friends_vault.dart';
 
 class FriendController extends GetxController {
   final friends = <LPHAddress, Friend>{}.obs;
@@ -44,71 +45,12 @@ class FriendController extends GetxController {
     friends.clear();
   }
 
-  // Add friend (also sends data to server vault)
-  Future<bool> addFromRequest(Request request) async {
-    sendLog("adding friend from request ${request.friend.id}");
-
-    // Query the guy
-    final guy = await Get.find<UnknownController>().loadUnknownProfile(request.id);
-    if (guy == null) {
-      sendLog("friend request is invalid cause couldn't find sender");
-      return false;
+  void addOrUpdate(Friend friend) {
+    if (friends[friend.id] != null) {
+      friends[friend.id]!.copyFrom(friend);
+    } else {
+      friends[friend.id] = friend;
     }
-
-    // Check if the guy in the request has the same name and stuff (in base64 cause otherwise it doesn't work, thanks dart)
-    if (base64Encode(request.keyStorage.publicKey) != base64Encode(guy.publicKey) ||
-        base64Encode(guy.signatureKey) != base64Encode(request.keyStorage.signatureKey)) {
-      sendLog("friend request has invalid keys");
-      return false;
-    }
-
-    // Set name and display name from the server
-    request.displayName = guy.displayName;
-    request.name = guy.name;
-
-    // Remove from requests controller
-    await Get.find<RequestController>().deleteSentRequest(request);
-
-    // Remove request from server
-    final friendsVault = await FriendsVault.remove(request.vaultId);
-    if (!friendsVault) {
-      add(request.friend); // Add regardless cause restart of the app fixes not being able to remove the guy
-      return false;
-    }
-
-    // Add friend to vault
-    final id = await FriendsVault.store(
-      request.friend.toStoredPayload(),
-      lastPacket: request.updatedAt,
-      errorPopup: true,
-      prefix: "friend",
-    );
-
-    // Don't add if something failed
-    if (id == null) {
-      return false;
-    }
-
-    // Add friend to database with vault id
-    request.vaultId = id;
-    add(request.friend);
-
-    return true;
-  }
-
-  void add(Friend friend) {
-    friends[friend.id] = friend;
-    if (friend.id != StatusController.ownAddress) {
-      db.friend.insertOnConflictUpdate(friend.entity());
-    }
-  }
-
-  Future<bool> remove(Friend friend, {removal = true}) async {
-    if (removal) {
-      friends.remove(friend.id);
-    }
-    await db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id.encode()));
-    return true;
   }
 
   Friend getFriend(LPHAddress address) {
@@ -128,14 +70,6 @@ class Friend {
 
   // Display name of the friend
   final displayName = "".obs;
-
-  void updateDisplayName(String displayName) {
-    if (id == StatusController.ownAddress) {
-      return;
-    }
-    this.displayName.value = displayName;
-    db.friend.insertOnConflictUpdate(entity());
-  }
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
@@ -186,12 +120,12 @@ class Friend {
   }
 
   /// Convert a json to a friend (used for friends vault)
-  factory Friend.fromStoredPayload(Map<String, dynamic> json, int updatedAt) {
+  factory Friend.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
     return Friend(
       LPHAddress.from(json["id"]),
       json["name"],
       json["dname"],
-      "",
+      id,
       KeyStorage.fromJson(json),
       updatedAt,
     );
@@ -210,6 +144,21 @@ class Friend {
     return jsonEncode(reqPayload);
   }
 
+  /// Copy of all of the values from another friend into this one.
+  void copyFrom(Friend friend) {
+    id = friend.id;
+    vaultId = friend.vaultId;
+    keyStorage = friend.keyStorage;
+    displayName.value = friend.displayName.value;
+    name = friend.name;
+    updatedAt = friend.updatedAt;
+  }
+
+  /// Copy this friend for editing.
+  Friend copy() {
+    return Friend(id, name, displayName.value, vaultId, keyStorage, updatedAt);
+  }
+
   // Check if vault id is known (this would require a restart of the app)
   bool canBeDeleted() => vaultId != "";
 
@@ -221,22 +170,6 @@ class Friend {
         keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
         updatedAt: BigInt.from(updatedAt),
       );
-
-  // Update in database
-  Future<bool> update() async {
-    if (id == StatusController.ownAddress || unknown) {
-      return false;
-    }
-    await FriendsVault.remove(vaultId);
-    final result = await FriendsVault.store(toStoredPayload());
-    if (result == null) {
-      sendLog("FRIEND CONFLICT: Couldn't update in vault!");
-      return true;
-    }
-    vaultId = result;
-    await db.friend.insertOnConflictUpdate(entity());
-    return true;
-  }
 
   //* Status
   final status = "".obs;

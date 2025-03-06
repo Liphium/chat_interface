@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -8,6 +9,7 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -78,21 +80,21 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           ProfileButton(
             icon: Icons.delete,
             label: "Delete all conversations (local)",
-            onTap: () => db.conversation.deleteAll(),
-            loading: false.obs,
-          ),
-          verticalSpacing(elementSpacing),
-          ProfileButton(
-            icon: Icons.delete,
-            label: "Delete all members (local)",
-            onTap: () => db.member.deleteAll(),
+            onTap: () {
+              VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, Constants.vaultConversationTag, 0);
+              db.conversation.deleteAll();
+              db.member.deleteAll();
+            },
             loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.delete,
             label: "Delete all friends (local)",
-            onTap: () => db.friend.deleteAll(),
+            onTap: () {
+              VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeFriend, "", 0);
+              db.friend.deleteAll();
+            },
             loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
@@ -106,7 +108,10 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           ProfileButton(
             icon: Icons.delete,
             label: "Delete all library entries (local)",
-            onTap: () => db.libraryEntry.deleteAll(),
+            onTap: () {
+              VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, Constants.vaultLibraryTag, 0);
+              db.libraryEntry.deleteAll();
+            },
             loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
