@@ -53,14 +53,6 @@ class FriendController extends GetxController {
     }
   }
 
-  Future<bool> remove(Friend friend, {removal = true}) async {
-    if (removal) {
-      friends.remove(friend.id);
-    }
-    await db.friend.deleteWhere((tbl) => tbl.id.equals(friend.id.encode()));
-    return true;
-  }
-
   Friend getFriend(LPHAddress address) {
     if (StatusController.ownAddress == address) return Friend.me();
     return friends[address] ?? Friend.unknown(address);
@@ -78,14 +70,6 @@ class Friend {
 
   // Display name of the friend
   final displayName = "".obs;
-
-  void updateDisplayName(String displayName) {
-    if (id == StatusController.ownAddress) {
-      return;
-    }
-    this.displayName.value = displayName;
-    db.friend.insertOnConflictUpdate(entity());
-  }
 
   /// Loading state for open conversation buttons
   final openConversationLoading = false.obs;
