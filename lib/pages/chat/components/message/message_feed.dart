@@ -6,7 +6,6 @@ import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class MessageFeed extends StatefulWidget {
@@ -74,11 +73,11 @@ class _MessageFeedState extends State<MessageFeed> {
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
-                  //* Message list
+                  // Message list
                   Expanded(
                     child: Stack(
                       children: [
-                        //* Messages
+                        // Messages
                         Center(
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
@@ -100,18 +99,12 @@ class _MessageFeedState extends State<MessageFeed> {
                           ),
                         ),
 
-                        //* Animated loading indicator
+                        // Animated loading indicator
                         Align(
                           alignment: Alignment.topCenter,
                           child: Obx(
-                            () => Animate(
-                              effects: [
-                                FadeEffect(
-                                  curve: Curves.ease,
-                                  duration: 250.ms,
-                                ),
-                              ],
-                              target: controller.currentProvider.value!.newMessagesLoading.value ? 1 : 0,
+                            () => Visibility(
+                              visible: controller.currentProvider.value!.newMessagesLoading.value,
                               child: Padding(
                                 padding: const EdgeInsets.all(defaultSpacing),
                                 child: Material(

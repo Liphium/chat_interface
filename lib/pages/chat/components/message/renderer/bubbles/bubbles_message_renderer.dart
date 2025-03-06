@@ -187,7 +187,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
       padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
       child: Material(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color: widget.self ? Get.theme.colorScheme.onPrimary.withOpacity(0.2) : Get.theme.colorScheme.inverseSurface,
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withAlpha(50) : Get.theme.colorScheme.inverseSurface,
         child: InkWell(
           borderRadius: BorderRadius.circular(defaultSpacing),
           onTap: () => widget.provider.scrollToMessage(widget.message.answer),

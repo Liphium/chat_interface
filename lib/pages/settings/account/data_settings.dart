@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/pages/chat/messages/message_automaton.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/pages/settings/account/log_out_window.dart';
@@ -52,7 +53,7 @@ class DataSettingsPage extends StatelessWidget {
                       horizontalSpacing(defaultSpacing),
                       Container(
                         decoration: BoxDecoration(
-                          color: Get.theme.colorScheme.error.withOpacity(0.1),
+                          color: Get.theme.colorScheme.error.withAlpha(25),
                           borderRadius: BorderRadius.circular(defaultSpacing),
                         ),
                         padding: const EdgeInsets.all(elementSpacing),
@@ -77,6 +78,11 @@ class DataSettingsPage extends StatelessWidget {
                 ],
               ),
             ),
+
+          RichText(
+            text: TextSpan(
+                children: TextEvaluator().evaluate("**bold** **something else* **sasdasasd** **sadaadsd**", Get.theme.textTheme.bodyMedium!)),
+          ),
 
           //* Profile picture
           Text("settings.data.profile_picture".tr, style: Get.theme.textTheme.labelLarge),
