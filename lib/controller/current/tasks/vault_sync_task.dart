@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
+import 'package:chat_interface/services/chat/library_manager.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
@@ -97,7 +97,7 @@ class VaultSyncTask extends SynchronizationTask {
   }
 
   /// Called by vault_actions when a new entry is added or updated
-  void onUpdateOrInsert(String tag, VaultEntry entry) {
+  void onUpdateOrInsert(String tag, VaultEntry entry, int version) {
     final target = targets.firstWhereOrNull((target) => target.tag == tag);
     if (target == null) {
       return;
@@ -105,6 +105,19 @@ class VaultSyncTask extends SynchronizationTask {
 
     // Let the target process the new entry
     target.processEntries([], [entry]);
+    unawaited(VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, version));
+  }
+
+  /// Called by vault_actions when an entry is deleted
+  void onDeletion(String tag, String id, int version) {
+    final target = targets.firstWhereOrNull((target) => target.tag == tag);
+    if (target == null) {
+      return;
+    }
+
+    // Let the target process the deletion
+    target.processEntries([id], []);
+    unawaited(VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, version));
   }
 
   @override

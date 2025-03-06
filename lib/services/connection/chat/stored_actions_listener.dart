@@ -228,9 +228,9 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   );
 
   // Add to vault
-  final vaultId = await addToVault(Constants.vaultConversationTag, conversation.toJson());
-  if (vaultId == null) {
-    sendLog("WARNING: Conversation couldn't be added to vault");
+  final (error, _) = await addToVault(Constants.vaultConversationTag, conversation.toJson());
+  if (error != null) {
+    sendLog("WARNING: Conversation couldn't be added to vault: $error");
   }
 
   return true;

@@ -15,11 +15,6 @@ class LibraryManager extends VaultTarget {
   LibraryManager() : super(Constants.vaultLibraryTag);
 
   @override
-  Future<int> getLatestVersion() async {
-    return 1;
-  }
-
-  @override
   Future<void> processEntries(List<String> deleted, List<VaultEntry> newEntries) async {
     // Add all new entries
     final list = <LibraryEntry>[];
@@ -43,9 +38,6 @@ class LibraryManager extends VaultTarget {
       showErrorPopup("error", error);
       return false;
     }
-
-    // Remove from the local database
-    await db.libraryEntry.deleteWhere((tbl) => tbl.id.equals(entry.id));
 
     return true;
   }
@@ -91,15 +83,11 @@ class LibraryManager extends VaultTarget {
     }
 
     // Add entry to server vault
-    final id = await addToVault(Constants.vaultLibraryTag, jsonEncode(entry.toJson()));
-    if (id == null) {
-      showErrorPopup("error", "server.error".tr);
+    final (error, _) = await addToVault(Constants.vaultLibraryTag, jsonEncode(entry.toJson()));
+    if (error != null) {
+      showErrorPopup("error", error);
       return false;
     }
-
-    // Add to local database as well
-    entry.id = id;
-    await db.libraryEntry.insertOnConflictUpdate(entry.entity);
     return true;
   }
 
