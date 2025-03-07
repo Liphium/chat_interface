@@ -5,7 +5,7 @@ PODS:
     - FlutterMacOS
   - flutter_secure_storage_macos (6.1.1):
     - FlutterMacOS
-  - flutter_webrtc (0.12.2):
+  - flutter_webrtc (0.12.6):
     - FlutterMacOS
     - WebRTC-SDK (= 125.6422.06)
   - FlutterMacOS (1.0.0)
@@ -20,7 +20,7 @@ PODS:
     - FlutterMacOS
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - "sodium_libs (3.4.1+2)":
+  - "sodium_libs (3.4.3+1)":
     - Flutter
     - FlutterMacOS
   - sqlite3 (3.47.2):
@@ -108,14 +108,14 @@ SPEC CHECKSUMS:
   audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
   file_selector_macos: cc3858c981fe6889f364731200d6232dac1d812d
   flutter_secure_storage_macos: 59459653abe1adb92abbc8ea747d79f8d19866c9
-  flutter_webrtc: 53c9e1285ab32dfb58afb1e1471416a877e23d7a
+  flutter_webrtc: d55fd3f5c75b42940b6b4b2cf376a5797398d1f8
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   just_audio: 9b67ca7b97c61cfc9784ea23cd8cc55eb226d489
   open_file_mac: 0e554648e2a87ce59e9438e3e5ca3e552e90d89a
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   screen_retriever_macos: 776e0fa5d42c6163d2bf772d22478df4b302b161
-  sodium_libs: 4a81757edfdea3152b0d38e0a9a450c8f9bf7070
+  sodium_libs: 2ec9dede9b53c8de7e26e53d085cfe4ecc288f95
   sqlite3: 7559e33dae4c78538df563795af3a86fc887ee71
   sqlite3_flutter_libs: 58ae36c0dd086395d066b4fe4de9cdca83e717b3
   tray_manager: 9064e219c56d75c476e46b9a21182087930baf90
