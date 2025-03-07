@@ -177,7 +177,7 @@ class TextEvaluator {
       var (currentStart, currentEnd, currentFmt) = allRanges[currentIndex];
       List<List<TextFormattingType>> currentFormats = [currentFmt];
 
-      // Fix all the overlapping patterns
+      // Parse all the ranges into a non-overlapping list
       List<(int, int, List<List<TextFormattingType>>)> ranges = [];
       if (lastEnd < currentStart) {
         ranges.add((lastEnd, currentStart, []));
