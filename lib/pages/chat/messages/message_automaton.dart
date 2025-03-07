@@ -40,6 +40,7 @@ abstract class PatternAutomaton {
         _count++;
         _currentStart = _count + 1;
       }
+      sendLog("$char | skip");
       return;
     }
     _incremented = false;
@@ -164,56 +165,74 @@ class TextEvaluator {
       allRanges.addAll(automaton.getResult());
     }
 
-    sendLog(allRanges);
-
-    // Sort ranges by start index
+    // Sort ranges
     allRanges.sort((a, b) => a.$1.compareTo(b.$1));
 
     // Build text spans
     List<TextSpan> spans = [];
     int currentIndex = 0;
+    int lastEnd = 0;
 
-    for (var (start, end, formats) in allRanges) {
-      // Add text before the formatted section
-      if (start > currentIndex) {
-        spans.add(TextSpan(
-          text: text.substring(currentIndex, start),
-          style: startStyle,
-        ));
+    while (currentIndex < allRanges.length) {
+      var (currentStart, currentEnd, currentFmt) = allRanges[currentIndex];
+      List<List<TextFormattingType>> currentFormats = [currentFmt];
+
+      // Fix all the overlapping patterns
+      List<(int, int, List<List<TextFormattingType>>)> ranges = [];
+      if (lastEnd < currentStart) {
+        ranges.add((lastEnd, currentStart, []));
       }
 
-      // Apply formatting
-      TextStyle style = startStyle;
-      for (var format in formats) {
-        switch (format) {
-          case TextFormattingType.bold:
-            style = style.copyWith(fontWeight: FontWeight.bold);
-            break;
-          case TextFormattingType.italic:
-            style = style.copyWith(fontStyle: FontStyle.italic);
-            break;
-          case TextFormattingType.pattern:
-            // Skip rendering pattern markers
-            currentIndex = end;
-            continue;
+      while (allRanges.length > currentIndex + 1) {
+        // Check for overlap, if it doesn't go out
+        final (nextStart, nextEnd, nextFormats) = allRanges[currentIndex + 1];
+        if (nextStart < currentEnd) {
+          if (currentStart != nextStart) {
+            ranges.add((currentStart, nextStart, currentFormats));
+          }
+          if (currentEnd < nextEnd) {
+            currentFormats.add(nextFormats);
+            ranges.add((nextStart, currentEnd, currentFormats));
+            currentStart = currentEnd;
+            currentEnd = nextEnd;
+            currentFormats.removeAt(0);
+          } else if (currentEnd > nextEnd) {
+            currentFormats.add(nextFormats);
+            ranges.add((nextStart, nextEnd, currentFormats));
+            currentFormats.removeLast();
+          }
+          currentIndex++;
+        } else {
+          break;
         }
       }
+      ranges.add((currentStart, currentEnd, currentFormats));
 
-      // Add the formatted text span
-      spans.add(TextSpan(
-        text: text.substring(start, end),
-        style: style,
-      ));
+      // Translate to the actual text spans
+      for (var (start, end, formats) in ranges) {
+        // Compute style
+        TextStyle base = startStyle;
+        for (var format in formats) {
+          for (var f in format) {
+            switch (f) {
+              case TextFormattingType.bold:
+                base = base.copyWith(fontWeight: FontWeight.bold);
+              case TextFormattingType.italic:
+                base = base.copyWith(fontStyle: FontStyle.italic);
+              default:
+                continue;
+            }
+          }
+        }
 
-      currentIndex = end;
-    }
+        sendLog("adding $start-$end: $formats");
+        // The min is there because the pattern evaluator has to evaluate the last character as nothing to
+        // tell the automaton to finish its final range (this extends the range 1 beyond the original text)
+        spans.add(TextSpan(text: text.substring(start, min(text.length, end)), style: base));
+      }
 
-    // Add any remaining text
-    if (currentIndex < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(currentIndex),
-        style: startStyle,
-      ));
+      currentIndex++;
+      lastEnd = currentEnd;
     }
 
     return spans;

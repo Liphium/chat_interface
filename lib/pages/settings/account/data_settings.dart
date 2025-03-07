@@ -80,8 +80,7 @@ class DataSettingsPage extends StatelessWidget {
             ),
 
           RichText(
-            text: TextSpan(
-                children: TextEvaluator().evaluate("**bold** **something else* **sasdasasd** **sadaadsd**", Get.theme.textTheme.bodyMedium!)),
+            text: TextSpan(children: TextEvaluator().evaluate("*bold1* *** **bold2**", Get.theme.textTheme.bodyMedium!)),
           ),
 
           //* Profile picture
