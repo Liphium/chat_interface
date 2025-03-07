@@ -183,20 +183,25 @@ class TextEvaluator {
         ranges.add((lastEnd, currentStart, []));
       }
 
+      // TODO: This algorithm is not perfect, it won't catch 3 patterns combined for example
       while (allRanges.length > currentIndex + 1) {
         // Check for overlap, if it doesn't go out
         final (nextStart, nextEnd, nextFormats) = allRanges[currentIndex + 1];
         if (nextStart < currentEnd) {
+          // Make sure to apply current formats in case the next starts after the current start
           if (currentStart != nextStart) {
             ranges.add((currentStart, nextStart, currentFormats));
           }
+
           if (currentEnd < nextEnd) {
+            // If the current range ends before the next one, make sure to separate the ranges properly
             currentFormats.add(nextFormats);
             ranges.add((nextStart, currentEnd, currentFormats));
             currentStart = currentEnd;
             currentEnd = nextEnd;
             currentFormats.removeAt(0);
           } else if (currentEnd > nextEnd) {
+            // If the current range ends after the next one, make sure to apply the formatting only in the next range
             currentFormats.add(nextFormats);
             ranges.add((nextStart, nextEnd, currentFormats));
             currentFormats.removeLast();
