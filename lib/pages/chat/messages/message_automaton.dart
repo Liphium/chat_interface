@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:chat_interface/pages/chat/messages/message_formatters.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,24 @@ import 'package:flutter/material.dart';
 enum TextFormattingType {
   bold,
   italic,
+  lineThrough,
+  underline,
   pattern;
+
+  TextStyle apply(TextStyle base, {TextStyle? pattern}) {
+    switch (this) {
+      case TextFormattingType.bold:
+        return base.copyWith(fontWeight: FontWeight.bold);
+      case TextFormattingType.italic:
+        return base.copyWith(fontStyle: FontStyle.italic);
+      case TextFormattingType.underline:
+        return base.copyWith(decoration: TextDecoration.combine([base.decoration ?? TextDecoration.none, TextDecoration.underline]));
+      case TextFormattingType.lineThrough:
+        return base.copyWith(decoration: TextDecoration.combine([base.decoration ?? TextDecoration.none, TextDecoration.lineThrough]));
+      case TextFormattingType.pattern:
+        return pattern ?? base;
+    }
+  }
 }
 
 abstract class PatternAutomaton {
@@ -40,25 +58,23 @@ abstract class PatternAutomaton {
         _count++;
         _currentStart = _count + 1;
       }
-      sendLog("$char | skip");
+      sendLog("$char | skip $_count");
       return;
     }
     _incremented = false;
 
     // Apply the current formatting
     if (_currentState.length == _count) {
-      sendLog("$char | add new $valid $invalid");
+      sendLog("$char | add new $valid $invalid $_count");
       _currentState.add((index, index + 1, formatting));
     } else {
       final (currStart, currEnd, currFmt) = _currentState[_count];
+      sendLog("$char | add existing $valid $invalid $_count");
 
       // If there is no new formatting, leave it be and add the current thing on top
       if (listEquals(currFmt, formatting)) {
-        sendLog("$char | add existing $valid $invalid");
         _currentState[_count] = (currStart, currEnd + 1, currFmt);
       } else {
-        sendLog("$char | start new $valid $invalid");
-
         // If there is new formatting, start a new range
         _currentState.add((currEnd, currEnd + 1, formatting));
         _count += 1;
@@ -84,60 +100,11 @@ abstract class PatternAutomaton {
   (bool, bool, bool, List<TextFormattingType>) evaluate(String prevChar, String char);
 }
 
-class FormattingAutomaton extends PatternAutomaton {
-  int _stars = 0;
-  bool _inPattern = false;
-  List<TextFormattingType> _current = [];
-
-  @override
-  void resetState() {
-    _stars = 0;
-    _inPattern = false;
-    _current = [];
-  }
-
-  @override
-  (bool, bool, bool, List<TextFormattingType>) evaluate(String prevChar, String char) {
-    // Check for star characters
-    if (char == '*') {
-      // If the previous char wasn't a star, we're changing modes
-      if (prevChar != "*") {
-        _inPattern = !_inPattern;
-      }
-
-      // When we're inside the pattern, adjust the outputted formatting
-      if (_inPattern) {
-        _stars = min(_stars + 1, 3);
-        if (_stars == 1) {
-          _current = [TextFormattingType.italic];
-        } else if (_stars == 2) {
-          _current = [TextFormattingType.bold];
-        } else if (_stars == 3) {
-          _current = [TextFormattingType.bold, TextFormattingType.italic];
-        }
-      } else {
-        _stars--;
-        _current = [];
-      }
-
-      return (true, _stars == 0, false, _current);
-    } else {
-      // The pattern is invalid we're outside and the right amount of stars weren't escaped
-      if (!_inPattern) {
-        final invalid = _stars != 0;
-        _stars = 0;
-        return (false, false, invalid, _current); // Only return valid when there are no stars left
-      }
-
-      // The pattern is valid as long as nothing happens
-      return (false, false, false, _current);
-    }
-  }
-}
-
 class TextEvaluator {
   final automatons = [
-    FormattingAutomaton(),
+    BoldItalicAutomaton(),
+    StrikethroughAutomaton(),
+    UnderlineAutomaton(),
   ];
 
   List<TextSpan> evaluate(String text, TextStyle startStyle) {
@@ -219,14 +186,7 @@ class TextEvaluator {
         TextStyle base = startStyle;
         for (var format in formats) {
           for (var f in format) {
-            switch (f) {
-              case TextFormattingType.bold:
-                base = base.copyWith(fontWeight: FontWeight.bold);
-              case TextFormattingType.italic:
-                base = base.copyWith(fontStyle: FontStyle.italic);
-              default:
-                continue;
-            }
+            base = f.apply(base);
           }
         }
 
