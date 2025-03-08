@@ -29,6 +29,7 @@ enum TextFormattingType {
 }
 
 abstract class PatternAutomaton {
+  bool logging = false;
   int _count = 0;
   int _currentStart = 0;
   bool _incremented = false;
@@ -41,9 +42,8 @@ abstract class PatternAutomaton {
       _currentStart = _count;
     }
     if (invalid) {
-      final toRemove = _currentState.length - _currentStart;
       _currentState.removeRange(_currentStart, _currentState.length);
-      _count -= toRemove;
+      _count = _currentState.length - 1;
     }
 
     // If the pattern is currently being scanned, set the formatting type to pattern
@@ -53,23 +53,29 @@ abstract class PatternAutomaton {
 
     if (formatting.isEmpty) {
       // Reset the current state to make sure it will start rendering again from the beginning
-      if (!_incremented) {
+      if (!_incremented && _currentState.isNotEmpty) {
         _incremented = true;
         _count++;
         _currentStart = _count + 1;
       }
-      sendLog("$char | skip $_count");
+      if (logging) {
+        sendLog("$char | skip valid=$valid invalid=$invalid count=$_count");
+      }
       return;
     }
     _incremented = false;
 
     // Apply the current formatting
     if (_currentState.length == _count) {
-      sendLog("$char | add new $valid $invalid $_count");
+      if (logging) {
+        sendLog("$char | add new valid=$valid invalid=$invalid count=$_count");
+      }
       _currentState.add((index, index + 1, formatting));
     } else {
       final (currStart, currEnd, currFmt) = _currentState[_count];
-      sendLog("$char | add existing $valid $invalid $_count");
+      if (logging) {
+        sendLog("$char | add existing $valid $invalid $_count");
+      }
 
       // If there is no new formatting, leave it be and add the current thing on top
       if (listEquals(currFmt, formatting)) {
@@ -89,6 +95,7 @@ abstract class PatternAutomaton {
   /// Reset all of the state of the automaton.
   void resetState() {
     _currentState = [];
+    _count = 0;
   }
 
   /// Evaluate an automaton for one char and the previous one.
@@ -127,79 +134,114 @@ class TextEvaluator {
     }
 
     // Collect all ranges from automatons
-    List<(int, int, List<TextFormattingType>)> allRanges = [];
+    List<(int, int, List<List<TextFormattingType>>)> ranges = [];
     for (var automaton in automatons) {
-      allRanges.addAll(automaton.getResult());
+      if (ranges.isEmpty) {
+        // If nothing is there yet, add all the ranges from the automaton (shouldn't have overlaps)
+        for (var (start, end, formatting) in automaton.getResult()) {
+          // Only add if it's a valid range
+          if (end >= start) {
+            ranges.add((start, end, [formatting]));
+          }
+        }
+      } else {
+        // Merge all of the ranges into it
+        for (var range in automaton.getResult()) {
+          ranges = mergeRanges(range, ranges);
+        }
+      }
     }
 
-    // Sort ranges
-    allRanges.sort((a, b) => a.$1.compareTo(b.$1));
-
-    // Build text spans
+    // Create the text spans from the ranges
     List<TextSpan> spans = [];
-    int currentIndex = 0;
     int lastEnd = 0;
-
-    while (currentIndex < allRanges.length) {
-      var (currentStart, currentEnd, currentFmt) = allRanges[currentIndex];
-      List<List<TextFormattingType>> currentFormats = [currentFmt];
-
-      // Parse all the ranges into a non-overlapping list
-      List<(int, int, List<List<TextFormattingType>>)> ranges = [];
-      if (lastEnd < currentStart) {
-        ranges.add((lastEnd, currentStart, []));
+    for (var (start, end, formattings) in ranges) {
+      // Add everything before the range in case necessary
+      if (start != lastEnd) {
+        spans.add(TextSpan(
+          text: text.substring(lastEnd, start),
+          style: startStyle,
+        ));
       }
 
-      // TODO: This algorithm is not perfect, it won't catch 3 patterns combined for example
-      while (allRanges.length > currentIndex + 1) {
-        // Check for overlap, if it doesn't go out
-        final (nextStart, nextEnd, nextFormats) = allRanges[currentIndex + 1];
-        if (nextStart < currentEnd) {
-          // Make sure to apply current formats in case the next starts after the current start
-          if (currentStart != nextStart) {
-            ranges.add((currentStart, nextStart, currentFormats));
-          }
-
-          if (currentEnd < nextEnd) {
-            // If the current range ends before the next one, make sure to separate the ranges properly
-            currentFormats.add(nextFormats);
-            ranges.add((nextStart, currentEnd, currentFormats));
-            currentStart = currentEnd;
-            currentEnd = nextEnd;
-            currentFormats.removeAt(0);
-          } else if (currentEnd > nextEnd) {
-            // If the current range ends after the next one, make sure to apply the formatting only in the next range
-            currentFormats.add(nextFormats);
-            ranges.add((nextStart, nextEnd, currentFormats));
-            currentFormats.removeLast();
-          }
-          currentIndex++;
-        } else {
-          break;
+      // Build the formatting for the range
+      TextStyle style = startStyle;
+      for (var formatting in formattings) {
+        for (var format in formatting) {
+          style = format.apply(style);
         }
       }
-      ranges.add((currentStart, currentEnd, currentFormats));
 
-      // Translate to the actual text spans
-      for (var (start, end, formats) in ranges) {
-        // Compute style
-        TextStyle base = startStyle;
-        for (var format in formats) {
-          for (var f in format) {
-            base = f.apply(base);
-          }
-        }
+      // Add the range itself
+      spans.add(TextSpan(
+        text: text.substring(start, end),
+        style: style,
+      ));
+      lastEnd = end;
+    }
 
-        sendLog("adding $start-$end: $formats");
-        // The min is there because the pattern evaluator has to evaluate the last character as nothing to
-        // tell the automaton to finish its final range (this extends the range 1 beyond the original text)
-        spans.add(TextSpan(text: text.substring(start, min(text.length, end)), style: base));
-      }
-
-      currentIndex++;
-      lastEnd = currentEnd;
+    // Add the rest of the text (in case necessary)
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastEnd, text.length),
+        style: startStyle,
+      ));
     }
 
     return spans;
+  }
+
+  /// Merge a range with text formatting ([toAdd]) into a non-overlapping set of base ([ranges]) ranges.
+  ///
+  /// Returns the merged ranges (also non-overlapping).
+  List<(int, int, List<List<TextFormattingType>>)> mergeRanges(
+    (int, int, List<TextFormattingType>) toAdd,
+    List<(int, int, List<List<TextFormattingType>>)> ranges,
+  ) {
+    List<(int, int, List<List<TextFormattingType>>)> merged = [];
+
+    var (start, end, formatting) = toAdd;
+    for (var (mStart, mEnd, mFormatting) in ranges) {
+      // Add the rest if current range is already past it
+      if (start < end && mStart > end) {
+        merged.add((start, end, [formatting]));
+      }
+
+      // Check if they are overlapping
+      if (mEnd < start || mStart > end || start >= end) {
+        merged.add((mStart, mEnd, mFormatting));
+        continue;
+      }
+
+      if (start <= mStart) {
+        if (end <= mEnd) {
+          merged.add((mStart, end, [...mFormatting, formatting]));
+          merged.add((end, mEnd, mFormatting));
+        } else if (end > mEnd) {
+          if (start != mStart) {
+            merged.add((start, mStart, [formatting]));
+          }
+          merged.add((mStart, mEnd, [...mFormatting, formatting]));
+        } else {
+          merged.add((mStart, mEnd, [...mFormatting, formatting]));
+        }
+      } else {
+        // start > mStart (already enforced cause if)
+        merged.add((mStart, start, mFormatting));
+
+        if (end < mEnd) {
+          merged.add((start, end, [...mFormatting, formatting]));
+          merged.add((end, mEnd, mFormatting));
+        } else if (end > mEnd) {
+          merged.add((start, mEnd, [...mFormatting, formatting]));
+        } else {
+          merged.add((start, mEnd, [...mFormatting, formatting]));
+        }
+      }
+
+      start = mEnd;
+    }
+
+    return merged;
   }
 }

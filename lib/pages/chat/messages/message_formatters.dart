@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:chat_interface/pages/chat/messages/message_automaton.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 
 class BoldItalicAutomaton extends PatternAutomaton {
   int _stars = 0;
@@ -12,6 +13,7 @@ class BoldItalicAutomaton extends PatternAutomaton {
     _stars = 0;
     _inPattern = false;
     _current = [];
+    super.resetState();
   }
 
   @override
@@ -61,6 +63,7 @@ class StrikethroughAutomaton extends PatternAutomaton {
   void resetState() {
     _squiggles = 0;
     _inPattern = false;
+    super.resetState();
   }
 
   @override
@@ -103,12 +106,13 @@ class UnderlineAutomaton extends PatternAutomaton {
   void resetState() {
     _underscores = 0;
     _inPattern = false;
+    super.resetState();
   }
 
   @override
   (bool, bool, bool, List<TextFormattingType>) evaluate(String prevChar, String char) {
     // Check for underscore characters
-    if (char == '_') {
+    if (char == "_") {
       // If the previous char wasn't an underscore, we're changing modes
       if (prevChar != "_") {
         _inPattern = !_inPattern;
@@ -116,6 +120,7 @@ class UnderlineAutomaton extends PatternAutomaton {
 
       if (_inPattern) {
         _underscores = min(_underscores + 1, 1);
+        sendLog("detected");
         return (true, false, false, [TextFormattingType.underline]);
       } else {
         _underscores--;
