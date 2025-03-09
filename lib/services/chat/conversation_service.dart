@@ -406,18 +406,30 @@ class ConversationService extends VaultTarget {
     }
   }
 
-  /// Update the message read time of a conversation.
+  /// Update when the last message was read in a conversation.
   ///
   /// [messageSendTime] is when the message was sent.
   /// [increment] is whether the notification count should be incremented or not.
   ///
   /// Also calls the same method in the controller.
-  static void updateMessageRead(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
+  static void updateLastMessage(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
     // Save the new update time in the local database
     (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode())))
         .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
 
     // Update it in the UI
-    ConversationController.updateMessageReadTime(conversation, increment: increment, messageSendTime: messageSendTime);
+    ConversationController.updateLastMessageTime(conversation, increment: increment, messageSendTime: messageSendTime);
+  }
+
+  /// Mark the conversation as read for the current time.
+  static Future<void> overwriteRead(Conversation conversation) async {
+    // Send new read state to the server
+    final json = await postNodeJSON("/conversations/read", {
+      "token": conversation.token.toMap(),
+    });
+    if (json["success"]) {
+      conversation.notificationCount.value = 0;
+      conversation.readAt.value = DateTime.now().millisecondsSinceEpoch;
+    }
   }
 }

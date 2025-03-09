@@ -5,7 +5,6 @@ import 'package:chat_interface/controller/account/writing_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_search_controller.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -20,7 +19,6 @@ void initializeControllers() {
   Get.put(MessageController());
   Get.put(UnknownController());
   Get.put(AttachmentController());
-  Get.put(ConversationController());
   Get.put(MessageSearchController());
 
   // Account controls

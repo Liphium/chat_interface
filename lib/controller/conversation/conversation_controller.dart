@@ -30,10 +30,10 @@ class ConversationController {
     });
   }
 
-  /// Update the last message read time of a conversation in the UI.
+  /// Update the last message send time of a conversation in the UI.
   ///
-  /// For more explanation look at [ConversationService.updateMessageRead].
-  static void updateMessageReadTime(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
+  /// For more explanation look at [ConversationService.updateLastMessage].
+  static void updateLastMessageTime(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
     batch(() {
       // Make sure the conversation is at the top
       _insertToOrder(conversation);
@@ -122,11 +122,11 @@ class Conversation {
   final ConversationToken token;
   ConversationContainer container;
   int lastVersion;
-  final updatedAt = 0.obs;
-  final readAt = 0.obs;
-  final notificationCount = 0.obs;
-  final containerSub = ConversationContainer("").obs; // Data subscription
-  final error = Rx<String?>(null);
+  final updatedAt = signal(0);
+  final readAt = signal(0);
+  final notificationCount = signal(0);
+  final containerSub = signal(ConversationContainer("")); // Data subscription
+  final error = signal<String?>(null);
   String packedKey;
   SecureKey? _cachedKey;
 
@@ -135,8 +135,8 @@ class Conversation {
     return _cachedKey!;
   }
 
-  final membersLoading = false.obs;
-  final members = <LPHAddress, Member>{}.obs; // Token ID -> Member
+  final membersLoading = signal(false);
+  final members = mapSignal(<LPHAddress, Member>{}); // Token ID -> Member
 
   Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
     containerSub.value = container;
