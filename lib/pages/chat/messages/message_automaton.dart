@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:chat_interface/pages/chat/messages/message_formatters.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/foundation.dart';
@@ -96,6 +94,8 @@ abstract class PatternAutomaton {
   void resetState() {
     _currentState = [];
     _count = 0;
+    _currentStart = 0;
+    _incremented = false;
   }
 
   /// Evaluate an automaton for one char and the previous one.
@@ -114,9 +114,20 @@ class TextEvaluator {
     UnderlineAutomaton(),
   ];
 
-  List<TextSpan> evaluate(String text, TextStyle startStyle) {
+  /// Evaluate a text with a start style of [startStyle].
+  /// Optionally provide a text style for the formatting patterns.
+  ///
+  /// Returns a list of text spans that are formatted properly.
+  List<TextSpan> evaluate(String text, TextStyle startStyle, {TextStyle? pattern, bool skipPatterns = false}) {
     // Reset the state of the automatons
     for (var automaton in automatons) {
+      /*
+      // Add logging to any automaton like this (in case tests fail or sth)
+      if (automaton is BoldItalicAutomaton) {
+        automaton.logging = true;
+      }
+      */
+
       automaton.resetState();
     }
 
@@ -134,14 +145,14 @@ class TextEvaluator {
     }
 
     // Collect all ranges from automatons
-    List<(int, int, List<List<TextFormattingType>>)> ranges = [];
+    List<(int, int, List<TextFormattingType>)> ranges = [];
     for (var automaton in automatons) {
       if (ranges.isEmpty) {
         // If nothing is there yet, add all the ranges from the automaton (shouldn't have overlaps)
         for (var (start, end, formatting) in automaton.getResult()) {
           // Only add if it's a valid range
           if (end >= start) {
-            ranges.add((start, end, [formatting]));
+            ranges.add((start, end, formatting));
           }
         }
       } else {
@@ -165,18 +176,23 @@ class TextEvaluator {
       }
 
       // Build the formatting for the range
+      bool skip = false;
       TextStyle style = startStyle;
-      for (var formatting in formattings) {
-        for (var format in formatting) {
-          style = format.apply(style);
+      for (var format in formattings) {
+        if (format == TextFormattingType.pattern && skipPatterns) {
+          skip = true;
+          break;
         }
+        style = format.apply(style, pattern: pattern);
       }
 
       // Add the range itself
-      spans.add(TextSpan(
-        text: text.substring(start, end),
-        style: style,
-      ));
+      if (!skip) {
+        spans.add(TextSpan(
+          text: text.substring(start, end),
+          style: style,
+        ));
+      }
       lastEnd = end;
     }
 
@@ -194,17 +210,18 @@ class TextEvaluator {
   /// Merge a range with text formatting ([toAdd]) into a non-overlapping set of base ([ranges]) ranges.
   ///
   /// Returns the merged ranges (also non-overlapping).
-  List<(int, int, List<List<TextFormattingType>>)> mergeRanges(
+  List<(int, int, List<TextFormattingType>)> mergeRanges(
     (int, int, List<TextFormattingType>) toAdd,
-    List<(int, int, List<List<TextFormattingType>>)> ranges,
+    List<(int, int, List<TextFormattingType>)> ranges,
   ) {
-    List<(int, int, List<List<TextFormattingType>>)> merged = [];
+    List<(int, int, List<TextFormattingType>)> merged = [];
 
     var (start, end, formatting) = toAdd;
     for (var (mStart, mEnd, mFormatting) in ranges) {
       // Add the rest if current range is already past it
-      if (start < end && mStart > end) {
-        merged.add((start, end, [formatting]));
+      if (start < end && mStart > end && start < end) {
+        merged.add((start, end, formatting));
+        start = end;
       }
 
       // Check if they are overlapping
@@ -214,32 +231,39 @@ class TextEvaluator {
       }
 
       if (start <= mStart) {
+        if (start != mStart) {
+          merged.add((start, mStart, formatting));
+        }
         if (end <= mEnd) {
-          merged.add((mStart, end, [...mFormatting, formatting]));
-          merged.add((end, mEnd, mFormatting));
-        } else if (end > mEnd) {
-          if (start != mStart) {
-            merged.add((start, mStart, [formatting]));
+          if (mStart != end) {
+            merged.add((mStart, end, [...mFormatting, ...formatting]));
           }
-          merged.add((mStart, mEnd, [...mFormatting, formatting]));
+          if (end != mEnd) {
+            merged.add((end, mEnd, mFormatting));
+          }
+        } else if (end > mEnd) {
+          merged.add((mStart, mEnd, [...mFormatting, ...formatting]));
         } else {
-          merged.add((mStart, mEnd, [...mFormatting, formatting]));
+          merged.add((mStart, mEnd, [...mFormatting, ...formatting]));
         }
       } else {
         // start > mStart (already enforced cause if)
         merged.add((mStart, start, mFormatting));
 
         if (end < mEnd) {
-          merged.add((start, end, [...mFormatting, formatting]));
+          merged.add((start, end, [...mFormatting, ...formatting]));
           merged.add((end, mEnd, mFormatting));
-        } else if (end > mEnd) {
-          merged.add((start, mEnd, [...mFormatting, formatting]));
-        } else {
-          merged.add((start, mEnd, [...mFormatting, formatting]));
+        } else if (end >= mEnd && start != mEnd) {
+          merged.add((start, mEnd, [...mFormatting, ...formatting]));
         }
       }
 
       start = mEnd;
+    }
+
+    // Add rest, if not added by merge operation
+    if (start < end) {
+      merged.add((start, end, formatting));
     }
 
     return merged;

@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:chat_interface/pages/chat/messages/message_automaton.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 
 class BoldItalicAutomaton extends PatternAutomaton {
   int _stars = 0;
@@ -40,13 +39,13 @@ class BoldItalicAutomaton extends PatternAutomaton {
         _current = [];
       }
 
-      return (true, _stars == 0, false, _current);
+      return (true, false, false, _current);
     } else {
       // The pattern is invalid we're outside and the right amount of stars weren't escaped
       if (!_inPattern) {
         final invalid = _stars != 0;
         _stars = 0;
-        return (false, false, invalid, _current); // Only return valid when there are no stars left
+        return (false, !invalid, invalid, _current); // Only return valid when there are no stars left
       }
 
       // The pattern is valid as long as nothing happens
@@ -83,13 +82,13 @@ class StrikethroughAutomaton extends PatternAutomaton {
         _squiggles--;
       }
 
-      return (true, _squiggles == 0, false, [TextFormattingType.lineThrough]);
+      return (true, false, false, [TextFormattingType.lineThrough]);
     } else {
       // The pattern is invalid we're outside and the right amount of squiggles weren't escaped
       if (!_inPattern) {
         final invalid = _squiggles != 0;
         _squiggles = 0;
-        return (false, false, invalid, []); // Only return valid when there are no squiggles left
+        return (false, !invalid, invalid, []); // Only return valid when there are no squiggles left
       }
 
       // The pattern is valid as long as nothing happens
@@ -119,20 +118,19 @@ class UnderlineAutomaton extends PatternAutomaton {
       }
 
       if (_inPattern) {
-        _underscores = min(_underscores + 1, 1);
-        sendLog("detected");
+        _underscores = min(_underscores + 1, 2);
         return (true, false, false, [TextFormattingType.underline]);
       } else {
         _underscores--;
       }
 
-      return (true, _underscores == 0, false, [TextFormattingType.underline]);
+      return (true, false, false, [TextFormattingType.underline]);
     } else {
       // The pattern is invalid we're outside and the right amount of underscores weren't escaped
       if (!_inPattern) {
         final invalid = _underscores != 0;
         _underscores = 0;
-        return (false, false, invalid, []); // Only return valid when there are no underscores left
+        return (false, !invalid, invalid, []); // Only return valid when there are no underscores left
       }
 
       // The pattern is valid as long as nothing happens
