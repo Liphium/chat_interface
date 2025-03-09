@@ -3,13 +3,13 @@ import 'dart:convert';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
+import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
@@ -19,7 +19,7 @@ import 'package:chat_interface/util/encryption/signatures.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -82,32 +82,28 @@ class ConversationService extends VaultTarget {
 
   @override
   Future<void> init() async {
-    final conversationController = Get.find<ConversationController>();
-    final conversations = await (db.select(db.conversation)..orderBy([(u) => OrderingTerm.asc(u.updatedAt)])).get();
+    final conversations = await (db.select(db.conversation)..orderBy([(u) => drift.OrderingTerm.asc(u.updatedAt)])).get();
     for (var conversation in conversations) {
-      await conversationController.add(Conversation.fromData(conversation));
+      ConversationController.add(Conversation.fromData(conversation));
     }
   }
 
   @override
   Future<void> processEntries(List<String> deleted, List<VaultEntry> newEntries) async {
-    sendLog("processing");
-
     // Add all the new conversations to the vault
     final messageController = Get.find<MessageController>();
-    final controller = Get.find<ConversationController>();
     for (var entry in newEntries) {
       final conv = Conversation.fromJson(jsonDecode(entry.payload), entry.id);
-      if (controller.conversations[conv.id] == null) {
+      if (ConversationController.conversations[conv.id] == null) {
         await ConversationService.insertFromVault(conv);
       }
     }
 
     // Delete everything that's been deleted from the vault on the server
-    controller.conversations.removeWhere((id, conv) {
+    ConversationController.conversations.removeWhere((id, conv) {
       if (deleted.contains(conv.vaultId)) {
         ConversationService.delete(id, vaultId: conv.vaultId, deleteLocal: false);
-        controller.order.remove(id);
+        ConversationController.order.remove(id);
         messageController.unselectConversation(id: id);
         return true;
       }
@@ -121,11 +117,11 @@ class ConversationService extends VaultTarget {
   /// The string is an error if there was one.
   static Future<(Conversation?, String?)> openDirectMessage(Friend friend) async {
     // Check if the conversation already exists
-    final conversation = Get.find<ConversationController>().conversations.values.firstWhere(
-          (element) => element.type == model.ConversationType.directMessage && element.members.values.any((element) => element.address == friend.id),
-          orElse: () => Conversation(LPHAddress.error(), "", model.ConversationType.directMessage, ConversationToken(LPHAddress.error(), ""),
-              ConversationContainer(""), "", 0, 0),
-        );
+    final conversation = ConversationController.conversations.values.firstWhere(
+      (element) => element.type == model.ConversationType.directMessage && element.members.values.any((element) => element.address == friend.id),
+      orElse: () => Conversation(LPHAddress.error(), "", model.ConversationType.directMessage, ConversationToken(LPHAddress.error(), ""),
+          ConversationContainer(""), "", 0, 0),
+    );
     if (!conversation.id.isError()) {
       return (conversation, null);
     }
@@ -232,7 +228,7 @@ class ConversationService extends VaultTarget {
     await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
     if (deleteLocal) {
       Get.find<MessageController>().unselectConversation(id: id);
-      Get.find<ConversationController>().removeConversation(id);
+      ConversationController.removeConversation(id);
     }
     return null;
   }
@@ -275,7 +271,7 @@ class ConversationService extends VaultTarget {
 
     // Collect all thet tokens for the conversations currently in cache
     final tokens = <Map<String, dynamic>>[];
-    for (var conversation in Get.find<ConversationController>().conversations.values) {
+    for (var conversation in ConversationController.conversations.values) {
       tokens.add(conversation.token.toMap());
     }
 
@@ -316,7 +312,7 @@ class ConversationService extends VaultTarget {
         return;
       }
       Get.find<StatusController>().statusLoading.value = false;
-      Get.find<ConversationController>().finishedLoading(
+      ConversationController.finishedLoading(
         basePath,
         event.data["info"],
         deletions ? (event.data["missing"] ?? []) : [],
@@ -331,7 +327,7 @@ class ConversationService extends VaultTarget {
   /// Subscribes to the conversation.
   static Future<bool> insertFromVault(Conversation conversation) async {
     // Insert it into cache
-    await Get.find<ConversationController>().add(conversation, loadMembers: false);
+    ConversationController.add(conversation);
 
     // Insert into database
     saveToDatabase(conversation, saveMembers: false);
@@ -408,5 +404,20 @@ class ConversationService extends VaultTarget {
         db.member.insertOnConflictUpdate(member.toData(conversation.id));
       }
     }
+  }
+
+  /// Update the message read time of a conversation.
+  ///
+  /// [messageSendTime] is when the message was sent.
+  /// [increment] is whether the notification count should be incremented or not.
+  ///
+  /// Also calls the same method in the controller.
+  static void updateMessageRead(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
+    // Save the new update time in the local database
+    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode())))
+        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+
+    // Update it in the UI
+    ConversationController.updateMessageReadTime(conversation, increment: increment, messageSendTime: messageSendTime);
   }
 }

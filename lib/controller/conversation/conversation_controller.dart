@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
@@ -10,107 +12,104 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
-import 'member_controller.dart';
-
-class ConversationController extends GetxController {
-  final loaded = false.obs;
-  final order = <LPHAddress>[].obs; // List of conversation IDs in order of last updated
-  final conversations = <LPHAddress, Conversation>{};
+class ConversationController {
+  static final loaded = signal(false);
+  static final order = listSignal(<LPHAddress>[]); // List of conversation IDs in order of last updated
+  static final conversations = mapSignal(<LPHAddress, Conversation>{});
   int newConvs = 0;
 
-  /// Add a conversation to the cache
-  Future<bool> add(Conversation conversation, {loadMembers = true}) async {
-    // Load members from the database
-    if (conversation.members.isEmpty && loadMembers) {
-      final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id.encode()))).get();
-
-      for (var member in members) {
-        conversation.addMember(Member.fromData(member));
-      }
-    }
-
-    // Insert into cache
-    _insertToOrder(conversation.id);
-    conversations[conversation.id] = conversation;
-
-    return true;
+  /// Add a conversation to the cache.
+  static void add(Conversation conversation) {
+    batch(() {
+      _insertToOrder(conversation.id);
+      conversations[conversation.id] = conversation;
+    });
   }
 
-  void updateMessageRead(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode())))
-        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+  /// Update the last message read time of a conversation in the UI.
+  ///
+  /// For more explanation look at [ConversationService.updateMessageRead].
+  static void updateMessageReadTime(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
+    batch(() {
+      // Make sure the conversation is at the top
+      _insertToOrder(conversation);
 
-    // Swap in the map
-    _insertToOrder(conversation);
-    conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
-    if (increment && conversations[conversation]!.readAt.value < messageSendTime) {
-      conversations[conversation]!.notificationCount.value += 1;
-    }
+      // Update the cache
+      conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
+      if (increment && conversations[conversation]!.readAt.value < messageSendTime) {
+        conversations[conversation]!.notificationCount.value += 1;
+      }
+    });
   }
 
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date.
   ///
   /// Called later for all conversations from other servers since they are streamed in after.
-  Future<void> finishedLoading(
+  static Future<void> finishedLoading(
     String server,
     Map<String, dynamic> conversationInfo,
     List<dynamic> deleted,
     bool error,
   ) async {
-    // Sort the conversations
-    order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
-
     // Delete all the conversations that should be deleted
-    var toRemove = <LPHAddress>[];
-    final controller = Get.find<ConversationController>();
-    for (var conversation in controller.conversations.values) {
-      if (deleted.contains(conversation.token.id.encode())) {
-        toRemove.add(conversation.id);
-      }
-    }
-    for (var key in toRemove) {
-      sendLog("deleting $key");
-      await controller.conversations[key]!.delete(popup: false);
-    }
-
-    // Update all the conversations
     for (var conversation in conversations.values) {
-      if (!isSameServer(conversation.id.server, server)) {
-        continue;
-      }
-
-      // Get conversation info
-      final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
-      final version = (info["v"] ?? 0) as int;
-      conversation.notificationCount.value = (info["n"] ?? 0) as int;
-      conversation.readAt.value = (info["r"] ?? 0) as int;
-
-      // Set an error if there is one
-      if (error) {
-        conversation.error.value = "other.server.error".tr;
-      }
-
-      // Check if the current version of the conversation is up to date
-      if (conversation.lastVersion != version) {
-        await ConversationService.fetchNewestVersion(conversation);
+      if (deleted.contains(conversation.token.id.encode())) {
+        unawaited(ConversationService.delete(
+          conversation.id,
+          vaultId: conversation.vaultId,
+          token: conversation.token,
+        ));
       }
     }
 
-    loaded.value = true;
+    // Start a new batch to modify all the state at once
+    batch(() {
+      // Sort the conversations
+      order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
+
+      // Update all the conversations
+      for (var conversation in conversations.values) {
+        if (!isSameServer(conversation.id.server, server)) {
+          continue;
+        }
+
+        // Get conversation info
+        final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
+        final version = (info["v"] ?? 0) as int;
+        conversation.notificationCount.value = (info["n"] ?? 0) as int;
+        conversation.readAt.value = (info["r"] ?? 0) as int;
+
+        // Set an error if there is one
+        if (error) {
+          conversation.error.value = "other.server.error".tr;
+        }
+
+        // Check if the current version of the conversation is up to date
+        if (conversation.lastVersion != version) {
+          unawaited(ConversationService.fetchNewestVersion(conversation));
+        }
+      }
+
+      loaded.value = true;
+    });
   }
 
-  void _insertToOrder(LPHAddress id) {
-    if (order.contains(id)) {
+  /// Insert a conversation into the ordered list of conversations.
+  ///
+  /// If it already exists it will be added at the top of the order.
+  static void _insertToOrder(LPHAddress id) {
+    batch(() {
       order.remove(id);
-    }
-    order.insert(0, id);
+      order.insert(0, id);
+    });
   }
 
-  void removeConversation(LPHAddress id) {
+  /// Remove a conversation from the cache.
+  static void removeConversation(LPHAddress id) {
     conversations.remove(id);
     order.remove(id);
   }
@@ -252,13 +251,13 @@ class Conversation {
         "data": container.toJson(),
       });
 
-  // Delete conversation from vault and database
-  Future<void> delete({bool leaveRequest = true, bool popup = true}) async {
+  /// Delete conversation from vault and database.
+  ///
+  /// Shows an error popup when there was an error.
+  Future<void> delete({bool leaveRequest = true}) async {
     // Check if the vault id has been synchronized yet
     if (vaultId == "") {
-      if (popup) {
-        showErrorPopup("error", "conversation.delete_error".tr);
-      }
+      showErrorPopup("error", "conversation.delete_error".tr);
       sendLog("ERROR: Can't delete conversation yet: no vault id");
       return;
     }
@@ -266,9 +265,7 @@ class Conversation {
     // Delete the conversation
     final error = await ConversationService.delete(id, vaultId: vaultId, token: leaveRequest ? token : null);
     if (error != null) {
-      if (popup) {
-        showErrorPopup("error", error);
-      }
+      showErrorPopup("error", error);
       sendLog("ERROR: Can't delete conversation: $error");
     }
   }

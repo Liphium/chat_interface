@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/connection/chat/message_listener.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -112,7 +113,7 @@ class MessageController extends GetxController {
     // Ignore certain things in case they are already done or not needed
     if (!simple) {
       // Update message read time for conversations (nessecary for notification count)
-      Get.find<ConversationController>().updateMessageRead(
+      ConversationService.updateMessageRead(
         conversation.id,
         increment: currentProvider.value?.conversation.id != conversation.id,
         messageSendTime: message.createdAt.millisecondsSinceEpoch,
@@ -226,7 +227,7 @@ class MessageController extends GetxController {
     }
 
     // Update message read time (to sort conversations properly)
-    Get.find<ConversationController>().updateMessageRead(
+    ConversationService.updateMessageRead(
       conversation.id,
       increment: currentProvider.value?.conversation.id != conversation.id,
       messageSendTime: messages.last.createdAt.millisecondsSinceEpoch,
@@ -450,7 +451,7 @@ class ConversationMessageProvider extends MessageProvider {
   @override
   Future<String?> deleteMessage(Message message) async {
     // Check if the message is sent by the user
-    final token = Get.find<ConversationController>().conversations[conversation.id]!.token;
+    final token = ConversationController.conversations[conversation.id]!.token;
     if (message.senderToken != token.id) {
       return "no.permission".tr;
     }

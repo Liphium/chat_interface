@@ -1,11 +1,12 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -74,16 +75,28 @@ class ConversationMembers extends StatelessWidget {
                                         //* Promotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
                                           ProfileAction(
-                                              icon: Icons.add_moderator,
-                                              label: "chat.make_moderator".tr,
-                                              loading: false.obs,
-                                              onTap: (f, l) => member.promote(conversation.id))
+                                            icon: Icons.add_moderator,
+                                            label: "chat.make_moderator".tr,
+                                            loading: false.obs,
+                                            onTap: (f, l) async {
+                                              final error = await member.promote(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              }
+                                            },
+                                          )
                                         else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
                                           ProfileAction(
-                                              icon: Icons.add_moderator,
-                                              label: "chat.make_admin".tr,
-                                              loading: false.obs,
-                                              onTap: (f, l) => member.promote(conversation.id)),
+                                            icon: Icons.add_moderator,
+                                            label: "chat.make_admin".tr,
+                                            loading: false.obs,
+                                            onTap: (f, l) async {
+                                              final error = await member.promote(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              }
+                                            },
+                                          ),
 
                                         //* Demotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
@@ -91,14 +104,24 @@ class ConversationMembers extends StatelessWidget {
                                             icon: Icons.remove_moderator,
                                             label: "chat.remove_moderator".tr,
                                             loading: false.obs,
-                                            onTap: (f, l) => member.demote(conversation.id),
+                                            onTap: (f, l) async {
+                                              final error = await member.demote(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              }
+                                            },
                                           )
                                         else if (ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
                                           ProfileAction(
                                             icon: Icons.remove_moderator,
                                             label: "chat.remove_admin".tr,
                                             loading: false.obs,
-                                            onTap: (f, l) => member.demote(conversation.id),
+                                            onTap: (f, l) async {
+                                              final error = await member.demote(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              }
+                                            },
                                           ),
 
                                         //* Removal actions
@@ -109,7 +132,12 @@ class ConversationMembers extends StatelessWidget {
                                             loading: false.obs,
                                             color: Get.theme.colorScheme.errorContainer,
                                             iconColor: Get.theme.colorScheme.error,
-                                            onTap: (f, l) => member.remove(conversation.id),
+                                            onTap: (f, l) async {
+                                              final error = await member.remove(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              }
+                                            },
                                           ),
                                       ] +
                                       ProfileDefaults.buildDefaultActions(friend);
