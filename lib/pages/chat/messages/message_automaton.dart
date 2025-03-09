@@ -1,4 +1,5 @@
-import 'package:chat_interface/pages/chat/messages/message_formatters.dart';
+import 'dart:math';
+
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ abstract class PatternAutomaton {
     }
     if (invalid) {
       _currentState.removeRange(_currentStart, _currentState.length);
-      _count = _currentState.length - 1;
+      _count = max(_currentState.length - 1, 0);
     }
 
     // If the pattern is currently being scanned, set the formatting type to pattern
@@ -66,19 +67,27 @@ abstract class PatternAutomaton {
     // Apply the current formatting
     if (_currentState.length == _count) {
       if (logging) {
-        sendLog("$char | add new valid=$valid invalid=$invalid count=$_count");
+        sendLog("$char | start valid=$valid invalid=$invalid count=$_count");
       }
       _currentState.add((index, index + 1, formatting));
     } else {
-      final (currStart, currEnd, currFmt) = _currentState[_count];
       if (logging) {
-        sendLog("$char | add existing $valid $invalid $_count");
+        sendLog(_count);
       }
+      final (currStart, currEnd, currFmt) = _currentState[_count];
 
       // If there is no new formatting, leave it be and add the current thing on top
       if (listEquals(currFmt, formatting)) {
+        if (logging) {
+          sendLog("$char | add existing $valid $invalid $_count");
+        }
+
         _currentState[_count] = (currStart, currEnd + 1, currFmt);
       } else {
+        if (logging) {
+          sendLog("$char | add new $valid $invalid $_count");
+        }
+
         // If there is new formatting, start a new range
         _currentState.add((currEnd, currEnd + 1, formatting));
         _count += 1;
@@ -107,165 +116,154 @@ abstract class PatternAutomaton {
   (bool, bool, bool, List<TextFormattingType>) evaluate(String prevChar, String char);
 }
 
-class TextEvaluator {
-  final automatons = [
-    BoldItalicAutomaton(),
-    StrikethroughAutomaton(),
-    UnderlineAutomaton(),
-  ];
+class BoldItalicAutomaton extends PatternAutomaton {
+  int _stars = 0;
+  bool _inPattern = false;
+  List<TextFormattingType> _current = [];
 
-  /// Evaluate a text with a start style of [startStyle].
-  /// Optionally provide a text style for the formatting patterns.
-  ///
-  /// Returns a list of text spans that are formatted properly.
-  List<TextSpan> evaluate(String text, TextStyle startStyle, {TextStyle? pattern, bool skipPatterns = false}) {
-    // Reset the state of the automatons
-    for (var automaton in automatons) {
-      /*
-      // Add logging to any automaton like this (in case tests fail or sth)
-      if (automaton is BoldItalicAutomaton) {
-        automaton.logging = true;
-      }
-      */
-
-      automaton.resetState();
-    }
-
-    // Run all the automatons
-    var prevChar = "";
-    for (int i = 0; i < text.length; i++) {
-      final char = text.characters.elementAt(i);
-      for (var automaton in automatons) {
-        automaton.run(i, prevChar, char);
-      }
-      prevChar = char;
-    }
-    for (var automaton in automatons) {
-      automaton.run(text.length, prevChar, "");
-    }
-
-    // Collect all ranges from automatons
-    List<(int, int, List<TextFormattingType>)> ranges = [];
-    for (var automaton in automatons) {
-      if (ranges.isEmpty) {
-        // If nothing is there yet, add all the ranges from the automaton (shouldn't have overlaps)
-        for (var (start, end, formatting) in automaton.getResult()) {
-          // Only add if it's a valid range
-          if (end >= start) {
-            ranges.add((start, end, formatting));
-          }
-        }
-      } else {
-        // Merge all of the ranges into it
-        for (var range in automaton.getResult()) {
-          ranges = mergeRanges(range, ranges);
-        }
-      }
-    }
-
-    // Create the text spans from the ranges
-    List<TextSpan> spans = [];
-    int lastEnd = 0;
-    for (var (start, end, formattings) in ranges) {
-      // Add everything before the range in case necessary
-      if (start != lastEnd) {
-        spans.add(TextSpan(
-          text: text.substring(lastEnd, start),
-          style: startStyle,
-        ));
-      }
-
-      // Build the formatting for the range
-      bool skip = false;
-      TextStyle style = startStyle;
-      for (var format in formattings) {
-        if (format == TextFormattingType.pattern && skipPatterns) {
-          skip = true;
-          break;
-        }
-        style = format.apply(style, pattern: pattern);
-      }
-
-      // Add the range itself
-      if (!skip) {
-        spans.add(TextSpan(
-          text: text.substring(start, end),
-          style: style,
-        ));
-      }
-      lastEnd = end;
-    }
-
-    // Add the rest of the text (in case necessary)
-    if (lastEnd < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(lastEnd, text.length),
-        style: startStyle,
-      ));
-    }
-
-    return spans;
+  @override
+  void resetState() {
+    _stars = 0;
+    _inPattern = false;
+    _current = [];
+    super.resetState();
   }
 
-  /// Merge a range with text formatting ([toAdd]) into a non-overlapping set of base ([ranges]) ranges.
-  ///
-  /// Returns the merged ranges (also non-overlapping).
-  List<(int, int, List<TextFormattingType>)> mergeRanges(
-    (int, int, List<TextFormattingType>) toAdd,
-    List<(int, int, List<TextFormattingType>)> ranges,
-  ) {
-    List<(int, int, List<TextFormattingType>)> merged = [];
+  @override
+  (bool, bool, bool, List<TextFormattingType>) evaluate(String prevChar, String char) {
+    // Close as invalid in case of termination symbol
+    if (char == '' && _inPattern) {
+      return (false, false, true, []);
+    }
 
-    var (start, end, formatting) = toAdd;
-    for (var (mStart, mEnd, mFormatting) in ranges) {
-      // Add the rest if current range is already past it
-      if (start < end && mStart > end && start < end) {
-        merged.add((start, end, formatting));
-        start = end;
+    // Check for star characters
+    if (char == '*') {
+      // If the previous char wasn't a star, we're changing modes
+      if (prevChar != "*") {
+        _inPattern = !_inPattern;
       }
 
-      // Check if they are overlapping
-      if (mEnd < start || mStart > end || start >= end) {
-        merged.add((mStart, mEnd, mFormatting));
-        continue;
-      }
-
-      if (start <= mStart) {
-        if (start != mStart) {
-          merged.add((start, mStart, formatting));
-        }
-        if (end <= mEnd) {
-          if (mStart != end) {
-            merged.add((mStart, end, [...mFormatting, ...formatting]));
-          }
-          if (end != mEnd) {
-            merged.add((end, mEnd, mFormatting));
-          }
-        } else if (end > mEnd) {
-          merged.add((mStart, mEnd, [...mFormatting, ...formatting]));
-        } else {
-          merged.add((mStart, mEnd, [...mFormatting, ...formatting]));
+      // When we're inside the pattern, adjust the outputted formatting
+      if (_inPattern) {
+        _stars = min(_stars + 1, 3);
+        if (_stars == 1) {
+          _current = [TextFormattingType.italic];
+        } else if (_stars == 2) {
+          _current = [TextFormattingType.bold];
+        } else if (_stars == 3) {
+          _current = [TextFormattingType.bold, TextFormattingType.italic];
         }
       } else {
-        // start > mStart (already enforced cause if)
-        merged.add((mStart, start, mFormatting));
-
-        if (end < mEnd) {
-          merged.add((start, end, [...mFormatting, ...formatting]));
-          merged.add((end, mEnd, mFormatting));
-        } else if (end >= mEnd && start != mEnd) {
-          merged.add((start, mEnd, [...mFormatting, ...formatting]));
-        }
+        _stars--;
+        _current = [];
       }
 
-      start = mEnd;
+      return (true, false, false, _current);
+    } else {
+      // The pattern is invalid we're outside and the right amount of stars weren't escaped
+      if (!_inPattern) {
+        final invalid = _stars != 0;
+        _stars = 0;
+        return (false, !invalid, invalid, _current); // Only return valid when there are no stars left
+      }
+
+      // The pattern is valid as long as nothing happens
+      return (false, false, false, _current);
+    }
+  }
+}
+
+class StrikethroughAutomaton extends PatternAutomaton {
+  int _squiggles = 0;
+  bool _inPattern = false;
+
+  @override
+  void resetState() {
+    _squiggles = 0;
+    _inPattern = false;
+    super.resetState();
+  }
+
+  @override
+  (bool, bool, bool, List<TextFormattingType>) evaluate(String prevChar, String char) {
+    // Close as invalid in case of termination symbol
+    if (char == '' && _inPattern) {
+      return (false, false, true, []);
     }
 
-    // Add rest, if not added by merge operation
-    if (start < end) {
-      merged.add((start, end, formatting));
+    // Check for squiggle characters
+    if (char == '~') {
+      // If the previous char wasn't a squiggle, we're changing modes
+      if (prevChar != "~") {
+        _inPattern = !_inPattern;
+      }
+
+      // When we're inside the pattern, adjust the outputted formatting
+      if (_inPattern) {
+        _squiggles = min(_squiggles + 1, 2);
+        return (true, false, false, [TextFormattingType.lineThrough]);
+      } else {
+        _squiggles--;
+      }
+
+      return (true, false, false, [TextFormattingType.lineThrough]);
+    } else {
+      // The pattern is invalid we're outside and the right amount of squiggles weren't escaped
+      if (!_inPattern) {
+        final invalid = _squiggles != 0;
+        _squiggles = 0;
+        return (false, !invalid, invalid, []); // Only return valid when there are no squiggles left
+      }
+
+      // The pattern is valid as long as nothing happens
+      return (false, false, false, [TextFormattingType.lineThrough]);
+    }
+  }
+}
+
+class UnderlineAutomaton extends PatternAutomaton {
+  int _underscores = 0;
+  bool _inPattern = false;
+
+  @override
+  void resetState() {
+    _underscores = 0;
+    _inPattern = false;
+    super.resetState();
+  }
+
+  @override
+  (bool, bool, bool, List<TextFormattingType>) evaluate(String prevChar, String char) {
+    // Close as invalid in case of termination symbol
+    if (char == '' && _inPattern) {
+      return (false, false, true, []);
     }
 
-    return merged;
+    // Check for underscore characters
+    if (char == "_") {
+      // If the previous char wasn't an underscore, we're changing modes
+      if (prevChar != "_") {
+        _inPattern = !_inPattern;
+      }
+
+      if (_inPattern) {
+        _underscores = min(_underscores + 1, 2);
+        return (true, false, false, [TextFormattingType.underline]);
+      } else {
+        _underscores--;
+      }
+
+      return (true, false, false, [TextFormattingType.underline]);
+    } else {
+      // The pattern is invalid we're outside and the right amount of underscores weren't escaped
+      if (!_inPattern) {
+        final invalid = _underscores != 0;
+        _underscores = 0;
+        return (false, !invalid, invalid, []); // Only return valid when there are no underscores left
+      }
+
+      // The pattern is valid as long as nothing happens
+      return (false, false, false, [TextFormattingType.underline]);
+    }
   }
 }

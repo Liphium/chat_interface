@@ -14,6 +14,8 @@
 - Fixed Warp allowing to share already shared ports
 - Fixed being able to add accounts that are already friends as a friend
 - Rewrote the entire vault synchronization for better performance and maintainability
+- Rewrote the text formatting detection to make it more extensible and also more stable (\*\*\*\* no longer breaks the app)
+  - Regression: Links are no longer clickable (TODO: Fix before 1.0.0 Beta)
 
 ## 0.6.0
 

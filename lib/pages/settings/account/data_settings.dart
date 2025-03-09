@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/messages/message_automaton.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/pages/settings/account/log_out_window.dart';
@@ -78,10 +77,6 @@ class DataSettingsPage extends StatelessWidget {
                 ],
               ),
             ),
-
-          RichText(
-            text: TextSpan(children: TextEvaluator().evaluate("~~__*italic1*__~~", Get.theme.textTheme.bodyMedium!, skipPatterns: true)),
-          ),
 
           //* Profile picture
           Text("settings.data.profile_picture".tr, style: Get.theme.textTheme.labelLarge),
