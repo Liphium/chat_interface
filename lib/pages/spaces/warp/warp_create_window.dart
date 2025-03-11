@@ -9,6 +9,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class WarpCreateWindow extends StatefulWidget {
   const WarpCreateWindow({super.key});
@@ -17,10 +18,10 @@ class WarpCreateWindow extends StatefulWidget {
   State<WarpCreateWindow> createState() => _WarpCreateWindowState();
 }
 
-class _WarpCreateWindowState extends State<WarpCreateWindow> {
+class _WarpCreateWindowState extends State<WarpCreateWindow> with SignalsMixin {
   final TextEditingController _port = TextEditingController();
-  final _error = "".obs;
-  final _loading = false.obs;
+  final _error = signal("");
+  final _loading = signal(false);
 
   @override
   void dispose() {

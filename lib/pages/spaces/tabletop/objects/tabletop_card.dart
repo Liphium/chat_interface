@@ -47,7 +47,7 @@ class CardObject extends TableObject {
     obj.imageSize = size;
 
     // Download the file
-    unawaited(Get.find<AttachmentController>().downloadAttachment(container).then((success) async {
+    unawaited(AttachmentController.downloadAttachment(container).then((success) async {
       if (success) {
         // Get the actual image and add it to the object
         final buffer = await ui.ImmutableBuffer.fromUint8List(await container.file!.readAsBytes());
@@ -208,8 +208,8 @@ class CardObject extends TableObject {
 
     // Download the new image
     final type = await AttachmentController.checkLocations(json["i"], StorageType.cache);
-    container = Get.find<AttachmentController>().fromJson(type, jsonDecode(data));
-    final download = await Get.find<AttachmentController>().downloadAttachment(container!);
+    container = AttachmentController.fromJson(type, jsonDecode(data));
+    final download = await AttachmentController.downloadAttachment(container!);
     if (!download) {
       error = true;
       sendLog("failed to download card");

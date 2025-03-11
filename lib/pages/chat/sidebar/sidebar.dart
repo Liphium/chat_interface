@@ -54,7 +54,7 @@ class _SidebarState extends State<Sidebar> {
                   right: defaultSpacing,
                   left: defaultSpacing,
                 ),
-                message: Get.find<ConnectionController>().error,
+                message: ConnectionController.error,
               ),
             ),
 

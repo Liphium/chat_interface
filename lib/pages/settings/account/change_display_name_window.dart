@@ -7,6 +7,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ChangeDisplayNameWindow extends StatefulWidget {
   const ChangeDisplayNameWindow({super.key});
@@ -15,13 +16,13 @@ class ChangeDisplayNameWindow extends StatefulWidget {
   State<ChangeDisplayNameWindow> createState() => _ChangeNameWindowState();
 }
 
-class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
+class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> with SignalsMixin {
   // Text controllers
   final _displayNameController = TextEditingController();
 
   // State
-  final _errorText = ''.obs;
-  final _loading = false.obs;
+  final _errorText = signal('');
+  final _loading = signal(false);
 
   @override
   void dispose() {

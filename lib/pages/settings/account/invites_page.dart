@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class InvitesPage extends StatefulWidget {
   const InvitesPage({super.key});
@@ -16,7 +17,7 @@ class InvitesPage extends StatefulWidget {
   State<InvitesPage> createState() => _InvitesPageState();
 }
 
-class _InvitesPageState extends State<InvitesPage> {
+class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
   @override
   void initState() {
     super.initState();
@@ -41,12 +42,12 @@ class _InvitesPageState extends State<InvitesPage> {
   }
 
   // Data
-  final _error = "".obs;
-  final count = 0.obs;
-  final invites = <String>[].obs;
-  final loading = false.obs;
-  final hovering = "".obs;
-  final generateLoading = false.obs;
+  final _error = signal("");
+  final count = signal(0);
+  final invites = listSignal(<String>[]);
+  final loading = signal(false);
+  final hovering = signal("");
+  final generateLoading = signal(false);
 
   /// Generate a new invite code
   Future<void> generateNewInvite() async {

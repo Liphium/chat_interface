@@ -193,7 +193,6 @@ class InventoryObject extends TableObject {
     _cards.removeWhere((c) => !cardList.any((o) => o["i"] == c.container?.id && o["u"] == c.container?.url));
 
     // Go through all cards and unpack them (only works in main thread cause sodium)
-    final controller = Get.find<AttachmentController>();
     int index = -1;
     for (var card in cardList) {
       index++;
@@ -204,7 +203,7 @@ class InventoryObject extends TableObject {
       }
 
       final type = await AttachmentController.checkLocations(card["i"], StorageType.cache);
-      final container = controller.fromJson(type, card);
+      final container = AttachmentController.fromJson(type, card);
 
       // Create a card object from it
       final obj = await CardObject.downloadCard(container, location);

@@ -61,7 +61,7 @@ class AnswerData {
           if (attachments.first.isURL) {
             content = attachments.first;
           } else {
-            content = Get.find<AttachmentController>().fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+            content = AttachmentController.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
           }
         }
         return content;

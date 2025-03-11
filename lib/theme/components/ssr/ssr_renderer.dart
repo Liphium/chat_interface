@@ -7,6 +7,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SSRRenderer extends StatefulWidget {
@@ -154,7 +155,7 @@ class _SSRRendererState extends State<SSRRenderer> {
 
   /// Render a normal button using json (NOT A NORMAL ELEMENT)
   Widget _renderButton(Map<String, dynamic> json, bool last) {
-    final loading = false.obs;
+    final loading = signal(false);
     return Padding(
       padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
       child: FJElevatedLoadingButton(

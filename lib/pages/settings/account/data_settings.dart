@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/profile_picture_helper.dart';
+import 'package:chat_interface/services/chat/profile_picture_helper.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';

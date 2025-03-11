@@ -395,10 +395,10 @@ class DeckCreationWindow extends StatefulWidget {
   State<DeckCreationWindow> createState() => _DeckCreationWindowState();
 }
 
-class _DeckCreationWindowState extends State<DeckCreationWindow> {
+class _DeckCreationWindowState extends State<DeckCreationWindow> with SignalsMixin {
   final TextEditingController _nameController = TextEditingController();
-  final _errorText = "".obs;
-  final _loading = false.obs;
+  final _errorText = signal("");
+  final _loading = signal(false);
 
   @override
   void dispose() {
@@ -610,7 +610,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                               child: IconButton(
                                 onPressed: () async {
                                   widget.deck.cards.value.remove(card);
-                                  unawaited(Get.find<AttachmentController>().deleteFile(card));
+                                  unawaited(AttachmentController.deleteFile(card));
                                   final result = await widget.deck.save();
                                   if (!result) {
                                     showErrorPopup("error", "server.error".tr);
@@ -714,11 +714,10 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
   }
 
   Future<void> startFileUploading() async {
-    final controller = Get.find<AttachmentController>();
     _current.value = 0;
     for (var file in widget.files) {
       // Upload the card to the server
-      final response = await controller.uploadFile(
+      final response = await AttachmentController.uploadFile(
         UploadData(file),
         StorageType.permanent,
         Constants.fileDeckTag,

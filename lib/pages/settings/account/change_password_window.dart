@@ -7,6 +7,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ChangePasswordWindow extends StatefulWidget {
   const ChangePasswordWindow({super.key});
@@ -15,15 +16,15 @@ class ChangePasswordWindow extends StatefulWidget {
   State<ChangePasswordWindow> createState() => _ChangeNameWindowState();
 }
 
-class _ChangeNameWindowState extends State<ChangePasswordWindow> {
+class _ChangeNameWindowState extends State<ChangePasswordWindow> with SignalsMixin {
   // Text controllers
   final _currentPasswordController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   // State
-  final _errorText = ''.obs;
-  final _loading = false.obs;
+  final _errorText = signal('');
+  final _loading = signal(false);
 
   @override
   void dispose() {

@@ -1,5 +1,5 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
@@ -82,7 +82,7 @@ class RequestsService {
         request,
       );
       if (error != null) {
-        requestsLoading.value = false;
+        RequestController.requestsLoading.value = false;
         return (error, null);
       }
 

@@ -75,7 +75,7 @@ class _ChatPageState extends State<ChatPageMobile> {
                           right: defaultSpacing,
                           left: defaultSpacing,
                         ),
-                        message: Get.find<ConnectionController>().error,
+                        message: ConnectionController.error,
                       ),
                     ),
                     Row(

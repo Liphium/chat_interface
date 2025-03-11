@@ -8,8 +8,8 @@ import 'package:chat_interface/services/chat/requests_service.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/profile_picture_helper.dart';
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/services/chat/profile_picture_helper.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
@@ -23,7 +23,7 @@ import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
-part '../../../services/chat/friends_vault.dart';
+part '../../services/chat/friends_vault.dart';
 
 class FriendController {
   static final friends = mapSignal(<LPHAddress, Friend>{});
@@ -275,7 +275,7 @@ class Friend {
     // Load the profile picture
     final json = jsonDecode(fromDbEncrypted(data.pictureContainer));
     final type = await AttachmentController.checkLocations(json["i"], StorageType.permanent);
-    profilePicture = Get.find<AttachmentController>().fromJson(type, json);
+    profilePicture = AttachmentController.fromJson(type, json);
 
     // Make sure the file actually exists
     if (!await doesFileExist(profilePicture!.file!)) {

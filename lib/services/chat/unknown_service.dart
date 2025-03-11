@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
@@ -10,13 +10,12 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
-import 'package:get/get.dart';
 
 class UnknownService {
   /// Load the profile of an unknown account by name
   static Future<UnknownAccount?> getUnknownProfileByName(String name) async {
     // Ignore if it is the name of the current account
-    if (Get.find<StatusController>().name.value == name) {
+    if (StatusController.name.value == name) {
       return UnknownAccount(StatusController.ownAddress, name, "", signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
     }
 

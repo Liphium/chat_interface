@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -16,6 +16,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 import '../../../util/vertical_spacing.dart';
 
@@ -79,12 +80,12 @@ class ConversationAddWindow extends StatefulWidget {
   }
 }
 
-class _ConversationAddWindowState extends State<ConversationAddWindow> {
+class _ConversationAddWindowState extends State<ConversationAddWindow> with SignalsMixin {
   // State
-  final _members = <Friend>[].obs;
-  final _length = 0.obs;
-  final _conversationLoading = false.obs;
-  final _errorText = "".obs;
+  final _members = listSignal(<Friend>[]);
+  final _length = signal(0);
+  final _conversationLoading = signal(false);
+  final _errorText = signal("");
   final _search = "".obs;
 
   // Input

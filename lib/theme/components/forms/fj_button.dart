@@ -1,6 +1,7 @@
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class FJElevatedButton extends StatelessWidget {
   final Function() onTap;
@@ -42,7 +43,7 @@ class FJElevatedButton extends StatelessWidget {
 class FJElevatedLoadingButton extends StatelessWidget {
   final Function() onTap;
   final String label;
-  final RxBool loading;
+  final ReadonlySignal<bool> loading;
 
   const FJElevatedLoadingButton({super.key, required this.onTap, required this.label, required this.loading});
 
@@ -51,8 +52,8 @@ class FJElevatedLoadingButton extends StatelessWidget {
     return FJElevatedButton(
       onTap: () => loading.value ? null : onTap(),
       child: Center(
-        child: Obx(
-          () => loading.value
+        child: Watch(
+          (ctx) => loading.value
               ? SizedBox(
                   height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                   width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
@@ -72,7 +73,7 @@ class FJElevatedLoadingButtonCustom extends StatelessWidget {
   final Function() onTap;
   final Widget Function()? builder;
   final Widget child;
-  final RxBool loading;
+  final Signal<bool> loading;
 
   const FJElevatedLoadingButtonCustom({super.key, required this.onTap, required this.child, required this.loading, this.builder});
 

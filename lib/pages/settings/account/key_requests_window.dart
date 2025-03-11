@@ -20,6 +20,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class KeyRequest {
   final String session;
@@ -28,7 +29,7 @@ class KeyRequest {
   final String payload;
   final String signature;
   final int createdAt;
-  final processing = false.obs;
+  final processing = signal(false);
 
   KeyRequest({
     required this.session,
@@ -105,10 +106,10 @@ class KeyRequestsWindow extends StatefulWidget {
   State<KeyRequestsWindow> createState() => _KeyRequestsWindowState();
 }
 
-class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
-  final loading = false.obs;
-  final error = "".obs;
-  final requests = <KeyRequest>[].obs;
+class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin {
+  final loading = signal(false);
+  final error = signal("");
+  final requests = listSignal(<KeyRequest>[]);
   Timer? _timer;
 
   @override
@@ -280,8 +281,8 @@ class KeyRequestAcceptWindow extends StatefulWidget {
   State<KeyRequestAcceptWindow> createState() => _KeyRequestAcceptWindowState();
 }
 
-class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> {
-  final _error = "".obs;
+class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> with SignalsMixin {
+  final _error = signal("");
   final TextEditingController _codeController = TextEditingController();
 
   @override

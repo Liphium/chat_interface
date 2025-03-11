@@ -61,7 +61,6 @@ class _LibraryTabState extends State<LibraryTab> {
     }
 
     // Get all the attachment containers from the library entries for displaying them
-    final controller = Get.find<AttachmentController>();
     final newContainerList = <AttachmentContainer>[];
     for (var entry in entries) {
       if (entry.data.isURL) {
@@ -72,7 +71,7 @@ class _LibraryTabState extends State<LibraryTab> {
         if (type == null) {
           continue;
         }
-        newContainerList.add(controller.fromJson(type, json));
+        newContainerList.add(AttachmentController.fromJson(type, json));
       }
     }
 

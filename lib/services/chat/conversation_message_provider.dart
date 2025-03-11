@@ -31,7 +31,7 @@ class ConversationMessageProvider extends MessageProvider {
     // If there are no messages, check for them on the server
     if (messages.isEmpty) {
       // Check if the user is even connected to the server (to make sure offline retrieval works)
-      if (!Get.find<ConnectionController>().connected.value) {
+      if (!ConnectionController.connected.value) {
         // Act like the top has been reached
         return (null, false);
       }
@@ -77,7 +77,7 @@ class ConversationMessageProvider extends MessageProvider {
     // If there are no messages, check if there are some on the server
     if (messages.isEmpty) {
       // Check if the user is even connected to the server (to make sure offline retrieval works)
-      if (!Get.find<ConnectionController>().connected.value) {
+      if (!ConnectionController.connected.value) {
         // Act like the bottom has been reached
         return (null, false);
       }
@@ -122,7 +122,7 @@ class ConversationMessageProvider extends MessageProvider {
     final message = await messageQuery.getSingleOrNull();
     if (message == null) {
       // Check if the user is even connected to the server (to make sure offline retrieval works)
-      if (!Get.find<ConnectionController>().connected.value) {
+      if (!ConnectionController.connected.value) {
         // Act like the message doesn't exist
         return null;
       }

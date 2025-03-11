@@ -15,6 +15,7 @@ import 'package:signals/signals_flutter.dart';
 import 'friend_controller.dart';
 
 class RequestController {
+  static final requestsLoading = signal(false);
   static final requestsSent = mapSignal(<LPHAddress, Request>{});
   static final requests = mapSignal(<LPHAddress, Request>{});
 
@@ -68,15 +69,13 @@ class RequestController {
   }
 }
 
-final requestsLoading = false.obs;
-
 /// Send a new friend request to an account by name
 Future<void> newFriendRequest(String name, Function(String) success) async {
-  requestsLoading.value = true;
+  RequestController.requestsLoading.value = true;
 
   if (name == StatusController.name.value || LPHAddress.from(name) == StatusController.ownAddress) {
     showErrorPopup("request.self", "request.self.text".tr);
-    requestsLoading.value = false;
+    RequestController.requestsLoading.value = false;
     return;
   }
 
@@ -93,14 +92,14 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
   // Check if the profile is valid
   if (profile == null) {
     showErrorPopup("request.not.found", "request.not.found.text".tr);
-    requestsLoading.value = false;
+    RequestController.requestsLoading.value = false;
     return;
   }
 
   // Make sure the person is not already a friend
   if (FriendController.friends.keys.any((a) => a == profile!.id)) {
     showErrorPopup("request.friend.exists", "request.friend.exists.text".tr);
-    requestsLoading.value = false;
+    RequestController.requestsLoading.value = false;
     return;
   }
 
@@ -116,7 +115,7 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
     onDecline: () {},
   ));
 
-  requestsLoading.value = false;
+  RequestController.requestsLoading.value = false;
   return;
 }
 
@@ -127,7 +126,7 @@ class Request {
   String vaultId;
   int updatedAt;
   KeyStorage keyStorage;
-  final loading = false.obs;
+  final loading = signal(false);
 
   Request(this.id, this.name, this.displayName, this.vaultId, this.keyStorage, this.updatedAt);
 

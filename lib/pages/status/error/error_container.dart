@@ -4,6 +4,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ErrorContainer extends StatelessWidget {
   /// Translation required
@@ -77,7 +78,7 @@ class InfoContainer extends StatelessWidget {
 
 class AnimatedErrorContainer extends StatefulWidget {
   /// Translation required
-  final RxString message;
+  final Signal<String> message;
   final EdgeInsets padding;
   final bool expand;
 
@@ -91,23 +92,23 @@ class AnimatedErrorContainer extends StatefulWidget {
   State<AnimatedErrorContainer> createState() => _AnimatedErrorContainerState();
 }
 
-class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
-  final message = "".obs;
-  final showing = false.obs;
+class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> with SignalsMixin {
+  final message = signal("");
+  final showing = signal(false);
   AnimationController? controller;
-  StreamSubscription<String>? _sub;
   String? prev;
 
   @override
   void initState() {
-    _sub = widget.message.listen((p0) {
-      if (prev != null && prev != "" && p0 != "") {
+    effect(() {
+      final msg = widget.message.value;
+      if (prev != null && prev != "" && msg != "") {
         controller?.loop(count: 1, reverse: true);
       }
-      if (p0 != "") {
-        message.value = p0;
+      if (msg != "") {
+        message.value = msg;
         showing.value = true;
-        prev = p0;
+        prev = msg;
       } else {
         showing.value = false;
       }
@@ -116,15 +117,9 @@ class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
   }
 
   @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Animate(
+    return Watch(
+      (ctx) => Animate(
         effects: [
           ScaleEffect(
             duration: 250.ms,
@@ -170,7 +165,7 @@ class _AnimatedErrorContainerState extends State<AnimatedErrorContainer> {
 
 class AnimatedInfoContainer extends StatefulWidget {
   /// Translation required
-  final RxString message;
+  final Signal<String> message;
   final EdgeInsets padding;
   final bool expand;
 
@@ -193,14 +188,15 @@ class _AnimatedInfoContainerState extends State<AnimatedInfoContainer> {
 
   @override
   void initState() {
-    _sub = widget.message.listen((p0) {
-      if (prev != null && prev != "" && p0 != "") {
+    effect(() {
+      final msg = widget.message.value;
+      if (prev != null && prev != "" && msg != "") {
         controller?.loop(count: 1, reverse: true);
       }
-      if (p0 != "") {
-        message.value = p0;
+      if (msg != "") {
+        message.value = msg;
         showing.value = true;
-        prev = p0;
+        prev = msg;
       } else {
         showing.value = false;
       }

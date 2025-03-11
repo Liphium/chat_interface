@@ -9,6 +9,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../util/vertical_spacing.dart';
@@ -78,9 +79,9 @@ class PolicyAcceptPage extends StatefulWidget {
   State<PolicyAcceptPage> createState() => _PolicyAcceptPageState();
 }
 
-class _PolicyAcceptPageState extends State<PolicyAcceptPage> {
-  final error = "".obs;
-  final clicked = false.obs;
+class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
+  final error = signal("");
+  final clicked = signal(false);
   final TextEditingController _controller = TextEditingController();
 
   @override

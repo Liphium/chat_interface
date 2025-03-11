@@ -60,7 +60,7 @@ class StatusService {
 
     // Delete all files
     if (deleteFiles) {
-      await Get.find<AttachmentController>().deleteAllFiles();
+      await AttachmentController.deleteAllFiles();
     }
 
     // Exit the app

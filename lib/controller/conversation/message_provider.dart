@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
@@ -242,7 +242,7 @@ abstract class MessageProvider {
     // Upload files
     final attachments = <String>[];
     for (var file in files) {
-      final res = await Get.find<AttachmentController>().uploadFile(file, StorageType.temporary, Constants.fileAttachmentTag);
+      final res = await AttachmentController.uploadFile(file, StorageType.temporary, Constants.fileAttachmentTag);
       if (res.container == null) {
         return res.message;
       }
@@ -265,7 +265,7 @@ abstract class MessageProvider {
     String answer,
   ) async {
     // Check if there is a connection before doing this
-    if (!Get.find<ConnectionController>().connected.value) {
+    if (!ConnectionController.connected.value) {
       return "error.no_connection".tr;
     }
 
@@ -428,17 +428,17 @@ class Message {
           if (FileSettings.imageTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
             if (download) {
-              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
+              await AttachmentController.downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.videoTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
             if (download) {
-              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
+              await AttachmentController.downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.audioTypes.contains(extension)) {
             final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
             if (download) {
-              await Get.find<AttachmentController>().downloadAttachment(container, ignoreLimit: false);
+              await AttachmentController.downloadAttachment(container, ignoreLimit: false);
             }
           }
         }

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
@@ -139,7 +139,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                           children: [
                             Obx(() {
                               // Check if the thing is loading
-                              if (Get.find<ConnectionController>().loading.value) {
+                              if (ConnectionController.loading.value) {
                                 return Row(
                                   children: [
                                     horizontalSpacing(defaultSpacing),
@@ -157,7 +157,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                               }
 
                               // Check if the thing is connected
-                              if (!Get.find<ConnectionController>().connected.value) {
+                              if (!ConnectionController.connected.value) {
                                 return Row(
                                   children: [
                                     horizontalSpacing(defaultSpacing),

@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:signals/signals_flutter.dart';

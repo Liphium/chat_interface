@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -217,7 +217,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
                             final path = await AttachmentController.getFilePathFor(json["i"]);
 
                             // Delete the file (also locally in case needed)
-                            await Get.find<AttachmentController>().deleteFileFromPath(
+                            await AttachmentController.deleteFileFromPath(
                               json["i"],
                               path == null ? null : XFile(path),
                               popup: true,

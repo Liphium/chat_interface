@@ -238,7 +238,7 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
                                         file.deleteLoading.value = true;
 
                                         // Make a request to the server
-                                        final success = await Get.find<AttachmentController>().deleteFileFromPath(
+                                        final success = await AttachmentController.deleteFileFromPath(
                                           file.id,
                                           file.path != null ? XFile(file.path!) : null,
                                           popup: true,

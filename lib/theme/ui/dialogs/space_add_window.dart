@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
@@ -8,6 +8,7 @@ import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 import '../../../util/vertical_spacing.dart';
 
@@ -20,9 +21,9 @@ class SpaceAddWindow extends StatefulWidget {
   State<SpaceAddWindow> createState() => _ConversationAddWindowState();
 }
 
-class _ConversationAddWindowState extends State<SpaceAddWindow> {
-  final public = true.obs;
-  final _conversationLoading = false.obs;
+class _ConversationAddWindowState extends State<SpaceAddWindow> with SignalsMixin {
+  late final public = createSignal(true);
+  late final _conversationLoading = createSignal(false);
 
   final _controller = TextEditingController();
 
@@ -82,8 +83,8 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Public", style: Get.theme.textTheme.bodyMedium),
-              Obx(
-                () => FJSwitch(
+              Watch(
+                (ctx) => FJSwitch(
                   value: public.value,
                   onChanged: (p0) {
                     public.value = p0;

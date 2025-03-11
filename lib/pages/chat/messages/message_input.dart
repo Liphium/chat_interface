@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
@@ -174,7 +174,7 @@ class _MessageInputState extends State<MessageInput> with SignalsMixin {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) async {
           // Check if there is a connection before doing this
-          if (!Get.find<ConnectionController>().connected.value) {
+          if (!ConnectionController.connected.value) {
             showErrorPopup("error", "error.no_connection".tr);
             return;
           }

@@ -1,4 +1,4 @@
-part of '../../controller/account/friends/friend_controller.dart';
+part of '../../controller/account/friend_controller.dart';
 
 class FriendsVault {
   /// Store a received request in the vault.

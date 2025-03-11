@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -55,7 +55,7 @@ class ProfileHelper {
 
     // Decrypt the profile picture data
     final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey));
-    final container = Get.find<AttachmentController>().fromJson(StorageType.permanent, containerJson);
+    final container = AttachmentController.fromJson(StorageType.permanent, containerJson);
 
     String? oldPictureId;
     String? oldPath;
@@ -76,7 +76,7 @@ class ProfileHelper {
     }
 
     // Download the file
-    final success = await Get.find<AttachmentController>().downloadAttachment(container, popups: false, trustPopups: true);
+    final success = await AttachmentController.downloadAttachment(container, popups: false, trustPopups: true);
     if (!success) {
       sendLog("download failed");
       return null;
@@ -98,7 +98,7 @@ class ProfileHelper {
   /// Upload a profile picture to the server and set it as the current profile picture
   static Future<bool> uploadProfilePicture(XFile file, String originalName, {Uint8List? bytes}) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(
+    final response = await AttachmentController.uploadFile(
       UploadData(file),
       StorageType.permanent,
       Constants.fileAppDataTag,

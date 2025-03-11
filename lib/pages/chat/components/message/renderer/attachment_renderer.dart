@@ -256,7 +256,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             if (widget.container.error.value) {
               return IconButton(
                 onPressed: () {
-                  Get.find<AttachmentController>().downloadAttachment(widget.container, retry: true);
+                  AttachmentController.downloadAttachment(widget.container, retry: true);
                 },
                 icon: const Icon(Icons.refresh),
               );
@@ -276,7 +276,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
 
             return IconButton(
               onPressed: () {
-                Get.find<AttachmentController>().downloadAttachment(widget.container);
+                AttachmentController.downloadAttachment(widget.container);
               },
               icon: const Icon(Icons.download),
             );

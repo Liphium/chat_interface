@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:chat_interface/controller/account/profile_picture_helper.dart';
+import 'package:chat_interface/services/chat/profile_picture_helper.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -10,6 +10,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ProfilePictureWindow extends StatefulWidget {
   final XFile file;
@@ -20,15 +21,15 @@ class ProfilePictureWindow extends StatefulWidget {
   State<ProfilePictureWindow> createState() => _ProfilePictureWindowState();
 }
 
-class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
+class _ProfilePictureWindowState extends State<ProfilePictureWindow> with SignalsMixin {
   double minScale = 0;
   double maxScale = 0;
-  final scaleFactor = 1.0.obs;
-  final moveX = 0.0.obs;
-  final moveY = 0.0.obs;
+  late final scaleFactor = createSignal(1.0);
+  late final moveX = createSignal(0.0);
+  late final moveY = createSignal(0.0);
 
-  final uploading = false.obs;
-  final _image = Rx<ui.Image?>(null);
+  late final uploading = createSignal(false);
+  late final _image = createSignal<ui.Image?>(null);
 
   @override
   void initState() {
@@ -56,7 +57,7 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
   Widget build(BuildContext context) {
     return DialogBase(
         maxWidth: 450,
-        child: Obx(() {
+        child: Watch((ctx) {
           if (_image.value == null) {
             return SizedBox(height: 100, width: 100, child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
           }

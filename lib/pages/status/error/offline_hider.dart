@@ -33,8 +33,8 @@ class OfflineHider extends StatelessWidget {
             duration: 250.ms,
           ),
         ],
-        target: Get.find<ConnectionController>().connected.value ? 1 : 0,
-        onInit: (controller) => controller.value = Get.find<ConnectionController>().connected.value ? 1 : 0,
+        target: ConnectionController.connected.value ? 1 : 0,
+        onInit: (controller) => controller.value = ConnectionController.connected.value ? 1 : 0,
         child: Padding(
           padding: padding ?? EdgeInsets.all(0),
           child: child,

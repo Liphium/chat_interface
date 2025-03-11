@@ -13,11 +13,12 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
-class ConnectionController extends GetxController {
-  final loading = false.obs;
-  final connected = false.obs;
-  final error = RxString("");
+class ConnectionController {
+  static final loading = signal(false);
+  static final connected = signal(false);
+  static final error = signal("");
   Timer? _retryTimer;
 
   // Static tasks so their loading state can be accessed from anywhere
