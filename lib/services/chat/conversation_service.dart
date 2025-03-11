@@ -91,7 +91,6 @@ class ConversationService extends VaultTarget {
   @override
   Future<void> processEntries(List<String> deleted, List<VaultEntry> newEntries) async {
     // Add all the new conversations to the vault
-    final messageController = Get.find<MessageController>();
     for (var entry in newEntries) {
       final conv = Conversation.fromJson(jsonDecode(entry.payload), entry.id);
       if (ConversationController.conversations[conv.id] == null) {
@@ -104,7 +103,7 @@ class ConversationService extends VaultTarget {
       if (deleted.contains(conv.vaultId)) {
         ConversationService.delete(id, vaultId: conv.vaultId, deleteLocal: false);
         ConversationController.order.remove(id);
-        messageController.unselectConversation(id: id);
+        MessageController.unselectConversation(id: id);
         return true;
       }
       return false;
@@ -227,7 +226,7 @@ class ConversationService extends VaultTarget {
     await db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
     await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
     if (deleteLocal) {
-      Get.find<MessageController>().unselectConversation(id: id);
+      MessageController.unselectConversation(id: id);
       ConversationController.removeConversation(id);
     }
     return null;
@@ -266,7 +265,7 @@ class ConversationService extends VaultTarget {
   /// Ask the server to subscribe to all conversations.
   ///
   /// Also sends out status packets.
-  static Future<bool> subscribeToConversations({StatusController? controller}) async {
+  static void subscribeToConversations({StatusController? controller}) {
     controller ??= Get.find<StatusController>();
 
     // Collect all thet tokens for the conversations currently in cache
@@ -276,8 +275,7 @@ class ConversationService extends VaultTarget {
     }
 
     // Subscribe to all conversations
-    unawaited(_sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, deletions: true));
-    return true;
+    unawaited(_sub(StatusController.statusPacket(), StatusController.sharedContentPacket(), tokens, deletions: true));
   }
 
   /// Ask the server to subscribe to a singular conversation.
@@ -291,34 +289,38 @@ class ConversationService extends VaultTarget {
     final tokens = <Map<String, dynamic>>[token.toMap()];
 
     // Subscribe
-    unawaited(_sub(controller.statusPacket(), controller.sharedContentPacket(), tokens, deletions: deletions));
+    unawaited(_sub(StatusController.statusPacket(), StatusController.sharedContentPacket(), tokens, deletions: deletions));
   }
 
-  static Future<void> _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {deletions = false}) async {
+  /// Returns an error if there was one.
+  static Future<String?> _sub(String status, String statusData, List<Map<String, dynamic>> tokens, {deletions = false}) async {
     // Get the maximum value of the conversation update timestamps
     final max = db.conversation.updatedAt.max();
     final query = db.selectOnly(db.conversation)..addColumns([max]);
     final maxValue = await query.map((row) => row.read(max)).getSingleOrNull();
 
-    connector.sendAction(
-        ServerAction("conv_sub", <String, dynamic>{
-          "tokens": tokens,
-          "status": status,
-          "sync": maxValue?.toInt() ?? 0,
-          "data": statusData,
-        }), handler: (event) {
-      if (!event.data["success"]) {
-        sendLog("ERROR WHILE SUBSCRIBING: ${event.data["message"]}");
-        return;
-      }
-      Get.find<StatusController>().statusLoading.value = false;
-      ConversationController.finishedLoading(
-        basePath,
-        event.data["info"],
-        deletions ? (event.data["missing"] ?? []) : [],
-        false,
-      );
-    });
+    // Send the subscription request
+    final event = await connector.sendActionAndWait(ServerAction("conv_sub", <String, dynamic>{
+      "tokens": tokens,
+      "status": status,
+      "sync": maxValue?.toInt() ?? 0,
+      "data": statusData,
+    }));
+    if (event == null) {
+      return "server.error".tr;
+    }
+    if (!event.data["success"]) {
+      sendLog("ERROR WHILE SUBSCRIBING: ${event.data["message"]}");
+      return event.data["message"];
+    }
+    await ConversationController.finishedLoading(
+      basePath,
+      event.data["info"],
+      deletions ? (event.data["missing"] ?? []) : [],
+      false,
+    );
+
+    return null;
   }
 
   /// Add a new conversation to the cache from the vault.

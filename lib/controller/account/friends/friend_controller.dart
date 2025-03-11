@@ -8,27 +8,25 @@ import 'package:chat_interface/services/chat/requests_service.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/controller/account/profile_picture_helper.dart';
 import 'package:chat_interface/controller/account/friends/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/database/database_entities.dart' as dbe;
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 part '../../../services/chat/friends_vault.dart';
 
-class FriendController extends GetxController {
-  final friends = <LPHAddress, Friend>{}.obs;
+class FriendController {
+  static final friends = mapSignal(<LPHAddress, Friend>{});
 
   Future<bool> loadFriends() async {
     for (FriendData data in await db.friend.select().get()) {
@@ -69,10 +67,10 @@ class Friend {
   int updatedAt;
 
   // Display name of the friend
-  final displayName = "".obs;
+  final displayName = signal("");
 
   /// Loading state for open conversation buttons
-  final openConversationLoading = false.obs;
+  final openConversationLoading = signal(false);
 
   Friend(this.id, this.name, String displayName, this.vaultId, this.keyStorage, this.updatedAt, {this.unknown = false}) {
     this.displayName.value = displayName;
@@ -88,8 +86,8 @@ class Friend {
     controller ??= Get.find<StatusController>();
     return Friend(
       StatusController.ownAddress,
-      controller.name.value,
-      controller.displayName.value,
+      StatusController.name.value,
+      StatusController.displayName.value,
       "",
       KeyStorage.empty(),
       0,
@@ -172,9 +170,9 @@ class Friend {
       );
 
   //* Status
-  final status = "".obs;
+  final status = signal("");
   bool answerStatus = true;
-  final statusType = 0.obs;
+  final statusType = signal(0);
 
   void loadStatus(String message) {
     message = decryptSymmetric(message, keyStorage.profileKey);
@@ -199,7 +197,7 @@ class Friend {
   void setOffline() {
     status.value = "";
     statusType.value = 0;
-    Get.find<StatusController>().sharedContent.remove(id);
+    StatusController.sharedContent.remove(id);
   }
 
   //* Profile picture
@@ -287,33 +285,10 @@ class Friend {
     profilePictureImage.value = await ProfileHelper.loadImageFromBytes(await profilePicture!.file!.readAsBytes());
   }
 
-  //* Remove friend
-  Future<bool> remove(RxBool loading, {bool removeAction = true}) async {
-    loading.value = true;
-
-    // Remove the friend from the friends vault and local storage
-    await FriendsVault.remove(vaultId);
-    await db.friend.deleteWhere((tbl) => tbl.id.equals(id.encode()));
-    Get.find<FriendController>().friends.remove(id);
-
-    if (removeAction) {
-      // Send the other guy a notice that he's been removed from your friends list
-      await sendAuthenticatedStoredAction(this, authenticatedStoredAction("fr_rem", {}));
-    }
-
-    // Leave direct message conversations with the guy in them
-    var toRemove = <LPHAddress>[];
-    final controller = Get.find<ConversationController>();
-    for (var conversation in controller.conversations.values) {
-      if (conversation.members.values.any((mem) => mem.address == id) && conversation.type == dbe.ConversationType.directMessage) {
-        toRemove.add(conversation.id);
-      }
-    }
-    for (var key in toRemove) {
-      await controller.conversations[key]!.delete();
-    }
-
-    loading.value = false;
-    return true;
+  /// Remove the friend. Just calls [FriendsService.remove] for you.
+  ///
+  /// Returns an error if there was one.
+  Future<String?> remove({bool removeAction = true}) {
+    return FriendsService.remove(this, removeAction: removeAction);
   }
 }

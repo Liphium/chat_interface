@@ -3,10 +3,10 @@ import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.da
 import 'package:chat_interface/services/spaces/tabletop/tabletop_object.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals.dart';
 
 class ObjectContextMenu extends StatefulWidget {
   final TableObject object;
@@ -41,7 +41,7 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
                   iconColor: addition.iconColor,
                   color: addition.color,
                   label: addition.label,
-                  loading: false.obs,
+                  loading: signal(false),
                   onTap: () {
                     addition.onTap.call(Get.find<TabletopController>());
                     if (addition.goBack) {
@@ -57,7 +57,7 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
             ProfileButton(
               icon: Icons.crop_rotate,
               label: "tabletop.match_viewport".tr,
-              loading: false.obs,
+              loading: signal(false),
               onTap: () {
                 widget.object.newRotation(-TabletopController.canvasRotation.value);
                 Get.back();
@@ -68,7 +68,7 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
             ProfileButton(
               icon: Icons.delete,
               label: "remove".tr,
-              loading: false.obs,
+              loading: signal(false),
               color: Get.theme.colorScheme.errorContainer,
               iconColor: Get.theme.colorScheme.error,
               onTap: () {

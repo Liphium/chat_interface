@@ -1,17 +1,16 @@
 import 'dart:convert';
 
+import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 void setupStatusListener() {
@@ -22,20 +21,17 @@ void setupStatusListener() {
     if (!friend.answerStatus) return;
     friend.answerStatus = false;
 
-    // Send back status
-    final controller = Get.find<StatusController>();
-
     // Get dm with friend
-    final dm = Get.find<ConversationController>().conversations.values.firstWhere(
-          (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
-        );
+    final dm = ConversationController.conversations.values.firstWhere(
+      (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
+    );
 
     sendLog("sending status answer");
     await postNodeJSON("/conversations/answer_status", {
       "token": dm.token.toMap(),
       "data": {
-        "status": controller.statusPacket(),
-        "data": controller.sharedContentPacket(),
+        "status": StatusController.statusPacket(),
+        "data": StatusController.sharedContentPacket(),
       }
     });
   }, afterSetup: true);
@@ -57,15 +53,13 @@ Friend? handleStatus(Event event, bool own) {
   final message = event.data["st"] as String;
 
   // Load own status when the packet specifies it
-  final statusController = Get.find<StatusController>();
-  final controller = Get.find<FriendController>();
   if (own) {
-    controller.friends[StatusController.ownAddress]!.loadStatus(message);
-    statusController.fromStatusJson(decryptSymmetric(message, profileKey));
+    FriendController.friends[StatusController.ownAddress]!.loadStatus(message);
+    StatusController.fromStatusJson(decryptSymmetric(message, profileKey));
     // Load own shared content
-    final (container, shouldUpdate) = _dataToContainer(statusController.ownContainer.value, event.data["d"], profileKey);
+    final (container, shouldUpdate) = _dataToContainer(StatusController.ownContainer.value, event.data["d"], profileKey);
     if (shouldUpdate) {
-      statusController.ownContainer.value = container;
+      StatusController.ownContainer.value = container;
     }
 
     return null;
@@ -76,8 +70,7 @@ Friend? handleStatus(Event event, bool own) {
   final owner = LPHAddress.from(event.data["o"] as String);
 
   // Get conversation from the status packet
-  final convController = Get.find<ConversationController>();
-  final conversation = convController.conversations[convId];
+  final conversation = ConversationController.conversations[convId];
   if (conversation == null) {
     sendLog("conversation not found for status packet $convId");
     return null;
@@ -92,7 +85,7 @@ Friend? handleStatus(Event event, bool own) {
     sendLog("member $owner not found in conversation $convId (status packet)");
     return null;
   }
-  final friend = controller.friends[member.address];
+  final friend = FriendController.friends[member.address];
   if (friend == null) {
     sendLog("account ${member.address.toString()} isn't a friend (status packet)");
     return null;
@@ -102,13 +95,13 @@ Friend? handleStatus(Event event, bool own) {
   friend.loadStatus(message);
 
   // Extract shared content
-  final (container, shouldUpdate) = _dataToContainer(statusController.sharedContent[friend.id], event.data["d"], friend.keyStorage.profileKey);
+  final (container, shouldUpdate) = _dataToContainer(StatusController.sharedContent[friend.id], event.data["d"], friend.keyStorage.profileKey);
   if (shouldUpdate) {
     if (container == null) {
-      final container = statusController.sharedContent.remove(friend.id);
+      final container = StatusController.sharedContent.remove(friend.id);
       container?.onDrop();
     } else {
-      statusController.sharedContent[friend.id] = container;
+      StatusController.sharedContent[friend.id] = container;
     }
   }
 

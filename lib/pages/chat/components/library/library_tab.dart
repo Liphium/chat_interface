@@ -12,6 +12,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:signals/signals_flutter.dart';
 
 class LibraryTab extends StatefulWidget {
   final LibraryEntryType? filter;
@@ -135,7 +136,7 @@ class _LibraryTabState extends State<LibraryTab> {
               borderRadius: BorderRadius.circular(defaultSpacing),
               onTap: () {
                 //* Send message with the library element
-                widget.provider.sendMessage(false.obs, MessageType.text, [container.toAttachment()], "", "");
+                widget.provider.sendMessage(signal(false), MessageType.text, [container.toAttachment()], "", "");
                 Get.back();
               },
               child: ClipRRect(

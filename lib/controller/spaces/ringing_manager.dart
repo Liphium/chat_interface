@@ -69,7 +69,7 @@ class RingingManager {
     }
 
     // Only ring when the status is online or away
-    final doNotDisturb = Get.find<StatusController>().type.value == statusDoNotDisturb || Get.find<StatusController>().type.value == statusOffline;
+    final doNotDisturb = StatusController.type.value == statusDoNotDisturb || StatusController.type.value == statusOffline;
     if (doNotDisturb && !Get.find<SettingController>().settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
       return false;
     }
@@ -93,7 +93,7 @@ class RingingManager {
     }
 
     // Check if it should play a sound when the status is do not disturb
-    final doNotDisturb = Get.find<StatusController>().type.value == statusDoNotDisturb || Get.find<StatusController>().type.value == statusOffline;
+    final doNotDisturb = StatusController.type.value == statusDoNotDisturb || StatusController.type.value == statusOffline;
     if (doNotDisturb && !Get.find<SettingController>().settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
       return false;
     }

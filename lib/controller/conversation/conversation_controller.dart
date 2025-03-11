@@ -203,7 +203,7 @@ class Conversation {
         MemberRole.user,
       ),
     );
-    return Get.find<FriendController>().friends[member.address]?.displayName.value ?? container.name;
+    return FriendController.friends[member.address]?.displayName.value ?? container.name;
   }
 
   /// Only works for direct messages
@@ -216,13 +216,13 @@ class Conversation {
         MemberRole.user,
       ),
     );
-    return Get.find<FriendController>().friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
+    return FriendController.friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
   }
 
   /// Check if a conversation is broken (borked)
   bool get borked =>
       !isGroup &&
-      Get.find<FriendController>().friends[members.values
+      FriendController.friends[members.values
               .firstWhere((element) => element.address != StatusController.ownAddress,
                   orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user))
               .address] ==

@@ -7,17 +7,20 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/developer_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class OwnProfile extends StatefulWidget {
@@ -30,17 +33,17 @@ class OwnProfile extends StatefulWidget {
   State<OwnProfile> createState() => _ProfileState();
 }
 
-class _ProfileState extends State<OwnProfile> {
+class _ProfileState extends State<OwnProfile> with SignalsMixin {
   //* Edit state for buttons
-  final edit = false.obs;
+  final edit = signal(false);
 
   final TextEditingController _status = TextEditingController();
-  final statusMessage = "".obs;
+  final statusMessage = signal("");
   final FocusNode _statusFocus = FocusNode();
 
   // Developer things
-  final testLoading = false.obs;
-  final _clicks = 0.obs;
+  final testLoading = signal(false);
+  final _clicks = signal(0);
 
   @override
   void dispose() {
@@ -51,11 +54,10 @@ class _ProfileState extends State<OwnProfile> {
 
   @override
   Widget build(BuildContext context) {
-    StatusController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
-    _status.text = controller.status.value;
-    statusMessage.value = controller.status.value;
+    _status.text = StatusController.status.value;
+    statusMessage.value = StatusController.status.value;
 
     //* Context menu
     return SlidingWindowBase(
@@ -76,7 +78,7 @@ class _ProfileState extends State<OwnProfile> {
                   Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
                   horizontalSpacing(defaultSpacing),
                   Text(
-                    controller.displayName.value,
+                    StatusController.displayName.value,
                     style: theme.textTheme.titleMedium,
                     textHeightBehavior: noTextHeight,
                   ),
@@ -85,13 +87,13 @@ class _ProfileState extends State<OwnProfile> {
 
               //* Copy button
               LoadingIconButton(
-                loading: false.obs,
+                loading: signal(false),
                 onTap: () {
                   _clicks.value++;
                   if (_clicks.value > 7) {
                     Get.dialog(const DeveloperWindow());
                   }
-                  Clipboard.setData(ClipboardData(text: controller.name.value));
+                  Clipboard.setData(ClipboardData(text: StatusController.name.value));
                 },
                 icon: Icons.copy,
               )
@@ -100,15 +102,15 @@ class _ProfileState extends State<OwnProfile> {
           verticalSpacing(defaultSpacing),
 
           //* Status
-          Obx(() {
-            if (controller.ownContainer.value != null) {
+          Watch((ctx) {
+            if (StatusController.ownContainer.value != null) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
                 child: ProfileButton(
                   icon: Icons.stop,
                   label: 'profile.stop_sharing'.tr,
-                  onTap: () => controller.stopSharing(),
-                  loading: false.obs,
+                  onTap: () => StatusController.stopSharing(),
+                  loading: signal(false),
                 ),
               );
             }
@@ -119,8 +121,8 @@ class _ProfileState extends State<OwnProfile> {
                 child: ProfileButton(
                   icon: Icons.start,
                   label: 'profile.start_sharing'.tr,
-                  onTap: () => controller.share(SpaceController.getContainer()),
-                  loading: false.obs,
+                  onTap: () => StatusController.share(SpaceController.getContainer()),
+                  loading: signal(false),
                 ),
               );
             } else {
@@ -130,14 +132,14 @@ class _ProfileState extends State<OwnProfile> {
 
           //* Current status type
           RepaintBoundary(
-            child: GetX<StatusController>(builder: (statusController) {
+            child: Watch((ctx) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: List.generate(4, (index) {
                   // Get details
                   Color color = getStatusColor(theme, index);
                   IconData icon = getStatusIcon(index);
-                  final bool selected = statusController.type.value == index;
+                  final bool selected = StatusController.type.value == index;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: elementSpacing),
@@ -146,8 +148,13 @@ class _ProfileState extends State<OwnProfile> {
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
-                        onTap: () {
-                          controller.setStatus(type: index, success: () => Get.back());
+                        onTap: () async {
+                          final error = await StatusService.sendStatus(type: index);
+                          if (error != null) {
+                            showErrorPopup("error", error);
+                            return;
+                          }
+                          Get.back();
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(defaultSpacing),
@@ -186,11 +193,11 @@ class _ProfileState extends State<OwnProfile> {
                     edit.value = true;
                     _statusFocus.requestFocus();
                   },
-                  child: Obx(
-                    () => Visibility(
+                  child: Watch(
+                    (ctx) => Visibility(
                       visible: edit.value,
                       replacement: Text(
-                        controller.status.value == "" ? 'status.message.add'.tr : controller.status.value,
+                        StatusController.status.value == "" ? 'status.message.add'.tr : StatusController.status.value,
                         style: theme.textTheme.bodyMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -207,9 +214,13 @@ class _ProfileState extends State<OwnProfile> {
                         style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
 
                         //* Save status
-                        onEditingComplete: () {
+                        onEditingComplete: () async {
                           if (_status.text == "") _status.text = "";
-                          controller.setStatus(message: _status.text);
+                          final error = await StatusService.sendStatus(message: _status.text);
+                          if (error != null) {
+                            showErrorPopup("error", error);
+                            return;
+                          }
                           edit.value = false;
                         },
 
@@ -226,9 +237,9 @@ class _ProfileState extends State<OwnProfile> {
               //* Close button
               Obx(
                 () => LoadingIconButton(
-                  loading: controller.statusLoading,
-                  onTap: () {
-                    if (controller.status.value == "" && !edit.value) {
+                  loading: StatusController.statusLoading,
+                  onTap: () async {
+                    if (StatusController.status.value == "" && !edit.value) {
                       edit.value = true;
                       _status.text = "";
                       _statusFocus.requestFocus();
@@ -236,14 +247,22 @@ class _ProfileState extends State<OwnProfile> {
                     }
 
                     if (!edit.value) {
-                      controller.setStatus(message: "");
+                      final error = await StatusService.sendStatus(message: "");
+                      if (error != null) {
+                        showErrorPopup("error", error);
+                        return;
+                      }
                       _status.text = "";
                       return;
                     }
 
+                    final error = await StatusService.sendStatus(message: _status.text);
+                    if (error != null) {
+                      showErrorPopup("error", error);
+                      return;
+                    }
                     edit.value = false;
                     _statusFocus.unfocus();
-                    controller.setStatus(message: _status.text);
                   },
                   icon: statusMessage.value == ""
                       ? Icons.add
@@ -262,7 +281,7 @@ class _ProfileState extends State<OwnProfile> {
             icon: Icons.settings,
             label: 'profile.settings'.tr,
             onTap: () => SettingController.openSettingsPage(),
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
 
@@ -271,7 +290,7 @@ class _ProfileState extends State<OwnProfile> {
             icon: Icons.group,
             label: 'profile.friends'.tr,
             onTap: () => showModal(const FriendsPage()),
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
 
@@ -310,7 +329,7 @@ class _ProfileState extends State<OwnProfile> {
             icon: Icons.launch,
             label: 'help'.tr,
             onTap: () => launchUrlString(Constants.docsBase),
-            loading: false.obs,
+            loading: signal(false),
           ),
         ],
       ),

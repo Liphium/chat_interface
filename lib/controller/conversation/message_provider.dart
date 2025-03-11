@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
+import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -17,6 +17,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 // Package this and message sending as one
@@ -228,7 +229,7 @@ abstract class MessageProvider {
   ///
   /// Returns an error or null if successful.
   Future<String?> sendTextMessageWithFiles(
-    RxBool loading,
+    Signal<bool> loading,
     String message,
     List<UploadData> files,
     String answer,
@@ -257,7 +258,7 @@ abstract class MessageProvider {
   ///
   /// Returns an error or null if successful.
   Future<String?> sendMessage(
-    RxBool loading,
+    Signal<bool> loading,
     MessageType type,
     List<String> attachments,
     String message,
@@ -396,7 +397,7 @@ class Message {
 
   /// Extracts and decrypts the attachments
   Future<bool> initAttachments(MessageProvider? provider) async {
-    //* Load answer
+    // Load answer
     if (answer != "" && provider != null) {
       final message = await provider.loadMessageFromServer(answer, init: false);
       answerMessage = message;
@@ -404,22 +405,24 @@ class Message {
       answerMessage = null;
     }
 
-    //* Load attachments
+    // Load attachments
     if (attachmentsRenderer.isNotEmpty || renderingAttachments) {
       return true;
     }
     renderingAttachments = true;
     if (attachments.isNotEmpty && type != MessageType.system) {
       for (var attachment in attachments) {
-        if (attachment.isURL) {
-          final container = AttachmentContainer.remoteImage(attachment);
+        // Parse the attachment to the container
+        final container = await AttachmentController.fromString(attachment);
+
+        // Make sure to properly handle remote containers (both links and remote images)
+        if (container.attachmentType != AttachmentContainerType.file) {
           await container.init();
           attachmentsRenderer.add(container);
           continue;
         }
-        final json = jsonDecode(attachment);
-        final type = await AttachmentController.checkLocations(json["i"], StorageType.temporary);
-        final container = Get.find<AttachmentController>().fromJson(type, json);
+
+        // Check if the container should be downloaded automatically
         if (!await container.existsLocally()) {
           final extension = container.id.split(".").last;
           if (FileSettings.imageTypes.contains(extension)) {
@@ -515,7 +518,7 @@ class Message {
 
   /// Verifies the signature of the message
   Future<bool> verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
-    final sender = await Get.find<UnknownController>().loadUnknownProfile(senderAddress);
+    final sender = await UnknownService.loadUnknownProfile(senderAddress);
     if (sender == null) {
       sendLog("NO SENDER FOUND");
       verified.value = false;

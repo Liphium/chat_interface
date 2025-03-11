@@ -12,11 +12,9 @@ import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 
-class UnknownController extends GetxController {
-  final cache = <LPHAddress, UnknownAccount>{};
-
+class UnknownService {
   /// Load the profile of an unknown account by name
-  Future<UnknownAccount?> getUnknownProfileByName(String name) async {
+  static Future<UnknownAccount?> getUnknownProfileByName(String name) async {
     // Ignore if it is the name of the current account
     if (Get.find<StatusController>().name.value == name) {
       return UnknownAccount(StatusController.ownAddress, name, "", signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
@@ -42,36 +40,33 @@ class UnknownController extends GetxController {
       unpackagePublicKey(json["pub"]),
     );
 
-    // Add the unknown profile to the database
-    await db.unknownProfile.insertOnConflictUpdate(profile.toData());
-    cache[profile.id] = profile;
     return profile;
   }
 
   /// Load the profile of someone unknown
-  Future<UnknownAccount?> loadUnknownProfile(LPHAddress address) async {
+  static Future<UnknownAccount?> loadUnknownProfile(LPHAddress address) async {
     // Ignore if it is the id of the current account
     if (address == StatusController.ownAddress) {
       return UnknownAccount(StatusController.ownAddress, "", "", signatureKeyPair.publicKey, asymmetricKeyPair.publicKey);
     }
 
     // If the id matches a friend, use that instead
-    final controller = Get.find<FriendController>();
-    if (controller.friends[address] != null) {
-      return UnknownAccount.fromFriend(controller.friends[address]!);
-    }
-
-    // If the guy is in the cache, that works too
-    if (cache[address] != null) {
-      // Make sure the cached version isn't too old
-      if (cache[address]!.lastFetch != null && DateTime.now().difference(cache[address]!.lastFetch!) < const Duration(minutes: 5)) {
-        return cache[address];
-      }
+    final friend = FriendController.friends[address];
+    if (friend != null) {
+      return UnknownAccount.fromFriend(friend);
     }
 
     // Make sure the server is trusted
     if (!await TrustedLinkHelper.askToAddIfNotAdded(address.server)) {
       return null;
+    }
+
+    // Check if there is a cached version of the unknown account in the local database
+    final query = db.unknownProfile.select()
+      ..where((tbl) => tbl.id.equals(address.encode()) & tbl.lastFetched.isBiggerThanValue(DateTime.now().subtract(Duration(hours: 2))));
+    final result = await query.getSingleOrNull();
+    if (result != null) {
+      return UnknownAccount.fromData(result);
     }
 
     // Get account
@@ -95,8 +90,7 @@ class UnknownController extends GetxController {
     );
 
     // Add the unknown profile to the database
-    await db.unknownProfile.insertOnConflictUpdate(profile.toData());
-    cache[address] = profile;
+    await db.unknownProfile.insertOnConflictUpdate(profile.toData(DateTime.now()));
     return profile;
   }
 }
@@ -114,13 +108,15 @@ class UnknownAccount {
 
   factory UnknownAccount.fromData(UnknownProfileData data) {
     final keys = jsonDecode(fromDbEncrypted(data.keys));
-    return UnknownAccount(
+    final account = UnknownAccount(
       LPHAddress.from(data.id),
       fromDbEncrypted(data.name),
       fromDbEncrypted(data.displayName),
       unpackagePublicKey(keys["sg"]),
       unpackagePublicKey(keys["pub"]),
     );
+    account.lastFetch = data.lastFetched;
+    return account;
   }
 
   factory UnknownAccount.fromFriend(Friend friend) {
@@ -133,7 +129,7 @@ class UnknownAccount {
     );
   }
 
-  UnknownProfileData toData() => UnknownProfileData(
+  UnknownProfileData toData(DateTime lastFetched) => UnknownProfileData(
         id: id.encode(),
         name: dbEncrypted(name),
         displayName: dbEncrypted(displayName),
@@ -141,5 +137,6 @@ class UnknownAccount {
           "sg": packagePublicKey(signatureKey),
           "pub": packagePublicKey(publicKey),
         })),
+        lastFetched: lastFetched,
       );
 }

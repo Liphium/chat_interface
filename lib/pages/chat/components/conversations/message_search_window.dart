@@ -40,7 +40,6 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final friendController = Get.find<FriendController>();
     final searchController = Get.find<MessageSearchController>();
 
     return Container(
@@ -59,12 +58,11 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
               prefixIcon: Icons.search,
               hintText: "search".tr,
               onChange: (query) {
-                final controller = Get.find<MessageController>();
-                if (controller.currentProvider.value == null) {
+                if (MessageController.currentProvider.value == null) {
                   return;
                 }
                 searchController.filters.value = [
-                  ConversationFilter(controller.currentProvider.value!.conversation.id.encode()),
+                  ConversationFilter(MessageController.currentProvider.value!.conversation.id.encode()),
                   ContentFilter(query),
                 ];
                 searchController.search();
@@ -81,7 +79,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                   itemCount: searchController.results.length,
                   itemBuilder: (context, index) {
                     final message = searchController.results[index];
-                    final friend = friendController.friends[message.senderAddress];
+                    final friend = FriendController.friends[message.senderAddress];
 
                     // Check if a timestamp should be rendered
                     bool newHeading = false;
@@ -113,7 +111,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                             color: Get.theme.colorScheme.inverseSurface,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(defaultSpacing),
-                              onTap: () => Get.find<MessageController>().currentProvider.value!.scrollToMessage(message.id),
+                              onTap: () => MessageController.currentProvider.value!.scrollToMessage(message.id),
                               child: Padding(
                                 padding: const EdgeInsets.all(defaultSpacing),
                                 child: MaterialMessageRenderer(

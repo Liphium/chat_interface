@@ -96,8 +96,8 @@ class SpaceService {
     TabletopController.resetControllerState();
 
     // Open the screen
-    Get.find<MessageController>().unselectConversation();
-    Get.find<MessageController>().openTab(OpenTabType.space);
+    MessageController.unselectConversation();
+    MessageController.openTab(OpenTabType.space);
 
     // Send the server all the data required for setup
     final event = await SpaceConnection.spaceConnector!.sendActionAndWait(msg.ServerAction("setup", {

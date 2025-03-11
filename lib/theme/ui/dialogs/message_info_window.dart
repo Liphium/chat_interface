@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/services/chat/conversation_member.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -12,6 +12,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MessageInfoWindow extends StatefulWidget {
   final Message message;
@@ -27,15 +28,15 @@ class MessageInfoWindow extends StatefulWidget {
   State<MessageInfoWindow> createState() => _ConversationAddWindowState();
 }
 
-class _ConversationAddWindowState extends State<MessageInfoWindow> {
-  final messageDeletionLoading = false.obs;
+class _ConversationAddWindowState extends State<MessageInfoWindow> with SignalsMixin {
+  final messageDeletionLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {
     final provider = widget.provider;
     Member member;
     if (provider is ConversationMessageProvider) {
-      member = Get.find<ConversationController>().conversations[provider.conversation.id]!.members[widget.message.senderToken] ??
+      member = ConversationController.conversations[provider.conversation.id]!.members[widget.message.senderToken] ??
           Member(LPHAddress("", "removed".tr), widget.message.senderAddress, MemberRole.user);
     } else {
       member = Member(LPHAddress("", "removed".tr), widget.message.senderAddress, MemberRole.user);
@@ -68,7 +69,7 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
               Clipboard.setData(ClipboardData(text: widget.message.id));
               Get.back();
             },
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -78,7 +79,7 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
               Clipboard.setData(ClipboardData(text: member.tokenId.encode()));
               Get.back();
             },
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -87,7 +88,7 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
             onTap: () {
               showSuccessPopup("success", utf8.decode(base64Decode(widget.message.content)));
             },
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -96,7 +97,7 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> {
             icon: Icons.close,
             label: "close".tr,
             onTap: () => Get.back(),
-            loading: false.obs,
+            loading: signal(false),
           ),
         ],
       ),

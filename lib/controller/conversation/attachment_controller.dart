@@ -360,6 +360,21 @@ class AttachmentController extends GetxController {
     return null;
   }
 
+  /// Get an attachment container from a string.
+  ///
+  /// Also handles it when the container is a remote image.
+  static Future<AttachmentContainer> fromString(String data) async {
+    // Check if the container is a remote container
+    if (data.isURL) {
+      return AttachmentContainer.remoteImage(data);
+    }
+
+    // Decode the attachment container like regular
+    final json = jsonDecode(data);
+    final type = await AttachmentController.checkLocations(json["i"], StorageType.temporary);
+    return Get.find<AttachmentController>().fromJson(type, json);
+  }
+
   /// Get an attachment container from json
   AttachmentContainer fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
     var container = attachments[json["i"]];

@@ -92,9 +92,6 @@ class _FriendsPageState extends State<FriendsPage> {
             Flexible(
               child: RepaintBoundary(
                 child: Obx(() {
-                  final friendController = Get.find<FriendController>();
-                  final requestController = Get.find<RequestController>();
-
                   //* Friends, requests, sent requests list
                   return SingleChildScrollView(
                     child: Column(
@@ -121,7 +118,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         ),
 
                         Obx(() {
-                          final found = friendController.friends.values.any((friend) =>
+                          final found = FriendController.friends.values.any((friend) =>
                               (friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
                                   friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
                               friend.id != StatusController.ownAddress);
@@ -167,7 +164,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             ],
                             target: query.value.isEmpty ? 0.0 : 1.0,
                             child: Visibility(
-                              visible: requestController.requests.isNotEmpty,
+                              visible: RequestController.requests.isNotEmpty,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -178,20 +175,20 @@ class _FriendsPageState extends State<FriendsPage> {
                                   verticalSpacing(elementSpacing),
                                   Builder(
                                     builder: (context) {
-                                      if (requestController.requests.isEmpty) {
+                                      if (RequestController.requests.isEmpty) {
                                         return const SizedBox.shrink();
                                       }
                                       return Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        children: List.generate(requestController.requests.length, (index) {
-                                          final request = requestController.requests.values.elementAt(index);
+                                        children: List.generate(RequestController.requests.length, (index) {
+                                          final request = RequestController.requests.values.elementAt(index);
                                           return RequestButton(request: request, self: false);
                                         }),
                                       );
                                     },
                                   ),
                                   Visibility(
-                                    visible: friendController.friends.length > 1 || requestController.requestsSent.isNotEmpty,
+                                    visible: FriendController.friends.length > 1 || RequestController.requestsSent.isNotEmpty,
                                     child: verticalSpacing(sectionSpacing - elementSpacing),
                                   )
                                 ],
@@ -217,7 +214,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             ],
                             target: query.value.isEmpty ? 0.0 : 1.0,
                             child: Visibility(
-                              visible: requestController.requestsSent.isNotEmpty,
+                              visible: RequestController.requestsSent.isNotEmpty,
                               child: Padding(
                                 padding: const EdgeInsets.only(top: sectionSpacing),
                                 child: Column(
@@ -229,13 +226,13 @@ class _FriendsPageState extends State<FriendsPage> {
                                     verticalSpacing(elementSpacing),
                                     Builder(
                                       builder: (context) {
-                                        if (requestController.requestsSent.isEmpty) {
+                                        if (RequestController.requestsSent.isEmpty) {
                                           return const SizedBox.shrink();
                                         }
                                         return Column(
                                           mainAxisSize: MainAxisSize.min,
-                                          children: List.generate(requestController.requestsSent.length, (index) {
-                                            final request = requestController.requestsSent.values.elementAt(index);
+                                          children: List.generate(RequestController.requestsSent.length, (index) {
+                                            final request = RequestController.requestsSent.values.elementAt(index);
                                             return Padding(
                                               padding: const EdgeInsets.only(bottom: elementSpacing),
                                               child: RequestButton(request: request, self: true),
@@ -245,7 +242,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                       },
                                     ),
                                     Visibility(
-                                      visible: friendController.friends.length > 1,
+                                      visible: FriendController.friends.length > 1,
                                       child: verticalSpacing(sectionSpacing - elementSpacing),
                                     )
                                   ],
@@ -257,7 +254,7 @@ class _FriendsPageState extends State<FriendsPage> {
 
                         //* Friends
                         Visibility(
-                          visible: friendController.friends.length > 1,
+                          visible: FriendController.friends.length > 1,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -265,14 +262,14 @@ class _FriendsPageState extends State<FriendsPage> {
                             children: [
                               Builder(
                                 builder: (context) {
-                                  if (friendController.friends.length <= 1) {
+                                  if (FriendController.friends.length <= 1) {
                                     return const SizedBox.shrink();
                                   }
                                   return ListView.builder(
                                     shrinkWrap: true,
-                                    itemCount: friendController.friends.length,
+                                    itemCount: FriendController.friends.length,
                                     itemBuilder: (context, index) {
-                                      final friend = friendController.friends.values.elementAt(index);
+                                      final friend = FriendController.friends.values.elementAt(index);
 
                                       if (friend.unknown || friend.id == StatusController.ownAddress) {
                                         return const SizedBox();

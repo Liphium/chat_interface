@@ -21,6 +21,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
 
 import '../../../theme/components/forms/icon_button.dart';
@@ -46,9 +47,9 @@ class MessageInput extends StatefulWidget {
   State<MessageInput> createState() => _MessageInputState();
 }
 
-class _MessageInputState extends State<MessageInput> {
+class _MessageInputState extends State<MessageInput> with SignalsMixin {
   final FormattedTextEditingController _message = FormattedTextEditingController(Get.theme.textTheme.labelLarge!, Get.theme.textTheme.bodyLarge!);
-  final loading = false.obs;
+  final loading = signal(false);
   final FocusNode _inputFocus = FocusNode();
   StreamSubscription<Conversation>? _sub;
   final GlobalKey _libraryKey = GlobalKey();
@@ -317,7 +318,7 @@ class _MessageInputState extends State<MessageInput> {
                                     "message.reply.text".trParams({
                                       "name": _previousAccount == null
                                           ? "tf"
-                                          : Get.find<FriendController>().friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
+                                          : FriendController.friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
                                     }),
                                     style: theme.textTheme.labelMedium,
                                     maxLines: 1,

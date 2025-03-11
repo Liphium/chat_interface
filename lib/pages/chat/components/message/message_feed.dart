@@ -7,6 +7,7 @@ import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MessageFeed extends StatefulWidget {
   final double? overwritePadding;
@@ -22,14 +23,9 @@ class MessageFeed extends StatefulWidget {
   State<MessageFeed> createState() => _MessageFeedState();
 }
 
-class _MessageFeedState extends State<MessageFeed> {
+class _MessageFeedState extends State<MessageFeed> with SignalsMixin {
   final TextEditingController _message = TextEditingController();
-  final loading = false.obs;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final loading = signal(false);
 
   @override
   void dispose() {
@@ -39,11 +35,10 @@ class _MessageFeedState extends State<MessageFeed> {
 
   @override
   Widget build(BuildContext context) {
-    MessageController controller = Get.find();
     SettingController settingController = Get.find();
 
     return Obx(() {
-      if (controller.currentProvider.value!.conversation.error.value != null) {
+      if (MessageController.currentProvider.value!.conversation.error.value != null) {
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
@@ -56,7 +51,7 @@ class _MessageFeedState extends State<MessageFeed> {
                 ),
                 verticalSpacing(defaultSpacing),
                 Text(
-                  controller.currentProvider.value!.conversation.error.value!,
+                  MessageController.currentProvider.value!.conversation.error.value!,
                   style: Get.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -85,13 +80,13 @@ class _MessageFeedState extends State<MessageFeed> {
                             ),
                             child: Obx(
                               () {
-                                if (!controller.loaded.value) {
+                                if (!MessageController.loaded.value) {
                                   return const SizedBox();
                                 }
 
                                 return MessageList(
-                                  key: ValueKey(controller.currentProvider.value!.conversation.id),
-                                  provider: controller.currentProvider.value!,
+                                  key: ValueKey(MessageController.currentProvider.value!.conversation.id),
+                                  provider: MessageController.currentProvider.value!,
                                   overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
                                 );
                               },
@@ -104,7 +99,7 @@ class _MessageFeedState extends State<MessageFeed> {
                           alignment: Alignment.topCenter,
                           child: Obx(
                             () => Visibility(
-                              visible: controller.currentProvider.value!.newMessagesLoading.value,
+                              visible: MessageController.currentProvider.value!.newMessagesLoading.value,
                               child: Padding(
                                 padding: const EdgeInsets.all(defaultSpacing),
                                 child: Material(
@@ -140,12 +135,12 @@ class _MessageFeedState extends State<MessageFeed> {
 
                   //* Message input
                   SelectionContainer.disabled(
-                    child: controller.currentProvider.value!.conversation.borked
+                    child: MessageController.currentProvider.value!.conversation.borked
                         ? const SizedBox.shrink()
                         : MessageInput(
                             rectangle: widget.rectInput,
-                            draft: controller.currentProvider.value!.conversation.id.encode(),
-                            provider: controller.currentProvider.value!,
+                            draft: MessageController.currentProvider.value!.conversation.id.encode(),
+                            provider: MessageController.currentProvider.value!,
                           ),
                   )
                 ],
@@ -155,12 +150,12 @@ class _MessageFeedState extends State<MessageFeed> {
           Obx(() {
             final visible = settingController.settings[AppSettings.showGroupMembers]!.value.value;
             return Visibility(
-              visible: controller.currentProvider.value!.conversation.isGroup && visible,
+              visible: MessageController.currentProvider.value!.conversation.isGroup && visible,
               child: Container(
                 color: Get.theme.colorScheme.onInverseSurface,
                 width: 300,
                 child: ConversationMembers(
-                  conversation: controller.currentProvider.value!.conversation,
+                  conversation: MessageController.currentProvider.value!.conversation,
                 ),
               ),
             );

@@ -8,6 +8,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ConversationInfoWindow extends StatefulWidget {
   final ContextMenuData position;
@@ -25,7 +26,7 @@ class ConversationInfoWindow extends StatefulWidget {
 
 class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
   // Loading states
-  final deleteLoading = false.obs;
+  final deleteLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +54,7 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
                 icon: Icons.edit,
                 label: "Edit title",
                 onTap: () => {},
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
           ),
@@ -61,7 +62,7 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
             icon: Icons.developer_mode,
             label: "For developers",
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(sectionSpacing),
           Text(
@@ -97,7 +98,7 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
               },
               onDecline: () => {},
             )),
-            loading: false.obs,
+            loading: signal(false),
           ),
         ],
       ),

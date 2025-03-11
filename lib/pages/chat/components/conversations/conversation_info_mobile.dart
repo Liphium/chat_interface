@@ -10,6 +10,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ConversationInfoMobile extends StatefulWidget {
@@ -28,7 +29,7 @@ class ConversationInfoMobile extends StatefulWidget {
 
 class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
   // Loading states
-  final deleteLoading = false.obs;
+  final deleteLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +72,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             icon: Icons.search,
             label: "chat.search".tr,
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
 
@@ -84,7 +85,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
                 icon: Icons.electric_bolt,
                 label: "chat.zapshare".tr,
                 onTap: () => Get.find<ZapShareController>().openWindow(widget.conversation, ContextMenuData.fromPosition(Offset.zero)),
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
           ),
@@ -96,7 +97,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
                 icon: Icons.edit,
                 label: "Edit title",
                 onTap: () => {},
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
           ),
@@ -104,7 +105,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             icon: Icons.developer_mode,
             label: "dev.details".tr,
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(sectionSpacing),
 
@@ -122,7 +123,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             icon: Icons.launch,
             label: "learn_more".tr,
             onTap: () => launchUrlString("https://liphium.com"), // TODO: Make a page about encryption
-            loading: false.obs,
+            loading: signal(false),
           ),
 
           verticalSpacing(sectionSpacing),
@@ -159,7 +160,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
               },
               onDecline: () => {},
             )),
-            loading: false.obs,
+            loading: signal(false),
           ),
         ],
       ),

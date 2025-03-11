@@ -140,7 +140,7 @@ class WarpShareContainer {
   /// The person sharing the Warp.
   final Friend account;
 
-  final loading = false.obs;
+  final loading = signal(false);
 
   WarpShareContainer({
     required this.id,

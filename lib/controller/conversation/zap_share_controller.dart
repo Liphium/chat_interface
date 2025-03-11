@@ -22,6 +22,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:open_file/open_file.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
@@ -154,7 +155,7 @@ class ZapShareController extends GetxController {
 
         // Send live share message
         final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, fileName, key!);
-        Get.find<MessageController>().currentProvider.value!.sendMessage(false.obs, msg.MessageType.liveshare, [], container.toJson(), "");
+        MessageController.currentProvider.value!.sendMessage(signal(false), msg.MessageType.liveshare, [], container.toJson(), "");
       },
     );
   }

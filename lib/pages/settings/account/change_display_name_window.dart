@@ -31,7 +31,6 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
 
   /// Save the display name
   Future<void> save() async {
-    final controller = Get.find<StatusController>();
     if (_loading.value) return;
     _loading.value = true;
     _errorText.value = "";
@@ -46,15 +45,14 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
       return;
     }
 
-    controller.displayName.value = _displayNameController.text;
+    StatusController.displayName.value = _displayNameController.text;
     _loading.value = false;
     Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<StatusController>();
-    _displayNameController.text = controller.displayName.value;
+    _displayNameController.text = StatusController.displayName.value;
 
     return DialogBase(
       title: [

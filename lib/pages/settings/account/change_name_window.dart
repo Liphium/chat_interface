@@ -44,15 +44,14 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
       return;
     }
 
-    Get.find<StatusController>().name.value = _usernameController.text;
+    StatusController.name.value = _usernameController.text;
     _loading.value = false;
     Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<StatusController>();
-    _usernameController.text = controller.name.value;
+    _usernameController.text = StatusController.name.value;
 
     return DialogBase(
       title: [

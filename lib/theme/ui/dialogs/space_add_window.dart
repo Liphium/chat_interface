@@ -36,7 +36,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    if (Get.find<FriendController>().friends.length == 1) {
+    if (FriendController.friends.length == 1) {
       return SlidingWindowBase(
         title: [
           Text("chat.space.add".tr, style: theme.textTheme.titleMedium),

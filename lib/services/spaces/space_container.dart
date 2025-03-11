@@ -94,9 +94,8 @@ class SpaceInfo {
   SpaceInfo(this.start, this.members) {
     error = false;
     exists = true;
-    final controller = Get.find<FriendController>();
     for (var member in members) {
-      final friend = controller.friends[member];
+      final friend = FriendController.friends[member];
       if (friend != null) friends.add(friend);
     }
   }
@@ -106,10 +105,8 @@ class SpaceInfo {
     members = List<LPHAddress>.from(json["members"].map((e) => LPHAddress.from(decryptSymmetric(e, container.key))));
     exists = true;
 
-    final controller = Get.find<FriendController>();
-
     for (var member in members) {
-      final friend = controller.friends[member];
+      final friend = FriendController.friends[member];
       if (friend != null) friends.add(friend);
     }
   }

@@ -1,7 +1,7 @@
 import 'package:chat_interface/util/encryption/signatures.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
+import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
@@ -39,8 +39,7 @@ class SpaceMemberController {
         // Add the member to the list if they're not in it yet
         if (members[clientId] == null) {
           members[clientId] = SpaceMember(
-            Get.find<FriendController>().friends[address] ??
-                (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
+            FriendController.friends[address] ?? (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
             clientId,
           );
           members[clientId]!.verifySignature(member["sign"]);
@@ -88,7 +87,7 @@ class SpaceMember {
 
   Future<void> verifySignature(String signature) async {
     // Load the guy's profile
-    final profile = await Get.find<UnknownController>().loadUnknownProfile(friend.id);
+    final profile = await UnknownService.loadUnknownProfile(friend.id);
     if (profile == null) {
       verified.value = false;
       sendLog("couldn't find profile: identity of space member is uncertain");

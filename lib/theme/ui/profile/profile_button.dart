@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 import '../../../util/vertical_spacing.dart';
 
@@ -9,7 +10,7 @@ class ProfileButton extends StatelessWidget {
   final Function() onTap;
   final Color? color;
   final Color? iconColor;
-  final RxBool loading;
+  final Signal<bool> loading;
 
   const ProfileButton({super.key, required this.icon, required this.label, required this.onTap, required this.loading, this.color, this.iconColor});
 

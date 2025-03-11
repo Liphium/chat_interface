@@ -33,9 +33,9 @@ class MessageBar extends StatefulWidget {
   State<MessageBar> createState() => _MessageBarState();
 }
 
-class _MessageBarState extends State<MessageBar> {
+class _MessageBarState extends State<MessageBar> with SignalsMixin {
   final GlobalKey _infoKey = GlobalKey(), _zapShareKey = GlobalKey();
-  final callLoading = false.obs;
+  final callLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +70,10 @@ class _MessageBarState extends State<MessageBar> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Show a hide sidebar icon for more focus on the current conversation
-                Obx(
-                  () => LoadingIconButton(
-                    onTap: () => Get.find<MessageController>().toggleSidebar(),
-                    icon: Get.find<MessageController>().hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
+                Watch(
+                  (ctx) => LoadingIconButton(
+                    onTap: () => MessageController.toggleSidebar(),
+                    icon: MessageController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                   ),
                 ),
                 horizontalSpacing(elementSpacing),
@@ -215,12 +215,11 @@ class _MessageBarState extends State<MessageBar> {
                     () => IconButton(
                       iconSize: 27,
                       icon: Icon(Icons.search,
-                          color: Get.find<MessageController>().showSearch.value
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurface),
+                          color:
+                              MessageController.showSearch.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
-                        Get.find<MessageController>().toggleSearchView();
-                        if (Get.find<MessageController>().showSearch.value) {
+                        MessageController.toggleSearchView();
+                        if (MessageController.showSearch.value) {
                           Get.find<MessageSearchController>().currentFocus!.requestFocus();
                         }
                       },
@@ -247,7 +246,7 @@ class _MessageBarState extends State<MessageBar> {
 
 class ConversationAddButton extends StatefulWidget {
   final Conversation conversation;
-  final RxBool loading;
+  final Signal<bool> loading;
 
   const ConversationAddButton({super.key, required this.conversation, required this.loading});
 

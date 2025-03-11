@@ -47,8 +47,6 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MessageController>();
-
     return Scaffold(
       backgroundColor: Get.theme.colorScheme.inverseSurface,
       body: CloseToTray(
@@ -58,10 +56,9 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
           left: false,
           child: PlatformCallback(
             mobile: () {
-              final controller = Get.find<MessageController>();
-              if (controller.currentProvider.value != null) {
+              if (MessageController.currentProvider.value != null) {
                 Get.off(const ChatPageMobile());
-                Get.to(MessagesPageMobile(provider: controller.currentProvider.value!));
+                Get.to(MessagesPageMobile(provider: MessageController.currentProvider.value!));
               } else {
                 Get.off(const ChatPageMobile());
               }
@@ -83,8 +80,8 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                           duration: 250.ms,
                         )
                       ],
-                      onInit: (ac) => ac.value = controller.hideSidebar.value ? 0 : 1,
-                      target: controller.hideSidebar.value ? 0 : 1,
+                      onInit: (ac) => ac.value = MessageController.hideSidebar.value ? 0 : 1,
+                      target: MessageController.hideSidebar.value ? 0 : 1,
                       child: SizedBox(
                         width: 350,
                         child: Sidebar(),
@@ -98,12 +95,11 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                   child: Obx(
                     () {
                       // Check if a space is selected (show the page if it is)
-                      final controller = Get.find<MessageController>();
-                      switch (controller.currentOpenType.value) {
+                      switch (MessageController.currentOpenType.value) {
                         case OpenTabType.townsquare:
                           return const TownsquarePage();
                         case OpenTabType.conversation:
-                          if (controller.currentProvider.value == null) {
+                          if (MessageController.currentProvider.value == null) {
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -123,8 +119,8 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                                 top: true,
                                 padding: const EdgeInsets.all(0),
                                 child: MessageBar(
-                                  conversation: controller.currentProvider.value!.conversation,
-                                  provider: controller.currentProvider.value!,
+                                  conversation: MessageController.currentProvider.value!.conversation,
+                                  provider: MessageController.currentProvider.value!,
                                 ),
                               ),
 
@@ -152,8 +148,8 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                                               duration: 250.ms,
                                             )
                                           ],
-                                          onInit: (ac) => ac.value = controller.showSearch.value ? 1 : 0,
-                                          target: controller.showSearch.value ? 1 : 0,
+                                          onInit: (ac) => ac.value = MessageController.showSearch.value ? 1 : 0,
+                                          target: MessageController.showSearch.value ? 1 : 0,
                                           child: SizedBox(
                                             width: 350,
                                             child: MessageSearchWindow(),

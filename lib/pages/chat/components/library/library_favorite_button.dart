@@ -37,13 +37,13 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
       final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.data.equals(widget.container.url))).getSingleOrNull();
       bookmarked.value = dbEntry != null;
       if (bookmarked.value) {
-        entry = LibraryEntry.fromData(dbEntry!);
+        entry = await LibraryEntry.fromData(dbEntry!);
       }
     } else {
       final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.data.contains(widget.container.id))).getSingleOrNull();
       bookmarked.value = dbEntry != null;
       if (bookmarked.value) {
-        entry = LibraryEntry.fromData(dbEntry!);
+        entry = await LibraryEntry.fromData(dbEntry!);
       }
     }
 

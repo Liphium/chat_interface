@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class ServerFileViewer extends StatefulWidget {
@@ -22,11 +23,11 @@ class ServerFileViewer extends StatefulWidget {
   State<ServerFileViewer> createState() => _ConversationsPageState();
 }
 
-class _ConversationsPageState extends State<ServerFileViewer> {
+class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin {
   final files = RxList<FileContainer>.empty();
   final query = "".obs;
-  final startLoading = true.obs;
-  final pageLoading = false.obs;
+  final startLoading = signal(true);
+  final pageLoading = signal(false);
   final currentPage = 0.obs;
   final totalCount = 0.obs;
   final storageLine = "loading".tr.obs;
@@ -280,7 +281,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
 class PageSwitcher extends StatefulWidget {
   final RxInt currentPage;
   final RxInt count;
-  final RxBool loading;
+  final Signal<bool> loading;
   final Function(int) page;
 
   const PageSwitcher({
@@ -371,8 +372,8 @@ class FileContainer {
   bool system;
   int createdAt;
   String? path;
-  final deleteLoading = false.obs;
-  final deleted = false.obs;
+  final deleteLoading = signal(false);
+  final deleted = signal(false);
 
   FileContainer(
     this.id,

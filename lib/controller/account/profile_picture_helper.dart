@@ -121,7 +121,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    await Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
+    await FriendController.friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
 
     return true;
   }
@@ -135,7 +135,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    await Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(null);
+    await FriendController.friends[StatusController.ownAddress]!.updateProfilePicture(null);
     return true;
   }
 

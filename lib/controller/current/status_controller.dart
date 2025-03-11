@@ -1,152 +1,115 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
-import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/settings/account/data_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart';
-import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
-class StatusController extends GetxController {
+class StatusController {
   static String ownAccountId = "";
   static List<String> permissions = [];
   static List<RankData> ranks = [];
   static LPHAddress get ownAddress => LPHAddress(basePath, ownAccountId);
 
-  Timer? _timer;
-  StatusController() {
+  /// Timer for constantly sending the status
+  static Timer? _timer;
+
+  /// Start a timer that always sends the status to the server.
+  static void init() {
     if (_timer != null) _timer!.cancel();
 
     // Update status every minute
     _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       if (connector.isConnected()) {
-        setStatus();
+        StatusService.sendStatus();
       }
     });
   }
 
-  final displayName = "not-set".obs;
-  final name = 'not-set'.obs;
+  static final displayName = signal("not-set");
+  static final name = signal('not-set');
 
   // Status message
-  final statusLoading = true.obs;
-  final status = ''.obs;
-  final type = 1.obs;
+  static final statusLoading = signal(true);
+  static final status = signal("");
+  static final type = signal(1);
 
   // Shared content by friends
-  final sharedContent = RxMap<LPHAddress, ShareContainer>();
+  static final sharedContent = mapSignal(<LPHAddress, ShareContainer>{});
 
   // Current shared content (by this account)
-  final ownContainer = Rx<ShareContainer?>(null);
+  static final ownContainer = signal<ShareContainer?>(null);
 
   void setName(String value) => name.value = value;
 
-  String statusJson() => jsonEncode(<String, dynamic>{
-        "s": base64Encode(utf8.encode(status.value)),
-        "t": type.value,
+  /// Get the current status json for the current client.
+  static String statusJson() => jsonEncode(<String, dynamic>{
+        "s": base64Encode(utf8.encode(status.peek())),
+        "t": type.peek(),
       });
 
-  String newStatusJson(String status, int type) => jsonEncode(<String, dynamic>{
+  /// Create a new status json.
+  static String newStatusJson(String status, int type) => jsonEncode(<String, dynamic>{
         "s": base64Encode(utf8.encode(status)),
         "t": type,
       });
 
-  void fromStatusJson(String json) {
-    sendLog("received $json");
+  /// Update the status from a status json.
+  static void fromStatusJson(String json) {
+    // Decode the status
     final data = jsonDecode(json);
-    try {
-      status.value = utf8.decode(base64Decode(data["s"]));
-    } catch (e) {
-      status.value = "";
-    }
-    type.value = data["t"] ?? 1;
+
+    // Start a batch to set the new status
+    batch(() {
+      try {
+        status.value = utf8.decode(base64Decode(data["s"]));
+      } catch (e) {
+        status.value = "";
+      }
+      type.value = data["t"] ?? 1;
+    });
   }
 
-  String statusPacket([String? newStatusJson]) {
+  /// Get the encrypted version of the status json.
+  static String statusPacket([String? newStatusJson]) {
     return encryptSymmetric(newStatusJson ?? statusJson(), profileKey);
   }
 
-  String sharedContentPacket() {
+  /// Get the encrypted version of the currently shared content.
+  static String sharedContentPacket() {
     if (ownContainer.value == null) {
       return "";
     }
     return encryptSymmetric(ownContainer.value!.toJson(), profileKey);
   }
 
-  Future<bool> share(ShareContainer container) async {
+  /// Share a new [ShareContainer].
+  static Future<bool> share(ShareContainer container) async {
     if (ownContainer.value != null) return false; // TODO: Potentially remove
     ownContainer.value = container;
-    await setStatus();
+    await StatusService.sendStatus();
     return true;
   }
 
-  void stopSharing() {
+  /// Stop sharing the current [ShareContainer].
+  static void stopSharing() {
     if (ownContainer.value == null) {
       return;
     }
     ownContainer.value = null;
-    setStatus();
+    StatusService.sendStatus();
   }
 
-  Future<bool> setStatus({String? message, int? type, Function()? success}) async {
-    if (statusLoading.value) return false;
-    statusLoading.value = true;
-
-    // Secret: Enable new social features experiment
-    if (message == "liphium.social") {
-      message = "activated";
-      await Get.find<SettingController>().settings[DataSettings.socialFeatures]!.setValue(true);
-    }
-
-    // Validate the status to make sure everything is fine
-    connector.sendAction(
-        ServerAction("st_validate", <String, dynamic>{
-          "status": statusPacket(newStatusJson(message ?? status.value, type ?? this.type.value)),
-          "data": sharedContentPacket(),
-        }), handler: (event) {
-      statusLoading.value = false;
-      success?.call();
-      if (event.data["success"] == true) {
-        if (message != null) status.value = message;
-        if (type != null) this.type.value = type;
-
-        // Send the new status
-        ConversationService.subscribeToConversations(controller: this);
-      }
+  /// Update the current status.
+  static void updateStatus({String? message, int? type}) {
+    batch(() {
+      if (message != null) status.value = message;
+      if (type != null) StatusController.type.value = type;
     });
-
-    return true;
-  }
-
-  // Log out of this account
-  Future<void> logOut({deleteEverything = false, deleteFiles = false}) async {
-    // Delete the session information
-    await db.setting.deleteWhere((tbl) => tbl.key.equals("profile"));
-
-    // Delete all data
-    if (deleteEverything) {
-      for (var table in db.allTables) {
-        await table.deleteAll();
-      }
-    }
-
-    // Delete all files
-    if (deleteFiles) {
-      await Get.find<AttachmentController>().deleteAllFiles();
-    }
-
-    // Exit the app
-    exit(0);
   }
 }
 

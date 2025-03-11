@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/services/chat/message_service.dart';
 import 'package:chat_interface/services/connection/connection.dart' as cn;
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -19,7 +20,7 @@ class MessageListener {
     cn.connector.listen("conv_msg", (event) async {
       sendLog("received one message");
       // Check if the conversation even exists on this account
-      final conversation = Get.find<ConversationController>().conversations[LPHAddress.from(event.data["msg"]["cv"])];
+      final conversation = ConversationController.conversations[LPHAddress.from(event.data["msg"]["cv"])];
       if (conversation == null) {
         sendLog("WARNING: invalid message, conversation not found");
         return;
@@ -35,7 +36,7 @@ class MessageListener {
       }
 
       // Tell the controller about the message in a different isolate
-      unawaited(Get.find<MessageController>().storeMessage(message, conversation));
+      unawaited(MessageService.storeMessage(message, conversation));
     });
 
     // Listen for multiple messages (mp stands for multiple)
@@ -43,7 +44,7 @@ class MessageListener {
       "conv_msg_mp",
       (event) async {
         // Check if the conversation even exists on this account
-        final conversation = Get.find<ConversationController>().conversations[LPHAddress.from(event.data["cv"])];
+        final conversation = ConversationController.conversations[LPHAddress.from(event.data["cv"])];
         if (conversation == null) {
           sendLog("WARNING: invalid message, conversation not found");
           return;
@@ -63,7 +64,7 @@ class MessageListener {
         });
 
         // Store all of the messages in the local database
-        unawaited(Get.find<MessageController>().storeMessages(messages, conversation));
+        unawaited(MessageService.storeMessages(messages, conversation));
       },
     );
   }
@@ -160,7 +161,7 @@ class MessageListener {
   /// **Doesn't verify the signature**
   static (Message, SymmetricSequencedInfo?) messageFromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
     // Convert to message
-    conversation ??= Get.find<ConversationController>().conversations[json["cv"]]!;
+    conversation ??= ConversationController.conversations[json["cv"]]!;
     final senderAddress = LPHAddress.from(json["sr"]);
     final message = Message(
       id: json["id"],

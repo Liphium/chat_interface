@@ -81,7 +81,7 @@ class _ColorPreviewState extends State<ColorPreview> {
                   children: [
                     Icon(Icons.person, color: colors.getPrimary(), size: 40),
                     horizontalSpacing(defaultSpacing),
-                    Expanded(child: Text(Get.find<StatusController>().name.value, style: Get.theme.textTheme.labelLarge)),
+                    Expanded(child: Text(StatusController.name.value, style: Get.theme.textTheme.labelLarge)),
                   ],
                 ),
               ),

@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:signals/signals_flutter.dart';
 
 class BubblesRenderer extends StatefulWidget {
   final int index;
@@ -40,10 +41,10 @@ class BubblesRenderer extends StatefulWidget {
   State<BubblesRenderer> createState() => _BubblesRendererState();
 }
 
-class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderStateMixin {
+class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderStateMixin, SignalsMixin {
   final GlobalKey _heightKey = GlobalKey();
   final GlobalKey contextMenuKey = GlobalKey();
-  final hovering = false.obs;
+  final hovering = signal(false);
   Message? _message;
 
   @override
@@ -68,11 +69,9 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    final friendController = Get.find<FriendController>();
-
     // This is needed for jump to message
     if (widget.index == widget.provider.messages.length + 1) {
-      return Obx(() {
+      return Watch((ctx) {
         final loading = widget.provider.newMessagesLoading.value && widget.provider.messages.isEmpty;
         return SizedBox(
           height: Get.height * widget.heightMultiplier,
@@ -123,7 +122,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     if (message.type == MessageType.system) {
       return BubblesSystemMessageRenderer(message: message, provider: widget.provider);
     }
-    final sender = friendController.friends[message.senderAddress];
+    final sender = FriendController.friends[message.senderAddress];
     final self = message.senderAddress == StatusController.ownAddress;
 
     bool last = false;
@@ -202,7 +201,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
             MouseRegion(
               onEnter: (event) {
                 hovering.value = true;
-                Get.find<MessageController>().hoveredMessage = message;
+                MessageController.hoveredMessage = message;
               },
               onHover: (event) {
                 if (hovering.value) {
@@ -212,7 +211,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
               },
               onExit: (event) {
                 hovering.value = false;
-                Get.find<MessageController>().hoveredMessage = null;
+                MessageController.hoveredMessage = null;
               },
               child: Row(
                 textDirection: self ? TextDirection.rtl : TextDirection.ltr,

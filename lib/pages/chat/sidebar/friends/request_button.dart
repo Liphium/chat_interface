@@ -6,6 +6,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class RequestButton extends StatefulWidget {
   final bool self; // If the request was sent by the user
@@ -17,8 +18,8 @@ class RequestButton extends StatefulWidget {
   State<RequestButton> createState() => _RequestButtonState();
 }
 
-class _RequestButtonState extends State<RequestButton> {
-  final requestLoading = false.obs;
+class _RequestButtonState extends State<RequestButton> with SignalsMixin {
+  final requestLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {

@@ -8,7 +8,6 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 late SecureKey vaultKey;
@@ -28,9 +27,8 @@ class AccountStep extends ConnectionStep {
     }
 
     // Set all account data
-    StatusController controller = Get.find();
-    final uNameChanged = controller.name.value != account["username"];
-    final dNameChanged = controller.displayName.value != account["display_name"];
+    final uNameChanged = StatusController.name.value != account["username"];
+    final dNameChanged = StatusController.displayName.value != account["display_name"];
 
     // Set the account id if there isn't one
     if (StatusController.ownAccountId == "" || uNameChanged || dNameChanged || StatusController.ownAccountId != account["id"]) {
@@ -62,7 +60,7 @@ class AccountStep extends ConnectionStep {
     storedActionKey = body["actions"];
 
     // Set own key pair as cached (in the friend that represents this account)
-    Get.find<FriendController>().friends[StatusController.ownAddress]!.keyStorage =
+    FriendController.friends[StatusController.ownAddress]!.keyStorage =
         KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, "");
 
     return SetupResponse();

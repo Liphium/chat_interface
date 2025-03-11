@@ -13,6 +13,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class AccountData {
   String id;
@@ -21,8 +22,8 @@ class AccountData {
   String displayName;
   int rankID;
   DateTime createdAt;
-  final deleted = false.obs;
-  final deleteLoading = false.obs;
+  final deleted = signal(false);
+  final deleteLoading = signal(false);
 
   AccountData({
     required this.id,
@@ -65,11 +66,11 @@ class AdminAccountsPage extends StatefulWidget {
   State<AdminAccountsPage> createState() => _AdminAccountsPageState();
 }
 
-class _AdminAccountsPageState extends State<AdminAccountsPage> {
+class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin {
   final accounts = RxList<AccountData>.empty();
   final query = "".obs;
   final startLoading = true.obs;
-  final pageLoading = false.obs;
+  final pageLoading = signal(false);
   final currentPage = 0.obs;
   final totalCount = 0.obs;
   Future? currentFuture;
@@ -254,7 +255,6 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                                   children: [
                                     // Launch button (go to their profile)
                                     LoadingIconButton(
-                                      loading: false.obs,
                                       onTap: () => Get.dialog(AdminAccountProfile(account: account)),
                                       icon: Icons.launch,
                                     ),

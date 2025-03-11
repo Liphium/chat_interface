@@ -4,7 +4,6 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:get/get.dart';
 
 class Member {
   final LPHAddress tokenId; // Token id
@@ -34,10 +33,9 @@ class Member {
         conversationId: conversation.encode(),
       );
 
-  Friend getFriend([FriendController? controller]) {
+  Friend getFriend() {
     if (StatusController.ownAddress == address) return Friend.me();
-    controller ??= Get.find<FriendController>();
-    return controller.friends[address] ?? Friend.unknown(address);
+    return FriendController.friends[address] ?? Friend.unknown(address);
   }
 
   /// Promote a member to the next available role.

@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -38,22 +38,17 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ConversationController>();
-    final messageController = Get.find<MessageController>();
-    final friendController = Get.find<FriendController>();
-
     return Obx(
       () {
-        final statusController = Get.find<StatusController>();
         return FadingEdgeScrollView.fromScrollView(
           child: ListView.builder(
             controller: _controller,
-            itemCount: controller.order.length,
+            itemCount: ConversationController.order.length,
             addRepaintBoundaries: true,
             padding: const EdgeInsets.only(top: defaultSpacing),
             itemBuilder: (context, index) {
               //* Normal conversation renderer
-              Conversation conversation = controller.conversations[controller.order.elementAt(index)]!;
+              Conversation conversation = ConversationController.conversations[ConversationController.order.elementAt(index)]!;
 
               Friend? friend;
               if (!conversation.isGroup) {
@@ -71,7 +66,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                   friend = Friend.me();
                 } else {
                   // If found, use the actual friend of course
-                  friend = friendController.friends[id];
+                  friend = FriendController.friends[id];
                 }
               }
 
@@ -103,7 +98,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         child: Obx(
                           () => Material(
                             borderRadius: BorderRadius.circular(defaultSpacing),
-                            color: messageController.currentProvider.value?.conversation == conversation && !isMobileMode()
+                            color: MessageController.currentProvider.value?.conversation == conversation && !isMobileMode()
                                 ? Get.theme.colorScheme.onSurface.withOpacity(0.075)
                                 : Colors.transparent,
                             child: InkWell(
@@ -116,8 +111,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                               //* When conversation is tapped (open conversation)
                               onTap: () {
-                                if (messageController.currentProvider.value?.conversation == conversation && !isMobileMode()) return;
-                                messageController.selectConversation(conversation);
+                                if (MessageController.currentProvider.value?.conversation == conversation && !isMobileMode()) return;
+                                MessageController.selectConversation(conversation);
                               },
 
                               //* Conversation item content
@@ -157,7 +152,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                                       Flexible(
                                                         child: Text(
                                                           conversation.containerSub.value.name,
-                                                          style: messageController.currentProvider.value?.conversation == conversation
+                                                          style: MessageController.currentProvider.value?.conversation == conversation
                                                               ? Get.theme.textTheme.labelMedium
                                                               : Get.theme.textTheme.bodyMedium,
                                                           textHeightBehavior: noTextHeight,
@@ -187,7 +182,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                                         Flexible(
                                                           child: Text(
                                                             friend != null ? conversation.dmName : conversation.containerSub.value.name,
-                                                            style: messageController.currentProvider.value?.conversation == conversation
+                                                            style: MessageController.currentProvider.value?.conversation == conversation
                                                                 ? Get.theme.textTheme.labelMedium
                                                                 : Get.theme.textTheme.bodyMedium,
                                                             maxLines: 1,
@@ -304,7 +299,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                   //* Render shared content
                   if (friend != null)
                     Obx(() {
-                      final content = statusController.sharedContent[friend!.id];
+                      final content = StatusController.sharedContent[friend!.id];
                       if (content == null) {
                         return const SizedBox();
                       }

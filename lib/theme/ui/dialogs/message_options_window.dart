@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MessageOptionsWindow extends StatefulWidget {
   final ContextMenuData data;
@@ -40,12 +41,12 @@ class MessageOptionsWindow extends StatefulWidget {
   State<MessageOptionsWindow> createState() => _ConversationAddWindowState();
 }
 
-class _ConversationAddWindowState extends State<MessageOptionsWindow> {
-  final messageDeletionLoading = false.obs;
+class _ConversationAddWindowState extends State<MessageOptionsWindow> with SignalsMixin {
+  final messageDeletionLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {
-    final friend = Get.find<FriendController>().friends[widget.message.senderAddress];
+    final friend = FriendController.friends[widget.message.senderAddress];
 
     return SlidingWindowBase(
       lessPadding: true,
@@ -75,7 +76,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   Get.back();
                   Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider!));
                 },
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
 
@@ -90,7 +91,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   Clipboard.setData(ClipboardData(text: widget.message.content));
                   Get.back();
                 },
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
 
@@ -119,7 +120,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   await attachment.file!.saveTo(saveLocation.path);
                   Get.back();
                 },
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
 
@@ -142,7 +143,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   unawaited(OpenFile.open(attachment.file!.path));
                   Get.back();
                 },
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
 
@@ -158,7 +159,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   await Pasteboard.writeFiles([widget.message.attachmentsRenderer[0].file!.path]);
                   Get.back();
                 },
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
 
@@ -170,7 +171,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
               Get.back();
               showModal(Profile(friend: friend ?? Friend.unknown(widget.message.senderAddress)));
             },
-            loading: false.obs,
+            loading: signal(false),
           ),
 
           // Give the user an option to reply in case it's a text message
@@ -184,7 +185,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   MessageSendHelper.addReplyToCurrentDraft(widget.message);
                   Get.back();
                 },
-                loading: false.obs,
+                loading: signal(false),
               ),
             ),
 

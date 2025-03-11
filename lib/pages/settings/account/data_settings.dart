@@ -33,7 +33,6 @@ class DataSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<StatusController>();
     return SettingsPageBase(
       label: "data",
       child: Column(
@@ -209,9 +208,9 @@ class DataSettingsPage extends StatelessWidget {
                     verticalSpacing(elementSpacing),
                     Obx(
                       () => Text(
-                        controller.displayName.value.toLowerCase() == controller.name.value.toLowerCase()
-                            ? List.generate(controller.name.value.length, (index) => "*").join("")
-                            : controller.displayName.value,
+                        StatusController.displayName.value.toLowerCase() == StatusController.name.value.toLowerCase()
+                            ? List.generate(StatusController.name.value.length, (index) => "*").join("")
+                            : StatusController.displayName.value,
                         style: Get.theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -244,7 +243,7 @@ class DataSettingsPage extends StatelessWidget {
                     Text("username".tr, style: Get.theme.textTheme.labelMedium),
                     verticalSpacing(elementSpacing),
                     Text(
-                      List.generate(controller.name.value.length, (index) => "*").join(""),
+                      List.generate(StatusController.name.value.length, (index) => "*").join(""),
                       style: Get.theme.textTheme.bodyMedium,
                     ),
                   ],

@@ -69,7 +69,7 @@ class ConversationAddWindow extends StatefulWidget {
       Conversation? conv;
       (conv, error) = await ConversationService.openDirectMessage(friends.first);
       if (conv != null) {
-        unawaited(Get.find<MessageController>().selectConversation(conv));
+        unawaited(MessageController.selectConversation(conv));
       }
     } else {
       error = await ConversationService.openGroupConversation(friends, name);
@@ -116,9 +116,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    FriendController friendController = Get.find();
 
-    if (friendController.friends.length == 1) {
+    if (FriendController.friends.length == 1) {
       return SlidingWindowBase(
         title: [
           Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
@@ -178,8 +177,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     controller: _searchController,
                     onSubmitted: (value) {
                       // Make the first friend that matches the search the selected one
-                      if (friendController.friends.isNotEmpty) {
-                        final member = friendController.friends.values.firstWhere(
+                      if (FriendController.friends.isNotEmpty) {
+                        final member = FriendController.friends.values.firstWhere(
                           (element) =>
                               (element.name.toLowerCase().contains(value.toLowerCase()) ||
                                   element.displayName.value.toLowerCase().contains(value.toLowerCase())) &&
@@ -213,11 +212,11 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
             constraints: const BoxConstraints(maxHeight: 300),
             child: Obx(
               () => ListView.builder(
-                itemCount: friendController.friends.length,
+                itemCount: FriendController.friends.length,
                 shrinkWrap: true,
                 padding: const EdgeInsets.only(top: defaultSpacing),
                 itemBuilder: (context, index) {
-                  Friend friend = friendController.friends.values.elementAt(index);
+                  Friend friend = FriendController.friends.values.elementAt(index);
 
                   if (friend.id == StatusController.ownAddress) {
                     return const SizedBox();

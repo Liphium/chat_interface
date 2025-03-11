@@ -1,7 +1,7 @@
 import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';

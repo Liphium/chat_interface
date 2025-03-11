@@ -7,6 +7,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:signals/signals_flutter.dart';
 
 class AudioAttachmentPlayer extends StatefulWidget {
   final AttachmentContainer container;
@@ -135,7 +136,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
                   }
 
                   return LoadingIconButton(
-                    loading: false.obs,
+                    loading: signal(false),
                     onTap: () async {
                       if (playing.value) {
                         await player.pause();

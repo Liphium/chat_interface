@@ -10,6 +10,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ConversationMembers extends StatelessWidget {
   final Conversation conversation;
@@ -62,7 +63,7 @@ class ConversationMembers extends StatelessWidget {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         onTap: () {
-                          final friend = Get.find<FriendController>().friends[member.address];
+                          final friend = FriendController.friends[member.address];
                           if (StatusController.ownAddress != member.address) {
                             final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                             Get.dialog(
@@ -77,7 +78,7 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.add_moderator,
                                             label: "chat.make_moderator".tr,
-                                            loading: false.obs,
+                                            loading: signal(false),
                                             onTap: (f, l) async {
                                               final error = await member.promote(conversation.id);
                                               if (error != null) {
@@ -89,7 +90,7 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.add_moderator,
                                             label: "chat.make_admin".tr,
-                                            loading: false.obs,
+                                            loading: signal(false),
                                             onTap: (f, l) async {
                                               final error = await member.promote(conversation.id);
                                               if (error != null) {
@@ -103,7 +104,7 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.remove_moderator,
                                             label: "chat.remove_moderator".tr,
-                                            loading: false.obs,
+                                            loading: signal(false),
                                             onTap: (f, l) async {
                                               final error = await member.demote(conversation.id);
                                               if (error != null) {
@@ -115,7 +116,7 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.remove_moderator,
                                             label: "chat.remove_admin".tr,
-                                            loading: false.obs,
+                                            loading: signal(false),
                                             onTap: (f, l) async {
                                               final error = await member.demote(conversation.id);
                                               if (error != null) {
@@ -129,7 +130,7 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.person_remove,
                                             label: "chat.remove_member".tr,
-                                            loading: false.obs,
+                                            loading: signal(false),
                                             color: Get.theme.colorScheme.errorContainer,
                                             iconColor: Get.theme.colorScheme.error,
                                             onTap: (f, l) async {

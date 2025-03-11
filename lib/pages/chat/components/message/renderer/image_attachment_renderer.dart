@@ -94,11 +94,11 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                 container: widget.image,
                 onEnter: () {
                   if (widget.hoverCheck) {
-                    Get.find<MessageController>().hoveredAttachment = widget.image;
+                    MessageController.hoveredAttachment = widget.image;
                   }
                 },
                 onExit: () {
-                  Get.find<MessageController>().hoveredAttachment = widget.image;
+                  MessageController.hoveredAttachment = widget.image;
                 },
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,

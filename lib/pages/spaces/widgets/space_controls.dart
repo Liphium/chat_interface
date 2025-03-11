@@ -55,7 +55,6 @@ class _SpaceControlsState extends State<SpaceControls> {
             Watch(
               (context) => LoadingIconButton(
                 background: true,
-                loading: false.obs,
                 onTap: () {
                   SpaceController.hideSidebar.value = !SpaceController.hideSidebar.peek();
                   if (SpaceController.hideSidebar.value) {
@@ -112,7 +111,7 @@ class _SpaceControlsState extends State<SpaceControls> {
                         target: SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
                         child: Padding(
                           padding: const EdgeInsets.only(right: defaultSpacing),
-                          child: LoadingIconButtonSignal(
+                          child: LoadingIconButton(
                             key: tabletopKey,
                             background: true,
                             padding: defaultSpacing,
@@ -166,7 +165,6 @@ class _SpaceControlsState extends State<SpaceControls> {
             Watch(
               (context) {
                 return LoadingIconButton(
-                  loading: false.obs,
                   background: true,
                   onTap: () => SpaceController.chatOpen.value = !SpaceController.chatOpen.peek(),
                   icon: SpaceController.chatOpen.value ? Icons.arrow_forward : Icons.arrow_back,

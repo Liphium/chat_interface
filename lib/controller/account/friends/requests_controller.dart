@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/services/chat/requests_service.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
+import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
@@ -10,12 +10,13 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 import 'friend_controller.dart';
 
-class RequestController extends GetxController {
-  final requestsSent = <LPHAddress, Request>{}.obs;
-  final requests = <LPHAddress, Request>{}.obs;
+class RequestController {
+  static final requestsSent = mapSignal(<LPHAddress, Request>{});
+  static final requests = mapSignal(<LPHAddress, Request>{});
 
   void reset() {
     requests.clear();
@@ -73,8 +74,7 @@ final requestsLoading = false.obs;
 Future<void> newFriendRequest(String name, Function(String) success) async {
   requestsLoading.value = true;
 
-  final controller = Get.find<StatusController>();
-  if (name == controller.name.value || LPHAddress.from(name) == StatusController.ownAddress) {
+  if (name == StatusController.name.value || LPHAddress.from(name) == StatusController.ownAddress) {
     showErrorPopup("request.self", "request.self.text".tr);
     requestsLoading.value = false;
     return;
@@ -84,10 +84,10 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
   UnknownAccount? profile;
   if (name.contains("@")) {
     // If it is an address, get it by using the id
-    profile = await Get.find<UnknownController>().loadUnknownProfile(LPHAddress.from(name));
+    profile = await UnknownService.loadUnknownProfile(LPHAddress.from(name));
   } else {
     // If it is a name, then get it from the current instance by name
-    profile = await Get.find<UnknownController>().getUnknownProfileByName(name);
+    profile = await UnknownService.getUnknownProfileByName(name);
   }
 
   // Check if the profile is valid
@@ -98,7 +98,7 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
   }
 
   // Make sure the person is not already a friend
-  if (Get.find<FriendController>().friends.keys.any((a) => a == profile!.id)) {
+  if (FriendController.friends.keys.any((a) => a == profile!.id)) {
     showErrorPopup("request.friend.exists", "request.friend.exists.text".tr);
     requestsLoading.value = false;
     return;

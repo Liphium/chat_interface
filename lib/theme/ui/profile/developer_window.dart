@@ -17,6 +17,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class DeveloperWindow extends StatefulWidget {
   const DeveloperWindow({super.key});
@@ -25,8 +26,8 @@ class DeveloperWindow extends StatefulWidget {
   State<DeveloperWindow> createState() => _DeveloperWindowState();
 }
 
-class _DeveloperWindowState extends State<DeveloperWindow> {
-  final remoteActionTesting = false.obs;
+class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
+  final remoteActionTesting = signal(false);
 
   /// Perform a remote action test with any instance server
   Future<void> remoteActionTest(String server) async {
@@ -74,7 +75,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             onTap: () async {
               unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
             },
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -85,7 +86,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
               db.conversation.deleteAll();
               db.member.deleteAll();
             },
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -95,14 +96,14 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
               VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeFriend, "", 0);
               db.friend.deleteAll();
             },
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.delete,
             label: "Delete all messages (local)",
             onTap: () => db.message.deleteAll(),
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -112,7 +113,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
               VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, Constants.vaultLibraryTag, 0);
               db.libraryEntry.deleteAll();
             },
-            loading: false.obs,
+            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -122,7 +123,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             loading: remoteActionTesting,
           ),
           Column(
-            children: Get.find<FriendController>().friends.values.where((friend) => friend.id.server != basePath).map((friend) {
+            children: FriendController.friends.values.where((friend) => friend.id.server != basePath).map((friend) {
               return Padding(
                 padding: const EdgeInsets.only(top: elementSpacing),
                 child: ProfileButton(

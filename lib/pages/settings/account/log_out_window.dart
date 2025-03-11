@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -44,7 +44,7 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
               Expanded(
                 child: FJElevatedButton(
                   onTap: () async {
-                    await Get.find<StatusController>().logOut(deleteEverything: true, deleteFiles: _deleteFiles.value);
+                    await StatusService.logOut(deleteEverything: true, deleteFiles: _deleteFiles.value);
                   },
                   child: Center(child: Text("yes".tr, style: Get.theme.textTheme.labelLarge)),
                 ),

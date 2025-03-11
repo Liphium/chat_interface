@@ -92,7 +92,7 @@ class SpaceController {
     }
 
     if (publish) {
-      unawaited(Get.find<StatusController>().share(container!));
+      unawaited(StatusController.share(container!));
     }
   }
 
@@ -112,7 +112,7 @@ class SpaceController {
       return;
     }
 
-    unawaited(provider.sendMessage(false.obs, MessageType.call, [], container!.toInviteJson(), ""));
+    unawaited(provider.sendMessage(signal(false), MessageType.call, [], container!.toInviteJson(), ""));
   }
 
   static Future<void> join(SpaceConnectionContainer container) async {
@@ -133,8 +133,8 @@ class SpaceController {
     key = spaceKey;
 
     // Open the screen
-    Get.find<MessageController>().unselectConversation();
-    Get.find<MessageController>().openTab(OpenTabType.space);
+    MessageController.unselectConversation();
+    MessageController.openTab(OpenTabType.space);
 
     // Load the first messages of the Space chat
     provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
@@ -157,7 +157,7 @@ class SpaceController {
   }
 
   static void inviteToCall(MessageProvider provider) {
-    provider.sendMessage(false.obs, MessageType.call, [], getContainer().toInviteJson(), "");
+    provider.sendMessage(signal(false), MessageType.call, [], getContainer().toInviteJson(), "");
   }
 
   /// Get a [SpaceConnectionContainer] for the current Space.
@@ -188,7 +188,7 @@ class SpaceController {
     // Show an error if there was one
     if (!error) {
       unawaited(Get.offAll(getChatPage(), transition: Transition.fadeIn));
-      Get.find<MessageController>().openTab(OpenTabType.conversation);
+      MessageController.openTab(OpenTabType.conversation);
     }
   }
 
