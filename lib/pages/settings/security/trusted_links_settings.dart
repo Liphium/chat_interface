@@ -12,6 +12,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class TrustedLinkSettings {
   static const String unsafeSources = "links.unsafe_sources";
@@ -37,12 +38,18 @@ class TrustedLinkSettingsPage extends StatefulWidget {
 }
 
 class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
-  final _trusted = <TrustedLinkData>[].obs;
+  final _trusted = listSignal<TrustedLinkData>([]);
 
   @override
   void initState() {
     super.initState();
     loadTrusted();
+  }
+
+  @override
+  void dispose() {
+    _trusted.dispose();
+    super.dispose();
   }
 
   Future<void> loadTrusted() async {

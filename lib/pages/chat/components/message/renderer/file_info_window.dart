@@ -5,6 +5,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class FileInfoWindow extends StatefulWidget {
   final AttachmentContainer container;
@@ -16,14 +17,21 @@ class FileInfoWindow extends StatefulWidget {
 }
 
 class _ConversationAddWindowState extends State<FileInfoWindow> {
-  final _errorText = "".obs;
-  final _loading = true.obs;
+  final _errorText = signal("");
+  final _loading = signal(true);
   double _size = 0.0;
 
   @override
   void initState() {
     grabFileInfo();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _errorText.dispose();
+    _loading.dispose();
+    super.dispose();
   }
 
   Future<void> grabFileInfo() async {

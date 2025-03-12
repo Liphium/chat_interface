@@ -9,6 +9,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class AdminAccountProfile extends StatefulWidget {
   final AccountData account;
@@ -23,15 +24,20 @@ class AdminAccountProfile extends StatefulWidget {
 }
 
 class _AdminAccountProfileState extends State<AdminAccountProfile> {
-  late SmoothDialogController controller;
-  late AccountData current;
+  late SmoothDialogController _controller;
 
-  final currentTab = "settings.acc_profile.tab.info".tr.obs;
-  late Map<String, Widget Function()> tabs;
+  final _currentTab = signal("settings.acc_profile.tab.info".tr);
+  late Map<String, Widget Function()> _tabs;
+
+  @override
+  void dispose() {
+    _currentTab.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
-    tabs = <String, Widget Function()>{
+    _tabs = <String, Widget Function()>{
       "settings.acc_profile.tab.info".tr: () => Column(
             children: [
               // Fields for copying all the account data
@@ -69,13 +75,12 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
           ),
     };
 
-    current = widget.account;
-    controller = SmoothDialogController(tabs[currentTab.value]!());
+    _controller = SmoothDialogController(_tabs[_currentTab.value]!());
     super.initState();
   }
 
   void acceptUpdate(AccountData data) {
-    controller.transitionToContinuos(tabs[currentTab.value]!());
+    _controller.transitionToContinuos(_tabs[_currentTab.value]!());
   }
 
   @override
@@ -99,13 +104,13 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
               "settings.acc_profile.tab.actions".tr,
             ],
             onTabSwitch: (tab) {
-              currentTab.value = tab;
-              controller.transitionToContinuos(tabs[tab]!());
+              _currentTab.value = tab;
+              _controller.transitionToContinuos(_tabs[tab]!());
             },
           ),
           verticalSpacing(defaultSpacing),
           SmoothBox(
-            controller: controller,
+            controller: _controller,
           ),
         ],
       ),

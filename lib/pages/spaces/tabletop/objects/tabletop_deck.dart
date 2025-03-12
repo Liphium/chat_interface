@@ -235,14 +235,22 @@ class DeckObjectCreationWindow extends StatefulWidget {
 
 class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
   // Deck list
-  final _decks = <TabletopDeck>[].obs;
-  final _loading = true.obs;
-  final _error = false.obs;
+  final _decks = listSignal<TabletopDeck>([]);
+  final _loading = signal(true);
+  final _error = signal(false);
 
   @override
   void initState() {
     getDecksFromServer();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _decks.dispose();
+    _loading.dispose();
+    _error.dispose();
+    super.dispose();
   }
 
   Future<void> getDecksFromServer() async {

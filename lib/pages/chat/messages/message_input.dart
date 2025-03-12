@@ -49,12 +49,12 @@ class MessageInput extends StatefulWidget {
 
 class _MessageInputState extends State<MessageInput> {
   final FormattedTextEditingController _message = FormattedTextEditingController(Get.theme.textTheme.labelLarge!, Get.theme.textTheme.bodyLarge!);
-  final loading = signal(false);
+  final _loading = signal(false);
   final FocusNode _inputFocus = FocusNode();
   StreamSubscription<Conversation>? _sub;
   final GlobalKey _libraryKey = GlobalKey();
   // final GlobalKey _emojiKey = GlobalKey();
-  final _emojiSuggestions = <Emoji>[].obs;
+  final _emojiSuggestions = listSignal<Emoji>([]);
 
   // For a little hack to prevent the answers from disappearing instantly
   LPHAddress? _previousAccount;
@@ -63,8 +63,9 @@ class _MessageInputState extends State<MessageInput> {
   void dispose() {
     _message.dispose();
     _sub?.cancel();
-    loading.dispose();
+    _loading.dispose();
     _inputFocus.dispose();
+    _emojiSuggestions.dispose();
     super.dispose();
   }
 
@@ -120,7 +121,7 @@ class _MessageInputState extends State<MessageInput> {
       MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.target, "");
       _message.clear();
     }
-    loading.value = false;
+    _loading.value = false;
   }
 
   /// Replace the current selection with a new text
@@ -189,7 +190,7 @@ class _MessageInputState extends State<MessageInput> {
           // Send a regular text message if there are no files to attach
           if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
             final error = await widget.provider.sendMessage(
-              loading,
+              _loading,
               MessageType.text,
               [],
               _message.text,
@@ -209,7 +210,7 @@ class _MessageInputState extends State<MessageInput> {
 
           // Send a regular text message with files
           final error = await widget.provider.sendTextMessageWithFiles(
-            loading,
+            _loading,
             _message.text,
             MessageSendHelper.currentDraft.value!.files,
             MessageSendHelper.currentDraft.value!.answer.value?.id ?? "",
@@ -505,7 +506,7 @@ class _MessageInputState extends State<MessageInput> {
                             },
                             icon: Icons.send,
                             color: theme.colorScheme.tertiary,
-                            loading: loading,
+                            loading: _loading,
                           ),
                         ),
                       ],

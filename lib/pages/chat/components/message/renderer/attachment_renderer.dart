@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
+import 'package:signals/signals_flutter.dart';
 
 class AttachmentRenderer extends StatefulWidget {
   final Message? message;
@@ -40,7 +41,13 @@ class AttachmentRenderer extends StatefulWidget {
 class _AttachmentRendererState extends State<AttachmentRenderer> {
   Image? _networkImage;
   final GlobalKey _heightKey = GlobalKey();
-  final loading = true.obs;
+  final _loading = signal(true);
+
+  @override
+  void dispose() {
+    _loading.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -70,10 +77,10 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       );
       final stream = _networkImage!.image.resolve(const ImageConfiguration());
       final listener = ImageStreamListener((image, synchronousCall) {
-        if (!loading.value) {
+        if (!_loading.value) {
           return;
         }
-        loading.value = false;
+        _loading.value = false;
         sendLog("current height ${widget.message!.currentHeight}");
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           sendLog("NEW HEIGHT ${widget.message!.heightKey!.currentContext!.size!.height}");
@@ -103,7 +110,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         widget.container.url,
         fit: BoxFit.cover,
       );
-      loading.value = false;
+      _loading.value = false;
     }
   }
 
@@ -171,7 +178,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           children: [
             Align(
               key: _heightKey,
-              heightFactor: loading.value ? 0 : 1,
+              heightFactor: _loading.value ? 0 : 1,
               child: LibraryFavoriteButton(
                 container: widget.container,
                 child: InkWell(

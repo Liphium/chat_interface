@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class SpaceConnectionContainer extends ShareContainer {
@@ -14,7 +14,7 @@ class SpaceConnectionContainer extends ShareContainer {
   final String roomId; // Token required for joining (even though it's not really a token)
   final SecureKey key; // Symmetric key
 
-  final info = Rx<SpaceInfo?>(null);
+  final info = signal<SpaceInfo?>(null);
   int errorCount = 0;
   Timer? _timer;
   bool get cancelled => _timer == null;

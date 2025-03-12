@@ -6,6 +6,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
 
 class EmojiWindow extends StatefulWidget {
@@ -20,23 +21,22 @@ class EmojiWindow extends StatefulWidget {
 class _EmojiWindowState extends State<EmojiWindow> {
   final _scrollController = ScrollController();
   final _controller = TextEditingController();
-  final _currentSearch = "".obs;
-  int currentIndex = 0;
-  final emojis = <Emoji>[].obs;
-  bool gone = false;
-  Timer? currentTimer;
+  final _currentSearch = signal("");
+  final _emojis = listSignal(<Emoji>[]);
+  Timer? _currentTimer;
 
   @override
   void initState() {
     super.initState();
-    emojis.value = UnicodeEmojis.allEmojis;
+    _emojis.value = UnicodeEmojis.allEmojis;
   }
 
   @override
   void dispose() {
-    gone = true;
     _scrollController.dispose();
     _controller.dispose();
+    _currentSearch.dispose();
+    _emojis.dispose();
     super.dispose();
   }
 
@@ -60,10 +60,10 @@ class _EmojiWindowState extends State<EmojiWindow> {
             onChange: (value) {
               _currentSearch.value = value;
               if (value == "") {
-                emojis.value = UnicodeEmojis.allEmojis;
+                _emojis.value = UnicodeEmojis.allEmojis;
               } else {
                 final search = UnicodeEmojis.search(value);
-                emojis.value = search;
+                _emojis.value = search;
               }
             },
           ),
@@ -81,9 +81,9 @@ class _EmojiWindowState extends State<EmojiWindow> {
                       maxCrossAxisExtent: 30 * 1.5,
                       crossAxisSpacing: elementSpacing,
                     ),
-                    itemCount: emojis.length,
+                    itemCount: _emojis.length,
                     itemBuilder: (context, index) {
-                      final emoji = emojis[index];
+                      final emoji = _emojis[index];
                       return RepaintBoundary(
                         child: Tooltip(
                           key: ValueKey(emoji.shortName),
@@ -95,7 +95,7 @@ class _EmojiWindowState extends State<EmojiWindow> {
                               borderRadius: BorderRadius.circular(1000),
                               onTap: () {
                                 Get.back(result: emoji.emoji);
-                                currentTimer?.cancel();
+                                _currentTimer?.cancel();
                               },
                               child: Text(
                                 emoji.emoji,

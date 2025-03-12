@@ -5,6 +5,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class LibraryFavoriteButton extends StatefulWidget {
   final AttachmentContainer container;
@@ -26,24 +27,24 @@ class LibraryFavoriteButton extends StatefulWidget {
   State<LibraryFavoriteButton> createState() => _LibraryFavoriteButtonState();
 }
 
-class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
-  final visible = false.obs;
-  final bookmarked = false.obs;
-  LibraryEntry? entry;
+class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with SignalsMixin {
+  late final _visible = createSignal(false);
+  late final _bookmarked = createSignal(false);
+  LibraryEntry? _entry;
 
   /// Fetches the bookmark state from the local database
   Future<bool> fetchBookmarkState() async {
     if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
       final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.data.equals(widget.container.url))).getSingleOrNull();
-      bookmarked.value = dbEntry != null;
-      if (bookmarked.value) {
-        entry = await LibraryEntry.fromData(dbEntry!);
+      _bookmarked.value = dbEntry != null;
+      if (_bookmarked.value) {
+        _entry = await LibraryEntry.fromData(dbEntry!);
       }
     } else {
       final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.data.contains(widget.container.id))).getSingleOrNull();
-      bookmarked.value = dbEntry != null;
-      if (bookmarked.value) {
-        entry = await LibraryEntry.fromData(dbEntry!);
+      _bookmarked.value = dbEntry != null;
+      if (_bookmarked.value) {
+        _entry = await LibraryEntry.fromData(dbEntry!);
       }
     }
 
@@ -56,11 +57,11 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
     return MouseRegion(
       onEnter: (e) async {
         await fetchBookmarkState();
-        visible.value = true;
+        _visible.value = true;
         widget.onEnter?.call();
       },
       onExit: (e) {
-        visible.value = false;
+        _visible.value = false;
         widget.onExit?.call();
       },
       child: Stack(
@@ -71,7 +72,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
             right: elementSpacing,
             child: Obx(
               () => Visibility(
-                visible: visible.value,
+                visible: _visible.value,
                 child: Material(
                   color: Get.theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(elementSpacing),
@@ -82,15 +83,15 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                     splashColor: Colors.transparent,
                     overlayColor: const WidgetStatePropertyAll(Colors.transparent),
                     onTap: () async {
-                      if (bookmarked.value) {
-                        final success = await LibraryManager.removeEntryFromLibrary(entry!);
+                      if (_bookmarked.value) {
+                        final success = await LibraryManager.removeEntryFromLibrary(_entry!);
                         if (success) {
-                          bookmarked.value = false;
+                          _bookmarked.value = false;
                         }
                       } else {
                         final success = await LibraryManager.addContainerToLibrary(widget.container);
                         if (success) {
-                          bookmarked.value = true;
+                          _bookmarked.value = true;
                         }
                       }
                     },
@@ -98,8 +99,8 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                       padding: const EdgeInsets.all(elementSpacing),
                       child: Obx(
                         () => Icon(
-                          bookmarked.value ? Icons.bookmark : Icons.bookmark_outline,
-                          color: bookmarked.value ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,
+                          _bookmarked.value ? Icons.bookmark : Icons.bookmark_outline,
+                          color: _bookmarked.value ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,
                         ),
                       ),
                     ),

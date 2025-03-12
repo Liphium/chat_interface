@@ -30,14 +30,21 @@ class LibraryTab extends StatefulWidget {
 
 class _LibraryTabState extends State<LibraryTab> {
   LibraryEntryType? _lastFilter;
-  final _containerList = <AttachmentContainer>[].obs;
-  BigInt lastDate = BigInt.from(0);
-  final _show = false.obs;
+  final _containerList = listSignal(<AttachmentContainer>[]);
+  BigInt _lastDate = BigInt.from(0);
+  final _show = signal(false);
+
+  @override
+  void dispose() {
+    _show.dispose();
+    _containerList.dispose();
+    super.dispose();
+  }
 
   Future<void> loadMoreItems() async {
     // Make sure to start from the top again when a new filter is set
     if (widget.filter != _lastFilter) {
-      lastDate = BigInt.from(0);
+      _lastDate = BigInt.from(0);
     }
 
     // Get all the library entries that match the current filter
@@ -45,19 +52,19 @@ class _LibraryTabState extends State<LibraryTab> {
     if (widget.filter != null) {
       entries = await (db.libraryEntry.select()
             ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
-            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(lastDate)))
+            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(_lastDate)))
             ..where((tbl) => tbl.type.equals(widget.filter!.index))
             ..limit(30))
           .get();
     } else {
       entries = await (db.libraryEntry.select()
             ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
-            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(lastDate)))
+            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(_lastDate)))
             ..limit(30))
           .get();
     }
     if (entries.isNotEmpty) {
-      lastDate = entries.last.createdAt;
+      _lastDate = entries.last.createdAt;
     }
 
     // Get all the attachment containers from the library entries for displaying them

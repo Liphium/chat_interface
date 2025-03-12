@@ -24,7 +24,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 part 'message_sending.dart';
 
 abstract class MessageProvider {
-  final messages = <Message>[].obs;
+  final messages = listSignal(<Message>[]);
   final waitingMessages = <String>[]; // To prevent messages from being sent twice due to a race condition
 
   //* Scroll
@@ -103,7 +103,7 @@ abstract class MessageProvider {
   }
 
   /// Loading state for new messages (at top or bottom)
-  final newMessagesLoading = false.obs;
+  final newMessagesLoading = signal(false);
 
   /// Whether or not the messages are loading at the top (for showing a loading indicator)
   bool messagesLoadingTop = false;
@@ -377,7 +377,7 @@ class Message {
   MessageType type;
   String content;
   List<String> attachments;
-  final verified = true.obs;
+  final verified = signal(true);
   String answer;
   final LPHAddress senderToken;
   final LPHAddress senderAddress;
@@ -386,7 +386,7 @@ class Message {
 
   Function()? highlightCallback;
   AnimationController? highlightAnimation;
-  final canScroll = false.obs;
+  final canScroll = signal(false);
   double? currentHeight;
   GlobalKey? heightKey;
   bool heightReported = false;

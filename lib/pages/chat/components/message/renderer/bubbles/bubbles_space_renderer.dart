@@ -11,6 +11,7 @@ import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class BubblesSpaceMessageRenderer extends StatefulWidget {
   final Message message;
@@ -35,8 +36,14 @@ class BubblesSpaceMessageRenderer extends StatefulWidget {
 }
 
 class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
-  final loading = false.obs;
+  final _loading = signal(false);
   double _mouseX = 0, _mouseY = 0;
+
+  @override
+  void dispose() {
+    _loading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

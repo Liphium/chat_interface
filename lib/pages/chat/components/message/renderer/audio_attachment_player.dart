@@ -7,6 +7,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:signals/signals_flutter.dart';
 
 class AudioAttachmentPlayer extends StatefulWidget {
   final AttachmentContainer container;
@@ -17,13 +18,13 @@ class AudioAttachmentPlayer extends StatefulWidget {
   State<AudioAttachmentPlayer> createState() => _AudioAttachmentPlayerState();
 }
 
-class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
-  final player = AudioPlayer();
-  final playing = false.obs;
-  final currentMax = Rx<Duration?>(null);
-  final currentDuration = Rx<Duration?>(null);
-  bool paused = false;
-  final hoverPosition = Rx<double?>(null);
+class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with SignalsMixin {
+  final _player = AudioPlayer();
+  late final _playing = createSignal(false);
+  late final _currentMax = createSignal<Duration?>(null);
+  late final _currentDuration = createSignal<Duration?>(null);
+  bool _paused = false;
+  late final _hoverPosition = createSignal<double?>(null);
 
   @override
   void initState() {
@@ -32,14 +33,14 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
   }
 
   void _init() {
-    player.positionStream.listen(
+    _player.positionStream.listen(
       (duration) {
-        currentDuration.value = duration;
+        _currentDuration.value = duration;
       },
     );
-    player.durationStream.listen(
+    _player.durationStream.listen(
       (max) {
-        currentMax.value = max;
+        _currentMax.value = max;
       },
     );
   }
@@ -47,7 +48,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
   @override
   void dispose() {
     super.dispose();
-    player.dispose();
+    _player.dispose();
   }
 
   @override
@@ -136,25 +137,25 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
 
                   return LoadingIconButton(
                     onTap: () async {
-                      if (playing.value) {
-                        await player.pause();
-                        playing.value = false;
-                        paused = true;
+                      if (_playing.value) {
+                        await _player.pause();
+                        _playing.value = false;
+                        _paused = true;
                       } else {
-                        if (paused) {
-                          unawaited(player.play());
-                          paused = false;
-                          playing.value = true;
+                        if (_paused) {
+                          unawaited(_player.play());
+                          _paused = false;
+                          _playing.value = true;
                           return;
                         }
 
-                        await player.setFilePath(widget.container.file!.path);
-                        await player.setVolume(0.2);
-                        unawaited(player.play());
-                        playing.value = true;
+                        await _player.setFilePath(widget.container.file!.path);
+                        await _player.setVolume(0.2);
+                        unawaited(_player.play());
+                        _playing.value = true;
                       }
                     },
-                    icon: playing.value ? Icons.pause : Icons.play_arrow,
+                    icon: _playing.value ? Icons.pause : Icons.play_arrow,
                     background: true,
                     color: Get.theme.colorScheme.onPrimary,
                     backgroundColor: Get.theme.colorScheme.primary,
@@ -165,7 +166,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
             verticalSpacing(defaultSpacing),
             LayoutBuilder(builder: (context, constraints) {
               return Obx(() {
-                if (currentDuration.value == null || currentMax.value == null) {
+                if (_currentDuration.value == null || _currentMax.value == null) {
                   return Container(
                     height: 10,
                     decoration: BoxDecoration(
@@ -179,13 +180,13 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
                 return MouseRegion(
                   cursor: SystemMouseCursors.click,
                   onHover: (event) {
-                    hoverPosition.value = event.localPosition.dx;
+                    _hoverPosition.value = event.localPosition.dx;
                   },
-                  onExit: (event) => hoverPosition.value = null,
+                  onExit: (event) => _hoverPosition.value = null,
                   child: GestureDetector(
                     onTap: () {
-                      final percentage = (hoverPosition.value! / constraints.maxWidth);
-                      player.seek(Duration(milliseconds: (currentMax.value!.inMilliseconds * percentage).toInt()));
+                      final percentage = (_hoverPosition.value! / constraints.maxWidth);
+                      _player.seek(Duration(milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt()));
                     },
                     child: Stack(
                       children: [
@@ -201,9 +202,9 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> {
                             duration: Duration(milliseconds: 100),
                             height: 10,
                             width: constraints.maxWidth *
-                                (hoverPosition.value == null
-                                        ? (currentDuration.value!.inMilliseconds / currentMax.value!.inMilliseconds)
-                                        : (hoverPosition.value! / constraints.maxWidth))
+                                (_hoverPosition.value == null
+                                        ? (_currentDuration.value!.inMilliseconds / _currentMax.value!.inMilliseconds)
+                                        : (_hoverPosition.value! / constraints.maxWidth))
                                     .clamp(0, 1),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(defaultSpacing),

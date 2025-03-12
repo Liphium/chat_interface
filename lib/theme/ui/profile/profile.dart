@@ -131,7 +131,6 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   //* Loading state for buttons
-  final removeLoading = false.obs;
   final List<ProfileAction> actions = [];
 
   @override

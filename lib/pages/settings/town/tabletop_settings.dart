@@ -72,8 +72,8 @@ class TabletopSettingsPage extends StatefulWidget {
   State<TabletopSettingsPage> createState() => _TabletopSettingsPageState();
 }
 
-class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
-  final _selected = "settings.tabletop.general".tr.obs;
+class _TabletopSettingsPageState extends State<TabletopSettingsPage> with SignalsMixin {
+  late final _selected = createSignal("settings.tabletop.general".tr);
 
   // Tabs
   final _tabs = <String, Widget>{
@@ -99,7 +99,7 @@ class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
           verticalSpacing(sectionSpacing),
 
           //* Current tab
-          Obx(() => _tabs[_selected.value]!)
+          _tabs[_selected.value]!
         ],
       ),
     );
@@ -115,12 +115,18 @@ class TabletopGeneralTab extends StatefulWidget {
 
 class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
   /// The hue of the cursor (for updating the preview)
-  final _cursorHue = 0.0.obs;
+  final _cursorHue = signal(0.0);
 
   @override
   void initState() {
     _cursorHue.value = SettingController.settings[TabletopSettings.cursorHue]!.getValue();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _cursorHue.dispose();
+    super.dispose();
   }
 
   @override
@@ -218,9 +224,17 @@ class TabletopDeckTab extends StatefulWidget {
 
 class _TabletopDeckTabState extends State<TabletopDeckTab> {
   // Deck list
-  final _decks = <TabletopDeck>[].obs;
-  final _loading = true.obs;
-  final _error = false.obs;
+  final _decks = listSignal<TabletopDeck>([]);
+  final _loading = signal(true);
+  final _error = signal(false);
+
+  @override
+  void dispose() {
+    _decks.dispose();
+    _loading.dispose();
+    _error.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {

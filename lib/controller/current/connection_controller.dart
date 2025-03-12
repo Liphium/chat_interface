@@ -170,7 +170,7 @@ abstract class SynchronizationTask {
   SynchronizationTask(this.name, this.frequency);
 
   Timer? _timer;
-  final loading = false.obs;
+  final loading = signal(false);
 
   /// Starts the task.
   Future<void> start() async {

@@ -440,11 +440,11 @@ class AttachmentContainer {
   String get name => fileName ?? id;
 
   // Download status
-  final downloading = false.obs;
-  final downloaded = false.obs;
-  final error = false.obs;
-  final unsafeLocation = false.obs;
-  final percentage = 0.0.obs;
+  final downloading = signal(false);
+  final downloaded = signal(false);
+  final error = signal(false);
+  final unsafeLocation = signal(false);
+  final percentage = signal(0.0);
 
   void errorHappened(bool unsafe) {
     error.value = true;

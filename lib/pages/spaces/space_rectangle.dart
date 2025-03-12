@@ -120,7 +120,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                                       borderRadius: BorderRadius.circular(defaultSpacing),
                                     ),
                                     padding: EdgeInsets.all(elementSpacing),
-                                    child: LPHTabElementSignal(
+                                    child: LPHTabElement(
                                       tabs: SpaceTabType.values.map((e) => e.name.tr).toList(),
                                       onTabSwitch: (el) {
                                         final type = SpaceTabType.values.firstWhereOrNull((t) => t.name.tr == el);
@@ -205,7 +205,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                           color: Get.theme.colorScheme.primaryContainer,
                           padding: const EdgeInsets.all(defaultSpacing),
                           child: Center(
-                            child: LPHTabElementSignal(
+                            child: LPHTabElement(
                               tabs: SpaceSidebarTabType.values.map((e) => e.name.tr).toList(),
                               onTabSwitch: (el) {
                                 final type = SpaceSidebarTabType.values.firstWhereOrNull((t) => t.name.tr == el);

@@ -11,6 +11,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -20,10 +21,17 @@ class FriendsPage extends StatefulWidget {
 }
 
 class _FriendsPageState extends State<FriendsPage> {
-  final position = const Offset(0, 0).obs;
-  final query = "".obs;
-  final loading = false.obs;
-  final revealSuccess = false.obs;
+  final _position = signal(Offset(0, 0));
+  final _query = signal("");
+  final _revealSuccess = signal(false);
+
+  @override
+  void dispose() {
+    _revealSuccess.dispose();
+    _position.dispose();
+    _query.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +79,7 @@ class _FriendsPageState extends State<FriendsPage> {
                             hintText: "friends.placeholder".tr,
                           ),
                           onChanged: (value) {
-                            query.value = value;
+                            _query.value = value;
                           },
                           onSubmitted: (value) => {}, // TODO: Think about what do with this
                           cursorColor: Get.theme.colorScheme.onPrimary,
@@ -112,15 +120,15 @@ class _FriendsPageState extends State<FriendsPage> {
                                 duration: 250.ms,
                               ),
                             ],
-                            target: revealSuccess.value ? 1.0 : 0.0,
+                            target: _revealSuccess.value ? 1.0 : 0.0,
                             child: SuccessContainer(text: "request.sent".tr),
                           ),
                         ),
 
                         Obx(() {
                           final found = FriendController.friends.values.any((friend) =>
-                              (friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
-                                  friend.name.toLowerCase().contains(query.value.toLowerCase())) &&
+                              (friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
+                                  friend.name.toLowerCase().contains(_query.value.toLowerCase())) &&
                               friend.id != StatusController.ownAddress);
                           return Animate(
                               effects: [
@@ -162,7 +170,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                 duration: 250.ms,
                               ),
                             ],
-                            target: query.value.isEmpty ? 0.0 : 1.0,
+                            target: _query.value.isEmpty ? 0.0 : 1.0,
                             child: Visibility(
                               visible: RequestController.requests.isNotEmpty,
                               child: Column(
@@ -212,7 +220,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                 duration: 250.ms,
                               ),
                             ],
-                            target: query.value.isEmpty ? 0.0 : 1.0,
+                            target: _query.value.isEmpty ? 0.0 : 1.0,
                             child: Visibility(
                               visible: RequestController.requestsSent.isNotEmpty,
                               child: Padding(
@@ -276,9 +284,9 @@ class _FriendsPageState extends State<FriendsPage> {
                                       }
                                       return Obx(
                                         () {
-                                          final visible = query.value.isEmpty ||
-                                              friend.displayName.value.toLowerCase().contains(query.value.toLowerCase()) ||
-                                              friend.name.toLowerCase().contains(query.value.toLowerCase());
+                                          final visible = _query.value.isEmpty ||
+                                              friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
+                                              friend.name.toLowerCase().contains(_query.value.toLowerCase());
 
                                           return Animate(
                                             effects: [
@@ -297,7 +305,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                             target: visible ? 0.0 : 1.0,
                                             child: Padding(
                                               padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
-                                              child: FriendButton(friend: friend, position: position),
+                                              child: FriendButton(friend: friend, position: _position),
                                             ),
                                           );
                                         },

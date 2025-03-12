@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
 class FriendButton extends StatefulWidget {
-  final Rx<Offset> position;
+  final Signal<Offset> position;
   final Friend friend;
 
   const FriendButton({super.key, required this.friend, required this.position});

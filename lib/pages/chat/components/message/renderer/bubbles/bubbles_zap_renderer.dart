@@ -15,6 +15,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class BubblesLiveshareMessageRenderer extends StatefulWidget {
   final MessageProvider provider;
@@ -37,14 +38,14 @@ class BubblesLiveshareMessageRenderer extends StatefulWidget {
 }
 
 class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessageRenderer> {
-  final loading = true.obs;
-  final available = false.obs;
-  LiveshareInviteContainer? container;
-  int unavailableCount = 0;
-  final size = 0.obs;
-  String transactionBegin = "";
+  final _loading = signal(true);
+  final _available = signal(false);
+  LiveshareInviteContainer? _container;
+  int _unavailableCount = 0;
+  final _size = signal(0);
+  String _transactionBegin = "";
 
-  Timer? timer;
+  Timer? _timer;
 
   // For the context menu
   double _mouseX = 0, _mouseY = 0;
@@ -52,50 +53,53 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
   @override
   void initState() {
     super.initState();
-    container = LiveshareInviteContainer.fromJson(widget.message.content);
-    timer?.cancel();
-    timer = Timer.periodic(const Duration(seconds: 3), (_) => updateInfo());
-    transactionBegin = container!.id;
+    _container = LiveshareInviteContainer.fromJson(widget.message.content);
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) => updateInfo());
+    _transactionBegin = _container!.id;
     updateInfo();
   }
 
   Future<void> updateInfo() async {
-    if (transactionBegin != container!.id) {
-      sendLog("WTF Flutter is actually weird $transactionBegin ${container!.id}");
+    if (_transactionBegin != _container!.id) {
+      sendLog("WTF Flutter is actually weird $_transactionBegin ${_container!.id}");
       return;
     }
 
-    final json = await postAny("${nodeProtocol()}${container!.url}/liveshare/info", {
-      "id": container!.id,
-      "token": container!.token,
+    final json = await postAny("${nodeProtocol()}${_container!.url}/liveshare/info", {
+      "id": _container!.id,
+      "token": _container!.token,
     });
-    loading.value = false;
+    _loading.value = false;
 
     if (!json["success"]) {
-      unavailableCount++;
-      sendLog(unavailableCount);
-      if (unavailableCount > 5) {
-        available.value = false;
-        timer?.cancel();
+      _unavailableCount++;
+      sendLog(_unavailableCount);
+      if (_unavailableCount > 5) {
+        _available.value = false;
+        _timer?.cancel();
       }
-      available.value = false;
+      _available.value = false;
       return;
     }
 
-    available.value = true;
-    size.value = json["size"];
+    _available.value = true;
+    _size.value = json["size"];
   }
 
   @override
   void dispose() {
+    _loading.dispose();
+    _available.dispose();
+    _size.dispose();
+    _timer?.cancel();
     super.dispose();
-    timer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     Friend sender = widget.sender ?? Friend.system();
-    container = LiveshareInviteContainer.fromJson(widget.message.content);
+    _container = LiveshareInviteContainer.fromJson(widget.message.content);
 
     return RepaintBoundary(
       child: MouseRegion(
@@ -233,7 +237,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            getIconForFileName(container!.fileName),
+            getIconForFileName(_container!.fileName),
             size: sectionSpacing * 2,
             color: Get.theme.colorScheme.onPrimary,
           ),
@@ -245,7 +249,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
               children: [
                 Flexible(
                   child: Text(
-                    container!.fileName,
+                    _container!.fileName,
                     style: Get.theme.textTheme.labelMedium,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -253,7 +257,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                 Flexible(
                   child: Obx(
                     () => Text(
-                      available.value ? formatFileSize(size.value) : 'chat.zapshare.not_found'.tr,
+                      _available.value ? formatFileSize(_size.value) : 'chat.zapshare.not_found'.tr,
                       style: Get.theme.textTheme.bodyMedium,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -278,7 +282,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
             }
 
             final convProvider = widget.provider as ConversationMessageProvider;
-            if (available.value && ZapShareController.currentConversation.value == convProvider.conversation.id) {
+            if (_available.value && ZapShareController.currentConversation.value == convProvider.conversation.id) {
               return SizedBox(
                 width: 30,
                 height: 30,
@@ -290,12 +294,12 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
             }
 
             return Visibility(
-              visible: available.value && !widget.self,
+              visible: _available.value && !widget.self,
               child: IconButton(
                 onPressed: () => ZapShareController.joinTransaction(
                   convProvider.conversation.id,
                   widget.message.senderAddress,
-                  container!,
+                  _container!,
                 ),
                 icon: const Icon(Icons.check),
               ),

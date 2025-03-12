@@ -79,7 +79,7 @@ class MessageDraft {
   final String target;
   final answer = Rx<AnswerData?>(null);
   String message;
-  final files = <UploadData>[].obs;
+  final files = listSignal(<UploadData>[]);
   final attachments = <String>[];
 
   MessageDraft(this.target, this.message);
@@ -87,7 +87,7 @@ class MessageDraft {
 
 class UploadData {
   final XFile file;
-  final progress = 0.0.obs;
+  final progress = signal(0.0);
 
   UploadData(this.file);
 }

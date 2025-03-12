@@ -4,6 +4,7 @@ import 'package:chat_interface/theme/components/ssr/ssr.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SSRFetcher extends StatefulWidget {
   final String label;
@@ -24,30 +25,30 @@ class SSRFetcher extends StatefulWidget {
 }
 
 class _SSRFetcherState extends State<SSRFetcher> {
-  final error = true.obs;
-  final success = false.obs;
-  final loading = false.obs;
+  final _error = signal(true);
+  final _success = signal(false);
+  final _loading = signal(false);
 
-  Timer? timer;
+  Timer? _timer;
 
   @override
   void initState() {
     // Timer for periodically checking the endpoint provided by the server
-    timer = Timer.periodic(
+    _timer = Timer.periodic(
       Duration(seconds: widget.frequency),
       (timer) async {
-        if (loading.value) {
+        if (_loading.value) {
           return;
         }
-        loading.value = true;
+        _loading.value = true;
 
         // Do a request to the server using the SSR request function
         final json = await widget.ssr.doRequest.call(widget.path, {
           if (widget.ssr.currentToken != null) "token": widget.ssr.currentToken,
         });
         await Future.delayed(const Duration(milliseconds: 250)); // To show the user that it's actually doing something
-        loading.value = false;
-        error.value = !json["success"];
+        _loading.value = false;
+        _error.value = !json["success"];
         await Future.delayed(const Duration(milliseconds: 500)); // To show the user what's going on
         if (json["success"]) {
           unawaited(widget.ssr.handleSSRResponse(widget.path, json));
@@ -60,7 +61,10 @@ class _SSRFetcherState extends State<SSRFetcher> {
 
   @override
   void dispose() {
-    timer?.cancel();
+    _error.dispose();
+    _success.dispose();
+    _loading.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -91,7 +95,7 @@ class _SSRFetcherState extends State<SSRFetcher> {
             Obx(
               () {
                 // If it's loading return a loading indicator
-                if (loading.value) {
+                if (_loading.value) {
                   return SizedBox(
                     width: 24,
                     height: 24,
@@ -103,7 +107,7 @@ class _SSRFetcherState extends State<SSRFetcher> {
                 }
 
                 // If there was an error, show the error icon until the next request
-                if (error.value) {
+                if (_error.value) {
                   return Icon(Icons.error, color: Get.theme.colorScheme.error);
                 }
 

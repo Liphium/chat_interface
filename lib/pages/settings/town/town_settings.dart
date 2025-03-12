@@ -21,8 +21,6 @@ class TownSettingsPage extends StatefulWidget {
 }
 
 class _TownSettingsPageState extends State<TownSettingsPage> {
-  final maxFileSize = 10.0.obs;
-
   @override
   Widget build(BuildContext context) {
     return SettingsPageBase(
