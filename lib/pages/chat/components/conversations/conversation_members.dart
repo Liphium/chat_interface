@@ -10,7 +10,6 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:signals/signals_flutter.dart';
 
 class ConversationMembers extends StatelessWidget {
   final Conversation conversation;
@@ -78,24 +77,30 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.add_moderator,
                                             label: "chat.make_moderator".tr,
-                                            loading: signal(false),
-                                            onTap: (f, l) async {
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
                                               final error = await member.promote(conversation.id);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
                                               }
+                                              loading.value = false;
                                             },
                                           )
                                         else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
                                           ProfileAction(
                                             icon: Icons.add_moderator,
                                             label: "chat.make_admin".tr,
-                                            loading: signal(false),
-                                            onTap: (f, l) async {
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
                                               final error = await member.promote(conversation.id);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
                                               }
+                                              loading.value = false;
                                             },
                                           ),
 
@@ -104,24 +109,30 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.remove_moderator,
                                             label: "chat.remove_moderator".tr,
-                                            loading: signal(false),
-                                            onTap: (f, l) async {
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
                                               final error = await member.demote(conversation.id);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
                                               }
+                                              loading.value = false;
                                             },
                                           )
                                         else if (ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
                                           ProfileAction(
                                             icon: Icons.remove_moderator,
                                             label: "chat.remove_admin".tr,
-                                            loading: signal(false),
-                                            onTap: (f, l) async {
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
                                               final error = await member.demote(conversation.id);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
                                               }
+                                              loading.value = false;
                                             },
                                           ),
 
@@ -130,14 +141,17 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.person_remove,
                                             label: "chat.remove_member".tr,
-                                            loading: signal(false),
                                             color: Get.theme.colorScheme.errorContainer,
                                             iconColor: Get.theme.colorScheme.error,
-                                            onTap: (f, l) async {
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
                                               final error = await member.remove(conversation.id);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
                                               }
+                                              loading.value = false;
                                             },
                                           ),
                                       ] +

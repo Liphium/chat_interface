@@ -1,3 +1,4 @@
+import 'package:chat_interface/theme/components/lph_page_switcher.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -23,14 +24,14 @@ class ServerFileViewer extends StatefulWidget {
   State<ServerFileViewer> createState() => _ConversationsPageState();
 }
 
-class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin {
-  final files = RxList<FileContainer>.empty();
-  final query = "".obs;
-  final startLoading = signal(true);
-  final pageLoading = signal(false);
-  final currentPage = 0.obs;
-  final totalCount = 0.obs;
-  final storageLine = "loading".tr.obs;
+class _ConversationsPageState extends State<ServerFileViewer> {
+  final _files = listSignal<FileContainer>([]);
+  final _query = signal("");
+  final _startLoading = signal(true);
+  final _pageLoading = signal(false);
+  final _currentPage = signal(0);
+  final _totalCount = signal(0);
+  final _storageLine = signal("loading".tr);
 
   final extensionMap = {
     "webp": Icons.image,
@@ -46,6 +47,18 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
   };
 
   @override
+  void dispose() {
+    _files.dispose();
+    _query.dispose();
+    _startLoading.dispose();
+    _pageLoading.dispose();
+    _currentPage.dispose();
+    _totalCount.dispose();
+    _storageLine.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     goToPage(0);
     getStorageData();
@@ -55,10 +68,10 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
   Future<void> getStorageData() async {
     final json = await postAuthorizedJSON("/account/files/storage", {});
     if (!json["success"]) {
-      storageLine.value = json["error"];
+      _storageLine.value = json["error"];
       return;
     }
-    storageLine.value = "settings.file.uploaded.description".trParams({
+    _storageLine.value = "settings.file.uploaded.description".trParams({
       "current": formatFileSize(json["amount"]),
       "max": formatFileSize(json["max"]),
     });
@@ -66,18 +79,18 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
 
   Future<void> goToPage(int page) async {
     // Set the current page
-    if (pageLoading.value) {
+    if (_pageLoading.value) {
       return;
     }
-    pageLoading.value = true;
-    currentPage.value = page;
+    _pageLoading.value = true;
+    _currentPage.value = page;
 
     // Get the files from the server
     final json = await postAuthorizedJSON("/account/files/list", {
       "page": page,
     });
-    startLoading.value = false;
-    pageLoading.value = false;
+    _startLoading.value = false;
+    _pageLoading.value = false;
 
     // Check if there was an error
     if (!json["success"]) {
@@ -87,12 +100,12 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
 
     // Parse the entire json
     if (json["files"] == null) {
-      files.clear();
+      _files.clear();
       return;
     }
 
     // Set the total amount of files
-    totalCount.value = json["count"];
+    _totalCount.value = json["count"];
 
     // Decrypt some stuff in an isolate
     final list = await sodiumLib.runIsolated((sodium, secureKeys, keyPairs) async {
@@ -111,7 +124,7 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
     }
 
     // Update the UI
-    files.value = list;
+    _files.value = list;
   }
 
   @override
@@ -122,22 +135,22 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
         Obx(
           () => Text(
             "settings.file.uploaded.title".trParams({
-              "count": totalCount.value.toString(),
+              "count": _totalCount.value.toString(),
             }),
             style: Get.theme.textTheme.labelLarge,
           ),
         ),
         verticalSpacing(defaultSpacing),
-        Obx(() => Text(storageLine.value, style: Get.theme.textTheme.bodyMedium)),
+        Obx(() => Text(_storageLine.value, style: Get.theme.textTheme.bodyMedium)),
         verticalSpacing(defaultSpacing),
         Obx(() {
-          if (startLoading.value) {
+          if (_startLoading.value) {
             return CircularProgressIndicator(
               color: Get.theme.colorScheme.onPrimary,
             );
           }
 
-          if (!files.isNotEmpty) {
+          if (!_files.isNotEmpty) {
             return Padding(
               padding: const EdgeInsets.only(top: elementSpacing),
               child: Text("settings.file.uploaded.none".tr, style: Get.theme.textTheme.labelMedium),
@@ -147,22 +160,22 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PageSwitcher(
-                loading: pageLoading,
-                currentPage: currentPage,
-                count: totalCount,
+              LPHPageSwitcher(
+                loading: _pageLoading,
+                currentPage: _currentPage,
+                count: _totalCount,
                 page: (page) => goToPage(page),
               ),
               verticalSpacing(defaultSpacing),
               ListView.builder(
-                itemCount: files.length,
+                itemCount: _files.length,
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
-                  final file = files[index];
+                  final file = _files[index];
                   final extension = file.id.split(".").last;
 
-                  return Obx(
-                    () => Animate(
+                  return Watch(
+                    (ctx) => Animate(
                       key: ValueKey(file.id),
                       effects: [
                         ReverseExpandEffect(
@@ -263,99 +276,16 @@ class _ConversationsPageState extends State<ServerFileViewer> with SignalsMixin 
                   );
                 },
               ),
-              PageSwitcher(
-                loading: pageLoading,
-                currentPage: currentPage,
-                count: totalCount,
+              LPHPageSwitcher(
+                loading: _pageLoading,
+                currentPage: _currentPage,
+                count: _totalCount,
                 page: (page) => goToPage(page),
               ),
               verticalSpacing(defaultSpacing),
             ],
           );
         })
-      ],
-    );
-  }
-}
-
-class PageSwitcher extends StatefulWidget {
-  final RxInt currentPage;
-  final RxInt count;
-  final Signal<bool> loading;
-  final Function(int) page;
-
-  const PageSwitcher({
-    super.key,
-    required this.currentPage,
-    required this.count,
-    required this.loading,
-    required this.page,
-  });
-
-  @override
-  State<PageSwitcher> createState() => _PageSwitcherState();
-}
-
-class _PageSwitcherState extends State<PageSwitcher> {
-  int getMaxPage() => (widget.count.value / 20).ceil();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        LoadingIconButton(
-          loading: widget.loading,
-          onTap: () {
-            if (widget.currentPage.value == 0) {
-              return;
-            }
-            widget.page(0);
-          },
-          icon: Icons.skip_previous,
-        ),
-        horizontalSpacing(elementSpacing),
-        LoadingIconButton(
-          loading: widget.loading,
-          onTap: () {
-            if (widget.currentPage.value == 0) {
-              return;
-            }
-            widget.page(widget.currentPage.value - 1);
-          },
-          icon: Icons.arrow_back,
-        ),
-        const Spacer(),
-        Obx(
-          () => Text(
-            "page_switcher".trParams({
-              "count": (widget.currentPage.value + 1).toString(),
-              "max": getMaxPage().toString(),
-            }),
-            style: Get.textTheme.labelLarge,
-          ),
-        ),
-        const Spacer(),
-        LoadingIconButton(
-          loading: widget.loading,
-          onTap: () {
-            if (widget.currentPage.value == getMaxPage() - 1) {
-              return;
-            }
-            widget.page(widget.currentPage.value + 1);
-          },
-          icon: Icons.arrow_forward,
-        ),
-        horizontalSpacing(elementSpacing),
-        LoadingIconButton(
-          loading: widget.loading,
-          onTap: () {
-            if (widget.currentPage.value == getMaxPage() - 1) {
-              return;
-            }
-            widget.page(getMaxPage() - 1);
-          },
-          icon: Icons.skip_next,
-        ),
       ],
     );
   }

@@ -107,15 +107,18 @@ class TextObjectCreationWindow extends StatefulWidget {
 }
 
 class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> with SignalsMixin {
-  final fontSize = signal(16.0);
+  // Controller for the text input to power the preview
   final _textController = TextEditingController();
-  final _text = signal("");
+
+  // State
+  late final _fontSize = createSignal(16.0);
+  late final _text = createSignal("");
 
   @override
   void initState() {
     _textController.text = widget.object?.text ?? "";
     _text.value = widget.object?.text ?? "";
-    fontSize.value = widget.object?.fontSize.realValue ?? 16;
+    _fontSize.value = widget.object?.fontSize.realValue ?? 16;
     super.initState();
   }
 
@@ -134,17 +137,15 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> wit
             onChange: (value) => _text.value = value,
           ),
           verticalSpacing(defaultSpacing),
-          Watch(
-            (context) => FJSliderWithInput(
-              min: 16,
-              max: 48,
-              value: fontSize.value,
-              label: fontSize.value.toStringAsFixed(0),
-              onChanged: (value) => fontSize.value = value,
-            ),
+          FJSliderWithInput(
+            min: 16,
+            max: 48,
+            value: _fontSize.value,
+            label: _fontSize.value.toStringAsFixed(0),
+            onChanged: (value) => _fontSize.value = value,
           ),
           verticalSpacing(defaultSpacing),
-          Watch((context) => Text(_text.value, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: fontSize.value))),
+          Text(_text.value, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: _fontSize.value)),
           verticalSpacing(defaultSpacing),
           FJElevatedButton(
             onTap: () {
@@ -152,13 +153,13 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> wit
               if (widget.object != null) {
                 widget.object!.queue(() {
                   widget.object!.text = _textController.text;
-                  widget.object!.fontSize.setValue(fontSize.value);
+                  widget.object!.fontSize.setValue(_fontSize.value);
                   widget.object!.evaluateSize();
                   widget.object!.modifyData();
                 });
                 return;
               }
-              final object = TextObject.createFromText(widget.location, _textController.text, fontSize.value.roundToDouble());
+              final object = TextObject.createFromText(widget.location, _textController.text, _fontSize.value.roundToDouble());
               object.sendAdd();
             },
             child: Center(

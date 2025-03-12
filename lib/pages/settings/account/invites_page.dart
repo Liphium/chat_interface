@@ -42,12 +42,12 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
   }
 
   // Data
-  final _error = signal("");
-  final count = signal(0);
-  final invites = listSignal(<String>[]);
-  final loading = signal(false);
-  final hovering = signal("");
-  final generateLoading = signal(false);
+  late final _error = createSignal("");
+  late final count = createSignal(0);
+  late final invites = createListSignal(<String>[]);
+  late final loading = createSignal(false);
+  late final hovering = createSignal("");
+  late final generateLoading = createSignal(false);
 
   /// Generate a new invite code
   Future<void> generateNewInvite() async {

@@ -80,7 +80,6 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
               onTap: () {
                 Get.back();
               },
-              loading: signal(false),
             ),
             verticalSpacing(elementSpacing),
             ProfileButton(
@@ -89,7 +88,6 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
               onTap: () {
                 Get.back();
               },
-              loading: signal(false),
             ),
           ],
         );

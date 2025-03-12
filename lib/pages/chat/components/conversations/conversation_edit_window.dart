@@ -54,7 +54,6 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
                 icon: Icons.edit,
                 label: "Edit title",
                 onTap: () => {},
-                loading: signal(false),
               ),
             ),
           ),
@@ -62,7 +61,6 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
             icon: Icons.developer_mode,
             label: "For developers",
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
-            loading: signal(false),
           ),
           verticalSpacing(sectionSpacing),
           Text(
@@ -98,7 +96,6 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
               },
               onDecline: () => {},
             )),
-            loading: signal(false),
           ),
         ],
       ),

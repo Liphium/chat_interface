@@ -11,6 +11,7 @@ import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/dispose_hook.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -45,12 +46,12 @@ class ProfileDefaults {
     final (conv, error) = await ConversationService.openDirectMessage(friend);
     if (conv != null) {
       unawaited(MessageController.selectConversation(conv));
+      Get.back();
     }
     if (error != null) {
       showErrorPopup("error", error);
     }
     loading.value = false;
-    Get.back();
   };
 
   static List<ProfileAction> buildDefaultActions(Friend friend) {
@@ -58,7 +59,7 @@ class ProfileDefaults {
 
     if (friend.unknown) {
       return [
-        ProfileAction(icon: Icons.person_add, category: true, label: 'friends.add'.tr, loading: signal(false), onTap: (f, l) => {}),
+        ProfileAction(icon: Icons.person_add, category: true, label: 'friends.add'.tr, onTap: (f, l) => {}),
       ];
     }
 
@@ -105,14 +106,14 @@ class ProfileDefaults {
 class ProfileAction {
   final IconData icon;
   final bool category;
-  final Signal<bool> loading;
+  final Signal<bool>? loading;
   final String label;
   final Color? color;
   final Color? iconColor;
   final Function(Friend, Signal<bool>) onTap;
 
   const ProfileAction(
-      {required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
+      {required this.icon, required this.label, this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
 }
 
 class Profile extends StatefulWidget {
@@ -228,8 +229,8 @@ class _ProfileState extends State<Profile> {
             )
           ],
         ),
-        Obx(
-          () => widget.friend.status.value != ""
+        Watch(
+          (ctx) => widget.friend.status.value != ""
               ? Text(
                   widget.friend.status.value,
                   style: Get.theme.textTheme.bodyMedium,
@@ -242,22 +243,36 @@ class _ProfileState extends State<Profile> {
           itemCount: actions.length,
           itemBuilder: (context, index) {
             ProfileAction action = actions[index];
-            return Padding(
-              padding: EdgeInsets.only(
-                  top: index == 0
-                      ? 0
-                      : action.category
-                          ? defaultSpacing
-                          : elementSpacing),
-              child: ProfileButton(
-                icon: action.icon,
-                label: action.label,
-                onTap: () => action.onTap.call(widget.friend, action.loading),
-                loading: action.loading,
-                color: action.color,
-                iconColor: action.iconColor,
-              ),
-            );
+
+            // Create a function that takes in a loading signal to create the button
+            button(loading) => Padding(
+                  padding: EdgeInsets.only(
+                      top: index == 0
+                          ? 0
+                          : action.category
+                              ? defaultSpacing
+                              : elementSpacing),
+                  child: ProfileButton(
+                    icon: action.icon,
+                    label: action.label,
+                    onTap: () => action.onTap.call(widget.friend, loading),
+                    loading: action.loading,
+                    color: action.color,
+                    iconColor: action.iconColor,
+                  ),
+                );
+
+            // Make sure to manually add the loading state in case not there
+            if (action.loading == null) {
+              return SignalHook(
+                value: false,
+                builder: (loading) {
+                  return button(loading);
+                },
+              );
+            }
+
+            return button(action.loading);
           },
         ),
       ],

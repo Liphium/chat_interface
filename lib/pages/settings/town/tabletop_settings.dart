@@ -395,13 +395,15 @@ class DeckCreationWindow extends StatefulWidget {
   State<DeckCreationWindow> createState() => _DeckCreationWindowState();
 }
 
-class _DeckCreationWindowState extends State<DeckCreationWindow> with SignalsMixin {
+class _DeckCreationWindowState extends State<DeckCreationWindow> {
   final TextEditingController _nameController = TextEditingController();
   final _errorText = signal("");
   final _loading = signal(false);
 
   @override
   void dispose() {
+    _errorText.dispose();
+    _loading.dispose();
     _nameController.dispose();
     super.dispose();
   }
@@ -703,8 +705,8 @@ class CardsUploadWindow extends StatefulWidget {
   State<CardsUploadWindow> createState() => _CardsUploadWindowState();
 }
 
-class _CardsUploadWindowState extends State<CardsUploadWindow> {
-  final _current = 0.obs;
+class _CardsUploadWindowState extends State<CardsUploadWindow> with SignalsMixin {
+  late final _current = createSignal(0);
   final finished = <AttachmentContainer>[];
 
   @override
@@ -744,22 +746,19 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Obx(
-            () => Text(
-                "file.uploading".trParams({
-                  "index": (_current.value).toString(),
-                  "total": widget.files.length.toString(),
-                }),
-                style: Get.theme.textTheme.titleLarge),
+          Text(
+            "file.uploading".trParams({
+              "index": (_current.value).toString(),
+              "total": widget.files.length.toString(),
+            }),
+            style: Get.theme.textTheme.titleLarge,
           ),
           verticalSpacing(sectionSpacing),
-          Obx(
-            () => LinearProgressIndicator(
-              value: _current.value / widget.files.length,
-              minHeight: 10,
-              color: Get.theme.colorScheme.onPrimary,
-              backgroundColor: Get.theme.colorScheme.primary,
-            ),
+          LinearProgressIndicator(
+            value: _current.value / widget.files.length,
+            minHeight: 10,
+            color: Get.theme.colorScheme.onPrimary,
+            backgroundColor: Get.theme.colorScheme.primary,
           ),
         ],
       ),

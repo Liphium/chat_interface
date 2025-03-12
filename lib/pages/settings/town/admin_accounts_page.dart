@@ -3,9 +3,9 @@ import 'dart:isolate';
 
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/pages/settings/town/admin_account_profile.dart';
-import 'package:chat_interface/pages/settings/town/server_file_viewer.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
+import 'package:chat_interface/theme/components/lph_page_switcher.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -66,26 +66,37 @@ class AdminAccountsPage extends StatefulWidget {
   State<AdminAccountsPage> createState() => _AdminAccountsPageState();
 }
 
-class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin {
-  final accounts = RxList<AccountData>.empty();
-  final query = "".obs;
-  final startLoading = true.obs;
-  final pageLoading = signal(false);
-  final currentPage = 0.obs;
-  final totalCount = 0.obs;
-  Future? currentFuture;
+class _AdminAccountsPageState extends State<AdminAccountsPage> {
+  final _accounts = listSignal<AccountData>([]);
+  final _query = signal("");
+  final _startLoading = signal(true);
+  final _pageLoading = signal(false);
+  final _currentPage = signal(0);
+  final _totalCount = signal(0);
+  Future? _currentFuture;
+
+  @override
+  void dispose() {
+    _accounts.dispose();
+    _query.dispose();
+    _startLoading.dispose();
+    _pageLoading.dispose();
+    _currentPage.dispose();
+    _totalCount.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     goToPage(0);
 
-    query.listen(
+    _query.subscribe(
       (qry) async {
-        if (currentFuture != null) {
-          await currentFuture;
+        if (_currentFuture != null) {
+          await _currentFuture;
         }
-        unawaited(goToPage(currentPage.value));
-        currentFuture = Future.delayed(500.ms);
+        unawaited(goToPage(_currentPage.value));
+        _currentFuture = Future.delayed(500.ms);
       },
     );
 
@@ -94,19 +105,19 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin
 
   Future<void> goToPage(int page) async {
     // Set the current page
-    if (pageLoading.value) {
+    if (_pageLoading.value) {
       return;
     }
-    pageLoading.value = true;
-    currentPage.value = page;
+    _pageLoading.value = true;
+    _currentPage.value = page;
 
     // Get the files from the server
     final json = await postAuthorizedJSON("/townhall/accounts/list", {
       "page": page,
-      "query": query.value,
+      "query": _query.value,
     });
-    startLoading.value = false;
-    pageLoading.value = false;
+    _startLoading.value = false;
+    _pageLoading.value = false;
 
     // Check if there was an error
     if (!json["success"]) {
@@ -116,12 +127,12 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin
 
     // Parse the entire json
     if (json["accounts"] == null) {
-      accounts.clear();
+      _accounts.clear();
       return;
     }
 
     // Set the total amount of files
-    totalCount.value = json["count"];
+    _totalCount.value = json["count"];
 
     // Decrypt some stuff in an isolate
     final list = await Isolate.run(() {
@@ -135,7 +146,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin
     });
 
     // Update the UI
-    accounts.value = list;
+    _accounts.value = list;
   }
 
   @override
@@ -154,19 +165,19 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin
               hintText: "settings.accounts.search".tr,
               secondaryColor: true,
               onChange: (qry) {
-                query.value = qry;
+                _query.value = qry;
               },
             ),
           ),
           verticalSpacing(defaultSpacing),
-          Obx(() {
-            if (startLoading.value) {
+          Watch((ctx) {
+            if (_startLoading.value) {
               return CircularProgressIndicator(
                 color: Get.theme.colorScheme.onPrimary,
               );
             }
 
-            if (!accounts.isNotEmpty) {
+            if (!_accounts.isNotEmpty) {
               return Padding(
                 padding: const EdgeInsets.only(top: elementSpacing),
                 child: Text("settings.accounts.none".tr, style: Get.theme.textTheme.bodyMedium),
@@ -177,24 +188,24 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Top page switcher element
-                PageSwitcher(
-                  loading: pageLoading,
-                  currentPage: currentPage,
-                  count: totalCount,
+                LPHPageSwitcher(
+                  loading: _pageLoading,
+                  currentPage: _currentPage,
+                  count: _totalCount,
                   page: (page) => goToPage(page),
                 ),
                 verticalSpacing(defaultSpacing),
 
                 // The view rendering all the accounts
                 ListView.builder(
-                  itemCount: accounts.length,
+                  itemCount: _accounts.length,
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
-                    final account = accounts[index];
+                    final account = _accounts[index];
 
                     // Obx for delete animation
-                    return Obx(
-                      () => Animate(
+                    return Watch(
+                      (ctx) => Animate(
                         key: ValueKey(account.id),
                         effects: [
                           ReverseExpandEffect(
@@ -253,7 +264,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin
                                 // Actions that can be performed on the account
                                 Row(
                                   children: [
-                                    // Launch button (go to their profile)
+                                    // Launch button (go to manage their account)
                                     LoadingIconButton(
                                       onTap: () => Get.dialog(AdminAccountProfile(account: account)),
                                       icon: Icons.launch,
@@ -300,10 +311,10 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> with SignalsMixin
                 ),
 
                 // Bottom page switcher
-                PageSwitcher(
-                  loading: pageLoading,
-                  currentPage: currentPage,
-                  count: totalCount,
+                LPHPageSwitcher(
+                  loading: _pageLoading,
+                  currentPage: _currentPage,
+                  count: _totalCount,
                   page: (page) => goToPage(page),
                 ),
                 verticalSpacing(defaultSpacing),

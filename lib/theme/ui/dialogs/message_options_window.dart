@@ -41,8 +41,14 @@ class MessageOptionsWindow extends StatefulWidget {
   State<MessageOptionsWindow> createState() => _ConversationAddWindowState();
 }
 
-class _ConversationAddWindowState extends State<MessageOptionsWindow> with SignalsMixin {
-  final messageDeletionLoading = signal(false);
+class _ConversationAddWindowState extends State<MessageOptionsWindow> {
+  final _messageDeletionLoading = signal(false);
+
+  @override
+  void dispose() {
+    _messageDeletionLoading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +82,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
                   Get.back();
                   Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider!));
                 },
-                loading: signal(false),
               ),
             ),
 
@@ -91,7 +96,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
                   Clipboard.setData(ClipboardData(text: widget.message.content));
                   Get.back();
                 },
-                loading: signal(false),
               ),
             ),
 
@@ -120,7 +124,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
                   await attachment.file!.saveTo(saveLocation.path);
                   Get.back();
                 },
-                loading: signal(false),
               ),
             ),
 
@@ -143,7 +146,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
                   unawaited(OpenFile.open(attachment.file!.path));
                   Get.back();
                 },
-                loading: signal(false),
               ),
             ),
 
@@ -159,7 +161,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
                   await Pasteboard.writeFiles([widget.message.attachmentsRenderer[0].file!.path]);
                   Get.back();
                 },
-                loading: signal(false),
               ),
             ),
 
@@ -171,7 +172,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
               Get.back();
               showModal(Profile(friend: friend ?? Friend.unknown(widget.message.senderAddress)));
             },
-            loading: signal(false),
           ),
 
           // Give the user an option to reply in case it's a text message
@@ -185,7 +185,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
                   MessageSendHelper.addReplyToCurrentDraft(widget.message);
                   Get.back();
                 },
-                loading: signal(false),
               ),
             ),
 
@@ -201,8 +200,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
                 label: "message.delete".tr,
                 onTap: () async {
                   // Set and check loading state
-                  if (messageDeletionLoading.value) return;
-                  messageDeletionLoading.value = true;
+                  if (_messageDeletionLoading.value) return;
+                  _messageDeletionLoading.value = true;
 
                   // Check if the message is sent by the current user to ask for file deletions
                   if (StatusController.ownAddress == widget.message.senderAddress && widget.message.attachments.isNotEmpty) {
@@ -230,7 +229,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
 
                   // Delete message
                   final result = await widget.message.delete(widget.provider!);
-                  messageDeletionLoading.value = false;
+                  _messageDeletionLoading.value = false;
                   if (result != null) {
                     showErrorPopup("error", result);
                     return;
@@ -238,7 +237,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> with Signa
 
                   Get.back();
                 },
-                loading: messageDeletionLoading,
+                loading: _messageDeletionLoading,
               ),
             ),
         ],

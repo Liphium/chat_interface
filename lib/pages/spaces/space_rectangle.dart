@@ -20,11 +20,10 @@ class SpaceRectangle extends StatefulWidget {
   State<SpaceRectangle> createState() => _SpaceRectangleState();
 }
 
-class _SpaceRectangleState extends State<SpaceRectangle> with SignalsMixin {
-  final controlsHovered = signal(true);
-  final hovered = signal(true);
-  Timer? timer;
-  final GlobalKey tabletopKey = GlobalKey();
+class _SpaceRectangleState extends State<SpaceRectangle> {
+  final _controlsHovered = signal(true);
+  final _hovered = signal(true);
+  Timer? _timer;
 
   // Space tabs
   final _tabs = [
@@ -37,6 +36,13 @@ class _SpaceRectangleState extends State<SpaceRectangle> with SignalsMixin {
     const SpacesMessageFeed(),
     const SpaceMembersTab(),
   ];
+
+  @override
+  void dispose() {
+    _controlsHovered.dispose();
+    _hovered.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,18 +58,18 @@ class _SpaceRectangleState extends State<SpaceRectangle> with SignalsMixin {
       child: LayoutBuilder(builder: (context, constraints) {
         return MouseRegion(
           onEnter: (event) {
-            hovered.value = true;
+            _hovered.value = true;
           },
           onHover: (event) {
-            hovered.value = true;
-            if (timer != null) timer?.cancel();
-            timer = Timer(1000.ms, () {
-              hovered.value = false;
+            _hovered.value = true;
+            if (_timer != null) _timer?.cancel();
+            _timer = Timer(1000.ms, () {
+              _hovered.value = false;
             });
           },
           onExit: (event) {
-            hovered.value = false;
-            timer?.cancel();
+            _hovered.value = false;
+            _timer?.cancel();
           },
           child: Row(
             children: [
@@ -86,7 +92,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> with SignalsMixin {
                               begin: 1.0,
                             )
                           ],
-                          target: hovered.value || controlsHovered.value ? 0 : 1,
+                          target: _hovered.value || _controlsHovered.value ? 0 : 1,
                           child: Container(
                             width: double.infinity,
                             // Create a gradient on this container from bottom to top
@@ -102,8 +108,8 @@ class _SpaceRectangleState extends State<SpaceRectangle> with SignalsMixin {
                             ),
 
                             child: MouseRegion(
-                              onEnter: (event) => controlsHovered.value = true,
-                              onExit: (event) => controlsHovered.value = false,
+                              onEnter: (event) => _controlsHovered.value = true,
+                              onExit: (event) => _controlsHovered.value = false,
                               child: Center(
                                 heightFactor: 1,
                                 child: Padding(
@@ -146,7 +152,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> with SignalsMixin {
                               begin: 1.0,
                             )
                           ],
-                          target: hovered.value || controlsHovered.value ? 0 : 1,
+                          target: _hovered.value || _controlsHovered.value ? 0 : 1,
                           child: Container(
                             width: double.infinity,
                             // Create a gradient on this container from bottom to top
@@ -162,8 +168,8 @@ class _SpaceRectangleState extends State<SpaceRectangle> with SignalsMixin {
                             ),
 
                             child: MouseRegion(
-                              onEnter: (event) => controlsHovered.value = true,
-                              onExit: (event) => controlsHovered.value = false,
+                              onEnter: (event) => _controlsHovered.value = true,
+                              onExit: (event) => _controlsHovered.value = false,
                               child: SpaceControls(),
                             ),
                           ),

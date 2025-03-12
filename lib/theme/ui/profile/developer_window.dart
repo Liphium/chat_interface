@@ -26,12 +26,12 @@ class DeveloperWindow extends StatefulWidget {
   State<DeveloperWindow> createState() => _DeveloperWindowState();
 }
 
-class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
-  final remoteActionTesting = signal(false);
+class _DeveloperWindowState extends State<DeveloperWindow> {
+  final _remoteActionTesting = signal(false);
 
   /// Perform a remote action test with any instance server
   Future<void> remoteActionTest(String server) async {
-    remoteActionTesting.value = true;
+    _remoteActionTesting.value = true;
 
     // Make the post request to the test endpoint
     final json = await postAddress(server, "/node/actions/send", {
@@ -41,7 +41,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
         "echo": "hello world",
       }
     });
-    remoteActionTesting.value = false;
+    _remoteActionTesting.value = false;
 
     // Check if there was an error
     if (!json["success"]) {
@@ -51,6 +51,12 @@ class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
 
     // Show the popup from the other server
     showSuccessPopup("success", json["answer"].toString());
+  }
+
+  @override
+  void dispose() {
+    _remoteActionTesting.dispose();
+    super.dispose();
   }
 
   @override
@@ -75,7 +81,6 @@ class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
             onTap: () async {
               unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -86,7 +91,6 @@ class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
               db.conversation.deleteAll();
               db.member.deleteAll();
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -96,14 +100,12 @@ class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
               VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeFriend, "", 0);
               db.friend.deleteAll();
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.delete,
             label: "Delete all messages (local)",
             onTap: () => db.message.deleteAll(),
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -113,14 +115,13 @@ class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
               VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, Constants.vaultLibraryTag, 0);
               db.libraryEntry.deleteAll();
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.hardware,
             label: "Test remote actions",
             onTap: () => remoteActionTest(basePath),
-            loading: remoteActionTesting,
+            loading: _remoteActionTesting,
           ),
           Column(
             children: FriendController.friends.values.where((friend) => friend.id.server != basePath).map((friend) {
@@ -130,7 +131,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> with SignalsMixin {
                   icon: Icons.hardware,
                   label: "Test remote actions (${friend.id.server})",
                   onTap: () => remoteActionTest(friend.id.server),
-                  loading: remoteActionTesting,
+                  loading: _remoteActionTesting,
                 ),
               );
             }).toList(),

@@ -62,6 +62,11 @@ class KeyRequest {
     };
   }
 
+  /// Dispose all the signals related to the key request
+  void dispose() {
+    processing.dispose();
+  }
+
   Future<void> updateStatus(bool delete, Function() success) async {
     // Make the payload
     late final String payload;
@@ -107,9 +112,9 @@ class KeyRequestsWindow extends StatefulWidget {
 }
 
 class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin {
-  final loading = signal(false);
-  final error = signal("");
-  final requests = listSignal(<KeyRequest>[]);
+  late final _loading = createSignal(false);
+  late final _error = createSignal("");
+  late final _requests = createListSignal(<KeyRequest>[]);
   Timer? _timer;
 
   @override
@@ -123,23 +128,27 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
 
   @override
   void dispose() {
+    for (var req in _requests) {
+      req.dispose();
+    }
+
     _timer?.cancel();
     super.dispose();
   }
 
   Future<void> requestKeyRequests() async {
-    loading.value = true;
+    _loading.value = true;
 
     // Get the key synchronization requests from the server
     final json = await postAuthorizedJSON("/account/keys/requests/list", {});
     if (!json["success"]) {
-      error.value = (json["error"] as String).tr;
-      loading.value = false;
+      _error.value = (json["error"] as String).tr;
+      _loading.value = false;
       return;
     }
 
-    error.value = "";
-    loading.value = false;
+    _error.value = "";
+    _loading.value = false;
 
     // Parse all the requests
     for (var request in json["requests"]) {
@@ -147,8 +156,8 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
       if (keyRequest.payload != "") {
         continue;
       }
-      if (!requests.any((element) => keyRequest.session == element.session)) {
-        requests.add(keyRequest);
+      if (!_requests.any((element) => keyRequest.session == element.session)) {
+        _requests.add(keyRequest);
       }
     }
   }
@@ -163,18 +172,16 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
           style: Get.theme.textTheme.labelLarge,
           overflow: TextOverflow.ellipsis,
         )),
-        Obx(
-          () => Visibility(
-            visible: loading.value,
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                color: Get.theme.colorScheme.onPrimary,
-              ),
+        Visibility(
+          visible: _loading.value,
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              color: Get.theme.colorScheme.onPrimary,
             ),
           ),
-        )
+        ),
       ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -182,11 +189,11 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
           AnimatedErrorContainer(
             expand: true,
             padding: const EdgeInsets.only(bottom: defaultSpacing),
-            message: error,
+            message: _error,
           ),
-          Obx(() {
+          Builder(builder: (context) {
             // Check if the requests are empty
-            if (requests.isEmpty) {
+            if (_requests.isEmpty) {
               return InfoContainer(
                 expand: true,
                 message: "key_requests.empty".tr,
@@ -195,8 +202,8 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
 
             // Render the requests (if not empty)
             return Column(
-              children: List.generate(requests.length, (index) {
-                final request = requests[index];
+              children: List.generate(_requests.length, (index) {
+                final request = _requests[index];
                 return Padding(
                   padding: EdgeInsets.only(top: index == 0 ? 0 : defaultSpacing),
                   child: Container(
@@ -217,7 +224,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
                           ),
                         ),
                         horizontalSpacing(defaultSpacing),
-                        Obx(() {
+                        Watch((ctx) {
                           if (request.processing.value) {
                             return SizedBox(
                               width: 31,
@@ -238,7 +245,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
                                 onTap: () async {
                                   final result = await Get.dialog(KeyRequestAcceptWindow(request: request));
                                   if (result != null && result) {
-                                    requests.remove(request);
+                                    _requests.remove(request);
                                   }
                                 },
                                 padding: 0,
@@ -249,7 +256,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
                               LoadingIconButton(
                                 onTap: () {
                                   request.updateStatus(true, () {
-                                    requests.remove(request);
+                                    _requests.remove(request);
                                   });
                                 },
                                 padding: 0,
@@ -282,7 +289,7 @@ class KeyRequestAcceptWindow extends StatefulWidget {
 }
 
 class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> with SignalsMixin {
-  final _error = signal("");
+  late final _error = createSignal("");
   final TextEditingController _codeController = TextEditingController();
 
   @override

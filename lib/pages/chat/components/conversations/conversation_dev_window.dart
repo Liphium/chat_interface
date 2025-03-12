@@ -89,7 +89,6 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
               Clipboard.setData(ClipboardData(text: widget.conversation.id.toString()));
               Get.back();
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -99,7 +98,6 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
               Clipboard.setData(ClipboardData(text: "${widget.conversation.token.id}:${widget.conversation.token.token}"));
               Get.back();
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -108,7 +106,6 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
             icon: Icons.close,
             label: "close".tr,
             onTap: () => Get.back(),
-            loading: signal(false),
           ),
         ],
       ),

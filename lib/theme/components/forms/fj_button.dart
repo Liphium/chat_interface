@@ -43,27 +43,35 @@ class FJElevatedButton extends StatelessWidget {
 class FJElevatedLoadingButton extends StatelessWidget {
   final Function() onTap;
   final String label;
-  final ReadonlySignal<bool> loading;
+  final ReadonlySignal<bool>? loading;
 
-  const FJElevatedLoadingButton({super.key, required this.onTap, required this.label, required this.loading});
+  const FJElevatedLoadingButton({super.key, required this.onTap, required this.label, this.loading});
 
   @override
   Widget build(BuildContext context) {
     return FJElevatedButton(
-      onTap: () => loading.value ? null : onTap(),
+      onTap: () => (loading?.value ?? false) ? null : onTap(),
       child: Center(
-        child: Watch(
-          (ctx) => loading.value
-              ? SizedBox(
-                  height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                  width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                  child: Padding(
-                    padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                    child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
-                  ),
-                )
-              : Text(label, style: Get.theme.textTheme.labelLarge),
-        ),
+        child: Builder(builder: (context) {
+          // Don't care about state in case there is no loading state
+          if (loading == null) {
+            return Text(label, style: Get.theme.textTheme.labelLarge);
+          }
+
+          // Handle loading states as well
+          return Watch(
+            (ctx) => loading!.value
+                ? SizedBox(
+                    height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                    width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                    child: Padding(
+                      padding: const EdgeInsets.all(defaultSpacing * 0.25),
+                      child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                    ),
+                  )
+                : Text(label, style: Get.theme.textTheme.labelLarge),
+          );
+        }),
       ),
     );
   }

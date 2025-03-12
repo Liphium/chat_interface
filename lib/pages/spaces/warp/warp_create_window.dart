@@ -18,14 +18,19 @@ class WarpCreateWindow extends StatefulWidget {
   State<WarpCreateWindow> createState() => _WarpCreateWindowState();
 }
 
-class _WarpCreateWindowState extends State<WarpCreateWindow> with SignalsMixin {
+class _WarpCreateWindowState extends State<WarpCreateWindow> {
+  // Controller for the port input
   final TextEditingController _port = TextEditingController();
+
+  // State
   final _error = signal("");
   final _loading = signal(false);
 
   @override
   void dispose() {
     _port.dispose();
+    _error.dispose();
+    _loading.dispose();
     super.dispose();
   }
 

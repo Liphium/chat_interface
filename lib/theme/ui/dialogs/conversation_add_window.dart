@@ -80,13 +80,13 @@ class ConversationAddWindow extends StatefulWidget {
   }
 }
 
-class _ConversationAddWindowState extends State<ConversationAddWindow> with SignalsMixin {
+class _ConversationAddWindowState extends State<ConversationAddWindow> {
   // State
   final _members = listSignal(<Friend>[]);
   final _length = signal(0);
   final _conversationLoading = signal(false);
   final _errorText = signal("");
-  final _search = "".obs;
+  final _search = signal("");
 
   // Input
   final _searchFocusNode = FocusNode();
@@ -111,6 +111,11 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> with Sign
     _searchFocusNode.dispose();
     _searchController.dispose();
     _controller.dispose();
+    _members.dispose();
+    _length.dispose();
+    _conversationLoading.dispose();
+    _errorText.dispose();
+    _search.dispose();
     super.dispose();
   }
 

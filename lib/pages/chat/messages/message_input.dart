@@ -47,7 +47,7 @@ class MessageInput extends StatefulWidget {
   State<MessageInput> createState() => _MessageInputState();
 }
 
-class _MessageInputState extends State<MessageInput> with SignalsMixin {
+class _MessageInputState extends State<MessageInput> {
   final FormattedTextEditingController _message = FormattedTextEditingController(Get.theme.textTheme.labelLarge!, Get.theme.textTheme.bodyLarge!);
   final loading = signal(false);
   final FocusNode _inputFocus = FocusNode();
@@ -63,6 +63,7 @@ class _MessageInputState extends State<MessageInput> with SignalsMixin {
   void dispose() {
     _message.dispose();
     _sub?.cancel();
+    loading.dispose();
     _inputFocus.dispose();
     super.dispose();
   }

@@ -33,9 +33,15 @@ class MessageBar extends StatefulWidget {
   State<MessageBar> createState() => _MessageBarState();
 }
 
-class _MessageBarState extends State<MessageBar> with SignalsMixin {
+class _MessageBarState extends State<MessageBar> {
   final GlobalKey _infoKey = GlobalKey(), _zapShareKey = GlobalKey();
-  final callLoading = signal(false);
+  final additionLoading = signal(false);
+
+  @override
+  void dispose() {
+    additionLoading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +166,7 @@ class _MessageBarState extends State<MessageBar> with SignalsMixin {
                             return LoadingIconButton(
                               icon: Icons.forward_to_inbox,
                               iconSize: 27,
-                              loading: callLoading,
+                              loading: additionLoading,
                               tooltip: "chat.invite_to_space".tr,
                               onTap: () {
                                 SpaceController.inviteToCall(widget.provider);
@@ -176,7 +182,7 @@ class _MessageBarState extends State<MessageBar> with SignalsMixin {
                           LoadingIconButton(
                             icon: Icons.rocket_launch,
                             iconSize: 27,
-                            loading: callLoading,
+                            loading: additionLoading,
                             tooltip: "chat.start_space".tr,
                             onTap: () {
                               SpaceController.createAndConnect(widget.provider);
@@ -187,7 +193,7 @@ class _MessageBarState extends State<MessageBar> with SignalsMixin {
                         if (!error)
                           ConversationAddButton(
                             conversation: widget.conversation,
-                            loading: callLoading,
+                            loading: additionLoading,
                           ),
 
                         Visibility(

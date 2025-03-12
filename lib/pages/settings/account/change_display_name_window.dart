@@ -16,7 +16,7 @@ class ChangeDisplayNameWindow extends StatefulWidget {
   State<ChangeDisplayNameWindow> createState() => _ChangeNameWindowState();
 }
 
-class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> with SignalsMixin {
+class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
   // Text controllers
   final _displayNameController = TextEditingController();
 
@@ -26,6 +26,8 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> with Signals
 
   @override
   void dispose() {
+    _errorText.dispose();
+    _loading.dispose();
     _displayNameController.dispose();
     super.dispose();
   }

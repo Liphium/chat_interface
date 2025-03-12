@@ -23,8 +23,8 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> with SignalsMix
   final _confirmPasswordController = TextEditingController();
 
   // State
-  final _errorText = signal('');
-  final _loading = signal(false);
+  late final _errorText = createSignal('');
+  late final _loading = createSignal(false);
 
   @override
   void dispose() {

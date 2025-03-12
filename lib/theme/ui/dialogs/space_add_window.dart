@@ -21,15 +21,17 @@ class SpaceAddWindow extends StatefulWidget {
   State<SpaceAddWindow> createState() => _ConversationAddWindowState();
 }
 
-class _ConversationAddWindowState extends State<SpaceAddWindow> with SignalsMixin {
-  late final public = createSignal(true);
-  late final _conversationLoading = createSignal(false);
+class _ConversationAddWindowState extends State<SpaceAddWindow> {
+  late final _public = signal(true);
+  late final _conversationLoading = signal(false);
 
   final _controller = TextEditingController();
 
   @override
   void dispose() {
     _controller.dispose();
+    _public.dispose();
+    _conversationLoading.dispose();
     super.dispose();
   }
 
@@ -71,8 +73,8 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> with SignalsMixi
         children: [
           /*
           verticalSpacing(sectionSpacing),
-          Obx(
-            () => FJTextField(
+          Watch(
+            (ctx) => FJTextField(
               controller: _controller,
               hintText: "Space name".tr,
               errorText: _errorText.value,
@@ -85,9 +87,9 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> with SignalsMixi
               Text("Public", style: Get.theme.textTheme.bodyMedium),
               Watch(
                 (ctx) => FJSwitch(
-                  value: public.value,
+                  value: _public.value,
                   onChanged: (p0) {
-                    public.value = p0;
+                    _public.value = p0;
                   },
                 ),
               ),
@@ -96,7 +98,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> with SignalsMixi
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButton(
             onTap: () async {
-              unawaited(SpaceController.createSpace(public.value));
+              unawaited(SpaceController.createSpace(_public.value));
               Get.back();
             },
             label: "create".tr,

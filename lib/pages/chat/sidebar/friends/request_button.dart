@@ -19,7 +19,7 @@ class RequestButton extends StatefulWidget {
 }
 
 class _RequestButtonState extends State<RequestButton> with SignalsMixin {
-  final requestLoading = signal(false);
+  late final requestLoading = createSignal(false);
 
   @override
   Widget build(BuildContext context) {

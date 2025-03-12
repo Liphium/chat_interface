@@ -33,22 +33,25 @@ class OwnProfile extends StatefulWidget {
   State<OwnProfile> createState() => _ProfileState();
 }
 
-class _ProfileState extends State<OwnProfile> with SignalsMixin {
-  //* Edit state for buttons
-  final edit = signal(false);
+class _ProfileState extends State<OwnProfile> {
+  // Edit state for buttons
+  final _edit = signal(false);
 
   final TextEditingController _status = TextEditingController();
-  final statusMessage = signal("");
+  final _statusMessage = signal("");
   final FocusNode _statusFocus = FocusNode();
 
   // Developer things
-  final testLoading = signal(false);
-  final _clicks = signal(0);
+  final _testLoading = signal(false);
+  var _clicks = 0;
 
   @override
   void dispose() {
     _status.dispose();
     _statusFocus.dispose();
+    _edit.dispose();
+    _testLoading.dispose();
+    _statusMessage.dispose();
     super.dispose();
   }
 
@@ -57,9 +60,9 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
     ThemeData theme = Theme.of(context);
 
     _status.text = StatusController.status.value;
-    statusMessage.value = StatusController.status.value;
+    _statusMessage.value = StatusController.status.value;
 
-    //* Context menu
+    // Context menu
     return SlidingWindowBase(
       title: const [],
       position: widget.position,
@@ -71,7 +74,7 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              //* Profile info
+              // Show display name
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -85,12 +88,11 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                 ],
               ),
 
-              //* Copy button
+              // Show a button for copying your own name (with secret developer window)
               LoadingIconButton(
-                loading: signal(false),
                 onTap: () {
-                  _clicks.value++;
-                  if (_clicks.value > 7) {
+                  _clicks++;
+                  if (_clicks > 7) {
                     Get.dialog(const DeveloperWindow());
                   }
                   Clipboard.setData(ClipboardData(text: StatusController.name.value));
@@ -101,7 +103,7 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
           ),
           verticalSpacing(defaultSpacing),
 
-          //* Status
+          // Show a
           Watch((ctx) {
             if (StatusController.ownContainer.value != null) {
               return Padding(
@@ -110,7 +112,6 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                   icon: Icons.stop,
                   label: 'profile.stop_sharing'.tr,
                   onTap: () => StatusController.stopSharing(),
-                  loading: signal(false),
                 ),
               );
             }
@@ -122,7 +123,6 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                   icon: Icons.start,
                   label: 'profile.start_sharing'.tr,
                   onTap: () => StatusController.share(SpaceController.getContainer()),
-                  loading: signal(false),
                 ),
               );
             } else {
@@ -130,7 +130,7 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
             }
           }),
 
-          //* Current status type
+          // Current status type
           RepaintBoundary(
             child: Watch((ctx) {
               return Column(
@@ -160,7 +160,7 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                           padding: const EdgeInsets.all(defaultSpacing),
                           child: Row(
                             children: [
-                              //* Status icon
+                              // Status icon
                               Icon(icon, size: 13.0, color: color),
                               horizontalSpacing(defaultSpacing),
                               Text(
@@ -181,21 +181,21 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
             }),
           ),
 
-          //* Status message
+          // Status message
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              //* Profile id
+              // Profile id
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    edit.value = true;
+                    _edit.value = true;
                     _statusFocus.requestFocus();
                   },
                   child: Watch(
                     (ctx) => Visibility(
-                      visible: edit.value,
+                      visible: _edit.value,
                       replacement: Text(
                         StatusController.status.value == "" ? 'status.message.add'.tr : StatusController.status.value,
                         style: theme.textTheme.bodyMedium,
@@ -205,7 +205,7 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                       ),
                       child: TextField(
                         focusNode: _statusFocus,
-                        onChanged: (value) => statusMessage.value = value,
+                        onChanged: (value) => _statusMessage.value = value,
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintStyle: theme.textTheme.bodyMedium!,
@@ -213,7 +213,7 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                         ),
                         style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
 
-                        //* Save status
+                        // Save status
                         onEditingComplete: () async {
                           if (_status.text == "") _status.text = "";
                           final error = await StatusService.sendStatus(message: _status.text);
@@ -221,7 +221,7 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                             showErrorPopup("error", error);
                             return;
                           }
-                          edit.value = false;
+                          _edit.value = false;
                         },
 
                         inputFormatters: [
@@ -234,19 +234,19 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                 ),
               ),
 
-              //* Close button
+              // Close button
               Obx(
                 () => LoadingIconButton(
                   loading: StatusController.statusLoading,
                   onTap: () async {
-                    if (StatusController.status.value == "" && !edit.value) {
-                      edit.value = true;
+                    if (StatusController.status.value == "" && !_edit.value) {
+                      _edit.value = true;
                       _status.text = "";
                       _statusFocus.requestFocus();
                       return;
                     }
 
-                    if (!edit.value) {
+                    if (!_edit.value) {
                       final error = await StatusService.sendStatus(message: "");
                       if (error != null) {
                         showErrorPopup("error", error);
@@ -261,12 +261,12 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                       showErrorPopup("error", error);
                       return;
                     }
-                    edit.value = false;
+                    _edit.value = false;
                     _statusFocus.unfocus();
                   },
-                  icon: statusMessage.value == ""
+                  icon: _statusMessage.value == ""
                       ? Icons.add
-                      : edit.value
+                      : _edit.value
                           ? Icons.done
                           : Icons.close,
                   color: theme.colorScheme.onPrimary,
@@ -276,21 +276,19 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
           ),
           verticalSpacing(defaultSpacing),
 
-          //* Profile settings
+          // Profile settings
           ProfileButton(
             icon: Icons.settings,
             label: 'profile.settings'.tr,
             onTap: () => SettingController.openSettingsPage(),
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
 
-          //* Friends page
+          // Friends page
           ProfileButton(
             icon: Icons.group,
             label: 'profile.friends'.tr,
             onTap: () => showModal(const FriendsPage()),
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
 
@@ -302,11 +300,11 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                 icon: Icons.hardware,
                 label: 'profile.test'.tr,
                 onTap: () async {
-                  testLoading.value = true;
+                  _testLoading.value = true;
                   unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
-                  testLoading.value = false;
+                  _testLoading.value = false;
                 },
-                loading: testLoading,
+                loading: _testLoading,
               ),
             ),
 
@@ -320,7 +318,7 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
                 onTap: () async {
                   Get.find<ConnectionController>().restart();
                 },
-                loading: testLoading,
+                loading: _testLoading,
               ),
             ),
 
@@ -329,7 +327,6 @@ class _ProfileState extends State<OwnProfile> with SignalsMixin {
             icon: Icons.launch,
             label: 'help'.tr,
             onTap: () => launchUrlString(Constants.docsBase),
-            loading: signal(false),
           ),
         ],
       ),

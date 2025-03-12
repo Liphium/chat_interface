@@ -38,4 +38,5 @@ class Constants {
   static const String docsAdminBase = "https://docs.liphium.com";
   static const String docsBase = "https://liphium.com/docs";
   static const String docsUsageFAQ = "https://liphium.com/docs/usage/faq";
+  static const String docsEncryptionAndPrivacy = "https://liphium.com//docs/using-liphium/encryption-and-privacy/";
 }

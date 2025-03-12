@@ -7,7 +7,6 @@ import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:signals/signals_flutter.dart';
 
 class MessageFeed extends StatefulWidget {
   final double? overwritePadding;
@@ -23,9 +22,8 @@ class MessageFeed extends StatefulWidget {
   State<MessageFeed> createState() => _MessageFeedState();
 }
 
-class _MessageFeedState extends State<MessageFeed> with SignalsMixin {
+class _MessageFeedState extends State<MessageFeed> {
   final TextEditingController _message = TextEditingController();
-  final loading = signal(false);
 
   @override
   void dispose() {

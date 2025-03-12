@@ -22,31 +22,13 @@ class OwnProfileMobile extends StatefulWidget {
   State<OwnProfileMobile> createState() => _OwnProfileMobileState();
 }
 
-class _OwnProfileMobileState extends State<OwnProfileMobile> with SignalsMixin {
-  //* Edit state for buttons
-  final edit = signal(false);
-
-  final TextEditingController _status = TextEditingController();
-  final statusMessage = signal("");
-  final FocusNode _statusFocus = FocusNode();
-
+class _OwnProfileMobileState extends State<OwnProfileMobile> {
   // Developer things
-  final testLoading = signal(false);
-  final _clicks = signal(0);
-
-  @override
-  void dispose() {
-    _status.dispose();
-    _statusFocus.dispose();
-    super.dispose();
-  }
+  var _clicks = 0;
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-
-    _status.text = StatusController.status.value;
-    statusMessage.value = StatusController.status.value;
 
     return DevicePadding(
       top: true,
@@ -106,8 +88,8 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> with SignalsMixin {
                     children: [
                       LoadingIconButton(
                         onTap: () {
-                          _clicks.value++;
-                          if (_clicks.value > 7) {
+                          _clicks++;
+                          if (_clicks > 7) {
                             showModal(const DeveloperWindow());
                           }
                           Clipboard.setData(ClipboardData(text: StatusController.name.value));
@@ -144,7 +126,6 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> with SignalsMixin {
                   icon: Icons.stop,
                   label: 'profile.stop_sharing'.tr,
                   onTap: () => StatusController.stopSharing(),
-                  loading: signal(false),
                 ),
               );
             }
@@ -156,7 +137,6 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> with SignalsMixin {
                   icon: Icons.start,
                   label: 'profile.start_sharing'.tr,
                   onTap: () => StatusController.share(SpaceController.getContainer()),
-                  loading: signal(false),
                 ),
               );
             } else {
@@ -217,90 +197,6 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> with SignalsMixin {
               );
             }),
           ),
-
-          //* Status message
-          if (!isMobileMode())
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                //* Profile id
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      edit.value = true;
-                      _statusFocus.requestFocus();
-                    },
-                    child: Watch(
-                      (ctx) => Visibility(
-                        visible: edit.value,
-                        replacement: Text(
-                          StatusController.status.value == "" ? 'status.message.add'.tr : StatusController.status.value,
-                          style: theme.textTheme.bodyMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textHeightBehavior: noTextHeight,
-                        ),
-                        child: TextField(
-                          focusNode: _statusFocus,
-                          onChanged: (value) => statusMessage.value = value,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintStyle: theme.textTheme.bodyMedium!,
-                            hintText: 'status.message'.tr,
-                          ),
-                          style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
-
-                          //* Save status
-                          onEditingComplete: () {
-                            if (_status.text == "") _status.text = "";
-                            StatusService.sendStatus(message: _status.text);
-                            edit.value = false;
-                          },
-
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(70),
-                          ],
-                          controller: _status,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                //* Close button
-                if (!isMobileMode())
-                  Obx(
-                    () => LoadingIconButton(
-                      loading: StatusController.statusLoading,
-                      onTap: () {
-                        if (StatusController.status.value == "" && !edit.value) {
-                          edit.value = true;
-                          _status.text = "";
-                          _statusFocus.requestFocus();
-                          return;
-                        }
-
-                        if (!edit.value) {
-                          StatusService.sendStatus(message: "");
-                          _status.text = "";
-                          return;
-                        }
-
-                        edit.value = false;
-                        _statusFocus.unfocus();
-                        StatusService.sendStatus(message: _status.text);
-                      },
-                      icon: statusMessage.value == ""
-                          ? Icons.add
-                          : edit.value
-                              ? Icons.done
-                              : Icons.close,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                  )
-              ],
-            ),
         ],
       ),
     );

@@ -80,15 +80,8 @@ class PolicyAcceptPage extends StatefulWidget {
 }
 
 class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
-  final error = signal("");
-  final clicked = signal(false);
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  late final _error = createSignal("");
+  late final _clicked = createSignal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +99,7 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
         verticalSpacing(sectionSpacing),
         AnimatedErrorContainer(
           padding: const EdgeInsets.only(bottom: defaultSpacing),
-          message: error,
+          message: _error,
           expand: true,
         ),
         FJElevatedButton(
@@ -115,11 +108,11 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
             if (await canLaunchUrl(Uri.parse(url))) {
               final result = await launchUrl(Uri.parse(url));
               if (result) {
-                clicked.value = true;
+                _clicked.value = true;
                 return;
               }
             }
-            error.value = "setup.policy.error".tr;
+            _error.value = "setup.policy.error".tr;
           },
           child: Center(
             child: Text(
@@ -129,32 +122,30 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
             ),
           ),
         ),
-        Obx(
-          () => Animate(
-            effects: [
-              ExpandEffect(
-                axis: Axis.vertical,
-                curve: scaleAnimationCurve,
-                duration: 500.ms,
-              ),
-              FadeEffect(
-                duration: 500.ms,
-              )
-            ],
-            target: clicked.value ? 1 : 0,
-            child: Padding(
-              padding: const EdgeInsets.only(top: defaultSpacing),
-              child: FJElevatedButton(
-                onTap: () async {
-                  final supportDir = await getApplicationSupportDirectory();
+        Animate(
+          effects: [
+            ExpandEffect(
+              axis: Axis.vertical,
+              curve: scaleAnimationCurve,
+              duration: 500.ms,
+            ),
+            FadeEffect(
+              duration: 500.ms,
+            )
+          ],
+          target: _clicked.value ? 1 : 0,
+          child: Padding(
+            padding: const EdgeInsets.only(top: defaultSpacing),
+            child: FJElevatedButton(
+              onTap: () async {
+                final supportDir = await getApplicationSupportDirectory();
 
-                  // Add a file to document that the privacy policy has been accepted
-                  final file = await File(path.join(supportDir.path, agreeFile)).create();
-                  await file.writeAsString(widget.versionToWrite);
-                  await setupManager.next();
-                },
-                child: Center(child: Text("accept".tr, style: Get.textTheme.labelLarge)),
-              ),
+                // Add a file to document that the privacy policy has been accepted
+                final file = await File(path.join(supportDir.path, agreeFile)).create();
+                await file.writeAsString(widget.versionToWrite);
+                await setupManager.next();
+              },
+              child: Center(child: Text("accept".tr, style: Get.textTheme.labelLarge)),
             ),
           ),
         ),

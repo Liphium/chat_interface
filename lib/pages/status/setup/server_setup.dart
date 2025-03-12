@@ -41,10 +41,20 @@ class ServerSelectorPage extends StatefulWidget {
   State<ServerSelectorPage> createState() => _ServerSelectorPageState();
 }
 
-class _ServerSelectorPageState extends State<ServerSelectorPage> with SignalsMixin {
+class _ServerSelectorPageState extends State<ServerSelectorPage> {
+  // Controller for the server name
+  final TextEditingController _name = TextEditingController();
+
+  // State
   final _error = signal("");
   final _loading = signal(false);
-  final TextEditingController _name = TextEditingController();
+
+  @override
+  void dispose() {
+    _error.dispose();
+    _loading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +75,6 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> with SignalsMix
         ),
         verticalSpacing(defaultSpacing),
         FJElevatedLoadingButton(
-          loading: signal(false),
           onTap: () async {
             await launchUrl(Uri.parse("https://liphium.com/docs/concepts/towns"));
           },

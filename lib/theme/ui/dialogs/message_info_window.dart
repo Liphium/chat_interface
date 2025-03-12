@@ -25,11 +25,17 @@ class MessageInfoWindow extends StatefulWidget {
   });
 
   @override
-  State<MessageInfoWindow> createState() => _ConversationAddWindowState();
+  State<MessageInfoWindow> createState() => _MessageInfoWindowState();
 }
 
-class _ConversationAddWindowState extends State<MessageInfoWindow> with SignalsMixin {
-  final messageDeletionLoading = signal(false);
+class _MessageInfoWindowState extends State<MessageInfoWindow> {
+  final _messageDeletionLoading = signal(false);
+
+  @override
+  void dispose() {
+    _messageDeletionLoading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +75,6 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> with SignalsM
               Clipboard.setData(ClipboardData(text: widget.message.id));
               Get.back();
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -79,7 +84,6 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> with SignalsM
               Clipboard.setData(ClipboardData(text: member.tokenId.encode()));
               Get.back();
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -88,7 +92,6 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> with SignalsM
             onTap: () {
               showSuccessPopup("success", utf8.decode(base64Decode(widget.message.content)));
             },
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -97,7 +100,6 @@ class _ConversationAddWindowState extends State<MessageInfoWindow> with SignalsM
             icon: Icons.close,
             label: "close".tr,
             onTap: () => Get.back(),
-            loading: signal(false),
           ),
         ],
       ),

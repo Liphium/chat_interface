@@ -6,6 +6,7 @@ import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +73,6 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             icon: Icons.search,
             label: "chat.search".tr,
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
-            loading: signal(false),
           ),
           verticalSpacing(elementSpacing),
 
@@ -85,7 +85,6 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
                 icon: Icons.electric_bolt,
                 label: "chat.zapshare".tr,
                 onTap: () => Get.find<ZapShareController>().openWindow(widget.conversation, ContextMenuData.fromPosition(Offset.zero)),
-                loading: signal(false),
               ),
             ),
           ),
@@ -97,7 +96,6 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
                 icon: Icons.edit,
                 label: "Edit title",
                 onTap: () => {},
-                loading: signal(false),
               ),
             ),
           ),
@@ -105,7 +103,6 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             icon: Icons.developer_mode,
             label: "dev.details".tr,
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
-            loading: signal(false),
           ),
           verticalSpacing(sectionSpacing),
 
@@ -122,8 +119,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
           ProfileButton(
             icon: Icons.launch,
             label: "learn_more".tr,
-            onTap: () => launchUrlString("https://liphium.com"), // TODO: Make a page about encryption
-            loading: signal(false),
+            onTap: () => launchUrlString(Constants.docsEncryptionAndPrivacy),
           ),
 
           verticalSpacing(sectionSpacing),
@@ -160,7 +156,6 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
               },
               onDecline: () => {},
             )),
-            loading: signal(false),
           ),
         ],
       ),

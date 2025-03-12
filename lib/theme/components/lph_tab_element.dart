@@ -130,15 +130,15 @@ class LPHTabElementSignal extends StatefulWidget {
 }
 
 class _LPHTabElementSignalState extends State<LPHTabElementSignal> with SignalsMixin {
-  var _selected = signal(0);
+  late Signal<int> _selected;
 
   // The width of all the text in the tabs
-  final tabWidth = <int, double>{};
+  final _tabWidth = <int, double>{};
 
   @override
   void initState() {
     // Measure all the texts
-    _selected = widget.selected ?? signal(0);
+    _selected = widget.selected ?? createSignal(0);
     int count = 0;
     for (var tab in widget.tabs) {
       final textPainter = TextPainter(
@@ -149,7 +149,7 @@ class _LPHTabElementSignalState extends State<LPHTabElementSignal> with SignalsM
         textDirection: TextDirection.ltr,
       );
       textPainter.layout();
-      tabWidth[count] = textPainter.size.width + defaultSpacing * 2;
+      _tabWidth[count] = textPainter.size.width + defaultSpacing * 2;
       count++;
     }
     super.initState();
@@ -159,22 +159,24 @@ class _LPHTabElementSignalState extends State<LPHTabElementSignal> with SignalsM
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Watch((context) {
+        Builder(builder: (context) {
+          // Calculate where the background should be placed
           double left = 0;
           int count = 0;
           for (var _ in widget.tabs) {
             if (count == _selected.value) {
               break;
             }
-            left += tabWidth[count]! + defaultSpacing;
+            left += _tabWidth[count]! + defaultSpacing;
             count++;
           }
 
+          // Render the background with animation
           return AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
             curve: Curves.easeInOutCubicEmphasized,
             left: left,
-            width: tabWidth[_selected.value],
+            width: _tabWidth[_selected.value],
             height: Get.textTheme.titleMedium!.fontSize! * 1.5 + elementSpacing * 2,
             child: Container(
               decoration: BoxDecoration(

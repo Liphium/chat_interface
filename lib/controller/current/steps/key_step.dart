@@ -18,7 +18,6 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:signals/signals.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 import '../../../pages/status/setup/setup_manager.dart';
@@ -272,7 +271,6 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
         ),
         verticalSpacing(sectionSpacing),
         FJElevatedLoadingButton(
-          loading: signal(false),
           onTap: () async {
             final json = await postJSON("/account/keys/requests/check", {
               "token": refreshToken,
