@@ -1,7 +1,7 @@
 import 'package:chat_interface/theme/components/transitions/transition_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class TransitionContainer extends StatefulWidget {
   final Color? color;
@@ -20,47 +20,33 @@ class TransitionContainer extends StatefulWidget {
 class _AnimatedContainerState extends State<TransitionContainer> {
   @override
   Widget build(BuildContext context) {
-    Effect<dynamic> mainEffect;
-
-    if (widget.fade) {
-      mainEffect = FadeEffect(
-        duration: 250.ms,
-        begin: 0,
-        end: 1,
-      );
-    } else {
-      mainEffect = FadeEffect(
-        duration: 250.ms,
-        begin: 0,
-        end: 1,
-      );
-    }
-
-    return GetX<TransitionController>(
-      builder: (controller) {
-        return IgnorePointer(
-          ignoring: controller.transition.value,
-          child: Hero(
-            tag: "login",
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: widget.width ?? double.infinity),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: widget.borderRadius,
-                  color: widget.color ?? Theme.of(context).colorScheme.onInverseSurface,
-                ),
-                child: Animate(
-                  effects: [
-                    mainEffect,
-                  ],
-                  target: controller.transition.value ? 0 : 1,
-                  child: widget.child,
-                ),
+    return Watch(
+      (ctx) => IgnorePointer(
+        ignoring: TransitionController.transition.value,
+        child: Hero(
+          tag: "login",
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: widget.width ?? double.infinity),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: widget.borderRadius,
+                color: widget.color ?? Theme.of(context).colorScheme.onInverseSurface,
+              ),
+              child: Animate(
+                effects: [
+                  FadeEffect(
+                    duration: 250.ms,
+                    begin: 0,
+                    end: 1,
+                  ),
+                ],
+                target: TransitionController.transition.value ? 0 : 1,
+                child: widget.child,
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

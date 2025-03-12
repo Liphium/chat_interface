@@ -5,8 +5,9 @@ import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
-class ZapShareWindow extends StatefulWidget {
+class ZapShareWindow extends StatelessWidget {
   final Conversation conversation;
   final ContextMenuData data;
 
@@ -17,17 +18,10 @@ class ZapShareWindow extends StatefulWidget {
   });
 
   @override
-  State<ZapShareWindow> createState() => _ZapShareWindowState();
-}
-
-class _ZapShareWindowState extends State<ZapShareWindow> {
-  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ZapShareController>();
-
     return SlidingWindowBase(
       title: const [],
-      position: widget.data,
+      position: data,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -38,14 +32,15 @@ class _ZapShareWindowState extends State<ZapShareWindow> {
                 children: [
                   Row(
                     children: [
-                      Obx(() => Text("${controller.step.value} ", style: Get.theme.textTheme.labelLarge)),
-                      Obx(() => Text("(${controller.currentPart.value}/${controller.endPart})", style: Get.theme.textTheme.bodyLarge)),
+                      Watch((ctx) => Text("${ZapShareController.step.value} ", style: Get.theme.textTheme.labelLarge)),
+                      Watch((ctx) =>
+                          Text("(${ZapShareController.currentPart.value}/${ZapShareController.endPart})", style: Get.theme.textTheme.bodyLarge)),
                     ],
                   ),
                   verticalSpacing(defaultSpacing),
                   FJElevatedButton(
                     onTap: () {
-                      controller.cancel();
+                      ZapShareController.cancel();
                       Get.back();
                     },
                     child: Row(
@@ -63,7 +58,7 @@ class _ZapShareWindowState extends State<ZapShareWindow> {
               Obx(
                 () => CircularProgressIndicator(
                   backgroundColor: Get.theme.colorScheme.primary,
-                  value: controller.waiting.value ? null : controller.progress.value,
+                  value: ZapShareController.waiting.value ? null : ZapShareController.progress.value,
                   valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                 ),
               ),

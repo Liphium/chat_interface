@@ -183,7 +183,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
         FJElevatedButton(
           onTap: () {
             final ThemeData theme = getThemeData();
-            Get.find<ThemeManager>().changeTheme(theme);
+            ThemeManager.changeTheme(theme);
           },
           child: Text("theme.apply".tr, style: Get.theme.textTheme.labelLarge),
         )

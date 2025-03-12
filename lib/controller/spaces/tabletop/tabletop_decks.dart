@@ -4,7 +4,6 @@ import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/web.dart';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:get/get.dart';
 import 'package:signals/signals.dart';
 
 class TabletopDecks {

@@ -4,38 +4,27 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class TransitionController extends GetxController {
-  final transitionDuration = 250.ms; // constant
-  final transition = false.obs;
+  static final transitionDuration = 250.ms; // constant
+  static final transition = false.obs;
 
-  Timer? currentTimer;
+  static Timer? _currentTimer;
 
-  void cancelAll() {
+  static void cancelAll() {
     transition.value = false;
-    currentTimer?.cancel();
+    _currentTimer?.cancel();
   }
 
-  void modelTransition(dynamic page) {
-    transitionTo(page, (page) => Get.offAll(page, transition: Transition.fade));
-  }
-
-  void dialogTransition(dynamic page) {
-    Get.back();
-    Get.dialog(
-      page,
-      barrierDismissible: false,
-    );
-  }
-
-  void transitionTo(dynamic page, Function(dynamic) goTo) {
+  /// Transition to a new page
+  static void transitionTo(dynamic page, Function(dynamic) goTo) {
     // Reset the state
-    currentTimer?.cancel();
+    _currentTimer?.cancel();
     transition.value = true;
 
     // Start a timer to give the hero element time to fade out
-    currentTimer = Timer(transitionDuration, () {
+    _currentTimer = Timer(transitionDuration, () {
       goTo(page);
 
-      currentTimer = Timer(transitionDuration, () {
+      _currentTimer = Timer(transitionDuration, () {
         transition.value = false;
       });
     });

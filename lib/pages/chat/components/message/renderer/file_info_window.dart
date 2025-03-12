@@ -5,7 +5,6 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:signals/signals_flutter.dart';
 
 class FileInfoWindow extends StatefulWidget {
   final AttachmentContainer container;

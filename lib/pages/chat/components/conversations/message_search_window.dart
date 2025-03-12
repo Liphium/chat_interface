@@ -22,7 +22,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
   @override
   void initState() {
     _controller.addListener(checkForScrollChanges);
-    Get.find<MessageSearchController>().currentFocus = _focus;
+    MessageSearchController.currentFocus = _focus;
     super.initState();
   }
 
@@ -34,14 +34,12 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
 
   void checkForScrollChanges() {
     if (_controller.position.pixels >= _controller.position.maxScrollExtent - 200) {
-      Get.find<MessageSearchController>().search(increment: true);
+      MessageSearchController.search(increment: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final searchController = Get.find<MessageSearchController>();
-
     return Container(
       color: Get.theme.colorScheme.onInverseSurface,
       child: Column(
@@ -61,11 +59,11 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                 if (MessageController.currentProvider.value == null) {
                   return;
                 }
-                searchController.filters.value = [
+                MessageSearchController.filters.value = [
                   ConversationFilter(MessageController.currentProvider.value!.conversation.id.encode()),
                   ContentFilter(query),
                 ];
-                searchController.search();
+                MessageSearchController.search();
               },
             ),
           ),
@@ -76,15 +74,15 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                 gradientFractionOnEnd: 0,
                 child: ListView.builder(
                   controller: _controller,
-                  itemCount: searchController.results.length,
+                  itemCount: MessageSearchController.results.length,
                   itemBuilder: (context, index) {
-                    final message = searchController.results[index];
+                    final message = MessageSearchController.results[index];
                     final friend = FriendController.friends[message.senderAddress];
 
                     // Check if a timestamp should be rendered
                     bool newHeading = false;
                     if (index != 0) {
-                      final lastMessage = searchController.results[index - 1];
+                      final lastMessage = MessageSearchController.results[index - 1];
 
                       // Check if the last message was a day before the current one
                       if (lastMessage.createdAt.day != message.createdAt.day) {
@@ -124,7 +122,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                               ),
                             ),
                           ),
-                          if (index == searchController.results.length - 1) verticalSpacing(elementSpacing)
+                          if (index == MessageSearchController.results.length - 1) verticalSpacing(elementSpacing)
                         ],
                       ),
                     );

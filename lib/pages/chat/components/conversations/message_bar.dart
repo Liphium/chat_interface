@@ -45,8 +45,6 @@ class _MessageBarState extends State<MessageBar> {
 
   @override
   Widget build(BuildContext context) {
-    final zapShareController = Get.find<ZapShareController>();
-
     if (widget.conversation.borked) {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
@@ -135,7 +133,7 @@ class _MessageBarState extends State<MessageBar> {
                             children: [
                               IconButton(
                                 onPressed: () async {
-                                  await zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
+                                  await ZapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
                                 },
                                 icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                                 tooltip: "chat.zapshare".tr,
@@ -148,7 +146,7 @@ class _MessageBarState extends State<MessageBar> {
                                     padding: const EdgeInsets.all(2.0),
                                     child: Obx(
                                       () => CircularProgressIndicator(
-                                        value: zapShareController.waiting.value ? null : zapShareController.progress.value.clamp(0, 1),
+                                        value: ZapShareController.waiting.value ? null : ZapShareController.progress.value.clamp(0, 1),
                                         strokeWidth: 3,
                                         valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                                       ),
@@ -225,7 +223,7 @@ class _MessageBarState extends State<MessageBar> {
                       onPressed: () {
                         MessageController.toggleSearchView();
                         if (MessageController.showSearch.value) {
-                          Get.find<MessageSearchController>().currentFocus!.requestFocus();
+                          MessageSearchController.currentFocus!.requestFocus();
                         }
                       },
                     ),

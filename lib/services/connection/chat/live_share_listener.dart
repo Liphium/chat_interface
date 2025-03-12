@@ -5,11 +5,11 @@ import 'package:get/get.dart';
 
 void setupLiveshareListening() {
   connector.listen("transaction_send_part", (event) {
-    Get.find<ZapShareController>().onFilePartRequest(event);
+    ZapShareController.onFilePartRequest(event);
   });
 
   connector.listen("transaction_end", (event) {
     sendLog("transaction cancelled :sad:");
-    Get.find<ZapShareController>().onTransactionEnd();
+    ZapShareController.onTransactionEnd();
   });
 }

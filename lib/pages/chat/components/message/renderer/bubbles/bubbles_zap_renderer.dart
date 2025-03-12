@@ -223,12 +223,10 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
   }
 
   Widget renderZapEmbed() {
-    final controller = Get.find<ZapShareController>();
-
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color: widget.self ? Get.theme.colorScheme.onPrimary.withOpacity(0.13) : Get.theme.colorScheme.inverseSurface,
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withAlpha(40) : Get.theme.colorScheme.inverseSurface,
       ),
       padding: const EdgeInsets.symmetric(vertical: defaultSpacing, horizontal: defaultSpacing),
       child: Row(
@@ -280,13 +278,13 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
             }
 
             final convProvider = widget.provider as ConversationMessageProvider;
-            if (available.value && controller.currentConversation.value == convProvider.conversation.id) {
+            if (available.value && ZapShareController.currentConversation.value == convProvider.conversation.id) {
               return SizedBox(
                 width: 30,
                 height: 30,
                 child: CircularProgressIndicator(
                   color: Get.theme.colorScheme.onPrimary,
-                  value: controller.progress.value,
+                  value: ZapShareController.progress.value,
                 ),
               );
             }
@@ -294,7 +292,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
             return Visibility(
               visible: available.value && !widget.self,
               child: IconButton(
-                onPressed: () => Get.find<ZapShareController>().joinTransaction(
+                onPressed: () => ZapShareController.joinTransaction(
                   convProvider.conversation.id,
                   widget.message.senderAddress,
                   container!,

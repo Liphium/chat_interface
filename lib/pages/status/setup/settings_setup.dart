@@ -24,7 +24,7 @@ class SettingsSetup extends Setup {
     await Get.updateLocale(GeneralSettings.languages[SettingController.settings[GeneralSettings.language]!.getValue()].locale);
 
     // Changes the color theme
-    Get.find<ThemeManager>().changeTheme(getThemeData());
+    ThemeManager.changeTheme(getThemeData());
 
     // Initialize the tabletop settings
     await TabletopSettings.initSettings();

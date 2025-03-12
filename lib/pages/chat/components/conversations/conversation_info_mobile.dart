@@ -84,7 +84,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
               child: ProfileButton(
                 icon: Icons.electric_bolt,
                 label: "chat.zapshare".tr,
-                onTap: () => Get.find<ZapShareController>().openWindow(widget.conversation, ContextMenuData.fromPosition(Offset.zero)),
+                onTap: () => ZapShareController.openWindow(widget.conversation, ContextMenuData.fromPosition(Offset.zero)),
               ),
             ),
           ),
