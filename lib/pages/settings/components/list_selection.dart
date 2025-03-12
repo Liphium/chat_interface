@@ -25,8 +25,6 @@ class ListSelectionSetting extends StatefulWidget {
 class _ListSelectionSettingState extends State<ListSelectionSetting> {
   @override
   Widget build(BuildContext context) {
-    SettingController controller = Get.find();
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(widget.items.length, (index) {
@@ -42,14 +40,14 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
           child: Obx(
             () => Material(
-              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index
+              color: SettingController.settings[widget.settingName]!.getWhenValue(0, 0) == index
                   ? Get.theme.colorScheme.primary
                   : Get.theme.colorScheme.onInverseSurface,
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,
                 onTap: () {
-                  controller.settings[widget.settingName]!.setValue(index);
+                  SettingController.settings[widget.settingName]!.setValue(index);
                   if (widget.callback != null) {
                     widget.callback!(widget.items[index]);
                   }

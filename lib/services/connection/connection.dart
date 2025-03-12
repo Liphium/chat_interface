@@ -162,7 +162,7 @@ class Connector {
           onDone(false);
         }
         if (restart) {
-          Get.find<ConnectionController>().connectionStopped();
+          ConnectionController.connectionStopped();
         }
         initialized = false;
       },

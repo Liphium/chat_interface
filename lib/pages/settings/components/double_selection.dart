@@ -38,8 +38,7 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
 
   @override
   Widget build(BuildContext context) {
-    SettingController controller = Get.find();
-    final setting = controller.settings[widget.settingName]!;
+    final setting = SettingController.settings[widget.settingName]!;
     current.value = setting.getValue() as double;
 
     return Column(

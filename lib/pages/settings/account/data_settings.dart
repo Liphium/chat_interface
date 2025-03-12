@@ -6,9 +6,6 @@ import 'package:chat_interface/pages/settings/account/change_display_name_window
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/pages/settings/account/log_out_window.dart';
 import 'package:chat_interface/pages/settings/account/key_requests_window.dart';
-import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
-import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -20,14 +17,6 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class DataSettings {
-  static const String socialFeatures = "social.enable";
-
-  static void registerSettings(SettingController controller) {
-    controller.settings[socialFeatures] = Setting<bool>(socialFeatures, false);
-  }
-}
-
 class DataSettingsPage extends StatelessWidget {
   const DataSettingsPage({super.key});
 
@@ -38,45 +27,6 @@ class DataSettingsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //* Social features
-          if (Get.find<SettingController>().settings[DataSettings.socialFeatures]!.getValue())
-            Padding(
-              padding: const EdgeInsets.only(bottom: sectionSpacing),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Text("settings.data.social".tr, style: Get.theme.textTheme.labelLarge),
-                      horizontalSpacing(defaultSpacing),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Get.theme.colorScheme.error.withAlpha(25),
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                        ),
-                        padding: const EdgeInsets.all(elementSpacing),
-                        child: Row(
-                          children: [
-                            Icon(Icons.science, color: Get.theme.colorScheme.error),
-                            horizontalSpacing(elementSpacing),
-                            Text(
-                              "settings.experimental".tr,
-                              style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
-                            ),
-                            horizontalSpacing(elementSpacing)
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                  verticalSpacing(defaultSpacing),
-                  Text("settings.data.social.text".tr, style: Get.theme.textTheme.bodyMedium),
-                  verticalSpacing(defaultSpacing),
-                  const BoolSettingSmall(settingName: DataSettings.socialFeatures),
-                ],
-              ),
-            ),
-
           //* Profile picture
           Text("settings.data.profile_picture".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),

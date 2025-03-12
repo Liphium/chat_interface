@@ -146,7 +146,7 @@ class AttachmentController {
     }
 
     sendLog("Downloading ${container.name}...");
-    final maxSize = Get.find<SettingController>().settings[FileSettings.maxFileSize]!.getValue();
+    final maxSize = SettingController.settings[FileSettings.maxFileSize]!.getValue();
 
     // Check the file size to make sure it isn't over the limit
     final json = await postAddress(container.url, "/account/file_info/info", {
@@ -258,9 +258,9 @@ class AttachmentController {
   /// Clean the cache until the size is below the max cache size
   static Future<void> cleanUpCache() async {
     // Move into isolate in the future?
-    final cacheType = Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue();
+    final cacheType = SettingController.settings[FileSettings.fileCacheType]!.getValue();
     if (cacheType == 0) return;
-    final maxSize = Get.find<SettingController>().settings[FileSettings.maxCacheSize]!.getValue() * 1000 * 1000; // Convert to bytes
+    final maxSize = SettingController.settings[FileSettings.maxCacheSize]!.getValue() * 1000 * 1000; // Convert to bytes
     final dir = Directory(getFilePathForType(StorageType.temporary));
     final files = await dir.list().toList();
     var cacheSize = files.fold(0, (previousValue, element) => previousValue + element.statSync().size);

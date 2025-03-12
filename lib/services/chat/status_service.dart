@@ -1,8 +1,6 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/settings/account/data_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
@@ -15,12 +13,6 @@ class StatusService {
   ///
   /// Returns an error if there was one.
   static Future<String?> sendStatus({String? message, int? type}) async {
-    // Secret: Enable new social features experiment
-    if (message == "liphium.social") {
-      message = "activated";
-      await Get.find<SettingController>().settings[DataSettings.socialFeatures]!.setValue(true);
-    }
-
     // Validate the status to make sure everything is fine
     final event = await connector.sendActionAndWait(ServerAction("st_validate", <String, dynamic>{
       "status": StatusController.statusPacket(StatusController.newStatusJson(

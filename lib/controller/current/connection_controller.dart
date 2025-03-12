@@ -19,23 +19,23 @@ class ConnectionController {
   static final loading = signal(false);
   static final connected = signal(false);
   static final error = signal("");
-  Timer? _retryTimer;
+  static Timer? _retryTimer;
 
   // Static tasks so their loading state can be accessed from anywhere
   static final friendSyncTask = FriendsSyncTask();
   static final vaultSyncTask = VaultSyncTask();
 
   /// Tasks that run after the setup
-  final _tasks = <SynchronizationTask>[
+  static final _tasks = <SynchronizationTask>[
     friendSyncTask,
     vaultSyncTask,
   ];
-  bool tasksRan = false;
+  static bool tasksRan = false;
 
   /// Steps that run to get the client connected
-  final _steps = <ConnectionStep>[];
+  static final _steps = <ConnectionStep>[];
 
-  ConnectionController() {
+  static void init() {
     // Refresh the token and make sure it works
     _steps.add(RefreshTokenStep());
 
@@ -52,7 +52,7 @@ class ConnectionController {
     _steps.add(StoredActionsSetup());
   }
 
-  Future<void> tryConnection() async {
+  static Future<void> tryConnection() async {
     // Initialize all the stuff
     for (var task in _tasks) {
       final result = await task.init();
@@ -99,7 +99,7 @@ class ConnectionController {
     unawaited(_startTasks());
   }
 
-  Future<void> _startTasks() async {
+  static Future<void> _startTasks() async {
     if (tasksRan) return;
     tasksRan = true;
 
@@ -109,7 +109,7 @@ class ConnectionController {
     }
   }
 
-  void restart() {
+  static void restart() {
     tasksRan = false;
 
     // Reset all data from the tasks before the restart
@@ -127,14 +127,14 @@ class ConnectionController {
   }
 
   /// Retries to connect again after a certain amount of time
-  void _retry() {
+  static void _retry() {
     _retryTimer?.cancel();
     _retryTimer = Timer(const Duration(seconds: 10), () {
       tryConnection();
     });
   }
 
-  void connectionStopped() {
+  static void connectionStopped() {
     connected.value = false;
     loading.value = true;
     error.value = "error.network".tr;

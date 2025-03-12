@@ -47,13 +47,13 @@ class FileSettings {
     return imageTypes.contains(ext) || audioTypes.contains(ext) || videoTypes.contains(ext);
   }
 
-  static void addSettings(SettingController controller) {
-    controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, isWeb ? false : true);
-    controller.settings[autoDownloadVideos] = Setting<bool>(autoDownloadVideos, false);
-    controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, false);
-    controller.settings[maxFileSize] = Setting<double>(maxFileSize, isWeb ? 1.0 : 5.0);
-    controller.settings[maxCacheSize] = Setting<double>(maxCacheSize, 500.0);
-    controller.settings[fileCacheType] = Setting<int>(fileCacheType, 0);
+  static void addSettings() {
+    SettingController.addSetting(Setting<bool>(autoDownloadImages, isWeb ? false : true));
+    SettingController.addSetting(Setting<bool>(autoDownloadVideos, false));
+    SettingController.addSetting(Setting<bool>(autoDownloadAudio, false));
+    SettingController.addSetting(Setting<double>(maxFileSize, isWeb ? 1.0 : 5.0));
+    SettingController.addSetting(Setting<double>(maxCacheSize, 500.0));
+    SettingController.addSetting(Setting<int>(fileCacheType, 0));
   }
 }
 
@@ -102,7 +102,7 @@ class FileSettingsPage extends StatelessWidget {
 
           Obx(
             () => Visibility(
-              visible: Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue() == 1,
+              visible: SettingController.settings[FileSettings.fileCacheType]!.getValue() == 1,
               child: const DoubleSelectionSetting(
                 settingName: FileSettings.maxCacheSize,
                 description: "",

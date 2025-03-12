@@ -11,7 +11,6 @@ class BoolSettingSmall extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<SettingController>();
     return Obx(
       () => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -28,9 +27,9 @@ class BoolSettingSmall extends StatelessWidget {
             thumbColor: WidgetStateColor.resolveWith(
               (states) => states.contains(WidgetState.selected) ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.surface,
             ),
-            value: controller.settings[settingName]!.getValue(),
+            value: SettingController.settings[settingName]!.getValue(),
             onChanged: (value) {
-              controller.settings[settingName]!.setValue(value);
+              SettingController.settings[settingName]!.setValue(value);
               onChanged?.call(value);
             },
           )

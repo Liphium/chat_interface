@@ -33,8 +33,6 @@ class _MessageFeedState extends State<MessageFeed> {
 
   @override
   Widget build(BuildContext context) {
-    SettingController settingController = Get.find();
-
     return Obx(() {
       if (MessageController.currentProvider.value!.conversation.error.value != null) {
         return Center(
@@ -74,7 +72,7 @@ class _MessageFeedState extends State<MessageFeed> {
                         Center(
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200,
+                              maxWidth: (SettingController.settings[ChatSettings.chatTheme]!.value.value ?? 1) == 0 ? double.infinity : 1200,
                             ),
                             child: Obx(
                               () {
@@ -146,7 +144,7 @@ class _MessageFeedState extends State<MessageFeed> {
             ),
           ),
           Obx(() {
-            final visible = settingController.settings[AppSettings.showGroupMembers]!.value.value;
+            final visible = SettingController.settings[AppSettings.showGroupMembers]!.value.value;
             return Visibility(
               visible: MessageController.currentProvider.value!.conversation.isGroup && visible,
               child: Container(

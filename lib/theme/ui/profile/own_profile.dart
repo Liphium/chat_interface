@@ -316,7 +316,7 @@ class _ProfileState extends State<OwnProfile> {
                 icon: Icons.restart_alt,
                 label: 'profile.retry'.tr,
                 onTap: () async {
-                  Get.find<ConnectionController>().restart();
+                  ConnectionController.restart();
                 },
                 loading: _testLoading,
               ),

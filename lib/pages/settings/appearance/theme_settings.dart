@@ -57,13 +57,13 @@ class ThemeSettings {
   ];
   static const int customThemeIndex = 3;
 
-  static void addThemeSettings(SettingController controller) {
-    controller.addSetting(Setting<int>(themePreset, 0));
-    controller.addSetting(Setting<double>(primaryHue, 0.54));
-    controller.addSetting(Setting<double>(secondaryHue, 0.62));
-    controller.addSetting(Setting<double>(baseSaturation, 0.6));
-    controller.addSetting(Setting<int>(backgroundMode, 0));
-    controller.addSetting(Setting<int>(themeMode, 0));
+  static void addSettings() {
+    SettingController.addSetting((Setting<int>(themePreset, 0)));
+    SettingController.addSetting(Setting<double>(primaryHue, 0.54));
+    SettingController.addSetting(Setting<double>(secondaryHue, 0.62));
+    SettingController.addSetting(Setting<double>(baseSaturation, 0.6));
+    SettingController.addSetting(Setting<int>(backgroundMode, 0));
+    SettingController.addSetting(Setting<int>(themeMode, 0));
   }
 }
 
@@ -140,7 +140,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
         verticalSpacing(sectionSpacing),
         Obx(
           () => Visibility(
-            visible: Get.find<SettingController>().settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
+            visible: SettingController.settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

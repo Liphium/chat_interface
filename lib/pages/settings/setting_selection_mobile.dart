@@ -4,9 +4,10 @@ import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SettingSelectionMobile extends StatelessWidget {
-  final Rx<SettingCategory?>? category;
+  final Signal<SettingCategory?>? category;
   final bool desktop;
 
   const SettingSelectionMobile({super.key, this.desktop = false, this.category});

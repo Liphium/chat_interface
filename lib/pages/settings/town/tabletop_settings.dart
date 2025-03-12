@@ -38,29 +38,30 @@ class TabletopSettings {
   // Experimental settings
   static const String smoothDragging = "tabletop.smooth_dragging";
 
-  static void addSettings(SettingController controller) {
-    controller.settings[framerate] = Setting<double>(framerate, 60.0);
-    controller.settings[cursorHue] = Setting<double>(cursorHue, 0.0);
+  static void addSettings() {
+    SettingController.addSetting(Setting<double>(framerate, 60.0));
+    SettingController.addSetting(Setting<double>(cursorHue, 0.0));
 
-    controller.settings[smoothDragging] = Setting<bool>(smoothDragging, false);
+    // I don't know if we will ever do this xd
+    SettingController.addSetting(Setting<bool>(smoothDragging, false));
   }
 
   /// Initialize the cursor hue to make sure it's actually randomized by default
   static Future<void> initSettings() async {
     final val = await (db.setting.select()..where((tbl) => tbl.key.equals(cursorHue))).getSingleOrNull();
     if (val == null) {
-      await Get.find<SettingController>().settings[cursorHue]!.setValue(Random().nextDouble());
+      await SettingController.settings[cursorHue]!.setValue(Random().nextDouble());
     }
   }
 
   static Color getCursorColor({double? hue}) {
     final themeHSL = HSLColor.fromColor(Get.theme.colorScheme.onPrimary);
-    hue ??= Get.find<SettingController>().settings[cursorHue]!.getValue();
+    hue ??= SettingController.settings[cursorHue]!.getValue();
     return HSLColor.fromAHSL(1.0, hue! * 360, themeHSL.saturation, themeHSL.lightness).toColor();
   }
 
   static double getHue() {
-    return Get.find<SettingController>().settings[cursorHue]!.getValue();
+    return SettingController.settings[cursorHue]!.getValue();
   }
 }
 
@@ -118,7 +119,7 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
 
   @override
   void initState() {
-    _cursorHue.value = Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue();
+    _cursorHue.value = SettingController.settings[TabletopSettings.cursorHue]!.getValue();
     super.initState();
   }
 

@@ -46,7 +46,6 @@ class _MessageBarState extends State<MessageBar> {
   @override
   Widget build(BuildContext context) {
     final zapShareController = Get.find<ZapShareController>();
-    final controller = Get.find<SettingController>();
 
     if (widget.conversation.borked) {
       return Material(
@@ -202,12 +201,12 @@ class _MessageBarState extends State<MessageBar> {
                             () => IconButton(
                               iconSize: 27,
                               icon: Icon(Icons.group,
-                                  color: controller.settings[AppSettings.showGroupMembers]!.value.value
+                                  color: SettingController.settings[AppSettings.showGroupMembers]!.value.value
                                       ? Theme.of(context).colorScheme.onPrimary
                                       : Theme.of(context).colorScheme.onSurface),
                               onPressed: () {
-                                controller.settings[AppSettings.showGroupMembers]!
-                                    .setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
+                                SettingController.settings[AppSettings.showGroupMembers]!
+                                    .setValue(!SettingController.settings[AppSettings.showGroupMembers]!.value.value);
                               },
                             ),
                           ),

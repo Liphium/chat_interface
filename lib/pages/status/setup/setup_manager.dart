@@ -115,7 +115,7 @@ class SetupManager {
       }
       controller = null;
       unawaited(Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500)));
-      unawaited(Get.find<ConnectionController>().tryConnection());
+      unawaited(ConnectionController.tryConnection());
     }
   }
 

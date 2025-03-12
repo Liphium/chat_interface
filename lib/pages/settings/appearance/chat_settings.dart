@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 
 class ChatSettings {
   static const String chatTheme = "appearance.chat.theme";
-  static final Setting<int> chatThemeSetting = Setting<int>(chatTheme, 1);
 
   static final chatThemes = <SelectableItem>[
     SelectableItem(
@@ -22,8 +21,8 @@ class ChatSettings {
     ),
   ];
 
-  static void registerSettings(SettingController controller) {
-    controller.settings[chatTheme] = chatThemeSetting;
+  static void addSettings() {
+    SettingController.addSetting(Setting<int>(chatTheme, 1));
   }
 }
 

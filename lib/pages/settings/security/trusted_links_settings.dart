@@ -23,9 +23,9 @@ class TrustedLinkSettings {
     SelectableItem("links.trust_mode.none", Icons.close),
   ];
 
-  static void registerSettings(SettingController controller) {
-    controller.addSetting(Setting<bool>(unsafeSources, false));
-    controller.addSetting(Setting<int>(trustMode, 1));
+  static void addSettings() {
+    SettingController.addSetting(Setting<bool>(unsafeSources, false));
+    SettingController.addSetting(Setting<int>(trustMode, 1));
   }
 }
 

@@ -15,15 +15,13 @@ class SettingsSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    SettingController controller = Get.find();
-
     // Load all settings
-    for (var setting in controller.settings.values) {
+    for (var setting in SettingController.settings.values) {
       await setting.grabFromDb();
     }
 
     // Set current language
-    await Get.updateLocale(GeneralSettings.languages[controller.settings[GeneralSettings.language]!.getValue()].locale);
+    await Get.updateLocale(GeneralSettings.languages[SettingController.settings[GeneralSettings.language]!.getValue()].locale);
 
     // Changes the color theme
     Get.find<ThemeManager>().changeTheme(getThemeData());
@@ -35,7 +33,7 @@ class SettingsSetup extends Setup {
     if (!isWeb) {
       final list = await LogManager.loggingDirectory!.list().toList();
       list.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
-      var index = Get.find<SettingController>().settings[LogSettings.amountOfLogs]!.getValue() as double;
+      var index = SettingController.settings[LogSettings.amountOfLogs]!.getValue() as double;
       for (final file in list) {
         if (index <= 0) {
           await file.delete();

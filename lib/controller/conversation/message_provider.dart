@@ -426,17 +426,17 @@ class Message {
         if (!await container.existsLocally()) {
           final extension = container.id.split(".").last;
           if (FileSettings.imageTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadImages]!.getValue();
+            final download = SettingController.settings[FileSettings.autoDownloadImages]!.getValue();
             if (download) {
               await AttachmentController.downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.videoTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadVideos]!.getValue();
+            final download = SettingController.settings[FileSettings.autoDownloadVideos]!.getValue();
             if (download) {
               await AttachmentController.downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.audioTypes.contains(extension)) {
-            final download = Get.find<SettingController>().settings[FileSettings.autoDownloadAudio]!.getValue();
+            final download = SettingController.settings[FileSettings.autoDownloadAudio]!.getValue();
             if (download) {
               await AttachmentController.downloadAttachment(container, ignoreLimit: false);
             }

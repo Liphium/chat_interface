@@ -26,15 +26,15 @@ class GeneralSettings {
   static const String ringOnInvite = "ring.enable";
   static const String ringIgnoreTray = "ring.ignore_tray";
 
-  static void addSettings(SettingController controller) {
-    controller.settings[language] = Setting<int>(language, 0);
+  static void addSettings() {
+    SettingController.addSetting(Setting<int>(language, 0));
 
     // Default notification sounds settings
-    controller.settings[soundsEnabled] = Setting(soundsEnabled, true);
-    controller.settings[soundsDoNotDisturb] = Setting(soundsDoNotDisturb, false);
-    controller.settings[soundsOnlyWhenTray] = Setting(soundsOnlyWhenTray, true);
-    controller.settings[ringOnInvite] = Setting(ringOnInvite, true);
-    controller.settings[ringIgnoreTray] = Setting(ringIgnoreTray, true);
+    SettingController.addSetting(Setting(soundsEnabled, true));
+    SettingController.addSetting(Setting(soundsDoNotDisturb, false));
+    SettingController.addSetting(Setting(soundsOnlyWhenTray, true));
+    SettingController.addSetting(Setting(ringOnInvite, true));
+    SettingController.addSetting(Setting(ringIgnoreTray, true));
   }
 }
 

@@ -1,6 +1,5 @@
 import 'package:chat_interface/controller/conversation/message_search_controller.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
-import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -16,7 +15,6 @@ void initializeControllers() {
   Get.put(ZapShareController());
 
   // App controls
-  Get.put(ConnectionController());
   Get.put(SettingController());
   Get.put(ThemeManager());
   Get.put(TransitionController());

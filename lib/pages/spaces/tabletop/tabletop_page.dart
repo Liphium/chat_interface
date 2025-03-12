@@ -66,7 +66,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    final setting = Get.find<SettingController>().settings[TabletopSettings.framerate]! as Setting<double>;
+    final setting = SettingController.settings[TabletopSettings.framerate]! as Setting<double>;
     setting.value.listenAndPump((value) => startFrameTimer(value!));
   }
 
