@@ -153,7 +153,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
       title: [
         Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
         const Spacer(),
-        Obx(() => Text("${_members.length}/100", style: Get.theme.textTheme.bodyLarge)),
+        Watch((ctx) => Text("${_members.length}/100", style: Get.theme.textTheme.bodyLarge)),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,8 +216,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 300),
-            child: Obx(
-              () => ListView.builder(
+            child: Watch(
+              (ctx) => ListView.builder(
                 itemCount: FriendController.friends.length,
                 shrinkWrap: true,
                 padding: const EdgeInsets.only(top: defaultSpacing),
@@ -228,7 +228,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     return const SizedBox();
                   }
 
-                  return Obx(() {
+                  return Watch((ctx) {
                     final search = _search.value;
                     if (search.isNotEmpty &&
                         !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
@@ -238,8 +238,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: defaultSpacing),
-                      child: Obx(
-                        () => Material(
+                      child: Watch(
+                        (ctx) => Material(
                           color: _members.contains(friend) ? theme.colorScheme.primary : Colors.transparent,
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           child: InkWell(
@@ -264,7 +264,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                                     size: 35,
                                   ),
                                   horizontalSpacing(defaultSpacing),
-                                  Obx(() => Text(friend.displayName.value, style: theme.textTheme.labelLarge)),
+                                  Watch((ctx) => Text(friend.displayName.value, style: theme.textTheme.labelLarge)),
                                 ],
                               ),
                             ),
@@ -285,8 +285,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
               Visibility(
                 visible: widget.nameField,
                 child: RepaintBoundary(
-                  child: Obx(
-                    () => Animate(
+                  child: Watch(
+                    (ctx) => Animate(
                       effects: [
                         ExpandEffect(
                           alignment: Alignment.topCenter,

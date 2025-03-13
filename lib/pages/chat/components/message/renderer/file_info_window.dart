@@ -51,7 +51,7 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      child: Obx(() {
+      child: Watch((ctx) {
         // Show loading spinner
         if (_loading.value) {
           return Center(

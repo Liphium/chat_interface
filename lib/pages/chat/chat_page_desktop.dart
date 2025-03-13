@@ -13,6 +13,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 Widget getChatPage() {
   if (isMobileMode()) {
@@ -67,8 +68,8 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
               children: [
                 // Render the sidebar (with an animation when it's hidden/shown)
                 SelectionContainer.disabled(
-                  child: Obx(
-                    () => Animate(
+                  child: Watch(
+                    (ctx) => Animate(
                       effects: [
                         ExpandEffect(
                           curve: Curves.easeInOut,
@@ -92,8 +93,8 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
 
                 // Render the conversation/space/other stuff
                 Expanded(
-                  child: Obx(
-                    () {
+                  child: Watch(
+                    (ctx) {
                       // Check if a space is selected (show the page if it is)
                       switch (MessageController.currentOpenType.value) {
                         case OpenTabType.townsquare:
@@ -135,8 +136,8 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
 
                                     // Render the search window
                                     SelectionContainer.disabled(
-                                      child: Obx(
-                                        () => Animate(
+                                      child: Watch(
+                                        (ctx) => Animate(
                                           effects: [
                                             ExpandEffect(
                                               curve: Curves.easeInOut,

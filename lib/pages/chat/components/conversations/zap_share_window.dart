@@ -55,8 +55,8 @@ class ZapShareWindow extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              Obx(
-                () => CircularProgressIndicator(
+              Watch(
+                (ctx) => CircularProgressIndicator(
                   backgroundColor: Get.theme.colorScheme.primary,
                   value: ZapShareController.waiting.value ? null : ZapShareController.progress.value,
                   valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),

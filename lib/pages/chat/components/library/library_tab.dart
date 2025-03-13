@@ -98,7 +98,7 @@ class _LibraryTabState extends State<LibraryTab> {
   Widget build(BuildContext context) {
     unawaited(loadMoreItems());
 
-    return Obx(() {
+    return Watch((ctx) {
       if (!_show.value) {
         return const SizedBox();
       }

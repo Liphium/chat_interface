@@ -2,6 +2,7 @@ import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SelectableItem {
   final String label;
@@ -38,8 +39,8 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
 
         return Padding(
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-          child: Obx(
-            () => Material(
+          child: Watch(
+            (ctx) => Material(
               color: SettingController.settings[widget.settingName]!.getWhenValue(0, 0) == index
                   ? Get.theme.colorScheme.primary
                   : Get.theme.colorScheme.onInverseSurface,

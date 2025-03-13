@@ -59,7 +59,7 @@ class _ChatPageState extends State<ChatPageMobile> {
         child: Column(
           children: [
             Expanded(
-              child: Obx(() => _tabs[_selected.value]!),
+              child: Watch((ctx) => _tabs[_selected.value]!),
             ),
             Container(
               decoration: BoxDecoration(

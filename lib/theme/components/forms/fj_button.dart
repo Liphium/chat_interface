@@ -89,7 +89,7 @@ class FJElevatedLoadingButtonCustom extends StatelessWidget {
   Widget build(BuildContext context) {
     return FJElevatedButton(
       onTap: () => loading.value ? null : onTap(),
-      child: Obx(() => loading.value
+      child: Watch((ctx) => loading.value
           ? builder?.call() ??
               SizedBox(
                 height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,

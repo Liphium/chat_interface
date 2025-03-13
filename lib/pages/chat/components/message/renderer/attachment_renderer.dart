@@ -126,7 +126,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
 
     //* Remote images
     if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
-      return Obx(() {
+      return Watch((ctx) {
         if (widget.container.unsafeLocation.value) {
           final domain = TrustedLinkHelper.extractDomain(widget.container.url);
 
@@ -235,8 +235,8 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                   ),
                 ),
                 Flexible(
-                  child: Obx(
-                    () => Text(
+                  child: Watch(
+                    (ctx) => Text(
                       !widget.container.error.value ? formatFileSize(widget.container.size) : 'file.not_uploaded'.tr,
                       style: Get.theme.textTheme.bodyMedium,
                     ),
@@ -248,7 +248,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           horizontalSpacing(defaultSpacing),
 
           //* Button
-          Obx(() {
+          Watch((ctx) {
             if (widget.container.downloading.value) {
               return SizedBox(
                 width: 30,

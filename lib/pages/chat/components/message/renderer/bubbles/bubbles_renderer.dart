@@ -263,7 +263,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     }
 
     if (message.heightCallback) {
-      return Obx(() {
+      return Watch((ctx) {
         return Align(
           alignment: Alignment.topCenter,
           heightFactor: message.canScroll.value ? 1 : 0,
@@ -276,8 +276,8 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
   }
 
   Widget renderOverlay(bool self, Message message) {
-    return Obx(
-      () => SizedBox(
+    return Watch(
+      (ctx) => SizedBox(
         height: 34,
         child: Visibility(
           visible: hovering.value,

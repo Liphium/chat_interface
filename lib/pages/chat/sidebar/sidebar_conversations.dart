@@ -52,8 +52,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () {
+    return Watch(
+      (ctx) {
         return FadingEdgeScrollView.fromScrollView(
           child: ListView.builder(
             controller: _controller,
@@ -191,7 +191,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                                       ],
                                                     )
                                                   else
-                                                    Obx(() {
+                                                    Watch((ctx) {
                                                       return Row(
                                                         children: [
                                                           Flexible(
@@ -254,8 +254,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                                               overflow: TextOverflow.ellipsis,
                                                               textHeightBehavior: noTextHeight,
                                                             )
-                                                          : Obx(
-                                                              () => Visibility(
+                                                          : Watch(
+                                                              (ctx) => Visibility(
                                                                 visible: friend!.status.value != "" && friend.statusType.value != statusOffline,
                                                                 child: Text(
                                                                   friend.status.value,
@@ -272,8 +272,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                           ],
                                         ),
                                       ),
-                                      Obx(
-                                        () {
+                                      Watch(
+                                        (ctx) {
                                           final notifications = conversation.notificationCount.value;
                                           if (hover.value) {
                                             return IconButton(
@@ -314,7 +314,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                   ),
                   //* Render shared content
                   if (friend != null)
-                    Obx(() {
+                    Watch((ctx) {
                       final content = StatusController.sharedContent[friend!.id];
                       if (content == null) {
                         return const SizedBox();

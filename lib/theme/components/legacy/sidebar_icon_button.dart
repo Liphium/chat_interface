@@ -58,8 +58,8 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
     return Animate(
       controller: _controller,
       effects: [ScaleEffect(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), curve: Curves.easeOut, duration: 120.ms)],
-      child: Obx(
-        () => Material(
+      child: Watch(
+        (ctx) => Material(
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(defaultSpacing),
             topRight: Radius.circular(defaultSpacing),

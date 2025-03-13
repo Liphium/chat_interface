@@ -1761,7 +1761,9 @@ class UnknownProfile extends Table
       type: DriftSqlType.string, requiredDuringInsert: true);
   late final GeneratedColumn<DateTime> lastFetched = GeneratedColumn<DateTime>(
       'last_fetched', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: const CustomExpression('0'));
   @override
   List<GeneratedColumn> get $columns =>
       [id, name, displayName, keys, lastFetched];
@@ -1922,13 +1924,12 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
     required String name,
     required String displayName,
     required String keys,
-    required DateTime lastFetched,
+    this.lastFetched = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
         displayName = Value(displayName),
-        keys = Value(keys),
-        lastFetched = Value(lastFetched);
+        keys = Value(keys);
   static Insertable<UnknownProfileData> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -2356,7 +2357,7 @@ class LibraryEntry extends Table
       'identifier_hash', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
-      defaultValue: Constant("to-migrate"));
+      defaultValue: const CustomExpression('\'to-migrate\''));
   late final GeneratedColumn<String> data = GeneratedColumn<String>(
       'data', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);

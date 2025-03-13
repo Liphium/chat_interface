@@ -14,6 +14,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 part 'color_generator.dart';
 
@@ -75,11 +76,12 @@ class ThemeSettingsPage extends StatefulWidget {
 }
 
 class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
-  final _factory = Rx<ColorFactory?>(null);
+  final _factory = Signal<ColorFactory?>(null);
   Timer? _timer;
 
   @override
   void dispose() {
+    _factory.dispose();
     _timer!.cancel();
     super.dispose();
   }
@@ -138,8 +140,8 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
         verticalSpacing(elementSpacing),
         ListSelectionSetting(settingName: ThemeSettings.themePreset, items: ThemeSettings.themePresets),
         verticalSpacing(sectionSpacing),
-        Obx(
-          () => Visibility(
+        Watch(
+          (ctx) => Visibility(
             visible: SettingController.settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
             child: Column(
               mainAxisSize: MainAxisSize.min,

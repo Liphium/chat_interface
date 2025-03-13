@@ -70,8 +70,8 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with Sign
           Positioned(
             top: elementSpacing,
             right: elementSpacing,
-            child: Obx(
-              () => Visibility(
+            child: Watch(
+              (ctx) => Visibility(
                 visible: _visible.value,
                 child: Material(
                   color: Get.theme.colorScheme.primaryContainer,
@@ -97,8 +97,8 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with Sign
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(elementSpacing),
-                      child: Obx(
-                        () => Icon(
+                      child: Watch(
+                        (ctx) => Icon(
                           _bookmarked.value ? Icons.bookmark : Icons.bookmark_outline,
                           color: _bookmarked.value ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,
                         ),

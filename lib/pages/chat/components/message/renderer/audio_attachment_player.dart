@@ -90,8 +90,8 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                             ),
                           ),
                           Flexible(
-                            child: Obx(
-                              () => Text(
+                            child: Watch(
+                              (ctx) => Text(
                                 !widget.container.error.value ? formatFileSize(1000) : 'file.not_uploaded'.tr,
                                 style: Get.theme.textTheme.bodyMedium,
                               ),
@@ -105,7 +105,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                 ),
 
                 //* Button
-                Obx(() {
+                Watch((ctx) {
                   if (widget.container.downloading.value) {
                     return SizedBox(
                       width: 30,
@@ -165,58 +165,56 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
             ),
             verticalSpacing(defaultSpacing),
             LayoutBuilder(builder: (context, constraints) {
-              return Obx(() {
-                if (_currentDuration.value == null || _currentMax.value == null) {
-                  return Container(
-                    height: 10,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(defaultSpacing),
-                      color: Get.theme.colorScheme.primary,
-                    ),
-                  );
-                }
-
-                // Render the current duration
-                return MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  onHover: (event) {
-                    _hoverPosition.value = event.localPosition.dx;
-                  },
-                  onExit: (event) => _hoverPosition.value = null,
-                  child: GestureDetector(
-                    onTap: () {
-                      final percentage = (_hoverPosition.value! / constraints.maxWidth);
-                      _player.seek(Duration(milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt()));
-                    },
-                    child: Stack(
-                      children: [
-                        Container(
-                          height: 10,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(defaultSpacing),
-                            color: Get.theme.colorScheme.primary,
-                          ),
-                        ),
-                        Obx(
-                          () => AnimatedContainer(
-                            duration: Duration(milliseconds: 100),
-                            height: 10,
-                            width: constraints.maxWidth *
-                                (_hoverPosition.value == null
-                                        ? (_currentDuration.value!.inMilliseconds / _currentMax.value!.inMilliseconds)
-                                        : (_hoverPosition.value! / constraints.maxWidth))
-                                    .clamp(0, 1),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(defaultSpacing),
-                              color: Get.theme.colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+              if (_currentDuration.value == null || _currentMax.value == null) {
+                return Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    color: Get.theme.colorScheme.primary,
                   ),
                 );
-              });
+              }
+
+              // Render the current duration
+              return MouseRegion(
+                cursor: SystemMouseCursors.click,
+                onHover: (event) {
+                  _hoverPosition.value = event.localPosition.dx;
+                },
+                onExit: (event) => _hoverPosition.value = null,
+                child: GestureDetector(
+                  onTap: () {
+                    final percentage = (_hoverPosition.value! / constraints.maxWidth);
+                    _player.seek(Duration(milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt()));
+                  },
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 10,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          color: Get.theme.colorScheme.primary,
+                        ),
+                      ),
+                      Watch(
+                        (ctx) => AnimatedContainer(
+                          duration: Duration(milliseconds: 100),
+                          height: 10,
+                          width: constraints.maxWidth *
+                              (_hoverPosition.value == null
+                                      ? (_currentDuration.value!.inMilliseconds / _currentMax.value!.inMilliseconds)
+                                      : (_hoverPosition.value! / constraints.maxWidth))
+                                  .clamp(0, 1),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            color: Get.theme.colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             })
           ],
         ),

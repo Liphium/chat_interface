@@ -14,6 +14,7 @@ import 'package:chat_interface/pages/settings/security/trusted_links_settings.da
 import 'package:chat_interface/pages/settings/town/town_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 enum SettingLabel {
   // Account settings (everything to do with the account and stored on the server)
@@ -74,7 +75,7 @@ class SettingCategory {
 
 class Setting<T> {
   final String label;
-  final Rx<T?> value = Rx<T?>(null);
+  final Signal<T?> value = signal<T?>(null);
   T defaultValue;
 
   Setting(this.label, this.defaultValue);

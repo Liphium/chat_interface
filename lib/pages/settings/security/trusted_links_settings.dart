@@ -103,7 +103,7 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
             child: Text("links.trusted_list.add".tr, style: Get.theme.textTheme.labelLarge),
           ),
           verticalSpacing(defaultSpacing),
-          Obx(() {
+          Watch((ctx) {
             if (_trusted.isEmpty) {
               return Text("links.trusted_list.empty".tr, style: Get.theme.textTheme.labelMedium);
             }

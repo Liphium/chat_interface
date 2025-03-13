@@ -11,6 +11,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MaterialMessageRenderer extends StatefulWidget {
   final LPHAddress senderAddress;
@@ -83,8 +84,8 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
                     horizontalSpacing(defaultSpacing),
 
                     // Render the display name of the user
-                    Obx(
-                      () => Text(
+                    Watch(
+                      (ctx) => Text(
                         sender.displayName.value,
                         style: Get.textTheme.labelLarge,
                       ),
@@ -100,7 +101,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
                     ),
 
                     // Render the verified indicator of the message
-                    Obx(() {
+                    Watch((ctx) {
                       final verified = widget.message.verified.value;
                       return Visibility(
                         visible: !verified,

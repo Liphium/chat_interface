@@ -159,8 +159,8 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
               height: 45,
               child: Stack(
                 children: [
-                  Obx(
-                    () => Container(
+                  Watch(
+                    (ctx) => Container(
                       width: 45,
                       height: 45,
                       decoration: BoxDecoration(
@@ -178,8 +178,8 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: Obx(
-                      () => Padding(
+                    child: Watch(
+                      (ctx) => Padding(
                         padding: const EdgeInsets.all(0.0),
                         child: Container(
                           width: 12,
@@ -255,7 +255,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
+    return Watch((ctx) {
       if (_loading.value) {
         return Center(
           child: CircularProgressIndicator(
@@ -279,8 +279,8 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Obx(
-                () => Text(
+              Watch(
+                (ctx) => Text(
                   "settings.tabletop.decks.limit".trParams({
                     "count": _decks.length.toString(),
                     "limit": Constants.maxDecks.toString(),

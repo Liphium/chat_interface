@@ -72,7 +72,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
   Widget build(BuildContext context) {
     return SettingsPageBase(
       label: "invites",
-      child: Obx(() {
+      child: Watch((ctx) {
         if (loading.value) {
           return Padding(
             padding: const EdgeInsets.only(top: defaultSpacing),
@@ -105,7 +105,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
             if (StatusController.permissions.contains("admin"))
               Text("settings.invites.title.admin".tr, style: Get.theme.textTheme.headlineMedium)
             else
-              Obx(() => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
+              Watch((ctx) => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
             verticalSpacing(defaultSpacing),
             Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),
             verticalSpacing(defaultSpacing),
@@ -128,7 +128,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
             verticalSpacing(defaultSpacing),
             Text("settings.invites.history.description".tr, style: Get.theme.textTheme.bodyMedium),
             verticalSpacing(defaultSpacing),
-            Obx(() {
+            Watch((ctx) {
               if (invites.isEmpty) {
                 return Text("settings.invites.history.empty".tr, style: Get.theme.textTheme.labelMedium);
               }
@@ -156,8 +156,8 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Obx(
-                                () => MouseRegion(
+                              Watch(
+                                (ctx) => MouseRegion(
                                   onEnter: (_) => hovering.value = invite,
                                   onExit: (_) => hovering.value = "",
                                   child: Animate(

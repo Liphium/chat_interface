@@ -289,8 +289,8 @@ class _MessageInputState extends State<MessageInput> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //* Reply preview
-                    Obx(
-                      () {
+                    Watch(
+                      (ctx) {
                         final answer = MessageSendHelper.currentDraft.value?.answer.value;
                         if (answer != null) {
                           _previousAccount = answer.senderAddress;
@@ -344,8 +344,8 @@ class _MessageInputState extends State<MessageInput> {
                     ),
 
                     //* Emoji suggestions
-                    Obx(
-                      () {
+                    Watch(
+                      (ctx) {
                         if (_emojiSuggestions.isEmpty) {
                           return const SizedBox();
                         }
@@ -387,8 +387,8 @@ class _MessageInputState extends State<MessageInput> {
                     ),
 
                     //* File preview
-                    Obx(
-                      () {
+                    Watch(
+                      (ctx) {
                         if (MessageSendHelper.currentDraft.value == null) {
                           return const SizedBox();
                         }

@@ -115,7 +115,7 @@ class _MessageBarState extends State<MessageBar> {
             ),
 
             //* Conversation actions
-            Obx(() {
+            Watch((ctx) {
               final error = widget.conversation.error.value != null;
 
               return Row(
@@ -144,8 +144,8 @@ class _MessageBarState extends State<MessageBar> {
                                   height: 48 - defaultSpacing,
                                   child: Padding(
                                     padding: const EdgeInsets.all(2.0),
-                                    child: Obx(
-                                      () => CircularProgressIndicator(
+                                    child: Watch(
+                                      (ctx) => CircularProgressIndicator(
                                         value: ZapShareController.waiting.value ? null : ZapShareController.progress.value.clamp(0, 1),
                                         strokeWidth: 3,
                                         valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
@@ -195,8 +195,8 @@ class _MessageBarState extends State<MessageBar> {
 
                         Visibility(
                           visible: widget.conversation.isGroup,
-                          child: Obx(
-                            () => IconButton(
+                          child: Watch(
+                            (ctx) => IconButton(
                               iconSize: 27,
                               icon: Icon(Icons.group,
                                   color: SettingController.settings[AppSettings.showGroupMembers]!.value.value
@@ -214,8 +214,8 @@ class _MessageBarState extends State<MessageBar> {
                   ),
 
                   // Search the entire conversation
-                  Obx(
-                    () => IconButton(
+                  Watch(
+                    (ctx) => IconButton(
                       iconSize: 27,
                       icon: Icon(Icons.search,
                           color:

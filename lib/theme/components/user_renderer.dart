@@ -5,6 +5,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class UserAvatar extends StatefulWidget {
   final LPHAddress id;
@@ -39,8 +40,8 @@ class _UserAvatarState extends State<UserAvatar> {
     return SizedBox(
       width: widget.size ?? 45,
       height: widget.size ?? 45,
-      child: Obx(
-        () {
+      child: Watch(
+        (ctx) {
           if (friend.profilePictureImage.value != null) {
             final image = friend.profilePictureImage.value!;
             return ClipOval(
@@ -118,11 +119,11 @@ class UserRenderer extends StatelessWidget {
                       ),
                     ),
                   horizontalSpacing(defaultSpacing),
-                  Obx(() => StatusRenderer(status: own ? StatusController.type.value : friend!.statusType.value)),
+                  Watch((ctx) => StatusRenderer(status: own ? StatusController.type.value : friend!.statusType.value)),
                 ],
               ),
-              Obx(
-                () => Visibility(
+              Watch(
+                (ctx) => Visibility(
                   visible: own ? StatusController.status.value != "" : friend!.status.value != "",
                   child: Text(
                     own ? StatusController.status.value : friend!.status.value,

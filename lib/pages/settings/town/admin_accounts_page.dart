@@ -203,7 +203,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                   itemBuilder: (context, index) {
                     final account = _accounts[index];
 
-                    // Obx for delete animation
+                    // Render the delete animation
                     return Watch(
                       (ctx) => Animate(
                         key: ValueKey(account.id),

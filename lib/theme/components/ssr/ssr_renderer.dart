@@ -131,8 +131,8 @@ class _SSRRendererState extends State<SSRRenderer> {
             expand: true,
           ),
           _renderButton(json, true), // Last = true for no padding
-          Obx(
-            () => Animate(
+          Watch(
+            (ctx) => Animate(
               effects: [
                 ExpandEffect(
                   duration: 250.ms,

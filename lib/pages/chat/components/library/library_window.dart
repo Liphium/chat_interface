@@ -80,7 +80,7 @@ class _LibraryWindowState extends State<LibraryWindow> {
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.only(top: defaultSpacing),
-                child: Obx(() {
+                child: Watch((ctx) {
                   return _tabs[_selected.value]!;
                 }),
               ),

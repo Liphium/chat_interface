@@ -56,7 +56,7 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
               padding: const EdgeInsets.only(bottom: elementSpacing),
               child: Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
             )),
-        Obx(() {
+        Watch((ctx) {
           final value = _current.value;
           final roundedCurrent = widget.rounded ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
           return Row(

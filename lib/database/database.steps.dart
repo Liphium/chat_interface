@@ -886,7 +886,8 @@ class Shape10 extends i0.VersionedTable {
 
 i1.GeneratedColumn<DateTime> _column_28(String aliasedName) =>
     i1.GeneratedColumn<DateTime>('last_fetched', aliasedName, false,
-        type: i1.DriftSqlType.dateTime);
+        type: i1.DriftSqlType.dateTime,
+        defaultValue: const CustomExpression('0'));
 
 class Shape11 extends i0.VersionedTable {
   Shape11({required super.source, required super.alias}) : super.aliased();
@@ -908,7 +909,8 @@ class Shape11 extends i0.VersionedTable {
 
 i1.GeneratedColumn<String> _column_29(String aliasedName) =>
     i1.GeneratedColumn<String>('identifier_hash', aliasedName, false,
-        type: i1.DriftSqlType.string, defaultValue: Constant("to-migrate"));
+        type: i1.DriftSqlType.string,
+        defaultValue: const CustomExpression('\'to-migrate\''));
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,

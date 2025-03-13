@@ -92,8 +92,8 @@ class _SSRFetcherState extends State<SSRFetcher> {
             horizontalSpacing(defaultSpacing),
 
             // The icon showing the progress on the fetcher
-            Obx(
-              () {
+            Watch(
+              (ctx) {
                 // If it's loading return a loading indicator
                 if (_loading.value) {
                   return SizedBox(

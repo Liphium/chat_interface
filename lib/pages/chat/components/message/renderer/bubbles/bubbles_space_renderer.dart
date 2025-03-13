@@ -153,7 +153,7 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
 
                           // Show a warning in case the message couldn't be verified
                           horizontalSpacing(defaultSpacing),
-                          Obx(() {
+                          Watch((ctx) {
                             final verified = widget.message.verified.value;
                             return Visibility(
                               visible: !verified,

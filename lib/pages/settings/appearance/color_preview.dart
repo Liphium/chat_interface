@@ -3,9 +3,10 @@ import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ColorPreview extends StatefulWidget {
-  final Rx<ColorFactory?> factory;
+  final Signal<ColorFactory?> factory;
   final bool mobile;
 
   const ColorPreview({
@@ -21,7 +22,7 @@ class ColorPreview extends StatefulWidget {
 class _ColorPreviewState extends State<ColorPreview> {
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
+    return Watch((ctx) {
       final colors = widget.factory.value!;
 
       return Padding(

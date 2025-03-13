@@ -99,15 +99,15 @@ class _FriendsPageState extends State<FriendsPage> {
             //* Friends list
             Flexible(
               child: RepaintBoundary(
-                child: Obx(() {
+                child: Watch((ctx) {
                   //* Friends, requests, sent requests list
                   return SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Obx(
-                          () => Animate(
+                        Watch(
+                          (ctx) => Animate(
                             effects: [
                               ExpandEffect(
                                 curve: Curves.easeInOut,
@@ -125,7 +125,7 @@ class _FriendsPageState extends State<FriendsPage> {
                           ),
                         ),
 
-                        Obx(() {
+                        Watch((ctx) {
                           final found = FriendController.friends.values.any((friend) =>
                               (friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
                                   friend.name.toLowerCase().contains(_query.value.toLowerCase())) &&
@@ -156,8 +156,8 @@ class _FriendsPageState extends State<FriendsPage> {
                         }),
 
                         //* Requests
-                        Obx(
-                          () => Animate(
+                        Watch(
+                          (ctx) => Animate(
                             effects: [
                               ReverseExpandEffect(
                                 curve: Curves.easeInOut,
@@ -206,8 +206,8 @@ class _FriendsPageState extends State<FriendsPage> {
                         ),
 
                         //* Sent requests
-                        Obx(
-                          () => Animate(
+                        Watch(
+                          (ctx) => Animate(
                             effects: [
                               ReverseExpandEffect(
                                 curve: Curves.easeInOut,
@@ -282,8 +282,8 @@ class _FriendsPageState extends State<FriendsPage> {
                                       if (friend.unknown || friend.id == StatusController.ownAddress) {
                                         return const SizedBox();
                                       }
-                                      return Obx(
-                                        () {
+                                      return Watch(
+                                        (ctx) {
                                           final visible = _query.value.isEmpty ||
                                               friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
                                               friend.name.toLowerCase().contains(_query.value.toLowerCase());

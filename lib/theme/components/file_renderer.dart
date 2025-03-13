@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:path/path.dart' as path;
+import 'package:signals/signals_flutter.dart';
 
 enum FileTypes {
   image,
@@ -144,8 +145,8 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                           ),
                         ),
                         horizontalSpacing(defaultSpacing),
-                        Obx(
-                          () => Visibility(
+                        Watch(
+                          (ctx) => Visibility(
                             visible: widget.file.progress.value == 0,
                             replacement: Padding(
                               padding: const EdgeInsets.all(defaultSpacing),

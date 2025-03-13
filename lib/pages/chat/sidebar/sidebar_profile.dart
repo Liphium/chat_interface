@@ -50,7 +50,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                   Watch((context) {
                     if (!SpaceController.connected.value) {
                       // Render an embed letting the user know he's in a call on another device
-                      return Obx(() {
+                      return Watch((ctx) {
                         if (StatusController.ownContainer.value != null && StatusController.ownContainer.value is SpaceConnectionContainer) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
@@ -76,7 +76,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                       });
                     }
 
-                    return Obx(() {
+                    return Watch((ctx) {
                       final shown = MessageController.currentProvider.value == null;
 
                       return Column(
@@ -137,7 +137,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Obx(() {
+                            Watch((ctx) {
                               // Check if the thing is loading
                               if (ConnectionController.loading.value) {
                                 return Row(
@@ -177,8 +177,8 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                     UserAvatar(id: StatusController.ownAddress, size: 40),
                                     horizontalSpacing(defaultSpacing),
                                     Expanded(
-                                      child: Obx(
-                                        () => Visibility(
+                                      child: Watch(
+                                        (ctx) => Visibility(
                                           visible: !StatusController.statusLoading.value,
                                           replacement: Center(
                                             child: Padding(
@@ -200,8 +200,8 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                               Row(
                                                 children: [
                                                   Flexible(
-                                                    child: Obx(
-                                                      () => Text(
+                                                    child: Watch(
+                                                      (ctx) => Text(
                                                         StatusController.displayName.value,
                                                         maxLines: 1,
                                                         overflow: TextOverflow.ellipsis,
@@ -211,15 +211,15 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                                     ),
                                                   ),
                                                   horizontalSpacing(defaultSpacing),
-                                                  Obx(
-                                                    () => StatusRenderer(status: StatusController.type.value, text: false),
+                                                  Watch(
+                                                    (ctx) => StatusRenderer(status: StatusController.type.value, text: false),
                                                   )
                                                 ],
                                               ),
 
                                               //* Status message
-                                              Obx(
-                                                () => Visibility(
+                                              Watch(
+                                                (ctx) => Visibility(
                                                   visible: StatusController.status.value != "",
                                                   child: Column(
                                                     children: [
@@ -257,7 +257,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                         onPressed: () => showModal(const FriendsPage()),
                                         icon: const Icon(Icons.group, color: Colors.white),
                                       ),
-                                      Obx(() {
+                                      Watch((ctx) {
                                         if (RequestController.requests.isEmpty) {
                                           return const SizedBox();
                                         }

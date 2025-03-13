@@ -228,6 +228,12 @@ class _KeySetupPageState extends State<KeySetupPage> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SmoothDialogWindow(controller: controller);
   }

@@ -85,8 +85,8 @@ class _RequestButtonState extends State<RequestButton> with SignalsMixin {
               ),
 
               //* Request actions
-              Obx(
-                () => widget.request.loading.value
+              Watch(
+                (ctx) => widget.request.loading.value
                     ? const SizedBox(
                         width: 25,
                         height: 25,

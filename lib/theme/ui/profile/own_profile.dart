@@ -235,8 +235,8 @@ class _ProfileState extends State<OwnProfile> {
               ),
 
               // Close button
-              Obx(
-                () => LoadingIconButton(
+              Watch(
+                (ctx) => LoadingIconButton(
                   loading: StatusController.statusLoading,
                   onTap: () async {
                     if (StatusController.status.value == "" && !_edit.value) {

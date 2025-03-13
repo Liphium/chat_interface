@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
 import '../../../util/vertical_spacing.dart';
@@ -48,7 +47,7 @@ class _ProfileButtonState extends State<ProfileButton> with SignalsMixin {
           child: Row(
             children: [
               //* Loading indicator
-              Obx(() => _loading.value
+              Watch((ctx) => _loading.value
                   ? SizedBox(
                       width: 25,
                       height: 25,

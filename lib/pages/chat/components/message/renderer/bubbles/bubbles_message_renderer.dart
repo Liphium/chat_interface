@@ -12,6 +12,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class BubblesMessageRenderer extends StatefulWidget {
   final LPHAddress senderAddress;
@@ -114,7 +115,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                       //* Desktop verified indicator
                       horizontalSpacing(defaultSpacing),
 
-                      Obx(() {
+                      Watch((ctx) {
                         final verified = widget.message.verified.value;
                         return Visibility(
                           visible: !verified,

@@ -132,8 +132,8 @@ class _ConversationsPageState extends State<ServerFileViewer> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Obx(
-          () => Text(
+        Watch(
+          (ctx) => Text(
             "settings.file.uploaded.title".trParams({
               "count": _totalCount.value.toString(),
             }),
@@ -141,9 +141,9 @@ class _ConversationsPageState extends State<ServerFileViewer> {
           ),
         ),
         verticalSpacing(defaultSpacing),
-        Obx(() => Text(_storageLine.value, style: Get.theme.textTheme.bodyMedium)),
+        Watch((ctx) => Text(_storageLine.value, style: Get.theme.textTheme.bodyMedium)),
         verticalSpacing(defaultSpacing),
-        Obx(() {
+        Watch((ctx) {
           if (_startLoading.value) {
             return CircularProgressIndicator(
               color: Get.theme.colorScheme.onPrimary,

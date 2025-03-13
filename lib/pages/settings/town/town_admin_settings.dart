@@ -39,7 +39,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
 
   // Current tabs
   final _categories = <CategoryData>[];
-  final _currentTab = Rx<List<dynamic>?>(null);
+  final _currentTab = listSignal<dynamic>([]);
 
   @override
   void dispose() {
@@ -103,7 +103,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
         Text("settings.town.settings".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
-        Obx(() {
+        Watch((ctx) {
           // Render a loading indicator in case the tabs are still loading
           if (_loading.value) {
             return Padding(
@@ -129,17 +129,17 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
           );
         }),
         verticalSpacing(defaultSpacing),
-        Obx(() {
+        Watch((ctx) {
           // Return nothing if there is no tab content
-          if (_currentTab.value == null) {
+          if (_currentTab.value.isEmpty) {
             return const SizedBox();
           }
 
           return Column(
             children: List.generate(
-              _currentTab.value!.length,
+              _currentTab.value.length,
               (index) {
-                final setting = _currentTab.value![index]!;
+                final setting = _currentTab.value[index]!;
                 if (setting["visible"] != null && !setting["visible"]) {
                   return const SizedBox();
                 }

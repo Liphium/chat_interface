@@ -17,6 +17,7 @@ import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:signals/signals_flutter.dart';
 
 class FileSettings {
   // Auto download
@@ -100,8 +101,8 @@ class FileSettingsPage extends StatelessWidget {
             items: FileSettings.fileCacheTypes,
           ),
 
-          Obx(
-            () => Visibility(
+          Watch(
+            (ctx) => Visibility(
               visible: SettingController.settings[FileSettings.fileCacheType]!.getValue() == 1,
               child: const DoubleSelectionSetting(
                 settingName: FileSettings.maxCacheSize,

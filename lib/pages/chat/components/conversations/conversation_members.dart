@@ -10,6 +10,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ConversationMembers extends StatelessWidget {
   final Conversation conversation;
@@ -30,8 +31,8 @@ class ConversationMembers extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
-                child: Obx(
-                  () => Text(
+                child: Watch(
+                  (ctx) => Text(
                     'chat.members'.trParams({"count": conversation.members.length.toString()}),
                     style: Get.theme.textTheme.titleMedium,
                   ),
@@ -47,8 +48,8 @@ class ConversationMembers extends StatelessWidget {
           verticalSpacing(defaultSpacing),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
-            child: Obx(
-              () => ListView.builder(
+            child: Watch(
+              (ctx) => ListView.builder(
                 shrinkWrap: true,
                 itemCount: conversation.members.length,
                 itemBuilder: (context, index) {

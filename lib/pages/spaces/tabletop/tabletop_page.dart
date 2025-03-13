@@ -62,10 +62,12 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
   final _updated = signal(false);
   Timer? _timer;
+  Function()? _disposeSettingSub;
 
   @override
   void dispose() {
     _updated.dispose();
+    _disposeSettingSub?.call();
     super.dispose();
   }
 
@@ -73,7 +75,8 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
   void initState() {
     super.initState();
     final setting = SettingController.settings[TabletopSettings.framerate]! as Setting<double>;
-    setting.value.listenAndPump((value) => startFrameTimer(value!));
+    _disposeSettingSub = setting.value.subscribe((value) => startFrameTimer(value!));
+    startFrameTimer(setting.value.value!);
   }
 
   void startFrameTimer(double value) {

@@ -7,6 +7,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MessageSearchWindow extends StatefulWidget {
   const MessageSearchWindow({super.key});
@@ -69,7 +70,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
           ),
           verticalSpacing(defaultSpacing),
           Expanded(
-            child: Obx(() {
+            child: Watch((ctx) {
               return FadingEdgeScrollView.fromScrollView(
                 gradientFractionOnEnd: 0,
                 child: ListView.builder(

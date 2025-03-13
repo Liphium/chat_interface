@@ -7,6 +7,7 @@ import 'package:chat_interface/pages/chat/messages/message_input.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MessageFeed extends StatefulWidget {
   final double? overwritePadding;
@@ -33,7 +34,7 @@ class _MessageFeedState extends State<MessageFeed> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
+    return Watch((ctx) {
       if (MessageController.currentProvider.value!.conversation.error.value != null) {
         return Center(
           child: ConstrainedBox(
@@ -74,8 +75,8 @@ class _MessageFeedState extends State<MessageFeed> {
                             constraints: BoxConstraints(
                               maxWidth: (SettingController.settings[ChatSettings.chatTheme]!.value.value ?? 1) == 0 ? double.infinity : 1200,
                             ),
-                            child: Obx(
-                              () {
+                            child: Watch(
+                              (ctx) {
                                 if (!MessageController.loaded.value) {
                                   return const SizedBox();
                                 }
@@ -93,8 +94,8 @@ class _MessageFeedState extends State<MessageFeed> {
                         // Animated loading indicator
                         Align(
                           alignment: Alignment.topCenter,
-                          child: Obx(
-                            () => Visibility(
+                          child: Watch(
+                            (ctx) => Visibility(
                               visible: MessageController.currentProvider.value!.newMessagesLoading.value,
                               child: Padding(
                                 padding: const EdgeInsets.all(defaultSpacing),
@@ -143,7 +144,7 @@ class _MessageFeedState extends State<MessageFeed> {
               ),
             ),
           ),
-          Obx(() {
+          Watch((ctx) {
             final visible = SettingController.settings[AppSettings.showGroupMembers]!.value.value;
             return Visibility(
               visible: MessageController.currentProvider.value!.conversation.isGroup && visible,

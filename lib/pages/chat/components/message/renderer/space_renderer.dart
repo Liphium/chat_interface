@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
@@ -80,7 +79,7 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Obx(() {
+      child: Watch((ctx) {
         if (_loading.value || _info.value == null) {
           return Container(
             decoration: BoxDecoration(

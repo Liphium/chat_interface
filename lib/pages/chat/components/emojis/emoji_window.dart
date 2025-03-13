@@ -73,8 +73,8 @@ class _EmojiWindowState extends State<EmojiWindow> {
               padding: const EdgeInsets.only(top: defaultSpacing),
               child: Material(
                 color: Colors.transparent,
-                child: Obx(
-                  () => GridView.builder(
+                child: Watch(
+                  (ctx) => GridView.builder(
                     key: const ValueKey("the grid"),
                     controller: _scrollController,
                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(

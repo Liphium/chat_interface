@@ -16,6 +16,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class DataSettingsPage extends StatelessWidget {
   const DataSettingsPage({super.key});
@@ -156,8 +157,8 @@ class DataSettingsPage extends StatelessWidget {
                   children: [
                     Text("display_name".tr, style: Get.theme.textTheme.labelMedium),
                     verticalSpacing(elementSpacing),
-                    Obx(
-                      () => Text(
+                    Watch(
+                      (ctx) => Text(
                         StatusController.displayName.value.toLowerCase() == StatusController.name.value.toLowerCase()
                             ? List.generate(StatusController.name.value.length, (index) => "*").join("")
                             : StatusController.displayName.value,

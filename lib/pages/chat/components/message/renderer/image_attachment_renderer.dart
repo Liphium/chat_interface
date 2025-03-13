@@ -6,6 +6,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ImageAttachmentRenderer extends StatefulWidget {
   final bool hoverCheck;
@@ -35,7 +36,7 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
         borderRadius: BorderRadius.circular(defaultSpacing),
         child: AspectRatio(
           aspectRatio: width / height,
-          child: Obx(() {
+          child: Watch((ctx) {
             if (widget.image.downloading.value) {
               return Container(
                 width: width,

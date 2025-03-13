@@ -202,7 +202,7 @@ class Friend {
 
   //* Profile picture
   AttachmentContainer? profilePicture;
-  final profilePictureImage = Rx<ui.Image?>(null);
+  final profilePictureImage = signal<ui.Image?>(null);
   bool profilePictureDataNull = false;
   DateTime lastProfilePictureUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 

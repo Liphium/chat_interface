@@ -128,7 +128,7 @@ class UnknownProfile extends Table {
   TextColumn get name => text()();
   TextColumn get displayName => text()();
   TextColumn get keys => text()();
-  DateTimeColumn get lastFetched => dateTime()();
+  DateTimeColumn get lastFetched => dateTime().withDefault(Constant(DateTime.fromMillisecondsSinceEpoch(0)))();
 
   @override
   Set<Column> get primaryKey => {id};

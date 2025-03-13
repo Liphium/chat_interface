@@ -197,7 +197,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
 
                           // Show a warning in case the message couldn't be verified
                           horizontalSpacing(defaultSpacing),
-                          Obx(() {
+                          Watch((ctx) {
                             final verified = widget.message.verified.value;
                             return Visibility(
                               visible: !verified,
@@ -255,8 +255,8 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                   ),
                 ),
                 Flexible(
-                  child: Obx(
-                    () => Text(
+                  child: Watch(
+                    (ctx) => Text(
                       _available.value ? formatFileSize(_size.value) : 'chat.zapshare.not_found'.tr,
                       style: Get.theme.textTheme.bodyMedium,
                       overflow: TextOverflow.ellipsis,
@@ -269,7 +269,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
           horizontalSpacing(defaultSpacing),
 
           //* Accept button
-          Obx(() {
+          Watch((ctx) {
             // Return loading if this message wasn't send inside of a conversation
             if (widget.provider is! ConversationMessageProvider) {
               return SizedBox(
