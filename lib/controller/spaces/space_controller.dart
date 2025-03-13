@@ -132,10 +132,6 @@ class SpaceController {
     domain = server;
     key = spaceKey;
 
-    // Open the screen
-    MessageController.unselectConversation();
-    MessageController.openTab(OpenTabType.space);
-
     // Load the first messages of the Space chat
     provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 

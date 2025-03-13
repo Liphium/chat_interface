@@ -19,11 +19,11 @@ class RequestController {
   static final requestsSent = mapSignal(<LPHAddress, Request>{});
   static final requests = mapSignal(<LPHAddress, Request>{});
 
-  void reset() {
+  static void reset() {
     requests.clear();
   }
 
-  Future<bool> loadRequests() async {
+  static Future<bool> loadRequests() async {
     for (RequestData data in await db.request.select().get()) {
       final address = LPHAddress.from(data.id);
       if (data.self) {
@@ -36,7 +36,7 @@ class RequestController {
     return true;
   }
 
-  void addSentRequestOrUpdate(Request request) {
+  static void addSentRequestOrUpdate(Request request) {
     if (requestsSent[request.id] != null) {
       requestsSent[request.id]!.copyFrom(request);
     } else {
@@ -44,7 +44,7 @@ class RequestController {
     }
   }
 
-  void addRequestOrUpdate(Request request) {
+  static void addRequestOrUpdate(Request request) {
     if (requests[request.id] != null) {
       requests[request.id]!.copyFrom(request);
     } else {
@@ -52,7 +52,7 @@ class RequestController {
     }
   }
 
-  Future<bool> deleteSentRequest(Request request, {removal = true}) async {
+  static Future<bool> deleteSentRequest(Request request, {removal = true}) async {
     if (removal) {
       requestsSent.remove(request.id);
     }
@@ -60,7 +60,7 @@ class RequestController {
     return true;
   }
 
-  Future<bool> deleteRequest(Request request, {removal = true}) async {
+  static Future<bool> deleteRequest(Request request, {removal = true}) async {
     if (removal) {
       requests.remove(request.id);
     }

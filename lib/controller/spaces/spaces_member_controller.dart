@@ -7,7 +7,6 @@ import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
 class SpaceMemberController {
@@ -22,7 +21,6 @@ class SpaceMemberController {
 
   /// Parse a member list and add it to the members map.
   static void onMembersChanged(List<dynamic> newMembers) {
-    final statusController = Get.find<StatusController>();
     final membersFound = <String>[];
 
     // Start a batch to make sure members only updates after all the changes have been made
@@ -39,7 +37,7 @@ class SpaceMemberController {
         // Add the member to the list if they're not in it yet
         if (members[clientId] == null) {
           members[clientId] = SpaceMember(
-            FriendController.friends[address] ?? (address == StatusController.ownAddress ? Friend.me(statusController) : Friend.unknown(address)),
+            FriendController.friends[address] ?? (address == StatusController.ownAddress ? Friend.me() : Friend.unknown(address)),
             clientId,
           );
           members[clientId]!.verifySignature(member["sign"]);

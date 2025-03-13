@@ -43,7 +43,7 @@ class ProfileHelper {
       await FriendsVault.updateFriend(friend);
     }
 
-    sendLog("downloading ${friend.name}");
+    sendLog("downloading ${friend.name} on ${friend.id.server}");
 
     // Check if there is a profile picture
     if ((json["profile"]["container"] ?? "") == "") {
@@ -54,7 +54,7 @@ class ProfileHelper {
     }
 
     // Decrypt the profile picture data
-    final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey));
+    final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], (await friend.getKeys()).profileKey));
     final container = AttachmentController.fromJson(StorageType.permanent, containerJson);
 
     String? oldPictureId;

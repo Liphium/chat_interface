@@ -20,7 +20,6 @@ class $ConversationTable extends Conversation
   late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
       'vault_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<ConversationType, int> type =
       GeneratedColumn<int>('type', aliasedName, false,
@@ -82,7 +81,6 @@ class $ConversationTable extends Conversation
     } else if (isInserting) {
       context.missing(_vaultIdMeta);
     }
-    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('data')) {
       context.handle(
           _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
@@ -2139,7 +2137,9 @@ class $UnknownProfileTable extends UnknownProfile
   @override
   late final GeneratedColumn<DateTime> lastFetched = GeneratedColumn<DateTime>(
       'last_fetched', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: Constant(DateTime.fromMillisecondsSinceEpoch(0)));
   @override
   List<GeneratedColumn> get $columns =>
       [id, name, displayName, keys, lastFetched];
@@ -2183,8 +2183,6 @@ class $UnknownProfileTable extends UnknownProfile
           _lastFetchedMeta,
           lastFetched.isAcceptableOrUnknown(
               data['last_fetched']!, _lastFetchedMeta));
-    } else if (isInserting) {
-      context.missing(_lastFetchedMeta);
     }
     return context;
   }
@@ -2341,13 +2339,12 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
     required String name,
     required String displayName,
     required String keys,
-    required DateTime lastFetched,
+    this.lastFetched = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
         displayName = Value(displayName),
-        keys = Value(keys),
-        lastFetched = Value(lastFetched);
+        keys = Value(keys);
   static Insertable<UnknownProfileData> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -2818,7 +2815,6 @@ class $LibraryEntryTable extends LibraryEntry
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<LibraryEntryType, int> type =
       GeneratedColumn<int>('type', aliasedName, false,
@@ -2871,7 +2867,6 @@ class $LibraryEntryTable extends LibraryEntry
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -4343,7 +4338,7 @@ typedef $$UnknownProfileTableCreateCompanionBuilder = UnknownProfileCompanion
   required String name,
   required String displayName,
   required String keys,
-  required DateTime lastFetched,
+  Value<DateTime> lastFetched,
   Value<int> rowid,
 });
 typedef $$UnknownProfileTableUpdateCompanionBuilder = UnknownProfileCompanion
@@ -4477,7 +4472,7 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
             required String name,
             required String displayName,
             required String keys,
-            required DateTime lastFetched,
+            Value<DateTime> lastFetched = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UnknownProfileCompanion.insert(

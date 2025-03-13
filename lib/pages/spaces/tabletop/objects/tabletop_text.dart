@@ -82,7 +82,7 @@ class TextObject extends TableObject {
       ContextMenuAction(
         icon: Icons.edit,
         label: 'Edit',
-        onTap: (controller) {
+        onTap: () {
           Get.back();
           Get.dialog(TextObjectCreationWindow(location: location, object: this));
           Get.dialog(TextObjectCreationWindow(location: location, object: this));

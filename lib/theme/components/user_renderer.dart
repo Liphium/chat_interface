@@ -86,8 +86,7 @@ class UserRenderer extends StatelessWidget {
   Widget build(BuildContext context) {
     var friend = FriendController.friends[id];
     final own = id == StatusController.ownAddress;
-    StatusController? statusController = own ? Get.find<StatusController>() : null;
-    if (own) friend = Friend.me(statusController);
+    if (own) friend = Friend.me();
     friend ??= Friend.unknown(id);
 
     return Row(

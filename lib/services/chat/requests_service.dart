@@ -17,13 +17,13 @@ class RequestsService {
   /// Called when the request is updated in the vault
   static void onVaultUpdateSent(Request request) {
     db.request.insertOnConflictUpdate(request.entity(true));
-    Get.find<RequestController>().addSentRequestOrUpdate(request);
+    RequestController.addSentRequestOrUpdate(request);
   }
 
   /// Called when the request is updated in the vault
   static void onVaultUpdate(Request request) {
     db.request.insertOnConflictUpdate(request.entity(false));
-    Get.find<RequestController>().addRequestOrUpdate(request);
+    RequestController.addRequestOrUpdate(request);
   }
 
   /// Send a friend request to an account or accept if sent before.

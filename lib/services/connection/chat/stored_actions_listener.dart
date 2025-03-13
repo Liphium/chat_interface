@@ -75,7 +75,7 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
     }
 
     // Verify the signature
-    if (!extracted.verifySignature(sender.keyStorage.signatureKey)) {
+    if (!extracted.verifySignature((await sender.getKeys()).signatureKey)) {
       sendLog("ERROR: signature of authenticated stored action is invalid");
       return false;
     }

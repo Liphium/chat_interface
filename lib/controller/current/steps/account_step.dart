@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
@@ -15,6 +17,12 @@ late SecureKey profileKey;
 
 class AccountStep extends ConnectionStep {
   AccountStep() : super('loading.account');
+
+  /// A completer to wait until the keys are set.
+  ///
+  /// Instantiated in [FriendSyncTask].
+  /// Completed when this setup is over.
+  static Completer<void>? keyCompleter;
 
   @override
   Future<SetupResponse> load() async {
@@ -60,8 +68,11 @@ class AccountStep extends ConnectionStep {
     storedActionKey = body["actions"];
 
     // Set own key pair as cached (in the friend that represents this account)
-    FriendController.friends[StatusController.ownAddress]!.keyStorage =
-        KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, "");
+    FriendController.friends[StatusController.ownAddress]!
+        .setKeyStorage(KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""));
+
+    // Tell the completer that the keys of the own friend have been set
+    keyCompleter?.complete();
 
     return SetupResponse();
   }

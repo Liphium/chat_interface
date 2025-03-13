@@ -59,7 +59,7 @@ class FriendsVault {
   /// Returns an error if there was one.
   static Future<String?> updateFriend(Friend friend) async {
     // Store the request in the vault
-    final (error, version) = await _update(friend.vaultId, friend.toStoredPayload());
+    final (error, version) = await _update(friend.vaultId, await friend.toStoredPayload());
     if (error != null) {
       return error;
     }

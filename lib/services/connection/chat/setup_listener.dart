@@ -3,16 +3,15 @@ import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
-import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 
 void setupSetupListeners() {
   //* New status
   connector.listen("setup", (event) {
     final data = event.data["data"]! as String;
 
+    // Check if there even is a status that has been saved
     if (data == "" || data == "-") {
-      StatusController.status.value = "";
-      StatusController.type.value = statusOnline;
+      StatusController.loadDefaultStatus();
       ConversationService.subscribeToConversations();
       return;
     }

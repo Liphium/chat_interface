@@ -20,7 +20,9 @@ import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 /// The container used for storing members of conversations on the server
@@ -83,9 +85,13 @@ class ConversationService extends VaultTarget {
   @override
   Future<void> init() async {
     final conversations = await (db.select(db.conversation)..orderBy([(u) => drift.OrderingTerm.asc(u.updatedAt)])).get();
-    for (var conversation in conversations) {
-      ConversationController.add(Conversation.fromData(conversation));
-    }
+    await batch(() async {
+      for (var conversation in conversations) {
+        final conv = Conversation.fromData(conversation);
+        await ConversationService.loadMembers(conv);
+        ConversationController.add(conv);
+      }
+    });
   }
 
   @override
@@ -266,8 +272,6 @@ class ConversationService extends VaultTarget {
   ///
   /// Also sends out status packets.
   static void subscribeToConversations({StatusController? controller}) {
-    controller ??= Get.find<StatusController>();
-
     // Collect all thet tokens for the conversations currently in cache
     final tokens = <Map<String, dynamic>>[];
     for (var conversation in ConversationController.conversations.values) {
@@ -282,9 +286,6 @@ class ConversationService extends VaultTarget {
   ///
   /// Also sends out a status packet to this conversation (if it's a direct message).
   static void subscribeToConversation(ConversationToken token, {StatusController? controller, deletions = true}) {
-    // Encrypt status with profile key
-    controller ??= Get.find<StatusController>();
-
     // Subscribe to all conversations
     final tokens = <Map<String, dynamic>>[token.toMap()];
 
@@ -389,8 +390,10 @@ class ConversationService extends VaultTarget {
     }
 
     // Set the members and save the conversation
-    conversation.members.value = members;
-    conversation.membersLoading.value = false;
+    batch(() {
+      conversation.members.value = members;
+      conversation.membersLoading.value = false;
+    });
     saveToDatabase(conversation);
 
     return true;
@@ -433,5 +436,25 @@ class ConversationService extends VaultTarget {
       conversation.notificationCount.value = 0;
       conversation.readAt.value = DateTime.now().millisecondsSinceEpoch;
     }
+  }
+
+  /// Load all members of a conversation into it from the local database.
+  static Future<void> loadMembers(Conversation conv) async {
+    // Get all the members from the local database
+    final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conv.id.encode()))).get();
+    if (members.isEmpty) {
+      sendLog("WARNING: a conversation doesn't have any members associated with it");
+      return;
+    }
+
+    // Parse all of them from the database
+    final map = <LPHAddress, Member>{};
+    for (var dbMember in members) {
+      final member = Member.fromData(dbMember);
+      map[member.tokenId] = member;
+    }
+
+    // Set the members in the conversation
+    conv.members.value = map;
   }
 }

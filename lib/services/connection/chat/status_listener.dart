@@ -16,7 +16,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 void setupStatusListener() {
   // Handle friend status change
   connector.listen("acc_st", (event) async {
-    final friend = handleStatus(event, false);
+    final friend = await handleStatus(event, false);
     if (friend == null) return;
     if (!friend.answerStatus) return;
     friend.answerStatus = false;
@@ -49,12 +49,12 @@ void setupStatusListener() {
   }, afterSetup: true);
 }
 
-Friend? handleStatus(Event event, bool own) {
+Future<Friend?> handleStatus(Event event, bool own) async {
   final message = event.data["st"] as String;
 
   // Load own status when the packet specifies it
   if (own) {
-    FriendController.friends[StatusController.ownAddress]!.loadStatus(message);
+    await FriendController.friends[StatusController.ownAddress]!.loadStatus(message);
     StatusController.fromStatusJson(decryptSymmetric(message, profileKey));
     // Load own shared content
     final (container, shouldUpdate) = _dataToContainer(StatusController.ownContainer.value, event.data["d"], profileKey);
@@ -92,10 +92,10 @@ Friend? handleStatus(Event event, bool own) {
   }
 
   // Load the status
-  friend.loadStatus(message);
+  await friend.loadStatus(message);
 
   // Extract shared content
-  final (container, shouldUpdate) = _dataToContainer(StatusController.sharedContent[friend.id], event.data["d"], friend.keyStorage.profileKey);
+  final (container, shouldUpdate) = _dataToContainer(StatusController.sharedContent[friend.id], event.data["d"], (await friend.getKeys()).profileKey);
   if (shouldUpdate) {
     if (container == null) {
       final container = StatusController.sharedContent.remove(friend.id);

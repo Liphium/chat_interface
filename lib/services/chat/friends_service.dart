@@ -7,15 +7,14 @@ import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
-import 'package:get/get.dart';
 
 class FriendsService {
   /// Called when the friend is updated in the vault
-  static void onVaultUpdate(Friend friend) {
+  static Future<void> onVaultUpdate(Friend friend) async {
     if (friend.id != StatusController.ownAddress) {
-      db.friend.insertOnConflictUpdate(friend.entity());
+      await db.friend.insertOnConflictUpdate(await friend.entity());
     }
-    Get.find<FriendController>().addOrUpdate(friend);
+    FriendController.addOrUpdate(friend);
   }
 
   /// Remove a friend.

@@ -258,7 +258,7 @@ class CardObject extends TableObject {
         ContextMenuAction(
           icon: Icons.login,
           label: 'Put into inventory',
-          onTap: (controller) {
+          onTap: () {
             intoInventory();
           },
         ),
@@ -266,7 +266,7 @@ class CardObject extends TableObject {
         icon: Icons.fullscreen,
         goBack: false,
         label: 'View in image viewer',
-        onTap: (controller) {
+        onTap: () {
           sendLog("viewing..");
           Get.back();
           Get.dialog(ImagePreviewWindow(image: image));
@@ -280,7 +280,7 @@ class CardObject extends TableObject {
       ContextMenuAction(
         icon: Icons.fullscreen,
         label: 'View in image viewer',
-        onTap: (controller) {
+        onTap: () {
           Get.dialog(ImagePreviewWindow(image: image));
         },
       ),

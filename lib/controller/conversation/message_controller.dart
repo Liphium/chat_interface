@@ -54,10 +54,9 @@ class MessageController {
 
   /// Unselect a conversation (when id is set, the current conversation will only be closed if it has that id)
   static void unselectConversation({LPHAddress? id}) {
-    if (id != null && currentProvider.value?.conversation.id != id) {
+    if (id != null && currentProvider.peek()?.conversation.id != id) {
       return;
     }
-    currentProvider.value?.messages.clear();
     currentProvider.value = null;
   }
 

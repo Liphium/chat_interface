@@ -215,7 +215,7 @@ class DeckObject extends TableObject {
       ContextMenuAction(
         icon: Icons.shuffle,
         label: 'Shuffle',
-        onTap: (controller) {
+        onTap: () {
           shuffle();
           Get.back();
         },

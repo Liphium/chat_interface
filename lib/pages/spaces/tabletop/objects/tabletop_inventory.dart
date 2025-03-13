@@ -234,7 +234,7 @@ class InventoryObject extends TableObject {
         ContextMenuAction(
           icon: Icons.logout,
           label: "Disown",
-          onTap: (controller) {
+          onTap: () {
             TabletopController.inventory = null;
           },
         ),
@@ -242,7 +242,7 @@ class InventoryObject extends TableObject {
         ContextMenuAction(
           icon: Icons.login,
           label: "Make own",
-          onTap: (controller) {
+          onTap: () {
             TabletopController.inventory = this;
           },
         )

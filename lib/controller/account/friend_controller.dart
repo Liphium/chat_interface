@@ -28,22 +28,22 @@ part '../../services/chat/friends_vault.dart';
 class FriendController {
   static final friends = mapSignal(<LPHAddress, Friend>{});
 
-  Future<bool> loadFriends() async {
+  static Future<bool> loadFriends() async {
     for (FriendData data in await db.friend.select().get()) {
       friends[LPHAddress.from(data.id)] = Friend.fromEntity(data);
     }
     return true;
   }
 
-  void addSelf() {
+  static void addSelf() {
     friends[StatusController.ownAddress] = Friend.me();
   }
 
-  void reset() {
+  static void reset() {
     friends.clear();
   }
 
-  void addOrUpdate(Friend friend) {
+  static void addOrUpdate(Friend friend) {
     if (friends[friend.id] != null) {
       friends[friend.id]!.copyFrom(friend);
     } else {
@@ -51,7 +51,7 @@ class FriendController {
     }
   }
 
-  Friend getFriend(LPHAddress address) {
+  static Friend getFriend(LPHAddress address) {
     if (StatusController.ownAddress == address) return Friend.me();
     return friends[address] ?? Friend.unknown(address);
   }
@@ -61,10 +61,28 @@ class Friend {
   LPHAddress id;
   String name;
   String vaultId;
-  KeyStorage keyStorage;
+  KeyStorage _keyStorage;
   bool unknown;
   Timer? _timer;
   int updatedAt;
+
+  /// Get the key storage of the friend (future because the key storage of the current client may still be loading).
+  Future<KeyStorage> getKeys() async {
+    if (id == StatusController.ownAddress) {
+      await AccountStep.keyCompleter?.future;
+      return _keyStorage;
+    }
+
+    return _keyStorage;
+  }
+
+  /// Set the key storage of the friend.
+  ///
+  /// Should only be used for updating the key storage of the current client.
+  void setKeyStorage(KeyStorage storage) {
+    assert(id == StatusController.ownAddress);
+    _keyStorage = storage;
+  }
 
   // Display name of the friend
   final displayName = signal("");
@@ -72,7 +90,7 @@ class Friend {
   /// Loading state for open conversation buttons
   final openConversationLoading = signal(false);
 
-  Friend(this.id, this.name, String displayName, this.vaultId, this.keyStorage, this.updatedAt, {this.unknown = false}) {
+  Friend(this.id, this.name, String displayName, this.vaultId, this._keyStorage, this.updatedAt, {this.unknown = false}) {
     this.displayName.value = displayName;
   }
 
@@ -82,8 +100,7 @@ class Friend {
   }
 
   /// Own account as a friend (used to make implementations simpler)
-  factory Friend.me([StatusController? controller]) {
-    controller ??= Get.find<StatusController>();
+  factory Friend.me() {
     return Friend(
       StatusController.ownAddress,
       StatusController.name.value,
@@ -130,52 +147,54 @@ class Friend {
   }
 
   // Convert to a stored payload for the friends vault
-  String toStoredPayload() {
+  Future<String> toStoredPayload() async {
     final reqPayload = <String, dynamic>{
       "rq": false, // If it is a request or not (requests are stored in the same place)
       "id": id.encode(),
       "name": name,
       "dname": displayName.value,
     };
-    reqPayload.addAll(keyStorage.toJson());
+    reqPayload.addAll((await getKeys()).toJson());
 
     return jsonEncode(reqPayload);
   }
 
   /// Copy of all of the values from another friend into this one.
-  void copyFrom(Friend friend) {
+  Future<void> copyFrom(Friend friend) async {
     id = friend.id;
     vaultId = friend.vaultId;
-    keyStorage = friend.keyStorage;
+    _keyStorage = await friend.getKeys();
     displayName.value = friend.displayName.value;
     name = friend.name;
     updatedAt = friend.updatedAt;
   }
 
   /// Copy this friend for editing.
-  Friend copy() {
-    return Friend(id, name, displayName.value, vaultId, keyStorage, updatedAt);
+  Future<Friend> copy() async {
+    return Friend(id, name, displayName.value, vaultId, await getKeys(), updatedAt);
   }
 
   // Check if vault id is known (this would require a restart of the app)
   bool canBeDeleted() => vaultId != "";
 
-  FriendData entity() => FriendData(
-        id: id.encode(),
-        name: dbEncrypted(name),
-        displayName: dbEncrypted(displayName.value),
-        vaultId: dbEncrypted(vaultId),
-        keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
-        updatedAt: BigInt.from(updatedAt),
-      );
+  Future<FriendData> entity() async {
+    return FriendData(
+      id: id.encode(),
+      name: dbEncrypted(name),
+      displayName: dbEncrypted(displayName.value),
+      vaultId: dbEncrypted(vaultId),
+      keys: dbEncrypted(jsonEncode((await getKeys()).toJson())),
+      updatedAt: BigInt.from(updatedAt),
+    );
+  }
 
   //* Status
   final status = signal("");
   bool answerStatus = true;
   final statusType = signal(0);
 
-  void loadStatus(String message) {
-    message = decryptSymmetric(message, keyStorage.profileKey);
+  Future<void> loadStatus(String message) async {
+    message = decryptSymmetric(message, (await getKeys()).profileKey);
     final data = jsonDecode(message);
     try {
       status.value = utf8.decode(base64Decode(data["s"]));
@@ -283,6 +302,8 @@ class Friend {
     }
 
     profilePictureImage.value = await ProfileHelper.loadImageFromBytes(await profilePicture!.file!.readAsBytes());
+
+    sendLog("Profile picture set for $name");
   }
 
   /// Remove the friend. Just calls [FriendsService.remove] for you.

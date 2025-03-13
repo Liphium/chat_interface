@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
@@ -58,6 +59,15 @@ class StatusController {
         "t": type,
       });
 
+  /// Load the default status because nothing has been saved yet.
+  static void loadDefaultStatus() {
+    batch(() {
+      status.value = "";
+      type.value = statusOnline;
+      statusLoading.value = false;
+    });
+  }
+
   /// Update the status from a status json.
   static void fromStatusJson(String json) {
     // Decode the status
@@ -71,6 +81,7 @@ class StatusController {
         status.value = "";
       }
       type.value = data["t"] ?? 1;
+      statusLoading.value = false;
     });
   }
 

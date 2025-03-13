@@ -124,19 +124,19 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                   hover.value = value;
                                 },
 
-                                //* When conversation is tapped (open conversation)
+                                // When conversation is tapped (open conversation)
                                 onTap: () {
                                   if (MessageController.currentProvider.value?.conversation == conversation && !isMobileMode()) return;
                                   MessageController.selectConversation(conversation);
                                 },
 
-                                //* Conversation item content
+                                // Conversation item content
                                 child: Padding(
                                   padding: const EdgeInsets.all(elementSpacing2),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      //* Conversation info
+                                      // Conversation info
                                       Expanded(
                                         child: Row(
                                           children: [

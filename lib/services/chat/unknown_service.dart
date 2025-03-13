@@ -118,13 +118,14 @@ class UnknownAccount {
     return account;
   }
 
-  factory UnknownAccount.fromFriend(Friend friend) {
+  static Future<UnknownAccount> fromFriend(Friend friend) async {
+    final keys = await friend.getKeys();
     return UnknownAccount(
       friend.id,
       friend.name,
       friend.displayName.value,
-      friend.keyStorage.signatureKey,
-      friend.keyStorage.publicKey,
+      keys.signatureKey,
+      keys.publicKey,
     );
   }
 

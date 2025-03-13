@@ -96,7 +96,6 @@ class SpaceService {
     TabletopController.resetControllerState();
 
     // Open the screen
-    MessageController.unselectConversation();
     MessageController.openTab(OpenTabType.space);
 
     // Send the server all the data required for setup

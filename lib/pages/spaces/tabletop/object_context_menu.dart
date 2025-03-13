@@ -6,7 +6,6 @@ import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:signals/signals.dart';
 
 class ObjectContextMenu extends StatefulWidget {
   final TableObject object;
@@ -42,7 +41,7 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
                   color: addition.color,
                   label: addition.label,
                   onTap: () {
-                    addition.onTap.call(Get.find<TabletopController>());
+                    addition.onTap.call();
                     if (addition.goBack) {
                       Get.back();
                     }

@@ -86,8 +86,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                             color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
                             child: InkWell(
                               onTap: () {
-                                MessageController.unselectConversation();
-                                MessageController.currentOpenType.value = OpenTabType.space;
+                                MessageController.openTab(OpenTabType.space);
                               },
                               splashColor: theme.hoverColor,
                               hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
@@ -122,7 +121,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                     });
                   }),
 
-                  //* Actual profile
+                  // Actual profile
                   Material(
                     key: _profileKey,
                     borderRadius: BorderRadius.circular(defaultSpacing),
@@ -196,7 +195,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              //* Profile name and status type
+                                              // The current user's display name and status type
                                               Row(
                                                 children: [
                                                   Flexible(
@@ -217,15 +216,13 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                                 ],
                                               ),
 
-                                              //* Status message
+                                              // Render the status message of the curretn user
                                               Watch(
                                                 (ctx) => Visibility(
                                                   visible: StatusController.status.value != "",
                                                   child: Column(
                                                     children: [
                                                       verticalSpacing(defaultSpacing * 0.25),
-
-                                                      //* Status message
                                                       Text(
                                                         StatusController.status.value,
                                                         style: theme.textTheme.bodySmall,

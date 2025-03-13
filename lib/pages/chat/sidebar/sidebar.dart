@@ -65,7 +65,7 @@ class _SidebarState extends State<Sidebar> {
               ),
             ),
 
-            //* Search field
+            // Search field
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
               child: SizedBox(
@@ -133,7 +133,7 @@ class _SidebarState extends State<Sidebar> {
                                       onPressed: () {
                                         final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
 
-                                        //* Open conversation add window
+                                        // Open conversation add window
                                         showModal(ConversationAddWindow(
                                           position:
                                               ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
