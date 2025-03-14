@@ -1,8 +1,8 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/message_search_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -75,8 +75,8 @@ class _MessageBarState extends State<MessageBar> {
                 // Show a hide sidebar icon for more focus on the current conversation
                 Watch(
                   (ctx) => LoadingIconButton(
-                    onTap: () => MessageController.toggleSidebar(),
-                    icon: MessageController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
+                    onTap: () => SidebarController.toggleSidebar(),
+                    icon: SidebarController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                   ),
                 ),
                 horizontalSpacing(elementSpacing),
@@ -219,10 +219,10 @@ class _MessageBarState extends State<MessageBar> {
                       iconSize: 27,
                       icon: Icon(Icons.search,
                           color:
-                              MessageController.showSearch.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
+                              SidebarController.showSearch.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
-                        MessageController.toggleSearchView();
-                        if (MessageController.showSearch.value) {
+                        SidebarController.toggleSearchView();
+                        if (SidebarController.showSearch.value) {
                           MessageSearchController.currentFocus!.requestFocus();
                         }
                       },

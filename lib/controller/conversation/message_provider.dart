@@ -123,19 +123,24 @@ abstract class MessageProvider {
     newMessagesLoading.value = true;
     date ??= messages.last.createdAt.millisecondsSinceEpoch;
 
+    sendLog("do request");
+
     // Load new messages
     final (loadedMessages, error) = await loadMessagesBefore(date);
     if (error) {
       newMessagesLoading.value = false;
+      sendLog("error");
       return (false, true);
     }
+    newMessagesLoading.value = false;
     if (loadedMessages == null) {
-      newMessagesLoading.value = false;
+      sendLog("no messages");
       return (true, false);
     }
     messages.addAll(loadedMessages);
 
-    newMessagesLoading.value = false;
+    sendLog("success ${newMessagesLoading.value} $hashCode");
+
     return (false, false);
   }
 

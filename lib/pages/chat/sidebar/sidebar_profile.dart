@@ -1,7 +1,8 @@
 import 'dart:math';
 
 import 'package:chat_interface/controller/account/requests_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
@@ -77,7 +78,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                     }
 
                     return Watch((ctx) {
-                      final shown = MessageController.currentProvider.value == null;
+                      final shown = SidebarController.currentOpenTab.value is SpaceSidebarTab;
 
                       return Column(
                         children: [
@@ -86,7 +87,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                             color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
                             child: InkWell(
                               onTap: () {
-                                MessageController.openTab(OpenTabType.space);
+                                SidebarController.openTab(SpaceSidebarTab());
                               },
                               splashColor: theme.hoverColor,
                               hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,

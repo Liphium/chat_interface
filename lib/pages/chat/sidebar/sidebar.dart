@@ -33,7 +33,6 @@ class _SidebarState extends State<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
-    //* Sidebar
     return Container(
       decoration: BoxDecoration(
         color: Get.theme.colorScheme.onInverseSurface,

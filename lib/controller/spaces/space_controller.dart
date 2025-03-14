@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/controller/spaces/ringing_manager.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
@@ -35,7 +35,6 @@ class SpaceController {
 
   //* Call layout
   static final chatOpen = signal(true);
-  static final hideSidebar = signal(false);
   static final fullScreen = signal(false);
   static final sidebarTabType = signal(SpaceSidebarTabType.chat.index);
 
@@ -183,8 +182,7 @@ class SpaceController {
 
     // Show an error if there was one
     if (!error) {
-      unawaited(Get.offAll(getChatPage(), transition: Transition.fadeIn));
-      MessageController.openTab(OpenTabType.conversation);
+      SidebarController.openTab(DefaultSidebarTab());
     }
   }
 

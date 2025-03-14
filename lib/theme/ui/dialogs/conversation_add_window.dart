@@ -70,7 +70,7 @@ class ConversationAddWindow extends StatefulWidget {
       Conversation? conv;
       (conv, error) = await ConversationService.openDirectMessage(friends.first);
       if (conv != null) {
-        unawaited(MessageController.selectConversation(conv));
+        unawaited(MessageController.openConversation(conv));
       }
     } else {
       error = await ConversationService.openGroupConversation(friends, name);

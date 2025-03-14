@@ -68,6 +68,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
   void dispose() {
     _updated.dispose();
     _disposeSettingSub?.call();
+    _timer?.cancel();
     super.dispose();
   }
 

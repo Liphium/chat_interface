@@ -1,9 +1,12 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
 import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,7 +38,8 @@ class _MessageFeedState extends State<MessageFeed> {
   @override
   Widget build(BuildContext context) {
     return Watch((ctx) {
-      if (MessageController.currentProvider.value!.conversation.error.value != null) {
+      final provider = (SidebarController.currentOpenTab.value as ConversationSidebarTab).provider;
+      if (provider.conversation.error.value != null) {
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
@@ -48,7 +52,7 @@ class _MessageFeedState extends State<MessageFeed> {
                 ),
                 verticalSpacing(defaultSpacing),
                 Text(
-                  MessageController.currentProvider.value!.conversation.error.value!,
+                  provider.conversation.error.value!,
                   style: Get.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -82,8 +86,8 @@ class _MessageFeedState extends State<MessageFeed> {
                                 }
 
                                 return MessageList(
-                                  key: ValueKey(MessageController.currentProvider.value!.conversation.id),
-                                  provider: MessageController.currentProvider.value!,
+                                  key: ValueKey(provider.conversation.id),
+                                  provider: provider,
                                   overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
                                 );
                               },
@@ -94,9 +98,10 @@ class _MessageFeedState extends State<MessageFeed> {
                         // Animated loading indicator
                         Align(
                           alignment: Alignment.topCenter,
-                          child: Watch(
-                            (ctx) => Visibility(
-                              visible: MessageController.currentProvider.value!.newMessagesLoading.value,
+                          child: Watch(key: ValueKey(provider.conversation.id), (ctx) {
+                            sendLog("re-render loading thingy: ${provider.newMessagesLoading.value} ${provider.hashCode}");
+                            return Visibility(
+                              visible: provider.newMessagesLoading.value,
                               child: Padding(
                                 padding: const EdgeInsets.all(defaultSpacing),
                                 child: Material(
@@ -123,8 +128,8 @@ class _MessageFeedState extends State<MessageFeed> {
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          }),
                         ),
                       ],
                     ),
@@ -132,12 +137,12 @@ class _MessageFeedState extends State<MessageFeed> {
 
                   //* Message input
                   SelectionContainer.disabled(
-                    child: MessageController.currentProvider.value!.conversation.borked
+                    child: provider.conversation.borked
                         ? const SizedBox.shrink()
                         : MessageInput(
                             rectangle: widget.rectInput,
-                            draft: MessageController.currentProvider.value!.conversation.id.encode(),
-                            provider: MessageController.currentProvider.value!,
+                            draft: provider.conversation.id.encode(),
+                            provider: provider,
                           ),
                   )
                 ],
@@ -147,12 +152,12 @@ class _MessageFeedState extends State<MessageFeed> {
           Watch((ctx) {
             final visible = SettingController.settings[AppSettings.showGroupMembers]!.value.value;
             return Visibility(
-              visible: MessageController.currentProvider.value!.conversation.isGroup && visible,
+              visible: provider.conversation.isGroup && visible,
               child: Container(
                 color: Get.theme.colorScheme.onInverseSurface,
                 width: 300,
                 child: ConversationMembers(
-                  conversation: MessageController.currentProvider.value!.conversation,
+                  conversation: provider.conversation,
                 ),
               ),
             );

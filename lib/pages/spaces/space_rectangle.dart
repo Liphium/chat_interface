@@ -41,6 +41,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
   void dispose() {
     _controlsHovered.dispose();
     _hovered.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -180,7 +181,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                 ),
               ),
 
-              // The chat sidebar
+              // The Space sidebar
               Watch(
                 (context) => Animate(
                   effects: [
@@ -188,11 +189,11 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                       curve: Curves.easeInOut,
                       duration: 250.ms,
                       axis: Axis.horizontal,
-                      alignment: Alignment.centerRight,
+                      alignment: Alignment.centerLeft,
                     ),
                     FadeEffect(
                       duration: 250.ms,
-                    )
+                    ),
                   ],
                   onInit: (ac) => ac.value = SpaceController.chatOpen.value ? 1 : 0,
                   target: SpaceController.chatOpen.value ? 1 : 0,

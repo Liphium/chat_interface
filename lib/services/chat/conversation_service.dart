@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
@@ -20,7 +20,6 @@ import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart' as drift;
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -109,7 +108,7 @@ class ConversationService extends VaultTarget {
       if (deleted.contains(conv.vaultId)) {
         ConversationService.delete(id, vaultId: conv.vaultId, deleteLocal: false);
         ConversationController.order.remove(id);
-        MessageController.unselectConversation(id: id);
+        SidebarController.unselectConversation(id);
         return true;
       }
       return false;
@@ -232,7 +231,7 @@ class ConversationService extends VaultTarget {
     await db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
     await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
     if (deleteLocal) {
-      MessageController.unselectConversation(id: id);
+      SidebarController.unselectConversation(id);
       ConversationController.removeConversation(id);
     }
     return null;
@@ -434,7 +433,7 @@ class ConversationService extends VaultTarget {
     });
     if (json["success"]) {
       conversation.notificationCount.value = 0;
-      conversation.readAt.value = DateTime.now().millisecondsSinceEpoch;
+      conversation.readAt.value = json["time"];
     }
   }
 

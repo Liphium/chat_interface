@@ -26,7 +26,7 @@ class _MessagesPageMobileState extends State<MessagesPageMobile> {
       desktop: () {
         Get.back();
         Get.off(const ChatPageDesktop());
-        MessageController.selectConversation(widget.provider.conversation);
+        MessageController.openConversation(widget.provider.conversation);
       },
       child: Scaffold(
         backgroundColor: theme.colorScheme.inverseSurface,
@@ -36,7 +36,7 @@ class _MessagesPageMobileState extends State<MessagesPageMobile> {
             DevicePadding(
               top: true,
               padding: const EdgeInsets.all(0),
-              child: MobileMessageBar(conversation: MessageController.currentProvider.value!.conversation),
+              child: MobileMessageBar(conversation: widget.provider.conversation),
             ),
 
             // Render the actual message feed

@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
+import 'package:chat_interface/controller/spaces/ringing_manager.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
@@ -53,16 +55,16 @@ class MessageService {
     }
 
     // Update message read time (to sort conversations properly)
+    final provider = SidebarController.getCurrentProvider();
     ConversationService.updateLastMessage(
       conversation.id,
-      increment: MessageController.currentProvider.value?.conversation.id != conversation.id,
+      increment: (provider?.conversation.id ?? "hi") != conversation.id,
       messageSendTime: messages.last.createdAt.millisecondsSinceEpoch,
     );
 
     // Tell the server about the new read state in case the messages have been received properly
-    if (MessageController.currentProvider.value != null &&
-        MessageController.currentProvider.value?.conversation.token.id != messages.last.senderToken) {
-      await ConversationService.overwriteRead(MessageController.currentProvider.value!.conversation);
+    if (provider != null && provider.conversation.token.id != messages.last.senderToken) {
+      await ConversationService.overwriteRead(provider.conversation);
     }
 
     return true;
@@ -71,16 +73,37 @@ class MessageService {
   /// Store a message in the local database and in the cache (if the conversation is selected).
   ///
   /// Also handles system messages.
+  /// Set [simple] to [true] in case you want to avoid any extra stuff other than adding to cache and database.
   static Future<bool> storeMessage(
     Message message,
     Conversation conversation, {
     bool simple = false,
     (String, String)? part,
   }) async {
+    // Get the current provider
+    final provider = SidebarController.getCurrentProvider();
+
+    if (!simple) {
+      // Update message read time for conversations (nessecary for notification count)
+      ConversationService.updateLastMessage(
+        conversation.id,
+        increment: (provider?.conversation.id ?? "hi") != conversation.id,
+        messageSendTime: message.createdAt.millisecondsSinceEpoch,
+      );
+
+      // Update read time in case the message is sent in the currently open conversation
+      if (provider != null && message.senderToken != provider.conversation.token.id) {
+        await ConversationService.overwriteRead(provider.conversation);
+      }
+
+      // Play a notification sound when a new message arrives
+      unawaited(RingingManager.playNotificationSound());
+    }
+
     // Handle system messages
     if (message.type == MessageType.system) {
-      if (MessageController.currentProvider.value?.conversation.id == conversation.id) {
-        SystemMessages.messages[message.content]?.handle(message, MessageController.currentProvider.value!);
+      if ((provider?.conversation.id ?? "hi") == conversation.id) {
+        SystemMessages.messages[message.content]?.handle(message, provider!);
       } else {
         SystemMessages.messages[message.content]?.handle(message, ConversationMessageProvider(conversation));
       }

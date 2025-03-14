@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
@@ -110,10 +111,12 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         value: false,
                         builder: (hover) => Padding(
                           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                          child: Watch(
-                            (ctx) => Material(
+                          child: Watch((ctx) {
+                            final provider = SidebarController.getCurrentProviderReactive();
+
+                            return Material(
                               borderRadius: BorderRadius.circular(defaultSpacing),
-                              color: MessageController.currentProvider.value?.conversation == conversation && !isMobileMode()
+                              color: provider?.conversation == conversation && !isMobileMode()
                                   ? Get.theme.colorScheme.onSurface.withAlpha(20)
                                   : Colors.transparent,
                               child: InkWell(
@@ -126,8 +129,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                                 // When conversation is tapped (open conversation)
                                 onTap: () {
-                                  if (MessageController.currentProvider.value?.conversation == conversation && !isMobileMode()) return;
-                                  MessageController.selectConversation(conversation);
+                                  if (provider?.conversation == conversation && !isMobileMode()) return;
+                                  MessageController.openConversation(conversation);
                                 },
 
                                 // Conversation item content
@@ -167,7 +170,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                                         Flexible(
                                                           child: Text(
                                                             conversation.containerSub.value.name,
-                                                            style: MessageController.currentProvider.value?.conversation == conversation
+                                                            style: provider?.conversation == conversation
                                                                 ? Get.theme.textTheme.labelMedium
                                                                 : Get.theme.textTheme.bodyMedium,
                                                             textHeightBehavior: noTextHeight,
@@ -197,7 +200,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                                           Flexible(
                                                             child: Text(
                                                               friend != null ? conversation.dmName : conversation.containerSub.value.name,
-                                                              style: MessageController.currentProvider.value?.conversation == conversation
+                                                              style: provider?.conversation == conversation
                                                                   ? Get.theme.textTheme.labelMedium
                                                                   : Get.theme.textTheme.bodyMedium,
                                                               maxLines: 1,
@@ -306,8 +309,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          }),
                         ),
                       );
                     },

@@ -45,7 +45,7 @@ class ProfileDefaults {
     loading.value = true;
     final (conv, error) = await ConversationService.openDirectMessage(friend);
     if (conv != null) {
-      unawaited(MessageController.selectConversation(conv));
+      unawaited(MessageController.openConversation(conv));
       Get.back();
     }
     if (error != null) {

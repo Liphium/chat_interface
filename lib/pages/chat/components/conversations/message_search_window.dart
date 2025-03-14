@@ -1,6 +1,6 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_search_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/material/material_message_renderer.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -57,11 +57,12 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
               prefixIcon: Icons.search,
               hintText: "search".tr,
               onChange: (query) {
-                if (MessageController.currentProvider.value == null) {
+                final provider = SidebarController.getCurrentProvider();
+                if (provider == null) {
                   return;
                 }
                 MessageSearchController.filters.value = [
-                  ConversationFilter(MessageController.currentProvider.value!.conversation.id.encode()),
+                  ConversationFilter(provider.conversation.id.encode()),
                   ContentFilter(query),
                 ];
                 MessageSearchController.search();
@@ -110,7 +111,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                             color: Get.theme.colorScheme.inverseSurface,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(defaultSpacing),
-                              onTap: () => MessageController.currentProvider.value!.scrollToMessage(message.id),
+                              onTap: () => SidebarController.getCurrentProvider()!.scrollToMessage(message.id),
                               child: Padding(
                                 padding: const EdgeInsets.all(defaultSpacing),
                                 child: MaterialMessageRenderer(

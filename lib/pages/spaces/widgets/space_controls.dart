@@ -1,10 +1,9 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/spaces/warp_controller.dart';
-import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
-import 'package:chat_interface/pages/spaces/call_page.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -55,29 +54,8 @@ class _SpaceControlsState extends State<SpaceControls> {
             Watch(
               (context) => LoadingIconButton(
                 background: true,
-                onTap: () {
-                  SpaceController.hideSidebar.value = !SpaceController.hideSidebar.peek();
-                  if (SpaceController.hideSidebar.value) {
-                    popAllAndPush(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return const CallPage();
-                        },
-                      ),
-                    );
-                  } else {
-                    popAllAndPush(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return const ChatPageDesktop();
-                        },
-                      ),
-                    );
-                  }
-                },
-                icon: SpaceController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
+                onTap: () => SidebarController.toggleSidebar(),
+                icon: SidebarController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                 iconSize: 30,
               ),
             ),

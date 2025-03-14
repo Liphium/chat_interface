@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart' as msg;
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
@@ -155,7 +155,7 @@ class ZapShareController {
 
         // Send live share message
         final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, fileName, key!);
-        MessageController.currentProvider.value!.sendMessage(signal(false), msg.MessageType.liveshare, [], container.toJson(), "");
+        SidebarController.getCurrentProvider()!.sendMessage(signal(false), msg.MessageType.liveshare, [], container.toJson(), "");
       },
     );
   }

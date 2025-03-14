@@ -19,16 +19,22 @@ class LPHTabElement extends StatefulWidget {
   State<LPHTabElement> createState() => _LPHTabElementState();
 }
 
-class _LPHTabElementState extends State<LPHTabElement> with SignalsMixin {
+class _LPHTabElementState extends State<LPHTabElement> {
   late Signal<int> _selected;
+  bool _createdHere = false;
 
   // The width of all the text in the tabs
   final _tabWidth = <int, double>{};
 
   @override
   void initState() {
+    // Initialize the signal responsible for the state
+    if (widget.selected == null) {
+      _createdHere = true;
+    }
+    _selected = widget.selected ?? signal(0);
+
     // Measure all the texts
-    _selected = widget.selected ?? createSignal(0);
     int count = 0;
     for (var tab in widget.tabs) {
       final textPainter = TextPainter(
@@ -46,10 +52,18 @@ class _LPHTabElementState extends State<LPHTabElement> with SignalsMixin {
   }
 
   @override
+  void dispose() {
+    if (_createdHere) {
+      _selected.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Builder(builder: (context) {
+        Watch.builder(builder: (context) {
           // Calculate where the background should be placed
           double left = 0;
           int count = 0;
