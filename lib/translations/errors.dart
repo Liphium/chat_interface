@@ -81,7 +81,7 @@ class ErrorTranslations extends Translations {
           'username.taken': 'This username is taken, please choose a different one.',
           'password.mismatch': 'The passwords don\'t match.',
 
-          // Game
+          // Spaces, Studio and Tabletop
           'tabletop.not_found': 'The table wasn\'t found for some reason, maybe try rejoining the Space?',
           'tabletop.already_joined': 'You are already in tabletop. You can\'t join again.',
           'tabletop.couldnt_create': 'There was an issue during the table creation. Please report this to the developers.',
@@ -92,6 +92,7 @@ class ErrorTranslations extends Translations {
           'tabletop.invalid_action': 'You can\'t do that right now. Please try again later.',
           'no.start':
               'The game couldn\'t be started. We\'re sorry for the inconvenience, please message support about this issue if you encounter it.',
+          'error.studio.rtc': 'RTC couldn\'t connect (@code). Please check your internet connection.',
 
           // Message errors
           'error.message.timestamp': 'A timestamp for your message could not be generated.',

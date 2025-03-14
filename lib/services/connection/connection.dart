@@ -220,6 +220,11 @@ class Connector {
       return null;
     }
 
+    // Send a confirmation in debug mode
+    if (isDebug) {
+      sendLog("[$url] sending: ${action.action}");
+    }
+
     // Generate a valid response id
     var responseId = getRandomString(5);
     while (_responders.containsKey(responseId)) {

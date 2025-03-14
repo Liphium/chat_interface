@@ -49,10 +49,10 @@ class SpaceMemberController {
 
       // Remove everyone who left the space
       members.removeWhere((key, value) => !membersFound.contains(key));
-    });
 
-    // Update the signals
-    membersLoading.value = false;
+      // Update the signals
+      membersLoading.value = false;
+    });
   }
 
   /// Get the id of the current client

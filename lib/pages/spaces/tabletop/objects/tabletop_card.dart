@@ -79,10 +79,10 @@ class CardObject extends TableObject {
   }
 
   /// Renders the decorations for flipped cards
-  static void renderFlippedDecorations(Canvas canvas, Rect card, {bool ui = false}) {
-    final padding = ui ? sectionSpacing : sectionSpacing * 2;
-    final spacing = ui ? defaultSpacing + defaultSpacing / 2 : sectionSpacing * 2;
-    final size = ui ? 30.0 : 75.0;
+  static void renderFlippedDecorations(Canvas canvas, Rect card) {
+    final padding = sectionSpacing * 2;
+    final spacing = sectionSpacing * 2;
+    final size = 75.0;
     final cornerPaint = Paint()..color = Get.theme.colorScheme.onPrimary;
     canvas.drawRRect(
       RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.top + padding, size, size), Radius.circular(spacing)),
@@ -105,10 +105,10 @@ class CardObject extends TableObject {
   @override
   void render(Canvas canvas, Offset location) {
     final imageRect = Rect.fromLTWH(location.dx, location.dy, size.width, size.height);
-    renderCard(canvas, location, imageRect, false);
+    renderCard(canvas, location, imageRect);
   }
 
-  void renderCard(Canvas canvas, Offset location, Rect imageRect, bool ui) {
+  void renderCard(Canvas canvas, Offset location, Rect imageRect) {
     if (error) {
       final paint = Paint()..color = Colors.red;
       canvas.drawRect(Rect.fromLTWH(location.dx, location.dy, size.width, size.height), paint);
@@ -148,7 +148,7 @@ class CardObject extends TableObject {
       }
 
       if (image == null) {
-        canvas.clipRRect(RRect.fromRectAndRadius(imageRect, Radius.circular(ui ? sectionSpacing : sectionSpacing * 2)));
+        canvas.clipRRect(RRect.fromRectAndRadius(imageRect, Radius.circular(sectionSpacing * 2)));
         canvas.drawRect(
           imageRect,
           Paint()..color = Colors.red,
@@ -168,7 +168,7 @@ class CardObject extends TableObject {
         canvas.transform(matrix.storage);
         canvas.translate(-focalX, -focalY);
 
-        canvas.clipRRect(RRect.fromRectAndRadius(imageRect, Radius.circular(ui ? sectionSpacing : sectionSpacing * 2)));
+        canvas.clipRRect(RRect.fromRectAndRadius(imageRect, Radius.circular(sectionSpacing * 2)));
 
         // Check if the animation says it's flipped or not
         if (currentFlip > 0.5) {
@@ -176,7 +176,7 @@ class CardObject extends TableObject {
             imageRect,
             Paint()..color = Get.theme.colorScheme.primaryContainer,
           );
-          renderFlippedDecorations(canvas, imageRect, ui: ui);
+          renderFlippedDecorations(canvas, imageRect);
         } else {
           canvas.drawImageRect(
             image!,

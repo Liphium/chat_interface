@@ -233,7 +233,7 @@ class DeckObjectCreationWindow extends StatefulWidget {
   State<DeckObjectCreationWindow> createState() => _DeckSelectionWindowState();
 }
 
-class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> {
+class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> with SignalsMixin {
   // Deck list
   final _decks = listSignal<TabletopDeck>([]);
   final _loading = signal(true);

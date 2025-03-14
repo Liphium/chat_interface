@@ -16,6 +16,8 @@
 - Rewrote the entire vault synchronization for better performance and maintainability
 - Rewrote the text formatting detection to make it more extensible and also more stable (\*\*\*\* no longer breaks the app)
   - Regression: Links are no longer clickable (TODO: Fix before 1.0.0 Beta)
+- Fixed cards in rotated inventories having an incorrect rotation
+- Fixed not creating a new inventory when the old one has been deleted
 
 ## 0.6.0
 

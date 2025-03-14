@@ -200,6 +200,11 @@ class TabletopController {
     if (objectOrder[object?.order ?? -1] != null) {
       objectOrder.remove(object?.order);
     }
+
+    // Make sure to remove the inventory when it's not there anymore
+    if ((object == inventory && inventory != null) || id == inventory?.id) {
+      inventory = null;
+    }
   }
 
   /// Set the order of an object

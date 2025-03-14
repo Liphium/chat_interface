@@ -63,6 +63,11 @@ class SpacesTranslations extends Translations {
           'tabletop.object.text.placeholder': 'Enter text here',
           'tabletop.object.deck.incompatible':
               'This deck is incompatible with the newest version of the standard. Please create it again and try again.',
+
+          // Media profiles
+          'media_profile.static': 'Static',
+          'media_profile.motion': 'Motion',
+          'media_profile.balanced': 'Balanced',
         },
 
         //* German
