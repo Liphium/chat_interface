@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
+import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -27,7 +28,10 @@ const bool isWeb = kIsWeb || kIsWasm;
 
 // Build level settings
 const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
-const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
+const bool checkVersion = bool.fromEnvironment(
+  "CHECK_VERSION",
+  defaultValue: true,
+);
 
 Future<bool> initSodium() async {
   sodiumLib = await SodiumInit.init();
@@ -37,6 +41,8 @@ Future<bool> initSodium() async {
 var executableArguments = <String>[];
 
 void main(List<String> args) async {
+  await RustLib.init();
+
   // Handle errors from flutter
   final originalFunction = FlutterError.onError!;
   FlutterError.onError = (details) {
