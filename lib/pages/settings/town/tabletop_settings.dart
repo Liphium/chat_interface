@@ -38,29 +38,30 @@ class TabletopSettings {
   // Experimental settings
   static const String smoothDragging = "tabletop.smooth_dragging";
 
-  static void addSettings(SettingController controller) {
-    controller.settings[framerate] = Setting<double>(framerate, 60.0);
-    controller.settings[cursorHue] = Setting<double>(cursorHue, 0.0);
+  static void addSettings() {
+    SettingController.addSetting(Setting<double>(framerate, 60.0));
+    SettingController.addSetting(Setting<double>(cursorHue, 0.0));
 
-    controller.settings[smoothDragging] = Setting<bool>(smoothDragging, false);
+    // I don't know if we will ever do this xd
+    SettingController.addSetting(Setting<bool>(smoothDragging, false));
   }
 
   /// Initialize the cursor hue to make sure it's actually randomized by default
   static Future<void> initSettings() async {
     final val = await (db.setting.select()..where((tbl) => tbl.key.equals(cursorHue))).getSingleOrNull();
     if (val == null) {
-      await Get.find<SettingController>().settings[cursorHue]!.setValue(Random().nextDouble());
+      await SettingController.settings[cursorHue]!.setValue(Random().nextDouble());
     }
   }
 
   static Color getCursorColor({double? hue}) {
     final themeHSL = HSLColor.fromColor(Get.theme.colorScheme.onPrimary);
-    hue ??= Get.find<SettingController>().settings[cursorHue]!.getValue();
+    hue ??= SettingController.settings[cursorHue]!.getValue();
     return HSLColor.fromAHSL(1.0, hue! * 360, themeHSL.saturation, themeHSL.lightness).toColor();
   }
 
   static double getHue() {
-    return Get.find<SettingController>().settings[cursorHue]!.getValue();
+    return SettingController.settings[cursorHue]!.getValue();
   }
 }
 
@@ -71,8 +72,8 @@ class TabletopSettingsPage extends StatefulWidget {
   State<TabletopSettingsPage> createState() => _TabletopSettingsPageState();
 }
 
-class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
-  final _selected = "settings.tabletop.general".tr.obs;
+class _TabletopSettingsPageState extends State<TabletopSettingsPage> with SignalsMixin {
+  late final _selected = createSignal("settings.tabletop.general".tr);
 
   // Tabs
   final _tabs = <String, Widget>{
@@ -98,7 +99,7 @@ class _TabletopSettingsPageState extends State<TabletopSettingsPage> {
           verticalSpacing(sectionSpacing),
 
           //* Current tab
-          Obx(() => _tabs[_selected.value]!)
+          _tabs[_selected.value]!
         ],
       ),
     );
@@ -114,12 +115,18 @@ class TabletopGeneralTab extends StatefulWidget {
 
 class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
   /// The hue of the cursor (for updating the preview)
-  final _cursorHue = 0.0.obs;
+  final _cursorHue = signal(0.0);
 
   @override
   void initState() {
-    _cursorHue.value = Get.find<SettingController>().settings[TabletopSettings.cursorHue]!.getValue();
+    _cursorHue.value = SettingController.settings[TabletopSettings.cursorHue]!.getValue();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _cursorHue.dispose();
+    super.dispose();
   }
 
   @override
@@ -152,8 +159,8 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
               height: 45,
               child: Stack(
                 children: [
-                  Obx(
-                    () => Container(
+                  Watch(
+                    (ctx) => Container(
                       width: 45,
                       height: 45,
                       decoration: BoxDecoration(
@@ -171,8 +178,8 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: Obx(
-                      () => Padding(
+                    child: Watch(
+                      (ctx) => Padding(
                         padding: const EdgeInsets.all(0.0),
                         child: Container(
                           width: 12,
@@ -217,9 +224,17 @@ class TabletopDeckTab extends StatefulWidget {
 
 class _TabletopDeckTabState extends State<TabletopDeckTab> {
   // Deck list
-  final _decks = <TabletopDeck>[].obs;
-  final _loading = true.obs;
-  final _error = false.obs;
+  final _decks = listSignal<TabletopDeck>([]);
+  final _loading = signal(true);
+  final _error = signal(false);
+
+  @override
+  void dispose() {
+    _decks.dispose();
+    _loading.dispose();
+    _error.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -240,7 +255,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
+    return Watch((ctx) {
       if (_loading.value) {
         return Center(
           child: CircularProgressIndicator(
@@ -264,8 +279,8 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Obx(
-                () => Text(
+              Watch(
+                (ctx) => Text(
                   "settings.tabletop.decks.limit".trParams({
                     "count": _decks.length.toString(),
                     "limit": Constants.maxDecks.toString(),
@@ -397,11 +412,13 @@ class DeckCreationWindow extends StatefulWidget {
 
 class _DeckCreationWindowState extends State<DeckCreationWindow> {
   final TextEditingController _nameController = TextEditingController();
-  final _errorText = "".obs;
-  final _loading = false.obs;
+  final _errorText = signal("");
+  final _loading = signal(false);
 
   @override
   void dispose() {
+    _errorText.dispose();
+    _loading.dispose();
     _nameController.dispose();
     super.dispose();
   }
@@ -610,7 +627,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
                               child: IconButton(
                                 onPressed: () async {
                                   widget.deck.cards.value.remove(card);
-                                  unawaited(Get.find<AttachmentController>().deleteFile(card));
+                                  unawaited(AttachmentController.deleteFile(card));
                                   final result = await widget.deck.save();
                                   if (!result) {
                                     showErrorPopup("error", "server.error".tr);
@@ -703,8 +720,8 @@ class CardsUploadWindow extends StatefulWidget {
   State<CardsUploadWindow> createState() => _CardsUploadWindowState();
 }
 
-class _CardsUploadWindowState extends State<CardsUploadWindow> {
-  final _current = 0.obs;
+class _CardsUploadWindowState extends State<CardsUploadWindow> with SignalsMixin {
+  late final _current = createSignal(0);
   final finished = <AttachmentContainer>[];
 
   @override
@@ -714,11 +731,10 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
   }
 
   Future<void> startFileUploading() async {
-    final controller = Get.find<AttachmentController>();
     _current.value = 0;
     for (var file in widget.files) {
       // Upload the card to the server
-      final response = await controller.uploadFile(
+      final response = await AttachmentController.uploadFile(
         UploadData(file),
         StorageType.permanent,
         Constants.fileDeckTag,
@@ -745,22 +761,19 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Obx(
-            () => Text(
-                "file.uploading".trParams({
-                  "index": (_current.value).toString(),
-                  "total": widget.files.length.toString(),
-                }),
-                style: Get.theme.textTheme.titleLarge),
+          Text(
+            "file.uploading".trParams({
+              "index": (_current.value).toString(),
+              "total": widget.files.length.toString(),
+            }),
+            style: Get.theme.textTheme.titleLarge,
           ),
           verticalSpacing(sectionSpacing),
-          Obx(
-            () => LinearProgressIndicator(
-              value: _current.value / widget.files.length,
-              minHeight: 10,
-              color: Get.theme.colorScheme.onPrimary,
-              backgroundColor: Get.theme.colorScheme.primary,
-            ),
+          LinearProgressIndicator(
+            value: _current.value / widget.files.length,
+            minHeight: 10,
+            color: Get.theme.colorScheme.onPrimary,
+            backgroundColor: Get.theme.colorScheme.primary,
           ),
         ],
       ),

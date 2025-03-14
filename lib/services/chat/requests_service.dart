@@ -1,6 +1,6 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
@@ -17,13 +17,13 @@ class RequestsService {
   /// Called when the request is updated in the vault
   static void onVaultUpdateSent(Request request) {
     db.request.insertOnConflictUpdate(request.entity(true));
-    Get.find<RequestController>().addSentRequestOrUpdate(request);
+    RequestController.addSentRequestOrUpdate(request);
   }
 
   /// Called when the request is updated in the vault
   static void onVaultUpdate(Request request) {
     db.request.insertOnConflictUpdate(request.entity(false));
-    Get.find<RequestController>().addRequestOrUpdate(request);
+    RequestController.addRequestOrUpdate(request);
   }
 
   /// Send a friend request to an account or accept if sent before.
@@ -52,8 +52,7 @@ class RequestsService {
     }
 
     // Accept friend request if there is one from the other user
-    final requestController = Get.find<RequestController>();
-    final requestReceived = requestController.requests[account.id];
+    final requestReceived = RequestController.requests[account.id];
     if (requestReceived != null) {
       // Make the request a friend in the vault
       final error = await FriendsVault.updateFriend(requestReceived.friend);
@@ -83,7 +82,7 @@ class RequestsService {
         request,
       );
       if (error != null) {
-        requestsLoading.value = false;
+        RequestController.requestsLoading.value = false;
         return (error, null);
       }
 

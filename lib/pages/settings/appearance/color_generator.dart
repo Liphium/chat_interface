@@ -43,8 +43,7 @@ class ColorFactory {
 }
 
 ColorFactory buildColorFactoryFromSettings() {
-  final SettingController controller = Get.find();
-  var index = controller.settings[ThemeSettings.themePreset]!.getValue() as int;
+  var index = SettingController.settings[ThemeSettings.themePreset]!.getValue() as int;
   if (index > ThemeSettings.customThemeIndex) {
     index = ThemeSettings.customThemeIndex;
   }
@@ -60,13 +59,13 @@ ColorFactory buildColorFactoryFromSettings() {
   var backgroundMode = preset.backgroundMode;
 
   if (index == ThemeSettings.customThemeIndex) {
-    primHue = controller.settings[ThemeSettings.primaryHue]!.getValue() * 360.0;
-    secHue = controller.settings[ThemeSettings.secondaryHue]!.getValue() * 360.0;
-    sat = controller.settings[ThemeSettings.baseSaturation]!.getValue() as double;
+    primHue = SettingController.settings[ThemeSettings.primaryHue]!.getValue() * 360.0;
+    secHue = SettingController.settings[ThemeSettings.secondaryHue]!.getValue() * 360.0;
+    sat = SettingController.settings[ThemeSettings.baseSaturation]!.getValue() as double;
 
     // Advanced color
-    themeMode = ThemeSettings.themeModes[controller.settings[ThemeSettings.themeMode]!.getValue() as int];
-    backgroundMode = controller.settings[ThemeSettings.backgroundMode]!.getValue() as int;
+    themeMode = ThemeSettings.themeModes[SettingController.settings[ThemeSettings.themeMode]!.getValue() as int];
+    backgroundMode = SettingController.settings[ThemeSettings.backgroundMode]!.getValue() as int;
   }
 
   return ColorFactory(primHue, secHue, sat, themeMode == -1 ? ThemeSettings.baseLuminosityDark : ThemeSettings.baseLuminosityLight, themeMode,

@@ -57,7 +57,7 @@ class _SidebarState extends State<ConversationListMobile> {
                   bottom: false,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                    child: SidebarConversationList(query: "".obs),
+                    child: SidebarConversationList(),
                   ),
                 ),
               ),

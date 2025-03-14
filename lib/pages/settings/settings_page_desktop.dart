@@ -8,6 +8,7 @@ import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SettingsPageDesktop extends StatefulWidget {
   const SettingsPageDesktop({super.key});
@@ -26,7 +27,7 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
         bottom: false,
         child: PlatformCallback(
           mobile: () {
-            final current = Get.find<SettingController>().currentCategory.value;
+            final current = SettingController.currentCategory.value;
             if (current != null) {
               Get.off(const ChatPageMobile(selected: 3));
               Get.to(current.widget);
@@ -52,13 +53,12 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
                 SizedBox(
                   width: containerWidth,
                 ),
-                Obx(
-                  () {
-                    final category = Get.find<SettingController>().currentCategory;
+                Watch(
+                  (ctx) {
                     return SettingsSidebar(
                       sidebarWidth: sidebarWidth,
-                      currentCategory: category.value?.label,
-                      category: category,
+                      currentCategory: SettingController.currentCategory.value?.label,
+                      category: SettingController.currentCategory,
                     );
                   },
                 ),
@@ -78,9 +78,9 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Obx(
-                                    () {
-                                      final category = Get.find<SettingController>().currentCategory;
+                                  Watch(
+                                    (ctx) {
+                                      final category = SettingController.currentCategory;
                                       if (category.value != null && category.value!.displayTitle) {
                                         return Padding(
                                           padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
@@ -94,9 +94,9 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
                                       return const SizedBox();
                                     },
                                   ),
-                                  Obx(
-                                    () {
-                                      final category = Get.find<SettingController>().currentCategory;
+                                  Watch(
+                                    (ctx) {
+                                      final category = SettingController.currentCategory;
                                       if (category.value == null) {
                                         return SettingSelectionMobile(
                                           category: category,

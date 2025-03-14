@@ -1,24 +1,9 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:get/get.dart';
-
-class MemberController extends GetxController {
-  final members = <Member>[].obs;
-
-  Future<void> loadConversation(RxBool loading, String id) async {
-    loading.value = true;
-
-    final membersDb = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(id))).get();
-
-    members.clear();
-    members.addAll(membersDb.map((e) => Member.fromData(e)));
-  }
-}
 
 class Member {
   final LPHAddress tokenId; // Token id
@@ -48,53 +33,61 @@ class Member {
         conversationId: conversation.encode(),
       );
 
-  Friend getFriend([FriendController? controller]) {
+  Friend getFriend() {
     if (StatusController.ownAddress == address) return Friend.me();
-    controller ??= Get.find<FriendController>();
-    return controller.friends[address] ?? Friend.unknown(address);
+    return FriendController.friends[address] ?? Friend.unknown(address);
   }
 
-  Future<bool> promote(LPHAddress conversationId) async {
-    final conversation = Get.find<ConversationController>().conversations[conversationId]!;
+  /// Promote a member to the next available role.
+  ///
+  /// Returns an error if there was one.
+  Future<String?> promote(LPHAddress conversationId) async {
+    final conversation = ConversationController.conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/promote_token", {
       "token": conversation.token.toMap(),
       "data": tokenId.encode(),
     });
 
+    // Check if there was an error
     if (!json["success"]) {
-      return false;
+      return json["error"];
     }
-
-    return true;
+    return null;
   }
 
-  Future<bool> demote(LPHAddress conversationId) async {
-    final conversation = Get.find<ConversationController>().conversations[conversationId]!;
+  /// Demote a member to the next available role.
+  ///
+  /// Returns an error if there was one.
+  Future<String?> demote(LPHAddress conversationId) async {
+    final conversation = ConversationController.conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/demote_token", {
       "token": conversation.token.toMap(),
       "data": tokenId.encode(),
     });
 
+    // Check if there was an error
     if (!json["success"]) {
-      return false;
+      return json["error"];
     }
-
-    return true;
+    return null;
   }
 
-  Future<bool> remove(LPHAddress conversationId) async {
-    final conversation = Get.find<ConversationController>().conversations[conversationId]!;
+  /// Demote a member to the next available role.
+  ///
+  /// Returns an error if there was one.
+  Future<String?> remove(LPHAddress conversationId) async {
+    // Kick the member's token out of the conversation
+    final conversation = ConversationController.conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/kick_member", {
       "token": conversation.token.toMap(),
       "data": tokenId.encode(),
     });
 
+    // Check if there was an error
     if (!json["success"]) {
-      sendLog(json["error"]);
-      return false;
+      return json["error"];
     }
-
-    return true;
+    return null;
   }
 }
 

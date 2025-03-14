@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/controller/spaces/ringing_manager.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
@@ -35,7 +35,6 @@ class SpaceController {
 
   //* Call layout
   static final chatOpen = signal(true);
-  static final hideSidebar = signal(false);
   static final fullScreen = signal(false);
   static final sidebarTabType = signal(SpaceSidebarTabType.chat.index);
 
@@ -92,7 +91,7 @@ class SpaceController {
     }
 
     if (publish) {
-      unawaited(Get.find<StatusController>().share(container!));
+      unawaited(StatusController.share(container!));
     }
   }
 
@@ -112,7 +111,7 @@ class SpaceController {
       return;
     }
 
-    unawaited(provider.sendMessage(false.obs, MessageType.call, [], container!.toInviteJson(), ""));
+    unawaited(provider.sendMessage(signal(false), MessageType.call, [], container!.toInviteJson(), ""));
   }
 
   static Future<void> join(SpaceConnectionContainer container) async {
@@ -131,10 +130,6 @@ class SpaceController {
     // Load information from space container
     domain = server;
     key = spaceKey;
-
-    // Open the screen
-    Get.find<MessageController>().unselectConversation();
-    Get.find<MessageController>().openTab(OpenTabType.space);
 
     // Load the first messages of the Space chat
     provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
@@ -157,7 +152,7 @@ class SpaceController {
   }
 
   static void inviteToCall(MessageProvider provider) {
-    provider.sendMessage(false.obs, MessageType.call, [], getContainer().toInviteJson(), "");
+    provider.sendMessage(signal(false), MessageType.call, [], getContainer().toInviteJson(), "");
   }
 
   /// Get a [SpaceConnectionContainer] for the current Space.
@@ -187,8 +182,7 @@ class SpaceController {
 
     // Show an error if there was one
     if (!error) {
-      unawaited(Get.offAll(getChatPage(), transition: Transition.fadeIn));
-      Get.find<MessageController>().openTab(OpenTabType.conversation);
+      SidebarController.openTab(DefaultSidebarTab());
     }
   }
 

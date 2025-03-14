@@ -1,7 +1,7 @@
 part of 'message_provider.dart';
 
 class MessageSendHelper {
-  static final currentDraft = Rx<MessageDraft?>(null);
+  static final currentDraft = signal<MessageDraft?>(null);
   static final drafts = <String, MessageDraft>{}; // TargetID -> Message draft
 
   /// Add a reply to the current message draft
@@ -61,7 +61,7 @@ class AnswerData {
           if (attachments.first.isURL) {
             content = attachments.first;
           } else {
-            content = Get.find<AttachmentController>().fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+            content = AttachmentController.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
           }
         }
         return content;
@@ -77,9 +77,9 @@ class AnswerData {
 
 class MessageDraft {
   final String target;
-  final answer = Rx<AnswerData?>(null);
+  final answer = signal<AnswerData?>(null);
   String message;
-  final files = <UploadData>[].obs;
+  final files = listSignal(<UploadData>[]);
   final attachments = <String>[];
 
   MessageDraft(this.target, this.message);
@@ -87,7 +87,7 @@ class MessageDraft {
 
 class UploadData {
   final XFile file;
-  final progress = 0.0.obs;
+  final progress = signal(0.0);
 
   UploadData(this.file);
 }

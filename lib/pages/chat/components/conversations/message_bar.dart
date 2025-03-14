@@ -1,8 +1,8 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/message_search_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -35,13 +35,16 @@ class MessageBar extends StatefulWidget {
 
 class _MessageBarState extends State<MessageBar> {
   final GlobalKey _infoKey = GlobalKey(), _zapShareKey = GlobalKey();
-  final callLoading = false.obs;
+  final additionLoading = signal(false);
+
+  @override
+  void dispose() {
+    additionLoading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final zapShareController = Get.find<ZapShareController>();
-    final controller = Get.find<SettingController>();
-
     if (widget.conversation.borked) {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
@@ -70,10 +73,10 @@ class _MessageBarState extends State<MessageBar> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Show a hide sidebar icon for more focus on the current conversation
-                Obx(
-                  () => LoadingIconButton(
-                    onTap: () => Get.find<MessageController>().toggleSidebar(),
-                    icon: Get.find<MessageController>().hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
+                Watch(
+                  (ctx) => LoadingIconButton(
+                    onTap: () => SidebarController.toggleSidebar(),
+                    icon: SidebarController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                   ),
                 ),
                 horizontalSpacing(elementSpacing),
@@ -112,7 +115,7 @@ class _MessageBarState extends State<MessageBar> {
             ),
 
             //* Conversation actions
-            Obx(() {
+            Watch((ctx) {
               final error = widget.conversation.error.value != null;
 
               return Row(
@@ -130,7 +133,7 @@ class _MessageBarState extends State<MessageBar> {
                             children: [
                               IconButton(
                                 onPressed: () async {
-                                  await zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
+                                  await ZapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
                                 },
                                 icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                                 tooltip: "chat.zapshare".tr,
@@ -141,9 +144,9 @@ class _MessageBarState extends State<MessageBar> {
                                   height: 48 - defaultSpacing,
                                   child: Padding(
                                     padding: const EdgeInsets.all(2.0),
-                                    child: Obx(
-                                      () => CircularProgressIndicator(
-                                        value: zapShareController.waiting.value ? null : zapShareController.progress.value.clamp(0, 1),
+                                    child: Watch(
+                                      (ctx) => CircularProgressIndicator(
+                                        value: ZapShareController.waiting.value ? null : ZapShareController.progress.value.clamp(0, 1),
                                         strokeWidth: 3,
                                         valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                                       ),
@@ -160,7 +163,7 @@ class _MessageBarState extends State<MessageBar> {
                             return LoadingIconButton(
                               icon: Icons.forward_to_inbox,
                               iconSize: 27,
-                              loading: callLoading,
+                              loading: additionLoading,
                               tooltip: "chat.invite_to_space".tr,
                               onTap: () {
                                 SpaceController.inviteToCall(widget.provider);
@@ -176,7 +179,7 @@ class _MessageBarState extends State<MessageBar> {
                           LoadingIconButton(
                             icon: Icons.rocket_launch,
                             iconSize: 27,
-                            loading: callLoading,
+                            loading: additionLoading,
                             tooltip: "chat.start_space".tr,
                             onTap: () {
                               SpaceController.createAndConnect(widget.provider);
@@ -187,21 +190,21 @@ class _MessageBarState extends State<MessageBar> {
                         if (!error)
                           ConversationAddButton(
                             conversation: widget.conversation,
-                            loading: callLoading,
+                            loading: additionLoading,
                           ),
 
                         Visibility(
                           visible: widget.conversation.isGroup,
-                          child: Obx(
-                            () => IconButton(
+                          child: Watch(
+                            (ctx) => IconButton(
                               iconSize: 27,
                               icon: Icon(Icons.group,
-                                  color: controller.settings[AppSettings.showGroupMembers]!.value.value
+                                  color: SettingController.settings[AppSettings.showGroupMembers]!.value.value
                                       ? Theme.of(context).colorScheme.onPrimary
                                       : Theme.of(context).colorScheme.onSurface),
                               onPressed: () {
-                                controller.settings[AppSettings.showGroupMembers]!
-                                    .setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
+                                SettingController.settings[AppSettings.showGroupMembers]!
+                                    .setValue(!SettingController.settings[AppSettings.showGroupMembers]!.value.value);
                               },
                             ),
                           ),
@@ -211,17 +214,16 @@ class _MessageBarState extends State<MessageBar> {
                   ),
 
                   // Search the entire conversation
-                  Obx(
-                    () => IconButton(
+                  Watch(
+                    (ctx) => IconButton(
                       iconSize: 27,
                       icon: Icon(Icons.search,
-                          color: Get.find<MessageController>().showSearch.value
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurface),
+                          color:
+                              SidebarController.showSearch.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
-                        Get.find<MessageController>().toggleSearchView();
-                        if (Get.find<MessageController>().showSearch.value) {
-                          Get.find<MessageSearchController>().currentFocus!.requestFocus();
+                        SidebarController.toggleSearchView();
+                        if (SidebarController.showSearch.value) {
+                          MessageSearchController.currentFocus!.requestFocus();
                         }
                       },
                     ),
@@ -247,7 +249,7 @@ class _MessageBarState extends State<MessageBar> {
 
 class ConversationAddButton extends StatefulWidget {
   final Conversation conversation;
-  final RxBool loading;
+  final Signal<bool> loading;
 
   const ConversationAddButton({super.key, required this.conversation, required this.loading});
 

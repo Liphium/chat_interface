@@ -76,8 +76,8 @@ class LogManager {
 class LogSettings {
   static String amountOfLogs = "logging.amount";
 
-  static void registerSettings(SettingController controller) {
-    controller.settings[amountOfLogs] = Setting<double>(amountOfLogs, 5);
+  static void addSettings() {
+    SettingController.addSetting(Setting<double>(amountOfLogs, 5));
   }
 }
 

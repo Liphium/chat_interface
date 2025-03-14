@@ -4,9 +4,9 @@ import 'package:chat_interface/util/web.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class SpaceConnectionContainer extends ShareContainer {
@@ -14,7 +14,7 @@ class SpaceConnectionContainer extends ShareContainer {
   final String roomId; // Token required for joining (even though it's not really a token)
   final SecureKey key; // Symmetric key
 
-  final info = Rx<SpaceInfo?>(null);
+  final info = signal<SpaceInfo?>(null);
   int errorCount = 0;
   Timer? _timer;
   bool get cancelled => _timer == null;
@@ -94,9 +94,8 @@ class SpaceInfo {
   SpaceInfo(this.start, this.members) {
     error = false;
     exists = true;
-    final controller = Get.find<FriendController>();
     for (var member in members) {
-      final friend = controller.friends[member];
+      final friend = FriendController.friends[member];
       if (friend != null) friends.add(friend);
     }
   }
@@ -106,10 +105,8 @@ class SpaceInfo {
     members = List<LPHAddress>.from(json["members"].map((e) => LPHAddress.from(decryptSymmetric(e, container.key))));
     exists = true;
 
-    final controller = Get.find<FriendController>();
-
     for (var member in members) {
-      final friend = controller.friends[member];
+      final friend = FriendController.friends[member];
       if (friend != null) friends.add(friend);
     }
   }

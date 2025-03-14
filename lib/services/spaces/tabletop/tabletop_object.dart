@@ -293,7 +293,7 @@ class ContextMenuAction {
   final Color? color;
   final Color? iconColor;
   final bool goBack;
-  final Function(TabletopController) onTap;
+  final Function() onTap;
 
   const ContextMenuAction({
     required this.icon,

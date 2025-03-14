@@ -21,9 +21,8 @@ class TrustedLinkHelper {
   static late Setting _unsafeSetting;
 
   static void init() {
-    final controller = Get.find<SettingController>();
-    _unsafeSetting = controller.settings[TrustedLinkSettings.unsafeSources]!;
-    _trustModeSetting = controller.settings[TrustedLinkSettings.trustMode]!;
+    _unsafeSetting = SettingController.settings[TrustedLinkSettings.unsafeSources]!;
+    _trustModeSetting = SettingController.settings[TrustedLinkSettings.trustMode]!;
   }
 
   /// Show a confirm popup to confirm the user wants to add a new domain (returns whether the domain was trusted)

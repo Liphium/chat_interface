@@ -20,7 +20,6 @@ class $ConversationTable extends Conversation
   late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
       'vault_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<ConversationType, int> type =
       GeneratedColumn<int>('type', aliasedName, false,
@@ -82,7 +81,6 @@ class $ConversationTable extends Conversation
     } else if (isInserting) {
       context.missing(_vaultIdMeta);
     }
-    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('data')) {
       context.handle(
           _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
@@ -2134,8 +2132,17 @@ class $UnknownProfileTable extends UnknownProfile
   late final GeneratedColumn<String> keys = GeneratedColumn<String>(
       'keys', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _lastFetchedMeta =
+      const VerificationMeta('lastFetched');
   @override
-  List<GeneratedColumn> get $columns => [id, name, displayName, keys];
+  late final GeneratedColumn<DateTime> lastFetched = GeneratedColumn<DateTime>(
+      'last_fetched', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: Constant(DateTime.fromMillisecondsSinceEpoch(0)));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, displayName, keys, lastFetched];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2171,6 +2178,12 @@ class $UnknownProfileTable extends UnknownProfile
     } else if (isInserting) {
       context.missing(_keysMeta);
     }
+    if (data.containsKey('last_fetched')) {
+      context.handle(
+          _lastFetchedMeta,
+          lastFetched.isAcceptableOrUnknown(
+              data['last_fetched']!, _lastFetchedMeta));
+    }
     return context;
   }
 
@@ -2188,6 +2201,8 @@ class $UnknownProfileTable extends UnknownProfile
           .read(DriftSqlType.string, data['${effectivePrefix}display_name'])!,
       keys: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}keys'])!,
+      lastFetched: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_fetched'])!,
     );
   }
 
@@ -2203,11 +2218,13 @@ class UnknownProfileData extends DataClass
   final String name;
   final String displayName;
   final String keys;
+  final DateTime lastFetched;
   const UnknownProfileData(
       {required this.id,
       required this.name,
       required this.displayName,
-      required this.keys});
+      required this.keys,
+      required this.lastFetched});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2215,6 +2232,7 @@ class UnknownProfileData extends DataClass
     map['name'] = Variable<String>(name);
     map['display_name'] = Variable<String>(displayName);
     map['keys'] = Variable<String>(keys);
+    map['last_fetched'] = Variable<DateTime>(lastFetched);
     return map;
   }
 
@@ -2224,6 +2242,7 @@ class UnknownProfileData extends DataClass
       name: Value(name),
       displayName: Value(displayName),
       keys: Value(keys),
+      lastFetched: Value(lastFetched),
     );
   }
 
@@ -2235,6 +2254,7 @@ class UnknownProfileData extends DataClass
       name: serializer.fromJson<String>(json['name']),
       displayName: serializer.fromJson<String>(json['displayName']),
       keys: serializer.fromJson<String>(json['keys']),
+      lastFetched: serializer.fromJson<DateTime>(json['lastFetched']),
     );
   }
   @override
@@ -2245,16 +2265,22 @@ class UnknownProfileData extends DataClass
       'name': serializer.toJson<String>(name),
       'displayName': serializer.toJson<String>(displayName),
       'keys': serializer.toJson<String>(keys),
+      'lastFetched': serializer.toJson<DateTime>(lastFetched),
     };
   }
 
   UnknownProfileData copyWith(
-          {String? id, String? name, String? displayName, String? keys}) =>
+          {String? id,
+          String? name,
+          String? displayName,
+          String? keys,
+          DateTime? lastFetched}) =>
       UnknownProfileData(
         id: id ?? this.id,
         name: name ?? this.name,
         displayName: displayName ?? this.displayName,
         keys: keys ?? this.keys,
+        lastFetched: lastFetched ?? this.lastFetched,
       );
   UnknownProfileData copyWithCompanion(UnknownProfileCompanion data) {
     return UnknownProfileData(
@@ -2263,6 +2289,8 @@ class UnknownProfileData extends DataClass
       displayName:
           data.displayName.present ? data.displayName.value : this.displayName,
       keys: data.keys.present ? data.keys.value : this.keys,
+      lastFetched:
+          data.lastFetched.present ? data.lastFetched.value : this.lastFetched,
     );
   }
 
@@ -2272,13 +2300,14 @@ class UnknownProfileData extends DataClass
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('displayName: $displayName, ')
-          ..write('keys: $keys')
+          ..write('keys: $keys, ')
+          ..write('lastFetched: $lastFetched')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, displayName, keys);
+  int get hashCode => Object.hash(id, name, displayName, keys, lastFetched);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2286,7 +2315,8 @@ class UnknownProfileData extends DataClass
           other.id == this.id &&
           other.name == this.name &&
           other.displayName == this.displayName &&
-          other.keys == this.keys);
+          other.keys == this.keys &&
+          other.lastFetched == this.lastFetched);
 }
 
 class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
@@ -2294,12 +2324,14 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
   final Value<String> name;
   final Value<String> displayName;
   final Value<String> keys;
+  final Value<DateTime> lastFetched;
   final Value<int> rowid;
   const UnknownProfileCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.displayName = const Value.absent(),
     this.keys = const Value.absent(),
+    this.lastFetched = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UnknownProfileCompanion.insert({
@@ -2307,6 +2339,7 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
     required String name,
     required String displayName,
     required String keys,
+    this.lastFetched = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
@@ -2317,6 +2350,7 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
     Expression<String>? name,
     Expression<String>? displayName,
     Expression<String>? keys,
+    Expression<DateTime>? lastFetched,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2324,6 +2358,7 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
       if (name != null) 'name': name,
       if (displayName != null) 'display_name': displayName,
       if (keys != null) 'keys': keys,
+      if (lastFetched != null) 'last_fetched': lastFetched,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2333,12 +2368,14 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
       Value<String>? name,
       Value<String>? displayName,
       Value<String>? keys,
+      Value<DateTime>? lastFetched,
       Value<int>? rowid}) {
     return UnknownProfileCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       displayName: displayName ?? this.displayName,
       keys: keys ?? this.keys,
+      lastFetched: lastFetched ?? this.lastFetched,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2358,6 +2395,9 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
     if (keys.present) {
       map['keys'] = Variable<String>(keys.value);
     }
+    if (lastFetched.present) {
+      map['last_fetched'] = Variable<DateTime>(lastFetched.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2371,6 +2411,7 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
           ..write('name: $name, ')
           ..write('displayName: $displayName, ')
           ..write('keys: $keys, ')
+          ..write('lastFetched: $lastFetched, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2774,7 +2815,6 @@ class $LibraryEntryTable extends LibraryEntry
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<LibraryEntryType, int> type =
       GeneratedColumn<int>('type', aliasedName, false,
@@ -2786,6 +2826,14 @@ class $LibraryEntryTable extends LibraryEntry
   late final GeneratedColumn<BigInt> createdAt = GeneratedColumn<BigInt>(
       'created_at', aliasedName, false,
       type: DriftSqlType.bigInt, requiredDuringInsert: true);
+  static const VerificationMeta _identifierHashMeta =
+      const VerificationMeta('identifierHash');
+  @override
+  late final GeneratedColumn<String> identifierHash = GeneratedColumn<String>(
+      'identifier_hash', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: Constant("to-migrate"));
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
   late final GeneratedColumn<String> data = GeneratedColumn<String>(
@@ -2803,7 +2851,7 @@ class $LibraryEntryTable extends LibraryEntry
       type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, type, createdAt, data, width, height];
+      [id, type, createdAt, identifierHash, data, width, height];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2819,12 +2867,17 @@ class $LibraryEntryTable extends LibraryEntry
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('identifier_hash')) {
+      context.handle(
+          _identifierHashMeta,
+          identifierHash.isAcceptableOrUnknown(
+              data['identifier_hash']!, _identifierHashMeta));
     }
     if (data.containsKey('data')) {
       context.handle(
@@ -2860,6 +2913,8 @@ class $LibraryEntryTable extends LibraryEntry
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.bigInt, data['${effectivePrefix}created_at'])!,
+      identifierHash: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}identifier_hash'])!,
       data: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
       width: attachedDatabase.typeMapping
@@ -2883,6 +2938,7 @@ class LibraryEntryData extends DataClass
   final String id;
   final LibraryEntryType type;
   final BigInt createdAt;
+  final String identifierHash;
   final String data;
   final int width;
   final int height;
@@ -2890,6 +2946,7 @@ class LibraryEntryData extends DataClass
       {required this.id,
       required this.type,
       required this.createdAt,
+      required this.identifierHash,
       required this.data,
       required this.width,
       required this.height});
@@ -2902,6 +2959,7 @@ class LibraryEntryData extends DataClass
           Variable<int>($LibraryEntryTable.$convertertype.toSql(type));
     }
     map['created_at'] = Variable<BigInt>(createdAt);
+    map['identifier_hash'] = Variable<String>(identifierHash);
     map['data'] = Variable<String>(data);
     map['width'] = Variable<int>(width);
     map['height'] = Variable<int>(height);
@@ -2913,6 +2971,7 @@ class LibraryEntryData extends DataClass
       id: Value(id),
       type: Value(type),
       createdAt: Value(createdAt),
+      identifierHash: Value(identifierHash),
       data: Value(data),
       width: Value(width),
       height: Value(height),
@@ -2927,6 +2986,7 @@ class LibraryEntryData extends DataClass
       type: $LibraryEntryTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
+      identifierHash: serializer.fromJson<String>(json['identifierHash']),
       data: serializer.fromJson<String>(json['data']),
       width: serializer.fromJson<int>(json['width']),
       height: serializer.fromJson<int>(json['height']),
@@ -2940,6 +3000,7 @@ class LibraryEntryData extends DataClass
       'type': serializer
           .toJson<int>($LibraryEntryTable.$convertertype.toJson(type)),
       'createdAt': serializer.toJson<BigInt>(createdAt),
+      'identifierHash': serializer.toJson<String>(identifierHash),
       'data': serializer.toJson<String>(data),
       'width': serializer.toJson<int>(width),
       'height': serializer.toJson<int>(height),
@@ -2950,6 +3011,7 @@ class LibraryEntryData extends DataClass
           {String? id,
           LibraryEntryType? type,
           BigInt? createdAt,
+          String? identifierHash,
           String? data,
           int? width,
           int? height}) =>
@@ -2957,6 +3019,7 @@ class LibraryEntryData extends DataClass
         id: id ?? this.id,
         type: type ?? this.type,
         createdAt: createdAt ?? this.createdAt,
+        identifierHash: identifierHash ?? this.identifierHash,
         data: data ?? this.data,
         width: width ?? this.width,
         height: height ?? this.height,
@@ -2966,6 +3029,9 @@ class LibraryEntryData extends DataClass
       id: data.id.present ? data.id.value : this.id,
       type: data.type.present ? data.type.value : this.type,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      identifierHash: data.identifierHash.present
+          ? data.identifierHash.value
+          : this.identifierHash,
       data: data.data.present ? data.data.value : this.data,
       width: data.width.present ? data.width.value : this.width,
       height: data.height.present ? data.height.value : this.height,
@@ -2978,6 +3044,7 @@ class LibraryEntryData extends DataClass
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('createdAt: $createdAt, ')
+          ..write('identifierHash: $identifierHash, ')
           ..write('data: $data, ')
           ..write('width: $width, ')
           ..write('height: $height')
@@ -2986,7 +3053,8 @@ class LibraryEntryData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, type, createdAt, data, width, height);
+  int get hashCode =>
+      Object.hash(id, type, createdAt, identifierHash, data, width, height);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2994,6 +3062,7 @@ class LibraryEntryData extends DataClass
           other.id == this.id &&
           other.type == this.type &&
           other.createdAt == this.createdAt &&
+          other.identifierHash == this.identifierHash &&
           other.data == this.data &&
           other.width == this.width &&
           other.height == this.height);
@@ -3003,6 +3072,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   final Value<String> id;
   final Value<LibraryEntryType> type;
   final Value<BigInt> createdAt;
+  final Value<String> identifierHash;
   final Value<String> data;
   final Value<int> width;
   final Value<int> height;
@@ -3011,6 +3081,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     this.id = const Value.absent(),
     this.type = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.identifierHash = const Value.absent(),
     this.data = const Value.absent(),
     this.width = const Value.absent(),
     this.height = const Value.absent(),
@@ -3020,6 +3091,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     required String id,
     required LibraryEntryType type,
     required BigInt createdAt,
+    this.identifierHash = const Value.absent(),
     required String data,
     required int width,
     required int height,
@@ -3034,6 +3106,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     Expression<String>? id,
     Expression<int>? type,
     Expression<BigInt>? createdAt,
+    Expression<String>? identifierHash,
     Expression<String>? data,
     Expression<int>? width,
     Expression<int>? height,
@@ -3043,6 +3116,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
       if (id != null) 'id': id,
       if (type != null) 'type': type,
       if (createdAt != null) 'created_at': createdAt,
+      if (identifierHash != null) 'identifier_hash': identifierHash,
       if (data != null) 'data': data,
       if (width != null) 'width': width,
       if (height != null) 'height': height,
@@ -3054,6 +3128,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
       {Value<String>? id,
       Value<LibraryEntryType>? type,
       Value<BigInt>? createdAt,
+      Value<String>? identifierHash,
       Value<String>? data,
       Value<int>? width,
       Value<int>? height,
@@ -3062,6 +3137,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
       id: id ?? this.id,
       type: type ?? this.type,
       createdAt: createdAt ?? this.createdAt,
+      identifierHash: identifierHash ?? this.identifierHash,
       data: data ?? this.data,
       width: width ?? this.width,
       height: height ?? this.height,
@@ -3081,6 +3157,9 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     }
     if (createdAt.present) {
       map['created_at'] = Variable<BigInt>(createdAt.value);
+    }
+    if (identifierHash.present) {
+      map['identifier_hash'] = Variable<String>(identifierHash.value);
     }
     if (data.present) {
       map['data'] = Variable<String>(data.value);
@@ -3103,6 +3182,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('createdAt: $createdAt, ')
+          ..write('identifierHash: $identifierHash, ')
           ..write('data: $data, ')
           ..write('width: $width, ')
           ..write('height: $height, ')
@@ -3131,8 +3211,15 @@ abstract class _$Database extends GeneratedDatabase {
       'CREATE INDEX idx_message_created ON message (created_at)');
   late final Index idxFriendsUpdated = Index('idx_friends_updated',
       'CREATE INDEX idx_friends_updated ON friend (updated_at)');
+  late final Index idxRequestsUpdated = Index('idx_requests_updated',
+      'CREATE INDEX idx_requests_updated ON request (updated_at)');
+  late final Index idxUnknownProfilesLastFetched = Index(
+      'idx_unknown_profiles_last_fetched',
+      'CREATE INDEX idx_unknown_profiles_last_fetched ON unknown_profile (last_fetched)');
   late final Index idxLibraryEntryCreated = Index('idx_library_entry_created',
       'CREATE INDEX idx_library_entry_created ON library_entry (created_at)');
+  late final Index idxLibraryEntryIdhash = Index('idx_library_entry_idhash',
+      'CREATE INDEX idx_library_entry_idhash ON library_entry (identifier_hash)');
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3151,7 +3238,10 @@ abstract class _$Database extends GeneratedDatabase {
         idxConversationUpdated,
         idxMessageCreated,
         idxFriendsUpdated,
-        idxLibraryEntryCreated
+        idxRequestsUpdated,
+        idxUnknownProfilesLastFetched,
+        idxLibraryEntryCreated,
+        idxLibraryEntryIdhash
       ];
 }
 
@@ -4248,6 +4338,7 @@ typedef $$UnknownProfileTableCreateCompanionBuilder = UnknownProfileCompanion
   required String name,
   required String displayName,
   required String keys,
+  Value<DateTime> lastFetched,
   Value<int> rowid,
 });
 typedef $$UnknownProfileTableUpdateCompanionBuilder = UnknownProfileCompanion
@@ -4256,6 +4347,7 @@ typedef $$UnknownProfileTableUpdateCompanionBuilder = UnknownProfileCompanion
   Value<String> name,
   Value<String> displayName,
   Value<String> keys,
+  Value<DateTime> lastFetched,
   Value<int> rowid,
 });
 
@@ -4279,6 +4371,9 @@ class $$UnknownProfileTableFilterComposer
 
   ColumnFilters<String> get keys => $composableBuilder(
       column: $table.keys, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastFetched => $composableBuilder(
+      column: $table.lastFetched, builder: (column) => ColumnFilters(column));
 }
 
 class $$UnknownProfileTableOrderingComposer
@@ -4301,6 +4396,9 @@ class $$UnknownProfileTableOrderingComposer
 
   ColumnOrderings<String> get keys => $composableBuilder(
       column: $table.keys, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastFetched => $composableBuilder(
+      column: $table.lastFetched, builder: (column) => ColumnOrderings(column));
 }
 
 class $$UnknownProfileTableAnnotationComposer
@@ -4323,6 +4421,9 @@ class $$UnknownProfileTableAnnotationComposer
 
   GeneratedColumn<String> get keys =>
       $composableBuilder(column: $table.keys, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastFetched => $composableBuilder(
+      column: $table.lastFetched, builder: (column) => column);
 }
 
 class $$UnknownProfileTableTableManager extends RootTableManager<
@@ -4355,6 +4456,7 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
             Value<String> name = const Value.absent(),
             Value<String> displayName = const Value.absent(),
             Value<String> keys = const Value.absent(),
+            Value<DateTime> lastFetched = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UnknownProfileCompanion(
@@ -4362,6 +4464,7 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
             name: name,
             displayName: displayName,
             keys: keys,
+            lastFetched: lastFetched,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -4369,6 +4472,7 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
             required String name,
             required String displayName,
             required String keys,
+            Value<DateTime> lastFetched = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UnknownProfileCompanion.insert(
@@ -4376,6 +4480,7 @@ class $$UnknownProfileTableTableManager extends RootTableManager<
             name: name,
             displayName: displayName,
             keys: keys,
+            lastFetched: lastFetched,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -4654,6 +4759,7 @@ typedef $$LibraryEntryTableCreateCompanionBuilder = LibraryEntryCompanion
   required String id,
   required LibraryEntryType type,
   required BigInt createdAt,
+  Value<String> identifierHash,
   required String data,
   required int width,
   required int height,
@@ -4664,6 +4770,7 @@ typedef $$LibraryEntryTableUpdateCompanionBuilder = LibraryEntryCompanion
   Value<String> id,
   Value<LibraryEntryType> type,
   Value<BigInt> createdAt,
+  Value<String> identifierHash,
   Value<String> data,
   Value<int> width,
   Value<int> height,
@@ -4689,6 +4796,10 @@ class $$LibraryEntryTableFilterComposer
 
   ColumnFilters<BigInt> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get identifierHash => $composableBuilder(
+      column: $table.identifierHash,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get data => $composableBuilder(
       column: $table.data, builder: (column) => ColumnFilters(column));
@@ -4718,6 +4829,10 @@ class $$LibraryEntryTableOrderingComposer
   ColumnOrderings<BigInt> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get identifierHash => $composableBuilder(
+      column: $table.identifierHash,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get data => $composableBuilder(
       column: $table.data, builder: (column) => ColumnOrderings(column));
 
@@ -4745,6 +4860,9 @@ class $$LibraryEntryTableAnnotationComposer
 
   GeneratedColumn<BigInt> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get identifierHash => $composableBuilder(
+      column: $table.identifierHash, builder: (column) => column);
 
   GeneratedColumn<String> get data =>
       $composableBuilder(column: $table.data, builder: (column) => column);
@@ -4785,6 +4903,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<LibraryEntryType> type = const Value.absent(),
             Value<BigInt> createdAt = const Value.absent(),
+            Value<String> identifierHash = const Value.absent(),
             Value<String> data = const Value.absent(),
             Value<int> width = const Value.absent(),
             Value<int> height = const Value.absent(),
@@ -4794,6 +4913,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             id: id,
             type: type,
             createdAt: createdAt,
+            identifierHash: identifierHash,
             data: data,
             width: width,
             height: height,
@@ -4803,6 +4923,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             required String id,
             required LibraryEntryType type,
             required BigInt createdAt,
+            Value<String> identifierHash = const Value.absent(),
             required String data,
             required int width,
             required int height,
@@ -4812,6 +4933,7 @@ class $$LibraryEntryTableTableManager extends RootTableManager<
             id: id,
             type: type,
             createdAt: createdAt,
+            identifierHash: identifierHash,
             data: data,
             width: width,
             height: height,

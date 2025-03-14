@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -6,6 +6,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class RequestButton extends StatefulWidget {
   final bool self; // If the request was sent by the user
@@ -17,8 +18,8 @@ class RequestButton extends StatefulWidget {
   State<RequestButton> createState() => _RequestButtonState();
 }
 
-class _RequestButtonState extends State<RequestButton> {
-  final requestLoading = false.obs;
+class _RequestButtonState extends State<RequestButton> with SignalsMixin {
+  late final requestLoading = createSignal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +85,8 @@ class _RequestButtonState extends State<RequestButton> {
               ),
 
               //* Request actions
-              Obx(
-                () => widget.request.loading.value
+              Watch(
+                (ctx) => widget.request.loading.value
                     ? const SizedBox(
                         width: 25,
                         height: 25,

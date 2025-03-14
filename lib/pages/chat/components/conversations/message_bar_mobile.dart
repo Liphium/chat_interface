@@ -7,21 +7,14 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class MobileMessageBar extends StatefulWidget {
+class MobileMessageBar extends StatelessWidget {
   final Conversation conversation;
 
   const MobileMessageBar({super.key, required this.conversation});
 
   @override
-  State<MobileMessageBar> createState() => _MessageBarState();
-}
-
-class _MessageBarState extends State<MobileMessageBar> {
-  final callLoading = false.obs;
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.conversation.borked) {
+    if (conversation.borked) {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
         child: Padding(
@@ -41,7 +34,7 @@ class _MessageBarState extends State<MobileMessageBar> {
       color: Get.theme.colorScheme.onInverseSurface,
       child: InkWell(
         onTap: () => Get.to(ConversationMembersPage(
-          conversation: widget.conversation,
+          conversation: conversation,
         )),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
@@ -51,7 +44,6 @@ class _MessageBarState extends State<MobileMessageBar> {
               LoadingIconButton(
                 icon: Icons.arrow_back,
                 iconSize: 27,
-                loading: callLoading,
                 onTap: () => Get.back(),
               ),
 
@@ -61,11 +53,11 @@ class _MessageBarState extends State<MobileMessageBar> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                      Icon(conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                       horizontalSpacing(elementSpacing),
                       Flexible(
                         child: Text(
-                          widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
+                          conversation.isGroup ? conversation.containerSub.value.name : conversation.dmName,
                           style: Theme.of(context).textTheme.titleMedium,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -79,9 +71,8 @@ class _MessageBarState extends State<MobileMessageBar> {
               LoadingIconButton(
                 icon: Icons.more_vert,
                 iconSize: 27,
-                loading: callLoading,
                 onTap: () => showModal(ConversationInfoMobile(
-                  conversation: widget.conversation,
+                  conversation: conversation,
                   position: const ContextMenuData(Offset(0, 0), false, false),
                 )),
               ),

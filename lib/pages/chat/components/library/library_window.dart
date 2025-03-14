@@ -6,6 +6,7 @@ import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class LibraryWindow extends StatefulWidget {
   final ContextMenuData data;
@@ -22,7 +23,7 @@ class LibraryWindow extends StatefulWidget {
 }
 
 class _LibraryWindowState extends State<LibraryWindow> {
-  final _selected = "library.all".tr.obs;
+  final _selected = signal("library.all".tr);
 
   var _tabs = <String, Widget>{};
 
@@ -44,6 +45,12 @@ class _LibraryWindowState extends State<LibraryWindow> {
       'library.gifs'.tr: LibraryTab(filter: LibraryEntryType.gif, provider: widget.provider),
     };
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _selected.dispose();
+    super.dispose();
   }
 
   @override
@@ -73,7 +80,7 @@ class _LibraryWindowState extends State<LibraryWindow> {
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.only(top: defaultSpacing),
-                child: Obx(() {
+                child: Watch((ctx) {
                   return _tabs[_selected.value]!;
                 }),
               ),

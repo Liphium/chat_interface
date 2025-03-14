@@ -6,6 +6,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ConversationDevWindow extends StatefulWidget {
   final Conversation conversation;
@@ -17,7 +18,7 @@ class ConversationDevWindow extends StatefulWidget {
 }
 
 class _ConversationAddWindowState extends State<ConversationDevWindow> {
-  final messageDeletionLoading = false.obs;
+  final messageDeletionLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +89,6 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
               Clipboard.setData(ClipboardData(text: widget.conversation.id.toString()));
               Get.back();
             },
-            loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -98,7 +98,6 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
               Clipboard.setData(ClipboardData(text: "${widget.conversation.token.id}:${widget.conversation.token.token}"));
               Get.back();
             },
-            loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -107,7 +106,6 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
             icon: Icons.close,
             label: "close".tr,
             onTap: () => Get.back(),
-            loading: false.obs,
           ),
         ],
       ),

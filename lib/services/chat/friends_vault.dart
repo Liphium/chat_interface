@@ -1,4 +1,4 @@
-part of '../../controller/account/friends/friend_controller.dart';
+part of '../../controller/account/friend_controller.dart';
 
 class FriendsVault {
   /// Store a received request in the vault.
@@ -59,7 +59,7 @@ class FriendsVault {
   /// Returns an error if there was one.
   static Future<String?> updateFriend(Friend friend) async {
     // Store the request in the vault
-    final (error, version) = await _update(friend.vaultId, friend.toStoredPayload());
+    final (error, version) = await _update(friend.vaultId, await friend.toStoredPayload());
     if (error != null) {
       return error;
     }
@@ -148,7 +148,7 @@ class FriendsVault {
   }
 
   /// A global boolean that tells you whether the friends vault is currently refreshing or not
-  static final friendsVaultRefreshing = false.obs;
+  static final friendsVaultRefreshing = signal(false);
 
   /// Refresh all friends and load them from the vault (also removes what's not on the server)
   static Future<String?> refreshFriendsVault() async {
@@ -230,27 +230,26 @@ class FriendsVault {
     await VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeFriend, "", update.newVersion);
 
     // Update the requests
-    final controller = Get.find<RequestController>();
     for (var request in update.requests) {
-      if (controller.requests[request.id] == null) {
+      if (RequestController.requests[request.id] == null) {
         RequestsService.onVaultUpdate(request);
       }
     }
 
     // Remove all requests and also the ones that aren't requests anymore (a friend could've been upgraded)
     if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
-      controller.requests.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
+      RequestController.requests.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
     }
 
     for (var request in update.requestsSent) {
-      if (controller.requestsSent[request.id] == null) {
+      if (RequestController.requestsSent[request.id] == null) {
         RequestsService.onVaultUpdateSent(request);
       }
     }
 
     // Remove all requests and also the ones that aren't requests anymore (a friend could've been upgraded)
     if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
-      controller.requestsSent.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
+      RequestController.requestsSent.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
     }
 
     // Delete all deleted requests from the database
@@ -259,14 +258,13 @@ class FriendsVault {
     }
 
     // Push friends
-    final friendController = Get.find<FriendController>();
     for (var friend in update.friends) {
-      if (friendController.friends[friend.id] == null) {
+      if (FriendController.friends[friend.id] == null) {
         FriendsService.onVaultUpdate(friend);
       }
     }
     if (update.deleted.isNotEmpty) {
-      friendController.friends.removeWhere(
+      FriendController.friends.removeWhere(
         (id, fr) => update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress,
       );
     }

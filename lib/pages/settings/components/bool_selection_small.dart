@@ -2,6 +2,7 @@ import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class BoolSettingSmall extends StatelessWidget {
   final String settingName;
@@ -11,9 +12,8 @@ class BoolSettingSmall extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<SettingController>();
-    return Obx(
-      () => Row(
+    return Watch(
+      (ctx) => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -28,9 +28,9 @@ class BoolSettingSmall extends StatelessWidget {
             thumbColor: WidgetStateColor.resolveWith(
               (states) => states.contains(WidgetState.selected) ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.surface,
             ),
-            value: controller.settings[settingName]!.getValue(),
+            value: SettingController.settings[settingName]!.getValue(),
             onChanged: (value) {
-              controller.settings[settingName]!.setValue(value);
+              SettingController.settings[settingName]!.setValue(value);
               onChanged?.call(value);
             },
           )

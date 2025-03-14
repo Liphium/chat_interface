@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class FJTextField extends StatefulWidget {
   final bool obscureText;
@@ -49,9 +50,9 @@ class FJTextField extends StatefulWidget {
   State<FJTextField> createState() => _FJTextFieldState();
 }
 
-class _FJTextFieldState extends State<FJTextField> {
+class _FJTextFieldState extends State<FJTextField> with SignalsMixin {
   late FocusNode _node;
-  final _focus = false.obs;
+  late final _focus = createSignal(false);
 
   @override
   void initState() {
@@ -69,70 +70,68 @@ class _FJTextFieldState extends State<FJTextField> {
       _focus.value = (widget.focusNode ?? _node).hasFocus;
     });
 
-    return Obx(
-      () => Animate(
-        effects: [
-          ScaleEffect(end: const Offset(1.08, 1.08), duration: 250.ms, curve: Curves.ease),
-          CustomEffect(
-            begin: 0,
-            end: 1,
-            duration: 250.ms,
-            builder: (context, value, child) {
-              return Padding(padding: EdgeInsets.symmetric(horizontal: defaultSpacing * value), child: child);
-            },
-          )
-        ],
-        target: _focus.value && widget.animation ? 1 : 0,
-        child: Material(
-          color: widget.secondaryColor ? Get.theme.colorScheme.onInverseSurface : Get.theme.colorScheme.inverseSurface,
-          borderRadius: BorderRadius.circular(defaultSpacing),
-          child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing * 1.5),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (widget.prefixIcon != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: defaultSpacing, left: 0),
-                    child: Icon(
-                      widget.prefixIcon,
-                      color: Get.theme.colorScheme.onPrimary,
-                      size: (widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge)!.fontSize! * 1.5,
-                    ),
-                  ),
-                Flexible(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: widget.hintText,
-                      labelStyle: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
-                      hintStyle: widget.small ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge,
-                      errorText: widget.errorText,
-                      border: InputBorder.none,
-                      counterText: "",
-                    ),
-                    style: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
-                    obscureText: widget.obscureText,
-                    autofocus: widget.autofocus,
-                    autocorrect: widget.autocorrect,
-                    maxLines: widget.maxLines,
-                    enableSuggestions: false,
-                    controller: widget.controller,
-                    maxLength: widget.maxLength,
-                    maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
-                    onTap: () => _focus.value = true,
-                    onTapOutside: (event) {
-                      widget.onTapOutside?.call(event);
-                      (widget.focusNode ?? _node).unfocus();
-                    },
-                    focusNode: (widget.focusNode ?? _node),
-                    onChanged: widget.onChange,
-                    inputFormatters: widget.inputFormatters,
-                    onSubmitted: widget.onSubmitted,
+    return Animate(
+      effects: [
+        ScaleEffect(end: const Offset(1.08, 1.08), duration: 250.ms, curve: Curves.ease),
+        CustomEffect(
+          begin: 0,
+          end: 1,
+          duration: 250.ms,
+          builder: (context, value, child) {
+            return Padding(padding: EdgeInsets.symmetric(horizontal: defaultSpacing * value), child: child);
+          },
+        )
+      ],
+      target: _focus.value && widget.animation ? 1 : 0,
+      child: Material(
+        color: widget.secondaryColor ? Get.theme.colorScheme.onInverseSurface : Get.theme.colorScheme.inverseSurface,
+        borderRadius: BorderRadius.circular(defaultSpacing),
+        child: Padding(
+          padding: const EdgeInsets.all(defaultSpacing * 1.5),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.prefixIcon != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: defaultSpacing, left: 0),
+                  child: Icon(
+                    widget.prefixIcon,
+                    color: Get.theme.colorScheme.onPrimary,
+                    size: (widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge)!.fontSize! * 1.5,
                   ),
                 ),
-              ],
-            ),
+              Flexible(
+                child: TextField(
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: widget.hintText,
+                    labelStyle: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
+                    hintStyle: widget.small ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge,
+                    errorText: widget.errorText,
+                    border: InputBorder.none,
+                    counterText: "",
+                  ),
+                  style: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
+                  obscureText: widget.obscureText,
+                  autofocus: widget.autofocus,
+                  autocorrect: widget.autocorrect,
+                  maxLines: widget.maxLines,
+                  enableSuggestions: false,
+                  controller: widget.controller,
+                  maxLength: widget.maxLength,
+                  maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
+                  onTap: () => _focus.value = true,
+                  onTapOutside: (event) {
+                    widget.onTapOutside?.call(event);
+                    (widget.focusNode ?? _node).unfocus();
+                  },
+                  focusNode: (widget.focusNode ?? _node),
+                  onChanged: widget.onChange,
+                  inputFormatters: widget.inputFormatters,
+                  onSubmitted: widget.onSubmitted,
+                ),
+              ),
+            ],
           ),
         ),
       ),

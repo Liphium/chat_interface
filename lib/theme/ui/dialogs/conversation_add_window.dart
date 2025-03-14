@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -16,6 +16,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 import '../../../util/vertical_spacing.dart';
 
@@ -69,7 +70,7 @@ class ConversationAddWindow extends StatefulWidget {
       Conversation? conv;
       (conv, error) = await ConversationService.openDirectMessage(friends.first);
       if (conv != null) {
-        unawaited(Get.find<MessageController>().selectConversation(conv));
+        unawaited(MessageController.openConversation(conv));
       }
     } else {
       error = await ConversationService.openGroupConversation(friends, name);
@@ -81,11 +82,11 @@ class ConversationAddWindow extends StatefulWidget {
 
 class _ConversationAddWindowState extends State<ConversationAddWindow> {
   // State
-  final _members = <Friend>[].obs;
-  final _length = 0.obs;
-  final _conversationLoading = false.obs;
-  final _errorText = "".obs;
-  final _search = "".obs;
+  final _members = listSignal(<Friend>[]);
+  final _length = signal(0);
+  final _conversationLoading = signal(false);
+  final _errorText = signal("");
+  final _search = signal("");
 
   // Input
   final _searchFocusNode = FocusNode();
@@ -110,15 +111,19 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
     _searchFocusNode.dispose();
     _searchController.dispose();
     _controller.dispose();
+    _members.dispose();
+    _length.dispose();
+    _conversationLoading.dispose();
+    _errorText.dispose();
+    _search.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    FriendController friendController = Get.find();
 
-    if (friendController.friends.length == 1) {
+    if (FriendController.friends.length == 1) {
       return SlidingWindowBase(
         title: [
           Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
@@ -148,7 +153,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
       title: [
         Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
         const Spacer(),
-        Obx(() => Text("${_members.length}/100", style: Get.theme.textTheme.bodyLarge)),
+        Watch((ctx) => Text("${_members.length}/100", style: Get.theme.textTheme.bodyLarge)),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,8 +183,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     controller: _searchController,
                     onSubmitted: (value) {
                       // Make the first friend that matches the search the selected one
-                      if (friendController.friends.isNotEmpty) {
-                        final member = friendController.friends.values.firstWhere(
+                      if (FriendController.friends.isNotEmpty) {
+                        final member = FriendController.friends.values.firstWhere(
                           (element) =>
                               (element.name.toLowerCase().contains(value.toLowerCase()) ||
                                   element.displayName.value.toLowerCase().contains(value.toLowerCase())) &&
@@ -211,19 +216,19 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 300),
-            child: Obx(
-              () => ListView.builder(
-                itemCount: friendController.friends.length,
+            child: Watch(
+              (ctx) => ListView.builder(
+                itemCount: FriendController.friends.length,
                 shrinkWrap: true,
                 padding: const EdgeInsets.only(top: defaultSpacing),
                 itemBuilder: (context, index) {
-                  Friend friend = friendController.friends.values.elementAt(index);
+                  Friend friend = FriendController.friends.values.elementAt(index);
 
                   if (friend.id == StatusController.ownAddress) {
                     return const SizedBox();
                   }
 
-                  return Obx(() {
+                  return Watch((ctx) {
                     final search = _search.value;
                     if (search.isNotEmpty &&
                         !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
@@ -233,8 +238,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: defaultSpacing),
-                      child: Obx(
-                        () => Material(
+                      child: Watch(
+                        (ctx) => Material(
                           color: _members.contains(friend) ? theme.colorScheme.primary : Colors.transparent,
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           child: InkWell(
@@ -259,7 +264,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                                     size: 35,
                                   ),
                                   horizontalSpacing(defaultSpacing),
-                                  Obx(() => Text(friend.displayName.value, style: theme.textTheme.labelLarge)),
+                                  Watch((ctx) => Text(friend.displayName.value, style: theme.textTheme.labelLarge)),
                                 ],
                               ),
                             ),
@@ -280,8 +285,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
               Visibility(
                 visible: widget.nameField,
                 child: RepaintBoundary(
-                  child: Obx(
-                    () => Animate(
+                  child: Watch(
+                    (ctx) => Animate(
                       effects: [
                         ExpandEffect(
                           alignment: Alignment.topCenter,

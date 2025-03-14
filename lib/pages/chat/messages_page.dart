@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar_mobile.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _MessagesPageMobileState extends State<MessagesPageMobile> {
       desktop: () {
         Get.back();
         Get.off(const ChatPageDesktop());
-        Get.find<MessageController>().selectConversation(widget.provider.conversation);
+        MessageController.openConversation(widget.provider.conversation);
       },
       child: Scaffold(
         backgroundColor: theme.colorScheme.inverseSurface,
@@ -35,7 +36,7 @@ class _MessagesPageMobileState extends State<MessagesPageMobile> {
             DevicePadding(
               top: true,
               padding: const EdgeInsets.all(0),
-              child: MobileMessageBar(conversation: Get.find<MessageController>().currentProvider.value!.conversation),
+              child: MobileMessageBar(conversation: widget.provider.conversation),
             ),
 
             // Render the actual message feed

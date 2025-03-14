@@ -4,7 +4,6 @@ import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/web.dart';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:get/get.dart';
 import 'package:signals/signals.dart';
 
 class TabletopDecks {
@@ -75,13 +74,12 @@ class TabletopDeck {
 
   /// usecase is the type of storage to use for the cards (for downloaded ones it should be "cache" for example)
   Future<void> loadCards(StorageType usecase) async {
-    final controller = Get.find<AttachmentController>();
     bool removed = false;
     for (var card in encodedCards) {
       final type = await AttachmentController.checkLocations(card['i'], usecase, types: [StorageType.permanent, StorageType.cache]);
-      final container = controller.fromJson(type, card);
+      final container = AttachmentController.fromJson(type, card);
       amounts.value[container.id] = card['a'] ?? 1;
-      final result = await controller.downloadAttachment(container);
+      final result = await AttachmentController.downloadAttachment(container);
       if (!result || container.error.value) {
         removed = true;
         continue;
@@ -98,9 +96,8 @@ class TabletopDeck {
 
   Future<bool> delete() async {
     // Delete all cards
-    final controller = Get.find<AttachmentController>();
     for (var card in cards.peek()) {
-      await controller.deleteFile(card);
+      await AttachmentController.deleteFile(card);
     }
 
     if (vaultId == null) {

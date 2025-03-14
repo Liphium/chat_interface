@@ -4,6 +4,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SSR {
   /// The path the SSR rendering starts with calling
@@ -24,7 +25,7 @@ class SSR {
   // All data required for the UI
   final currentInputValues = <String, dynamic>{};
   String? currentToken;
-  final error = "".obs;
+  final error = signal("");
   Map<String, dynamic>? suggestButton;
 
   SSR({required this.startPath, required this.onSuccess, required this.onRender, this.doRequest = postJSON});

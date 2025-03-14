@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
@@ -21,6 +21,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
 
 import '../../../theme/components/forms/icon_button.dart';
@@ -48,12 +49,12 @@ class MessageInput extends StatefulWidget {
 
 class _MessageInputState extends State<MessageInput> {
   final FormattedTextEditingController _message = FormattedTextEditingController(Get.theme.textTheme.labelLarge!, Get.theme.textTheme.bodyLarge!);
-  final loading = false.obs;
+  final _loading = signal(false);
   final FocusNode _inputFocus = FocusNode();
   StreamSubscription<Conversation>? _sub;
   final GlobalKey _libraryKey = GlobalKey();
   // final GlobalKey _emojiKey = GlobalKey();
-  final _emojiSuggestions = <Emoji>[].obs;
+  final _emojiSuggestions = listSignal<Emoji>([]);
 
   // For a little hack to prevent the answers from disappearing instantly
   LPHAddress? _previousAccount;
@@ -62,7 +63,9 @@ class _MessageInputState extends State<MessageInput> {
   void dispose() {
     _message.dispose();
     _sub?.cancel();
+    _loading.dispose();
     _inputFocus.dispose();
+    _emojiSuggestions.dispose();
     super.dispose();
   }
 
@@ -118,7 +121,7 @@ class _MessageInputState extends State<MessageInput> {
       MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.target, "");
       _message.clear();
     }
-    loading.value = false;
+    _loading.value = false;
   }
 
   /// Replace the current selection with a new text
@@ -173,7 +176,7 @@ class _MessageInputState extends State<MessageInput> {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) async {
           // Check if there is a connection before doing this
-          if (!Get.find<ConnectionController>().connected.value) {
+          if (!ConnectionController.connected.value) {
             showErrorPopup("error", "error.no_connection".tr);
             return;
           }
@@ -187,7 +190,7 @@ class _MessageInputState extends State<MessageInput> {
           // Send a regular text message if there are no files to attach
           if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
             final error = await widget.provider.sendMessage(
-              loading,
+              _loading,
               MessageType.text,
               [],
               _message.text,
@@ -207,7 +210,7 @@ class _MessageInputState extends State<MessageInput> {
 
           // Send a regular text message with files
           final error = await widget.provider.sendTextMessageWithFiles(
-            loading,
+            _loading,
             _message.text,
             MessageSendHelper.currentDraft.value!.files,
             MessageSendHelper.currentDraft.value!.answer.value?.id ?? "",
@@ -286,8 +289,8 @@ class _MessageInputState extends State<MessageInput> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //* Reply preview
-                    Obx(
-                      () {
+                    Watch(
+                      (ctx) {
                         final answer = MessageSendHelper.currentDraft.value?.answer.value;
                         if (answer != null) {
                           _previousAccount = answer.senderAddress;
@@ -317,7 +320,7 @@ class _MessageInputState extends State<MessageInput> {
                                     "message.reply.text".trParams({
                                       "name": _previousAccount == null
                                           ? "tf"
-                                          : Get.find<FriendController>().friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
+                                          : FriendController.friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
                                     }),
                                     style: theme.textTheme.labelMedium,
                                     maxLines: 1,
@@ -341,8 +344,8 @@ class _MessageInputState extends State<MessageInput> {
                     ),
 
                     //* Emoji suggestions
-                    Obx(
-                      () {
+                    Watch(
+                      (ctx) {
                         if (_emojiSuggestions.isEmpty) {
                           return const SizedBox();
                         }
@@ -384,8 +387,8 @@ class _MessageInputState extends State<MessageInput> {
                     ),
 
                     //* File preview
-                    Obx(
-                      () {
+                    Watch(
+                      (ctx) {
                         if (MessageSendHelper.currentDraft.value == null) {
                           return const SizedBox();
                         }
@@ -503,7 +506,7 @@ class _MessageInputState extends State<MessageInput> {
                             },
                             icon: Icons.send,
                             color: theme.colorScheme.tertiary,
-                            loading: loading,
+                            loading: _loading,
                           ),
                         ),
                       ],

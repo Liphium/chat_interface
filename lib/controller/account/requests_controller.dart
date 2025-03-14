@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_interface/services/chat/requests_service.dart';
-import 'package:chat_interface/controller/account/unknown_controller.dart';
+import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
@@ -10,18 +10,20 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 import 'friend_controller.dart';
 
-class RequestController extends GetxController {
-  final requestsSent = <LPHAddress, Request>{}.obs;
-  final requests = <LPHAddress, Request>{}.obs;
+class RequestController {
+  static final requestsLoading = signal(false);
+  static final requestsSent = mapSignal(<LPHAddress, Request>{});
+  static final requests = mapSignal(<LPHAddress, Request>{});
 
-  void reset() {
+  static void reset() {
     requests.clear();
   }
 
-  Future<bool> loadRequests() async {
+  static Future<bool> loadRequests() async {
     for (RequestData data in await db.request.select().get()) {
       final address = LPHAddress.from(data.id);
       if (data.self) {
@@ -34,7 +36,7 @@ class RequestController extends GetxController {
     return true;
   }
 
-  void addSentRequestOrUpdate(Request request) {
+  static void addSentRequestOrUpdate(Request request) {
     if (requestsSent[request.id] != null) {
       requestsSent[request.id]!.copyFrom(request);
     } else {
@@ -42,7 +44,7 @@ class RequestController extends GetxController {
     }
   }
 
-  void addRequestOrUpdate(Request request) {
+  static void addRequestOrUpdate(Request request) {
     if (requests[request.id] != null) {
       requests[request.id]!.copyFrom(request);
     } else {
@@ -50,7 +52,7 @@ class RequestController extends GetxController {
     }
   }
 
-  Future<bool> deleteSentRequest(Request request, {removal = true}) async {
+  static Future<bool> deleteSentRequest(Request request, {removal = true}) async {
     if (removal) {
       requestsSent.remove(request.id);
     }
@@ -58,7 +60,7 @@ class RequestController extends GetxController {
     return true;
   }
 
-  Future<bool> deleteRequest(Request request, {removal = true}) async {
+  static Future<bool> deleteRequest(Request request, {removal = true}) async {
     if (removal) {
       requests.remove(request.id);
     }
@@ -67,16 +69,13 @@ class RequestController extends GetxController {
   }
 }
 
-final requestsLoading = false.obs;
-
 /// Send a new friend request to an account by name
 Future<void> newFriendRequest(String name, Function(String) success) async {
-  requestsLoading.value = true;
+  RequestController.requestsLoading.value = true;
 
-  final controller = Get.find<StatusController>();
-  if (name == controller.name.value || LPHAddress.from(name) == StatusController.ownAddress) {
+  if (name == StatusController.name.value || LPHAddress.from(name) == StatusController.ownAddress) {
     showErrorPopup("request.self", "request.self.text".tr);
-    requestsLoading.value = false;
+    RequestController.requestsLoading.value = false;
     return;
   }
 
@@ -84,23 +83,23 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
   UnknownAccount? profile;
   if (name.contains("@")) {
     // If it is an address, get it by using the id
-    profile = await Get.find<UnknownController>().loadUnknownProfile(LPHAddress.from(name));
+    profile = await UnknownService.loadUnknownProfile(LPHAddress.from(name));
   } else {
     // If it is a name, then get it from the current instance by name
-    profile = await Get.find<UnknownController>().getUnknownProfileByName(name);
+    profile = await UnknownService.getUnknownProfileByName(name);
   }
 
   // Check if the profile is valid
   if (profile == null) {
     showErrorPopup("request.not.found", "request.not.found.text".tr);
-    requestsLoading.value = false;
+    RequestController.requestsLoading.value = false;
     return;
   }
 
   // Make sure the person is not already a friend
-  if (Get.find<FriendController>().friends.keys.any((a) => a == profile!.id)) {
+  if (FriendController.friends.keys.any((a) => a == profile!.id)) {
     showErrorPopup("request.friend.exists", "request.friend.exists.text".tr);
-    requestsLoading.value = false;
+    RequestController.requestsLoading.value = false;
     return;
   }
 
@@ -116,7 +115,7 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
     onDecline: () {},
   ));
 
-  requestsLoading.value = false;
+  RequestController.requestsLoading.value = false;
   return;
 }
 
@@ -127,7 +126,7 @@ class Request {
   String vaultId;
   int updatedAt;
   KeyStorage keyStorage;
-  final loading = false.obs;
+  final loading = signal(false);
 
   Request(this.id, this.name, this.displayName, this.vaultId, this.keyStorage, this.updatedAt);
 

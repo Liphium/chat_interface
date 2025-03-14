@@ -26,6 +26,7 @@ class _SetupPageState extends State<SetupPage> {
   @override
   void dispose() {
     setupManager.controller = null;
+    _controller.dispose();
     super.dispose();
   }
 

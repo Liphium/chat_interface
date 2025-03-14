@@ -34,8 +34,6 @@ Future<bool> initSodium() async {
   return true;
 }
 
-final list = <String>[].obs;
-
 var executableArguments = <String>[];
 
 void main(List<String> args) async {

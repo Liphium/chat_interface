@@ -35,7 +35,7 @@ class SettingsPageBase extends StatelessWidget {
         for (var settingLabel in SettingLabel.values) {
           final category = settingLabel.categories.firstWhereOrNull((e) => e.label == label);
           if (category != null) {
-            Get.find<SettingController>().currentCategory.value = category;
+            SettingController.currentCategory.value = category;
             break;
           }
         }
