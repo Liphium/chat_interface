@@ -1,26 +1,27 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:drift/drift.dart';
+import 'package:signals/signals_flutter.dart';
 
-class MessageSearchController extends GetxController {
-  final filters = <MessageFilter>[].obs;
-  final results = <Message>[].obs;
-  FocusNode? currentFocus;
+class MessageSearchController {
+  static final filters = listSignal(<MessageFilter>[]);
+  static final results = listSignal(<Message>[]);
+  static FocusNode? currentFocus;
 
   // Data for the message search algorithm
-  bool _finished = false;
-  bool _restart = false;
-  int _lastTime = 0;
-  Timer? _searchTimer;
-  int neededMessages = 10;
+  static bool _finished = false;
+  static bool _restart = false;
+  static int _lastTime = 0;
+  static Timer? _searchTimer;
+  static int neededMessages = 10;
 
-  void search({bool increment = false}) {
+  static void search({bool increment = false}) {
     _searchTimer?.cancel();
     if (increment) {
       if (_finished) {

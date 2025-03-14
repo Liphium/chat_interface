@@ -1,13 +1,16 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/services/chat/conversation_member.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ConversationMembers extends StatelessWidget {
   final Conversation conversation;
@@ -28,8 +31,8 @@ class ConversationMembers extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
-                child: Obx(
-                  () => Text(
+                child: Watch(
+                  (ctx) => Text(
                     'chat.members'.trParams({"count": conversation.members.length.toString()}),
                     style: Get.theme.textTheme.titleMedium,
                   ),
@@ -37,7 +40,7 @@ class ConversationMembers extends StatelessWidget {
               ),
               LoadingIconButton(
                 loading: conversation.membersLoading,
-                onTap: () => conversation.fetchData(),
+                onTap: () => ConversationService.fetchNewestVersion(conversation),
                 icon: Icons.refresh,
               ),
             ],
@@ -45,8 +48,8 @@ class ConversationMembers extends StatelessWidget {
           verticalSpacing(defaultSpacing),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
-            child: Obx(
-              () => ListView.builder(
+            child: Watch(
+              (ctx) => ListView.builder(
                 shrinkWrap: true,
                 itemCount: conversation.members.length,
                 itemBuilder: (context, index) {
@@ -60,7 +63,7 @@ class ConversationMembers extends StatelessWidget {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         onTap: () {
-                          final friend = Get.find<FriendController>().friends[member.address];
+                          final friend = FriendController.friends[member.address];
                           if (StatusController.ownAddress != member.address) {
                             final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                             Get.dialog(
@@ -73,31 +76,65 @@ class ConversationMembers extends StatelessWidget {
                                         //* Promotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
                                           ProfileAction(
-                                              icon: Icons.add_moderator,
-                                              label: "chat.make_moderator".tr,
-                                              loading: false.obs,
-                                              onTap: (f, l) => member.promote(conversation.id))
+                                            icon: Icons.add_moderator,
+                                            label: "chat.make_moderator".tr,
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
+                                              final error = await member.promote(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
+                                              }
+                                              loading.value = false;
+                                            },
+                                          )
                                         else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
                                           ProfileAction(
-                                              icon: Icons.add_moderator,
-                                              label: "chat.make_admin".tr,
-                                              loading: false.obs,
-                                              onTap: (f, l) => member.promote(conversation.id)),
+                                            icon: Icons.add_moderator,
+                                            label: "chat.make_admin".tr,
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
+                                              final error = await member.promote(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
+                                              }
+                                              loading.value = false;
+                                            },
+                                          ),
 
                                         //* Demotion actions
                                         if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
                                           ProfileAction(
                                             icon: Icons.remove_moderator,
                                             label: "chat.remove_moderator".tr,
-                                            loading: false.obs,
-                                            onTap: (f, l) => member.demote(conversation.id),
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
+                                              final error = await member.demote(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
+                                              }
+                                              loading.value = false;
+                                            },
                                           )
                                         else if (ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
                                           ProfileAction(
                                             icon: Icons.remove_moderator,
                                             label: "chat.remove_admin".tr,
-                                            loading: false.obs,
-                                            onTap: (f, l) => member.demote(conversation.id),
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
+                                              final error = await member.demote(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
+                                              }
+                                              loading.value = false;
+                                            },
                                           ),
 
                                         //* Removal actions
@@ -105,10 +142,18 @@ class ConversationMembers extends StatelessWidget {
                                           ProfileAction(
                                             icon: Icons.person_remove,
                                             label: "chat.remove_member".tr,
-                                            loading: false.obs,
                                             color: Get.theme.colorScheme.errorContainer,
                                             iconColor: Get.theme.colorScheme.error,
-                                            onTap: (f, l) => member.remove(conversation.id),
+                                            onTap: (f, loading) async {
+                                              loading.value = true;
+                                              final error = await member.remove(conversation.id);
+                                              if (error != null) {
+                                                showErrorPopup("error", error);
+                                              } else {
+                                                Get.back();
+                                              }
+                                              loading.value = false;
+                                            },
                                           ),
                                       ] +
                                       ProfileDefaults.buildDefaultActions(friend);

@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 
 enum ConversationType { directMessage, group }
 
+@TableIndex(name: "idx_conversation_updated", columns: {#updatedAt})
 class Conversation extends Table {
   TextColumn get id => text()();
   TextColumn get vaultId => text()();
@@ -18,6 +19,7 @@ class Conversation extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_message_created", columns: {#createdAt})
 class Message extends Table {
   TextColumn get id => text()();
   TextColumn get content => text()();
@@ -44,6 +46,7 @@ class Member extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_friends_updated", columns: {#updatedAt})
 class Friend extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
@@ -56,10 +59,13 @@ class Friend extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_library_entry_created", columns: {#createdAt})
+@TableIndex(name: "idx_library_entry_idhash", columns: {#identifierHash})
 class LibraryEntry extends Table {
   TextColumn get id => text()();
   IntColumn get type => intEnum<LibraryEntryType>()();
   Int64Column get createdAt => int64()();
+  TextColumn get identifierHash => text().withDefault(Constant("to-migrate"))();
   TextColumn get data => text()();
   IntColumn get width => integer()();
   IntColumn get height => integer()();
@@ -94,6 +100,7 @@ class Profile extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@TableIndex(name: "idx_requests_updated", columns: {#updatedAt})
 class Request extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
@@ -115,11 +122,13 @@ class Setting extends Table {
   Set<Column<Object>>? get primaryKey => {key};
 }
 
+@TableIndex(name: "idx_unknown_profiles_last_fetched", columns: {#lastFetched})
 class UnknownProfile extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get displayName => text()();
   TextColumn get keys => text()();
+  DateTimeColumn get lastFetched => dateTime().withDefault(Constant(DateTime.fromMillisecondsSinceEpoch(0)))();
 
   @override
   Set<Column> get primaryKey => {id};

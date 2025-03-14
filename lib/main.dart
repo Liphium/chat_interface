@@ -17,7 +17,7 @@ import 'app.dart';
 // Configuration constants
 const appTag = "liphium_chat";
 const appTagSpaces = "liphium_spaces";
-const protocolVersion = 7;
+const protocolVersion = 8;
 
 final dio = Dio();
 late final Sodium sodiumLib;
@@ -33,8 +33,6 @@ Future<bool> initSodium() async {
   sodiumLib = await SodiumInit.init();
   return true;
 }
-
-final list = <String>[].obs;
 
 var executableArguments = <String>[];
 

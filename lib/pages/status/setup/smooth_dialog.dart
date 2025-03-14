@@ -7,10 +7,11 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SmoothDialogController {
-  final widgetOne = Rx<Widget?>(null);
-  final widgetTwo = Rx<Widget?>(null);
+  final widgetOne = signal<Widget?>(null);
+  final widgetTwo = signal<Widget?>(null);
   late AnimationController _one, _two;
   Future? transitionComplete;
   var keyOne = Random().nextDouble();
@@ -24,6 +25,12 @@ class SmoothDialogController {
   void init(AnimationController one, AnimationController two) {
     _one = one;
     _two = two;
+  }
+
+  /// Dispose the signals powering the smooth dialog controller.
+  void dispose() {
+    widgetOne.dispose();
+    widgetTwo.dispose();
   }
 
   static const curve = Curves.easeInOutQuart;
@@ -126,8 +133,8 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
                   ],
                   child: Padding(
                     padding: const EdgeInsets.all(sectionSpacing),
-                    child: Obx(
-                      () => SizedBox(
+                    child: Watch(
+                      (ctx) => SizedBox(
                         key: ValueKey(widget.controller.keyOne),
                         child: widget.controller.widgetOne.value ?? const SizedBox(),
                       ),
@@ -153,8 +160,8 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
                   ],
                   child: Padding(
                     padding: const EdgeInsets.all(sectionSpacing),
-                    child: Obx(
-                      () => SizedBox(
+                    child: Watch(
+                      (ctx) => SizedBox(
                         key: ValueKey(widget.controller.keyTwo),
                         child: widget.controller.widgetTwo.value!,
                       ),
@@ -237,8 +244,8 @@ class _SmoothDialogWindowState extends State<SmoothDialogWindow> with TickerProv
                 ],
                 child: Padding(
                   padding: const EdgeInsets.all(sectionSpacing),
-                  child: Obx(
-                    () => SizedBox(
+                  child: Watch(
+                    (ctx) => SizedBox(
                       key: ValueKey(widget.controller.keyOne),
                       child: widget.controller.widgetOne.value ?? const SizedBox(),
                     ),
@@ -264,8 +271,8 @@ class _SmoothDialogWindowState extends State<SmoothDialogWindow> with TickerProv
                 ],
                 child: Padding(
                   padding: const EdgeInsets.all(sectionSpacing),
-                  child: Obx(
-                    () => SizedBox(
+                  child: Watch(
+                    (ctx) => SizedBox(
                       key: ValueKey(widget.controller.keyTwo),
                       child: widget.controller.widgetTwo.value!,
                     ),
@@ -334,8 +341,8 @@ class _SmoothBoxState extends State<SmoothBox> with TickerProviderStateMixin {
               curve: Curves.linear,
             ),
           ],
-          child: Obx(
-            () => SizedBox(
+          child: Watch(
+            (ctx) => SizedBox(
               key: ValueKey(widget.controller.keyOne),
               child: widget.controller.widgetOne.value ?? const SizedBox(),
             ),
@@ -354,8 +361,8 @@ class _SmoothBoxState extends State<SmoothBox> with TickerProviderStateMixin {
               end: 1,
             ),
           ],
-          child: Obx(
-            () => SizedBox(
+          child: Watch(
+            (ctx) => SizedBox(
               key: ValueKey(widget.controller.keyTwo),
               child: widget.controller.widgetTwo.value!,
             ),

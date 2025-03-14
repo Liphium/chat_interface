@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
@@ -12,6 +12,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class BubblesMessageRenderer extends StatefulWidget {
   final LPHAddress senderAddress;
@@ -114,7 +115,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                       //* Desktop verified indicator
                       horizontalSpacing(defaultSpacing),
 
-                      Obx(() {
+                      Watch((ctx) {
                         final verified = widget.message.verified.value;
                         return Visibility(
                           visible: !verified,
@@ -187,7 +188,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
       padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
       child: Material(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color: widget.self ? Get.theme.colorScheme.onPrimary.withOpacity(0.2) : Get.theme.colorScheme.inverseSurface,
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withAlpha(50) : Get.theme.colorScheme.inverseSurface,
         child: InkWell(
           borderRadius: BorderRadius.circular(defaultSpacing),
           onTap: () => widget.provider.scrollToMessage(widget.message.answer),

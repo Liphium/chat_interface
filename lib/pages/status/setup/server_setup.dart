@@ -10,6 +10,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const apiVersion = "v1";
@@ -41,9 +42,19 @@ class ServerSelectorPage extends StatefulWidget {
 }
 
 class _ServerSelectorPageState extends State<ServerSelectorPage> {
-  final _error = "".obs;
-  final _loading = false.obs;
+  // Controller for the server name
   final TextEditingController _name = TextEditingController();
+
+  // State
+  final _error = signal("");
+  final _loading = signal(false);
+
+  @override
+  void dispose() {
+    _error.dispose();
+    _loading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +75,6 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
         ),
         verticalSpacing(defaultSpacing),
         FJElevatedLoadingButton(
-          loading: false.obs,
           onTap: () async {
             await launchUrl(Uri.parse("https://liphium.com/docs/concepts/towns"));
           },

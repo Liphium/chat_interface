@@ -2,7 +2,7 @@ import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class OfflineHider extends StatelessWidget {
   final EdgeInsets? padding;
@@ -20,8 +20,8 @@ class OfflineHider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Animate(
+    return Watch(
+      (ctx) => Animate(
         effects: [
           ExpandEffect(
             axis: axis,
@@ -33,8 +33,8 @@ class OfflineHider extends StatelessWidget {
             duration: 250.ms,
           ),
         ],
-        target: Get.find<ConnectionController>().connected.value ? 1 : 0,
-        onInit: (controller) => controller.value = Get.find<ConnectionController>().connected.value ? 1 : 0,
+        target: ConnectionController.connected.value ? 1 : 0,
+        onInit: (controller) => controller.value = ConnectionController.connected.value ? 1 : 0,
         child: Padding(
           padding: padding ?? EdgeInsets.all(0),
           child: child,

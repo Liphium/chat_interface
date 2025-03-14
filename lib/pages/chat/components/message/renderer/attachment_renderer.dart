@@ -1,5 +1,4 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
@@ -7,6 +6,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/audio_atta
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_zap_renderer.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
+import 'package:signals/signals_flutter.dart';
 
 class AttachmentRenderer extends StatefulWidget {
   final Message? message;
@@ -40,7 +41,13 @@ class AttachmentRenderer extends StatefulWidget {
 class _AttachmentRendererState extends State<AttachmentRenderer> {
   Image? _networkImage;
   final GlobalKey _heightKey = GlobalKey();
-  final loading = true.obs;
+  final _loading = signal(true);
+
+  @override
+  void dispose() {
+    _loading.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -70,10 +77,10 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       );
       final stream = _networkImage!.image.resolve(const ImageConfiguration());
       final listener = ImageStreamListener((image, synchronousCall) {
-        if (!loading.value) {
+        if (!_loading.value) {
           return;
         }
-        loading.value = false;
+        _loading.value = false;
         sendLog("current height ${widget.message!.currentHeight}");
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           sendLog("NEW HEIGHT ${widget.message!.heightKey!.currentContext!.size!.height}");
@@ -103,7 +110,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         widget.container.url,
         fit: BoxFit.cover,
       );
-      loading.value = false;
+      _loading.value = false;
     }
   }
 
@@ -119,7 +126,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
 
     //* Remote images
     if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
-      return Obx(() {
+      return Watch((ctx) {
         if (widget.container.unsafeLocation.value) {
           final domain = TrustedLinkHelper.extractDomain(widget.container.url);
 
@@ -171,7 +178,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           children: [
             Align(
               key: _heightKey,
-              heightFactor: loading.value ? 0 : 1,
+              heightFactor: _loading.value ? 0 : 1,
               child: LibraryFavoriteButton(
                 container: widget.container,
                 child: InkWell(
@@ -228,8 +235,8 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                   ),
                 ),
                 Flexible(
-                  child: Obx(
-                    () => Text(
+                  child: Watch(
+                    (ctx) => Text(
                       !widget.container.error.value ? formatFileSize(widget.container.size) : 'file.not_uploaded'.tr,
                       style: Get.theme.textTheme.bodyMedium,
                     ),
@@ -241,7 +248,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           horizontalSpacing(defaultSpacing),
 
           //* Button
-          Obx(() {
+          Watch((ctx) {
             if (widget.container.downloading.value) {
               return SizedBox(
                 width: 30,
@@ -256,7 +263,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             if (widget.container.error.value) {
               return IconButton(
                 onPressed: () {
-                  Get.find<AttachmentController>().downloadAttachment(widget.container, retry: true);
+                  AttachmentController.downloadAttachment(widget.container, retry: true);
                 },
                 icon: const Icon(Icons.refresh),
               );
@@ -276,7 +283,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
 
             return IconButton(
               onPressed: () {
-                Get.find<AttachmentController>().downloadAttachment(widget.container);
+                AttachmentController.downloadAttachment(widget.container);
               },
               icon: const Icon(Icons.download),
             );

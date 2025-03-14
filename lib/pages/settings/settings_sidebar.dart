@@ -6,9 +6,10 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SettingsSidebar extends StatefulWidget {
-  final Rx<SettingCategory?>? category;
+  final Signal<SettingCategory?>? category;
   final String? currentCategory;
   final double sidebarWidth;
 

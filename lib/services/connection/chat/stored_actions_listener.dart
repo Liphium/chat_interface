@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/database/trusted_links.dart';
@@ -51,7 +53,7 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
     // Parse the json and get the sender
     final json = jsonDecode(extracted.text);
     final address = LPHAddress.from(json["s"]);
-    final sender = Get.find<FriendController>().friends[address];
+    final sender = FriendController.friends[address];
     if (sender == null) {
       sendLog("ERROR: sender of authenticated stored action isn't a friend");
       return false;
@@ -73,7 +75,7 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
     }
 
     // Verify the signature
-    if (!extracted.verifySignature(sender.keyStorage.signatureKey)) {
+    if (!extracted.verifySignature((await sender.getKeys()).signatureKey)) {
       sendLog("ERROR: signature of authenticated stored action is invalid");
       return false;
     }
@@ -126,43 +128,48 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     return true;
   }
 
+  // Query the guy
+  final account = await UnknownService.loadUnknownProfile(address);
+  if (account == null) {
+    sendLog("invalid friend request: couldn't find sender");
+    return false;
+  }
+
   // Check the signature and stuff
-  final publicKey = unpackagePublicKey(json["pub"]);
-  final signaturePub = unpackagePublicKey(json["sg"]);
-  final statusController = Get.find<StatusController>();
-  final signedMessage = statusController.name.value;
-  final result = decryptAsymmetricAuth(publicKey, asymmetricKeyPair.secretKey, json["s"]);
+  final signedMessage = StatusController.name.value;
+  final result = decryptAsymmetricAuth(account.publicKey, asymmetricKeyPair.secretKey, json["s"]);
   if (!result.success || result.message != signedMessage) {
     sendLog("invalid friend request: invalid signature");
     return true;
   }
 
-  // Check if the current account already sent this account a friend request (-> add friend)
-  final requestController = Get.find<RequestController>();
-  var request = requestController.requestsSent[address];
-
+  // Add as a friend in case there is an existing request that was sent by the current client
+  var request = RequestController.requestsSent[address];
   if (request != null) {
     // This request doesn't have the right key storage yet
-    request.keyStorage.publicKey = publicKey;
+    request.keyStorage.publicKey = account.publicKey;
+    request.keyStorage.signatureKey = account.signatureKey;
     request.keyStorage.profileKeyPacked = json["pf"];
     request.keyStorage.unpackedProfileKey = unpackageSymmetricKey(json["pf"]);
     request.keyStorage.storedActionKey = json["sa"];
 
-    // Add friend
-    final controller = Get.find<FriendController>();
-    await controller.addFromRequest(request);
+    // Add friend to the vault
+    final error = await FriendsVault.updateFriend(request.friend);
+    if (error != null) {
+      sendLog("couldn't accept friend request: $error");
+    }
 
     return true;
   }
 
   // Check if the request is already in the list
-  if (requestController.requests[address] != null) {
+  if (RequestController.requests[address] != null) {
     sendLog("invalid friend request: already in list");
     return true;
   }
 
   // Check if the guy is already a friend
-  if (Get.find<FriendController>().friends.values.any((element) => element.id == address)) {
+  if (FriendController.friends.values.any((element) => element.id == address)) {
     sendLog("invalid friend request: already a friend");
     return true;
   }
@@ -174,19 +181,15 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
     json["name"],
     json["dname"],
     "",
-    KeyStorage(publicKey, signaturePub, profileKey, json["sa"]),
+    KeyStorage(account.publicKey, account.signatureKey, profileKey, json["sa"]),
     DateTime.now().millisecondsSinceEpoch,
   );
 
-  final vaultId = await FriendsVault.store(request.toStoredPayload(false));
-  if (vaultId == null) {
-    sendLog("couldn't store in vault: something happened");
-    return true;
+  // Store the friend in the vault
+  final error = await FriendsVault.storeReceivedRequest(request);
+  if (error != null) {
+    sendLog("couldn't store in vault: $error");
   }
-
-  // Add friend request
-  request.vaultId = vaultId;
-  Get.find<RequestController>().addRequest(request);
 
   return true;
 }
@@ -194,7 +197,7 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
 //* Conversation opening
 Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> actionJson) async {
   sendLog("opening conversation with ${actionJson["s"]}");
-  final friend = Get.find<FriendController>().friends[LPHAddress.from(actionJson["s"])];
+  final friend = FriendController.friends[LPHAddress.from(actionJson["s"])];
   if (friend == null) {
     sendLog("invalid conversation opening: friend doesn't exist");
     return true;
@@ -202,7 +205,6 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
 
   // Activate the token from the request
   final token = jsonDecode(actionJson["token"]);
-  sendLog(token);
   final json = await postNodeJSON("/conversations/activate", <String, dynamic>{"token": token});
   if (!json["success"]) {
     sendLog("couldn't activate conversation: ${json["error"]}");
@@ -211,29 +213,23 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
   token["token"] = json["token"]; // Set new token (from activation request)
 
   final key = unpackageSymmetricKey(actionJson["key"]);
-  final members = <Member>[];
-  for (var memberData in json["members"]) {
-    sendLog(memberData);
-    final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-    members.add(Member(LPHAddress.from(memberData["id"]), memberContainer.id, MemberRole.fromValue(memberData["rank"])));
-  }
 
-  final container = ConversationContainer.decrypt(json["data"], key);
-  final convToken = ConversationToken.fromJson(token);
-  await Get.find<ConversationController>().addCreated(
-    Conversation(
-      LPHAddress.from(actionJson["id"]),
-      "",
-      model.ConversationType.values[json["type"]],
-      convToken,
-      container,
-      packageSymmetricKey(key),
-      0,
-      DateTime.now().millisecondsSinceEpoch,
-    ),
-    members,
+  final conversation = Conversation(
+    LPHAddress.from(actionJson["id"]),
+    "",
+    model.ConversationType.values[json["type"]],
+    ConversationToken.fromJson(token),
+    ConversationContainer.decrypt(json["data"], key),
+    packageSymmetricKey(key),
+    0,
+    DateTime.now().millisecondsSinceEpoch,
   );
-  ConversationService.subscribeToConversation(convToken, deletions: false);
+
+  // Add to vault
+  final (error, _) = await addToVault(Constants.vaultConversationTag, conversation.toJson());
+  if (error != null) {
+    sendLog("WARNING: Conversation couldn't be added to vault: $error");
+  }
 
   return true;
 }
@@ -241,12 +237,13 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
 //* Friend removal
 Future<bool> _handleFriendRemoval(String actionId, Map<String, dynamic> actionJson) async {
   sendLog("deleting friend ${actionJson["s"]}");
-  final friend = Get.find<FriendController>().friends[LPHAddress.from(actionJson["s"])];
+  final friend = FriendController.friends[LPHAddress.from(actionJson["s"])];
   if (friend == null) {
     sendLog("invalid friend deletion: friend doesn't exist");
     return true;
   }
 
   // Remove the friend without asking
-  return friend.remove(false.obs, removeAction: false);
+  final error = await friend.remove(removeAction: false);
+  return error != null;
 }

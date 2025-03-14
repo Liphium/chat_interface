@@ -56,26 +56,36 @@ class TabletopView extends StatefulWidget {
   }
 }
 
-class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin, SignalsMixin {
-  bool moved = false;
+class _TabletopViewState extends State<TabletopView> with SingleTickerProviderStateMixin {
+  bool _moved = false;
   final GlobalKey _key = GlobalKey();
 
-  final updater = signal(false);
-  Timer? timer;
+  final _updated = signal(false);
+  Timer? _timer;
+  Function()? _disposeSettingSub;
+
+  @override
+  void dispose() {
+    _updated.dispose();
+    _disposeSettingSub?.call();
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
-    final setting = Get.find<SettingController>().settings[TabletopSettings.framerate]! as Setting<double>;
-    setting.value.listenAndPump((value) => startFrameTimer(value!));
+    final setting = SettingController.settings[TabletopSettings.framerate]! as Setting<double>;
+    _disposeSettingSub = setting.value.subscribe((value) => startFrameTimer(value!));
+    startFrameTimer(setting.value.value!);
   }
 
   void startFrameTimer(double value) {
-    if (timer != null) {
-      timer!.cancel();
+    if (_timer != null) {
+      _timer!.cancel();
     }
-    timer = Timer.periodic((1000 / value).ms, (timer) {
-      updater.value = !updater.value;
+    _timer = Timer.periodic((1000 / value).ms, (timer) {
+      _updated.value = !_updated.value;
     });
   }
 
@@ -92,7 +102,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
       body: RepaintBoundary(
         child: Watch(
           (context) {
-            updater.value;
+            _updated.value;
             return Listener(
               onPointerHover: (event) {
                 TabletopController.mousePosUnmodified = event.localPosition;
@@ -109,7 +119,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                       data: ContextMenuData.fromPosition(Offset(event.position.dx, event.position.dy)),
                       object: TabletopController.hoveringObjects.first,
                     ));
-                    moved = true;
+                    _moved = true;
                     return;
                   }
 
@@ -120,7 +130,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                     TabletopController.canvasOffset,
                   )));
                 } else if (event.buttons == 1) {
-                  moved = false;
+                  _moved = false;
                 }
               },
 
@@ -165,7 +175,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                       );
                       TabletopController.heldObject!.location += newPos - old;
                     } else {
-                      moved = true;
+                      _moved = true;
 
                       // Start holding the object
                       TabletopController.startHoldingObject(TabletopController.hoveringObjects.last);
@@ -185,7 +195,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               //* Handle when a mouse button is no longer pressed
               onPointerUp: (event) {
                 TabletopController.cancelledHolding = false;
-                if (TabletopController.hoveringObjects.isNotEmpty && !moved && TabletopController.heldObject == null && event.buttons == 0) {
+                if (TabletopController.hoveringObjects.isNotEmpty && !_moved && TabletopController.heldObject == null && event.buttons == 0) {
                   TabletopController.hoveringObjects.first.runAction();
                   return;
                 }

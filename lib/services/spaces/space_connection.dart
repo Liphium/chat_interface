@@ -26,7 +26,7 @@ class SpaceConnection {
       }
 
       // Tell all controllers about the leaving of the space
-      Get.find<StatusController>().stopSharing();
+      StatusController.stopSharing();
       TabletopController.resetControllerState();
       SpaceController.leaveSpace(error: error);
       WarpController.resetControllerState();

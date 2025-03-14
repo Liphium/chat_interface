@@ -147,7 +147,7 @@ class Connector {
         }
 
         // Add it to the after setup queue (in case it is an after setup handler)
-        if (_afterSetup[event.name] == true && !SetupManager.setupFinished && !Get.find<ConnectionController>().connected.value) {
+        if (_afterSetup[event.name] == true && !SetupManager.setupFinished && !ConnectionController.connected.value) {
           _afterSetupQueue.add(event);
           return;
         }
@@ -162,7 +162,7 @@ class Connector {
           onDone(false);
         }
         if (restart) {
-          Get.find<ConnectionController>().connectionStopped();
+          ConnectionController.connectionStopped();
         }
         initialized = false;
       },

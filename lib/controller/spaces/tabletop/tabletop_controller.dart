@@ -45,7 +45,7 @@ class TabletopController {
   // Movement of the canvas
   static Offset canvasOffset = const Offset(0, 0);
   static double canvasZoom = 0.5;
-  static final canvasRotation = 0.0.obs;
+  static final canvasRotation = signal(0.0);
 
   /// Reset the entire state of the controller (on every call start)
   static void resetControllerState() {

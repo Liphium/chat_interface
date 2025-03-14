@@ -7,12 +7,15 @@
 - Fixed that you couldn't invite people to a Space
 - Fixed same addresses sometimes not being recognized
 - Rewrote the code behind Spaces to be more readable and maintainable
-    - It now uses [signals](https://pub.dev/packages/signals) instead of GetX
-    - It's now devided into services and controllers for a better overview
-    - Tabletop's architecture still needs to be improved
+  - It now uses [signals](https://pub.dev/packages/signals) instead of GetX
+  - It's now devided into services and controllers for a better overview
+  - Tabletop's architecture still needs to be improved
 - Fixed Warp crashing when sharing invalid ports
 - Fixed Warp allowing to share already shared ports
 - Fixed being able to add accounts that are already friends as a friend
+- Rewrote the entire vault synchronization for better performance and maintainability
+- Rewrote the text formatting detection to make it more extensible and also more stable (\*\*\*\* no longer breaks the app)
+  - Regression: Links are no longer clickable (TODO: Fix before 1.0.0 Beta)
 - Fixed cards in rotated inventories having an incorrect rotation
 - Fixed not creating a new inventory when the old one has been deleted
 

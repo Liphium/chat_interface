@@ -10,6 +10,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SpaceRenderer extends StatefulWidget {
   final bool requestOnInit;
@@ -35,10 +36,10 @@ class SpaceRenderer extends StatefulWidget {
   State<SpaceRenderer> createState() => _SpaceRendererState();
 }
 
-class _SpaceRendererState extends State<SpaceRenderer> {
-  final _loading = true.obs;
-  final _info = Rx<SpaceInfo?>(null);
-  StreamSubscription<SpaceInfo?>? _sub;
+class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
+  late final _loading = createSignal(true);
+  late final _info = createSignal<SpaceInfo?>(null);
+  Function()? _disposeInfoSub;
 
   @override
   void initState() {
@@ -57,7 +58,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
 
   Future<void> loadState() async {
     _info.value = await widget.container.getInfo(timer: widget.pollNewData);
-    _sub = widget.container.info.listen((info) {
+    _disposeInfoSub = widget.container.info.subscribe((info) {
       if (widget.container.cancelled) {
         _loading.value = false;
       }
@@ -71,14 +72,14 @@ class _SpaceRendererState extends State<SpaceRenderer> {
   @override
   void dispose() {
     widget.container.onDrop();
-    _sub?.cancel();
+    _disposeInfoSub?.call();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Obx(() {
+      child: Watch((ctx) {
         if (_loading.value || _info.value == null) {
           return Container(
             decoration: BoxDecoration(

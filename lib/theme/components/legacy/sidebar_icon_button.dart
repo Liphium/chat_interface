@@ -2,12 +2,13 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SidebarIconButton extends StatefulWidget {
   final Function() onTap;
   final IconData icon;
   final int index;
-  final RxInt selected;
+  final ReadonlySignal<int> selected;
   final BorderRadius radius;
 
   const SidebarIconButton(
@@ -24,6 +25,12 @@ class SidebarIconButton extends StatefulWidget {
 
 class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderStateMixin {
   late AnimationController _controller;
+
+  late final selectedDispose = widget.selected.subscribe((value) {
+    if (widget.selected.value == widget.index) {
+      _controller.loop(count: 1, reverse: true);
+    }
+  });
 
   @override
   void initState() {
@@ -42,22 +49,17 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
   @override
   void dispose() {
     _controller.dispose();
+    selectedDispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    widget.selected.listen((value) {
-      if (widget.selected.value == widget.index) {
-        _controller.loop(count: 1, reverse: true);
-      }
-    });
-
     return Animate(
       controller: _controller,
       effects: [ScaleEffect(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), curve: Curves.easeOut, duration: 120.ms)],
-      child: Obx(
-        () => Material(
+      child: Watch(
+        (ctx) => Material(
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(defaultSpacing),
             topRight: Radius.circular(defaultSpacing),

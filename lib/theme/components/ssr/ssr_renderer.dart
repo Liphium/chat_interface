@@ -3,10 +3,12 @@ import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/ssr/ssr.dart';
 import 'package:chat_interface/theme/components/ssr/ssr_fetcher.dart';
+import 'package:chat_interface/util/dispose_hook.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SSRRenderer extends StatefulWidget {
@@ -129,8 +131,8 @@ class _SSRRendererState extends State<SSRRenderer> {
             expand: true,
           ),
           _renderButton(json, true), // Last = true for no padding
-          Obx(
-            () => Animate(
+          Watch(
+            (ctx) => Animate(
               effects: [
                 ExpandEffect(
                   duration: 250.ms,
@@ -154,25 +156,30 @@ class _SSRRendererState extends State<SSRRenderer> {
 
   /// Render a normal button using json (NOT A NORMAL ELEMENT)
   Widget _renderButton(Map<String, dynamic> json, bool last) {
-    final loading = false.obs;
-    return Padding(
-      padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
-      child: FJElevatedLoadingButton(
-        onTap: () async {
-          if (json["link"] ?? false) {
-            await launchUrl(Uri.parse(json["path"] ?? ""));
-            return;
-          }
+    final loading = signal(false);
+    return DisposeHook(
+      dispose: () {
+        loading.dispose();
+      },
+      child: Padding(
+        padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
+        child: FJElevatedLoadingButton(
+          onTap: () async {
+            if (json["link"] ?? false) {
+              await launchUrl(Uri.parse(json["path"] ?? ""));
+              return;
+            }
 
-          widget.ssr.error.value = "";
-          loading.value = true;
-          await Future.delayed(250.ms);
-          widget.ssr.suggestButton = null;
-          widget.ssr.error.value = await widget.ssr.next(json["path"]) ?? "";
-          loading.value = false;
-        },
-        label: json["label"],
-        loading: loading,
+            widget.ssr.error.value = "";
+            loading.value = true;
+            await Future.delayed(250.ms);
+            widget.ssr.suggestButton = null;
+            widget.ssr.error.value = await widget.ssr.next(json["path"]) ?? "";
+            loading.value = false;
+          },
+          label: json["label"],
+          loading: loading,
+        ),
       ),
     );
   }

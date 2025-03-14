@@ -113,10 +113,9 @@ class DeckObject extends TableObject {
 
     // Go through all cards and unpack them (only works in main thread cause sodium)
     final cardMap = json["cards"] as Map<String, dynamic>;
-    final controller = Get.find<AttachmentController>();
     for (var card in cardMap.values) {
       final type = await AttachmentController.checkLocations(card["i"], StorageType.cache);
-      cards[card["i"]] = controller.fromJson(type, card);
+      cards[card["i"]] = AttachmentController.fromJson(type, card);
     }
 
     // Set the width and height from the order
@@ -216,7 +215,7 @@ class DeckObject extends TableObject {
       ContextMenuAction(
         icon: Icons.shuffle,
         label: 'Shuffle',
-        onTap: (controller) {
+        onTap: () {
           shuffle();
           Get.back();
         },
@@ -236,7 +235,7 @@ class DeckObjectCreationWindow extends StatefulWidget {
 
 class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> with SignalsMixin {
   // Deck list
-  final _decks = listSignal(<TabletopDeck>[]);
+  final _decks = listSignal<TabletopDeck>([]);
   final _loading = signal(true);
   final _error = signal(false);
 
@@ -244,6 +243,14 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> with Sig
   void initState() {
     getDecksFromServer();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _decks.dispose();
+    _loading.dispose();
+    _error.dispose();
+    super.dispose();
   }
 
   Future<void> getDecksFromServer() async {

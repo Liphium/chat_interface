@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
@@ -8,6 +8,7 @@ import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 import '../../../util/vertical_spacing.dart';
 
@@ -21,14 +22,16 @@ class SpaceAddWindow extends StatefulWidget {
 }
 
 class _ConversationAddWindowState extends State<SpaceAddWindow> {
-  final public = true.obs;
-  final _conversationLoading = false.obs;
+  late final _public = signal(true);
+  late final _conversationLoading = signal(false);
 
   final _controller = TextEditingController();
 
   @override
   void dispose() {
     _controller.dispose();
+    _public.dispose();
+    _conversationLoading.dispose();
     super.dispose();
   }
 
@@ -36,7 +39,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    if (Get.find<FriendController>().friends.length == 1) {
+    if (FriendController.friends.length == 1) {
       return SlidingWindowBase(
         title: [
           Text("chat.space.add".tr, style: theme.textTheme.titleMedium),
@@ -70,8 +73,8 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
         children: [
           /*
           verticalSpacing(sectionSpacing),
-          Obx(
-            () => FJTextField(
+          Watch(
+            (ctx) => FJTextField(
               controller: _controller,
               hintText: "Space name".tr,
               errorText: _errorText.value,
@@ -82,11 +85,11 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Public", style: Get.theme.textTheme.bodyMedium),
-              Obx(
-                () => FJSwitch(
-                  value: public.value,
+              Watch(
+                (ctx) => FJSwitch(
+                  value: _public.value,
                   onChanged: (p0) {
-                    public.value = p0;
+                    _public.value = p0;
                   },
                 ),
               ),
@@ -95,7 +98,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
           verticalSpacing(defaultSpacing),
           FJElevatedLoadingButton(
             onTap: () async {
-              unawaited(SpaceController.createSpace(public.value));
+              unawaited(SpaceController.createSpace(_public.value));
               Get.back();
             },
             label: "create".tr,

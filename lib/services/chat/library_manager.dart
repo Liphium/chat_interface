@@ -4,61 +4,32 @@ import 'dart:convert';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart';
-import 'package:chat_interface/main.dart';
-import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/encryption/hash.dart';
 import 'package:chat_interface/util/popups.dart';
-import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class LibraryManager {
-  /// Load all new entries from the server
-  static Future<String?> refreshEntries() async {
-    // Get everything from the server after the date
-    final json = await postAuthorizedJSON("/account/vault/list", {
-      "after": 0,
-      "tag": Constants.vaultLibraryTag,
-    });
+class LibraryManager extends VaultTarget {
+  LibraryManager() : super(Constants.vaultLibraryTag);
 
-    // Check if there is an error
-    if (!json["success"]) {
-      return json["error"];
+  @override
+  Future<void> processEntries(List<String> deleted, List<VaultEntry> newEntries) async {
+    // Add all new entries
+    final list = <LibraryEntry>[];
+    for (var entry in newEntries) {
+      final libraryEntry = LibraryEntry.fromJson(entry.id, jsonDecode(entry.payload));
+      list.add(libraryEntry);
+      await db.libraryEntry.insertOnConflictUpdate(await libraryEntry.entity);
     }
-
-    // Parse all the vault entries in an isolate
-    final (parsed, ids) = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) {
-        final list = <LibraryEntry>[];
-        final ids = <String>[];
-        for (var entryJson in json["entries"]) {
-          final entry = VaultEntry.fromJson(entryJson);
-          final libraryEntry = LibraryEntry.fromJson(entry.id, jsonDecode(entry.decryptedPayload(keys[0], sodium)));
-          list.add(libraryEntry);
-          ids.add(entry.id);
-        }
-
-        return (list, ids);
-      },
-      secureKeys: [vaultKey],
-    );
 
     // Delete all library entries that aren't in the local database anymore
-    await db.libraryEntry.deleteWhere((tbl) => tbl.id.isNotIn(ids));
+    await db.libraryEntry.deleteWhere((tbl) => tbl.id.isIn(deleted));
 
-    // Check if there are any
-    if (parsed.isEmpty || ids.isEmpty) {
-      return null;
-    }
-
-    // Add all of them to the database
-    for (var entry in parsed) {
-      await db.libraryEntry.insertOnConflictUpdate(entry.entity);
-    }
-
-    return null;
+    return;
   }
 
   /// Remove a library entry from the library
@@ -69,9 +40,6 @@ class LibraryManager {
       showErrorPopup("error", error);
       return false;
     }
-
-    // Remove from the local database
-    await db.libraryEntry.deleteWhere((tbl) => tbl.id.equals(entry.id));
 
     return true;
   }
@@ -117,15 +85,11 @@ class LibraryManager {
     }
 
     // Add entry to server vault
-    final id = await addToVault(Constants.vaultLibraryTag, jsonEncode(entry.toJson()));
-    if (id == null) {
-      showErrorPopup("error", "server.error".tr);
+    final (error, _) = await addToVault(Constants.vaultLibraryTag, jsonEncode(entry.toJson()));
+    if (error != null) {
+      showErrorPopup("error", error);
       return false;
     }
-
-    // Add to local database as well
-    entry.id = id;
-    await db.libraryEntry.insertOnConflictUpdate(entry.entity);
     return true;
   }
 
@@ -155,25 +119,52 @@ class LibraryEntry {
   final DateTime createdAt;
   final int width;
   final int height;
+  String? identifier;
+  AttachmentContainer? container;
 
   LibraryEntry(this.id, this.type, this.data, this.createdAt, this.width, this.height);
 
   /// Get a library entry from the local database object
-  LibraryEntry.fromData(LibraryEntryData data)
-      : this(
-          data.id,
-          data.type,
-          data.data,
-          DateTime.fromMillisecondsSinceEpoch(data.createdAt.toInt()),
-          data.width,
-          data.height,
-        );
+  static Future<LibraryEntry> fromData(LibraryEntryData data) async {
+    // Migrate to new system in case still not database encrypted
+    if (data.identifierHash == "to-migrate") {
+      // Get the new identifier
+      final container = await AttachmentController.fromString(data.data);
+      final identifier = LibraryEntry.entryIdentifier(container);
 
-  get entity => LibraryEntryData(
+      // Fix the entry
+      data = LibraryEntryData(
+        id: data.id,
+        type: data.type,
+        createdAt: data.createdAt,
+        identifierHash: identifier,
+        data: dbEncrypted(data.data),
+        width: data.width,
+        height: data.height,
+      );
+      unawaited(db.libraryEntry.insertOnConflictUpdate(data));
+    }
+
+    // Create the actual library entry
+    final entry = LibraryEntry(
+      data.id,
+      data.type,
+      fromDbEncrypted(data.data),
+      DateTime.fromMillisecondsSinceEpoch(data.createdAt.toInt()),
+      data.width,
+      data.height,
+    );
+    entry.identifier = data.identifierHash;
+
+    return entry;
+  }
+
+  Future<LibraryEntryData> get entity async => LibraryEntryData(
         id: id,
         type: type,
         createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
-        data: data,
+        identifierHash: identifier ?? (await getIdentifier()),
+        data: dbEncrypted(data),
         width: width,
         height: height,
       );
@@ -199,5 +190,28 @@ class LibraryEntry {
       json['width'],
       json['height'],
     );
+  }
+
+  /// Get the identifier of the library entry.
+  Future<String> getIdentifier() async {
+    final container = await AttachmentController.fromString(data);
+    return LibraryEntry.entryIdentifier(container);
+  }
+
+  /// Load all the things needed for displaying the entry.
+  Future<void> initForUI() async {
+    container = await AttachmentController.fromString(data);
+    identifier = LibraryEntry.entryIdentifier(container!);
+  }
+
+  /// Get the identifier of a Library entry from an AttachmentContainer.
+  static String entryIdentifier(AttachmentContainer container) {
+    // If it's a file hash the file id
+    if (container.attachmentType == AttachmentContainerType.file) {
+      return hashSha(container.id);
+    }
+
+    // Otherwise hash the URL of the remote container
+    return hashSha(container.url);
   }
 }

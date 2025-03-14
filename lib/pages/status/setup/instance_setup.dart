@@ -55,8 +55,11 @@ class InstanceSetup extends Setup {
   }
 }
 
-String dbEncrypted(String data) {
-  return encryptSymmetric(data, databaseKey);
+/// Convert data to a local database encrypted string.
+///
+/// Encrypts using the database key stored in secure storage.
+String dbEncrypted(String data, [Sodium? sodium, SecureKey? key]) {
+  return encryptSymmetric(data, key ?? databaseKey, sodium);
 }
 
 String fromDbEncrypted(String cipher) {

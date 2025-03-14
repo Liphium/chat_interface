@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
@@ -10,140 +12,104 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
-import 'member_controller.dart';
-
-class ConversationController extends GetxController {
-  final loaded = false.obs;
-  final order = <LPHAddress>[].obs; // List of conversation IDs in order of last updated
-  final conversations = <LPHAddress, Conversation>{};
+class ConversationController {
+  static final loaded = signal(false);
+  static final order = listSignal(<LPHAddress>[]); // List of conversation IDs in order of last updated
+  static final conversations = mapSignal(<LPHAddress, Conversation>{});
   int newConvs = 0;
 
-  /// Add a conversation to the cache
-  Future<bool> add(Conversation conversation, {loadMembers = true}) async {
-    // Load members from the database
-    if (conversation.members.isEmpty && loadMembers) {
-      final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conversation.id.encode()))).get();
+  /// Add a conversation to the cache.
+  static void add(Conversation conversation) {
+    batch(() {
+      _insertToOrder(conversation.id);
+      conversations[conversation.id] = conversation;
+    });
+  }
 
-      for (var member in members) {
-        conversation.addMember(Member.fromData(member));
+  /// Update the last message send time of a conversation in the UI.
+  ///
+  /// For more explanation look at [ConversationService.updateLastMessage].
+  static void updateLastMessageTime(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
+    batch(() {
+      // Make sure the conversation is at the top
+      _insertToOrder(conversation);
+
+      // Update the cache
+      conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
+      if (increment && conversations[conversation]!.readAt.value < messageSendTime) {
+        conversations[conversation]!.notificationCount.value += 1;
       }
-    }
-
-    // Insert into cache
-    _insertToOrder(conversation.id);
-    conversations[conversation.id] = conversation;
-
-    return true;
-  }
-
-  /// Add a new conversation and refresh members (also subscribes)
-  Future<bool> addFromVault(Conversation conversation) async {
-    // Insert it into cache
-    await add(conversation, loadMembers: false);
-
-    // Insert into database
-    conversation.save(saveMembers: false);
-
-    // Subscribe to conversation
-    ConversationService.subscribeToConversation(conversation.token);
-
-    return true;
-  }
-
-  /// Add a conversation to the cache and local database (after created)
-  Future<bool> addCreated(Conversation conversation, List<Member> members, {Member? admin}) async {
-    // Cache the conversation
-    conversations[conversation.id] = conversation;
-    _insertToOrder(conversation.id);
-
-    // Add all the members to this conversation
-    for (var member in members) {
-      conversation.addMember(member);
-    }
-    if (admin != null) {
-      conversation.addMember(admin);
-    }
-
-    return true;
-  }
-
-  void updateMessageRead(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode())))
-        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
-
-    // Swap in the map
-    _insertToOrder(conversation);
-    conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
-    if (increment && conversations[conversation]!.readAt.value < messageSendTime) {
-      conversations[conversation]!.notificationCount.value += 1;
-    }
+    });
   }
 
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date.
   ///
   /// Called later for all conversations from other servers since they are streamed in after.
-  Future<void> finishedLoading(
+  static Future<void> finishedLoading(
     String server,
     Map<String, dynamic> conversationInfo,
     List<dynamic> deleted,
     bool error,
   ) async {
-    // Sort the conversations
-    order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
-
     // Delete all the conversations that should be deleted
-    var toRemove = <LPHAddress>[];
-    final controller = Get.find<ConversationController>();
-    for (var conversation in controller.conversations.values) {
-      if (deleted.contains(conversation.token.id.encode())) {
-        toRemove.add(conversation.id);
-      }
-    }
-    for (var key in toRemove) {
-      sendLog("deleting $key");
-      await controller.conversations[key]!.delete(popup: false);
-    }
-
-    // Update all the conversations
     for (var conversation in conversations.values) {
-      if (!isSameServer(conversation.id.server, server)) {
-        continue;
-      }
-
-      // Get conversation info
-      final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
-      final version = (info["v"] ?? 0) as int;
-      conversation.notificationCount.value = (info["n"] ?? 0) as int;
-      conversation.readAt.value = (info["r"] ?? 0) as int;
-
-      // Set an error if there is one
-      if (error) {
-        conversation.error.value = "other.server.error".tr;
-      }
-
-      // Check if the current version of the conversation is up to date
-      sendLog("version ${conversation.id} client: ${conversation.lastVersion}, server: $version");
-      if (conversation.lastVersion != version) {
-        sendLog("conversation version updated");
-        await conversation.fetchData();
+      if (deleted.contains(conversation.token.id.encode())) {
+        unawaited(ConversationService.delete(
+          conversation.id,
+          vaultId: conversation.vaultId,
+          token: conversation.token,
+        ));
       }
     }
 
-    loaded.value = true;
+    // Start a new batch to modify all the state at once
+    batch(() {
+      // Sort the conversations
+      order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
+
+      // Update all the conversations
+      for (var conversation in conversations.values) {
+        if (!isSameServer(conversation.id.server, server)) {
+          continue;
+        }
+
+        // Get conversation info
+        final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
+        final version = (info["v"] ?? 0) as int;
+        conversation.notificationCount.value = (info["n"] ?? 0) as int;
+        conversation.readAt.value = (info["r"] ?? 0) as int;
+
+        // Set an error if there is one
+        if (error) {
+          conversation.error.value = "other.server.error".tr;
+        }
+
+        // Check if the current version of the conversation is up to date
+        if (conversation.lastVersion != version) {
+          unawaited(ConversationService.fetchNewestVersion(conversation));
+        }
+      }
+
+      loaded.value = true;
+    });
   }
 
-  void _insertToOrder(LPHAddress id) {
-    if (order.contains(id)) {
+  /// Insert a conversation into the ordered list of conversations.
+  ///
+  /// If it already exists it will be added at the top of the order.
+  static void _insertToOrder(LPHAddress id) {
+    batch(() {
       order.remove(id);
-    }
-    order.insert(0, id);
+      order.insert(0, id);
+    });
   }
 
-  void removeConversation(LPHAddress id) {
+  /// Remove a conversation from the cache.
+  static void removeConversation(LPHAddress id) {
     conversations.remove(id);
     order.remove(id);
   }
@@ -156,11 +122,11 @@ class Conversation {
   final ConversationToken token;
   ConversationContainer container;
   int lastVersion;
-  final updatedAt = 0.obs;
-  final readAt = 0.obs;
-  final notificationCount = 0.obs;
-  final containerSub = ConversationContainer("").obs; // Data subscription
-  final error = Rx<String?>(null);
+  final updatedAt = signal(0);
+  final readAt = signal(0);
+  final notificationCount = signal(0);
+  final containerSub = signal(ConversationContainer("")); // Data subscription
+  final error = signal<String?>(null);
   String packedKey;
   SecureKey? _cachedKey;
 
@@ -169,8 +135,8 @@ class Conversation {
     return _cachedKey!;
   }
 
-  final membersLoading = false.obs;
-  final members = <LPHAddress, Member>{}.obs; // Token ID -> Member
+  final membersLoading = signal(false);
+  final members = mapSignal(<LPHAddress, Member>{}); // Token ID -> Member
 
   Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
     containerSub.value = container;
@@ -237,7 +203,7 @@ class Conversation {
         MemberRole.user,
       ),
     );
-    return Get.find<FriendController>().friends[member.address]?.displayName.value ?? container.name;
+    return FriendController.friends[member.address]?.displayName.value ?? container.name;
   }
 
   /// Only works for direct messages
@@ -250,13 +216,13 @@ class Conversation {
         MemberRole.user,
       ),
     );
-    return Get.find<FriendController>().friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
+    return FriendController.friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
   }
 
   /// Check if a conversation is broken (borked)
   bool get borked =>
       !isGroup &&
-      Get.find<FriendController>().friends[members.values
+      FriendController.friends[members.values
               .firstWhere((element) => element.address != StatusController.ownAddress,
                   orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user))
               .address] ==
@@ -285,89 +251,22 @@ class Conversation {
         "data": container.toJson(),
       });
 
-  // Delete conversation from vault and database
-  Future<void> delete({bool request = true, bool popup = true}) async {
+  /// Delete conversation from vault and database.
+  ///
+  /// Shows an error popup when there was an error.
+  Future<void> delete({bool leaveRequest = true}) async {
     // Check if the vault id has been synchronized yet
     if (vaultId == "") {
-      if (popup) {
-        showErrorPopup("error", "conversation.delete_error".tr);
-      }
+      showErrorPopup("error", "conversation.delete_error".tr);
       sendLog("ERROR: Can't delete conversation yet: no vault id");
       return;
     }
 
     // Delete the conversation
-    final error = await ConversationService.delete(id, vaultId: vaultId, token: token);
+    final error = await ConversationService.delete(id, vaultId: vaultId, token: leaveRequest ? token : null);
     if (error != null) {
-      if (popup) {
-        showErrorPopup("error", error);
-      }
+      showErrorPopup("error", error);
       sendLog("ERROR: Can't delete conversation: $error");
     }
-  }
-
-  /// Save the entire conversation to the local database.
-  ///
-  /// By default members are also overwritten. Can be disabled by setting `saveMembers` to `false`.
-  void save({saveMembers = true}) {
-    db.conversation.insertOnConflictUpdate(entity);
-    if (saveMembers) {
-      for (var member in members.values) {
-        db.member.insertOnConflictUpdate(member.toData(id));
-      }
-    }
-  }
-
-  /// Fetch all data about a conversation from the server and update it in the local database.
-  ///
-  /// Also compares the current version with the new version that was sent and doesn't refresh
-  /// in case it's not nessecary. Can be disabled by setting `refreshAnyway` to `false`.
-  Future<bool> fetchData() async {
-    if (membersLoading.value) {
-      return false;
-    }
-
-    // Get the data from the server
-    membersLoading.value = true;
-    final json = await postNodeJSON("/conversations/data", {
-      "token": token.toMap(),
-    });
-
-    if (!json["success"]) {
-      sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING ${json["error"]}");
-      // TODO: Add to some sort of error collection
-      return false;
-    }
-
-    // Update to the latest version
-    sendLog("PULLED VERSION ${json["version"]}");
-    lastVersion = json["version"];
-
-    // Update the container
-    container = ConversationContainer.decrypt(json["data"], key);
-    containerSub.value = container;
-
-    // Update the members
-    final members = <LPHAddress, Member>{};
-    for (var memberData in json["members"]) {
-      sendLog(memberData);
-      final memberContainer = MemberContainer.decrypt(memberData["data"], key);
-      final address = LPHAddress.from(memberData["id"]);
-      members[address] = Member(address, memberContainer.id, MemberRole.fromValue(memberData["rank"]));
-    }
-
-    // Load the members into the database
-    for (var currentMember in this.members.values) {
-      if (!members.containsKey(currentMember.tokenId)) {
-        await db.member.deleteWhere((tbl) => tbl.id.equals(currentMember.tokenId.encode()));
-      }
-    }
-
-    // Set the members and save the conversation
-    this.members.value = members;
-    membersLoading.value = false;
-    save();
-
-    return true;
   }
 }

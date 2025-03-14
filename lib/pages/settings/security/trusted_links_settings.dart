@@ -12,6 +12,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class TrustedLinkSettings {
   static const String unsafeSources = "links.unsafe_sources";
@@ -23,9 +24,9 @@ class TrustedLinkSettings {
     SelectableItem("links.trust_mode.none", Icons.close),
   ];
 
-  static void registerSettings(SettingController controller) {
-    controller.addSetting(Setting<bool>(unsafeSources, false));
-    controller.addSetting(Setting<int>(trustMode, 1));
+  static void addSettings() {
+    SettingController.addSetting(Setting<bool>(unsafeSources, false));
+    SettingController.addSetting(Setting<int>(trustMode, 1));
   }
 }
 
@@ -37,12 +38,18 @@ class TrustedLinkSettingsPage extends StatefulWidget {
 }
 
 class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
-  final _trusted = <TrustedLinkData>[].obs;
+  final _trusted = listSignal<TrustedLinkData>([]);
 
   @override
   void initState() {
     super.initState();
     loadTrusted();
+  }
+
+  @override
+  void dispose() {
+    _trusted.dispose();
+    super.dispose();
   }
 
   Future<void> loadTrusted() async {
@@ -96,7 +103,7 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
             child: Text("links.trusted_list.add".tr, style: Get.theme.textTheme.labelLarge),
           ),
           verticalSpacing(defaultSpacing),
-          Obx(() {
+          Watch((ctx) {
             if (_trusted.isEmpty) {
               return Text("links.trusted_list.empty".tr, style: Get.theme.textTheme.labelMedium);
             }

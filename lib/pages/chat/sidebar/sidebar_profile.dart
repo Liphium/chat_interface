@@ -1,7 +1,8 @@
 import 'dart:math';
 
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
@@ -31,7 +32,6 @@ class _SidebarProfileState extends State<SidebarProfile> {
 
   @override
   Widget build(BuildContext context) {
-    final statusController = Get.find<StatusController>();
     ThemeData theme = Theme.of(context);
 
     return Container(
@@ -51,8 +51,8 @@ class _SidebarProfileState extends State<SidebarProfile> {
                   Watch((context) {
                     if (!SpaceController.connected.value) {
                       // Render an embed letting the user know he's in a call on another device
-                      return Obx(() {
-                        if (statusController.ownContainer.value != null && statusController.ownContainer.value is SpaceConnectionContainer) {
+                      return Watch((ctx) {
+                        if (StatusController.ownContainer.value != null && StatusController.ownContainer.value is SpaceConnectionContainer) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
                             child: Row(
@@ -62,7 +62,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                 Text("spaces.sharing_other_device".tr, style: Get.theme.textTheme.bodyMedium),
                                 const Spacer(),
                                 LoadingIconButton(
-                                  onTap: () => SpaceController.join(statusController.ownContainer.value! as SpaceConnectionContainer),
+                                  onTap: () => SpaceController.join(StatusController.ownContainer.value! as SpaceConnectionContainer),
                                   icon: Icons.login,
                                   extra: defaultSpacing,
                                   iconSize: 25,
@@ -77,8 +77,8 @@ class _SidebarProfileState extends State<SidebarProfile> {
                       });
                     }
 
-                    return Obx(() {
-                      final shown = Get.find<MessageController>().currentProvider.value == null;
+                    return Watch((ctx) {
+                      final shown = SidebarController.currentOpenTab.value is SpaceSidebarTab;
 
                       return Column(
                         children: [
@@ -87,9 +87,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                             color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
                             child: InkWell(
                               onTap: () {
-                                final controller = Get.find<MessageController>();
-                                controller.unselectConversation();
-                                controller.currentOpenType.value = OpenTabType.space;
+                                SidebarController.openTab(SpaceSidebarTab());
                               },
                               splashColor: theme.hoverColor,
                               hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
@@ -124,7 +122,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                     });
                   }),
 
-                  //* Actual profile
+                  // Actual profile
                   Material(
                     key: _profileKey,
                     borderRadius: BorderRadius.circular(defaultSpacing),
@@ -139,9 +137,9 @@ class _SidebarProfileState extends State<SidebarProfile> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Obx(() {
+                            Watch((ctx) {
                               // Check if the thing is loading
-                              if (Get.find<ConnectionController>().loading.value) {
+                              if (ConnectionController.loading.value) {
                                 return Row(
                                   children: [
                                     horizontalSpacing(defaultSpacing),
@@ -159,7 +157,7 @@ class _SidebarProfileState extends State<SidebarProfile> {
                               }
 
                               // Check if the thing is connected
-                              if (!Get.find<ConnectionController>().connected.value) {
+                              if (!ConnectionController.connected.value) {
                                 return Row(
                                   children: [
                                     horizontalSpacing(defaultSpacing),
@@ -179,9 +177,9 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                     UserAvatar(id: StatusController.ownAddress, size: 40),
                                     horizontalSpacing(defaultSpacing),
                                     Expanded(
-                                      child: Obx(
-                                        () => Visibility(
-                                          visible: !statusController.statusLoading.value,
+                                      child: Watch(
+                                        (ctx) => Visibility(
+                                          visible: !StatusController.statusLoading.value,
                                           replacement: Center(
                                             child: Padding(
                                               padding: const EdgeInsets.all(defaultSpacing),
@@ -198,13 +196,13 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              //* Profile name and status type
+                                              // The current user's display name and status type
                                               Row(
                                                 children: [
                                                   Flexible(
-                                                    child: Obx(
-                                                      () => Text(
-                                                        statusController.displayName.value,
+                                                    child: Watch(
+                                                      (ctx) => Text(
+                                                        StatusController.displayName.value,
                                                         maxLines: 1,
                                                         overflow: TextOverflow.ellipsis,
                                                         style: theme.textTheme.titleMedium,
@@ -213,23 +211,21 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                                     ),
                                                   ),
                                                   horizontalSpacing(defaultSpacing),
-                                                  Obx(
-                                                    () => StatusRenderer(status: statusController.type.value, text: false),
+                                                  Watch(
+                                                    (ctx) => StatusRenderer(status: StatusController.type.value, text: false),
                                                   )
                                                 ],
                                               ),
 
-                                              //* Status message
-                                              Obx(
-                                                () => Visibility(
-                                                  visible: statusController.status.value != "",
+                                              // Render the status message of the curretn user
+                                              Watch(
+                                                (ctx) => Visibility(
+                                                  visible: StatusController.status.value != "",
                                                   child: Column(
                                                     children: [
                                                       verticalSpacing(defaultSpacing * 0.25),
-
-                                                      //* Status message
                                                       Text(
-                                                        statusController.status.value,
+                                                        StatusController.status.value,
                                                         style: theme.textTheme.bodySmall,
                                                         textHeightBehavior: noTextHeight,
                                                         overflow: TextOverflow.ellipsis,
@@ -259,12 +255,11 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                         onPressed: () => showModal(const FriendsPage()),
                                         icon: const Icon(Icons.group, color: Colors.white),
                                       ),
-                                      Obx(() {
-                                        final controller = Get.find<RequestController>();
-                                        if (controller.requests.isEmpty) {
+                                      Watch((ctx) {
+                                        if (RequestController.requests.isEmpty) {
                                           return const SizedBox();
                                         }
-                                        final amount = controller.requests.length;
+                                        final amount = RequestController.requests.length;
 
                                         return Align(
                                           alignment: Alignment.bottomRight,

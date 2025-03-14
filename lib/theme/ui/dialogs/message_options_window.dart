@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MessageOptionsWindow extends StatefulWidget {
   final ContextMenuData data;
@@ -41,11 +42,17 @@ class MessageOptionsWindow extends StatefulWidget {
 }
 
 class _ConversationAddWindowState extends State<MessageOptionsWindow> {
-  final messageDeletionLoading = false.obs;
+  final _messageDeletionLoading = signal(false);
+
+  @override
+  void dispose() {
+    _messageDeletionLoading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final friend = Get.find<FriendController>().friends[widget.message.senderAddress];
+    final friend = FriendController.friends[widget.message.senderAddress];
 
     return SlidingWindowBase(
       lessPadding: true,
@@ -75,7 +82,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   Get.back();
                   Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider!));
                 },
-                loading: false.obs,
               ),
             ),
 
@@ -90,7 +96,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   Clipboard.setData(ClipboardData(text: widget.message.content));
                   Get.back();
                 },
-                loading: false.obs,
               ),
             ),
 
@@ -119,7 +124,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   await attachment.file!.saveTo(saveLocation.path);
                   Get.back();
                 },
-                loading: false.obs,
               ),
             ),
 
@@ -142,7 +146,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   unawaited(OpenFile.open(attachment.file!.path));
                   Get.back();
                 },
-                loading: false.obs,
               ),
             ),
 
@@ -158,7 +161,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   await Pasteboard.writeFiles([widget.message.attachmentsRenderer[0].file!.path]);
                   Get.back();
                 },
-                loading: false.obs,
               ),
             ),
 
@@ -170,7 +172,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
               Get.back();
               showModal(Profile(friend: friend ?? Friend.unknown(widget.message.senderAddress)));
             },
-            loading: false.obs,
           ),
 
           // Give the user an option to reply in case it's a text message
@@ -184,7 +185,6 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   MessageSendHelper.addReplyToCurrentDraft(widget.message);
                   Get.back();
                 },
-                loading: false.obs,
               ),
             ),
 
@@ -200,8 +200,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 label: "message.delete".tr,
                 onTap: () async {
                   // Set and check loading state
-                  if (messageDeletionLoading.value) return;
-                  messageDeletionLoading.value = true;
+                  if (_messageDeletionLoading.value) return;
+                  _messageDeletionLoading.value = true;
 
                   // Check if the message is sent by the current user to ask for file deletions
                   if (StatusController.ownAddress == widget.message.senderAddress && widget.message.attachments.isNotEmpty) {
@@ -216,7 +216,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                             final path = await AttachmentController.getFilePathFor(json["i"]);
 
                             // Delete the file (also locally in case needed)
-                            await Get.find<AttachmentController>().deleteFileFromPath(
+                            await AttachmentController.deleteFileFromPath(
                               json["i"],
                               path == null ? null : XFile(path),
                               popup: true,
@@ -229,7 +229,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
                   // Delete message
                   final result = await widget.message.delete(widget.provider!);
-                  messageDeletionLoading.value = false;
+                  _messageDeletionLoading.value = false;
                   if (result != null) {
                     showErrorPopup("error", result);
                     return;
@@ -237,7 +237,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
 
                   Get.back();
                 },
-                loading: messageDeletionLoading,
+                loading: _messageDeletionLoading,
               ),
             ),
         ],

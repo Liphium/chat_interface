@@ -1,13 +1,16 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
 import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MessageFeed extends StatefulWidget {
   final double? overwritePadding;
@@ -25,12 +28,6 @@ class MessageFeed extends StatefulWidget {
 
 class _MessageFeedState extends State<MessageFeed> {
   final TextEditingController _message = TextEditingController();
-  final loading = false.obs;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -40,11 +37,9 @@ class _MessageFeedState extends State<MessageFeed> {
 
   @override
   Widget build(BuildContext context) {
-    MessageController controller = Get.find();
-    SettingController settingController = Get.find();
-
-    return Obx(() {
-      if (controller.currentProvider.value!.conversation.error.value != null) {
+    return Watch((ctx) {
+      final provider = (SidebarController.currentOpenTab.value as ConversationSidebarTab).provider;
+      if (provider.conversation.error.value != null) {
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
@@ -57,7 +52,7 @@ class _MessageFeedState extends State<MessageFeed> {
                 ),
                 verticalSpacing(defaultSpacing),
                 Text(
-                  controller.currentProvider.value!.conversation.error.value!,
+                  provider.conversation.error.value!,
                   style: Get.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -74,25 +69,25 @@ class _MessageFeedState extends State<MessageFeed> {
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
-                  //* Message list
+                  // Message list
                   Expanded(
                     child: Stack(
                       children: [
-                        //* Messages
+                        // Messages
                         Center(
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxWidth: (ChatSettings.chatThemeSetting.value.value ?? 1) == 0 ? double.infinity : 1200,
+                              maxWidth: (SettingController.settings[ChatSettings.chatTheme]!.value.value ?? 1) == 0 ? double.infinity : 1200,
                             ),
-                            child: Obx(
-                              () {
-                                if (!controller.loaded.value) {
+                            child: Watch(
+                              (ctx) {
+                                if (!MessageController.loaded.value) {
                                   return const SizedBox();
                                 }
 
                                 return MessageList(
-                                  key: ValueKey(controller.currentProvider.value!.conversation.id),
-                                  provider: controller.currentProvider.value!,
+                                  key: ValueKey(provider.conversation.id),
+                                  provider: provider,
                                   overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
                                 );
                               },
@@ -100,18 +95,13 @@ class _MessageFeedState extends State<MessageFeed> {
                           ),
                         ),
 
-                        //* Animated loading indicator
+                        // Animated loading indicator
                         Align(
                           alignment: Alignment.topCenter,
-                          child: Obx(
-                            () => Animate(
-                              effects: [
-                                FadeEffect(
-                                  curve: Curves.ease,
-                                  duration: 250.ms,
-                                ),
-                              ],
-                              target: controller.currentProvider.value!.newMessagesLoading.value ? 1 : 0,
+                          child: Watch(key: ValueKey(provider.conversation.id), (ctx) {
+                            sendLog("re-render loading thingy: ${provider.newMessagesLoading.value} ${provider.hashCode}");
+                            return Visibility(
+                              visible: provider.newMessagesLoading.value,
                               child: Padding(
                                 padding: const EdgeInsets.all(defaultSpacing),
                                 child: Material(
@@ -138,8 +128,8 @@ class _MessageFeedState extends State<MessageFeed> {
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          }),
                         ),
                       ],
                     ),
@@ -147,27 +137,27 @@ class _MessageFeedState extends State<MessageFeed> {
 
                   //* Message input
                   SelectionContainer.disabled(
-                    child: controller.currentProvider.value!.conversation.borked
+                    child: provider.conversation.borked
                         ? const SizedBox.shrink()
                         : MessageInput(
                             rectangle: widget.rectInput,
-                            draft: controller.currentProvider.value!.conversation.id.encode(),
-                            provider: controller.currentProvider.value!,
+                            draft: provider.conversation.id.encode(),
+                            provider: provider,
                           ),
                   )
                 ],
               ),
             ),
           ),
-          Obx(() {
-            final visible = settingController.settings[AppSettings.showGroupMembers]!.value.value;
+          Watch((ctx) {
+            final visible = SettingController.settings[AppSettings.showGroupMembers]!.value.value;
             return Visibility(
-              visible: controller.currentProvider.value!.conversation.isGroup && visible,
+              visible: provider.conversation.isGroup && visible,
               child: Container(
                 color: Get.theme.colorScheme.onInverseSurface,
                 width: 300,
                 child: ConversationMembers(
-                  conversation: controller.currentProvider.value!.conversation,
+                  conversation: provider.conversation,
                 ),
               ),
             );

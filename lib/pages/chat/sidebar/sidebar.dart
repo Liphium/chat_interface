@@ -12,6 +12,7 @@ import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_core.dart';
 
 class Sidebar extends StatefulWidget {
   const Sidebar({super.key});
@@ -21,12 +22,17 @@ class Sidebar extends StatefulWidget {
 }
 
 class _SidebarState extends State<Sidebar> {
-  final query = "".obs;
+  final _query = signal("");
   final GlobalKey _addConvKey = GlobalKey(), _addSpaceKey = GlobalKey();
 
   @override
+  void dispose() {
+    _query.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    //* Sidebar
     return Container(
       decoration: BoxDecoration(
         color: Get.theme.colorScheme.onInverseSurface,
@@ -54,11 +60,11 @@ class _SidebarState extends State<Sidebar> {
                   right: defaultSpacing,
                   left: defaultSpacing,
                 ),
-                message: Get.find<ConnectionController>().error,
+                message: ConnectionController.error,
               ),
             ),
 
-            //* Search field
+            // Search field
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
               child: SizedBox(
@@ -90,7 +96,7 @@ class _SidebarState extends State<Sidebar> {
                                     hintStyle: Get.textTheme.bodyMedium,
                                   ),
                                   onChanged: (value) {
-                                    query.value = value;
+                                    _query.value = value;
                                   },
                                   cursorColor: Get.theme.colorScheme.onPrimary,
                                 ),
@@ -126,7 +132,7 @@ class _SidebarState extends State<Sidebar> {
                                       onPressed: () {
                                         final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
 
-                                        //* Open conversation add window
+                                        // Open conversation add window
                                         showModal(ConversationAddWindow(
                                           position:
                                               ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
@@ -154,7 +160,7 @@ class _SidebarState extends State<Sidebar> {
                 bottom: false,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                  child: SidebarConversationList(query: query),
+                  child: SidebarConversationList(query: _query),
                 ),
               ),
             ),

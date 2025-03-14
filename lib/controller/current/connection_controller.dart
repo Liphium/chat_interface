@@ -13,28 +13,29 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
-class ConnectionController extends GetxController {
-  final loading = false.obs;
-  final connected = false.obs;
-  final error = RxString("");
-  Timer? _retryTimer;
+class ConnectionController {
+  static final loading = signal(false);
+  static final connected = signal(false);
+  static final error = signal("");
+  static Timer? _retryTimer;
 
   // Static tasks so their loading state can be accessed from anywhere
   static final friendSyncTask = FriendsSyncTask();
   static final vaultSyncTask = VaultSyncTask();
 
   /// Tasks that run after the setup
-  final _tasks = <SynchronizationTask>[
+  static final _tasks = <SynchronizationTask>[
     friendSyncTask,
     vaultSyncTask,
   ];
-  bool tasksRan = false;
+  static bool tasksRan = false;
 
   /// Steps that run to get the client connected
-  final _steps = <ConnectionStep>[];
+  static final _steps = <ConnectionStep>[];
 
-  ConnectionController() {
+  static void init() {
     // Refresh the token and make sure it works
     _steps.add(RefreshTokenStep());
 
@@ -51,7 +52,7 @@ class ConnectionController extends GetxController {
     _steps.add(StoredActionsSetup());
   }
 
-  Future<void> tryConnection() async {
+  static Future<void> tryConnection() async {
     // Initialize all the stuff
     for (var task in _tasks) {
       final result = await task.init();
@@ -98,7 +99,7 @@ class ConnectionController extends GetxController {
     unawaited(_startTasks());
   }
 
-  Future<void> _startTasks() async {
+  static Future<void> _startTasks() async {
     if (tasksRan) return;
     tasksRan = true;
 
@@ -108,7 +109,7 @@ class ConnectionController extends GetxController {
     }
   }
 
-  void restart() {
+  static void restart() {
     tasksRan = false;
 
     // Reset all data from the tasks before the restart
@@ -126,14 +127,14 @@ class ConnectionController extends GetxController {
   }
 
   /// Retries to connect again after a certain amount of time
-  void _retry() {
+  static void _retry() {
     _retryTimer?.cancel();
     _retryTimer = Timer(const Duration(seconds: 10), () {
       tryConnection();
     });
   }
 
-  void connectionStopped() {
+  static void connectionStopped() {
     connected.value = false;
     loading.value = true;
     error.value = "error.network".tr;
@@ -169,22 +170,30 @@ abstract class SynchronizationTask {
   SynchronizationTask(this.name, this.frequency);
 
   Timer? _timer;
-  final loading = false.obs;
+  final loading = signal(false);
 
   /// Starts the task.
   Future<void> start() async {
+    Future<void> runner() async {
+      if (loading.value) {
+        return;
+      }
+      loading.value = true;
+      final result = await refresh();
+      if (result != null) {
+        sendLog("task $name finished with error: $result");
+      }
+      loading.value = false;
+    }
+
+    // Run it after being initialized
+    unawaited(runner());
+
+    // Run the thing every now and then
     _timer = Timer.periodic(
       frequency,
       (timer) async {
-        if (loading.value) {
-          return;
-        }
-        loading.value = true;
-        final result = await refresh();
-        if (result != null) {
-          sendLog("task $name finished with error: $result");
-        }
-        loading.value = false;
+        unawaited(runner());
       },
     );
   }

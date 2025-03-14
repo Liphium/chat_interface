@@ -7,6 +7,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ChangeDisplayNameWindow extends StatefulWidget {
   const ChangeDisplayNameWindow({super.key});
@@ -20,18 +21,19 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
   final _displayNameController = TextEditingController();
 
   // State
-  final _errorText = ''.obs;
-  final _loading = false.obs;
+  final _errorText = signal('');
+  final _loading = signal(false);
 
   @override
   void dispose() {
+    _errorText.dispose();
+    _loading.dispose();
     _displayNameController.dispose();
     super.dispose();
   }
 
   /// Save the display name
   Future<void> save() async {
-    final controller = Get.find<StatusController>();
     if (_loading.value) return;
     _loading.value = true;
     _errorText.value = "";
@@ -46,15 +48,14 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
       return;
     }
 
-    controller.displayName.value = _displayNameController.text;
+    StatusController.displayName.value = _displayNameController.text;
     _loading.value = false;
     Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<StatusController>();
-    _displayNameController.text = controller.displayName.value;
+    _displayNameController.text = StatusController.displayName.value;
 
     return DialogBase(
       title: [

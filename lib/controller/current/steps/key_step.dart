@@ -228,6 +228,12 @@ class _KeySetupPageState extends State<KeySetupPage> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SmoothDialogWindow(controller: controller);
   }
@@ -271,7 +277,6 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
         ),
         verticalSpacing(sectionSpacing),
         FJElevatedLoadingButton(
-          loading: false.obs,
           onTap: () async {
             final json = await postJSON("/account/keys/requests/check", {
               "token": refreshToken,

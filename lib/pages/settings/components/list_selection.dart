@@ -2,6 +2,7 @@ import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SelectableItem {
   final String label;
@@ -25,8 +26,6 @@ class ListSelectionSetting extends StatefulWidget {
 class _ListSelectionSettingState extends State<ListSelectionSetting> {
   @override
   Widget build(BuildContext context) {
-    SettingController controller = Get.find();
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(widget.items.length, (index) {
@@ -40,16 +39,16 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
 
         return Padding(
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-          child: Obx(
-            () => Material(
-              color: controller.settings[widget.settingName]!.getWhenValue(0, 0) == index
+          child: Watch(
+            (ctx) => Material(
+              color: SettingController.settings[widget.settingName]!.getWhenValue(0, 0) == index
                   ? Get.theme.colorScheme.primary
                   : Get.theme.colorScheme.onInverseSurface,
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,
                 onTap: () {
-                  controller.settings[widget.settingName]!.setValue(index);
+                  SettingController.settings[widget.settingName]!.setValue(index);
                   if (widget.callback != null) {
                     widget.callback!(widget.items[index]);
                   }

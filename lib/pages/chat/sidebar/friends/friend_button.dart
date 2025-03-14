@@ -1,7 +1,7 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
 class FriendButton extends StatefulWidget {
-  final Rx<Offset> position;
+  final Signal<Offset> position;
   final Friend friend;
 
   const FriendButton({super.key, required this.friend, required this.position});
@@ -67,7 +67,7 @@ class _FriendButtonState extends State<FriendButton> {
                     icon: Icon(Icons.forward_to_inbox, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: () {
                       // Check if there even is a conversation with the guy
-                      final conversation = Get.find<ConversationController>().conversations.values.toList().firstWhereOrNull(
+                      final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
                             (c) => c.members.values.any((m) => m.address == widget.friend.id),
                           );
                       if (conversation == null) {
@@ -87,7 +87,7 @@ class _FriendButtonState extends State<FriendButton> {
                   icon: Icon(Icons.rocket_launch, color: Theme.of(context).colorScheme.onPrimary),
                   onPressed: () {
                     // Check if there even is a conversation with the guy
-                    final conversation = Get.find<ConversationController>().conversations.values.toList().firstWhereOrNull(
+                    final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
                           (c) => c.members.values.any((m) => m.address == widget.friend.id),
                         );
                     if (conversation == null) {

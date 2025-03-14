@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -36,19 +36,14 @@ class ProfileHelper {
       return null;
     }
 
-    // Check if there is a new name (also handled by the profile endpoint)
-    if (json["name"] != friend.name) {
+    // Check if there is a new name or a new display name
+    if (json["name"] != friend.name || json["display_name"] != friend.displayName.value) {
       friend.name = json["name"];
-      await friend.update();
+      friend.displayName.value = json["display_name"];
+      await FriendsVault.updateFriend(friend);
     }
 
-    // Check if there is a new display name
-    final displayName = json["display_name"];
-    if (displayName != friend.displayName.value) {
-      friend.updateDisplayName(displayName);
-    }
-
-    sendLog("downloading ${friend.name}");
+    sendLog("downloading ${friend.name} on ${friend.id.server}");
 
     // Check if there is a profile picture
     if ((json["profile"]["container"] ?? "") == "") {
@@ -59,8 +54,8 @@ class ProfileHelper {
     }
 
     // Decrypt the profile picture data
-    final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], friend.keyStorage.profileKey));
-    final container = Get.find<AttachmentController>().fromJson(StorageType.permanent, containerJson);
+    final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], (await friend.getKeys()).profileKey));
+    final container = AttachmentController.fromJson(StorageType.permanent, containerJson);
 
     String? oldPictureId;
     String? oldPath;
@@ -81,7 +76,7 @@ class ProfileHelper {
     }
 
     // Download the file
-    final success = await Get.find<AttachmentController>().downloadAttachment(container, popups: false, trustPopups: true);
+    final success = await AttachmentController.downloadAttachment(container, popups: false, trustPopups: true);
     if (!success) {
       sendLog("download failed");
       return null;
@@ -103,7 +98,7 @@ class ProfileHelper {
   /// Upload a profile picture to the server and set it as the current profile picture
   static Future<bool> uploadProfilePicture(XFile file, String originalName, {Uint8List? bytes}) async {
     // Upload the file
-    final response = await Get.find<AttachmentController>().uploadFile(
+    final response = await AttachmentController.uploadFile(
       UploadData(file),
       StorageType.permanent,
       Constants.fileAppDataTag,
@@ -126,7 +121,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    await Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
+    await FriendController.friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
 
     return true;
   }
@@ -140,7 +135,7 @@ class ProfileHelper {
     }
 
     // Set in local database
-    await Get.find<FriendController>().friends[StatusController.ownAddress]!.updateProfilePicture(null);
+    await FriendController.friends[StatusController.ownAddress]!.updateProfilePicture(null);
     return true;
   }
 

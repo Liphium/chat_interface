@@ -40,9 +40,8 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
                   iconColor: addition.iconColor,
                   color: addition.color,
                   label: addition.label,
-                  loading: false.obs,
                   onTap: () {
-                    addition.onTap.call(Get.find<TabletopController>());
+                    addition.onTap.call();
                     if (addition.goBack) {
                       Get.back();
                     }
@@ -56,7 +55,6 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
             ProfileButton(
               icon: Icons.crop_rotate,
               label: "tabletop.match_viewport".tr,
-              loading: false.obs,
               onTap: () {
                 widget.object.newRotation(-TabletopController.canvasRotation.value);
                 Get.back();
@@ -67,7 +65,6 @@ class _ObjectContextMenuState extends State<ObjectContextMenu> {
             ProfileButton(
               icon: Icons.delete,
               label: "remove".tr,
-              loading: false.obs,
               color: Get.theme.colorScheme.errorContainer,
               iconColor: Get.theme.colorScheme.error,
               onTap: () {

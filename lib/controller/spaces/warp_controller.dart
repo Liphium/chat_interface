@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:chat_interface/services/spaces/warp/warp_connection.dart';
 import 'package:chat_interface/services/spaces/warp/warp_service.dart';
 import 'package:chat_interface/services/spaces/warp/warp_shared.dart';
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/pages/spaces/warp/warp_manager_window.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:get/get.dart';
@@ -140,7 +140,7 @@ class WarpShareContainer {
   /// The person sharing the Warp.
   final Friend account;
 
-  final loading = false.obs;
+  final loading = signal(false);
 
   WarpShareContainer({
     required this.id,
