@@ -120,6 +120,7 @@ class LibraryEntry {
   final int width;
   final int height;
   String? identifier;
+  AttachmentContainer? container;
 
   LibraryEntry(this.id, this.type, this.data, this.createdAt, this.width, this.height);
 
@@ -195,6 +196,12 @@ class LibraryEntry {
   Future<String> getIdentifier() async {
     final container = await AttachmentController.fromString(data);
     return LibraryEntry.entryIdentifier(container);
+  }
+
+  /// Load all the things needed for displaying the entry.
+  Future<void> initForUI() async {
+    container = await AttachmentController.fromString(data);
+    identifier = LibraryEntry.entryIdentifier(container!);
   }
 
   /// Get the identifier of a Library entry from an AttachmentContainer.

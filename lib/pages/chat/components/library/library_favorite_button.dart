@@ -1,6 +1,7 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/services/chat/library_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
@@ -34,18 +35,20 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with Sign
 
   /// Fetches the bookmark state from the local database
   Future<bool> fetchBookmarkState() async {
-    if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
-      final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.data.equals(widget.container.url))).getSingleOrNull();
-      _bookmarked.value = dbEntry != null;
-      if (_bookmarked.value) {
-        _entry = await LibraryEntry.fromData(dbEntry!);
+    // Find identifier for the entry
+    final identifier = LibraryEntry.entryIdentifier(widget.container);
+
+    // Check if there is an entry with this identifier
+    final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.identifierHash.equals(identifier))).get();
+    if (dbEntry.length > 1) {
+      sendLog("WARNING: hash collision with identifier of library entry, deleting all entries other than index 0");
+      for (var entry in dbEntry.sublist(1)) {
+        await LibraryManager.removeEntryFromLibrary(await LibraryEntry.fromData(entry));
       }
-    } else {
-      final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.data.contains(widget.container.id))).getSingleOrNull();
-      _bookmarked.value = dbEntry != null;
-      if (_bookmarked.value) {
-        _entry = await LibraryEntry.fromData(dbEntry!);
-      }
+    }
+    _bookmarked.value = dbEntry.isNotEmpty;
+    if (_bookmarked.value) {
+      _entry = await LibraryEntry.fromData(dbEntry[0]);
     }
 
     // Just so you can await this function
