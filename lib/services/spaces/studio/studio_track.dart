@@ -8,4 +8,14 @@ class PublishedStudioTrack {
   final MediaStream _stream;
 
   PublishedStudioTrack(this._transceiver, this._stream);
+
+  /// Get the underlying transceiver.
+  RTCRtpTransceiver getTransceiver() {
+    return _transceiver;
+  }
+
+  /// Get the underlying media stream.
+  MediaStream getStream() {
+    return _stream;
+  }
 }

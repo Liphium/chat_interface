@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
@@ -42,32 +43,21 @@ class StudioService {
 
     // Create a data channel for pipes
     final studioConn = StudioConnection(peer);
-    await studioConn.createPipesChannel();
+    await studioConn.createLightwireChannel();
 
     // Create an offer for the server
     final offer = await peer.createOffer({
-      "offerToReceiveAudio": true,
-      "offerToReceiveVideo": true,
+      // TODO: Uncomment when video implementation is done
+      // "offerToReceiveVideo": true,
     });
     await peer.setLocalDescription(offer);
 
-    // Wait for one candidate to be gathered and then generate an offer
-    // TODO: Improve the handling of this in the future using trickle-ice
-    final completer = Completer<bool>();
+    // Send all the ice candidates to the server
     peer.onIceCandidate = (candidate) {
-      if (candidate.candidate != null && !completer.isCompleted) {
-        completer.complete(true);
+      if (candidate.candidate != null) {
+        SpaceConnection.spaceConnector!.sendAction(ServerAction("st_ice", candidate.toMap()));
       }
     };
-
-    // Cancel the connection attempt in case it can't be completed quickly enough
-    final success = await completer.future.timeout(
-      Duration(seconds: 10),
-      onTimeout: () => false,
-    );
-    if (!success) {
-      return (null, "error.studio.rtc".trParams({"code": "100"}));
-    }
 
     // Send the offer to the server
     event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_join", offer.toMap()));
@@ -107,6 +97,17 @@ class StudioService {
     connector.listen("st_tr_deleted", (event) {
       // Tell the controller about the deleted track
       StudioTrackController.deleteTrack(event.data["track"]);
+    });
+
+    // Handle ice candidates for studio
+    connector.listen("st_ice", (event) {
+      // Pass the candidate to the current connection
+      final candidate = event.data["candidate"];
+      StudioController.getConnection()?.handleIceCandidate(RTCIceCandidate(
+        candidate["candidate"],
+        candidate["sdpMid"],
+        candidate["sdpMLineIndex"],
+      ));
     });
   }
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
-import 'package:chat_interface/main.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/studio/studio_track_publisher.dart';
@@ -40,47 +39,40 @@ class StudioConnection {
     _publisher = StudioTrackPublisher(this);
   }
 
-  /// Create the default data channel used for pipes (but for now only keepalive packets)
-  Future<void> createPipesChannel() async {
+  /// Create the default data channel used for lightwire
+  Future<void> createLightwireChannel() async {
     // Create the channel
     final channel = await _peer.createDataChannel(
-      "pipes",
+      "lightwire",
       RTCDataChannelInit()
-        ..maxRetransmitTime = 500
+        ..maxRetransmits = 0
         ..ordered = false,
     );
 
-    // Start a timer to send messages over this channel (just for keeping the connection)
-    final timer = Timer.periodic(
-      Duration(seconds: 2),
-      (timer) {
-        channel.send(RTCDataChannelMessage("liphium_v$protocolVersion"));
-      },
-    );
+    // TODO: Start Lightwire
 
     // Subscribe to all the events the data channel has
-    _handleDataChannel(channel, timer: timer);
+    _handleDataChannel(channel);
   }
 
-  /// Handle a new data channel created by the server
-  void _handleDataChannel(RTCDataChannel channel, {Timer? timer}) {
-    if (timer == null) {
-      sendLog("server registered new data channel: ${channel.label!}");
-    }
-
+  /// Handle a new data channel created by the server or the client
+  void _handleDataChannel(RTCDataChannel channel) {
     // Subscribe to all the events the data channel has
     channel
       ..onDataChannelState = (state) {
         sendLog("studio: state of ${channel.label ?? "no_label_dc"}: $state");
-
-        // Cancel the timer sending keep alive in case closed
-        if (state == RTCDataChannelState.RTCDataChannelClosed) {
-          timer?.cancel();
-        }
       }
       ..onMessage = (msg) {
         sendLog("studio: received ${msg.text} from server");
+      }
+      ..onBufferedAmountLow = (buf) {
+        sendLog("studio: buffer amount $buf for ${channel.label ?? "no_label_dc"}");
       };
+  }
+
+  /// Handle a new ice candidate
+  void handleIceCandidate(RTCIceCandidate candidate) {
+    _peer.addCandidate(candidate);
   }
 
   /// Handle the renegotiation
