@@ -41,6 +41,7 @@ Future<bool> initSodium() async {
 var executableArguments = <String>[];
 
 void main(List<String> args) async {
+  // Initialize libspaceship
   await RustLib.init();
 
   // Handle errors from flutter
