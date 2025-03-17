@@ -10,6 +10,7 @@ pub struct AudioInputDevice {
 }
 
 // Get all audio input devices on the system.
+#[flutter_rust_bridge::frb(sync)]
 pub fn get_input_devices() -> Vec<AudioInputDevice> {
     let host = lightwire::get_preffered_host();
     let default_device_name = match host.default_input_device() {

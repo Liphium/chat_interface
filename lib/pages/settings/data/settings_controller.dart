@@ -1,4 +1,5 @@
 import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
+import 'package:chat_interface/pages/settings/app/audio_settings.dart';
 import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
@@ -36,6 +37,7 @@ class SettingController {
     TrustedLinkSettings.addSettings();
     ChatSettings.addSettings();
     LogSettings.addSettings();
+    AudioSettings.addSettings();
 
     // Add app settings (not in settings page)
     addSetting(Setting<bool>(AppSettings.showGroupMembers, true));

@@ -80,7 +80,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<List<AudioInputDevice>> crateApiAudioDevicesGetInputDevices();
+  List<AudioInputDevice> crateApiAudioDevicesGetInputDevices();
 
   String crateApiSimpleGreet({required String name});
 
@@ -96,12 +96,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<List<AudioInputDevice>> crateApiAudioDevicesGetInputDevices() {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
+  List<AudioInputDevice> crateApiAudioDevicesGetInputDevices() {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 1, port: port_);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_audio_input_device,

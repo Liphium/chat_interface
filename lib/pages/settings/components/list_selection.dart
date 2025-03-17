@@ -77,7 +77,7 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
 
                           return Container(
                             decoration: BoxDecoration(
-                              color: Get.theme.colorScheme.error.withOpacity(0.1),
+                              color: Get.theme.colorScheme.error.withAlpha(25),
                               borderRadius: BorderRadius.circular(defaultSpacing),
                             ),
                             padding: const EdgeInsets.all(elementSpacing),

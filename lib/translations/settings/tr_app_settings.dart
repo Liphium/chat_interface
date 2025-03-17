@@ -23,6 +23,9 @@ class AppSettingsTranslations extends Translations {
           // Logging settings
           'logging.amount.desc': 'Amount of logs to keep in the history',
           'logging.launch': 'Open log folder',
+
+          // Audio settings
+          'settings.audio.microphone': 'Microphone settings',
         },
       };
 }
