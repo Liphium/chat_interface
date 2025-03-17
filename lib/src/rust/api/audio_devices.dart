@@ -13,6 +13,17 @@ List<AudioInputDevice> getInputDevices() =>
 AudioInputDevice getDefaultInputDevice() =>
     RustLib.instance.api.crateApiAudioDevicesGetDefaultInputDevice();
 
+Future<LightwireEngine> createLightwireEngine() =>
+    RustLib.instance.api.crateApiAudioDevicesCreateLightwireEngine();
+
+Stream<Uint8List> startPacketEngine({required LightwireEngine engine}) =>
+    RustLib.instance.api.crateApiAudioDevicesStartPacketEngine(engine: engine);
+
+Future<void> setVoiceEnabled(
+        {required LightwireEngine engine, required bool enabled}) =>
+    RustLib.instance.api
+        .crateApiAudioDevicesSetVoiceEnabled(engine: engine, enabled: enabled);
+
 class AudioInputDevice {
   final String name;
   final bool systemDefault;
@@ -35,4 +46,22 @@ class AudioInputDevice {
           name == other.name &&
           systemDefault == other.systemDefault &&
           rating == other.rating;
+}
+
+class LightwireEngine {
+  final int id;
+
+  const LightwireEngine({
+    required this.id,
+  });
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LightwireEngine &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
 }

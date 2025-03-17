@@ -25,7 +25,13 @@ class AppSettingsTranslations extends Translations {
           'logging.launch': 'Open log folder',
 
           // Audio settings
-          'settings.audio.microphone': 'Microphone settings',
+          'settings.audio.microphone': 'Choose your microphone',
+          'settings.audio.activation_mode': 'Microphone activation mode',
+          'settings.audio.activation_mode.desc': 'Choose when you voice gets transmitted to all of the other people in a Space.',
+          'microphone.mode.voice_activity': 'Transmit my speech when I speak',
+          'microphone.mode.always_on': 'Always transmit my speech',
+          'microphone.auto_activity': 'Automatically determine when I speak',
+          'settings.audio.microphone.sensitivity.desc': 'You will be heard by other people when your volume is over the threshold defined below.',
         },
       };
 }

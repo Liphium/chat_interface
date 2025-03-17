@@ -76,7 +76,7 @@ impl jittr::Packet for AudioPacket {
 impl AudioPacket {
     // Encode the audio packet to bytes
     //
-    // Format: | seq | sample_rate | voice_data |
+    // Format: | seq | voice_data |
     pub fn encode(&self) -> Vec<u8> {
         let mut packet_vec = Vec::with_capacity(2 + 4 + self.packet.len());
         packet_vec.extend_from_slice(&self.seq.to_le_bytes());
@@ -86,7 +86,7 @@ impl AudioPacket {
 
     // Decode the audio packet
     //
-    // Format: | seq | sample_rate | voice_data |
+    // Format: | seq | voice_data |
     pub fn decode(id: Option<String>, bytes: Vec<u8>) -> Self {
         let (seq_bytes, packet) = bytes.split_at(2);
         return Self {

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
+import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -31,7 +33,7 @@ class AudioSettings {
   static Setting<bool> automaticVoiceActivity = Setting("microphone.auto_activity", true);
 
   /// The threshold for the microphone to activate
-  static Setting<double> microphoneSensitivity = Setting("microphone.sensitivity", -20);
+  static Setting<double> microphoneSensitivity = Setting("microphone.sensitivity", -50);
 
   static void addSettings() {
     SettingController.addSetting(microphone);
@@ -51,45 +53,52 @@ class AudioSettingsPage extends StatefulWidget {
 class _AudioSettingsPageState extends State<AudioSettingsPage> {
   late final _microphones = listSignal<SelectableItem>(_getMicrophones());
   late final _selectedMicrophone = computed(() {
-    final defaultDevice = libspace.getDefaultInputDevice();
-
     // Try to find the currently selected device
     final selected = AudioSettings.microphone.getValue();
     int i = 0;
-    int defaultIndex = 0;
     for (var mic in _microphones) {
       // If it's currently selected, return the index
       if (mic.label == selected) {
         return i;
       }
-
-      // If it's the default device, save the index for later
-      if (mic.label == defaultDevice.name) {
-        defaultIndex = i;
-      }
       i++;
     }
 
-    // Return the default index in case nothing was found
-    return defaultIndex;
+    // Return index 0 (default microphone)
+    return 0;
   });
   Timer? _timer;
 
   @override
   void initState() {
-    sendLog(_getMicrophones());
     // Start a timer for updating the microphones (new ones might be plugged in)
-    /*
     _timer = Timer.periodic(1.seconds, (timer) {
       _microphones.value = _getMicrophones();
     });
-    */
+    test();
     super.initState();
   }
 
   /// Convert all the microphones from libspaceship to selectable items for the selector
   List<SelectableItem> _getMicrophones() {
-    return libspace.getInputDevices().map((mic) => SelectableItem(mic.name, Icons.mic)).toList();
+    final microphones = libspace.getInputDevices().map((mic) => SelectableItem(mic.name, Icons.mic)).toList();
+
+    // Add the default microphone as a first option
+    final defaultMicrophone = libspace.getDefaultInputDevice();
+    microphones.insert(0, SelectableItem("Default (${defaultMicrophone.name})", Icons.mic));
+
+    return microphones;
+  }
+
+  Future<void> test() async {
+    final engine = await libspace.createLightwireEngine();
+    final sink = libspace.startPacketEngine(engine: engine);
+    sink.listen(
+      (packet) {
+        sendLog(packet.length);
+      },
+    );
+    await libspace.setVoiceEnabled(engine: engine, enabled: true);
   }
 
   @override
@@ -97,6 +106,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
     _timer?.cancel();
     _microphones.dispose();
     _selectedMicrophone.dispose();
+
     super.dispose();
   }
 
@@ -108,11 +118,9 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Heading for the microphone settings
+          // Render a list selection for the microphones
           Text("settings.audio.microphone".tr, style: theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
-
-          // Render a list selection for the microphones
           Watch(
             (context) => ListSelection(
               selected: _selectedMicrophone,
@@ -122,6 +130,43 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
               },
             ),
           ),
+          verticalSpacing(sectionSpacing),
+
+          // The selection for the microphone activation mode
+          Text("settings.audio.activation_mode".tr, style: theme.textTheme.labelLarge),
+          verticalSpacing(defaultSpacing),
+          Text("settings.audio.activation_mode.desc".tr, style: theme.textTheme.bodyMedium),
+          verticalSpacing(sectionSpacing),
+          ListSelectionSetting(
+            setting: AudioSettings.microphoneActivationMode,
+            items: AudioSettings.activationModes,
+          ),
+          verticalSpacing(defaultSpacing),
+
+          // Only render automatic sensitivity detection when
+          Watch(
+            (ctx) => Visibility(
+              visible: AudioSettings.microphoneActivationMode.getValue() == 0,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: defaultSpacing),
+                child: BoolSettingSmall(settingName: AudioSettings.automaticVoiceActivity.label),
+              ),
+            ),
+          ),
+
+          // Only render the sensitivity slider in case automatic detection is off
+          Watch(
+            (ctx) => Visibility(
+              visible: AudioSettings.microphoneActivationMode.getValue() == 0 && !AudioSettings.automaticVoiceActivity.getValue(),
+              child: DoubleSelectionSetting(
+                settingName: AudioSettings.microphoneSensitivity.label,
+                description: "settings.audio.microphone.sensitivity.desc",
+                min: -100,
+                max: 0,
+                unit: "dB",
+              ),
+            ),
+          )
         ],
       ),
     );
