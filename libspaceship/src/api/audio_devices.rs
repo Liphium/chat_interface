@@ -9,10 +9,10 @@ pub struct AudioInputDevice {
     pub rating: u32,
 }
 
-// Get all audio input devices on the system.
+/// Get all audio input devices on the system.
 #[flutter_rust_bridge::frb(sync)]
 pub fn get_input_devices() -> Vec<AudioInputDevice> {
-    let host = lightwire::get_preffered_host();
+    let host = lightwire::get_preferred_host();
     let default_device_name = match host.default_input_device() {
         Some(device) => device.name().expect("Couldn't get default device name"),
         None => "-".to_string(),
@@ -39,4 +39,20 @@ pub fn get_input_devices() -> Vec<AudioInputDevice> {
     }
 
     return parsed_devices;
+}
+
+// Get the default input device
+#[flutter_rust_bridge::frb(sync)]
+pub fn get_default_input_device() -> AudioInputDevice {
+    let host = lightwire::get_preferred_host();
+    let default_device = host
+        .default_input_device()
+        .expect("No default device found!");
+    return AudioInputDevice {
+        name: default_device
+            .name()
+            .expect("No name found for default device"),
+        system_default: true,
+        rating: 0,
+    };
 }

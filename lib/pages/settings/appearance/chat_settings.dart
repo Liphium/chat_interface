@@ -46,7 +46,7 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
           verticalSpacing(defaultSpacing),
 
           ListSelectionSetting(
-            settingName: ChatSettings.chatTheme,
+            setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>,
             items: ChatSettings.chatThemes,
           ),
         ],

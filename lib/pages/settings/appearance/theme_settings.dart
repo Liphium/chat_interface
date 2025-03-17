@@ -138,7 +138,10 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
       children: [
         Text("theme.presets".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(elementSpacing),
-        ListSelectionSetting(settingName: ThemeSettings.themePreset, items: ThemeSettings.themePresets),
+        ListSelectionSetting(
+          setting: SettingController.settings[ThemeSettings.themePreset]! as Setting<int>,
+          items: ThemeSettings.themePresets,
+        ),
         verticalSpacing(sectionSpacing),
         Watch(
           (ctx) => Visibility(
@@ -166,7 +169,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 ),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
-                  settingName: ThemeSettings.themeMode,
+                  setting: SettingController.settings[ThemeSettings.themeMode]! as Setting<int>,
                   items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)],
                 ),
                 verticalSpacing(defaultSpacing),
@@ -175,7 +178,10 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                   "custom.background_mode".tr,
                 ),
                 verticalSpacing(elementSpacing),
-                ListSelectionSetting(settingName: ThemeSettings.backgroundMode, items: ThemeSettings.backgroundModes),
+                ListSelectionSetting(
+                  setting: SettingController.settings[ThemeSettings.backgroundMode]! as Setting<int>,
+                  items: ThemeSettings.backgroundModes,
+                ),
 
                 verticalSpacing(sectionSpacing)
               ],

@@ -6,8 +6,12 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
+/// Get all audio input devices on the system.
 List<AudioInputDevice> getInputDevices() =>
     RustLib.instance.api.crateApiAudioDevicesGetInputDevices();
+
+AudioInputDevice getDefaultInputDevice() =>
+    RustLib.instance.api.crateApiAudioDevicesGetDefaultInputDevice();
 
 class AudioInputDevice {
   final String name;

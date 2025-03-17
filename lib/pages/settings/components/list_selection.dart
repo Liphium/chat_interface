@@ -1,4 +1,4 @@
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
+import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,17 +13,41 @@ class SelectableItem {
 }
 
 class ListSelectionSetting extends StatefulWidget {
-  final String settingName;
+  final Setting<int> setting;
   final List<SelectableItem> items;
   final Function(SelectableItem)? callback;
 
-  const ListSelectionSetting({super.key, required this.settingName, required this.items, this.callback});
+  const ListSelectionSetting({super.key, required this.setting, required this.items, this.callback});
 
   @override
   State<ListSelectionSetting> createState() => _ListSelectionSettingState();
 }
 
 class _ListSelectionSettingState extends State<ListSelectionSetting> {
+  @override
+  Widget build(BuildContext context) {
+    return ListSelection(
+      selected: computed(() => widget.setting.getValue()),
+      items: widget.items,
+      callback: (item, _) {
+        widget.callback?.call(item);
+      },
+    );
+  }
+}
+
+class ListSelection extends StatefulWidget {
+  final ReadonlySignal<int> selected;
+  final List<SelectableItem> items;
+  final Function(SelectableItem, int) callback;
+
+  const ListSelection({super.key, required this.selected, required this.items, required this.callback});
+
+  @override
+  State<ListSelection> createState() => _ListSelectionState();
+}
+
+class _ListSelectionState extends State<ListSelection> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -41,17 +65,12 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
           child: Watch(
             (ctx) => Material(
-              color: SettingController.settings[widget.settingName]!.getWhenValue(0, 0) == index
-                  ? Get.theme.colorScheme.primary
-                  : Get.theme.colorScheme.onInverseSurface,
+              color: widget.selected.value == index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,
                 onTap: () {
-                  SettingController.settings[widget.settingName]!.setValue(index);
-                  if (widget.callback != null) {
-                    widget.callback!(widget.items[index]);
-                  }
+                  widget.callback(widget.items[index], index);
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing),

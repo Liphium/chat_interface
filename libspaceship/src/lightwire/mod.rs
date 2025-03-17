@@ -98,7 +98,7 @@ impl AudioPacket {
 }
 
 // Get the host lightwire is going to use (mainly for making sure we can easily change it in the future in case needed)
-pub fn get_preffered_host() -> cpal::Host {
+pub fn get_preferred_host() -> cpal::Host {
     return cpal::default_host();
 }
 

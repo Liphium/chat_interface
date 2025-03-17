@@ -121,7 +121,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
           verticalSpacing(defaultSpacing),
 
           ListSelectionSetting(
-            settingName: "language",
+            setting: SettingController.settings[GeneralSettings.language]! as Setting<int>,
             items: GeneralSettings.languages,
             callback: (language) {
               Get.updateLocale((language as LanguageSelection).locale);

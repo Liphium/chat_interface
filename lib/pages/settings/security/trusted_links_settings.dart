@@ -85,8 +85,8 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
           // Trust mode
           Text("links.trust_mode".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
-          const ListSelectionSetting(
-            settingName: TrustedLinkSettings.trustMode,
+          ListSelectionSetting(
+            setting: SettingController.settings[TrustedLinkSettings.trustMode]! as Setting<int>,
             items: TrustedLinkSettings.trustModes,
           ),
           verticalSpacing(sectionSpacing),

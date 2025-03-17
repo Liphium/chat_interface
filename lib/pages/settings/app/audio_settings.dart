@@ -50,6 +50,29 @@ class AudioSettingsPage extends StatefulWidget {
 
 class _AudioSettingsPageState extends State<AudioSettingsPage> {
   late final _microphones = listSignal<SelectableItem>(_getMicrophones());
+  late final _selectedMicrophone = computed(() {
+    final defaultDevice = libspace.getDefaultInputDevice();
+
+    // Try to find the currently selected device
+    final selected = AudioSettings.microphone.getValue();
+    int i = 0;
+    int defaultIndex = 0;
+    for (var mic in _microphones) {
+      // If it's currently selected, return the index
+      if (mic.label == selected) {
+        return i;
+      }
+
+      // If it's the default device, save the index for later
+      if (mic.label == defaultDevice.name) {
+        defaultIndex = i;
+      }
+      i++;
+    }
+
+    // Return the default index in case nothing was found
+    return defaultIndex;
+  });
   Timer? _timer;
 
   @override
@@ -73,6 +96,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
   void dispose() {
     _timer?.cancel();
     _microphones.dispose();
+    _selectedMicrophone.dispose();
     super.dispose();
   }
 
@@ -87,6 +111,17 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
           // Heading for the microphone settings
           Text("settings.audio.microphone".tr, style: theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
+
+          // Render a list selection for the microphones
+          Watch(
+            (context) => ListSelection(
+              selected: _selectedMicrophone,
+              items: _microphones,
+              callback: (item, _) {
+                AudioSettings.microphone.setValue(item.label);
+              },
+            ),
+          ),
         ],
       ),
     );

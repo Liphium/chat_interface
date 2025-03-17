@@ -97,7 +97,7 @@ class FileSettingsPage extends StatelessWidget {
           verticalSpacing(defaultSpacing + elementSpacing),
 
           ListSelectionSetting(
-            settingName: FileSettings.fileCacheType,
+            setting: SettingController.settings[FileSettings.fileCacheType]! as Setting<int>,
             items: FileSettings.fileCacheTypes,
           ),
 
