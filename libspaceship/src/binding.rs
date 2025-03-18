@@ -62,6 +62,22 @@ pub async fn get_engine(id: u32) -> Option<Engine> {
     return result.unwrap().to_owned();
 }
 
+// Remove an engine from the map
+pub async fn delete_engine(id: u32) {
+    ENGINE_MAP.lock().await.remove(&id);
+}
+
+// Stop all engines
+pub async fn stop_all_engines() {
+    let mut map = ENGINE_MAP.lock().await;
+    for (_, engine) in map.iter() {
+        if let Some(engine) = engine {
+            engine.stop().await;
+        }
+    }
+    map.clear();
+}
+
 // Set the sink of the log stream
 pub async fn set_log_sink(sink: StreamSink<String>) {
     let mut stream = LOG_SINK.lock().await;

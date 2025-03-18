@@ -29,8 +29,9 @@ class _ListSelectionSettingState extends State<ListSelectionSetting> {
     return ListSelection(
       selected: computed(() => widget.setting.getValue()),
       items: widget.items,
-      callback: (item, _) {
+      callback: (item, index) {
         widget.callback?.call(item);
+        widget.setting.setValue(index);
       },
     );
   }

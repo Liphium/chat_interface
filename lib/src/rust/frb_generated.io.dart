@@ -37,16 +37,28 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AudioInputDevice dco_decode_audio_input_device(dynamic raw);
 
   @protected
+  AudioOuputDevice dco_decode_audio_ouput_device(dynamic raw);
+
+  @protected
   bool dco_decode_bool(dynamic raw);
 
   @protected
   LightwireEngine dco_decode_box_autoadd_lightwire_engine(dynamic raw);
 
   @protected
+  double dco_decode_f_32(dynamic raw);
+
+  @protected
   LightwireEngine dco_decode_lightwire_engine(dynamic raw);
 
   @protected
   List<AudioInputDevice> dco_decode_list_audio_input_device(dynamic raw);
+
+  @protected
+  List<AudioOuputDevice> dco_decode_list_audio_ouput_device(dynamic raw);
+
+  @protected
+  List<int> dco_decode_list_prim_u_8_loose(dynamic raw);
 
   @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
@@ -82,6 +94,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AudioInputDevice sse_decode_audio_input_device(SseDeserializer deserializer);
 
   @protected
+  AudioOuputDevice sse_decode_audio_ouput_device(SseDeserializer deserializer);
+
+  @protected
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
@@ -89,11 +104,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       SseDeserializer deserializer);
 
   @protected
+  double sse_decode_f_32(SseDeserializer deserializer);
+
+  @protected
   LightwireEngine sse_decode_lightwire_engine(SseDeserializer deserializer);
 
   @protected
   List<AudioInputDevice> sse_decode_list_audio_input_device(
       SseDeserializer deserializer);
+
+  @protected
+  List<AudioOuputDevice> sse_decode_list_audio_ouput_device(
+      SseDeserializer deserializer);
+
+  @protected
+  List<int> sse_decode_list_prim_u_8_loose(SseDeserializer deserializer);
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
@@ -134,11 +159,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       AudioInputDevice self, SseSerializer serializer);
 
   @protected
+  void sse_encode_audio_ouput_device(
+      AudioOuputDevice self, SseSerializer serializer);
+
+  @protected
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_lightwire_engine(
       LightwireEngine self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_f_32(double self, SseSerializer serializer);
 
   @protected
   void sse_encode_lightwire_engine(
@@ -147,6 +179,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_audio_input_device(
       List<AudioInputDevice> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_audio_ouput_device(
+      List<AudioOuputDevice> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_prim_u_8_loose(List<int> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_prim_u_8_strict(

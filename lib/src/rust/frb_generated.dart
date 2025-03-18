@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.9.0';
 
   @override
-  int get rustContentHash => 1838836052;
+  int get rustContentHash => -1513972233;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -83,15 +83,40 @@ abstract class RustLibApi extends BaseApi {
 
   Stream<String> crateApiGeneralCreateLogStream();
 
-  AudioInputDevice crateApiAudioDevicesGetDefaultInputDevice();
+  Future<AudioInputDevice> crateApiAudioDevicesGetDefaultInputDevice();
 
-  List<AudioInputDevice> crateApiAudioDevicesGetInputDevices();
+  Future<AudioOuputDevice> crateApiAudioDevicesGetDefaultOutputDevice();
+
+  Future<List<AudioInputDevice>> crateApiAudioDevicesGetInputDevices();
+
+  Future<List<AudioOuputDevice>> crateApiAudioDevicesGetOutputDevices();
+
+  Future<void> crateApiEngineHandlePacket(
+      {required LightwireEngine engine,
+      required String id,
+      required List<int> packet});
+
+  Future<void> crateApiEngineRegisterTarget(
+      {required LightwireEngine engine, required String id});
+
+  Future<void> crateApiEngineSetActivityDetection(
+      {required LightwireEngine engine, required bool enabled});
+
+  Future<void> crateApiEngineSetAutomaticDetection(
+      {required LightwireEngine engine, required bool enabled});
+
+  Future<void> crateApiEngineSetTalkingAmplitude(
+      {required LightwireEngine engine, required double amplitude});
 
   Future<void> crateApiEngineSetVoiceEnabled(
       {required LightwireEngine engine, required bool enabled});
 
   Stream<(Uint8List, bool)> crateApiEngineStartPacketStream(
       {required LightwireEngine engine});
+
+  Future<void> crateApiEngineStopAllEngines();
+
+  Future<void> crateApiEngineStopEngine({required LightwireEngine engine});
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -154,11 +179,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  AudioInputDevice crateApiAudioDevicesGetDefaultInputDevice() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
+  Future<AudioInputDevice> crateApiAudioDevicesGetDefaultInputDevice() {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 3, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_audio_input_device,
@@ -177,11 +203,36 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  List<AudioInputDevice> crateApiAudioDevicesGetInputDevices() {
-    return handler.executeSync(SyncTask(
-      callFfi: () {
+  Future<AudioOuputDevice> crateApiAudioDevicesGetDefaultOutputDevice() {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 4, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_audio_ouput_device,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiAudioDevicesGetDefaultOutputDeviceConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiAudioDevicesGetDefaultOutputDeviceConstMeta =>
+      const TaskConstMeta(
+        debugName: "get_default_output_device",
+        argNames: [],
+      );
+
+  @override
+  Future<List<AudioInputDevice>> crateApiAudioDevicesGetInputDevices() {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 5, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_audio_input_device,
@@ -200,6 +251,167 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<List<AudioOuputDevice>> crateApiAudioDevicesGetOutputDevices() {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 6, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_list_audio_ouput_device,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiAudioDevicesGetOutputDevicesConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiAudioDevicesGetOutputDevicesConstMeta =>
+      const TaskConstMeta(
+        debugName: "get_output_devices",
+        argNames: [],
+      );
+
+  @override
+  Future<void> crateApiEngineHandlePacket(
+      {required LightwireEngine engine,
+      required String id,
+      required List<int> packet}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_lightwire_engine(engine, serializer);
+        sse_encode_String(id, serializer);
+        sse_encode_list_prim_u_8_loose(packet, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 7, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiEngineHandlePacketConstMeta,
+      argValues: [engine, id, packet],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiEngineHandlePacketConstMeta => const TaskConstMeta(
+        debugName: "handle_packet",
+        argNames: ["engine", "id", "packet"],
+      );
+
+  @override
+  Future<void> crateApiEngineRegisterTarget(
+      {required LightwireEngine engine, required String id}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_lightwire_engine(engine, serializer);
+        sse_encode_String(id, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 8, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiEngineRegisterTargetConstMeta,
+      argValues: [engine, id],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiEngineRegisterTargetConstMeta =>
+      const TaskConstMeta(
+        debugName: "register_target",
+        argNames: ["engine", "id"],
+      );
+
+  @override
+  Future<void> crateApiEngineSetActivityDetection(
+      {required LightwireEngine engine, required bool enabled}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_lightwire_engine(engine, serializer);
+        sse_encode_bool(enabled, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 9, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiEngineSetActivityDetectionConstMeta,
+      argValues: [engine, enabled],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiEngineSetActivityDetectionConstMeta =>
+      const TaskConstMeta(
+        debugName: "set_activity_detection",
+        argNames: ["engine", "enabled"],
+      );
+
+  @override
+  Future<void> crateApiEngineSetAutomaticDetection(
+      {required LightwireEngine engine, required bool enabled}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_lightwire_engine(engine, serializer);
+        sse_encode_bool(enabled, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 10, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiEngineSetAutomaticDetectionConstMeta,
+      argValues: [engine, enabled],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiEngineSetAutomaticDetectionConstMeta =>
+      const TaskConstMeta(
+        debugName: "set_automatic_detection",
+        argNames: ["engine", "enabled"],
+      );
+
+  @override
+  Future<void> crateApiEngineSetTalkingAmplitude(
+      {required LightwireEngine engine, required double amplitude}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_lightwire_engine(engine, serializer);
+        sse_encode_f_32(amplitude, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 11, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiEngineSetTalkingAmplitudeConstMeta,
+      argValues: [engine, amplitude],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiEngineSetTalkingAmplitudeConstMeta =>
+      const TaskConstMeta(
+        debugName: "set_talking_amplitude",
+        argNames: ["engine", "amplitude"],
+      );
+
+  @override
   Future<void> crateApiEngineSetVoiceEnabled(
       {required LightwireEngine engine, required bool enabled}) {
     return handler.executeNormal(NormalTask(
@@ -208,7 +420,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_box_autoadd_lightwire_engine(engine, serializer);
         sse_encode_bool(enabled, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 5, port: port_);
+            funcId: 12, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -237,7 +449,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_StreamSink_record_list_prim_u_8_strict_bool_Sse(
             packetSink, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 6, port: port_);
+            funcId: 13, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -254,6 +466,54 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "start_packet_stream",
         argNames: ["engine", "packetSink"],
+      );
+
+  @override
+  Future<void> crateApiEngineStopAllEngines() {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 14, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiEngineStopAllEnginesConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiEngineStopAllEnginesConstMeta =>
+      const TaskConstMeta(
+        debugName: "stop_all_engines",
+        argNames: [],
+      );
+
+  @override
+  Future<void> crateApiEngineStopEngine({required LightwireEngine engine}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_lightwire_engine(engine, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 15, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiEngineStopEngineConstMeta,
+      argValues: [engine],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiEngineStopEngineConstMeta => const TaskConstMeta(
+        debugName: "stop_engine",
+        argNames: ["engine"],
       );
 
   @protected
@@ -285,12 +545,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   AudioInputDevice dco_decode_audio_input_device(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
     return AudioInputDevice(
       name: dco_decode_String(arr[0]),
       systemDefault: dco_decode_bool(arr[1]),
-      rating: dco_decode_u_32(arr[2]),
+    );
+  }
+
+  @protected
+  AudioOuputDevice dco_decode_audio_ouput_device(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return AudioOuputDevice(
+      name: dco_decode_String(arr[0]),
+      systemDefault: dco_decode_bool(arr[1]),
     );
   }
 
@@ -304,6 +575,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   LightwireEngine dco_decode_box_autoadd_lightwire_engine(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_lightwire_engine(raw);
+  }
+
+  @protected
+  double dco_decode_f_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as double;
   }
 
   @protected
@@ -321,6 +598,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   List<AudioInputDevice> dco_decode_list_audio_input_device(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_audio_input_device).toList();
+  }
+
+  @protected
+  List<AudioOuputDevice> dco_decode_list_audio_ouput_device(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_audio_ouput_device).toList();
+  }
+
+  @protected
+  List<int> dco_decode_list_prim_u_8_loose(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as List<int>;
   }
 
   @protected
@@ -394,9 +683,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_name = sse_decode_String(deserializer);
     var var_systemDefault = sse_decode_bool(deserializer);
-    var var_rating = sse_decode_u_32(deserializer);
-    return AudioInputDevice(
-        name: var_name, systemDefault: var_systemDefault, rating: var_rating);
+    return AudioInputDevice(name: var_name, systemDefault: var_systemDefault);
+  }
+
+  @protected
+  AudioOuputDevice sse_decode_audio_ouput_device(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_name = sse_decode_String(deserializer);
+    var var_systemDefault = sse_decode_bool(deserializer);
+    return AudioOuputDevice(name: var_name, systemDefault: var_systemDefault);
   }
 
   @protected
@@ -410,6 +705,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_lightwire_engine(deserializer));
+  }
+
+  @protected
+  double sse_decode_f_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getFloat32();
   }
 
   @protected
@@ -430,6 +731,26 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       ans_.add(sse_decode_audio_input_device(deserializer));
     }
     return ans_;
+  }
+
+  @protected
+  List<AudioOuputDevice> sse_decode_list_audio_ouput_device(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <AudioOuputDevice>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_audio_ouput_device(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<int> sse_decode_list_prim_u_8_loose(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var len_ = sse_decode_i_32(deserializer);
+    return deserializer.buffer.getUint8List(len_);
   }
 
   @protected
@@ -516,7 +837,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.name, serializer);
     sse_encode_bool(self.systemDefault, serializer);
-    sse_encode_u_32(self.rating, serializer);
+  }
+
+  @protected
+  void sse_encode_audio_ouput_device(
+      AudioOuputDevice self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.name, serializer);
+    sse_encode_bool(self.systemDefault, serializer);
   }
 
   @protected
@@ -530,6 +858,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       LightwireEngine self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_lightwire_engine(self, serializer);
+  }
+
+  @protected
+  void sse_encode_f_32(double self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putFloat32(self);
   }
 
   @protected
@@ -547,6 +881,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     for (final item in self) {
       sse_encode_audio_input_device(item, serializer);
     }
+  }
+
+  @protected
+  void sse_encode_list_audio_ouput_device(
+      List<AudioOuputDevice> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_audio_ouput_device(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_prim_u_8_loose(
+      List<int> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    serializer.buffer
+        .putUint8List(self is Uint8List ? self : Uint8List.fromList(self));
   }
 
   @protected

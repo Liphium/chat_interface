@@ -18,6 +18,38 @@ Future<void> setVoiceEnabled(
     RustLib.instance.api
         .crateApiEngineSetVoiceEnabled(engine: engine, enabled: enabled);
 
+Future<void> setActivityDetection(
+        {required LightwireEngine engine, required bool enabled}) =>
+    RustLib.instance.api
+        .crateApiEngineSetActivityDetection(engine: engine, enabled: enabled);
+
+Future<void> setAutomaticDetection(
+        {required LightwireEngine engine, required bool enabled}) =>
+    RustLib.instance.api
+        .crateApiEngineSetAutomaticDetection(engine: engine, enabled: enabled);
+
+Future<void> setTalkingAmplitude(
+        {required LightwireEngine engine, required double amplitude}) =>
+    RustLib.instance.api.crateApiEngineSetTalkingAmplitude(
+        engine: engine, amplitude: amplitude);
+
+Future<void> registerTarget(
+        {required LightwireEngine engine, required String id}) =>
+    RustLib.instance.api.crateApiEngineRegisterTarget(engine: engine, id: id);
+
+Future<void> handlePacket(
+        {required LightwireEngine engine,
+        required String id,
+        required List<int> packet}) =>
+    RustLib.instance.api
+        .crateApiEngineHandlePacket(engine: engine, id: id, packet: packet);
+
+Future<void> stopEngine({required LightwireEngine engine}) =>
+    RustLib.instance.api.crateApiEngineStopEngine(engine: engine);
+
+Future<void> stopAllEngines() =>
+    RustLib.instance.api.crateApiEngineStopAllEngines();
+
 class LightwireEngine {
   final int id;
 

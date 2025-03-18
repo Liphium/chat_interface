@@ -91,6 +91,13 @@ impl Engine {
             .send(AudioPacket::decode(Some(id), packet))
             .ok();
     }
+
+    // Stop the engine
+    pub async fn stop(&self) {
+        self.encoding_engine.lock().await.stop();
+        self.voice_input.lock().await.stop();
+        self.playing_engine.lock().await.stop();
+    }
 }
 
 #[derive(Clone)]

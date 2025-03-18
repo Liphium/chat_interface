@@ -4,8 +4,6 @@ use audiopus::coder::Encoder;
 use rand::Rng;
 use tokio::sync::{mpsc::Receiver, Mutex};
 
-use crate::info;
-
 use super::{AudioPacket, MicrophoneOptions};
 
 pub struct EncodingEngine {
@@ -45,8 +43,8 @@ impl EncodingEngine {
             let mut noise_floor = 0.0;
 
             // Constants for the automatic voice activity detection
-            let alpha = 0.95;
-            let threshold_factor = 1.5;
+            let alpha = 0.99;
+            let threshold_factor = 0.8;
 
             move || loop {
                 let samples: Option<Vec<f32>> = sample_receiver.blocking_recv();
@@ -85,6 +83,7 @@ impl EncodingEngine {
 
                     // Try to detect speech
                     let speech_detected: bool = if options.automatic_detection {
+                        // TODO: Improve this maybe
                         // Use automatic detection by having a noise floor
                         noise_floor = alpha * noise_floor + (1.0 - alpha) * avg;
                         avg > noise_floor * threshold_factor
@@ -101,8 +100,6 @@ impl EncodingEngine {
                         talking_streak = cmp::max(talking_streak - 1, 0);
                         talking_streak > 0
                     });
-
-                    info!("talking={}", speech.unwrap());
                 }
 
                 // Encode using Opus
@@ -122,6 +119,11 @@ impl EncodingEngine {
         });
 
         return engine.clone();
+    }
+
+    // Stop the encoding engine
+    pub fn stop(&mut self) {
+        self.encoder = None;
     }
 }
 

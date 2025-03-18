@@ -7,25 +7,30 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Get all audio input devices on the system.
-List<AudioInputDevice> getInputDevices() =>
+Future<List<AudioInputDevice>> getInputDevices() =>
     RustLib.instance.api.crateApiAudioDevicesGetInputDevices();
 
-AudioInputDevice getDefaultInputDevice() =>
+Future<AudioInputDevice> getDefaultInputDevice() =>
     RustLib.instance.api.crateApiAudioDevicesGetDefaultInputDevice();
+
+/// Get all audio output devices on the system.
+Future<List<AudioOuputDevice>> getOutputDevices() =>
+    RustLib.instance.api.crateApiAudioDevicesGetOutputDevices();
+
+Future<AudioOuputDevice> getDefaultOutputDevice() =>
+    RustLib.instance.api.crateApiAudioDevicesGetDefaultOutputDevice();
 
 class AudioInputDevice {
   final String name;
   final bool systemDefault;
-  final int rating;
 
   const AudioInputDevice({
     required this.name,
     required this.systemDefault,
-    required this.rating,
   });
 
   @override
-  int get hashCode => name.hashCode ^ systemDefault.hashCode ^ rating.hashCode;
+  int get hashCode => name.hashCode ^ systemDefault.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -33,6 +38,26 @@ class AudioInputDevice {
       other is AudioInputDevice &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          systemDefault == other.systemDefault &&
-          rating == other.rating;
+          systemDefault == other.systemDefault;
+}
+
+class AudioOuputDevice {
+  final String name;
+  final bool systemDefault;
+
+  const AudioOuputDevice({
+    required this.name,
+    required this.systemDefault,
+  });
+
+  @override
+  int get hashCode => name.hashCode ^ systemDefault.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AudioOuputDevice &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          systemDefault == other.systemDefault;
 }

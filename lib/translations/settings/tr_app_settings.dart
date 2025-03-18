@@ -26,9 +26,10 @@ class AppSettingsTranslations extends Translations {
 
           // Audio settings
           'settings.audio.microphone': 'Choose your microphone',
+          'settings.audio.output_device': 'Choose your output device',
           'settings.audio.activation_mode': 'Microphone activation mode',
-          'settings.audio.activation_mode.desc': 'Choose when you voice gets transmitted to all of the other people in a Space.',
-          'microphone.mode.voice_activity': 'Transmit my speech when I speak',
+          'settings.audio.activation_mode.desc': 'When the square on the right is a bright color, your voice will be transmitted.',
+          'microphone.mode.voice_activity': 'Detect when I speak',
           'microphone.mode.always_on': 'Always transmit my speech',
           'microphone.auto_activity': 'Automatically determine when I speak',
           'settings.audio.microphone.sensitivity.desc': 'You will be heard by other people when your volume is over the threshold defined below.',
