@@ -7,7 +7,8 @@
 // ignore_for_file: argument_type_not_assignable
 
 import 'api/audio_devices.dart';
-import 'api/simple.dart';
+import 'api/engine.dart';
+import 'api/general.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -25,8 +26,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
   @protected
-  RustStreamSink<Uint8List> dco_decode_StreamSink_list_prim_u_8_strict_Sse(
-      dynamic raw);
+  RustStreamSink<String> dco_decode_StreamSink_String_Sse(dynamic raw);
+
+  @protected
+  RustStreamSink<(Uint8List, bool)>
+      dco_decode_StreamSink_record_list_prim_u_8_strict_bool_Sse(dynamic raw);
 
   @protected
   String dco_decode_String(dynamic raw);
@@ -50,6 +54,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  (Uint8List, bool) dco_decode_record_list_prim_u_8_strict_bool(dynamic raw);
+
+  @protected
   int dco_decode_u_32(dynamic raw);
 
   @protected
@@ -62,8 +69,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
-  RustStreamSink<Uint8List> sse_decode_StreamSink_list_prim_u_8_strict_Sse(
+  RustStreamSink<String> sse_decode_StreamSink_String_Sse(
       SseDeserializer deserializer);
+
+  @protected
+  RustStreamSink<(Uint8List, bool)>
+      sse_decode_StreamSink_record_list_prim_u_8_strict_bool_Sse(
+          SseDeserializer deserializer);
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
@@ -89,6 +101,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  (Uint8List, bool) sse_decode_record_list_prim_u_8_strict_bool(
+      SseDeserializer deserializer);
+
+  @protected
   int sse_decode_u_32(SseDeserializer deserializer);
 
   @protected
@@ -105,8 +121,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       AnyhowException self, SseSerializer serializer);
 
   @protected
-  void sse_encode_StreamSink_list_prim_u_8_strict_Sse(
-      RustStreamSink<Uint8List> self, SseSerializer serializer);
+  void sse_encode_StreamSink_String_Sse(
+      RustStreamSink<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_StreamSink_record_list_prim_u_8_strict_bool_Sse(
+      RustStreamSink<(Uint8List, bool)> self, SseSerializer serializer);
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
@@ -133,6 +153,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_prim_u_8_strict(
       Uint8List self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_record_list_prim_u_8_strict_bool(
+      (Uint8List, bool) self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_32(int self, SseSerializer serializer);

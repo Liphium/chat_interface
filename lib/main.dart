@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
+import 'package:chat_interface/src/rust/api/general.dart';
 import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
@@ -43,6 +44,11 @@ var executableArguments = <String>[];
 void main(List<String> args) async {
   // Initialize libspaceship
   await RustLib.init();
+
+  // Create a log stream for communication with libspaceship
+  createLogStream().listen((log) {
+    sendLog("rust: $log");
+  });
 
   // Handle errors from flutter
   final originalFunction = FlutterError.onError!;

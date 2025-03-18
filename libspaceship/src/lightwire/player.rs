@@ -11,6 +11,8 @@ use tokio::{
     time,
 };
 
+use crate::{error, info};
+
 use super::AudioPacket;
 
 pub struct PlayingEngine {
@@ -69,12 +71,11 @@ impl PlayingEngine {
                     // Listen for new audio packets
                     let data = time::timeout(Duration::from_millis(500), receiver.recv()).await;
                     if data.is_err() {
-                        println!("timeout.");
                         continue;
                     }
                     let data = data.unwrap();
                     if data.is_none() {
-                        println!("closed playing engine.");
+                        info!("closed playing engine.");
                         return;
                     }
                     let data: AudioPacket = data.expect("No data found");
@@ -86,7 +87,7 @@ impl PlayingEngine {
                         .as_ref()
                         .expect("No client id in packet for decoding, can't decode this");
                     if !engine.client_map.contains_key(client_id) {
-                        println!("client {} hasn't been added yet", client_id);
+                        error!("client {} hasn't been added yet", client_id);
                         continue;
                     }
 
@@ -134,7 +135,7 @@ impl PlayingEngine {
                         );
                     }
 
-                    println!("packet received, seq={}", packet.seq);
+                    info!("packet received, seq={}", packet.seq);
 
                     // Decode the packet
                     let decoder = client.decoder.as_mut().expect("Decoder not found, wtf");
@@ -157,14 +158,14 @@ impl PlayingEngine {
                         .expect("Couldn't generate loss concealment");
                     let (decoded, _) = decoded.split_at(frame_size);
 
-                    println!("packet missing, adding seal");
+                    info!("packet missing, adding seal");
 
                     // Play the loss concealment using the sink
                     client
                         .sink
                         .append(SamplesBuffer::new(1, DEFAULT_SAMPLE_RATE, decoded));
                 } else {
-                    println!("packet missing, no seal");
+                    info!("packet missing, no seal");
                 }
             }
         });

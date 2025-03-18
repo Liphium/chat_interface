@@ -1,13 +1,7 @@
-use std::sync::Arc;
-
 use cpal::traits::HostTrait;
 use rodio::DeviceTrait;
-use tokio::sync::Mutex;
 
-use crate::{
-    binding, frb_generated,
-    lightwire::{self, Engine},
-};
+use crate::lightwire::{self};
 
 pub struct AudioInputDevice {
     pub name: String,
@@ -61,34 +55,4 @@ pub fn get_default_input_device() -> AudioInputDevice {
         system_default: true,
         rating: 0,
     };
-}
-
-pub struct LightwireEngine {
-    pub id: u32,
-}
-
-// Create a new engine
-pub async fn create_lightwire_engine() -> LightwireEngine {
-    LightwireEngine {
-        id: binding::create_engine().await,
-    }
-}
-
-// Start the engine with a callback
-pub async fn start_packet_engine(
-    engine: LightwireEngine,
-    packet_sink: frb_generated::StreamSink<Vec<u8>>,
-) {
-    binding::init_engine(engine.id, move |packet| {
-        packet_sink.add(packet).expect("Couldn't send packet");
-    })
-    .await;
-}
-
-// Set the enabled status of the microphone on an engine
-pub async fn set_voice_enabled(engine: LightwireEngine, enabled: bool) {
-    let engine = binding::get_engine(engine.id)
-        .await
-        .expect("Engine hasn't been initialized yet");
-    engine.set_voice_enabled(enabled).await;
 }

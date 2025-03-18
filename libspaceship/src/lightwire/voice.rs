@@ -8,6 +8,8 @@ use tokio::sync::{
     Mutex,
 };
 
+use crate::error;
+
 pub struct VoiceInput {
     device: cpal::Device,
     channels: u16,
@@ -76,7 +78,7 @@ impl VoiceInput {
                 };
 
                 // Error function for printing errors that happen during voice handling
-                let err_fn = move |err| eprintln!("error in cpal: {}", err);
+                let err_fn = move |err| error!("error in cpal: {}", err);
 
                 // Process data if needed (e.g. convert stereo to mono)
                 let channels = {

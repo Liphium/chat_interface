@@ -9,8 +9,15 @@ mod encoder;
 mod player;
 mod voice;
 
+struct MicrophoneOptions {
+    activity_detection: bool,
+    automatic_detection: bool,
+    talking_amplitude: f32,
+}
+
 #[derive(Clone)]
 pub struct Engine {
+    microphone_options: Arc<Mutex<MicrophoneOptions>>,
     voice_input: Arc<Mutex<VoiceInput>>,
     encoding_engine: Arc<Mutex<EncodingEngine>>,
     playing_engine: Arc<Mutex<PlayingEngine>>,
@@ -22,17 +29,25 @@ impl Engine {
     where
         F: FnMut(AudioPacket) + Send + 'static,
     {
+        // Create the default microphone options
+        let options = Arc::new(Mutex::new(MicrophoneOptions {
+            activity_detection: true,
+            automatic_detection: false,
+            talking_amplitude: -50.0,
+        }));
+
         // Create the voice input
         let (voice_input, receiver) = VoiceInput::create();
 
         // Create the encoding engine
-        let encoding_engine = EncodingEngine::create(receiver, send_fn);
+        let encoding_engine = EncodingEngine::create(receiver, options.clone(), send_fn);
 
         // Start the playing engine
         let (playing_engine, sender) = PlayingEngine::create().await;
 
         // Initialize the engine
         return Self {
+            microphone_options: options,
             voice_input: voice_input,
             encoding_engine: encoding_engine,
             playing_engine: playing_engine,
@@ -44,6 +59,24 @@ impl Engine {
     pub async fn set_voice_enabled(&self, enabled: bool) {
         let mut input = self.voice_input.lock().await;
         input.set_paused(!enabled);
+    }
+
+    // Enable or disable activity detection
+    pub async fn set_activity_detection(&self, enabled: bool) {
+        let mut opts = self.microphone_options.lock().await;
+        opts.activity_detection = enabled;
+    }
+
+    // Enable or disable automatic voice activity detection
+    pub async fn set_automatic_detection(&self, enabled: bool) {
+        let mut opts = self.microphone_options.lock().await;
+        opts.automatic_detection = enabled;
+    }
+
+    // Set the talking amplitude for voice activity detection (in decibel)
+    pub async fn set_talking_amplitude(&self, amplitude: f32) {
+        let mut opts = self.microphone_options.lock().await;
+        opts.talking_amplitude = amplitude;
     }
 
     // Register a new target in the playing engine
@@ -64,6 +97,7 @@ impl Engine {
 pub struct AudioPacket {
     pub id: Option<String>,
     pub seq: u16,
+    pub speech: Option<bool>,
     pub packet: Vec<u8>,
 }
 
@@ -91,6 +125,7 @@ impl AudioPacket {
         let (seq_bytes, packet) = bytes.split_at(2);
         return Self {
             id: id,
+            speech: None,
             seq: u16::from_le_bytes([seq_bytes[0], seq_bytes[1]]),
             packet: packet.to_vec(),
         };

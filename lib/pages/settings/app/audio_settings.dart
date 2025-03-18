@@ -6,8 +6,7 @@ import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
-import 'package:chat_interface/src/rust/api/audio_devices.dart' as libspace;
-import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/src/rust/api/audio_devices.dart' as libdevices;
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -75,30 +74,18 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
     _timer = Timer.periodic(1.seconds, (timer) {
       _microphones.value = _getMicrophones();
     });
-    test();
     super.initState();
   }
 
   /// Convert all the microphones from libspaceship to selectable items for the selector
   List<SelectableItem> _getMicrophones() {
-    final microphones = libspace.getInputDevices().map((mic) => SelectableItem(mic.name, Icons.mic)).toList();
+    final microphones = libdevices.getInputDevices().map((mic) => SelectableItem(mic.name, Icons.mic)).toList();
 
     // Add the default microphone as a first option
-    final defaultMicrophone = libspace.getDefaultInputDevice();
+    final defaultMicrophone = libdevices.getDefaultInputDevice();
     microphones.insert(0, SelectableItem("Default (${defaultMicrophone.name})", Icons.mic));
 
     return microphones;
-  }
-
-  Future<void> test() async {
-    final engine = await libspace.createLightwireEngine();
-    final sink = libspace.startPacketEngine(engine: engine);
-    sink.listen(
-      (packet) {
-        sendLog(packet.length);
-      },
-    );
-    await libspace.setVoiceEnabled(engine: engine, enabled: true);
   }
 
   @override
