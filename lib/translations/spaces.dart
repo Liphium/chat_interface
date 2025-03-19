@@ -64,6 +64,9 @@ class SpacesTranslations extends Translations {
           'tabletop.object.deck.incompatible':
               'This deck is incompatible with the newest version of the standard. Please create it again and try again.',
 
+          // Space Studio
+          'spaces.studio.connecting': 'Connecting to Studio..',
+
           // Media profiles
           'media_profile.static': 'Static',
           'media_profile.motion': 'Motion',

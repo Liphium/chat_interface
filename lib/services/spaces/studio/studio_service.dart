@@ -53,8 +53,10 @@ class StudioService {
     await peer.setLocalDescription(offer);
 
     // Send all the ice candidates to the server
-    peer.onIceCandidate = (candidate) {
+    final completer = Completer<void>();
+    peer.onIceCandidate = (candidate) async {
       if (candidate.candidate != null) {
+        await completer.future; // Make sure to not send ice candidates before the client is registered
         SpaceConnection.spaceConnector!.sendAction(ServerAction("st_ice", candidate.toMap()));
       }
     };
@@ -67,6 +69,7 @@ class StudioService {
     if (!event.data["success"]) {
       return (null, event.data["message"] as String);
     }
+    completer.complete();
 
     // Accept the offer from the server
     await peer.setRemoteDescription(RTCSessionDescription(event.data["answer"]["sdp"], event.data["answer"]["type"]));

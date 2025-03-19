@@ -103,7 +103,6 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
   });
 
   libspace.LightwireEngine? _engine;
-  Timer? _timer;
   final _disposeFunctions = <void Function()>[];
 
   @override
@@ -112,9 +111,13 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
     initLightwire();
 
     // Start a timer for updating the microphones (new ones might be plugged in)
-    _timer = Timer.periodic(1.seconds, (timer) async {
-      await _updateMicrophones();
-      await _updateOutputDevices();
+    Timer.periodic(1.seconds, (timer) async {
+      if (_microphones.disposed) {
+        timer.cancel();
+        return;
+      }
+      unawaited(_updateMicrophones());
+      unawaited(_updateOutputDevices());
     });
     super.initState();
   }
@@ -191,7 +194,6 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     _microphones.dispose();
     _selectedMicrophone.dispose();
     _outputDevices.dispose();

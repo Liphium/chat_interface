@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/util/encryption/signatures.dart';
@@ -95,6 +98,7 @@ class SpaceService {
     // Make everything ready
     SpaceController.onConnect(server, spaceId, key);
     TabletopController.resetControllerState();
+    StudioController.resetControllerState();
 
     // Open the screen
     SidebarController.openTab(SpaceSidebarTab());
@@ -110,6 +114,9 @@ class SpaceService {
     if (!event.data["success"]) {
       return event.data["message"];
     }
+
+    // Create a Studio connection
+    unawaited(StudioController.connectToStudio());
 
     return null;
   }

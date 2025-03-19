@@ -130,7 +130,7 @@ impl PlayingEngine {
                     // Create a decoder in case there isn't one
                     if client.decoder.is_none() {
                         client.decoder = Some(
-                            Decoder::new(audiopus::SampleRate::Hz48000, audiopus::Channels::Mono)
+                            Decoder::new(DEFAULT_SAMPLE_RATE_OPUS, audiopus::Channels::Mono)
                                 .expect("Couldn't create decoder"),
                         );
                     }

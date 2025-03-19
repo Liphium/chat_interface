@@ -86,24 +86,30 @@ pub async fn set_log_sink(sink: StreamSink<String>) {
 
 // Log information
 pub fn info_impl(message: &str) {
-    let sink = LOG_SINK.blocking_lock();
-    if let Some(sink) = sink.as_ref() {
-        sink.add(format!("info: {}", message))
-            .expect("Couldn't send log message");
-    } else {
-        println!("info: {}", message);
-    }
+    let message = message.to_string();
+    tokio::spawn(async move {
+        let sink = LOG_SINK.lock().await;
+        if let Some(sink) = sink.as_ref() {
+            sink.add(format!("info: {}", message))
+                .expect("Couldn't send log message");
+        } else {
+            println!("info: {}", message);
+        }
+    });
 }
 
 // Log an error
 pub fn error_impl(message: &str) {
-    let sink = LOG_SINK.blocking_lock();
-    if let Some(sink) = sink.as_ref() {
-        sink.add(format!("error: {}", message))
-            .expect("Couldn't send log message");
-    } else {
-        println!("error: {}", message);
-    }
+    let message = message.to_string();
+    tokio::spawn(async move {
+        let sink = LOG_SINK.lock().await;
+        if let Some(sink) = sink.as_ref() {
+            sink.add(format!("error: {}", message))
+                .expect("Couldn't send log message");
+        } else {
+            println!("error: {}", message);
+        }
+    });
 }
 
 #[macro_export]

@@ -47,13 +47,6 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: "call",
-      child: buildRectangle(),
-    );
-  }
-
-  Widget buildRectangle() {
     return Container(
       color: Get.theme.colorScheme.inverseSurface,
       child: LayoutBuilder(builder: (context, constraints) {

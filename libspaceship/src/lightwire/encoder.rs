@@ -44,7 +44,7 @@ impl EncodingEngine {
 
             // Constants for the automatic voice activity detection
             let alpha = 0.99;
-            let threshold_factor = 0.8;
+            let threshold_factor = 1.7;
 
             move || loop {
                 let samples: Option<Vec<f32>> = sample_receiver.blocking_recv();
@@ -79,7 +79,6 @@ impl EncodingEngine {
                     }
                     avg = avg / samples.len() as f32;
                     avg = avg.sqrt();
-                    avg = pcm_to_db(avg);
 
                     // Try to detect speech
                     let speech_detected: bool = if options.automatic_detection {
@@ -89,6 +88,7 @@ impl EncodingEngine {
                         avg > noise_floor * threshold_factor
                     } else {
                         // Use the talking amplitude for speech detection
+                        avg = pcm_to_db(avg);
                         avg > options.talking_amplitude
                     };
 
