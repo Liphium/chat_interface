@@ -1,5 +1,5 @@
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
-import 'package:chat_interface/pages/spaces/widgets/space_grid_renderer.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_member_tab.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,15 +20,7 @@ class _SpaceInfoTabState extends State<SpaceInfoTab> {
     return Watch((context) {
       // Render the member list when connected to Studio
       if (StudioController.connected.value) {
-        return Center(
-          child: SpaceGridRenderer(
-            amount: 3,
-            padding: sectionSpacing,
-            renderer: (index) {
-              return Placeholder();
-            },
-          ),
-        );
+        return SpaceMemberTab();
       }
 
       // Return a basic description of Spaces instead
