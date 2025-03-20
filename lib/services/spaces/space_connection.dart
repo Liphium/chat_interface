@@ -1,4 +1,6 @@
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
@@ -31,6 +33,8 @@ class SpaceConnection {
       SpaceController.leaveSpace(error: error);
       WarpController.resetControllerState();
       SpaceMemberController.onDisconnect();
+      StudioController.handleDisconnect();
+      StudioTrackController.handleDisconnect();
     }));
 
     // Setup all the listeners for the connector

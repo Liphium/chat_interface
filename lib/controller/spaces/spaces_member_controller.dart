@@ -55,6 +55,11 @@ class SpaceMemberController {
     });
   }
 
+  /// Handle a change in talking state for a member
+  static void handleTalkingState(String id, bool talking) {
+    members[id]?.talking.value = talking;
+  }
+
   /// Get the id of the current client
   static String getOwnId() {
     return _ownId;
@@ -62,7 +67,7 @@ class SpaceMemberController {
 
   /// Get the Space member for a client id
   static SpaceMember? getMember(String clientId) {
-    return members.peek()[clientId];
+    return members[clientId];
   }
 
   static void onDisconnect() {
@@ -76,7 +81,7 @@ class SpaceMember {
   final Friend friend;
 
   // We'll just keep this here for when Lightwire is finished
-  final isSpeaking = signal(false);
+  final talking = signal(false);
   final isMuted = signal(false);
   final isDeafened = signal(false);
   final verified = signal(true);

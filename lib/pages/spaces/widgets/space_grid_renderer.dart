@@ -25,7 +25,7 @@ class SpaceGridRenderer extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final ratio = 16 / 9;
-        final maxWidth = constraints.maxWidth - padding;
+        final maxWidth = min(constraints.maxWidth - padding, 500);
         final maxHeight = constraints.maxHeight - padding;
         double bestSize = 0;
 

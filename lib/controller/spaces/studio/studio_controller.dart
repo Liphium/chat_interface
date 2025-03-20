@@ -38,6 +38,7 @@ class StudioController {
   }
 
   static void resetControllerState() {
+    _connection?.close();
     _connection = null;
     connected.value = false;
     connecting.value = false;

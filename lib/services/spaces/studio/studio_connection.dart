@@ -1,16 +1,18 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
-import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/studio/studio_track_publisher.dart';
+import 'package:chat_interface/src/rust/api/engine.dart' as libspace;
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class StudioConnection {
   final RTCPeerConnection _peer;
   late final StudioTrackPublisher _publisher;
+  libspace.LightwireEngine? _engine;
 
   StudioConnection(this._peer) {
     // Create all the required listeners on the peer
@@ -19,7 +21,6 @@ class StudioConnection {
         sendLog("studio: new connection state: $state");
         if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
           StudioController.handleDisconnect();
-          StudioTrackController.handleDisconnect();
         }
       }
       ..onRenegotiationNeeded = _handleRenegotiation
@@ -49,8 +50,6 @@ class StudioConnection {
         ..ordered = false,
     );
 
-    // TODO: Start Lightwire
-
     // Subscribe to all the events the data channel has
     _handleDataChannel(channel);
   }
@@ -59,14 +58,32 @@ class StudioConnection {
   void _handleDataChannel(RTCDataChannel channel) {
     // Subscribe to all the events the data channel has
     channel
-      ..onDataChannelState = (state) {
+      ..onDataChannelState = (state) async {
         sendLog("studio: state of ${channel.label ?? "no_label_dc"}: $state");
+
+        // Start lightwire when the channel has been opeed
+        if (state == RTCDataChannelState.RTCDataChannelOpen) {
+          sendLog("studio: starting lightwire..");
+
+          // Create a new lightwire engine and wire it up with the data channel
+          _engine = await libspace.createLightwireEngine();
+          libspace.startPacketStream(engine: _engine!).listen((data) {
+            final (packet, speech) = data;
+            SpaceMemberController.handleTalkingState(SpaceMemberController.getOwnId(), speech);
+          });
+        }
+
+        // Close the lightwire engine when the data channel is closed
+        if (state == RTCDataChannelState.RTCDataChannelClosed && _engine != null) {
+          await libspace.stopEngine(engine: _engine!);
+          SpaceMemberController.handleTalkingState(SpaceMemberController.getOwnId(), false);
+        }
       }
       ..onMessage = (msg) {
         sendLog("studio: received ${msg.text} from server");
       }
       ..onBufferedAmountLow = (buf) {
-        sendLog("studio: buffer amount $buf for ${channel.label ?? "no_label_dc"}");
+        sendLog("studio: buffer amount low for ${channel.label ?? "no_label_dc"} ($buf)");
       };
   }
 
@@ -87,8 +104,8 @@ class StudioConnection {
 
     // Create a new offer
     final offer = await _peer.createOffer({
-      "offerToReceiveAudio": true,
-      "offerToReceiveVideo": true,
+      // TODO: Re-enable when video is implemented
+      /* "offerToReceiveVideo": true, */
     });
     await _peer.setLocalDescription(offer);
 
@@ -120,5 +137,9 @@ class StudioConnection {
   /// Get the underlying Track publisher
   StudioTrackPublisher getPublisher() {
     return _publisher;
+  }
+
+  void close() {
+    _peer.close();
   }
 }

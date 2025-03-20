@@ -31,7 +31,7 @@ class StudioTrackController {
     tracks.remove(id);
   }
 
-  /// Reset all of the controller state
+  /// Reset all of the controller state (when the user disconnects from the Space)
   static void handleDisconnect() {
     tracks.clear();
   }
