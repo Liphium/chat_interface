@@ -113,4 +113,25 @@ class StudioService {
       ));
     });
   }
+
+  /// Update your audio state on the server. Set muted and deafened only when changed.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> updateAudioState({bool? muted, bool? deafened}) async {
+    assert(muted != null || deafened != null);
+
+    // Send the new audio state to the server
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("set_audio_state", {
+      if (muted != null) "muted": muted,
+      if (deafened != null) "deafened": deafened,
+    }));
+    if (event == null) {
+      return "server.error".tr;
+    }
+    if (!event.data["success"]) {
+      return event.data["message"];
+    }
+
+    return null;
+  }
 }
