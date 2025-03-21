@@ -5,14 +5,14 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:signals/signals_flutter.dart';
 
-class SpaceMemberTab extends StatefulWidget {
-  const SpaceMemberTab({super.key});
+class SpaceStudioGridTab extends StatefulWidget {
+  const SpaceStudioGridTab({super.key});
 
   @override
-  State<SpaceMemberTab> createState() => _SpaceMemberTabState();
+  State<SpaceStudioGridTab> createState() => _SpaceStudioGridTabState();
 }
 
-class _SpaceMemberTabState extends State<SpaceMemberTab> {
+class _SpaceStudioGridTabState extends State<SpaceStudioGridTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -59,31 +59,50 @@ class _SpaceMemberTabState extends State<SpaceMemberTab> {
             ),
           ),
 
-          // Mute/deafen indicator
-          Positioned(
-            right: defaultSpacing,
-            bottom: defaultSpacing,
-            child: Container(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(200),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.primaryContainer,
-                    blurRadius: 10,
+          // Mute/deafen/connection indicator
+          Watch((ctx) {
+            // Determine the icon
+            IconData? icon;
+            if (member.isMuted.value) {
+              icon = Icons.mic_off;
+            }
+            if (member.isDeafened.value) {
+              icon = Icons.headset_off;
+            }
+            if (!member.connectedToStudio.value) {
+              icon = Icons.power_off;
+            }
+
+            // Render nothing if there is no icon
+            if (icon == null) {
+              return SizedBox();
+            }
+
+            return Positioned(
+              right: defaultSpacing,
+              bottom: defaultSpacing,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.primaryContainer,
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                width: 32,
+                height: 32,
+                child: Center(
+                  child: Icon(
+                    icon,
+                    color: theme.colorScheme.error,
                   ),
-                ],
-              ),
-              width: 32,
-              height: 32,
-              child: Center(
-                child: Icon(
-                  Icons.mic_off,
-                  color: theme.colorScheme.error,
                 ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       );
     });

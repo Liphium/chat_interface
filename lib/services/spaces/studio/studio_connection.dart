@@ -70,6 +70,11 @@ class StudioConnection {
           libspace.startPacketStream(engine: _engine!).listen((data) {
             final (packet, speech) = data;
             SpaceMemberController.handleTalkingState(SpaceMemberController.getOwnId(), speech);
+
+            // Send the packets to the data channel
+            if (speech) {
+              channel.send(RTCDataChannelMessage.fromBinary(packet));
+            }
           });
         }
 
@@ -80,7 +85,14 @@ class StudioConnection {
         }
       }
       ..onMessage = (msg) {
-        sendLog("studio: received ${msg.text} from server");
+        if (!msg.isBinary) {
+          sendLog("studio: error: message other than binary over lightwire");
+          return;
+        }
+
+        // TODO: Handle receiving lightwire stuff
+        // Format: | id_length (8 bytes) | client_id (of id_length) | voice_data (rest) |
+        sendLog("studio: received message from server");
       }
       ..onBufferedAmountLow = (buf) {
         sendLog("studio: buffer amount low for ${channel.label ?? "no_label_dc"} ($buf)");
@@ -127,6 +139,14 @@ class StudioConnection {
   /// Handle a new track
   void _handleNewTrack(RTCTrackEvent event) {
     sendLog("studio: received new track: ${event.track.kind ?? "no type found"}");
+  }
+
+  /// Handle the update of the audio state
+  Future<void> handleAudioState({bool? muted, bool? deafened}) async {
+    if (muted != null) {
+      await libspace.setVoiceEnabled(engine: _engine!, enabled: !muted);
+    }
+    // TODO: Handle deafen properly in lightwire
   }
 
   /// Get the underlying RTC connection

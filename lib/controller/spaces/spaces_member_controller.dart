@@ -43,6 +43,11 @@ class SpaceMemberController {
           members[clientId]!.verifySignature(member["sign"]);
         }
 
+        // Update their state
+        members[clientId]!.connectedToStudio.value = member["st"];
+        members[clientId]!.isMuted.value = member["mute"];
+        members[clientId]!.isDeafened.value = member["deaf"];
+
         // Cache the account id
         memberIds[clientId] = address;
       }
@@ -82,6 +87,7 @@ class SpaceMember {
 
   // We'll just keep this here for when Lightwire is finished
   final talking = signal(false);
+  final connectedToStudio = signal(false);
   final isMuted = signal(false);
   final isDeafened = signal(false);
   final verified = signal(true);

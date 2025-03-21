@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/spaces/warp_controller.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
@@ -114,6 +115,43 @@ class _SpaceControlsState extends State<SpaceControls> {
                     ),
 
                     horizontalSpacing(defaultSpacing),
+
+                    // Render mute and deafen buttons in case in Studio
+                    Watch((ctx) {
+                      if (!StudioController.connected.value) {
+                        return SizedBox();
+                      }
+
+                      return Row(
+                        children: [
+                          // Render the mute button
+                          Watch(
+                            (ctx) => LoadingIconButton(
+                              loading: StudioController.audioStateLoading,
+                              background: true,
+                              padding: defaultSpacing,
+                              onTap: () => StudioController.toggleMute(),
+                              icon: StudioController.audioMuted.value ? Icons.mic_off : Icons.mic,
+                              iconSize: 28,
+                            ),
+                          ),
+                          horizontalSpacing(defaultSpacing),
+
+                          // Render the deafen button
+                          Watch(
+                            (ctx) => LoadingIconButton(
+                              loading: StudioController.audioStateLoading,
+                              background: true,
+                              padding: defaultSpacing,
+                              onTap: () => StudioController.toggleDeafened(),
+                              icon: StudioController.audioDeafened.value ? Icons.headset_off : Icons.headset,
+                              iconSize: 28,
+                            ),
+                          ),
+                          horizontalSpacing(defaultSpacing),
+                        ],
+                      );
+                    }),
 
                     // Warp manager button
                     LoadingIconButton(
