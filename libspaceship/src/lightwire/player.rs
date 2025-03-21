@@ -29,6 +29,7 @@ struct Client {
 
 // Default sample rate for all packets
 static DEFAULT_SAMPLE_RATE: u32 = 48000;
+static DEFAULT_FRAME_SIZE: usize = (DEFAULT_SAMPLE_RATE / 50) as usize;
 static DEFAULT_SAMPLE_RATE_OPUS: audiopus::SampleRate = audiopus::SampleRate::Hz48000;
 
 impl PlayingEngine {
@@ -111,10 +112,10 @@ impl PlayingEngine {
     }
 
     // Add a new client to the playing engine
-    pub fn add_target(&mut self, id: String) {
+    pub fn add_target(&mut self, arc: Arc<Mutex<PlayingEngine>>, id: String) {
         // Create a sink for the thing
         let handle = self.output_handle.as_ref().unwrap();
-        let sink = Sink::try_new(&handle).expect("Couldn't create sink");
+        let sink = Sink::try_new(handle).expect("Couldn't create sink");
 
         // Add the target to the playing engine
         let client = Arc::new(Mutex::new(Client {
@@ -122,16 +123,19 @@ impl PlayingEngine {
             buffer: JitterBuffer::new(),
             decoder: None,
         }));
-        self.client_map.insert(id, client.clone());
+        self.client_map.insert(id.clone(), client.clone());
 
         // Spawn a task for playing the packets at a consistent interval
         tokio::spawn(async move {
+            let mut seals = 0;
             let mut interval = time::interval(Duration::from_millis(20));
             loop {
                 interval.tick().await;
 
                 let mut client = client.lock().await;
                 if let Some(packet) = client.buffer.pop() {
+                    seals = 0;
+
                     // Create a decoder in case there isn't one
                     if client.decoder.is_none() {
                         client.decoder = Some(
@@ -140,11 +144,9 @@ impl PlayingEngine {
                         );
                     }
 
-                    info!("packet received, seq={}", packet.seq);
-
                     // Decode the packet
                     let decoder = client.decoder.as_mut().expect("Decoder not found, wtf");
-                    let mut decoded = [0f32; 2000];
+                    let mut decoded = [0f32; DEFAULT_FRAME_SIZE];
                     let frame_size = decoder
                         .decode_float(Some(&packet.packet), &mut decoded[..], false)
                         .expect("Couldn't decode packet");
@@ -155,25 +157,38 @@ impl PlayingEngine {
                         .sink
                         .append(SamplesBuffer::new(1, DEFAULT_SAMPLE_RATE, decoded));
                 } else if let Some(decoder) = &mut client.decoder {
+                    seals += 1;
+                    if seals > 10 {
+                        // Shutdown the listener completely to prevent unneeded resource usage
+                        if seals > 1000 {
+                            let mut engine = arc.lock().await;
+                            engine.remove_target(&id);
+                            info!("unused listener for client {}", id);
+                            return;
+                        }
+                        continue;
+                    }
+
                     // Generate loss concealment using the decoder
-                    let mut decoded = [0f32; 2000];
+                    let mut decoded = [0f32; DEFAULT_FRAME_SIZE];
                     let none_option: Option<&Vec<u8>> = None;
                     let frame_size = decoder
                         .decode_float(none_option, &mut decoded[..], false)
                         .expect("Couldn't generate loss concealment");
                     let (decoded, _) = decoded.split_at(frame_size);
 
-                    info!("packet missing, adding seal");
-
                     // Play the loss concealment using the sink
                     client
                         .sink
                         .append(SamplesBuffer::new(1, DEFAULT_SAMPLE_RATE, decoded));
-                } else {
-                    info!("packet missing, no seal");
                 }
             }
         });
+    }
+
+    // Remove a target from the engine
+    pub fn remove_target(&mut self, id: &String) {
+        self.client_map.remove(id);
     }
 
     pub fn stop(&mut self) {

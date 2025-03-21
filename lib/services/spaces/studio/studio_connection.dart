@@ -8,12 +8,14 @@ import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/studio/studio_track_publisher.dart';
 import 'package:chat_interface/src/rust/api/engine.dart' as libspace;
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class StudioConnection {
   final RTCPeerConnection _peer;
   late final StudioTrackPublisher _publisher;
   libspace.LightwireEngine? _engine;
+  Timer? _talkingTimer;
 
   StudioConnection(this._peer) {
     // Create all the required listeners on the peer
@@ -34,7 +36,6 @@ class StudioConnection {
       ..onIceGatheringState = (state) {
         sendLog("studio: new ice gathering state: $state");
       }
-      ..onDataChannel = _handleDataChannel
       ..onTrack = _handleNewTrack;
 
     // Create the publisher to manage all the tracks
@@ -51,16 +52,25 @@ class StudioConnection {
         ..ordered = false,
     );
 
+    // Create a new timer for making sure talking states are deleted once no longer talking
+    _talkingTimer = Timer.periodic(100.ms, (timer) {
+      final flagDate = DateTime.now().subtract(250.ms);
+      for (var member in SpaceMemberController.members.peek().values) {
+        // Check if they have not talked since the last iteration
+        member.talking.value = member.lastPacket?.isBefore(flagDate) ?? member.talking.peek();
+      }
+    });
+
     // Subscribe to all the events the data channel has
-    _handleDataChannel(channel);
+    _handleLightwireChannel(channel);
   }
 
   /// Handle a new data channel created by the server or the client
-  void _handleDataChannel(RTCDataChannel channel) {
+  void _handleLightwireChannel(RTCDataChannel channel) {
     // Subscribe to all the events the data channel has
     channel
       ..onDataChannelState = (state) async {
-        sendLog("studio: state of ${channel.label ?? "no_label_dc"}: $state");
+        sendLog("studio: state of lightwire: $state");
 
         // Start lightwire when the channel has been opeed
         if (state == RTCDataChannelState.RTCDataChannelOpen) {
@@ -99,11 +109,16 @@ class StudioConnection {
         final clientId = utf8.decode(clientIdBytes);
         final voicePacket = bytes.sublist(1 + idLength);
 
+        // Set talking state (will be automatically cleared)
+        final member = SpaceMemberController.getMember(clientId);
+        member?.talking.value = true;
+        member?.lastPacket = DateTime.now();
+
         // Let lightwire handle the rest
         unawaited(libspace.handlePacket(engine: _engine!, id: clientId, packet: voicePacket));
       }
       ..onBufferedAmountLow = (buf) {
-        sendLog("studio: buffer amount low for ${channel.label ?? "no_label_dc"} ($buf)");
+        sendLog("studio: lightwire buffer amount low");
       };
   }
 
@@ -168,6 +183,7 @@ class StudioConnection {
   }
 
   void close() {
-    _peer.close();
+    _talkingTimer?.cancel();
+    _peer.close(); // This will close lightwire, etc.
   }
 }

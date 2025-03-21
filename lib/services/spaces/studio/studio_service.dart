@@ -8,7 +8,6 @@ import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/studio/studio_connection.dart';
-import 'package:chat_interface/src/rust/api/engine.dart';
 import 'package:get/get.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 

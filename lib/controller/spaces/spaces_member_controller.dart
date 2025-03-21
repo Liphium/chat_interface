@@ -47,6 +47,9 @@ class SpaceMemberController {
         members[clientId]!.connectedToStudio.value = member["st"];
         members[clientId]!.isMuted.value = member["mute"];
         members[clientId]!.isDeafened.value = member["deaf"];
+        if (member["mute"] || member["deaf"] || !member["st"]) {
+          members[clientId]!.talking.value = false;
+        }
 
         // Cache the account id
         memberIds[clientId] = address;
@@ -85,8 +88,9 @@ class SpaceMember {
   final String id;
   final Friend friend;
 
-  // We'll just keep this here for when Lightwire is finished
+  // Lightwire and Studio state
   final talking = signal(false);
+  DateTime? lastPacket;
   final connectedToStudio = signal(false);
   final isMuted = signal(false);
   final isDeafened = signal(false);

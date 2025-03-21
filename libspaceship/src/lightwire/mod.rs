@@ -84,7 +84,7 @@ impl Engine {
         // Make sure the target is registered in the engine
         let mut engine = self.playing_engine.lock().await;
         if !engine.does_target_exist(&id) {
-            engine.add_target(id.clone());
+            engine.add_target(self.playing_engine.clone(), id.clone());
         }
 
         self.packet_sender
