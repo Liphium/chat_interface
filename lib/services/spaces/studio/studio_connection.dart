@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
@@ -90,9 +91,16 @@ class StudioConnection {
           return;
         }
 
-        // TODO: Handle receiving lightwire stuff
+        // Decode the packet
         // Format: | id_length (8 bytes) | client_id (of id_length) | voice_data (rest) |
-        sendLog("studio: received message from server");
+        final bytes = msg.binary;
+        final idLength = bytes[0];
+        final clientIdBytes = bytes.sublist(1, 1 + idLength);
+        final clientId = utf8.decode(clientIdBytes);
+        final voicePacket = bytes.sublist(1 + idLength);
+
+        // Let lightwire handle the rest
+        unawaited(libspace.handlePacket(engine: _engine!, id: clientId, packet: voicePacket));
       }
       ..onBufferedAmountLow = (buf) {
         sendLog("studio: buffer amount low for ${channel.label ?? "no_label_dc"} ($buf)");

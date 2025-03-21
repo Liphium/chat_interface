@@ -79,14 +79,14 @@ impl Engine {
         opts.talking_amplitude = amplitude;
     }
 
-    // Register a new target in the playing engine
-    pub async fn register_target(&self, id: String) {
-        let mut engine = self.playing_engine.lock().await;
-        engine.add_target(id);
-    }
-
     // Handle a packet
     pub async fn handle_packet(&self, id: String, packet: Vec<u8>) {
+        // Make sure the target is registered in the engine
+        let mut engine = self.playing_engine.lock().await;
+        if !engine.does_target_exist(&id) {
+            engine.add_target(id.clone());
+        }
+
         self.packet_sender
             .send(AudioPacket::decode(Some(id), packet))
             .ok();

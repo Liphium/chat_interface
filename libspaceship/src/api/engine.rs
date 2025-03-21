@@ -56,14 +56,6 @@ pub async fn set_talking_amplitude(engine: LightwireEngine, amplitude: f32) {
     engine.set_talking_amplitude(amplitude).await;
 }
 
-// Register a new decoding target for an engine
-pub async fn register_target(engine: LightwireEngine, id: String) {
-    let engine = binding::get_engine(engine.id)
-        .await
-        .expect("Engine hasn't been initialized yet");
-    engine.register_target(id).await;
-}
-
 // Let the engine play a new audio packet (id needs to be registered before using register_target)
 pub async fn handle_packet(engine: LightwireEngine, id: String, packet: Vec<u8>) {
     let engine = binding::get_engine(engine.id)

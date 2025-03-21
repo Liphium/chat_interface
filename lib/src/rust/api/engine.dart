@@ -33,10 +33,6 @@ Future<void> setTalkingAmplitude(
     RustLib.instance.api.crateApiEngineSetTalkingAmplitude(
         engine: engine, amplitude: amplitude);
 
-Future<void> registerTarget(
-        {required LightwireEngine engine, required String id}) =>
-    RustLib.instance.api.crateApiEngineRegisterTarget(engine: engine, id: id);
-
 Future<void> handlePacket(
         {required LightwireEngine engine,
         required String id,

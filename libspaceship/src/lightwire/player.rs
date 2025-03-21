@@ -105,6 +105,11 @@ impl PlayingEngine {
         return (engine, sender);
     }
 
+    // Check if a target exists in the playing engine
+    pub fn does_target_exist(&self, id: &String) -> bool {
+        self.client_map.contains_key(id)
+    }
+
     // Add a new client to the playing engine
     pub fn add_target(&mut self, id: String) {
         // Create a sink for the thing
