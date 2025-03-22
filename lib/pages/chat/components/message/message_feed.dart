@@ -6,7 +6,6 @@ import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -99,7 +98,6 @@ class _MessageFeedState extends State<MessageFeed> {
                         Align(
                           alignment: Alignment.topCenter,
                           child: Watch(key: ValueKey(provider.conversation.id), (ctx) {
-                            sendLog("re-render loading thingy: ${provider.newMessagesLoading.value} ${provider.hashCode}");
                             return Visibility(
                               visible: provider.newMessagesLoading.value,
                               child: Padding(

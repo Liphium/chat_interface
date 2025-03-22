@@ -18,6 +18,7 @@ use super::AudioPacket;
 pub struct PlayingEngine {
     client_map: HashMap<String, Arc<Mutex<Client>>>,
     output_handle: Option<OutputStreamHandle>,
+    enabled: bool,
     stop: bool,
 }
 
@@ -37,6 +38,7 @@ impl PlayingEngine {
         let engine = Arc::new(Mutex::new(Self {
             client_map: HashMap::new(),
             output_handle: None,
+            enabled: true,
             stop: false,
         }));
 
@@ -74,15 +76,15 @@ impl PlayingEngine {
                     if data.is_err() {
                         continue;
                     }
+                    let engine = engine.lock().await;
                     let data = data.unwrap();
-                    if data.is_none() {
+                    if data.is_none() || engine.stop {
                         info!("closed playing engine.");
                         return;
                     }
                     let data: AudioPacket = data.expect("No data found");
 
                     // Make sure the client with the specified id actually exists
-                    let engine = engine.lock().await;
                     let client_id = data
                         .id
                         .as_ref()
@@ -131,8 +133,32 @@ impl PlayingEngine {
             let mut interval = time::interval(Duration::from_millis(20));
             loop {
                 interval.tick().await;
-
                 let mut client = client.lock().await;
+
+                // Make sure the engine is actually enabled
+                let enabled = {
+                    let engine = arc.lock().await;
+                    engine.enabled
+                };
+                if !enabled {
+                    let mut engine = arc.lock().await;
+                    engine.remove_target(&id);
+                    info!("unused listener for client {}", id);
+                    client.buffer.clear();
+                    return;
+                }
+
+                // Shutdown the listener completely at some point to prevent unneeded resource usage
+                seals += 1;
+                if seals > 1000 {
+                    let mut engine = arc.lock().await;
+                    engine.remove_target(&id);
+                    info!("unused listener for client {}", id);
+                    client.buffer.clear();
+                    return;
+                }
+
+                // Actually play the packet (or add seal)
                 if let Some(packet) = client.buffer.pop() {
                     seals = 0;
 
@@ -157,15 +183,8 @@ impl PlayingEngine {
                         .sink
                         .append(SamplesBuffer::new(1, DEFAULT_SAMPLE_RATE, decoded));
                 } else if let Some(decoder) = &mut client.decoder {
-                    seals += 1;
+                    // Don't generate seals anymore at some point
                     if seals > 10 {
-                        // Shutdown the listener completely to prevent unneeded resource usage
-                        if seals > 1000 {
-                            let mut engine = arc.lock().await;
-                            engine.remove_target(&id);
-                            info!("unused listener for client {}", id);
-                            return;
-                        }
                         continue;
                     }
 
@@ -191,7 +210,19 @@ impl PlayingEngine {
         self.client_map.remove(id);
     }
 
+    // Completely stop the engine
     pub fn stop(&mut self) {
         self.stop = true;
+        self.client_map.clear();
+    }
+
+    // Enable or disable playing sound
+    pub fn set_enabled(&mut self, enabled: bool) {
+        self.enabled = enabled;
+    }
+
+    // Get the enabled state of the engine
+    pub fn is_enabled(&self) -> bool {
+        self.enabled
     }
 }

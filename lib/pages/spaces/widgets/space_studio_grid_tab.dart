@@ -23,7 +23,7 @@ class _SpaceStudioGridTabState extends State<SpaceStudioGridTab> {
           amount: SpaceMemberController.members.value.length,
           padding: sectionSpacing,
           renderer: (index) {
-            final member = SpaceMemberController.members.values.elementAt(0);
+            final member = SpaceMemberController.members.values.elementAt(index);
 
             // Render the actual user
             return renderMember(member, theme);

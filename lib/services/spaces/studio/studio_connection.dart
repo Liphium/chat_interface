@@ -56,8 +56,11 @@ class StudioConnection {
     _talkingTimer = Timer.periodic(100.ms, (timer) {
       final flagDate = DateTime.now().subtract(250.ms);
       for (var member in SpaceMemberController.members.peek().values) {
+        if (member.id == SpaceMemberController.getOwnId()) {
+          continue;
+        }
         // Check if they have not talked since the last iteration
-        member.talking.value = member.lastPacket?.isBefore(flagDate) ?? member.talking.peek();
+        member.talking.value = !(member.lastPacket?.isBefore(flagDate) ?? !member.talking.peek());
       }
     });
 
@@ -169,7 +172,9 @@ class StudioConnection {
     if (muted != null) {
       await libspace.setVoiceEnabled(engine: _engine!, enabled: !muted);
     }
-    // TODO: Handle deafen properly in lightwire
+    if (deafened != null) {
+      await libspace.setAudioEnabled(engine: _engine!, enabled: !deafened);
+    }
   }
 
   /// Get the underlying RTC connection

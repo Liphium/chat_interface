@@ -32,6 +32,14 @@ pub async fn set_voice_enabled(engine: LightwireEngine, enabled: bool) {
     engine.set_voice_enabled(enabled).await;
 }
 
+// Set the enabled status of the audio on an engine
+pub async fn set_audio_enabled(engine: LightwireEngine, enabled: bool) {
+    let engine = binding::get_engine(engine.id)
+        .await
+        .expect("Engine hasn't been initialized yet");
+    engine.set_audio_enabled(enabled).await;
+}
+
 // Enable or disable voice activity detection on an engine
 pub async fn set_activity_detection(engine: LightwireEngine, enabled: bool) {
     let engine = binding::get_engine(engine.id)

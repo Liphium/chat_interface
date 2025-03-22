@@ -157,16 +157,8 @@ impl VoiceInput {
         return (input, receiver);
     }
 
-    pub fn get_sample_rate(&self) -> u32 {
-        return self.sample_rate;
-    }
-
     pub fn set_paused(&mut self, paused: bool) {
         self.paused = paused;
-    }
-
-    pub fn is_paused(&self) -> bool {
-        return self.paused;
     }
 
     pub fn stop(&mut self) {

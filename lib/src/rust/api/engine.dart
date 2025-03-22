@@ -18,6 +18,11 @@ Future<void> setVoiceEnabled(
     RustLib.instance.api
         .crateApiEngineSetVoiceEnabled(engine: engine, enabled: enabled);
 
+Future<void> setAudioEnabled(
+        {required LightwireEngine engine, required bool enabled}) =>
+    RustLib.instance.api
+        .crateApiEngineSetAudioEnabled(engine: engine, enabled: enabled);
+
 Future<void> setActivityDetection(
         {required LightwireEngine engine, required bool enabled}) =>
     RustLib.instance.api

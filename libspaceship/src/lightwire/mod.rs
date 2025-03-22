@@ -61,6 +61,12 @@ impl Engine {
         input.set_paused(!enabled);
     }
 
+    // Enable or disable playing sound
+    pub async fn set_audio_enabled(&self, enabled: bool) {
+        let mut engine = self.playing_engine.lock().await;
+        engine.set_enabled(enabled);
+    }
+
     // Enable or disable activity detection
     pub async fn set_activity_detection(&self, enabled: bool) {
         let mut opts = self.microphone_options.lock().await;
@@ -81,8 +87,13 @@ impl Engine {
 
     // Handle a packet
     pub async fn handle_packet(&self, id: String, packet: Vec<u8>) {
-        // Make sure the target is registered in the engine
+        // Make sure the the engine is actually enabled
         let mut engine = self.playing_engine.lock().await;
+        if !engine.is_enabled() {
+            return;
+        }
+
+        // Add the target in case it doesn't exist
         if !engine.does_target_exist(&id) {
             engine.add_target(self.playing_engine.clone(), id.clone());
         }

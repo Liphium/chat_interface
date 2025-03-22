@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.9.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -197170720;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 721087168;
 
 // Section: executor
 
@@ -327,6 +327,45 @@ fn wire__crate__api__engine__set_activity_detection_impl(
                         let output_ok = Result::<_, ()>::Ok({
                             crate::api::engine::set_activity_detection(api_engine, api_enabled)
                                 .await;
+                        })?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__engine__set_audio_enabled_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "set_audio_enabled",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_engine = <crate::api::engine::LightwireEngine>::sse_decode(&mut deserializer);
+            let api_enabled = <bool>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, ()>(
+                    (move || async move {
+                        let output_ok = Result::<_, ()>::Ok({
+                            crate::api::engine::set_audio_enabled(api_engine, api_enabled).await;
                         })?;
                         Ok(output_ok)
                     })()
@@ -773,19 +812,20 @@ fn pde_ffi_dispatcher_primary_impl(
         8 => {
             wire__crate__api__engine__set_activity_detection_impl(port, ptr, rust_vec_len, data_len)
         }
-        9 => wire__crate__api__engine__set_automatic_detection_impl(
+        9 => wire__crate__api__engine__set_audio_enabled_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__engine__set_automatic_detection_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        10 => {
+        11 => {
             wire__crate__api__engine__set_talking_amplitude_impl(port, ptr, rust_vec_len, data_len)
         }
-        11 => wire__crate__api__engine__set_voice_enabled_impl(port, ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__engine__start_packet_stream_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__engine__stop_all_engines_impl(port, ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__engine__stop_engine_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__engine__set_voice_enabled_impl(port, ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__engine__start_packet_stream_impl(port, ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__engine__stop_all_engines_impl(port, ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__engine__stop_engine_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
