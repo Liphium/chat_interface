@@ -53,24 +53,12 @@ impl EncodingEngine {
                 }
                 let samples = samples.expect("Couldn't unwrap option even though some?");
 
-                // Get the encoder from the engine
-                let mut engine = engine.blocking_lock();
-                if engine.encoder.is_none() {
-                    break;
-                }
-                if engine.current_seq == u16::MAX {
-                    engine.current_seq = 0;
-                } else {
-                    engine.current_seq += 1;
-                }
-                let encoder = engine.encoder.as_ref().unwrap();
-                let coder = encoder.blocking_lock();
-
                 // Get the options for voice activity detection
                 let options = options.blocking_lock();
 
                 // Run voice activity detection (if desired)
                 let mut speech = None;
+                let mut amplitude = None;
                 if options.activity_detection {
                     // Calculate the mean square root of the samples (or "energy", really useful for speech detection)
                     let mut avg = 0.0;
@@ -89,6 +77,7 @@ impl EncodingEngine {
                     } else {
                         // Use the talking amplitude for speech detection
                         avg = pcm_to_db(avg);
+                        amplitude = Some(avg);
                         avg > options.talking_amplitude
                     };
 
@@ -102,18 +91,43 @@ impl EncodingEngine {
                     });
                 }
 
-                // Encode using Opus
-                let mut output = [0u8; 2000];
-                let output_size = coder
-                    .encode_float(samples.as_slice(), &mut output)
-                    .expect("Couldn't encode");
+                // Encode using Opus (only when speech is detected)
+                let mut seq = 0;
+                let mut packet = None;
+                if speech.is_none() || speech.is_some_and(|s| s) {
+                    let mut engine = engine.blocking_lock();
+                    if engine.encoder.is_none() {
+                        break;
+                    }
 
-                let (packet, _) = output.split_at(output_size);
+                    // Increment the sequence number
+                    if engine.current_seq == u16::MAX {
+                        engine.current_seq = 0;
+                    } else {
+                        engine.current_seq += 1;
+                    }
+
+                    // Encode the packet
+                    let encoder = engine.encoder.as_ref().unwrap();
+                    let coder = encoder.blocking_lock();
+                    let mut output = [0u8; 2000];
+                    let output_size = coder
+                        .encode_float(samples.as_slice(), &mut output)
+                        .expect("Couldn't encode");
+                    let (encoded, _) = output.split_at(output_size);
+
+                    // Return the packet
+                    packet = Some(encoded.to_vec());
+                    seq = engine.current_seq;
+                }
+
+                // Send to the client
                 send_fn(AudioPacket {
                     id: None,
                     speech: speech,
-                    packet: packet.to_vec(),
-                    seq: engine.current_seq,
+                    amplitude: amplitude,
+                    packet: packet,
+                    seq: seq,
                 });
             }
         });

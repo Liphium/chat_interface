@@ -14,11 +14,11 @@ pub async fn create_lightwire_engine() -> LightwireEngine {
 // Stream the packets of an engine to a sink
 pub async fn start_packet_stream(
     engine: LightwireEngine,
-    packet_sink: StreamSink<(Vec<u8>, bool)>,
+    packet_sink: StreamSink<(Option<Vec<u8>>, Option<f32>, Option<bool>)>,
 ) {
-    binding::init_engine(engine.id, move |(packet, speech)| {
+    binding::init_engine(engine.id, move |(packet, amplitude, speech)| {
         packet_sink
-            .add((packet, speech))
+            .add((packet, amplitude, speech))
             .expect("Couldn't send packet");
     })
     .await;

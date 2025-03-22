@@ -9,7 +9,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 Future<LightwireEngine> createLightwireEngine() =>
     RustLib.instance.api.crateApiEngineCreateLightwireEngine();
 
-Stream<(Uint8List, bool)> startPacketStream(
+Stream<(Uint8List?, double?, bool?)> startPacketStream(
         {required LightwireEngine engine}) =>
     RustLib.instance.api.crateApiEngineStartPacketStream(engine: engine);
 

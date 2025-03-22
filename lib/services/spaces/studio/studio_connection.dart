@@ -70,6 +70,8 @@ class StudioConnection {
 
   /// Handle a new data channel created by the server or the client
   void _handleLightwireChannel(RTCDataChannel channel) {
+    channel.bufferedAmountLowThreshold = 256 * 1024; // 256 KB
+
     // Subscribe to all the events the data channel has
     channel
       ..onDataChannelState = (state) async {
@@ -82,11 +84,11 @@ class StudioConnection {
           // Create a new lightwire engine and wire it up with the data channel
           _engine = await libspace.createLightwireEngine();
           libspace.startPacketStream(engine: _engine!).listen((data) {
-            final (packet, speech) = data;
-            SpaceMemberController.handleTalkingState(SpaceMemberController.getOwnId(), speech);
+            final (packet, amplitude, speech) = data;
+            SpaceMemberController.handleTalkingState(SpaceMemberController.getOwnId(), speech ?? false);
 
             // Send the packets to the data channel
-            if (speech) {
+            if (packet != null) {
               channel.send(RTCDataChannelMessage.fromBinary(packet));
             }
           });

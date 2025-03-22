@@ -115,8 +115,9 @@ impl Engine {
 pub struct AudioPacket {
     pub id: Option<String>,
     pub seq: u16,
+    pub amplitude: Option<f32>,
     pub speech: Option<bool>,
-    pub packet: Vec<u8>,
+    pub packet: Option<Vec<u8>>,
 }
 
 impl jittr::Packet for AudioPacket {
@@ -129,11 +130,18 @@ impl AudioPacket {
     // Encode the audio packet to bytes
     //
     // Format: | seq | voice_data |
-    pub fn encode(&self) -> Vec<u8> {
-        let mut packet_vec = Vec::with_capacity(2 + 4 + self.packet.len());
+    pub fn encode(&self) -> Option<Vec<u8>> {
+        // Make sure there actually is a packet
+        if self.packet.is_none() {
+            return None;
+        }
+
+        // Encode the packet with the sequence number added
+        let packet = self.packet.as_ref().unwrap();
+        let mut packet_vec = Vec::with_capacity(2 + 4 + packet.len());
         packet_vec.extend_from_slice(&self.seq.to_le_bytes());
-        packet_vec.extend(self.packet.iter());
-        return packet_vec;
+        packet_vec.extend(packet.iter());
+        return Some(packet_vec);
     }
 
     // Decode the audio packet
@@ -144,8 +152,9 @@ impl AudioPacket {
         return Self {
             id: id,
             speech: None,
+            amplitude: None,
             seq: u16::from_le_bytes([seq_bytes[0], seq_bytes[1]]),
-            packet: packet.to_vec(),
+            packet: Some(packet.to_vec()),
         };
     }
 }

@@ -36,7 +36,7 @@ pub async fn create_engine() -> u32 {
 // Initialize an engine with the callback sending back the packets
 pub async fn init_engine<F>(id: u32, mut send_fn: F)
 where
-    F: FnMut((Vec<u8>, bool)) + Send + 'static,
+    F: FnMut((Option<Vec<u8>>, Option<f32>, Option<bool>)) + Send + 'static,
 {
     // Get the global map of engines
     let mut map = ENGINE_MAP.lock().await;
@@ -44,7 +44,7 @@ where
         id,
         Some(
             lightwire::Engine::create(move |packet| {
-                send_fn((packet.encode(), packet.speech.unwrap_or(false)));
+                send_fn((packet.encode(), packet.amplitude, packet.speech));
             })
             .await,
         ),

@@ -47,21 +47,25 @@ impl VoiceInput {
             let input = input.clone(); // Clone for use in the task
             move || {
                 // Create stream config for the device based on the channels
-                let stream_config = {
+                // Determine appropriate buffer size based on device capabilities
+                let desired_buffer_size = {
                     let input = input.blocking_lock();
-                    if input.channels == 1 {
-                        cpal::StreamConfig {
-                            channels: 1,
-                            sample_rate: cpal::SampleRate(input.sample_rate),
-                            buffer_size: cpal::BufferSize::Fixed(input.frame_size),
+                    match device_config.buffer_size() {
+                        cpal::SupportedBufferSize::Range { min, max } => {
+                            // Try to use frame_size, but stay within allowed range
+                            let frame_size = input.frame_size * input.channels as u32;
+                            cpal::BufferSize::Fixed(frame_size.clamp(*min, *max))
                         }
-                    } else {
-                        cpal::StreamConfig {
-                            channels: 2,
-                            sample_rate: cpal::SampleRate(input.sample_rate),
-                            buffer_size: cpal::BufferSize::Fixed(input.frame_size * 2), // Use double here because it will be turned into mono
+                        cpal::SupportedBufferSize::Unknown => {
+                            // Use default buffer size when unknown
+                            cpal::BufferSize::Default
                         }
                     }
+                };
+                let stream_config = cpal::StreamConfig {
+                    channels: device_config.channels(),
+                    sample_rate: device_config.sample_rate(),
+                    buffer_size: desired_buffer_size,
                 };
 
                 // Create a resampler to resample to 48kHz (default sample rate)

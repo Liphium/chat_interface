@@ -128,8 +128,8 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
 
     // Start the engine
     libspace.startPacketStream(engine: _engine!).listen((packet) {
-      final (_, speech) = packet;
-      _speechDetected.value = speech;
+      final (_, _, speech) = packet;
+      _speechDetected.value = speech ?? false;
     });
     await libspace.setVoiceEnabled(engine: _engine!, enabled: true);
 

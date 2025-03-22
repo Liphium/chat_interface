@@ -61,6 +61,7 @@ impl PlayingEngine {
                     thread::sleep(Duration::from_millis(500));
                     let engine = engine.blocking_lock();
                     if engine.stop {
+                        info!("stopping playing engine.");
                         return;
                     }
                 }
@@ -174,9 +175,11 @@ impl PlayingEngine {
                     let decoder = client.decoder.as_mut().expect("Decoder not found, wtf");
                     let mut decoded = [0f32; DEFAULT_FRAME_SIZE];
                     let frame_size = decoder
-                        .decode_float(Some(&packet.packet), &mut decoded[..], false)
+                        .decode_float(Some(&packet.packet.unwrap()), &mut decoded[..], false)
                         .expect("Couldn't decode packet");
                     let (decoded, _) = decoded.split_at(frame_size);
+
+                    println!("playing seq={}", packet.seq);
 
                     // Play the packet using the sink
                     client
