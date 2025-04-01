@@ -37,10 +37,10 @@ packages:
     dependency: transitive
     description:
       name: asn1lib
-      sha256: "068190d6c99c436287936ba5855af2e1fa78d8083ae65b4db6a281780da727ae"
+      sha256: e02d018628c870ef2d7f03e33f9ad179d89ff6ec52ca6c56bcb80bcef979867f
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.0"
+    version: "1.6.2"
   async:
     dependency: transitive
     description:
@@ -1215,10 +1215,10 @@ packages:
     dependency: "direct main"
     description:
       name: sodium_libs
-      sha256: "7dd5324ec78ec08699f4fa89c954cc8fed93eb4a0fb1439e0beee2934f3aab21"
+      sha256: "3ccaae490588955854ba391eabbc4d8fca40e6efed735dd92b10dd3aaa17fe6e"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.3+2"
+    version: "3.4.4+1"
   source_gen:
     dependency: transitive
     description:
@@ -1271,10 +1271,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3_flutter_libs
-      sha256: "7adb4cc96dc08648a5eb1d80a7619070796ca6db03901ff2b6dcb15ee30468f3"
+      sha256: "1a96b59227828d9eb1463191d684b37a27d66ee5ed7597fcf42eee6452c88a14"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.31"
+    version: "0.5.32"
   sqlparser:
     dependency: transitive
     description:
@@ -1367,10 +1367,10 @@ packages:
     dependency: "direct main"
     description:
       name: tray_manager
-      sha256: "80be6c508159a6f3c57983de795209ac13453e9832fd574143b06dceee188ed2"
+      sha256: c2da0f0f1ddb455e721cf68d05d1281fec75cf5df0a1d3cb67b6ca0bdfd5709d
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.2"
+    version: "0.4.0"
   typed_data:
     dependency: transitive
     description:
