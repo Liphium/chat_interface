@@ -61,10 +61,22 @@ impl Engine {
         input.set_paused(!enabled);
     }
 
+    // Set the current input device
+    pub async fn set_input_device(&self, device: String) {
+        let mut input = self.voice_input.lock().await;
+        input.set_device(device);
+    }
+
     // Enable or disable playing sound
     pub async fn set_audio_enabled(&self, enabled: bool) {
         let mut engine = self.playing_engine.lock().await;
         engine.set_enabled(enabled);
+    }
+
+    // Set the current output device
+    pub async fn set_output_device(&self, device: String) {
+        let mut engine = self.playing_engine.lock().await;
+        engine.set_device(device);
     }
 
     // Enable or disable activity detection

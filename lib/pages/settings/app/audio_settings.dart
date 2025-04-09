@@ -132,6 +132,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
       _speechDetected.value = speech ?? false;
     });
     await libspace.setVoiceEnabled(engine: _engine!, enabled: true);
+    await libspace.setInputDevice(engine: _engine!, device: AudioSettings.microphone.getValue());
 
     // Add subscriptions to automatically update the engine
     _disposeFunctions.add(AudioSettings.microphoneActivationMode.value.subscribe((value) {
@@ -233,6 +234,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
                 } else {
                   AudioSettings.microphone.setValue(item.label);
                 }
+                libspace.setInputDevice(engine: _engine!, device: AudioSettings.microphone.getValue());
               },
             ),
           ),

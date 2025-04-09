@@ -1,8 +1,9 @@
 use std::{collections::HashMap, sync::Arc, thread, time::Duration};
 
 use audiopus::coder::Decoder;
+use cpal::{traits::HostTrait, Device};
 use jittr::JitterBuffer;
-use rodio::{buffer::SamplesBuffer, OutputStream, OutputStreamHandle, Sink};
+use rodio::{buffer::SamplesBuffer, DeviceTrait, OutputStream, OutputStreamHandle, Sink};
 use tokio::{
     sync::{
         mpsc::{self, UnboundedSender},
@@ -13,10 +14,11 @@ use tokio::{
 
 use crate::{error, info};
 
-use super::AudioPacket;
+use super::{get_preferred_host, AudioPacket};
 
 pub struct PlayingEngine {
     client_map: HashMap<String, Arc<Mutex<Client>>>,
+    device: String,
     output_handle: Option<OutputStreamHandle>,
     enabled: bool,
     stop: bool,
@@ -37,6 +39,7 @@ impl PlayingEngine {
     pub async fn create() -> (Arc<Mutex<PlayingEngine>>, UnboundedSender<AudioPacket>) {
         let engine = Arc::new(Mutex::new(Self {
             client_map: HashMap::new(),
+            device: "-".to_string(),
             output_handle: None,
             enabled: true,
             stop: false,
@@ -49,21 +52,51 @@ impl PlayingEngine {
             let engine = engine.clone();
             move || {
                 // Stream needs to be created on the main thread
-                let (_stream, stream_handle) =
-                    OutputStream::try_default().expect("Failed to get default output stream");
-                {
-                    let mut engine_lock = engine.blocking_lock();
-                    engine_lock.output_handle = Some(stream_handle);
-                }
+                let (mut _stream, mut stream_handle): (OutputStream, OutputStreamHandle);
 
                 // Start a loop to keep the stream in scope until the engine exists
+                let mut last_device = "----".to_string();
                 loop {
-                    thread::sleep(Duration::from_millis(500));
-                    let engine = engine.blocking_lock();
+                    let mut engine = engine.blocking_lock();
                     if engine.stop {
                         info!("stopping playing engine.");
                         return;
                     }
+
+                    // Restart the output stream when the device changes
+                    if engine.device != last_device {
+                        let host = get_preferred_host();
+
+                        // Try to get the device
+                        let mut device: Option<Device> = None;
+                        for dev in host.output_devices().expect("Couldn't list output devices") {
+                            if dev.name().expect("Couldn't get output name") == engine.device {
+                                device = Some(dev);
+                                break;
+                            }
+                        }
+
+                        // Create the new output stream
+                        if let Some(dev) = device {
+                            (_stream, stream_handle) = OutputStream::try_from_device(&dev)
+                                .expect("Failed to get output stream from found device");
+                        } else {
+                            (_stream, stream_handle) = OutputStream::try_default()
+                                .expect("Failed to get default output stream");
+                        }
+                        engine.output_handle = Some(stream_handle);
+
+                        // Change the sinks of all the clients to use the the new output stream
+                        for client in engine.client_map.values() {
+                            let mut client = client.blocking_lock();
+                            client.sink = Sink::try_new(engine.output_handle.as_ref().unwrap())
+                                .expect("Couldn't create new Sink")
+                        }
+
+                        last_device = engine.device.clone();
+                    }
+
+                    thread::sleep(Duration::from_millis(500));
                 }
             }
         });
@@ -134,15 +167,11 @@ impl PlayingEngine {
             let mut interval = time::interval(Duration::from_millis(20));
             loop {
                 interval.tick().await;
+                let mut engine = arc.lock().await; // needs to be locked here to prevent deadlocks with device switching
                 let mut client = client.lock().await;
 
                 // Make sure the engine is actually enabled
-                let enabled = {
-                    let engine = arc.lock().await;
-                    engine.enabled
-                };
-                if !enabled {
-                    let mut engine = arc.lock().await;
+                if !engine.enabled {
                     engine.remove_target(&id);
                     info!("unused listener for client {}", id);
                     client.buffer.clear();
@@ -152,7 +181,6 @@ impl PlayingEngine {
                 // Shutdown the listener completely at some point to prevent unneeded resource usage
                 seals += 1;
                 if seals > 1000 {
-                    let mut engine = arc.lock().await;
                     engine.remove_target(&id);
                     info!("unused listener for client {}", id);
                     client.buffer.clear();
@@ -227,5 +255,10 @@ impl PlayingEngine {
     // Get the enabled state of the engine
     pub fn is_enabled(&self) -> bool {
         self.enabled
+    }
+
+    // Set the output device of the engine
+    pub fn set_device(&mut self, device: String) {
+        self.device = device;
     }
 }
