@@ -27,6 +27,7 @@ class AppSettingsTranslations extends Translations {
       // Audio settings
       'settings.audio.microphone': 'Choose your microphone',
       'settings.audio.output_device': 'Choose your output device',
+      'settings.audio.devices_empty': 'No devices found or still loading devices.',
       'settings.audio.activation_mode': 'Microphone activation mode',
       'settings.audio.activation_mode.desc': 'When the square on the right is a bright color, your voice will be transmitted.',
       'microphone.mode.voice_activity': 'Detect when I speak',

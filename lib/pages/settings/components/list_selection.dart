@@ -41,8 +41,9 @@ class ListSelection extends StatefulWidget {
   final ReadonlySignal<int> selected;
   final List<SelectableItem> items;
   final Function(SelectableItem, int) callback;
+  final bool secondary;
 
-  const ListSelection({super.key, required this.selected, required this.items, required this.callback});
+  const ListSelection({super.key, required this.selected, required this.items, required this.callback, this.secondary = false});
 
   @override
   State<ListSelection> createState() => _ListSelectionState();
@@ -66,7 +67,10 @@ class _ListSelectionState extends State<ListSelection> {
           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
           child: Watch(
             (ctx) => Material(
-              color: widget.selected.value == index ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
+              color:
+                  widget.selected.value == index
+                      ? Get.theme.colorScheme.primary
+                      : (widget.secondary ? Get.theme.colorScheme.inverseSurface : Get.theme.colorScheme.onInverseSurface),
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,

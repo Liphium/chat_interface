@@ -5,7 +5,9 @@ import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/spaces/warp_controller.dart';
+import 'package:chat_interface/pages/settings/app/audio_settings.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_device_selection.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -22,8 +24,8 @@ class SpaceControls extends StatefulWidget {
 }
 
 class _SpaceControlsState extends State<SpaceControls> {
-  final GlobalKey tabletopKey = GlobalKey();
-  StreamSubscription<dynamic>? subscription;
+  final GlobalKey _tabletopKey = GlobalKey(), _microphoneKey = GlobalKey(), _outputDeviceKey = GlobalKey();
+  StreamSubscription<dynamic>? _subscription;
 
   @override
   void initState() {
@@ -32,7 +34,7 @@ class _SpaceControlsState extends State<SpaceControls> {
 
   @override
   void dispose() {
-    subscription?.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 
@@ -82,12 +84,12 @@ class _SpaceControlsState extends State<SpaceControls> {
                         child: Padding(
                           padding: const EdgeInsets.only(right: defaultSpacing),
                           child: LoadingIconButton(
-                            key: tabletopKey,
+                            key: _tabletopKey,
                             background: true,
                             padding: defaultSpacing,
                             loading: TabletopController.loading,
                             onTap: () {
-                              Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+                              Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(_tabletopKey, above: true)));
                             },
                             icon: Icons.crop_rotate,
                             iconSize: 28,
@@ -118,10 +120,23 @@ class _SpaceControlsState extends State<SpaceControls> {
                           // Render the mute button
                           Watch(
                             (ctx) => LoadingIconButton(
+                              key: _microphoneKey,
                               loading: StudioController.audioStateLoading,
                               background: true,
                               padding: defaultSpacing,
                               onTap: () => StudioController.toggleMute(),
+                              onSecondaryTap: () {
+                                if (StudioController.getConnection() == null || StudioController.getConnection()!.getEngine() == null) {
+                                  return;
+                                }
+                                Get.dialog(
+                                  SpaceDeviceSelection(
+                                    title: "settings.audio.microphone".tr,
+                                    data: ContextMenuData.fromKey(_microphoneKey, above: true),
+                                    child: MicrophoneSelection(engine: StudioController.getConnection()!.getEngine()!, secondary: true),
+                                  ),
+                                );
+                              },
                               icon: StudioController.audioMuted.value ? Icons.mic_off : Icons.mic,
                               iconSize: 28,
                             ),
@@ -131,10 +146,23 @@ class _SpaceControlsState extends State<SpaceControls> {
                           // Render the deafen button
                           Watch(
                             (ctx) => LoadingIconButton(
+                              key: _outputDeviceKey,
                               loading: StudioController.audioStateLoading,
                               background: true,
                               padding: defaultSpacing,
                               onTap: () => StudioController.toggleDeafened(),
+                              onSecondaryTap: () {
+                                if (StudioController.getConnection() == null || StudioController.getConnection()!.getEngine() == null) {
+                                  return;
+                                }
+                                Get.dialog(
+                                  SpaceDeviceSelection(
+                                    title: "settings.audio.output_device".tr,
+                                    data: ContextMenuData.fromKey(_outputDeviceKey, above: true),
+                                    child: OutputDeviceSelection(engine: StudioController.getConnection()!.getEngine()!, secondary: true),
+                                  ),
+                                );
+                              },
                               icon: StudioController.audioDeafened.value ? Icons.headset_off : Icons.headset,
                               iconSize: 28,
                             ),

@@ -207,6 +207,10 @@ class StudioConnection {
     return _publisher;
   }
 
+  libspace.LightwireEngine? getEngine() {
+    return _engine;
+  }
+
   void close() {
     _talkingTimer?.cancel();
     _peer.close(); // This will close lightwire, etc.
