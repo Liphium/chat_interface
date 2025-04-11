@@ -36,9 +36,10 @@ class TabletopCursor {
       return;
     }
 
-    final paint = Paint()
-      ..color = TabletopSettings.getCursorColor(hue: hue.value)
-      ..style = PaintingStyle.fill;
+    final paint =
+        Paint()
+          ..color = TabletopSettings.getCursorColor(hue: hue.value)
+          ..style = PaintingStyle.fill;
     canvas.drawCircle(interpolatedLocation(DateTime.now()), 10, paint);
   }
 }

@@ -99,14 +99,12 @@ class LibraryManager extends VaultTarget {
     final stream = image.image.resolve(const ImageConfiguration());
     ImageStreamListener? listener;
     stream.addListener(
-      listener = ImageStreamListener(
-        (ImageInfo image, bool synchronousCall) {
-          var myImage = image.image;
-          Size size = Size(myImage.width.toDouble(), myImage.height.toDouble());
-          completer.complete(size);
-          stream.removeListener(listener!);
-        },
-      ),
+      listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        var myImage = image.image;
+        Size size = Size(myImage.width.toDouble(), myImage.height.toDouble());
+        completer.complete(size);
+        stream.removeListener(listener!);
+      }),
     );
     return completer.future;
   }
@@ -160,24 +158,18 @@ class LibraryEntry {
   }
 
   Future<LibraryEntryData> get entity async => LibraryEntryData(
-        id: id,
-        type: type,
-        createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
-        identifierHash: identifier ?? (await getIdentifier()),
-        data: dbEncrypted(data),
-        width: width,
-        height: height,
-      );
+    id: id,
+    type: type,
+    createdAt: BigInt.from(createdAt.millisecondsSinceEpoch),
+    identifierHash: identifier ?? (await getIdentifier()),
+    data: dbEncrypted(data),
+    width: width,
+    height: height,
+  );
 
   /// Convert a LibraryEntry to a JSON map
   Map<String, dynamic> toJson() {
-    return {
-      'type': type.index,
-      'data': data,
-      'created_at': createdAt.millisecondsSinceEpoch,
-      'width': width,
-      'height': height,
-    };
+    return {'type': type.index, 'data': data, 'created_at': createdAt.millisecondsSinceEpoch, 'width': width, 'height': height};
   }
 
   /// Create a LibraryEntry from a JSON map

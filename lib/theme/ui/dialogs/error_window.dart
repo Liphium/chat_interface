@@ -21,12 +21,7 @@ class ErrorWindow extends StatelessWidget {
           verticalSpacing(defaultSpacing),
           Text(error, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(sectionSpacing),
-          FJElevatedButton(
-            onTap: () => Get.back(),
-            child: Center(
-              child: Text("ok".tr, style: Get.theme.textTheme.titleMedium),
-            ),
-          )
+          FJElevatedButton(onTap: () => Get.back(), child: Center(child: Text("ok".tr, style: Get.theme.textTheme.titleMedium))),
         ],
       ),
     );

@@ -55,10 +55,7 @@ class DeckObject extends TableObject {
       location.dy + currentHeight,
       const Radius.circular(sectionSpacing * 2),
     );
-    canvas.drawRRect(
-      cardRect,
-      Paint()..color = Get.theme.colorScheme.primaryContainer,
-    );
+    canvas.drawRRect(cardRect, Paint()..color = Get.theme.colorScheme.primaryContainer);
 
     // Draw the flipped icon on the card
     CardObject.renderFlippedDecorations(canvas, cardRect.outerRect);
@@ -72,30 +69,16 @@ class DeckObject extends TableObject {
       location.dy + currentHeight / 2 + counterSize / 2,
       const Radius.circular(sectionSpacing * 2),
     );
-    canvas.drawRRect(
-      rect,
-      Paint()..color = Get.theme.colorScheme.inverseSurface,
-    );
+    canvas.drawRRect(rect, Paint()..color = Get.theme.colorScheme.inverseSurface);
     var textSpan = TextSpan(
       text: cardOrder.length.toString(),
-      style: TextStyle(
-        color: Get.theme.colorScheme.onPrimary,
-        fontSize: 100,
-        fontFamily: "Roboto Mono",
-        fontWeight: FontWeight.bold,
-      ),
+      style: TextStyle(color: Get.theme.colorScheme.onPrimary, fontSize: 100, fontFamily: "Roboto Mono", fontWeight: FontWeight.bold),
     );
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
+    final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
     textPainter.layout();
     textPainter.paint(
       canvas,
-      Offset(
-        rect.left + rect.width / 2 - textPainter.size.width / 2,
-        rect.top + rect.height / 2 - textPainter.size.height / 2,
-      ),
+      Offset(rect.left + rect.width / 2 - textPainter.size.width / 2, rect.top + rect.height / 2 - textPainter.size.height / 2),
     );
   }
 
@@ -146,10 +129,7 @@ class DeckObject extends TableObject {
       map[card.id] = card.toJson();
     }
 
-    return jsonEncode({
-      "cards": map,
-      "order": cardOrder.toList(),
-    });
+    return jsonEncode({"cards": map, "order": cardOrder.toList()});
   }
 
   @override
@@ -269,23 +249,15 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> with Sig
     return DialogBase(
       child: Watch((context) {
         if (_loading.value) {
-          return CircularProgressIndicator(
-            color: Get.theme.colorScheme.onPrimary,
-          );
+          return CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary);
         }
 
         if (_error.value) {
-          return ErrorContainer(
-            message: "settings.tabletop.decks.error".tr,
-            expand: true,
-          );
+          return ErrorContainer(message: "settings.tabletop.decks.error".tr, expand: true);
         }
 
         if (_decks.isEmpty) {
-          return ErrorContainer(
-            message: "tabletop.object.deck.choose_empty".tr,
-            expand: true,
-          );
+          return ErrorContainer(message: "tabletop.object.deck.choose_empty".tr, expand: true);
         }
 
         return Column(
@@ -339,7 +311,7 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> with Sig
                   ),
                 );
               },
-            )
+            ),
           ],
         );
       }),

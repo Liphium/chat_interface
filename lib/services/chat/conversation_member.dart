@@ -11,27 +11,17 @@ class Member {
   final MemberRole role;
 
   Member(this.tokenId, this.address, this.role);
-  Member.unknown(this.address)
-      : tokenId = LPHAddress.error(),
-        role = MemberRole.user;
+  Member.unknown(this.address) : tokenId = LPHAddress.error(), role = MemberRole.user;
   Member.fromJson(Map<String, dynamic> json)
-      : tokenId = LPHAddress.from(json['id']),
-        address = LPHAddress.from(json['address']),
-        role = MemberRole.fromValue(json['role']);
+    : tokenId = LPHAddress.from(json['id']),
+      address = LPHAddress.from(json['address']),
+      role = MemberRole.fromValue(json['role']);
 
   Member.fromData(MemberData data)
-      : this(
-          LPHAddress.from(data.id),
-          LPHAddress.from(fromDbEncrypted(data.accountId)),
-          MemberRole.fromValue(data.roleId),
-        );
+    : this(LPHAddress.from(data.id), LPHAddress.from(fromDbEncrypted(data.accountId)), MemberRole.fromValue(data.roleId));
 
-  MemberData toData(LPHAddress conversation) => MemberData(
-        id: tokenId.encode(),
-        accountId: dbEncrypted(address.encode()),
-        roleId: role.value,
-        conversationId: conversation.encode(),
-      );
+  MemberData toData(LPHAddress conversation) =>
+      MemberData(id: tokenId.encode(), accountId: dbEncrypted(address.encode()), roleId: role.value, conversationId: conversation.encode());
 
   Friend getFriend() {
     if (StatusController.ownAddress == address) return Friend.me();
@@ -43,10 +33,7 @@ class Member {
   /// Returns an error if there was one.
   Future<String?> promote(LPHAddress conversationId) async {
     final conversation = ConversationController.conversations[conversationId]!;
-    final json = await postNodeJSON("/conversations/promote_token", {
-      "token": conversation.token.toMap(),
-      "data": tokenId.encode(),
-    });
+    final json = await postNodeJSON("/conversations/promote_token", {"token": conversation.token.toMap(), "data": tokenId.encode()});
 
     // Check if there was an error
     if (!json["success"]) {
@@ -60,10 +47,7 @@ class Member {
   /// Returns an error if there was one.
   Future<String?> demote(LPHAddress conversationId) async {
     final conversation = ConversationController.conversations[conversationId]!;
-    final json = await postNodeJSON("/conversations/demote_token", {
-      "token": conversation.token.toMap(),
-      "data": tokenId.encode(),
-    });
+    final json = await postNodeJSON("/conversations/demote_token", {"token": conversation.token.toMap(), "data": tokenId.encode()});
 
     // Check if there was an error
     if (!json["success"]) {
@@ -78,10 +62,7 @@ class Member {
   Future<String?> remove(LPHAddress conversationId) async {
     // Kick the member's token out of the conversation
     final conversation = ConversationController.conversations[conversationId]!;
-    final json = await postNodeJSON("/conversations/kick_member", {
-      "token": conversation.token.toMap(),
-      "data": tokenId.encode(),
-    });
+    final json = await postNodeJSON("/conversations/kick_member", {"token": conversation.token.toMap(), "data": tokenId.encode()});
 
     // Check if there was an error
     if (!json["success"]) {

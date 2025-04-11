@@ -7,20 +7,13 @@ class LPHCopyField extends StatelessWidget {
   final String label;
   final String value;
 
-  const LPHCopyField({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const LPHCopyField({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(defaultSpacing),
-      decoration: BoxDecoration(
-        color: Get.theme.colorScheme.inverseSurface,
-        borderRadius: BorderRadius.circular(defaultSpacing),
-      ),
+      decoration: BoxDecoration(color: Get.theme.colorScheme.inverseSurface, borderRadius: BorderRadius.circular(defaultSpacing)),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -28,29 +21,18 @@ class LPHCopyField extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: Get.textTheme.labelSmall,
-                ),
+                Text(label, overflow: TextOverflow.ellipsis, style: Get.textTheme.labelSmall),
                 Tooltip(
                   waitDuration: const Duration(milliseconds: 500),
                   exitDuration: const Duration(microseconds: 0),
                   message: "$label: $value",
-                  child: Text(
-                    value,
-                    overflow: TextOverflow.ellipsis,
-                    style: Get.textTheme.bodyLarge,
-                  ),
+                  child: Text(value, overflow: TextOverflow.ellipsis, style: Get.textTheme.bodyLarge),
                 ),
               ],
             ),
           ),
           verticalSpacing(defaultSpacing),
-          IconButton(
-            onPressed: () => Clipboard.setData(ClipboardData(text: value)),
-            icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary),
-          ),
+          IconButton(onPressed: () => Clipboard.setData(ClipboardData(text: value)), icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary)),
         ],
       ),
     );
@@ -70,21 +52,13 @@ class LPHActionField extends StatelessWidget {
   final String secondary;
   final List<LPHActionData> actions;
 
-  const LPHActionField({
-    super.key,
-    required this.primary,
-    required this.secondary,
-    required this.actions,
-  });
+  const LPHActionField({super.key, required this.primary, required this.secondary, required this.actions});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(defaultSpacing),
-      decoration: BoxDecoration(
-        color: Get.theme.colorScheme.inverseSurface,
-        borderRadius: BorderRadius.circular(defaultSpacing),
-      ),
+      decoration: BoxDecoration(color: Get.theme.colorScheme.inverseSurface, borderRadius: BorderRadius.circular(defaultSpacing)),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -92,20 +66,12 @@ class LPHActionField extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  primary,
-                  overflow: TextOverflow.ellipsis,
-                  style: Get.textTheme.labelSmall,
-                ),
+                Text(primary, overflow: TextOverflow.ellipsis, style: Get.textTheme.labelSmall),
                 Tooltip(
                   waitDuration: const Duration(milliseconds: 500),
                   exitDuration: const Duration(microseconds: 0),
                   message: "$primary: $secondary",
-                  child: Text(
-                    secondary,
-                    overflow: TextOverflow.ellipsis,
-                    style: Get.textTheme.bodyLarge,
-                  ),
+                  child: Text(secondary, overflow: TextOverflow.ellipsis, style: Get.textTheme.bodyLarge),
                 ),
               ],
             ),
@@ -114,11 +80,7 @@ class LPHActionField extends StatelessWidget {
           for (var action in actions)
             Padding(
               padding: const EdgeInsets.only(right: elementSpacing),
-              child: IconButton(
-                tooltip: action.tooltip,
-                onPressed: action.onClick,
-                icon: Icon(action.icon, color: Get.theme.colorScheme.onPrimary),
-              ),
+              child: IconButton(tooltip: action.tooltip, onPressed: action.onClick, icon: Icon(action.icon, color: Get.theme.colorScheme.onPrimary)),
             ),
         ],
       ),

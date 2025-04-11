@@ -87,37 +87,36 @@ class _ListSelectionState extends State<ListSelection> {
                       ),
                       horizontalSpacing(defaultSpacing),
                       if (widget.items[index].experimental)
-                        LayoutBuilder(builder: (context, constraints) {
-                          if (isMobileMode()) {
-                            return Tooltip(
-                              message: "settings.experimental".tr,
-                              child: Icon(Icons.science, color: Get.theme.colorScheme.error),
-                            );
-                          }
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            if (isMobileMode()) {
+                              return Tooltip(message: "settings.experimental".tr, child: Icon(Icons.science, color: Get.theme.colorScheme.error));
+                            }
 
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: Get.theme.colorScheme.error.withAlpha(25),
-                              borderRadius: BorderRadius.circular(defaultSpacing),
-                            ),
-                            padding: const EdgeInsets.all(elementSpacing),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.science, color: Get.theme.colorScheme.error),
-                                horizontalSpacing(elementSpacing),
-                                Flexible(
-                                  child: Text(
-                                    "settings.experimental".tr,
-                                    style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
-                                    overflow: TextOverflow.clip,
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Get.theme.colorScheme.error.withAlpha(25),
+                                borderRadius: BorderRadius.circular(defaultSpacing),
+                              ),
+                              padding: const EdgeInsets.all(elementSpacing),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.science, color: Get.theme.colorScheme.error),
+                                  horizontalSpacing(elementSpacing),
+                                  Flexible(
+                                    child: Text(
+                                      "settings.experimental".tr,
+                                      style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
+                                      overflow: TextOverflow.clip,
+                                    ),
                                   ),
-                                ),
-                                horizontalSpacing(elementSpacing)
-                              ],
-                            ),
-                          );
-                        })
+                                  horizontalSpacing(elementSpacing),
+                                ],
+                              ),
+                            );
+                          },
+                        )
                       else
                         const SizedBox.shrink(),
                     ],

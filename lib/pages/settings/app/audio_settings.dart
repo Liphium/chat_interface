@@ -135,17 +135,23 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
     await libspace.setInputDevice(engine: _engine!, device: AudioSettings.microphone.getValue());
 
     // Add subscriptions to automatically update the engine
-    _disposeFunctions.add(AudioSettings.microphoneActivationMode.value.subscribe((value) {
-      libspace.setActivityDetection(engine: _engine!, enabled: AudioSettings.microphoneActivationMode.getValue() == 0);
-    }));
+    _disposeFunctions.add(
+      AudioSettings.microphoneActivationMode.value.subscribe((value) {
+        libspace.setActivityDetection(engine: _engine!, enabled: AudioSettings.microphoneActivationMode.getValue() == 0);
+      }),
+    );
     await libspace.setActivityDetection(engine: _engine!, enabled: AudioSettings.microphoneActivationMode.getValue() == 0);
-    _disposeFunctions.add(AudioSettings.automaticVoiceActivity.value.subscribe((value) {
-      libspace.setAutomaticDetection(engine: _engine!, enabled: AudioSettings.automaticVoiceActivity.getValue());
-    }));
+    _disposeFunctions.add(
+      AudioSettings.automaticVoiceActivity.value.subscribe((value) {
+        libspace.setAutomaticDetection(engine: _engine!, enabled: AudioSettings.automaticVoiceActivity.getValue());
+      }),
+    );
     await libspace.setAutomaticDetection(engine: _engine!, enabled: AudioSettings.automaticVoiceActivity.getValue());
-    _disposeFunctions.add(AudioSettings.microphoneSensitivity.value.subscribe((value) {
-      libspace.setTalkingAmplitude(engine: _engine!, amplitude: AudioSettings.microphoneSensitivity.getValue());
-    }));
+    _disposeFunctions.add(
+      AudioSettings.microphoneSensitivity.value.subscribe((value) {
+        libspace.setTalkingAmplitude(engine: _engine!, amplitude: AudioSettings.microphoneSensitivity.getValue());
+      }),
+    );
     await libspace.setTalkingAmplitude(engine: _engine!, amplitude: AudioSettings.microphoneSensitivity.getValue());
   }
 
@@ -159,9 +165,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
   Future<void> _updateMicrophones() async {
     // Add the default microphone as a first option
     final defaultMicrophone = await libdevices.getDefaultInputDevice();
-    final newList = <SelectableItem>[
-      SelectableItem("Default (${defaultMicrophone.name})", Icons.mic),
-    ];
+    final newList = <SelectableItem>[SelectableItem("Default (${defaultMicrophone.name})", Icons.mic)];
 
     // Add all the other microphones
     for (var mic in await libdevices.getInputDevices()) {
@@ -178,9 +182,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
   Future<void> _updateOutputDevices() async {
     // Add the default output device as a first option
     final defaultDevice = await libdevices.getDefaultOutputDevice();
-    final newList = <SelectableItem>[
-      SelectableItem("Default (${defaultDevice.name})", Icons.speaker),
-    ];
+    final newList = <SelectableItem>[SelectableItem("Default (${defaultDevice.name})", Icons.speaker)];
 
     // Add all the other devices
     for (var device in await libdevices.getOutputDevices()) {
@@ -284,10 +286,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
               ),
             ],
           ),
-          ListSelectionSetting(
-            setting: AudioSettings.microphoneActivationMode,
-            items: AudioSettings.activationModes,
-          ),
+          ListSelectionSetting(setting: AudioSettings.microphoneActivationMode, items: AudioSettings.activationModes),
           verticalSpacing(defaultSpacing),
 
           // Only render automatic sensitivity detection when

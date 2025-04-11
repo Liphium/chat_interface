@@ -32,11 +32,7 @@ class _SetupPageState extends State<SetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        child: SmoothDialog(controller: _controller),
-      ),
-    );
+    return Center(child: SizedBox(child: SmoothDialog(controller: _controller)));
   }
 }
 
@@ -48,8 +44,6 @@ class SetupLoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(text.tr, style: Get.textTheme.headlineMedium),
-    );
+    return Center(child: Text(text.tr, style: Get.textTheme.headlineMedium));
   }
 }

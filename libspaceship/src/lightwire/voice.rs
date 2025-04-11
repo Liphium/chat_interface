@@ -110,7 +110,6 @@ impl VoiceInput {
                     let input: Arc<Mutex<VoiceInput>> = vc_input.clone();
                     let mut overflow_buffer = Vec::<f32>::new();
                     let sender = sender.to_owned();
-                    let dev = selected_device.clone();
 
                     move |data: &[f32], _: &cpal::InputCallbackInfo| {
                         // Check if paused
@@ -120,8 +119,6 @@ impl VoiceInput {
                                 return;
                             }
                         }
-
-                        println!("sending.. {}", dev);
 
                         // Add the data to the buffer
                         if channels == 1 {

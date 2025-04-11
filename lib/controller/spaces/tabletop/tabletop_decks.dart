@@ -8,10 +8,7 @@ import 'package:signals/signals.dart';
 
 class TabletopDecks {
   static Future<List<TabletopDeck>?> listDecks() async {
-    final json = await postAuthorizedJSON("/account/vault/list", {
-      "after": 0,
-      "tag": Constants.vaultDeckTag,
-    });
+    final json = await postAuthorizedJSON("/account/vault/list", {"after": 0, "tag": Constants.vaultDeckTag});
 
     if (!json["success"]) {
       return null;
@@ -37,10 +34,7 @@ class TabletopDeck {
   factory TabletopDeck.decrypt(StorageType usecase, Map<String, dynamic> json) {
     final entry = VaultEntry.fromJson(json);
     final decrypted = jsonDecode(entry.decryptedPayload());
-    final deck = TabletopDeck(
-      decrypted['name'],
-      vaultId: entry.id,
-    );
+    final deck = TabletopDeck(decrypted['name'], vaultId: entry.id);
     if (decrypted['cards'] == null) {
       return deck;
     }
@@ -57,10 +51,7 @@ class TabletopDeck {
       json["amount"] = amounts.peek()[card.id] ?? 1;
       encodedCards.add(json);
     }
-    final payload = jsonEncode({
-      "name": name,
-      "cards": encodedCards,
-    });
+    final payload = jsonEncode({"name": name, "cards": encodedCards});
     if (vaultId != null) {
       return updateVault(Constants.vaultDeckTag, vaultId!, payload);
     }

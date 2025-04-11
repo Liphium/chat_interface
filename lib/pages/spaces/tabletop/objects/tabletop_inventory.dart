@@ -81,10 +81,11 @@ class InventoryObject extends TableObject {
 
     // Draw the background
     final backRect = getInventoryRect(now: now, base: location);
-    final backPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
+    final backPaint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth;
     canvas.drawRRect(RRect.fromRectAndRadius(backRect, Radius.circular(32)), backPaint);
 
     // Check if the general inventory is hovered
@@ -121,12 +122,7 @@ class InventoryObject extends TableObject {
 
       final x = object.positionX.value(now);
       final y = object.positionY.value(now);
-      final rect = Rect.fromLTWH(
-        x,
-        y,
-        object.size.width,
-        object.size.height,
-      );
+      final rect = Rect.fromLTWH(x, y, object.size.width, object.size.height);
 
       // Tell the controller about the hover state
       if (ownInventory) {
@@ -245,7 +241,7 @@ class InventoryObject extends TableObject {
           onTap: () {
             TabletopController.inventory = this;
           },
-        )
+        ),
     ];
   }
 }
@@ -254,11 +250,7 @@ class InventoryObjectWindow extends StatefulWidget {
   final Offset location;
   final InventoryObject? object;
 
-  const InventoryObjectWindow({
-    super.key,
-    required this.location,
-    this.object,
-  });
+  const InventoryObjectWindow({super.key, required this.location, this.object});
 
   @override
   State<InventoryObjectWindow> createState() => _InventoryObjectWindowState();
@@ -275,15 +267,7 @@ class _InventoryObjectWindowState extends State<InventoryObjectWindow> {
         children: [
           Text("Inventory settings".tr, style: Get.theme.textTheme.titleMedium),
           verticalSpacing(sectionSpacing),
-          Row(
-            children: [
-              Text("Show cards to other players", style: theme.textTheme.bodyMedium),
-              const Spacer(),
-              FJSwitch(
-                value: false,
-              ),
-            ],
-          ),
+          Row(children: [Text("Show cards to other players", style: theme.textTheme.bodyMedium), const Spacer(), FJSwitch(value: false)]),
           verticalSpacing(defaultSpacing),
           FJElevatedButton(
             onTap: () {
@@ -294,10 +278,8 @@ class _InventoryObjectWindowState extends State<InventoryObjectWindow> {
               final object = InventoryObject("", 0, widget.location, Size(200, 200));
               object.sendAdd();
             },
-            child: Center(
-              child: Text((widget.object != null ? "edit" : "create").tr, style: Get.theme.textTheme.labelLarge),
-            ),
-          )
+            child: Center(child: Text((widget.object != null ? "edit" : "create").tr, style: Get.theme.textTheme.labelLarge)),
+          ),
         ],
       ),
     );

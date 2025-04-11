@@ -24,13 +24,7 @@ class ServerSelectorContainer extends StatelessWidget {
             children: [
               Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
               horizontalSpacing(defaultSpacing),
-              Expanded(
-                child: Text(
-                  basePath.replaceAll("/v1", ""),
-                  style: Get.theme.textTheme.labelMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              Expanded(child: Text(basePath.replaceAll("/v1", ""), style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis)),
               horizontalSpacing(defaultSpacing),
               Icon(Icons.edit, color: Get.theme.colorScheme.onPrimary),
             ],

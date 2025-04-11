@@ -22,21 +22,16 @@ class MessageService {
     }
 
     // Sort all the messages to prevent failing system messages
-    messages.sort(
-      (a, b) {
-        return a.createdAt.compareTo(b.createdAt);
-      },
-    );
+    messages.sort((a, b) {
+      return a.createdAt.compareTo(b.createdAt);
+    });
 
     // Encrypt everything for local database storage
     final copied = Conversation.copyWithoutKey(conversation);
     final parts = await sodiumLib.runIsolated((sodium, keys, pairs) async {
       final list = <(String, String)>[];
       for (var message in messages) {
-        list.add((
-          dbEncrypted(message.toContentJson(), sodium, keys[0]),
-          dbEncrypted(message.senderAddress.encode(), sodium, keys[0]),
-        ));
+        list.add((dbEncrypted(message.toContentJson(), sodium, keys[0]), dbEncrypted(message.senderAddress.encode(), sodium, keys[0])));
       }
 
       return list;
@@ -45,12 +40,7 @@ class MessageService {
     // Store all the messages in the local database
     int index = 0;
     for (var message in messages) {
-      await storeMessage(
-        message,
-        copied,
-        simple: true,
-        part: parts[index],
-      );
+      await storeMessage(message, copied, simple: true, part: parts[index]);
       index++;
     }
 
@@ -74,12 +64,7 @@ class MessageService {
   ///
   /// Also handles system messages.
   /// Set [simple] to [true] in case you want to avoid any extra stuff other than adding to cache and database.
-  static Future<bool> storeMessage(
-    Message message,
-    Conversation conversation, {
-    bool simple = false,
-    (String, String)? part,
-  }) async {
+  static Future<bool> storeMessage(Message message, Conversation conversation, {bool simple = false, (String, String)? part}) async {
     // Get the current provider
     final provider = SidebarController.getCurrentProvider();
 
@@ -134,7 +119,9 @@ class MessageService {
   ///
   /// The part tuple is provided by [storeMessages] to not encrypt the data twice.
   static void _storeInLocalDatabase(Conversation conversation, Message message, {(String, String)? part}) {
-    db.into(db.message).insertOnConflictUpdate(
+    db
+        .into(db.message)
+        .insertOnConflictUpdate(
           MessageData(
             id: message.id,
             content: part?.$1 ?? dbEncrypted(message.toContentJson()),

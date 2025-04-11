@@ -16,10 +16,7 @@ class Event {
   Event.fromMap(Map<String, dynamic> map) : this(map['name'], map['data']);
   Event.fromJson(String json) : this.fromMap(jsonDecode(json));
 
-  Map<String, dynamic> toMap() => {
-        'name': name,
-        'data': data,
-      };
+  Map<String, dynamic> toMap() => {'name': name, 'data': data};
 
   String toJson() => jsonEncode(toMap());
 }
@@ -36,11 +33,7 @@ class ServerAction {
   ServerAction.fromMap(Map<String, dynamic> map) : this(map['action'], map['data']);
   ServerAction.fromJson(String json) : this.fromMap(jsonDecode(json));
 
-  Map<String, dynamic> toMap() => {
-        'action': action,
-        'lc': localeString(Get.locale ?? Get.fallbackLocale ?? const Locale("en", "US")),
-        'data': data,
-      };
+  Map<String, dynamic> toMap() => {'action': action, 'lc': localeString(Get.locale ?? Get.fallbackLocale ?? const Locale("en", "US")), 'data': data};
 
   String toJson() => jsonEncode(toMap());
 }

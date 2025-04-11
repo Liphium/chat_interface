@@ -77,10 +77,7 @@ class Connector {
     _connected = true;
 
     // Send the first request for authentication
-    connection!.sendText(jsonEncode({
-      "token": token,
-      "attachments": base64Encode(encryptedKey),
-    }));
+    connection!.sendText(jsonEncode({"token": token, "attachments": base64Encode(encryptedKey)}));
 
     connection!.events.listen(
       (message) {
@@ -105,7 +102,8 @@ class Connector {
 
           sendLog("FAILED TO DECRYPT MESSAGE");
           sendLog(
-              "This is most likely due to another client being in the same network, connected over the same port as you are. We can't do anything about this and this will not occur in production.");
+            "This is most likely due to another client being in the same network, connected over the same port as you are. We can't do anything about this and this will not occur in production.",
+          );
           e.printError();
           return;
         }
@@ -258,23 +256,20 @@ class Connector {
     if (responseId == null) {
       completer.complete(null);
     } else {
-      Timer(
-        timeout ?? Duration(seconds: 10),
-        () {
-          // If the event already received a response, it doesn't matter
-          if (completer.isCompleted) {
-            return;
-          }
+      Timer(timeout ?? Duration(seconds: 10), () {
+        // If the event already received a response, it doesn't matter
+        if (completer.isCompleted) {
+          return;
+        }
 
-          // Attach an error handler to make sure the error is logged when the server doesn't respond
-          _responders[responseId] = (event) {
-            sendLog("Event ${event.name} received even though there was an error with this previously.");
-          };
+        // Attach an error handler to make sure the error is logged when the server doesn't respond
+        _responders[responseId] = (event) {
+          sendLog("Event ${event.name} received even though there was an error with this previously.");
+        };
 
-          sendLog("Response to ${action.action} timed out");
-          completer.complete(null);
-        },
-      );
+        sendLog("Response to ${action.action} timed out");
+        completer.complete(null);
+      });
     }
     return completer.future;
   }

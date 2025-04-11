@@ -63,24 +63,23 @@ class SpaceInfoWindow extends StatelessWidget {
           verticalSpacing(sectionSpacing),
           Text("Members", style: Get.theme.textTheme.labelMedium),
           verticalSpacing(defaultSpacing),
-          Watch(
-            (context) {
-              return Column(
-                children: SpaceMemberController.members.value.values.map((member) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: elementSpacing),
-                    child: Row(
-                      children: [
-                        Text(member.friend.displayName.value, style: Get.theme.textTheme.bodyMedium),
-                        horizontalSpacing(defaultSpacing),
-                        Text("#${member.id}", style: Get.theme.textTheme.bodyMedium),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-          ),
+          Watch((context) {
+            return Column(
+              children:
+                  SpaceMemberController.members.value.values.map((member) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: elementSpacing),
+                      child: Row(
+                        children: [
+                          Text(member.friend.displayName.value, style: Get.theme.textTheme.bodyMedium),
+                          horizontalSpacing(defaultSpacing),
+                          Text("#${member.id}", style: Get.theme.textTheme.bodyMedium),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+            );
+          }),
         ],
       ),
     );

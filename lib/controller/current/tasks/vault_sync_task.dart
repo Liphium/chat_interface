@@ -18,10 +18,7 @@ class VaultSyncTask extends SynchronizationTask {
   VaultSyncTask() : super("loading.vault", const Duration(seconds: 30));
 
   // All vault targets (everything that needs sync from the server vault)
-  final List<VaultTarget> targets = [
-    ConversationService(),
-    LibraryManager(),
-  ];
+  final List<VaultTarget> targets = [ConversationService(), LibraryManager()];
 
   @override
   Future<String?> init() async {
@@ -41,9 +38,7 @@ class VaultSyncTask extends SynchronizationTask {
     }
 
     // Synchronize using the endpoint from the server
-    final json = await postAuthorizedJSON("/account/vault/sync", {
-      "tags": versionMap,
-    });
+    final json = await postAuthorizedJSON("/account/vault/sync", {"tags": versionMap});
     if (!json["success"]) {
       return json["error"];
     }
@@ -147,12 +142,12 @@ class VaultEntry {
 
   VaultEntry(this.id, this.tag, this.version, this.account, this.payload, this.updatedAt);
   VaultEntry.fromJson(Map<String, dynamic> json)
-      : id = json["id"],
-        tag = json["tag"],
-        version = json["version"],
-        account = json["account"],
-        payload = json["payload"],
-        updatedAt = json["updated_at"];
+    : id = json["id"],
+      tag = json["tag"],
+      version = json["version"],
+      account = json["account"],
+      payload = json["payload"],
+      updatedAt = json["updated_at"];
 
   String decryptedPayload([SecureKey? key, Sodium? sodium]) => decryptSymmetric(payload, key ?? vaultKey, sodium);
 }

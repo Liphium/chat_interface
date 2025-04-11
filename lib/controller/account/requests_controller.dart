@@ -104,16 +104,16 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
   }
 
   // Ask the user if they really want to send the friend requests (mostly cause of security concerns)
-  await showConfirmPopup(ConfirmWindow(
-    title: "request.confirm.title".tr,
-    text: "request.confirm.text".trParams(<String, String>{
-      "username": "${profile.displayName} (${profile.name})",
-    }),
-    onConfirm: () async {
-      await RequestsService.sendOrAcceptFriendRequest(profile!);
-    },
-    onDecline: () {},
-  ));
+  await showConfirmPopup(
+    ConfirmWindow(
+      title: "request.confirm.title".tr,
+      text: "request.confirm.text".trParams(<String, String>{"username": "${profile.displayName} (${profile.name})"}),
+      onConfirm: () async {
+        await RequestsService.sendOrAcceptFriendRequest(profile!);
+      },
+      onDecline: () {},
+    ),
+  );
 
   RequestController.requestsLoading.value = false;
   return;
@@ -144,25 +144,12 @@ class Request {
 
   /// Get a request from a stored payload in the database.
   factory Request.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
-    return Request(
-      LPHAddress.from(json["id"]),
-      json["name"],
-      json["display_name"],
-      "",
-      KeyStorage.fromJson(json),
-      updatedAt,
-    );
+    return Request(LPHAddress.from(json["id"]), json["name"], json["display_name"], "", KeyStorage.fromJson(json), updatedAt);
   }
 
   /// Convert to a payload for the friends vault (on the server).
   String toStoredPayload(bool self) {
-    final reqPayload = <String, dynamic>{
-      "rq": true,
-      "id": id.encode(),
-      "self": self,
-      "name": name,
-      "display_name": displayName,
-    };
+    final reqPayload = <String, dynamic>{"rq": true, "id": id.encode(), "self": self, "name": name, "display_name": displayName};
     reqPayload.addAll(keyStorage.toJson());
 
     return jsonEncode(reqPayload);
@@ -170,25 +157,19 @@ class Request {
 
   /// Convert the request to an unknown account (for accepting the friend request).
   UnknownAccount toUnknownAccount() {
-    return UnknownAccount(
-      id,
-      name,
-      displayName,
-      keyStorage.signatureKey,
-      keyStorage.publicKey,
-    );
+    return UnknownAccount(id, name, displayName, keyStorage.signatureKey, keyStorage.publicKey);
   }
 
   /// Convert a request object to the equivalent database object.
   RequestData entity(bool self) => RequestData(
-        id: id.encode(),
-        name: dbEncrypted(name),
-        displayName: dbEncrypted(displayName),
-        vaultId: dbEncrypted(vaultId),
-        keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
-        self: self,
-        updatedAt: BigInt.from(updatedAt),
-      );
+    id: id.encode(),
+    name: dbEncrypted(name),
+    displayName: dbEncrypted(displayName),
+    vaultId: dbEncrypted(vaultId),
+    keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
+    self: self,
+    updatedAt: BigInt.from(updatedAt),
+  );
 
   /// Copy all data from another request into this one.
   void copyFrom(Request request) {

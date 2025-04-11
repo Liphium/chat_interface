@@ -85,12 +85,9 @@ class ConnectedWarp {
 
   /// Send bytes to the host server.
   Future<bool> forwardBytesToHost(int connId, Uint8List bytes, int seq) async {
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("wp_send_to", {
-      "w": id,
-      "s": seq,
-      "c": connId,
-      "p": base64Encode(encryptSymmetricBytes(bytes, SpaceController.key!)),
-    }));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("wp_send_to", {"w": id, "s": seq, "c": connId, "p": base64Encode(encryptSymmetricBytes(bytes, SpaceController.key!))}),
+    );
     if (event == null || !event.data["success"]) {
       return false;
     }

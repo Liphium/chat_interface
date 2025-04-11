@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
+import 'package:chat_interface/pages/settings/app/audio_settings.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/studio/studio_track_publisher.dart';
@@ -16,6 +17,7 @@ class StudioConnection {
   late final StudioTrackPublisher _publisher;
   libspace.LightwireEngine? _engine;
   Timer? _talkingTimer;
+  final _disposeFunctions = <Function()>[];
 
   StudioConnection(this._peer) {
     // Create all the required listeners on the peer
@@ -92,6 +94,22 @@ class StudioConnection {
               channel.send(RTCDataChannelMessage.fromBinary(packet));
             }
           });
+
+          // Listen for output and input device changes to make sure the current engine is also using them
+          _disposeFunctions.add(
+            AudioSettings.microphone.value.subscribe((value) {
+              if (_engine != null) {
+                libspace.setInputDevice(engine: _engine!, device: value ?? AudioSettings.useDefaultDevice);
+              }
+            }),
+          );
+          _disposeFunctions.add(
+            AudioSettings.outputDevice.value.subscribe((value) {
+              if (_engine != null) {
+                libspace.setOutputDevice(engine: _engine!, device: value ?? AudioSettings.useDefaultDevice);
+              }
+            }),
+          );
         }
 
         // Close the lightwire engine when the data channel is closed
@@ -192,5 +210,8 @@ class StudioConnection {
   void close() {
     _talkingTimer?.cancel();
     _peer.close(); // This will close lightwire, etc.
+    for (var func in _disposeFunctions) {
+      func.call();
+    }
   }
 }

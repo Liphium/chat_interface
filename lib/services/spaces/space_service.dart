@@ -22,15 +22,7 @@ class SpaceService {
   /// Connect to a space using its connection container
   static Future<String?> connectToSpace(String domain, String spaceId, SecureKey key) async {
     // Ask the server for a join token
-    final spaceJson = await postAddress(
-      "${nodeProtocol()}$domain",
-      "/enc/join",
-      {
-        "id": spaceId,
-      },
-      noApiVersion: true,
-      checkProtocol: false,
-    );
+    final spaceJson = await postAddress("${nodeProtocol()}$domain", "/enc/join", {"id": spaceId}, noApiVersion: true, checkProtocol: false);
     if (!spaceJson["success"]) {
       return spaceJson["error"];
     }
@@ -47,15 +39,11 @@ class SpaceService {
   /// Create a new space (returns an error if there was one)
   static Future<(SpaceConnectionContainer?, String?)> createSpace() async {
     // Get a connection token for Spaces (required to create a new space)
-    final json = await postAuthorizedJSON(
-      "/node/connect",
-      <String, dynamic>{
-        "tag": appTagSpaces,
-        "token": refreshToken,
-        "extra": "",
-      },
-      checkProtocol: false,
-    );
+    final json = await postAuthorizedJSON("/node/connect", <String, dynamic>{
+      "tag": appTagSpaces,
+      "token": refreshToken,
+      "extra": "",
+    }, checkProtocol: false);
     if (!json["success"]) {
       return (null, json["error"] as String);
     }
@@ -64,9 +52,7 @@ class SpaceService {
     final spaceJson = await postAddress(
       "${nodeProtocol()}${json["domain"]}",
       "/enc/create",
-      {
-        "token": json["token"],
-      },
+      {"token": json["token"]},
       noApiVersion: true,
       checkProtocol: false,
     );
@@ -104,10 +90,12 @@ class SpaceService {
     SidebarController.openTab(SpaceSidebarTab());
 
     // Send the server all the data required for setup
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(msg.ServerAction("setup", {
-      "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
-      "signature": signMessage(signatureKeyPair.secretKey, craftSignature(spaceId, clientId, StatusController.ownAddress.encode())),
-    }));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      msg.ServerAction("setup", {
+        "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
+        "signature": signMessage(signatureKeyPair.secretKey, craftSignature(spaceId, clientId, StatusController.ownAddress.encode())),
+      }),
+    );
     if (event == null) {
       return "server.error".tr;
     }

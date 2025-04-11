@@ -24,12 +24,7 @@ class MessageSendHelper {
     // Check if the file size is valid
     final size = await file.length();
     if (size > specialConstants[Constants.specialConstantMaxFileSize]! * 1000 * 1000) {
-      showErrorPopup(
-        "error",
-        "file.too_large".trParams({
-          "1": specialConstants[Constants.specialConstantMaxFileSize].toString(),
-        }),
-      );
+      showErrorPopup("error", "file.too_large".trParams({"1": specialConstants[Constants.specialConstantMaxFileSize].toString()}));
       return false;
     }
 

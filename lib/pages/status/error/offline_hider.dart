@@ -10,35 +10,16 @@ class OfflineHider extends StatelessWidget {
   final Widget child;
   final Alignment alignment;
 
-  const OfflineHider({
-    super.key,
-    required this.axis,
-    required this.child,
-    required this.alignment,
-    this.padding,
-  });
+  const OfflineHider({super.key, required this.axis, required this.child, required this.alignment, this.padding});
 
   @override
   Widget build(BuildContext context) {
     return Watch(
       (ctx) => Animate(
-        effects: [
-          ExpandEffect(
-            axis: axis,
-            curve: Curves.ease,
-            duration: 250.ms,
-            alignment: alignment,
-          ),
-          FadeEffect(
-            duration: 250.ms,
-          ),
-        ],
+        effects: [ExpandEffect(axis: axis, curve: Curves.ease, duration: 250.ms, alignment: alignment), FadeEffect(duration: 250.ms)],
         target: ConnectionController.connected.value ? 1 : 0,
         onInit: (controller) => controller.value = ConnectionController.connected.value ? 1 : 0,
-        child: Padding(
-          padding: padding ?? EdgeInsets.all(0),
-          child: child,
-        ),
+        child: Padding(padding: padding ?? EdgeInsets.all(0), child: child),
       ),
     );
   }

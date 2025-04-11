@@ -15,8 +15,12 @@ class ServerStoredInfo {
 
   /// Decrypt stored stored info with own public and private key
   factory ServerStoredInfo.untransform(String transformed, {Sodium? sodium, KeyPair? ownKeyPair}) {
-    final result =
-        decryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, transformed, sodium);
+    final result = decryptAsymmetricAuth(
+      (ownKeyPair ?? asymmetricKeyPair).publicKey,
+      (ownKeyPair ?? asymmetricKeyPair).secretKey,
+      transformed,
+      sodium,
+    );
     return ServerStoredInfo(result.message, error: !result.success);
   }
 

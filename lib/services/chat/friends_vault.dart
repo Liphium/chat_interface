@@ -78,10 +78,7 @@ class FriendsVault {
     final payload = encryptSymmetric(data, vaultKey);
 
     // Add the friend to the vault
-    final json = await postAuthorizedJSON("/account/friends/update", <String, dynamic>{
-      "id": id,
-      "payload": payload,
-    });
+    final json = await postAuthorizedJSON("/account/friends/update", <String, dynamic>{"id": id, "payload": payload});
 
     // Check if there was an error
     if (!json["success"]) {
@@ -95,9 +92,7 @@ class FriendsVault {
   /// Returns an error if there was one.
   static Future<String?> remove(String vaultId) async {
     // Remove the friend from the server vault
-    final json = await postAuthorizedJSON("/account/friends/remove", <String, dynamic>{
-      "id": vaultId,
-    });
+    final json = await postAuthorizedJSON("/account/friends/remove", <String, dynamic>{"id": vaultId});
     if (!json["success"]) {
       return json["error"];
     }
@@ -120,9 +115,7 @@ class FriendsVault {
 
   /// Get the last date a new message was sent to the friend (for replay attack prevention)
   static Future<DateTime?> lastReceiveDate(String id) async {
-    final json = await postAuthorizedJSON("/account/friends/get_receive_date", {
-      "id": id,
-    });
+    final json = await postAuthorizedJSON("/account/friends/get_receive_date", {"id": id});
 
     if (!json["success"]) {
       sendLog("COULDN'T GET THE RECEIVE DATE FOR $id: ${json["error"]}");
@@ -134,10 +127,7 @@ class FriendsVault {
 
   /// Set a new receive date (for replay attack prevention)
   static Future<bool> setReceiveDate(String id, DateTime received) async {
-    final json = await postAuthorizedJSON("/account/friends/update_receive_date", {
-      "id": id,
-      "date": encryptDate(received),
-    });
+    final json = await postAuthorizedJSON("/account/friends/update_receive_date", {"id": id, "date": encryptDate(received)});
 
     if (!json["success"]) {
       sendLog("COULDN'T SAVE THE NEW RECEIVE DATE ${json["error"]}");
@@ -162,19 +152,14 @@ class FriendsVault {
 
     friendsVaultRefreshing.value = true;
     // Load friends from vault
-    final json = await postAuthorizedJSON("/account/friends/sync", <String, dynamic>{
-      "version": version,
-    });
+    final json = await postAuthorizedJSON("/account/friends/sync", <String, dynamic>{"version": version});
     if (!json["success"]) {
       friendsVaultRefreshing.value = false;
       return "friends.error".tr;
     }
 
     // Parse the JSON (in different isolate)
-    final res = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) => _parseFriends(version, json, sodium, keys[0]),
-      secureKeys: [vaultKey],
-    );
+    final res = await sodiumLib.runIsolated((sodium, keys, pairs) => _parseFriends(version, json, sodium, keys[0]), secureKeys: [vaultKey]);
 
     // Update the local vault
     await updateFromVaultUpdate(res);
@@ -264,9 +249,7 @@ class FriendsVault {
       }
     }
     if (update.deleted.isNotEmpty) {
-      FriendController.friends.removeWhere(
-        (id, fr) => update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress,
-      );
+      FriendController.friends.removeWhere((id, fr) => update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress);
     }
 
     // Delete all deleted friends from the database
@@ -297,19 +280,19 @@ class KeyStorage {
   Uint8List signatureKey;
 
   KeyStorage.empty()
-      : publicKey = Uint8List(0),
-        signatureKey = Uint8List(0),
-        profileKeyPacked = "unbreathable_was_here_but_2024",
-        storedActionKey = "unbreathable_was_here";
+    : publicKey = Uint8List(0),
+      signatureKey = Uint8List(0),
+      profileKeyPacked = "unbreathable_was_here_but_2024",
+      storedActionKey = "unbreathable_was_here";
   KeyStorage(this.publicKey, this.signatureKey, SecureKey profileKey, this.storedActionKey) {
     profileKeyPacked = packageSymmetricKey(profileKey);
     unpackedProfileKey = profileKey;
   }
   KeyStorage.fromJson(Map<String, dynamic> json)
-      : publicKey = unpackagePublicKey(json["pub"]),
-        profileKeyPacked = json["pf"] ?? "",
-        signatureKey = unpackagePublicKey(json["sg"]),
-        storedActionKey = json["sa"] ?? "";
+    : publicKey = unpackagePublicKey(json["pub"]),
+      profileKeyPacked = json["pf"] ?? "",
+      signatureKey = unpackagePublicKey(json["sg"]),
+      storedActionKey = json["sa"] ?? "";
 
   Map<String, dynamic> toJson() {
     return {"pub": packagePublicKey(publicKey), "pf": profileKeyPacked, "sg": packagePublicKey(signatureKey), "sa": storedActionKey};

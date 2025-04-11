@@ -46,17 +46,8 @@ class _SpaceStudioGridTabState extends State<SpaceStudioGridTab> {
         children: [
           // Base background layer with the profile picture
           Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.onInverseSurface,
-              border: border,
-              borderRadius: BorderRadius.circular(sectionSpacing),
-            ),
-            child: Center(
-              child: UserAvatar(
-                id: member.friend.id,
-                size: 64,
-              ),
-            ),
+            decoration: BoxDecoration(color: theme.colorScheme.onInverseSurface, border: border, borderRadius: BorderRadius.circular(sectionSpacing)),
+            child: Center(child: UserAvatar(id: member.friend.id, size: 64)),
           ),
 
           // Mute/deafen/connection indicator
@@ -85,21 +76,11 @@ class _SpaceStudioGridTabState extends State<SpaceStudioGridTab> {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(200),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.colorScheme.primaryContainer,
-                      blurRadius: 10,
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: theme.colorScheme.primaryContainer, blurRadius: 10)],
                 ),
                 width: 32,
                 height: 32,
-                child: Center(
-                  child: Icon(
-                    icon,
-                    color: theme.colorScheme.error,
-                  ),
-                ),
+                child: Center(child: Icon(icon, color: theme.colorScheme.error)),
               ),
             );
           }),

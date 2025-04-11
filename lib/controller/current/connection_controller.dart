@@ -26,10 +26,7 @@ class ConnectionController {
   static final vaultSyncTask = VaultSyncTask();
 
   /// Tasks that run after the setup
-  static final _tasks = <SynchronizationTask>[
-    friendSyncTask,
-    vaultSyncTask,
-  ];
+  static final _tasks = <SynchronizationTask>[friendSyncTask, vaultSyncTask];
   static bool tasksRan = false;
 
   /// Steps that run to get the client connected
@@ -148,11 +145,7 @@ class SetupResponse {
   final bool retryConnection;
   final String? error;
 
-  SetupResponse({
-    this.restart = false,
-    this.retryConnection = false,
-    this.error,
-  });
+  SetupResponse({this.restart = false, this.retryConnection = false, this.error});
 }
 
 abstract class ConnectionStep {
@@ -190,12 +183,9 @@ abstract class SynchronizationTask {
     unawaited(runner());
 
     // Run the thing every now and then
-    _timer = Timer.periodic(
-      frequency,
-      (timer) async {
-        unawaited(runner());
-      },
-    );
+    _timer = Timer.periodic(frequency, (timer) async {
+      unawaited(runner());
+    });
   }
 
   /// This method should initialize everything needed for the task.

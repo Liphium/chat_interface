@@ -23,10 +23,7 @@ import 'package:signals/signals_flutter.dart';
 class SidebarConversationList extends StatefulWidget {
   final Signal<String>? query;
 
-  const SidebarConversationList({
-    super.key,
-    this.query,
-  });
+  const SidebarConversationList({super.key, this.query});
 
   @override
   State<SidebarConversationList> createState() => _SidebarConversationListState();
@@ -50,67 +47,67 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
   @override
   Widget build(BuildContext context) {
-    return Watch(
-      (ctx) {
-        return FadingEdgeScrollView.fromScrollView(
-          child: ListView.builder(
-            controller: _controller,
-            itemCount: ConversationController.order.length,
-            addRepaintBoundaries: true,
-            padding: const EdgeInsets.only(top: defaultSpacing),
-            itemBuilder: (context, index) {
-              // Normal conversation renderer
-              Conversation conversation = ConversationController.conversations[ConversationController.order.elementAt(index)]!;
+    return Watch((ctx) {
+      return FadingEdgeScrollView.fromScrollView(
+        child: ListView.builder(
+          controller: _controller,
+          itemCount: ConversationController.order.length,
+          addRepaintBoundaries: true,
+          padding: const EdgeInsets.only(top: defaultSpacing),
+          itemBuilder: (context, index) {
+            // Normal conversation renderer
+            Conversation conversation = ConversationController.conversations[ConversationController.order.elementAt(index)]!;
 
-              Friend? friend;
-              if (!conversation.isGroup) {
-                // Fetch the member that isn't the own account
-                LPHAddress id = conversation.members.values
-                    .firstWhere(
-                      (element) => element.address != StatusController.ownAddress,
-                      orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
-                    )
-                    .address;
+            Friend? friend;
+            if (!conversation.isGroup) {
+              // Fetch the member that isn't the own account
+              LPHAddress id =
+                  conversation.members.values
+                      .firstWhere(
+                        (element) => element.address != StatusController.ownAddress,
+                        orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
+                      )
+                      .address;
 
-                // If not found, just use own friend as a backup plan
-                if (id.id == "-") {
-                  sendLog("THIS SHOULD NOT HAPPEN, rendering me as member of conversation");
-                  friend = Friend.me();
-                } else {
-                  // If found, use the actual friend of course
-                  friend = FriendController.friends[id];
-                }
+              // If not found, just use own friend as a backup plan
+              if (id.id == "-") {
+                sendLog("THIS SHOULD NOT HAPPEN, rendering me as member of conversation");
+                friend = Friend.me();
+              } else {
+                // If found, use the actual friend of course
+                friend = FriendController.friends[id];
+              }
+            }
+
+            // Hover menu
+            return Watch(key: ValueKey(conversation.id), (ctx) {
+              var title = conversation.isGroup || friend == null ? conversation.containerSub.value.name : conversation.dmName;
+              if (friend == null && !conversation.isGroup) {
+                title = ".$title";
               }
 
-              // Hover menu
-              return Watch(
-                key: ValueKey(conversation.id),
-                (ctx) {
-                  var title = conversation.isGroup || friend == null ? conversation.containerSub.value.name : conversation.dmName;
-                  if (friend == null && !conversation.isGroup) {
-                    title = ".$title";
-                  }
+              if (_query.value != "") {
+                if (!title.toLowerCase().startsWith(_query.value.toLowerCase())) {
+                  return const SizedBox.shrink();
+                }
+              } else if (friend == null && !conversation.isGroup) {
+                return const SizedBox.shrink();
+              }
 
-                  if (_query.value != "") {
-                    if (!title.toLowerCase().startsWith(_query.value.toLowerCase())) {
-                      return const SizedBox.shrink();
-                    }
-                  } else if (friend == null && !conversation.isGroup) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return SignalHook(
-                    value: false,
-                    builder: (hover) => Padding(
+              return SignalHook(
+                value: false,
+                builder:
+                    (hover) => Padding(
                       padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
                       child: Watch((ctx) {
                         final provider = SidebarController.getCurrentProviderReactive();
 
                         return Material(
                           borderRadius: BorderRadius.circular(defaultSpacing),
-                          color: provider?.conversation == conversation && !isMobileMode()
-                              ? Get.theme.colorScheme.onSurface.withAlpha(20)
-                              : Colors.transparent,
+                          color:
+                              provider?.conversation == conversation && !isMobileMode()
+                                  ? Get.theme.colorScheme.onSurface.withAlpha(20)
+                                  : Colors.transparent,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(defaultSpacing),
                             hoverColor: Get.theme.hoverColor,
@@ -137,36 +134,34 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                   else
                                     renderDirectMessage(friend, title, conversation, provider),
 
-                                  Watch(
-                                    (ctx) {
-                                      final notifications = conversation.notificationCount.value;
-                                      if (hover.value) {
-                                        return IconButton(
-                                          onPressed: () => showConfirmPopup(ConfirmWindow(
-                                            title: "conversations.leave".tr,
-                                            text: "conversations.leave.text".tr,
-                                            onConfirm: () => conversation.delete(),
-                                            onDecline: () => {},
-                                          )),
-                                          icon: const Icon(Icons.close),
-                                        );
-                                      }
-
-                                      return Visibility(
-                                        visible: notifications > 0,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Get.theme.colorScheme.error,
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
-                                            child: Center(child: Text(min(notifications, 99).toString(), style: Get.textTheme.labelSmall)),
-                                          ),
-                                        ),
+                                  Watch((ctx) {
+                                    final notifications = conversation.notificationCount.value;
+                                    if (hover.value) {
+                                      return IconButton(
+                                        onPressed:
+                                            () => showConfirmPopup(
+                                              ConfirmWindow(
+                                                title: "conversations.leave".tr,
+                                                text: "conversations.leave.text".tr,
+                                                onConfirm: () => conversation.delete(),
+                                                onDecline: () => {},
+                                              ),
+                                            ),
+                                        icon: const Icon(Icons.close),
                                       );
-                                    },
-                                  ),
+                                    }
+
+                                    return Visibility(
+                                      visible: notifications > 0,
+                                      child: Container(
+                                        decoration: BoxDecoration(shape: BoxShape.circle, color: Get.theme.colorScheme.error),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
+                                          child: Center(child: Text(min(notifications, 99).toString(), style: Get.textTheme.labelSmall)),
+                                        ),
+                                      ),
+                                    );
+                                  }),
                                 ],
                               ),
                             ),
@@ -174,23 +169,16 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         );
                       }),
                     ),
-                  );
-                },
               );
-            },
-          ),
-        );
-      },
-    );
+            });
+          },
+        ),
+      );
+    });
   }
 
   /// Render a direct message preview for the sidebar
-  Widget renderDirectMessage(
-    Friend? friend,
-    String title,
-    Conversation conversation,
-    ConversationMessageProvider? provider,
-  ) {
+  Widget renderDirectMessage(Friend? friend, String title, Conversation conversation, ConversationMessageProvider? provider) {
     // Get the friend associated
 
     return Expanded(
@@ -200,11 +188,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
           if (friend == null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
-              child: Icon(
-                friend == null ? Icons.person_off : Icons.person,
-                size: 35,
-                color: Get.theme.colorScheme.onPrimary,
-              ),
+              child: Icon(friend == null ? Icons.person_off : Icons.person, size: 35, color: Get.theme.colorScheme.onPrimary),
             )
           else
             UserAvatar(id: friend.id, size: 40),
@@ -232,14 +216,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         padding: const EdgeInsets.only(left: defaultSpacing),
                         child: Tooltip(
                           waitDuration: const Duration(milliseconds: 500),
-                          message: "friends.different_town".trParams({
-                            "town": friend.id.server,
-                          }),
-                          child: Icon(
-                            Icons.sensors,
-                            color: Get.theme.colorScheme.onPrimary,
-                            size: 21,
-                          ),
+                          message: "friends.different_town".trParams({"town": friend.id.server}),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                         ),
                       ),
                     horizontalSpacing(defaultSpacing),
@@ -251,10 +229,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                 friend == null
                     ? verticalSpacing(elementSpacing * 0.5)
-                    : Visibility(
-                        visible: conversation.isGroup || friend.status.value != "",
-                        child: verticalSpacing(elementSpacing * 0.5),
-                      ),
+                    : Visibility(visible: conversation.isGroup || friend.status.value != "", child: verticalSpacing(elementSpacing * 0.5)),
 
                 // Friend status message (if available)
                 if (friend == null)
@@ -287,22 +262,14 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   }
 
   /// Render a group preview for the sidebar
-  Widget renderGroup(
-    String title,
-    Conversation conversation,
-    ConversationMessageProvider? provider,
-  ) {
+  Widget renderGroup(String title, Conversation conversation, ConversationMessageProvider? provider) {
     return Expanded(
       child: Row(
         children: [
           // Render a group icon
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
-            child: Icon(
-              Icons.group,
-              size: 35,
-              color: Get.theme.colorScheme.onPrimary,
-            ),
+            child: Icon(Icons.group, size: 35, color: Get.theme.colorScheme.onPrimary),
           ),
           horizontalSpacing(defaultSpacing * 0.75),
           Expanded(
@@ -326,14 +293,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         padding: const EdgeInsets.only(left: defaultSpacing),
                         child: Tooltip(
                           waitDuration: const Duration(milliseconds: 500),
-                          message: "conversations.different_town".trParams({
-                            "town": conversation.id.server,
-                          }),
-                          child: Icon(
-                            Icons.sensors,
-                            color: Get.theme.colorScheme.onPrimary,
-                            size: 21,
-                          ),
+                          message: "conversations.different_town".trParams({"town": conversation.id.server}),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                         ),
                       ),
                   ],
@@ -343,13 +304,11 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                 // Render the amount of members of the conversation
                 Text(
-                  "chat.members".trParams(<String, String>{
-                    "count": conversation.members.length.toString(),
-                  }),
+                  "chat.members".trParams(<String, String>{"count": conversation.members.length.toString()}),
                   style: Get.textTheme.bodySmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                )
+                ),
               ],
             ),
           ),

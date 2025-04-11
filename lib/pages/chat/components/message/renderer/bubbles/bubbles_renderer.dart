@@ -85,17 +85,9 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        "chat.welcome.title".tr,
-                        style: Get.theme.textTheme.headlineMedium,
-                        textAlign: TextAlign.center,
-                      ),
+                      Text("chat.welcome.title".tr, style: Get.theme.textTheme.headlineMedium, textAlign: TextAlign.center),
                       verticalSpacing(sectionSpacing),
-                      Text(
-                        "chat.welcome.desc".tr,
-                        style: Get.theme.textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      )
+                      Text("chat.welcome.desc".tr, style: Get.theme.textTheme.bodyMedium, textAlign: TextAlign.center),
                     ],
                   ),
                 ),
@@ -219,18 +211,13 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                   Flexible(
                     child: Animate(
                       controller: message.highlightAnimation,
-                      effects: [
-                        ShimmerEffect(
-                          duration: 1000.ms,
-                          curve: Curves.ease,
-                        ),
-                      ],
+                      effects: [ShimmerEffect(duration: 1000.ms, curve: Curves.ease)],
                       target: 0,
                       child: renderer,
                     ),
                   ),
                   if (!widget.mobileLayout) renderOverlay(self, message),
-                  if (widget.mobileLayout && !GetPlatform.isMobile) renderOverlay(self, message)
+                  if (widget.mobileLayout && !GetPlatform.isMobile) renderOverlay(self, message),
                 ],
               ),
             ),
@@ -243,17 +230,8 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
       message.initAnimation(this);
       return Animate(
         effects: [
-          ExpandEffect(
-            alignment: Alignment.center,
-            duration: 250.ms,
-            curve: Curves.ease,
-            axis: Axis.vertical,
-          ),
-          FadeEffect(
-            begin: 0,
-            end: 1,
-            duration: 500.ms,
-          ),
+          ExpandEffect(alignment: Alignment.center, duration: 250.ms, curve: Curves.ease, axis: Axis.vertical),
+          FadeEffect(begin: 0, end: 1, duration: 500.ms),
         ],
         autoPlay: false,
         controller: message.controller!,
@@ -264,11 +242,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
     if (message.heightCallback) {
       return Watch((ctx) {
-        return Align(
-          alignment: Alignment.topCenter,
-          heightFactor: message.canScroll.value ? 1 : 0,
-          child: messageWidget,
-        );
+        return Align(alignment: Alignment.topCenter, heightFactor: message.canScroll.value ? 1 : 0, child: messageWidget);
       });
     }
 
@@ -293,12 +267,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                 padding: 4,
                 onTap: () {
                   Get.dialog(
-                    MessageOptionsWindow(
-                      data: ContextMenuData.fromKey(contextMenuKey),
-                      self: true,
-                      message: message,
-                      provider: widget.provider,
-                    ),
+                    MessageOptionsWindow(data: ContextMenuData.fromKey(contextMenuKey), self: true, message: message, provider: widget.provider),
                   );
                 },
                 icon: Icons.more_horiz,
@@ -311,7 +280,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                   MessageSendHelper.addReplyToCurrentDraft(message);
                 },
                 icon: Icons.reply,
-              )
+              ),
             ],
           ),
         ),

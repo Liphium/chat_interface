@@ -28,15 +28,8 @@ class SizeDemo extends StatelessWidget {
             children: List.generate(
               n,
               (index) => ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: computedHeight,
-                ),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Container(
-                    color: Colors.primaries[index % Colors.primaries.length],
-                  ),
-                ),
+                constraints: BoxConstraints(maxHeight: computedHeight),
+                child: AspectRatio(aspectRatio: 16 / 9, child: Container(color: Colors.primaries[index % Colors.primaries.length])),
               ),
             ),
           ),

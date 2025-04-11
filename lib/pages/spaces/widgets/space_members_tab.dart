@@ -41,11 +41,7 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                       if (StatusController.ownAddress != member.friend.id) {
                         final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                         Get.dialog(
-                          Profile(
-                            position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
-                            friend: member.friend,
-                            size: box.size.width.toInt(),
-                          ),
+                          Profile(position: box.localToGlobal(box.size.bottomLeft(Offset.zero)), friend: member.friend, size: box.size.width.toInt()),
                         );
                       }
                     },
@@ -54,11 +50,7 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                       padding: const EdgeInsets.all(elementSpacing),
                       child: Row(
                         children: [
-                          Flexible(
-                            child: UserRenderer(
-                              id: member.friend.id,
-                            ),
-                          ),
+                          Flexible(child: UserRenderer(id: member.friend.id)),
                           horizontalSpacing(defaultSpacing),
                           Watch(
                             (context) => Visibility(
@@ -89,10 +81,7 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                             }
 
                             return Container(
-                              decoration: BoxDecoration(
-                                color: color,
-                                borderRadius: BorderRadius.circular(sectionSpacing),
-                              ),
+                              decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(sectionSpacing)),
                               width: sectionSpacing,
                               height: sectionSpacing,
                             );

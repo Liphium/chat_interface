@@ -50,9 +50,7 @@ enum SettingLabel {
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 
-  privacy("settings.tab.security", [
-    SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage()),
-  ]);
+  privacy("settings.tab.security", [SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage())]);
 
   final String _label;
   final List<SettingCategory> categories;

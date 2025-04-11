@@ -40,33 +40,30 @@ class MessageListener {
     });
 
     // Listen for multiple messages (mp stands for multiple)
-    cn.connector.listen(
-      "conv_msg_mp",
-      (event) async {
-        // Check if the conversation even exists on this account
-        final conversation = ConversationController.conversations[LPHAddress.from(event.data["cv"])];
-        if (conversation == null) {
-          sendLog("WARNING: invalid message, conversation not found");
-          return;
+    cn.connector.listen("conv_msg_mp", (event) async {
+      // Check if the conversation even exists on this account
+      final conversation = ConversationController.conversations[LPHAddress.from(event.data["cv"])];
+      if (conversation == null) {
+        sendLog("WARNING: invalid message, conversation not found");
+        return;
+      }
+
+      // Unpack all of the messages in an isolate
+      final messages = await unpackMessagesInIsolate(conversation, event.data["msgs"], includeSystemMessages: true);
+
+      // Remove all messages with more than 5 attachments
+      messages.removeWhere((msg) {
+        if (msg.attachments.length > 5) {
+          sendLog("WARNING: invalid message received, dropping it (attachments > 5)");
+          return true;
         }
 
-        // Unpack all of the messages in an isolate
-        final messages = await unpackMessagesInIsolate(conversation, event.data["msgs"], includeSystemMessages: true);
+        return false;
+      });
 
-        // Remove all messages with more than 5 attachments
-        messages.removeWhere((msg) {
-          if (msg.attachments.length > 5) {
-            sendLog("WARNING: invalid message received, dropping it (attachments > 5)");
-            return true;
-          }
-
-          return false;
-        });
-
-        // Store all of the messages in the local database
-        unawaited(MessageService.storeMessages(messages, conversation));
-      },
-    );
+      // Store all of the messages in the local database
+      unawaited(MessageService.storeMessages(messages, conversation));
+    });
   }
 
   /// Unpack a message json in an isolate.
@@ -77,26 +74,18 @@ class MessageListener {
   static Future<Message> unpackMessageInIsolate(Conversation conv, Map<String, dynamic> json) async {
     // Run an isolate to parse the message
     final copy = Conversation.copyWithoutKey(conv);
-    final (message, info) = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) {
-        // Unpack the actual message
-        final (msg, info) = messageFromJson(
-          json,
-          sodium: sodium,
-          key: keys[0],
-          conversation: copy,
-        );
+    final (message, info) = await sodiumLib.runIsolated((sodium, keys, pairs) {
+      // Unpack the actual message
+      final (msg, info) = messageFromJson(json, sodium: sodium, key: keys[0], conversation: copy);
 
-        // Unpack the system message attachments in case needed
-        if (msg.type == MessageType.system) {
-          msg.decryptSystemMessageAttachments(keys[0], sodium);
-        }
+      // Unpack the system message attachments in case needed
+      if (msg.type == MessageType.system) {
+        msg.decryptSystemMessageAttachments(keys[0], sodium);
+      }
 
-        // Return it to the main isolate
-        return (msg, info);
-      },
-      secureKeys: [conv.key],
-    );
+      // Return it to the main isolate
+      return (msg, info);
+    }, secureKeys: [conv.key]);
 
     // Verify the signature
     if (info != null) {
@@ -115,36 +104,28 @@ class MessageListener {
   static Future<List<Message>> unpackMessagesInIsolate(Conversation conversation, List<dynamic> json, {bool includeSystemMessages = false}) async {
     // Unpack the messages in an isolate (in a separate thread yk)
     final copy = Conversation.copyWithoutKey(conversation);
-    final loadedMessages = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) async {
-        // Process all messages
-        final list = <(Message, SymmetricSequencedInfo?)>[];
-        for (var msgJson in json) {
-          final (message, info) = messageFromJson(
-            msgJson,
-            conversation: copy,
-            key: keys[0],
-            sodium: sodium,
-          );
+    final loadedMessages = await sodiumLib.runIsolated((sodium, keys, pairs) async {
+      // Process all messages
+      final list = <(Message, SymmetricSequencedInfo?)>[];
+      for (var msgJson in json) {
+        final (message, info) = messageFromJson(msgJson, conversation: copy, key: keys[0], sodium: sodium);
 
-          // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
-          if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false && !includeSystemMessages) {
-            continue;
-          }
-
-          // Decrypt system message attachments
-          if (message.type == MessageType.system) {
-            message.decryptSystemMessageAttachments(keys[0], sodium);
-          }
-
-          list.add((message, info));
+        // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
+        if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false && !includeSystemMessages) {
+          continue;
         }
 
-        // Return the list to the main isolate
-        return list;
-      },
-      secureKeys: [conversation.key],
-    );
+        // Decrypt system message attachments
+        if (message.type == MessageType.system) {
+          message.decryptSystemMessageAttachments(keys[0], sodium);
+        }
+
+        list.add((message, info));
+      }
+
+      // Return the list to the main isolate
+      return list;
+    }, secureKeys: [conversation.key]);
 
     // Verify the signature of all messages
     for (var (msg, info) in loadedMessages) {

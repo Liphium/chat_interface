@@ -35,13 +35,7 @@ class MessageInput extends StatefulWidget {
   final bool secondary;
   final bool rectangle;
 
-  const MessageInput({
-    super.key,
-    required this.draft,
-    required this.provider,
-    this.secondary = false,
-    this.rectangle = false,
-  });
+  const MessageInput({super.key, required this.draft, required this.provider, this.secondary = false, this.rectangle = false});
 
   @override
   State<MessageInput> createState() => _MessageInputState();
@@ -136,10 +130,7 @@ class _MessageInputState extends State<MessageInput> {
         _message.text.substring(0, _message.selection.start) + replacer + _message.text.substring(_message.selection.end, _message.text.length);
 
     // Change the selection to the calculated offset
-    _message.selection = _message.selection.copyWith(
-      baseOffset: newOffset,
-      extentOffset: newOffset,
-    );
+    _message.selection = _message.selection.copyWith(baseOffset: newOffset, extentOffset: newOffset);
   }
 
   /// Replace the emoji selector in the input with an emoji
@@ -158,10 +149,7 @@ class _MessageInputState extends State<MessageInput> {
           _inputFocus.requestFocus();
           // Change the selection to the calculated offset
           final newOffset = cursorPos - query.length + 3;
-          _message.selection = _message.selection.copyWith(
-            baseOffset: newOffset,
-            extentOffset: newOffset,
-          );
+          _message.selection = _message.selection.copyWith(baseOffset: newOffset, extentOffset: newOffset);
         }
       }
     }
@@ -264,9 +252,10 @@ class _MessageInputState extends State<MessageInput> {
     };
 
     // Build actual widget
-    final double padding = widget.rectangle
-        ? 0
-        : isMobileMode()
+    final double padding =
+        widget.rectangle
+            ? 0
+            : isMobileMode()
             ? defaultSpacing
             : sectionSpacing;
     return Padding(
@@ -281,142 +270,118 @@ class _MessageInputState extends State<MessageInput> {
               color: widget.secondary ? theme.colorScheme.inverseSurface : theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(defaultSpacing * (widget.rectangle ? 0 : 1.5)),
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: defaultSpacing,
-                  vertical: elementSpacing,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //* Reply preview
-                    Watch(
-                      (ctx) {
-                        final answer = MessageSendHelper.currentDraft.value?.answer.value;
-                        if (answer != null) {
-                          _previousAccount = answer.senderAddress;
-                        }
+                    Watch((ctx) {
+                      final answer = MessageSendHelper.currentDraft.value?.answer.value;
+                      if (answer != null) {
+                        _previousAccount = answer.senderAddress;
+                      }
 
-                        return Animate(
-                          effects: [
-                            ExpandEffect(
-                              duration: 300.ms,
-                              curve: Curves.easeInOut,
-                              axis: Axis.vertical,
-                              alignment: Alignment.center,
-                            ),
-                            FadeEffect(
-                              duration: 300.ms,
-                            )
-                          ],
-                          target: MessageSendHelper.currentDraft.value == null || answer == null ? 0 : 1,
-                          child: Padding(
-                            padding: const EdgeInsets.all(elementSpacing),
-                            child: Row(
-                              children: [
-                                Icon(Icons.reply, color: theme.colorScheme.tertiary),
-                                horizontalSpacing(defaultSpacing),
-                                Expanded(
-                                  child: Text(
-                                    "message.reply.text".trParams({
-                                      "name": _previousAccount == null
-                                          ? "tf"
-                                          : FriendController.friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
-                                    }),
-                                    style: theme.textTheme.labelMedium,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                      return Animate(
+                        effects: [
+                          ExpandEffect(duration: 300.ms, curve: Curves.easeInOut, axis: Axis.vertical, alignment: Alignment.center),
+                          FadeEffect(duration: 300.ms),
+                        ],
+                        target: MessageSendHelper.currentDraft.value == null || answer == null ? 0 : 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(elementSpacing),
+                          child: Row(
+                            children: [
+                              Icon(Icons.reply, color: theme.colorScheme.tertiary),
+                              horizontalSpacing(defaultSpacing),
+                              Expanded(
+                                child: Text(
+                                  "message.reply.text".trParams({
+                                    "name":
+                                        _previousAccount == null
+                                            ? "tf"
+                                            : FriendController.friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
+                                  }),
+                                  style: theme.textTheme.labelMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                LoadingIconButton(
-                                  iconSize: 22,
-                                  extra: 4,
-                                  padding: 4,
-                                  onTap: () {
-                                    MessageSendHelper.currentDraft.value!.answer.value = null;
-                                  },
-                                  icon: Icons.close,
-                                )
-                              ],
-                            ),
+                              ),
+                              LoadingIconButton(
+                                iconSize: 22,
+                                extra: 4,
+                                padding: 4,
+                                onTap: () {
+                                  MessageSendHelper.currentDraft.value!.answer.value = null;
+                                },
+                                icon: Icons.close,
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    }),
 
                     //* Emoji suggestions
-                    Watch(
-                      (ctx) {
-                        if (_emojiSuggestions.isEmpty) {
-                          return const SizedBox();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.all(elementSpacing),
-                          child: ScrollConfiguration(
-                            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  for (var emoji in _emojiSuggestions)
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: elementSpacing),
-                                      child: Tooltip(
-                                        key: ValueKey(emoji.shortName),
-                                        exitDuration: 0.ms,
-                                        message: ":${emoji.shortName}:",
-                                        child: Center(
-                                          child: InkWell(
-                                            borderRadius: BorderRadius.circular(1000),
-                                            onTap: () {
-                                              doEmojiSuggestion(emoji.emoji);
-                                            },
-                                            child: Text(
-                                              emoji.emoji,
-                                              style: Get.theme.textTheme.titleLarge!.copyWith(/* fontFamily: "Emoji", */ fontSize: 30),
-                                            ),
+                    Watch((ctx) {
+                      if (_emojiSuggestions.isEmpty) {
+                        return const SizedBox();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.all(elementSpacing),
+                        child: ScrollConfiguration(
+                          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (var emoji in _emojiSuggestions)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: elementSpacing),
+                                    child: Tooltip(
+                                      key: ValueKey(emoji.shortName),
+                                      exitDuration: 0.ms,
+                                      message: ":${emoji.shortName}:",
+                                      child: Center(
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(1000),
+                                          onTap: () {
+                                            doEmojiSuggestion(emoji.emoji);
+                                          },
+                                          child: Text(
+                                            emoji.emoji,
+                                            style: Get.theme.textTheme.titleLarge!.copyWith(/* fontFamily: "Emoji", */ fontSize: 30),
                                           ),
                                         ),
                                       ),
                                     ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    //* File preview
-                    Watch(
-                      (ctx) {
-                        if (MessageSendHelper.currentDraft.value == null) {
-                          return const SizedBox();
-                        }
-                        return Animate(
-                          effects: [
-                            ExpandEffect(
-                              duration: 250.ms,
-                              curve: Curves.easeInOut,
-                              axis: Axis.vertical,
-                            )
-                          ],
-                          target: MessageSendHelper.currentDraft.value!.files.isEmpty ? 0 : 1,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                            child: Row(
-                              children: [
-                                const SizedBox(height: 200 + defaultSpacing),
-                                for (final file in MessageSendHelper.currentDraft.value!.files)
-                                  SquareFileRenderer(
-                                    file: file,
-                                    onRemove: () => MessageSendHelper.currentDraft.value!.files.remove(file),
                                   ),
                               ],
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    }),
+
+                    //* File preview
+                    Watch((ctx) {
+                      if (MessageSendHelper.currentDraft.value == null) {
+                        return const SizedBox();
+                      }
+                      return Animate(
+                        effects: [ExpandEffect(duration: 250.ms, curve: Curves.easeInOut, axis: Axis.vertical)],
+                        target: MessageSendHelper.currentDraft.value!.files.isEmpty ? 0 : 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                          child: Row(
+                            children: [
+                              const SizedBox(height: 200 + defaultSpacing),
+                              for (final file in MessageSendHelper.currentDraft.value!.files)
+                                SquareFileRenderer(file: file, onRemove: () => MessageSendHelper.currentDraft.value!.files.remove(file)),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
 
                     //* Input
                     Row(
@@ -462,9 +427,7 @@ class _MessageInputState extends State<MessageInput> {
                                   hintText: 'chat.message'.tr,
                                   hintStyle: theme.textTheme.bodyLarge,
                                 ),
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(1000),
-                                ],
+                                inputFormatters: [LengthLimitingTextInputFormatter(1000)],
                                 focusNode: _inputFocus,
                                 onChanged: (value) {
                                   MessageSendHelper.currentDraft.value!.message = value;
@@ -486,12 +449,10 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         IconButton(
                           key: _libraryKey,
-                          onPressed: () => showModal(
-                            LibraryWindow(
-                              data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
-                              provider: widget.provider,
-                            ),
-                          ),
+                          onPressed:
+                              () => showModal(
+                                LibraryWindow(data: ContextMenuData.fromKey(_libraryKey, above: true, right: true), provider: widget.provider),
+                              ),
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),

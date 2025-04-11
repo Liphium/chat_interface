@@ -32,18 +32,13 @@ class _MessageRendererState extends State<BubblesSystemMessageRenderer> {
     return Padding(
       padding: const EdgeInsets.only(top: defaultSpacing),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: elementSpacing,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: elementSpacing),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             //* Icon
-            SizedBox(
-              width: 50,
-              child: Center(child: Icon(message.icon, size: 30, color: Get.theme.colorScheme.onPrimary)),
-            ),
+            SizedBox(width: 50, child: Center(child: Icon(message.icon, size: 30, color: Get.theme.colorScheme.onPrimary))),
             horizontalSpacing(defaultSpacing),
 
             //* Space info

@@ -34,10 +34,8 @@ class StudioService {
     final peer = await createPeerConnection({
       "iceServers": [
         {
-          "urls": [
-            "stun:${event.data["stun"]}",
-          ]
-        }
+          "urls": ["stun:${event.data["stun"]}"],
+        },
       ],
     });
 
@@ -106,11 +104,7 @@ class StudioService {
     connector.listen("st_ice", (event) {
       // Pass the candidate to the current connection
       final candidate = event.data["candidate"];
-      StudioController.getConnection()?.handleIceCandidate(RTCIceCandidate(
-        candidate["candidate"],
-        candidate["sdpMid"],
-        candidate["sdpMLineIndex"],
-      ));
+      StudioController.getConnection()?.handleIceCandidate(RTCIceCandidate(candidate["candidate"], candidate["sdpMid"], candidate["sdpMLineIndex"]));
     });
   }
 
@@ -121,10 +115,9 @@ class StudioService {
     assert(muted != null || deafened != null);
 
     // Send the new audio state to the server
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("set_audio_state", {
-      if (muted != null) "muted": muted,
-      if (deafened != null) "deafened": deafened,
-    }));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("set_audio_state", {if (muted != null) "muted": muted, if (deafened != null) "deafened": deafened}),
+    );
     if (event == null) {
       return "server.error".tr;
     }

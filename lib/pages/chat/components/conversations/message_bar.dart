@@ -90,22 +90,18 @@ class _MessageBarState extends State<MessageBar> {
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: Get.theme.hoverColor,
                     onTap: () {
-                      showModal(ConversationInfoWindow(
-                        conversation: widget.conversation,
-                        position: ContextMenuData.fromKey(_infoKey, below: true),
-                      ));
+                      showModal(ConversationInfoWindow(conversation: widget.conversation, position: ContextMenuData.fromKey(_infoKey, below: true)));
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: elementSpacing,
-                        horizontal: defaultSpacing,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
                       child: Row(
                         children: [
                           Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
-                          Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
-                              style: Theme.of(context).textTheme.titleMedium),
+                          Text(
+                            widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                         ],
                       ),
                     ),
@@ -153,7 +149,7 @@ class _MessageBarState extends State<MessageBar> {
                                     ),
                                   ),
                                 ),
-                              )
+                              ),
                             ],
                           ),
 
@@ -187,24 +183,24 @@ class _MessageBarState extends State<MessageBar> {
                           ),
 
                         // Give the user the ability to add people to a conversation
-                        if (!error)
-                          ConversationAddButton(
-                            conversation: widget.conversation,
-                            loading: additionLoading,
-                          ),
+                        if (!error) ConversationAddButton(conversation: widget.conversation, loading: additionLoading),
 
                         Visibility(
                           visible: widget.conversation.isGroup,
                           child: Watch(
                             (ctx) => IconButton(
                               iconSize: 27,
-                              icon: Icon(Icons.group,
-                                  color: SettingController.settings[AppSettings.showGroupMembers]!.value.value
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSurface),
+                              icon: Icon(
+                                Icons.group,
+                                color:
+                                    SettingController.settings[AppSettings.showGroupMembers]!.value.value
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSurface,
+                              ),
                               onPressed: () {
-                                SettingController.settings[AppSettings.showGroupMembers]!
-                                    .setValue(!SettingController.settings[AppSettings.showGroupMembers]!.value.value);
+                                SettingController.settings[AppSettings.showGroupMembers]!.setValue(
+                                  !SettingController.settings[AppSettings.showGroupMembers]!.value.value,
+                                );
                               },
                             ),
                           ),
@@ -217,9 +213,10 @@ class _MessageBarState extends State<MessageBar> {
                   Watch(
                     (ctx) => IconButton(
                       iconSize: 27,
-                      icon: Icon(Icons.search,
-                          color:
-                              SidebarController.showSearch.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface),
+                      icon: Icon(
+                        Icons.search,
+                        color: SidebarController.showSearch.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
+                      ),
                       onPressed: () {
                         SidebarController.toggleSearchView();
                         if (SidebarController.showSearch.value) {
@@ -288,43 +285,41 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
             }
             initial.add(friend);
           }
-          Get.dialog(ConversationAddWindow(
-            title: "conversations.add",
-            action: "add",
-            nameField: false,
-            position: ContextMenuData(position, true, false),
-            initial: initial,
-            onDone: (friends, name) async {
-              final finalList = <Friend>[];
-              for (var friend in friends) {
-                if (!initial.any((element) => element.id == friend.id)) {
-                  finalList.add(friend);
+          Get.dialog(
+            ConversationAddWindow(
+              title: "conversations.add",
+              action: "add",
+              nameField: false,
+              position: ContextMenuData(position, true, false),
+              initial: initial,
+              onDone: (friends, name) async {
+                final finalList = <Friend>[];
+                for (var friend in friends) {
+                  if (!initial.any((element) => element.id == friend.id)) {
+                    finalList.add(friend);
+                  }
                 }
-              }
 
-              // Add the people to the conversation
-              for (var friend in finalList) {
-                final error = await ConversationService.addToConversation(widget.conversation, friend);
-                if (error != null) {
-                  showErrorPopup("error", error);
-                  return null;
+                // Add the people to the conversation
+                for (var friend in finalList) {
+                  final error = await ConversationService.addToConversation(widget.conversation, friend);
+                  if (error != null) {
+                    showErrorPopup("error", error);
+                    return null;
+                  }
                 }
-              }
 
-              return null;
-            },
-          ));
+                return null;
+              },
+            ),
+          );
         } else {
           // Get the friend and open the window
           final friend = widget.conversation.members.values.firstWhere((element) => element.address != StatusController.ownAddress).getFriend();
           if (friend.unknown) {
             return;
           }
-          showModal(ConversationAddWindow(
-            title: "conversations.add.create",
-            position: ContextMenuData(position, true, false),
-            initial: [friend],
-          ));
+          showModal(ConversationAddWindow(title: "conversations.add.create", position: ContextMenuData(position, true, false), initial: [friend]));
         }
       },
     );

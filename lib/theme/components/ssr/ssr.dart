@@ -46,9 +46,7 @@ class SSR {
 
     if (currentToken != null) {
       // Build the request body to send to the server
-      final baseTokenMap = <String, dynamic>{
-        "token": currentToken,
-      };
+      final baseTokenMap = <String, dynamic>{"token": currentToken};
       baseTokenMap.addAll(currentInputValues);
 
       // Send a request to the server
@@ -101,11 +99,6 @@ class SSR {
 
   /// Returns a SSR renderer to render the components in a render response
   void _renderWidgets(String path, List<dynamic> json) {
-    onRender.call(SSRRenderer(
-      key: ValueKey(path),
-      ssr: this,
-      json: json,
-      path: path,
-    ));
+    onRender.call(SSRRenderer(key: ValueKey(path), ssr: this, json: json, path: path));
   }
 }

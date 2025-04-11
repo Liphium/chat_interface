@@ -27,8 +27,10 @@ class _DurationRendererState extends State<DurationRenderer> with SignalsMixin {
     final seconds = duration.inSeconds - (minutes * 60) - (hours * 60 * 60);
 
     if (hours > 0) {
-      return Text("${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}",
-          style: widget.style);
+      return Text(
+        "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}",
+        style: widget.style,
+      );
     }
     return Text("${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}", style: widget.style);
   }

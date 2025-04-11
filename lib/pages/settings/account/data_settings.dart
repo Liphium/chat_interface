@@ -33,10 +33,7 @@ class DataSettingsPage extends StatelessWidget {
           verticalSpacing(defaultSpacing),
 
           Container(
-            decoration: BoxDecoration(
-              color: Get.theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(sectionSpacing),
-            ),
+            decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
             padding: const EdgeInsets.all(sectionSpacing),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -77,31 +74,29 @@ class DataSettingsPage extends StatelessWidget {
                           horizontalSpacing(defaultSpacing),
                           IconButton(
                             tooltip: "settings.data.profile_picture.remove".tr,
-                            onPressed: () => showConfirmPopup(
-                              ConfirmWindow(
-                                title: "settings.data.profile_picture.remove".tr,
-                                text: "settings.data.profile_picture.remove.confirm".tr,
-                                onConfirm: () async {
-                                  // Tell the server to remove the picture
-                                  final valid = await ProfileHelper.deleteProfilePicture();
-                                  if (!valid) {
-                                    return;
-                                  }
-                                },
-                                onDecline: () => {},
-                              ),
-                            ),
+                            onPressed:
+                                () => showConfirmPopup(
+                                  ConfirmWindow(
+                                    title: "settings.data.profile_picture.remove".tr,
+                                    text: "settings.data.profile_picture.remove.confirm".tr,
+                                    onConfirm: () async {
+                                      // Tell the server to remove the picture
+                                      final valid = await ProfileHelper.deleteProfilePicture();
+                                      if (!valid) {
+                                        return;
+                                      }
+                                    },
+                                    onDecline: () => {},
+                                  ),
+                                ),
                             icon: Icon(Icons.delete, color: Get.theme.colorScheme.onPrimary),
-                          )
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
-                UserAvatar(
-                  id: StatusController.ownAddress,
-                  size: 100,
-                )
+                UserAvatar(id: StatusController.ownAddress, size: 100),
               ],
             ),
           ),
@@ -113,10 +108,7 @@ class DataSettingsPage extends StatelessWidget {
 
           //* Key requests
           Container(
-            decoration: BoxDecoration(
-              color: Get.theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(sectionSpacing),
-            ),
+            decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
             padding: const EdgeInsets.all(sectionSpacing),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -144,10 +136,7 @@ class DataSettingsPage extends StatelessWidget {
 
           //* Display name
           Container(
-            decoration: BoxDecoration(
-              color: Get.theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(sectionSpacing),
-            ),
+            decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
             padding: const EdgeInsets.all(sectionSpacing),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -180,10 +169,7 @@ class DataSettingsPage extends StatelessWidget {
 
           //* Username
           Container(
-            decoration: BoxDecoration(
-              color: Get.theme.colorScheme.onInverseSurface,
-              borderRadius: BorderRadius.circular(sectionSpacing),
-            ),
+            decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
             padding: const EdgeInsets.all(sectionSpacing),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,10 +179,7 @@ class DataSettingsPage extends StatelessWidget {
                   children: [
                     Text("username".tr, style: Get.theme.textTheme.labelMedium),
                     verticalSpacing(elementSpacing),
-                    Text(
-                      List.generate(StatusController.name.value.length, (index) => "*").join(""),
-                      style: Get.theme.textTheme.bodyMedium,
-                    ),
+                    Text(List.generate(StatusController.name.value.length, (index) => "*").join(""), style: Get.theme.textTheme.bodyMedium),
                   ],
                 ),
                 horizontalSpacing(defaultSpacing),
@@ -290,12 +273,14 @@ class DataSettingsPage extends StatelessWidget {
           FJElevatedButton(
             smallCorners: true,
             onTap: () {
-              showConfirmPopup(ConfirmWindow(
-                title: "settings.data.danger_zone.delete_account".tr,
-                text: "settings.data.danger_zone.delete_account.confirm".tr,
-                onConfirm: () => {},
-                onDecline: () => {},
-              ));
+              showConfirmPopup(
+                ConfirmWindow(
+                  title: "settings.data.danger_zone.delete_account".tr,
+                  text: "settings.data.danger_zone.delete_account.confirm".tr,
+                  onConfirm: () => {},
+                  onDecline: () => {},
+                ),
+              );
             },
             color: Get.theme.colorScheme.errorContainer,
             child: Row(

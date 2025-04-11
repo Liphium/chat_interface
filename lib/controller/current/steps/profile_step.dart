@@ -25,10 +25,7 @@ class RefreshTokenStep extends ConnectionStep {
     String session = getSessionFromJWT(sessionToken);
 
     // Refresh token
-    final body = await postJSON("/account/auth/refresh", <String, dynamic>{
-      "session": session,
-      "token": refreshToken,
-    });
+    final body = await postJSON("/account/auth/refresh", <String, dynamic>{"session": session, "token": refreshToken});
 
     // Set new token (if refreshed)
     if (body["success"]) {
@@ -43,10 +40,7 @@ class RefreshTokenStep extends ConnectionStep {
       // Check if the session is not verified
       if (body["verified"] != null && !body["verified"]) {
         final res = await KeySetup.openKeySynchronization();
-        return SetupResponse(
-          retryConnection: true,
-          error: res,
-        );
+        return SetupResponse(retryConnection: true, error: res);
       }
 
       // Check if the account data is invalid (make sure to delete everything)

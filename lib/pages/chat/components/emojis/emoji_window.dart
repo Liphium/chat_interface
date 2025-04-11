@@ -77,10 +77,7 @@ class _EmojiWindowState extends State<EmojiWindow> {
                   (ctx) => GridView.builder(
                     key: const ValueKey("the grid"),
                     controller: _scrollController,
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 30 * 1.5,
-                      crossAxisSpacing: elementSpacing,
-                    ),
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 30 * 1.5, crossAxisSpacing: elementSpacing),
                     itemCount: _emojis.length,
                     itemBuilder: (context, index) {
                       final emoji = _emojis[index];
@@ -97,10 +94,7 @@ class _EmojiWindowState extends State<EmojiWindow> {
                                 Get.back(result: emoji.emoji);
                                 _currentTimer?.cancel();
                               },
-                              child: Text(
-                                emoji.emoji,
-                                style: emojiTextStyle,
-                              ),
+                              child: Text(emoji.emoji, style: emojiTextStyle),
                             ),
                           ),
                         ),

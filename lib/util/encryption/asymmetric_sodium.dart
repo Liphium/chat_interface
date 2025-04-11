@@ -36,12 +36,7 @@ DecryptionResult decryptAsymmetricAuth(Uint8List publicKey, SecureKey secretKey,
 
   final Uint8List decrypted;
   try {
-    decrypted = sodium.crypto.box.openEasy(
-      cipherText: encrypted,
-      nonce: nonce,
-      publicKey: publicKey,
-      secretKey: secretKey,
-    );
+    decrypted = sodium.crypto.box.openEasy(cipherText: encrypted, nonce: nonce, publicKey: publicKey, secretKey: secretKey);
   } catch (e) {
     return DecryptionResult("", false);
   }
@@ -79,11 +74,7 @@ String decryptAsymmetricAnonymous(Uint8List publicKey, SecureKey secretKey, Stri
   final cipherText = base64Decode(message);
   var decrypted = "";
   try {
-    decrypted = utf8.decode(sodium.crypto.box.sealOpen(
-      cipherText: cipherText,
-      publicKey: publicKey,
-      secretKey: secretKey,
-    ));
+    decrypted = utf8.decode(sodium.crypto.box.sealOpen(cipherText: cipherText, publicKey: publicKey, secretKey: secretKey));
   } catch (e) {
     sendLog("WARNING: couldn't decrypt message");
     return "";
@@ -110,8 +101,5 @@ bool verifySignature(Uint8List publicKey, String signature, String message, [Sod
 */
 
 KeyPair toKeyPair(String publicKey, String privateKey, [Sodium? sd]) {
-  return KeyPair(
-    publicKey: unpackagePublicKey(publicKey),
-    secretKey: unpackagePrivateKey(privateKey, sd),
-  );
+  return KeyPair(publicKey: unpackagePublicKey(publicKey), secretKey: unpackagePrivateKey(privateKey, sd));
 }

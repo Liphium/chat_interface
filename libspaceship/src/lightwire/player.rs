@@ -57,45 +57,47 @@ impl PlayingEngine {
                 // Start a loop to keep the stream in scope until the engine exists
                 let mut last_device = "----".to_string();
                 loop {
-                    let mut engine = engine.blocking_lock();
-                    if engine.stop {
-                        info!("stopping playing engine.");
-                        return;
-                    }
+                    {
+                        let mut engine = engine.blocking_lock();
+                        if engine.stop {
+                            info!("stopping playing engine.");
+                            return;
+                        }
 
-                    // Restart the output stream when the device changes
-                    if engine.device != last_device {
-                        let host = get_preferred_host();
+                        // Restart the output stream when the device changes
+                        if engine.device != last_device {
+                            let host = get_preferred_host();
 
-                        // Try to get the device
-                        let mut device: Option<Device> = None;
-                        for dev in host.output_devices().expect("Couldn't list output devices") {
-                            if dev.name().expect("Couldn't get output name") == engine.device {
-                                device = Some(dev);
-                                break;
+                            // Try to get the device
+                            let mut device: Option<Device> = None;
+                            for dev in host.output_devices().expect("Couldn't list output devices")
+                            {
+                                if dev.name().expect("Couldn't get output name") == engine.device {
+                                    device = Some(dev);
+                                    break;
+                                }
                             }
-                        }
 
-                        // Create the new output stream
-                        if let Some(dev) = device {
-                            (_stream, stream_handle) = OutputStream::try_from_device(&dev)
-                                .expect("Failed to get output stream from found device");
-                        } else {
-                            (_stream, stream_handle) = OutputStream::try_default()
-                                .expect("Failed to get default output stream");
-                        }
-                        engine.output_handle = Some(stream_handle);
+                            // Create the new output stream
+                            if let Some(dev) = device {
+                                (_stream, stream_handle) = OutputStream::try_from_device(&dev)
+                                    .expect("Failed to get output stream from found device");
+                            } else {
+                                (_stream, stream_handle) = OutputStream::try_default()
+                                    .expect("Failed to get default output stream");
+                            }
+                            engine.output_handle = Some(stream_handle);
 
-                        // Change the sinks of all the clients to use the the new output stream
-                        for client in engine.client_map.values() {
-                            let mut client = client.blocking_lock();
-                            client.sink = Sink::try_new(engine.output_handle.as_ref().unwrap())
-                                .expect("Couldn't create new Sink")
-                        }
+                            // Change the sinks of all the clients to use the the new output stream
+                            for client in engine.client_map.values() {
+                                let mut client = client.blocking_lock();
+                                client.sink = Sink::try_new(engine.output_handle.as_ref().unwrap())
+                                    .expect("Couldn't create new Sink")
+                            }
 
-                        last_device = engine.device.clone();
+                            last_device = engine.device.clone();
+                        }
                     }
-
                     thread::sleep(Duration::from_millis(500));
                 }
             }

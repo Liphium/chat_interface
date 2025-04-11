@@ -35,9 +35,7 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
   }
 
   Future<void> grabFileInfo() async {
-    final json = await postAuthorizedJSON("/account/files/info", {
-      "id": widget.container.id,
-    });
+    final json = await postAuthorizedJSON("/account/files/info", {"id": widget.container.id});
 
     if (!json["success"]) {
       _errorText.value = json["error"];
@@ -54,32 +52,18 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
       child: Watch((ctx) {
         // Show loading spinner
         if (_loading.value) {
-          return Center(
-            heightFactor: 1,
-            child: CircularProgressIndicator(
-              color: Get.theme.colorScheme.onPrimary,
-            ),
-          );
+          return Center(heightFactor: 1, child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary));
         }
 
         if (_errorText.value.isNotEmpty) {
-          return Center(
-            heightFactor: 1,
-            child: Text(_errorText.value, style: Get.textTheme.bodyMedium),
-          );
+          return Center(heightFactor: 1, child: Text(_errorText.value, style: Get.textTheme.bodyMedium));
         }
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "file.dialog".trParams({
-                "name": widget.container.name,
-                "size": _size.toStringAsFixed(2),
-              }),
-              style: Get.textTheme.bodyMedium,
-            ),
+            Text("file.dialog".trParams({"name": widget.container.name, "size": _size.toStringAsFixed(2)}), style: Get.textTheme.bodyMedium),
             verticalSpacing(defaultSpacing),
             ProfileButton(
               icon: Icons.download,

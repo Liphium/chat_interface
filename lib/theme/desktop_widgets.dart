@@ -9,10 +9,7 @@ import 'package:window_manager/window_manager.dart';
 class CloseToTray extends StatefulWidget {
   final Widget child;
 
-  const CloseToTray({
-    super.key,
-    required this.child,
-  });
+  const CloseToTray({super.key, required this.child});
 
   @override
   State<CloseToTray> createState() => _CloseToTrayState();
@@ -46,11 +43,13 @@ class _CloseToTrayState extends State<CloseToTray> with WindowListener, TrayList
 
   /// Adds Liphium to the tray
   Future<void> initTray() async {
-    await trayManager.setIcon(Platform.isWindows
-        ? "assets/tray/icon_windows.ico"
-        : Platform.isMacOS
-            ? "assets/tray/icon_macos.png"
-            : "assets/tray/icon_linux.png");
+    await trayManager.setIcon(
+      Platform.isWindows
+          ? "assets/tray/icon_windows.ico"
+          : Platform.isMacOS
+          ? "assets/tray/icon_macos.png"
+          : "assets/tray/icon_linux.png",
+    );
     await trayManager.setToolTip("Liphium");
     await trayManager.setContextMenu(
       Menu(

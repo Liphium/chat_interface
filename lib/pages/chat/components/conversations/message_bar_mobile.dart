@@ -33,19 +33,13 @@ class MobileMessageBar extends StatelessWidget {
     return Material(
       color: Get.theme.colorScheme.onInverseSurface,
       child: InkWell(
-        onTap: () => Get.to(ConversationMembersPage(
-          conversation: conversation,
-        )),
+        onTap: () => Get.to(ConversationMembersPage(conversation: conversation)),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
           child: Row(
             children: [
               //* Back button
-              LoadingIconButton(
-                icon: Icons.arrow_back,
-                iconSize: 27,
-                onTap: () => Get.back(),
-              ),
+              LoadingIconButton(icon: Icons.arrow_back, iconSize: 27, onTap: () => Get.back()),
 
               //* Conversation label
               Expanded(
@@ -71,10 +65,8 @@ class MobileMessageBar extends StatelessWidget {
               LoadingIconButton(
                 icon: Icons.more_vert,
                 iconSize: 27,
-                onTap: () => showModal(ConversationInfoMobile(
-                  conversation: conversation,
-                  position: const ContextMenuData(Offset(0, 0), false, false),
-                )),
+                onTap:
+                    () => showModal(ConversationInfoMobile(conversation: conversation, position: const ContextMenuData(Offset(0, 0), false, false))),
               ),
             ],
           ),

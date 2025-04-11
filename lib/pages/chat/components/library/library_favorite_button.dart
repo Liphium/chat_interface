@@ -15,14 +15,7 @@ class LibraryFavoriteButton extends StatefulWidget {
   final Function()? onEnter;
   final Function()? onExit;
 
-  const LibraryFavoriteButton({
-    super.key,
-    required this.child,
-    required this.container,
-    this.callback,
-    this.onEnter,
-    this.onExit,
-  });
+  const LibraryFavoriteButton({super.key, required this.child, required this.container, this.callback, this.onEnter, this.onExit});
 
   @override
   State<LibraryFavoriteButton> createState() => _LibraryFavoriteButtonState();
@@ -111,7 +104,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with Sign
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

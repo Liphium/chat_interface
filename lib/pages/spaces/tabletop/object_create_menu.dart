@@ -72,7 +72,7 @@ class _ObjectCreateMenuState extends State<ObjectCreateMenu> {
                 ),
               );
             },
-          )
+          ),
         ],
       ),
     );

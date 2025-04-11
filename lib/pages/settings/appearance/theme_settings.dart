@@ -45,7 +45,7 @@ class ThemeSettings {
 
   static final themeModes = [
     -1, // Dark
-    1 // Light
+    1, // Light
   ];
 
   static final backgroundModes = [SelectableItem("custom.none".tr, Icons.close), SelectableItem("custom.colored".tr, Icons.color_lens)];
@@ -94,13 +94,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
     });
 
     if (isMobileMode()) {
-      return SettingsPageBase(
-        label: "colors",
-        child: ColorPreview(
-          factory: _factory,
-          mobile: true,
-        ),
-      );
+      return SettingsPageBase(label: "colors", child: ColorPreview(factory: _factory, mobile: true));
     }
 
     return SettingsPageBase(
@@ -108,14 +102,10 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Expanded(
-            child: ThemeSettingsElement(),
-          ),
+          const Expanded(child: ThemeSettingsElement()),
 
           //* Color preview
-          Expanded(
-            child: ColorPreview(factory: _factory),
-          ),
+          Expanded(child: ColorPreview(factory: _factory)),
         ],
       ),
     );
@@ -138,10 +128,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
       children: [
         Text("theme.presets".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(elementSpacing),
-        ListSelectionSetting(
-          setting: SettingController.settings[ThemeSettings.themePreset]! as Setting<int>,
-          items: ThemeSettings.themePresets,
-        ),
+        ListSelectionSetting(setting: SettingController.settings[ThemeSettings.themePreset]! as Setting<int>, items: ThemeSettings.themePresets),
         verticalSpacing(sectionSpacing),
         Watch(
           (ctx) => Visibility(
@@ -164,9 +151,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 verticalSpacing(defaultSpacing),
 
                 // Selections
-                Text(
-                  "custom.theme_mode".tr,
-                ),
+                Text("custom.theme_mode".tr),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
                   setting: SettingController.settings[ThemeSettings.themeMode]! as Setting<int>,
@@ -174,16 +159,14 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 ),
                 verticalSpacing(defaultSpacing),
 
-                Text(
-                  "custom.background_mode".tr,
-                ),
+                Text("custom.background_mode".tr),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
                   setting: SettingController.settings[ThemeSettings.backgroundMode]! as Setting<int>,
                   items: ThemeSettings.backgroundModes,
                 ),
 
-                verticalSpacing(sectionSpacing)
+                verticalSpacing(sectionSpacing),
               ],
             ),
           ),
@@ -194,7 +177,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
             ThemeManager.changeTheme(theme);
           },
           child: Text("theme.apply".tr, style: Get.theme.textTheme.labelLarge),
-        )
+        ),
       ],
     );
   }

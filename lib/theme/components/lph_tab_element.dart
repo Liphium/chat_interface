@@ -8,12 +8,7 @@ class LPHTabElement extends StatefulWidget {
   final List<String> tabs;
   final Function(String) onTabSwitch;
 
-  const LPHTabElement({
-    super.key,
-    required this.tabs,
-    required this.onTabSwitch,
-    this.selected,
-  });
+  const LPHTabElement({super.key, required this.tabs, required this.onTabSwitch, this.selected});
 
   @override
   State<LPHTabElement> createState() => _LPHTabElementState();
@@ -37,13 +32,7 @@ class _LPHTabElementState extends State<LPHTabElement> {
     // Measure all the texts
     int count = 0;
     for (var tab in widget.tabs) {
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: tab,
-          style: Get.textTheme.titleMedium,
-        ),
-        textDirection: TextDirection.ltr,
-      );
+      final textPainter = TextPainter(text: TextSpan(text: tab, style: Get.textTheme.titleMedium), textDirection: TextDirection.ltr);
       textPainter.layout();
       _tabWidth[count] = textPainter.size.width + defaultSpacing * 2;
       count++;
@@ -63,33 +52,30 @@ class _LPHTabElementState extends State<LPHTabElement> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Watch.builder(builder: (context) {
-          // Calculate where the background should be placed
-          double left = 0;
-          int count = 0;
-          for (var _ in widget.tabs) {
-            if (count == _selected.value) {
-              break;
+        Watch.builder(
+          builder: (context) {
+            // Calculate where the background should be placed
+            double left = 0;
+            int count = 0;
+            for (var _ in widget.tabs) {
+              if (count == _selected.value) {
+                break;
+              }
+              left += _tabWidth[count]! + defaultSpacing;
+              count++;
             }
-            left += _tabWidth[count]! + defaultSpacing;
-            count++;
-          }
 
-          // Render the background with animation
-          return AnimatedPositioned(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOutCubicEmphasized,
-            left: left,
-            width: _tabWidth[_selected.value],
-            height: Get.textTheme.titleMedium!.fontSize! * 1.5 + elementSpacing * 2,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Get.theme.colorScheme.primary,
-                borderRadius: BorderRadius.circular(defaultSpacing),
-              ),
-            ),
-          );
-        }),
+            // Render the background with animation
+            return AnimatedPositioned(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOutCubicEmphasized,
+              left: left,
+              width: _tabWidth[_selected.value],
+              height: Get.textTheme.titleMedium!.fontSize! * 1.5 + elementSpacing * 2,
+              child: Container(decoration: BoxDecoration(color: Get.theme.colorScheme.primary, borderRadius: BorderRadius.circular(defaultSpacing))),
+            );
+          },
+        ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: List.generate(widget.tabs.length, (index) {
@@ -106,16 +92,11 @@ class _LPHTabElementState extends State<LPHTabElement> {
                   },
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: defaultSpacing,
-                      vertical: elementSpacing,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
                     child: Watch(
                       (context) => Text(
                         widget.tabs[index],
-                        style: Get.textTheme.titleMedium!.copyWith(
-                          color: _selected.value == index ? Colors.white : Colors.white,
-                        ),
+                        style: Get.textTheme.titleMedium!.copyWith(color: _selected.value == index ? Colors.white : Colors.white),
                       ),
                     ),
                   ),

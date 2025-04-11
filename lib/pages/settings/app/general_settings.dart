@@ -104,10 +104,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
             ],
           ),
           verticalSpacing(defaultSpacing),
-          InfoContainer(
-            message: "settings.general.ringtone.disabled".tr,
-            expand: true,
-          ),
+          InfoContainer(message: "settings.general.ringtone.disabled".tr, expand: true),
           verticalSpacing(defaultSpacing),
           Text("ring.desc".tr, style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),

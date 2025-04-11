@@ -33,18 +33,10 @@ class _MessagesPageMobileState extends State<MessagesPageMobile> {
         body: Column(
           children: [
             // Render the message bar for mobile
-            DevicePadding(
-              top: true,
-              padding: const EdgeInsets.all(0),
-              child: MobileMessageBar(conversation: widget.provider.conversation),
-            ),
+            DevicePadding(top: true, padding: const EdgeInsets.all(0), child: MobileMessageBar(conversation: widget.provider.conversation)),
 
             // Render the actual message feed
-            Expanded(
-              child: MessageFeed(
-                rectInput: true,
-              ),
-            ),
+            Expanded(child: MessageFeed(rectInput: true)),
           ],
         ),
       ),

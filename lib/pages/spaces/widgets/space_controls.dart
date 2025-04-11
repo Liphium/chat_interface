@@ -43,11 +43,7 @@ class _SpaceControlsState extends State<SpaceControls> {
     return Center(
       heightFactor: 1,
       child: Padding(
-        padding: const EdgeInsets.only(
-          right: sectionSpacing,
-          left: sectionSpacing,
-          bottom: sectionSpacing,
-        ),
+        padding: const EdgeInsets.only(right: sectionSpacing, left: sectionSpacing, bottom: sectionSpacing),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -78,13 +74,8 @@ class _SpaceControlsState extends State<SpaceControls> {
                             axis: Axis.horizontal,
                             alignment: Alignment.center,
                           ),
-                          FadeEffect(
-                            duration: 250.ms,
-                          ),
-                          ScaleEffect(
-                            duration: 250.ms,
-                            curve: Curves.ease,
-                          ),
+                          FadeEffect(duration: 250.ms),
+                          ScaleEffect(duration: 250.ms, curve: Curves.ease),
                         ],
                         onInit: (ac) => ac.value = SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
                         target: SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
@@ -178,16 +169,14 @@ class _SpaceControlsState extends State<SpaceControls> {
               ],
             ),
             const Spacer(),
-            Watch(
-              (context) {
-                return LoadingIconButton(
-                  background: true,
-                  onTap: () => SpaceController.chatOpen.value = !SpaceController.chatOpen.peek(),
-                  icon: SpaceController.chatOpen.value ? Icons.arrow_forward : Icons.arrow_back,
-                  iconSize: 30,
-                );
-              },
-            ),
+            Watch((context) {
+              return LoadingIconButton(
+                background: true,
+                onTap: () => SpaceController.chatOpen.value = !SpaceController.chatOpen.peek(),
+                icon: SpaceController.chatOpen.value ? Icons.arrow_forward : Icons.arrow_back,
+                iconSize: 30,
+              );
+            }),
           ],
         ),
       ),

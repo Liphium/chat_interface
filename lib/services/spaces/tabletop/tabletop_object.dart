@@ -65,10 +65,7 @@ abstract class TableObject {
 
   void newRotation(double rot) {
     queue(() async {
-      final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("tobj_rotate", <String, dynamic>{
-        "id": id,
-        "r": rot,
-      }));
+      final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("tobj_rotate", <String, dynamic>{"id": id, "r": rot}));
       currentlyModifying = false;
 
       // Check if there was an error with the rotation
@@ -243,12 +240,7 @@ abstract class TableObject {
   Future<bool> modifyData() {
     final completer = Completer<bool>();
     SpaceConnection.spaceConnector!.sendAction(
-      ServerAction("tobj_modify", <String, dynamic>{
-        "id": id,
-        "data": encryptedData(),
-        "width": size.width,
-        "height": size.height,
-      }),
+      ServerAction("tobj_modify", <String, dynamic>{"id": id, "data": encryptedData(), "width": size.width, "height": size.height}),
       handler: (event) {
         currentlyModifying = false;
         // Reset data in case the modification wasn't successful

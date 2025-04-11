@@ -50,12 +50,7 @@ class FJSlider extends StatelessWidget {
               onChangeEnd: onChangeEnd,
             ),
           ),
-          label != null
-              ? Padding(
-                  padding: const EdgeInsets.only(left: defaultSpacing),
-                  child: Text(label!),
-                )
-              : const SizedBox(),
+          label != null ? Padding(padding: const EdgeInsets.only(left: defaultSpacing), child: Text(label!)) : const SizedBox(),
         ],
       ),
     );
@@ -163,7 +158,7 @@ class _FJSliderWithInputState extends State<FJSliderWithInput> {
                 widget.onChangeEnd!(finalValue);
               },
             ),
-          )
+          ),
         ],
       ),
     );
@@ -206,17 +201,20 @@ class CustomSliderThumbShape extends RoundSliderThumbShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    super.paint(context, center.translate(-(value - 0.5) / 0.5 * enabledThumbRadius, 0.0),
-        activationAnimation: activationAnimation,
-        enableAnimation: enableAnimation,
-        isDiscrete: isDiscrete,
-        labelPainter: labelPainter,
-        parentBox: parentBox,
-        sliderTheme: sliderTheme,
-        textDirection: textDirection,
-        value: value,
-        textScaleFactor: textScaleFactor,
-        sizeWithOverflow: sizeWithOverflow);
+    super.paint(
+      context,
+      center.translate(-(value - 0.5) / 0.5 * enabledThumbRadius, 0.0),
+      activationAnimation: activationAnimation,
+      enableAnimation: enableAnimation,
+      isDiscrete: isDiscrete,
+      labelPainter: labelPainter,
+      parentBox: parentBox,
+      sliderTheme: sliderTheme,
+      textDirection: textDirection,
+      value: value,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
+    );
   }
 }
 
@@ -239,16 +237,19 @@ class CustomSliderOverlayShape extends RoundSliderOverlayShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    super.paint(context, center.translate(-(value - 0.5) / 0.5 * thumbRadius, 0.0),
-        activationAnimation: activationAnimation,
-        enableAnimation: enableAnimation,
-        isDiscrete: isDiscrete,
-        labelPainter: labelPainter,
-        parentBox: parentBox,
-        sliderTheme: sliderTheme,
-        textDirection: textDirection,
-        value: value,
-        textScaleFactor: textScaleFactor,
-        sizeWithOverflow: sizeWithOverflow);
+    super.paint(
+      context,
+      center.translate(-(value - 0.5) / 0.5 * thumbRadius, 0.0),
+      activationAnimation: activationAnimation,
+      enableAnimation: enableAnimation,
+      isDiscrete: isDiscrete,
+      labelPainter: labelPainter,
+      parentBox: parentBox,
+      sliderTheme: sliderTheme,
+      textDirection: textDirection,
+      value: value,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
+    );
   }
 }

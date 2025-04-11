@@ -46,10 +46,7 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
 
   Widget buildChangeContainer(IconData icon, String name, Function() change) {
     return Container(
-      decoration: BoxDecoration(
-        color: Get.theme.colorScheme.onInverseSurface,
-        borderRadius: BorderRadius.circular(sectionSpacing),
-      ),
+      decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
       padding: const EdgeInsets.all(sectionSpacing),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -71,11 +68,7 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
             ),
           ),
           horizontalSpacing(defaultSpacing),
-          FJElevatedButton(
-            smallCorners: true,
-            onTap: change,
-            child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
-          ),
+          FJElevatedButton(smallCorners: true, onTap: change, child: Text("change".tr, style: Get.theme.textTheme.labelMedium)),
         ],
       ),
     );

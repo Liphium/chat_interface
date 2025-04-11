@@ -94,32 +94,16 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(elementSpacing),
-                    child: SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: CircularProgressIndicator(
-                        color: Get.theme.colorScheme.onPrimary,
-                      ),
-                    ),
+                    child: SizedBox(width: 30, height: 30, child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
                   ),
                   horizontalSpacing(defaultSpacing),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "chat.space.loading".tr,
-                          style: Get.theme.textTheme.labelMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text("chat.space.loading".tr, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis),
                         verticalSpacing(elementSpacing),
-                        Flexible(
-                          child: Text(
-                            "#${widget.container.roomId}",
-                            style: Get.theme.textTheme.bodySmall,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                        Flexible(child: Text("#${widget.container.roomId}", style: Get.theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ),
@@ -150,17 +134,9 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "chat.space.not_found".tr,
-                          style: Get.theme.textTheme.labelMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text("chat.space.not_found".tr, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis),
                         verticalSpacing(elementSpacing),
-                        Text(
-                          "#${widget.container.roomId}",
-                          style: Get.theme.textTheme.bodySmall,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text("#${widget.container.roomId}", style: Get.theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -175,81 +151,76 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
         final renderAmount = min(info.friends.length, 3);
 
         return Material(
-          color: widget.background ??
+          color:
+              widget.background ??
               (widget.sidebar
                   ? Get.theme.colorScheme.primary.withAlpha(100)
                   : widget.clickable
-                      ? Get.theme.colorScheme.primaryContainer
-                      : Colors.transparent),
+                  ? Get.theme.colorScheme.primaryContainer
+                  : Colors.transparent),
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: InkWell(
             borderRadius: BorderRadius.circular(defaultSpacing),
-            onTap: widget.clickable
-                ? () {
-                    showConfirmPopup(
-                      ConfirmWindow(
-                        title: "join.space".tr,
-                        text: "join.space.popup".tr,
-                        onConfirm: () {
-                          SpaceController.join(widget.container);
-                        },
-                      ),
-                    );
-                  }
-                : null,
+            onTap:
+                widget.clickable
+                    ? () {
+                      showConfirmPopup(
+                        ConfirmWindow(
+                          title: "join.space".tr,
+                          text: "join.space.popup".tr,
+                          onConfirm: () {
+                            SpaceController.join(widget.container);
+                          },
+                        ),
+                      );
+                    }
+                    : null,
             child: Padding(
               padding: widget.clickable ? const EdgeInsets.all(defaultSpacing) : const EdgeInsets.all(0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Visibility(
-                            visible: renderAmount > 0,
-                            child: Flexible(
-                              child: SizedBox(
-                                width: 44 + 25 * (renderAmount - 1),
-                                height: 44,
-                                child: Stack(
-                                  children: List.generate(renderAmount, (index) {
-                                    return Positioned(
-                                      left: index * 25,
-                                      child: Tooltip(
-                                        message: info.friends[index].displayName.value,
-                                        child: SizedBox(
-                                          width: 44,
-                                          height: 44,
-                                          child: UserAvatar(
-                                            id: info.friends[index].id,
-                                            size: 44,
-                                          ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Visibility(
+                              visible: renderAmount > 0,
+                              child: Flexible(
+                                child: SizedBox(
+                                  width: 44 + 25 * (renderAmount - 1),
+                                  height: 44,
+                                  child: Stack(
+                                    children: List.generate(renderAmount, (index) {
+                                      return Positioned(
+                                        left: index * 25,
+                                        child: Tooltip(
+                                          message: info.friends[index].displayName.value,
+                                          child: SizedBox(width: 44, height: 44, child: UserAvatar(id: info.friends[index].id, size: 44)),
                                         ),
-                                      ),
-                                    );
-                                  }),
+                                      );
+                                    }),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Visibility(
-                            visible: partyAmount >= renderAmount && renderAmount > 0 && partyAmount != renderAmount,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: defaultSpacing),
-                              child: Text("+${partyAmount - renderAmount}", style: Get.theme.textTheme.bodyLarge),
+                            Visibility(
+                              visible: partyAmount >= renderAmount && renderAmount > 0 && partyAmount != renderAmount,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: defaultSpacing),
+                                child: Text("+${partyAmount - renderAmount}", style: Get.theme.textTheme.bodyLarge),
+                              ),
                             ),
-                          ),
-                          Visibility(
-                            visible: renderAmount == 0,
-                            child: Text("$partyAmount members", style: Get.theme.textTheme.bodyLarge),
-                          )
-                        ],
-                      )
-                    ]),
+                            Visibility(visible: renderAmount == 0, child: Text("$partyAmount members", style: Get.theme.textTheme.bodyLarge)),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  DurationRenderer(info.start, style: Get.theme.textTheme.bodyLarge)
+                  DurationRenderer(info.start, style: Get.theme.textTheme.bodyLarge),
                 ],
               ),
             ),

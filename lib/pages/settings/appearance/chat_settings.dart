@@ -10,15 +10,8 @@ class ChatSettings {
   static const String chatTheme = "appearance.chat.theme";
 
   static final chatThemes = <SelectableItem>[
-    SelectableItem(
-      "appearance.chat.theme.material".tr,
-      Icons.view_list,
-      experimental: true,
-    ),
-    SelectableItem(
-      "appearance.chat.theme.bubbles".tr,
-      Icons.comment,
-    ),
+    SelectableItem("appearance.chat.theme.material".tr, Icons.view_list, experimental: true),
+    SelectableItem("appearance.chat.theme.bubbles".tr, Icons.comment),
   ];
 
   static void addSettings() {
@@ -45,10 +38,7 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
           Text("appearance.chat.theme".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
-          ListSelectionSetting(
-            setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>,
-            items: ChatSettings.chatThemes,
-          ),
+          ListSelectionSetting(setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>, items: ChatSettings.chatThemes),
         ],
       ),
     );

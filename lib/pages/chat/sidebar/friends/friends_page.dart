@@ -36,20 +36,13 @@ class _FriendsPageState extends State<FriendsPage> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text(
-          "friends".tr,
-          style: Get.theme.textTheme.labelLarge,
-        ),
-      ],
+      title: [Text("friends".tr, style: Get.theme.textTheme.labelLarge)],
       showTitleDesktop: false,
       maxWidth: 500,
       mobileSheet: false,
       mobileFlat: true,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxHeight: 800,
-        ),
+        constraints: const BoxConstraints(maxHeight: 800),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -89,7 +82,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         loading: FriendsVault.friendsVaultRefreshing,
                         onTap: () => showModal(const FriendAddWindow()),
                         icon: Icons.person_add_alt_1,
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -109,16 +102,8 @@ class _FriendsPageState extends State<FriendsPage> {
                         Watch(
                           (ctx) => Animate(
                             effects: [
-                              ExpandEffect(
-                                curve: Curves.easeInOut,
-                                duration: 250.ms,
-                                axis: Axis.vertical,
-                              ),
-                              FadeEffect(
-                                end: 0,
-                                begin: 1,
-                                duration: 250.ms,
-                              ),
+                              ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical),
+                              FadeEffect(end: 0, begin: 1, duration: 250.ms),
                             ],
                             target: _revealSuccess.value ? 1.0 : 0.0,
                             child: SuccessContainer(text: "request.sent".tr),
@@ -126,49 +111,31 @@ class _FriendsPageState extends State<FriendsPage> {
                         ),
 
                         Watch((ctx) {
-                          final found = FriendController.friends.values.any((friend) =>
-                              (friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
-                                  friend.name.toLowerCase().contains(_query.value.toLowerCase())) &&
-                              friend.id != StatusController.ownAddress);
+                          final found = FriendController.friends.values.any(
+                            (friend) =>
+                                (friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
+                                    friend.name.toLowerCase().contains(_query.value.toLowerCase())) &&
+                                friend.id != StatusController.ownAddress,
+                          );
                           return Animate(
-                              effects: [
-                                ExpandEffect(
-                                  curve: Curves.easeInOut,
-                                  duration: 250.ms,
-                                  axis: Axis.vertical,
-                                ),
-                                FadeEffect(
-                                  end: 1,
-                                  begin: 0,
-                                  duration: 250.ms,
-                                ),
-                              ],
-                              target: found ? 0.0 : 1.0,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: defaultSpacing, left: defaultSpacing, right: defaultSpacing),
-                                child: Center(
-                                  child: Text(
-                                    "friends.empty".tr,
-                                    style: Get.theme.textTheme.bodyMedium,
-                                  ),
-                                ),
-                              ));
+                            effects: [
+                              ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical),
+                              FadeEffect(end: 1, begin: 0, duration: 250.ms),
+                            ],
+                            target: found ? 0.0 : 1.0,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: defaultSpacing, left: defaultSpacing, right: defaultSpacing),
+                              child: Center(child: Text("friends.empty".tr, style: Get.theme.textTheme.bodyMedium)),
+                            ),
+                          );
                         }),
 
                         //* Requests
                         Watch(
                           (ctx) => Animate(
                             effects: [
-                              ReverseExpandEffect(
-                                curve: Curves.easeInOut,
-                                duration: 250.ms,
-                                axis: Axis.vertical,
-                              ),
-                              FadeEffect(
-                                end: 0,
-                                begin: 1,
-                                duration: 250.ms,
-                              ),
+                              ReverseExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical),
+                              FadeEffect(end: 0, begin: 1, duration: 250.ms),
                             ],
                             target: _query.value.isEmpty ? 0.0 : 1.0,
                             child: Visibility(
@@ -198,7 +165,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                   Visibility(
                                     visible: FriendController.friends.length > 1 || RequestController.requestsSent.isNotEmpty,
                                     child: verticalSpacing(sectionSpacing - elementSpacing),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -209,16 +176,8 @@ class _FriendsPageState extends State<FriendsPage> {
                         Watch(
                           (ctx) => Animate(
                             effects: [
-                              ReverseExpandEffect(
-                                curve: Curves.easeInOut,
-                                duration: 250.ms,
-                                axis: Axis.vertical,
-                              ),
-                              FadeEffect(
-                                end: 0,
-                                begin: 1,
-                                duration: 250.ms,
-                              ),
+                              ReverseExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical),
+                              FadeEffect(end: 0, begin: 1, duration: 250.ms),
                             ],
                             target: _query.value.isEmpty ? 0.0 : 1.0,
                             child: Visibility(
@@ -249,10 +208,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                         );
                                       },
                                     ),
-                                    Visibility(
-                                      visible: FriendController.friends.length > 1,
-                                      child: verticalSpacing(sectionSpacing - elementSpacing),
-                                    )
+                                    Visibility(visible: FriendController.friends.length > 1, child: verticalSpacing(sectionSpacing - elementSpacing)),
                                   ],
                                 ),
                               ),
@@ -282,34 +238,29 @@ class _FriendsPageState extends State<FriendsPage> {
                                       if (friend.unknown || friend.id == StatusController.ownAddress) {
                                         return const SizedBox();
                                       }
-                                      return Watch(
-                                        (ctx) {
-                                          final visible = _query.value.isEmpty ||
-                                              friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
-                                              friend.name.toLowerCase().contains(_query.value.toLowerCase());
+                                      return Watch((ctx) {
+                                        final visible =
+                                            _query.value.isEmpty ||
+                                            friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
+                                            friend.name.toLowerCase().contains(_query.value.toLowerCase());
 
-                                          return Animate(
-                                            effects: [
-                                              ReverseExpandEffect(
-                                                curve: Curves.easeInOut,
-                                                duration: 250.ms,
-                                                alignment: Alignment.bottomCenter,
-                                                axis: Axis.vertical,
-                                              ),
-                                              FadeEffect(
-                                                end: 0,
-                                                begin: 1,
-                                                duration: 250.ms,
-                                              ),
-                                            ],
-                                            target: visible ? 0.0 : 1.0,
-                                            child: Padding(
-                                              padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
-                                              child: FriendButton(friend: friend, position: _position),
+                                        return Animate(
+                                          effects: [
+                                            ReverseExpandEffect(
+                                              curve: Curves.easeInOut,
+                                              duration: 250.ms,
+                                              alignment: Alignment.bottomCenter,
+                                              axis: Axis.vertical,
                                             ),
-                                          );
-                                        },
-                                      );
+                                            FadeEffect(end: 0, begin: 1, duration: 250.ms),
+                                          ],
+                                          target: visible ? 0.0 : 1.0,
+                                          child: Padding(
+                                            padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
+                                            child: FriendButton(friend: friend, position: _position),
+                                          ),
+                                        );
+                                      });
                                     },
                                   );
                                 },

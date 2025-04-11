@@ -29,14 +29,8 @@ class TextObject extends TableObject {
   @override
   void render(Canvas canvas, Offset location) {
     final realFontSize = fontSize.value(DateTime.now()) * fontSizeMultiplier;
-    var textSpan = TextSpan(
-      text: text,
-      style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: realFontSize),
-    );
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
+    var textSpan = TextSpan(text: text, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: realFontSize));
+    final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
     textPainter.layout();
     final hintRect = Rect.fromLTWH(
       location.dx - realFontSize / 2 / 2,
@@ -57,21 +51,12 @@ class TextObject extends TableObject {
 
   @override
   String getData() {
-    return jsonEncode({
-      "text": text,
-      "size": fontSize.realValue,
-    });
+    return jsonEncode({"text": text, "size": fontSize.realValue});
   }
 
   void evaluateSize() {
-    var textSpan = TextSpan(
-      text: text,
-      style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: fontSize.realValue * fontSizeMultiplier),
-    );
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
+    var textSpan = TextSpan(text: text, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: fontSize.realValue * fontSizeMultiplier));
+    final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
     textPainter.layout();
     size = textPainter.size;
   }
@@ -96,11 +81,7 @@ class TextObjectCreationWindow extends StatefulWidget {
   final Offset location;
   final TextObject? object;
 
-  const TextObjectCreationWindow({
-    super.key,
-    required this.location,
-    this.object,
-  });
+  const TextObjectCreationWindow({super.key, required this.location, this.object});
 
   @override
   State<TextObjectCreationWindow> createState() => _TextObjectCreationWindowState();
@@ -131,11 +112,7 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> wit
         children: [
           Text("tabletop.object.text.create".tr, style: Get.theme.textTheme.titleMedium),
           verticalSpacing(sectionSpacing),
-          FJTextField(
-            hintText: "tabletop.object.text.placeholder".tr,
-            controller: _textController,
-            onChange: (value) => _text.value = value,
-          ),
+          FJTextField(hintText: "tabletop.object.text.placeholder".tr, controller: _textController, onChange: (value) => _text.value = value),
           verticalSpacing(defaultSpacing),
           FJSliderWithInput(
             min: 16,
@@ -162,10 +139,8 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> wit
               final object = TextObject.createFromText(widget.location, _textController.text, _fontSize.value.roundToDouble());
               object.sendAdd();
             },
-            child: Center(
-              child: Text((widget.object != null ? "edit" : "create").tr, style: Get.theme.textTheme.labelLarge),
-            ),
-          )
+            child: Center(child: Text((widget.object != null ? "edit" : "create").tr, style: Get.theme.textTheme.labelLarge)),
+          ),
         ],
       ),
     );

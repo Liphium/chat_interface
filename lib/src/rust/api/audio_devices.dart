@@ -7,27 +7,20 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Get all audio input devices on the system.
-Future<List<AudioInputDevice>> getInputDevices() =>
-    RustLib.instance.api.crateApiAudioDevicesGetInputDevices();
+Future<List<AudioInputDevice>> getInputDevices() => RustLib.instance.api.crateApiAudioDevicesGetInputDevices();
 
-Future<AudioInputDevice> getDefaultInputDevice() =>
-    RustLib.instance.api.crateApiAudioDevicesGetDefaultInputDevice();
+Future<AudioInputDevice> getDefaultInputDevice() => RustLib.instance.api.crateApiAudioDevicesGetDefaultInputDevice();
 
 /// Get all audio output devices on the system.
-Future<List<AudioOuputDevice>> getOutputDevices() =>
-    RustLib.instance.api.crateApiAudioDevicesGetOutputDevices();
+Future<List<AudioOuputDevice>> getOutputDevices() => RustLib.instance.api.crateApiAudioDevicesGetOutputDevices();
 
-Future<AudioOuputDevice> getDefaultOutputDevice() =>
-    RustLib.instance.api.crateApiAudioDevicesGetDefaultOutputDevice();
+Future<AudioOuputDevice> getDefaultOutputDevice() => RustLib.instance.api.crateApiAudioDevicesGetDefaultOutputDevice();
 
 class AudioInputDevice {
   final String name;
   final bool systemDefault;
 
-  const AudioInputDevice({
-    required this.name,
-    required this.systemDefault,
-  });
+  const AudioInputDevice({required this.name, required this.systemDefault});
 
   @override
   int get hashCode => name.hashCode ^ systemDefault.hashCode;
@@ -35,20 +28,14 @@ class AudioInputDevice {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AudioInputDevice &&
-          runtimeType == other.runtimeType &&
-          name == other.name &&
-          systemDefault == other.systemDefault;
+      other is AudioInputDevice && runtimeType == other.runtimeType && name == other.name && systemDefault == other.systemDefault;
 }
 
 class AudioOuputDevice {
   final String name;
   final bool systemDefault;
 
-  const AudioOuputDevice({
-    required this.name,
-    required this.systemDefault,
-  });
+  const AudioOuputDevice({required this.name, required this.systemDefault});
 
   @override
   int get hashCode => name.hashCode ^ systemDefault.hashCode;
@@ -56,8 +43,5 @@ class AudioOuputDevice {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AudioOuputDevice &&
-          runtimeType == other.runtimeType &&
-          name == other.name &&
-          systemDefault == other.systemDefault;
+      other is AudioOuputDevice && runtimeType == other.runtimeType && name == other.name && systemDefault == other.systemDefault;
 }

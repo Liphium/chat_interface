@@ -8,13 +8,7 @@ import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:path/path.dart' as path;
 import 'package:signals/signals_flutter.dart';
 
-enum FileTypes {
-  image,
-  video,
-  audio,
-  document,
-  unidentified,
-}
+enum FileTypes { image, video, audio, document, unidentified }
 
 const extensionToType = {
   "png": FileTypes.image,
@@ -65,35 +59,17 @@ class FilePreview extends StatelessWidget {
 
     switch (type) {
       case FileTypes.image:
-        return XImage(
-          file: file,
-          fit: BoxFit.cover,
-        );
+        return XImage(file: file, fit: BoxFit.cover);
 
       case FileTypes.audio:
-        return const Center(
-          child: Icon(
-            size: 50,
-            Icons.library_music,
-          ),
-        );
+        return const Center(child: Icon(size: 50, Icons.library_music));
 
       case FileTypes.document:
-        return const Center(
-          child: Icon(
-            size: 50,
-            Icons.text_snippet,
-          ),
-        );
+        return const Center(child: Icon(size: 50, Icons.text_snippet));
 
       case FileTypes.video:
       case FileTypes.unidentified:
-        return const Center(
-          child: Icon(
-            size: 50,
-            Icons.insert_drive_file,
-          ),
-        );
+        return const Center(child: Icon(size: 50, Icons.insert_drive_file));
     }
   }
 }
@@ -117,9 +93,7 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
       child: Container(
         width: 200,
         height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(defaultSpacing),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: Stack(
@@ -130,20 +104,12 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing),
                   child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(defaultSpacing),
-                      color: Get.theme.colorScheme.inverseSurface,
-                    ),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.inverseSurface),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         horizontalSpacing(defaultSpacing),
-                        Expanded(
-                          child: Text(
-                            path.basename(widget.file.file.path),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                        Expanded(child: Text(path.basename(widget.file.file.path), overflow: TextOverflow.ellipsis)),
                         horizontalSpacing(defaultSpacing),
                         Watch(
                           (ctx) => Visibility(

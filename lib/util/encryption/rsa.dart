@@ -46,7 +46,11 @@ String packageRSAPrivateKey(RSAPrivateKey key) {
 RSAPrivateKey unpackageRSAPrivateKey(String key) {
   final parts = key.split(":");
   return RSAPrivateKey(
-      BigInt.parse(parts[0], radix: 36), BigInt.parse(parts[2], radix: 36), BigInt.parse(parts[3], radix: 36), BigInt.parse(parts[4], radix: 36));
+    BigInt.parse(parts[0], radix: 36),
+    BigInt.parse(parts[2], radix: 36),
+    BigInt.parse(parts[3], radix: 36),
+    BigInt.parse(parts[4], radix: 36),
+  );
 }
 
 /// Turn a public and private key into an [AsymmetricKeyPair].

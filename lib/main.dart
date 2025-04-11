@@ -30,10 +30,7 @@ const bool isWeb = kIsWeb || kIsWasm;
 
 // Build level settings
 const bool isDebug = bool.fromEnvironment("DEBUG_MODE", defaultValue: true);
-const bool checkVersion = bool.fromEnvironment(
-  "CHECK_VERSION",
-  defaultValue: true,
-);
+const bool checkVersion = bool.fromEnvironment("CHECK_VERSION", defaultValue: true);
 
 Future<bool> initSodium() async {
   sodiumLib = await SodiumInit.init();
@@ -64,20 +61,22 @@ void main(List<String> args) async {
     unawaited(initApp(args));
   } else {
     // Run everything in a zone for error collection
-    unawaited(runZonedGuarded(
-      () async {
-        unawaited(initApp(args));
-      },
-      (error, stack) {
-        LogManager.addError(error, stack);
-      },
-      zoneSpecification: ZoneSpecification(
-        print: (self, parent, zone, line) async {
-          await LogManager.addLog(line);
-          parent.print(zone, line);
+    unawaited(
+      runZonedGuarded(
+        () async {
+          unawaited(initApp(args));
         },
+        (error, stack) {
+          LogManager.addError(error, stack);
+        },
+        zoneSpecification: ZoneSpecification(
+          print: (self, parent, zone, line) async {
+            await LogManager.addLog(line);
+            parent.print(zone, line);
+          },
+        ),
       ),
-    ));
+    );
   }
 }
 

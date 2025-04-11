@@ -22,20 +22,25 @@ class SpaceConnection {
   /// Connect to the space node.
   static Future<bool> createSpaceConnection(String domain, String token) async {
     spaceConnector = Connector();
-    final success = await spaceConnector!.connect("${isHttps ? "wss://" : "ws://"}$domain/gateway", token, restart: false, onDone: ((error) {
-      if (error) {
-        showErrorPopup("error", "spaces.connection_error".tr);
-      }
+    final success = await spaceConnector!.connect(
+      "${isHttps ? "wss://" : "ws://"}$domain/gateway",
+      token,
+      restart: false,
+      onDone: ((error) {
+        if (error) {
+          showErrorPopup("error", "spaces.connection_error".tr);
+        }
 
-      // Tell all controllers about the leaving of the space
-      StatusController.stopSharing();
-      TabletopController.resetControllerState();
-      SpaceController.leaveSpace(error: error);
-      WarpController.resetControllerState();
-      SpaceMemberController.onDisconnect();
-      StudioController.handleDisconnect();
-      StudioTrackController.handleDisconnect();
-    }));
+        // Tell all controllers about the leaving of the space
+        StatusController.stopSharing();
+        TabletopController.resetControllerState();
+        SpaceController.leaveSpace(error: error);
+        WarpController.resetControllerState();
+        SpaceMemberController.onDisconnect();
+        StudioController.handleDisconnect();
+        StudioTrackController.handleDisconnect();
+      }),
+    );
 
     // Setup all the listeners for the connector
     setupSpaceListeners();

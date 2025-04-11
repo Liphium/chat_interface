@@ -40,23 +40,27 @@ class TokensSetup extends Setup {
       );
 
       // Start the SSR process
-      unawaited(ssr.start(
-        extra: {
-          "/account/auth/form": ServerSelectorContainer(
-            onSelected: () {
-              setupManager.retry();
-            },
-          ),
-        },
-      ).then((error) async {
-        // You shall waste 750ms of your life to witness this amazing animation better
-        await Future.delayed(const Duration(milliseconds: 750));
+      unawaited(
+        ssr
+            .start(
+              extra: {
+                "/account/auth/form": ServerSelectorContainer(
+                  onSelected: () {
+                    setupManager.retry();
+                  },
+                ),
+              },
+            )
+            .then((error) async {
+              // You shall waste 750ms of your life to witness this amazing animation better
+              await Future.delayed(const Duration(milliseconds: 750));
 
-        // Return error (in here cause cool animation)
-        if (error != null) {
-          setupManager.error(error);
-        }
-      }));
+              // Return error (in here cause cool animation)
+              if (error != null) {
+                setupManager.error(error);
+              }
+            }),
+      );
 
       return const SetupLoadingWidget(text: "rendering");
     }

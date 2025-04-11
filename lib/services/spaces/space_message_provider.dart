@@ -103,36 +103,28 @@ class SpacesMessageProvider extends MessageProvider {
   Future<List<Message>> _processMessages(List<dynamic> json) async {
     // Unpack the messages in an isolate (in a separate thread yk)
     final members = SpaceMemberController.memberIds;
-    final loadedMessages = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) async {
-        // Process all messages
-        final list = <(Message, SymmetricSequencedInfo?)>[];
-        for (var msgJson in json) {
-          final (message, info) = messageFromJson(
-            msgJson,
-            key: keys[0],
-            sodium: sodium,
-            members: members,
-          );
+    final loadedMessages = await sodiumLib.runIsolated((sodium, keys, pairs) async {
+      // Process all messages
+      final list = <(Message, SymmetricSequencedInfo?)>[];
+      for (var msgJson in json) {
+        final (message, info) = messageFromJson(msgJson, key: keys[0], sodium: sodium, members: members);
 
-          // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
-          if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
-            continue;
-          }
-
-          // Decrypt system message attachments
-          if (message.type == MessageType.system) {
-            message.decryptSystemMessageAttachments(keys[0], sodium);
-          }
-
-          list.add((message, info));
+        // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
+        if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
+          continue;
         }
 
-        // Return the list to the main isolate
-        return list;
-      },
-      secureKeys: [SpaceController.key!],
-    );
+        // Decrypt system message attachments
+        if (message.type == MessageType.system) {
+          message.decryptSystemMessageAttachments(keys[0], sodium);
+        }
+
+        list.add((message, info));
+      }
+
+      // Return the list to the main isolate
+      return list;
+    }, secureKeys: [SpaceController.key!]);
 
     // Init the attachments on all messages and verify signatures
     for (var (msg, info) in loadedMessages) {
@@ -167,21 +159,13 @@ class SpacesMessageProvider extends MessageProvider {
     Map<String, LPHAddress> members,
     SecureKey key,
   ) {
-    return sodiumLib.runIsolated(
-      (sodium, keys, pairs) {
-        // Unpack the actual message
-        final (msg, info) = messageFromJson(
-          json,
-          sodium: sodium,
-          key: keys[0],
-          members: members,
-        );
+    return sodiumLib.runIsolated((sodium, keys, pairs) {
+      // Unpack the actual message
+      final (msg, info) = messageFromJson(json, sodium: sodium, key: keys[0], members: members);
 
-        // Return it to the main isolate
-        return (msg, info);
-      },
-      secureKeys: [key],
-    );
+      // Return it to the main isolate
+      return (msg, info);
+    }, secureKeys: [key]);
   }
 
   /// Load a message from json (from the server) and get the corresponding [SymmetricSequencedInfo] (only if no system message).
@@ -252,10 +236,7 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   Future<String?> handleMessageSend(String timeToken, String data) async {
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_send", {
-      "token": timeToken,
-      "data": data,
-    }));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_send", {"token": timeToken, "data": data}));
 
     // Return a server error if the thing didn't work
     if (event == null) {

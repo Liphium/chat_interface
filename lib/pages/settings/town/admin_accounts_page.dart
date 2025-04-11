@@ -48,14 +48,7 @@ class AccountData {
 
   // Method to convert Account object to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'username': username,
-      'display_name': displayName,
-      'rank': rankID,
-      'created_at': createdAt.toIso8601String(),
-    };
+    return {'id': id, 'email': email, 'username': username, 'display_name': displayName, 'rank': rankID, 'created_at': createdAt.toIso8601String()};
   }
 }
 
@@ -90,15 +83,13 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
   void initState() {
     goToPage(0);
 
-    _query.subscribe(
-      (qry) async {
-        if (_currentFuture != null) {
-          await _currentFuture;
-        }
-        unawaited(goToPage(_currentPage.value));
-        _currentFuture = Future.delayed(500.ms);
-      },
-    );
+    _query.subscribe((qry) async {
+      if (_currentFuture != null) {
+        await _currentFuture;
+      }
+      unawaited(goToPage(_currentPage.value));
+      _currentFuture = Future.delayed(500.ms);
+    });
 
     super.initState();
   }
@@ -112,10 +103,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
     _currentPage.value = page;
 
     // Get the files from the server
-    final json = await postAuthorizedJSON("/townhall/accounts/list", {
-      "page": page,
-      "query": _query.value,
-    });
+    final json = await postAuthorizedJSON("/townhall/accounts/list", {"page": page, "query": _query.value});
     _startLoading.value = false;
     _pageLoading.value = false;
 
@@ -157,9 +145,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 400,
-            ),
+            constraints: const BoxConstraints(maxWidth: 400),
             child: FJTextField(
               prefixIcon: Icons.search,
               hintText: "settings.accounts.search".tr,
@@ -172,9 +158,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
           verticalSpacing(defaultSpacing),
           Watch((ctx) {
             if (_startLoading.value) {
-              return CircularProgressIndicator(
-                color: Get.theme.colorScheme.onPrimary,
-              );
+              return CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary);
             }
 
             if (!_accounts.isNotEmpty) {
@@ -188,12 +172,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Top page switcher element
-                LPHPageSwitcher(
-                  loading: _pageLoading,
-                  currentPage: _currentPage,
-                  count: _totalCount,
-                  page: (page) => goToPage(page),
-                ),
+                LPHPageSwitcher(loading: _pageLoading, currentPage: _currentPage, count: _totalCount, page: (page) => goToPage(page)),
                 verticalSpacing(defaultSpacing),
 
                 // The view rendering all the accounts
@@ -208,22 +187,9 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                       (ctx) => Animate(
                         key: ValueKey(account.id),
                         effects: [
-                          ReverseExpandEffect(
-                            axis: Axis.vertical,
-                            curve: const ElasticOutCurve(2.0),
-                            duration: 1000.ms,
-                          ),
-                          ScaleEffect(
-                            begin: const Offset(1, 1),
-                            end: const Offset(0, 0),
-                            curve: Curves.ease,
-                            duration: 1000.ms,
-                          ),
-                          FadeEffect(
-                            begin: 1,
-                            end: 0,
-                            duration: 1000.ms,
-                          )
+                          ReverseExpandEffect(axis: Axis.vertical, curve: const ElasticOutCurve(2.0), duration: 1000.ms),
+                          ScaleEffect(begin: const Offset(1, 1), end: const Offset(0, 0), curve: Curves.ease, duration: 1000.ms),
+                          FadeEffect(begin: 1, end: 0, duration: 1000.ms),
                         ],
                         onInit: (controller) => controller.value = account.deleted.value ? 1 : 0,
                         target: account.deleted.value ? 1 : 0,
@@ -234,74 +200,72 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                             borderRadius: BorderRadius.circular(10),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing),
-                              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.account_circle,
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                      size: 30,
-                                    ),
-                                    horizontalSpacing(defaultSpacing),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.account_circle, color: Theme.of(context).colorScheme.onPrimary, size: 30),
+                                      horizontalSpacing(defaultSpacing),
 
-                                    // Account data (name and creation)
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text("${account.displayName} (${account.username})", style: Get.theme.textTheme.labelMedium),
-                                        Text(
-                                          "settings.accounts.created".trParams({
-                                            "date": formatOnlyYear(account.createdAt),
-                                            "time": formatMessageTime(account.createdAt),
-                                          }),
-                                          style: Get.theme.textTheme.bodyMedium,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                      // Account data (name and creation)
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text("${account.displayName} (${account.username})", style: Get.theme.textTheme.labelMedium),
+                                          Text(
+                                            "settings.accounts.created".trParams({
+                                              "date": formatOnlyYear(account.createdAt),
+                                              "time": formatMessageTime(account.createdAt),
+                                            }),
+                                            style: Get.theme.textTheme.bodyMedium,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
 
-                                // Actions that can be performed on the account
-                                Row(
-                                  children: [
-                                    // Launch button (go to manage their account)
-                                    LoadingIconButton(
-                                      onTap: () => Get.dialog(AdminAccountProfile(account: account)),
-                                      icon: Icons.launch,
-                                    ),
+                                  // Actions that can be performed on the account
+                                  Row(
+                                    children: [
+                                      // Launch button (go to manage their account)
+                                      LoadingIconButton(onTap: () => Get.dialog(AdminAccountProfile(account: account)), icon: Icons.launch),
 
-                                    // Delete icon button
-                                    LoadingIconButton(
-                                      loading: account.deleteLoading,
-                                      onTap: () async {
-                                        if (account.deleteLoading.value) {
-                                          return;
-                                        }
+                                      // Delete icon button
+                                      LoadingIconButton(
+                                        loading: account.deleteLoading,
+                                        onTap: () async {
+                                          if (account.deleteLoading.value) {
+                                            return;
+                                          }
 
-                                        unawaited(showConfirmPopup(ConfirmWindow(
-                                          title: "settings.accounts.delete.confirm".tr,
-                                          text: "settings.accounts.delete.desc".tr,
-                                          onConfirm: () async {
-                                            account.deleteLoading.value = true;
-                                            final json = await postAuthorizedJSON("/townhall/accounts/delete", {
-                                              "account": account.id,
-                                            });
-                                            account.deleteLoading.value = false;
+                                          unawaited(
+                                            showConfirmPopup(
+                                              ConfirmWindow(
+                                                title: "settings.accounts.delete.confirm".tr,
+                                                text: "settings.accounts.delete.desc".tr,
+                                                onConfirm: () async {
+                                                  account.deleteLoading.value = true;
+                                                  final json = await postAuthorizedJSON("/townhall/accounts/delete", {"account": account.id});
+                                                  account.deleteLoading.value = false;
 
-                                            if (!json["success"]) {
-                                              showErrorPopup("error", json["error"]);
-                                              return;
-                                            }
+                                                  if (!json["success"]) {
+                                                    showErrorPopup("error", json["error"]);
+                                                    return;
+                                                  }
 
-                                            account.deleted.value = true;
-                                          },
-                                        )));
-                                      },
-                                      icon: Icons.delete,
-                                    ),
-                                  ],
-                                )
-                              ]),
+                                                  account.deleted.value = true;
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        icon: Icons.delete,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -311,16 +275,11 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                 ),
 
                 // Bottom page switcher
-                LPHPageSwitcher(
-                  loading: _pageLoading,
-                  currentPage: _currentPage,
-                  count: _totalCount,
-                  page: (page) => goToPage(page),
-                ),
+                LPHPageSwitcher(loading: _pageLoading, currentPage: _currentPage, count: _totalCount, page: (page) => goToPage(page)),
                 verticalSpacing(defaultSpacing),
               ],
             );
-          })
+          }),
         ],
       ),
     );

@@ -31,10 +31,7 @@ class FJElevatedButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(defaultSpacing * (smallCorners ? 1.0 : 1.5)),
         splashColor: Get.theme.hoverColor.withAlpha(20),
-        child: Padding(
-          padding: const EdgeInsets.all(defaultSpacing),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(defaultSpacing), child: child),
       ),
     );
   }
@@ -52,26 +49,29 @@ class FJElevatedLoadingButton extends StatelessWidget {
     return FJElevatedButton(
       onTap: () => (loading?.value ?? false) ? null : onTap(),
       child: Center(
-        child: Builder(builder: (context) {
-          // Don't care about state in case there is no loading state
-          if (loading == null) {
-            return Text(label, style: Get.theme.textTheme.labelLarge);
-          }
+        child: Builder(
+          builder: (context) {
+            // Don't care about state in case there is no loading state
+            if (loading == null) {
+              return Text(label, style: Get.theme.textTheme.labelLarge);
+            }
 
-          // Handle loading states as well
-          return Watch(
-            (ctx) => loading!.value
-                ? SizedBox(
-                    height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                    width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                    child: Padding(
-                      padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                      child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
-                    ),
-                  )
-                : Text(label, style: Get.theme.textTheme.labelLarge),
-          );
-        }),
+            // Handle loading states as well
+            return Watch(
+              (ctx) =>
+                  loading!.value
+                      ? SizedBox(
+                        height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                        width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                        child: Padding(
+                          padding: const EdgeInsets.all(defaultSpacing * 0.25),
+                          child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                        ),
+                      )
+                      : Text(label, style: Get.theme.textTheme.labelLarge),
+            );
+          },
+        ),
       ),
     );
   }
@@ -89,17 +89,20 @@ class FJElevatedLoadingButtonCustom extends StatelessWidget {
   Widget build(BuildContext context) {
     return FJElevatedButton(
       onTap: () => loading.value ? null : onTap(),
-      child: Watch((ctx) => loading.value
-          ? builder?.call() ??
-              SizedBox(
-                height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
-                child: Padding(
-                  padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                  child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
-                ),
-              )
-          : child),
+      child: Watch(
+        (ctx) =>
+            loading.value
+                ? builder?.call() ??
+                    SizedBox(
+                      height: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                      width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
+                      child: Padding(
+                        padding: const EdgeInsets.all(defaultSpacing * 0.25),
+                        child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                      ),
+                    )
+                : child,
+      ),
     );
   }
 }

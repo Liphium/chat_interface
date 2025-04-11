@@ -38,9 +38,7 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
     _loading.value = true;
     _errorText.value = "";
 
-    final json = await postAuthorizedJSON("/account/settings/change_display_name", {
-      "name": _displayNameController.text,
-    });
+    final json = await postAuthorizedJSON("/account/settings/change_display_name", {"name": _displayNameController.text});
 
     if (!json["success"]) {
       _errorText.value = json["error"].toString().tr;
@@ -58,9 +56,7 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
     _displayNameController.text = StatusController.displayName.value;
 
     return DialogBase(
-      title: [
-        Text("display_name".tr, style: Get.textTheme.labelLarge),
-      ],
+      title: [Text("display_name".tr, style: Get.textTheme.labelLarge)],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -74,16 +70,12 @@ class _ChangeNameWindowState extends State<ChangeDisplayNameWindow> {
             onSubmitted: (t) => save(),
           ),
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(
-            message: _errorText,
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            expand: true,
-          ),
+          AnimatedErrorContainer(message: _errorText, padding: const EdgeInsets.only(bottom: defaultSpacing), expand: true),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
             onTap: () => save(),
             child: Center(child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
-          )
+          ),
         ],
       ),
     );

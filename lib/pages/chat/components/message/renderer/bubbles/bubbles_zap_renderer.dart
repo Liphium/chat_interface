@@ -66,10 +66,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
       return;
     }
 
-    final json = await postAny("${nodeProtocol()}${_container!.url}/liveshare/info", {
-      "id": _container!.id,
-      "token": _container!.token,
-    });
+    final json = await postAny("${nodeProtocol()}${_container!.url}/liveshare/info", {"id": _container!.id, "token": _container!.token});
     _loading.value = false;
 
     if (!json["success"]) {
@@ -117,17 +114,17 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
             final menuData = ContextMenuData.fromPosition(Offset(_mouseX, _mouseY));
 
             // Open the context menu
-            Get.dialog(MessageOptionsWindow(
-              data: menuData,
-              self: widget.message.senderAddress == StatusController.ownAddress,
-              message: widget.message,
-              provider: widget.provider,
-            ));
+            Get.dialog(
+              MessageOptionsWindow(
+                data: menuData,
+                self: widget.message.senderAddress == StatusController.ownAddress,
+                message: widget.message,
+                provider: widget.provider,
+              ),
+            );
           },
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: elementSpacing,
-            ),
+            padding: EdgeInsets.symmetric(vertical: elementSpacing),
             child: Row(
               textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,12 +166,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                                     children: [
                                       Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                                       horizontalSpacing(elementSpacing),
-                                      Flexible(
-                                        child: Text(
-                                          "chat.zapshare_request".tr,
-                                          style: Get.theme.textTheme.labelLarge,
-                                        ),
-                                      ),
+                                      Flexible(child: Text("chat.zapshare_request".tr, style: Get.theme.textTheme.labelLarge)),
                                     ],
                                   ),
 
@@ -203,16 +195,10 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                               visible: !verified,
                               child: Padding(
                                 padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
-                                child: Tooltip(
-                                  message: "chat.not.signed".tr,
-                                  child: const Icon(
-                                    Icons.warning_rounded,
-                                    color: Colors.amber,
-                                  ),
-                                ),
+                                child: Tooltip(message: "chat.not.signed".tr, child: const Icon(Icons.warning_rounded, color: Colors.amber)),
                               ),
                             );
-                          })
+                          }),
                         ],
                       ),
                     ],
@@ -236,24 +222,14 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            getIconForFileName(_container!.fileName),
-            size: sectionSpacing * 2,
-            color: Get.theme.colorScheme.onPrimary,
-          ),
+          Icon(getIconForFileName(_container!.fileName), size: sectionSpacing * 2, color: Get.theme.colorScheme.onPrimary),
           horizontalSpacing(defaultSpacing),
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Flexible(
-                  child: Text(
-                    _container!.fileName,
-                    style: Get.theme.textTheme.labelMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+                Flexible(child: Text(_container!.fileName, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis)),
                 Flexible(
                   child: Watch(
                     (ctx) => Text(
@@ -272,13 +248,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
           Watch((ctx) {
             // Return loading if this message wasn't send inside of a conversation
             if (widget.provider is! ConversationMessageProvider) {
-              return SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator(
-                  color: Get.theme.colorScheme.onPrimary,
-                ),
-              );
+              return SizedBox(width: 30, height: 30, child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary));
             }
 
             final convProvider = widget.provider as ConversationMessageProvider;
@@ -286,21 +256,14 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
               return SizedBox(
                 width: 30,
                 height: 30,
-                child: CircularProgressIndicator(
-                  color: Get.theme.colorScheme.onPrimary,
-                  value: ZapShareController.progress.value,
-                ),
+                child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, value: ZapShareController.progress.value),
               );
             }
 
             return Visibility(
               visible: _available.value && !widget.self,
               child: IconButton(
-                onPressed: () => ZapShareController.joinTransaction(
-                  convProvider.conversation.id,
-                  widget.message.senderAddress,
-                  _container!,
-                ),
+                onPressed: () => ZapShareController.joinTransaction(convProvider.conversation.id, widget.message.senderAddress, _container!),
                 icon: const Icon(Icons.check),
               ),
             );

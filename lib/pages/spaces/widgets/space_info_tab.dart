@@ -26,9 +26,7 @@ class _SpaceInfoTabState extends State<SpaceInfoTab> {
       // Return a basic description of Spaces instead
       return Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: 700 + sectionSpacing * 2,
-          ),
+          constraints: BoxConstraints(maxWidth: 700 + sectionSpacing * 2),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: sectionSpacing),
             child: Column(
@@ -55,13 +53,7 @@ class _SpaceInfoTabState extends State<SpaceInfoTab> {
                       padding: EdgeInsets.only(top: sectionSpacing),
                       child: Row(
                         children: [
-                          SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ),
+                          SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: theme.colorScheme.onPrimary)),
                           horizontalSpacing(defaultSpacing),
                           Text("spaces.studio.connecting".tr, style: Get.textTheme.bodyMedium),
                         ],

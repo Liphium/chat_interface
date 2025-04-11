@@ -10,13 +10,7 @@ class TabletopPainter extends CustomPainter {
   final double scale;
   final double rotation;
 
-  TabletopPainter({
-    required this.offset,
-    required this.mousePosition,
-    required this.mousePositionUnmodified,
-    this.scale = 1.0,
-    this.rotation = 0,
-  });
+  TabletopPainter({required this.offset, required this.mousePosition, required this.mousePositionUnmodified, this.scale = 1.0, this.rotation = 0});
 
   @override
   void paint(Canvas canvas, Size size) {

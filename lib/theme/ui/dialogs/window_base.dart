@@ -14,15 +14,7 @@ class WindowBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          left: position.dx,
-          top: position.dy,
-          child: child,
-        ),
-      ],
-    );
+    return Stack(children: [Positioned(left: position.dx, top: position.dy, child: child)]);
   }
 }
 
@@ -54,15 +46,7 @@ class DialogBase extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (title.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(elementSpacing),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ...title,
-                  ],
-                ),
-              ),
+              Padding(padding: const EdgeInsets.all(elementSpacing), child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [...title])),
             if (title.isNotEmpty) verticalSpacing(defaultSpacing),
             child,
           ],
@@ -75,11 +59,7 @@ class DialogBase extends StatelessWidget {
         top: true,
         right: true,
         left: true,
-        padding: EdgeInsets.only(
-          top: defaultSpacing * 1.5,
-          right: defaultSpacing * 1.5,
-          left: defaultSpacing * 1.5,
-        ),
+        padding: EdgeInsets.only(top: defaultSpacing * 1.5, right: defaultSpacing * 1.5, left: defaultSpacing * 1.5),
         child: child,
       );
     }
@@ -107,11 +87,7 @@ class DialogBase extends StatelessWidget {
             rotation: 0,
             curve: Curves.decelerate,
           ),
-          FadeEffect(
-            delay: 100.ms,
-            duration: 250.ms,
-            curve: Curves.easeOut,
-          )
+          FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut),
         ],
         target: 1,
         child: Material(
@@ -125,12 +101,7 @@ class DialogBase extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (showTitleDesktop && title.isNotEmpty)
-                    Row(
-                      children: [
-                        ...title,
-                      ],
-                    ),
+                  if (showTitleDesktop && title.isNotEmpty) Row(children: [...title]),
                   if (showTitleDesktop && title.isNotEmpty) verticalSpacing(defaultSpacing),
                   child,
                 ],
@@ -170,12 +141,7 @@ class SlidingWindowBase extends StatelessWidget {
             if (title.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: elementSpacing),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ...title,
-                  ],
-                ),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [...title]),
               ),
             if (title.isNotEmpty) verticalSpacing(defaultSpacing),
             child,
@@ -217,13 +183,7 @@ class SlidingWindowBase extends StatelessWidget {
                   padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: title,
-                      ),
-                      if (title.isNotEmpty) verticalSpacing(defaultSpacing),
-                      child,
-                    ],
+                    children: [Row(children: title), if (title.isNotEmpty) verticalSpacing(defaultSpacing), child],
                   ),
                 ),
               ),
@@ -238,10 +198,7 @@ class SlidingWindowBase extends StatelessWidget {
 class LPHBottomSheet extends StatelessWidget {
   final Widget child;
 
-  const LPHBottomSheet({
-    super.key,
-    required this.child,
-  });
+  const LPHBottomSheet({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -262,18 +219,11 @@ class LPHBottomSheet extends StatelessWidget {
               rotation: 0,
               curve: Curves.decelerate,
             ),
-            ScaleEffect(
-              duration: 250.ms,
-              curve: Curves.decelerate,
-              begin: Offset(0.8, 0.8),
-            ),
+            ScaleEffect(duration: 250.ms, curve: Curves.decelerate, begin: Offset(0.8, 0.8)),
           ],
           child: Material(
             color: Get.theme.colorScheme.onInverseSurface,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(sectionSpacing * 1.5),
-              topRight: Radius.circular(sectionSpacing * 1.5),
-            ),
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(sectionSpacing * 1.5), topRight: Radius.circular(sectionSpacing * 1.5)),
             child: SafeArea(
               bottom: false,
               child: SingleChildScrollView(

@@ -4,11 +4,7 @@ import 'package:chat_interface/pages/chat/messages/message_automaton.dart';
 import 'package:flutter/material.dart';
 
 class TextEvaluator {
-  final automatons = [
-    BoldItalicAutomaton(),
-    StrikethroughAutomaton(),
-    UnderlineAutomaton(),
-  ];
+  final automatons = [BoldItalicAutomaton(), StrikethroughAutomaton(), UnderlineAutomaton()];
 
   /// Evaluate a text with a start style of [startStyle].
   /// Optionally provide a text style for the formatting patterns.
@@ -65,10 +61,7 @@ class TextEvaluator {
     for (var (start, end, formattings) in ranges) {
       // Add everything before the range in case necessary
       if (start != lastEnd) {
-        spans.add(TextSpan(
-          text: text.substring(lastEnd, start),
-          style: startStyle,
-        ));
+        spans.add(TextSpan(text: text.substring(lastEnd, start), style: startStyle));
       }
 
       // Build the formatting for the range
@@ -84,20 +77,14 @@ class TextEvaluator {
 
       // Add the range itself
       if (!skip) {
-        spans.add(TextSpan(
-          text: text.substring(start, min(end, text.length)),
-          style: style,
-        ));
+        spans.add(TextSpan(text: text.substring(start, min(end, text.length)), style: style));
       }
       lastEnd = end;
     }
 
     // Add the rest of the text (in case necessary)
     if (lastEnd < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(lastEnd, text.length),
-        style: startStyle,
-      ));
+      spans.add(TextSpan(text: text.substring(lastEnd, text.length), style: startStyle));
     }
 
     return spans;
@@ -176,12 +163,7 @@ class MessageFormatter {
   /// Build a text span from a text by parsing the formatting patterns in it.
   TextSpan build(String text) {
     return TextSpan(
-      children: evaluator.evaluate(
-        text,
-        normalStyle,
-        pattern: formattedStyle,
-        skipPatterns: formattedStyle == null,
-      ),
+      children: evaluator.evaluate(text, normalStyle, pattern: formattedStyle, skipPatterns: formattedStyle == null),
       style: normalStyle,
     );
   }
@@ -207,12 +189,7 @@ class FormattedText extends StatefulWidget {
   final TextStyle baseStyle;
   final TextStyle? formatStyle;
 
-  const FormattedText({
-    super.key,
-    required this.text,
-    required this.baseStyle,
-    this.formatStyle,
-  });
+  const FormattedText({super.key, required this.text, required this.baseStyle, this.formatStyle});
 
   @override
   State<FormattedText> createState() => _FormattedTextState();

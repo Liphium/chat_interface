@@ -12,11 +12,7 @@ class LibraryWindow extends StatefulWidget {
   final ContextMenuData data;
   final MessageProvider provider;
 
-  const LibraryWindow({
-    super.key,
-    required this.data,
-    required this.provider,
-  });
+  const LibraryWindow({super.key, required this.data, required this.provider});
 
   @override
   State<LibraryWindow> createState() => _LibraryWindowState();
@@ -65,11 +61,7 @@ class _LibraryWindowState extends State<LibraryWindow> {
         children: [
           //* Tabs
           LPHTabElement(
-            tabs: [
-              "library.all".tr,
-              "library.images".tr,
-              "library.gifs".tr,
-            ],
+            tabs: ["library.all".tr, "library.images".tr, "library.gifs".tr],
             onTabSwitch: (newTab) {
               _selected.value = newTab;
             },

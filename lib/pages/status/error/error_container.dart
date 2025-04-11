@@ -9,11 +9,7 @@ class ErrorContainer extends StatelessWidget {
   final String message;
   final bool expand;
 
-  const ErrorContainer({
-    super.key,
-    required this.message,
-    this.expand = false,
-  });
+  const ErrorContainer({super.key, required this.message, this.expand = false});
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +40,7 @@ class InfoContainer extends StatelessWidget {
   final String message;
   final bool expand;
 
-  const InfoContainer({
-    super.key,
-    required this.message,
-    this.expand = false,
-  });
+  const InfoContainer({super.key, required this.message, this.expand = false});
 
   @override
   Widget build(BuildContext context) {
@@ -124,23 +116,10 @@ class _AnimatedContainerBaseState extends State<_AnimatedContainerBase> with Sig
   @override
   Widget build(BuildContext context) {
     return Animate(
-      effects: [
-        ScaleEffect(
-          duration: 250.ms,
-          curve: Curves.ease,
-          begin: const Offset(1.1, 1.1),
-          end: const Offset(1.0, 1.0),
-        ),
-      ],
+      effects: [ScaleEffect(duration: 250.ms, curve: Curves.ease, begin: const Offset(1.1, 1.1), end: const Offset(1.0, 1.0))],
       onInit: (controller) => this.controller = controller,
       child: Animate(
-        effects: [
-          ExpandEffect(
-            axis: Axis.vertical,
-            curve: Curves.ease,
-            duration: 250.ms,
-          ),
-        ],
+        effects: [ExpandEffect(axis: Axis.vertical, curve: Curves.ease, duration: 250.ms)],
         target: _showing.value ? 1 : 0,
         child: Padding(
           padding: widget.padding,
@@ -154,9 +133,7 @@ class _AnimatedContainerBaseState extends State<_AnimatedContainerBase> with Sig
               children: [
                 Icon(Icons.error, color: Theme.of(context).colorScheme.error),
                 horizontalSpacing(defaultSpacing),
-                Flexible(
-                  child: Text(_message.value, style: Theme.of(context).textTheme.labelMedium),
-                ),
+                Flexible(child: Text(_message.value, style: Theme.of(context).textTheme.labelMedium)),
               ],
             ),
           ),
@@ -172,12 +149,7 @@ class AnimatedErrorContainer extends StatelessWidget {
   final EdgeInsets padding;
   final bool expand;
 
-  const AnimatedErrorContainer({
-    super.key,
-    required this.padding,
-    required this.message,
-    this.expand = false,
-  });
+  const AnimatedErrorContainer({super.key, required this.padding, required this.message, this.expand = false});
 
   @override
   Widget build(BuildContext context) {
@@ -199,12 +171,7 @@ class AnimatedInfoContainer extends StatelessWidget {
   final EdgeInsets padding;
   final bool expand;
 
-  const AnimatedInfoContainer({
-    super.key,
-    required this.padding,
-    required this.message,
-    this.expand = false,
-  });
+  const AnimatedInfoContainer({super.key, required this.padding, required this.message, this.expand = false});
 
   @override
   Widget build(BuildContext context) {

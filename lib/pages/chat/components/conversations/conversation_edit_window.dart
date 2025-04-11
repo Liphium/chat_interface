@@ -14,11 +14,7 @@ class ConversationInfoWindow extends StatefulWidget {
   final ContextMenuData position;
   final Conversation conversation;
 
-  const ConversationInfoWindow({
-    super.key,
-    required this.position,
-    required this.conversation,
-  });
+  const ConversationInfoWindow({super.key, required this.position, required this.conversation});
 
   @override
   State<ConversationInfoWindow> createState() => _ConversationInfoWindowState();
@@ -37,8 +33,10 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
           children: [
             Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
             horizontalSpacing(defaultSpacing),
-            Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ],
         ),
       ],
@@ -50,11 +48,7 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
             visible: widget.conversation.isGroup,
             child: Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
-              child: ProfileButton(
-                icon: Icons.edit,
-                label: "Edit title",
-                onTap: () => {},
-              ),
+              child: ProfileButton(icon: Icons.edit, label: "Edit title", onTap: () => {}),
             ),
           ),
           ProfileButton(
@@ -63,10 +57,7 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
           ),
           verticalSpacing(sectionSpacing),
-          Text(
-            "Danger zone",
-            style: Get.theme.textTheme.bodyMedium,
-          ),
+          Text("Danger zone", style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(elementSpacing),
           Visibility(
             visible: !widget.conversation.isGroup,
@@ -87,15 +78,18 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
             iconColor: Get.theme.colorScheme.error,
             icon: Icons.logout,
             label: "Leave conversation",
-            onTap: () => showConfirmPopup(ConfirmWindow(
-              title: "conversations.leave".tr,
-              text: "conversations.leave.text".tr,
-              onConfirm: () {
-                widget.conversation.delete();
-                Get.back();
-              },
-              onDecline: () => {},
-            )),
+            onTap:
+                () => showConfirmPopup(
+                  ConfirmWindow(
+                    title: "conversations.leave".tr,
+                    text: "conversations.leave.text".tr,
+                    onConfirm: () {
+                      widget.conversation.delete();
+                      Get.back();
+                    },
+                    onDecline: () => {},
+                  ),
+                ),
           ),
         ],
       ),

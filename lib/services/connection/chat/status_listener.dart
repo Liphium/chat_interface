@@ -29,10 +29,7 @@ void setupStatusListener() {
     sendLog("sending status answer");
     await postNodeJSON("/conversations/answer_status", {
       "token": dm.token.toMap(),
-      "data": {
-        "status": StatusController.statusPacket(),
-        "data": StatusController.sharedContentPacket(),
-      }
+      "data": {"status": StatusController.statusPacket(), "data": StatusController.sharedContentPacket()},
     });
   }, afterSetup: true);
 

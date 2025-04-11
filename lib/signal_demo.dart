@@ -24,10 +24,7 @@ class _SignalDemoState extends State<SignalDemo> with SignalsMixin {
             children: [
               Text("Current value: ${count.value}"),
               verticalSpacing(sectionSpacing),
-              FJElevatedButton(
-                onTap: () => count.value++,
-                child: Text("Increment"),
-              ),
+              FJElevatedButton(onTap: () => count.value++, child: Text("Increment")),
             ],
           ),
         ),

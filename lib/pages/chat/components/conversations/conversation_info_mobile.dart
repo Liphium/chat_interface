@@ -18,11 +18,7 @@ class ConversationInfoMobile extends StatefulWidget {
   final ContextMenuData position;
   final Conversation conversation;
 
-  const ConversationInfoMobile({
-    super.key,
-    required this.position,
-    required this.conversation,
-  });
+  const ConversationInfoMobile({super.key, required this.position, required this.conversation});
 
   @override
   State<ConversationInfoMobile> createState() => _ConversationInfoMobileState();
@@ -53,19 +49,11 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Show basic information about the conversation
-          Text(
-            "conversation.info.town".trParams({
-              "town": widget.conversation.id.server,
-            }),
-            style: Get.textTheme.bodyMedium,
-          ),
+          Text("conversation.info.town".trParams({"town": widget.conversation.id.server}), style: Get.textTheme.bodyMedium),
           verticalSpacing(sectionSpacing),
 
           // Show things that can be done with the current conversation
-          Text(
-            "Actions",
-            style: Get.theme.textTheme.labelMedium,
-          ),
+          Text("Actions", style: Get.theme.textTheme.labelMedium),
           verticalSpacing(defaultSpacing),
 
           // The conversation search is here to make it easier to access
@@ -92,11 +80,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             visible: widget.conversation.isGroup,
             child: Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
-              child: ProfileButton(
-                icon: Icons.edit,
-                label: "Edit title",
-                onTap: () => {},
-              ),
+              child: ProfileButton(icon: Icons.edit, label: "Edit title", onTap: () => {}),
             ),
           ),
           ProfileButton(
@@ -107,26 +91,16 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
           verticalSpacing(sectionSpacing),
 
           // Show that the conversation is encrypted (to make the user feel safe ig)
-          Text(
-            "Encryption",
-            style: Get.theme.textTheme.labelMedium,
-          ),
+          Text("Encryption", style: Get.theme.textTheme.labelMedium),
           verticalSpacing(defaultSpacing),
           Text("conversation.info.encrypted".tr, style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
 
           // Make sure they have the ability to learn more in case they want to
-          ProfileButton(
-            icon: Icons.launch,
-            label: "learn_more".tr,
-            onTap: () => launchUrlString(Constants.docsEncryptionAndPrivacy),
-          ),
+          ProfileButton(icon: Icons.launch, label: "learn_more".tr, onTap: () => launchUrlString(Constants.docsEncryptionAndPrivacy)),
 
           verticalSpacing(sectionSpacing),
-          Text(
-            "Danger zone",
-            style: Get.theme.textTheme.labelMedium,
-          ),
+          Text("Danger zone", style: Get.theme.textTheme.labelMedium),
           verticalSpacing(defaultSpacing),
           Visibility(
             visible: !widget.conversation.isGroup,
@@ -147,15 +121,18 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             iconColor: Get.theme.colorScheme.error,
             icon: Icons.logout,
             label: "Leave conversation",
-            onTap: () => showConfirmPopup(ConfirmWindow(
-              title: "conversations.leave".tr,
-              text: "conversations.leave.text".tr,
-              onConfirm: () {
-                widget.conversation.delete();
-                Get.back();
-              },
-              onDecline: () => {},
-            )),
+            onTap:
+                () => showConfirmPopup(
+                  ConfirmWindow(
+                    title: "conversations.leave".tr,
+                    text: "conversations.leave.text".tr,
+                    onConfirm: () {
+                      widget.conversation.delete();
+                      Get.back();
+                    },
+                    onDecline: () => {},
+                  ),
+                ),
           ),
         ],
       ),

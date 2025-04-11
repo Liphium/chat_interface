@@ -96,10 +96,7 @@ class FileSettingsPage extends StatelessWidget {
           Text("settings.file.cache.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing + elementSpacing),
 
-          ListSelectionSetting(
-            setting: SettingController.settings[FileSettings.fileCacheType]! as Setting<int>,
-            items: FileSettings.fileCacheTypes,
-          ),
+          ListSelectionSetting(setting: SettingController.settings[FileSettings.fileCacheType]! as Setting<int>, items: FileSettings.fileCacheTypes),
 
           Watch(
             (ctx) => Visibility(

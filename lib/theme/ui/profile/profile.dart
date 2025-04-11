@@ -22,10 +22,7 @@ import 'package:signals/signals_flutter.dart';
 class ProfileDefaults {
   static Function(Friend, Signal<bool>) deleteAction = (Friend friend, Signal<bool> loading) async {
     // Show a confirm popup
-    final result = await showConfirmPopup(ConfirmWindow(
-      title: "friends.remove.confirm".tr,
-      text: "friends.remove.desc".tr,
-    ));
+    final result = await showConfirmPopup(ConfirmWindow(title: "friends.remove.confirm".tr, text: "friends.remove.desc".tr));
     if (!result) {
       return;
     }
@@ -58,19 +55,11 @@ class ProfileDefaults {
     final removeLoading = signal(false);
 
     if (friend.unknown) {
-      return [
-        ProfileAction(icon: Icons.person_add, category: true, label: 'friends.add'.tr, onTap: (f, l) => {}),
-      ];
+      return [ProfileAction(icon: Icons.person_add, category: true, label: 'friends.add'.tr, onTap: (f, l) => {})];
     }
 
     return [
-      ProfileAction(
-        category: true,
-        icon: Icons.message,
-        label: 'friends.message'.tr,
-        onTap: openAction,
-        loading: friend.openConversationLoading,
-      ),
+      ProfileAction(category: true, icon: Icons.message, label: 'friends.message'.tr, onTap: openAction, loading: friend.openConversationLoading),
       if (SpaceController.connected.value)
         ProfileAction(
           icon: Icons.forward_to_inbox,
@@ -79,8 +68,8 @@ class ProfileDefaults {
           onTap: (friend, l) {
             // Check if there even is a conversation with the guy
             final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
-                  (c) => c.members.values.any((m) => m.address == friend.id),
-                );
+              (c) => c.members.values.any((m) => m.address == friend.id),
+            );
             if (conversation == null) {
               showErrorPopup("error", "profile.conversation_not_found".tr);
               return;
@@ -112,8 +101,15 @@ class ProfileAction {
   final Color? iconColor;
   final Function(Friend, Signal<bool>) onTap;
 
-  const ProfileAction(
-      {required this.icon, required this.label, this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
+  const ProfileAction({
+    required this.icon,
+    required this.label,
+    this.loading,
+    required this.onTap,
+    this.category = false,
+    this.color,
+    this.iconColor,
+  });
 }
 
 class Profile extends StatefulWidget {
@@ -155,11 +151,7 @@ class _ProfileState extends State<Profile> {
         child: buildProfile(),
       );
     } else {
-      return DialogBase(
-        title: const [],
-        maxWidth: widget.size.toDouble(),
-        child: buildProfile(),
-      );
+      return DialogBase(title: const [], maxWidth: widget.size.toDouble(), child: buildProfile());
     }
   }
 
@@ -178,26 +170,14 @@ class _ProfileState extends State<Profile> {
                 children: [
                   UserAvatar(id: widget.friend.id, size: 40),
                   horizontalSpacing(defaultSpacing),
-                  Flexible(
-                    child: Text(
-                      widget.friend.displayName.value,
-                      overflow: TextOverflow.ellipsis,
-                      style: Get.theme.textTheme.titleMedium,
-                    ),
-                  ),
+                  Flexible(child: Text(widget.friend.displayName.value, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.titleMedium)),
                   if (widget.friend.id.server != basePath)
                     Padding(
                       padding: const EdgeInsets.only(left: defaultSpacing),
                       child: Tooltip(
                         waitDuration: const Duration(milliseconds: 500),
-                        message: "friends.different_town".trParams({
-                          "town": widget.friend.id.server,
-                        }),
-                        child: Icon(
-                          Icons.sensors,
-                          color: Get.theme.colorScheme.onPrimary,
-                          size: 21,
-                        ),
+                        message: "friends.different_town".trParams({"town": widget.friend.id.server}),
+                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                       ),
                     ),
                 ],
@@ -209,8 +189,8 @@ class _ProfileState extends State<Profile> {
               onTap: () {
                 // Check if there even is a conversation with the guy
                 final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
-                      (c) => c.members.values.any((m) => m.address == widget.friend.id),
-                    );
+                  (c) => c.members.values.any((m) => m.address == widget.friend.id),
+                );
                 if (conversation == null) {
                   showErrorPopup("error", "profile.conversation_not_found".tr);
                   return;
@@ -225,17 +205,10 @@ class _ProfileState extends State<Profile> {
                 Get.back();
               },
               icon: SpaceController.connected.value ? Icons.forward_to_inbox : Icons.rocket_launch,
-            )
+            ),
           ],
         ),
-        Watch(
-          (ctx) => widget.friend.status.value != ""
-              ? Text(
-                  widget.friend.status.value,
-                  style: Get.theme.textTheme.bodyMedium,
-                )
-              : const SizedBox(),
-        ),
+        Watch((ctx) => widget.friend.status.value != "" ? Text(widget.friend.status.value, style: Get.theme.textTheme.bodyMedium) : const SizedBox()),
         verticalSpacing(defaultSpacing),
         ListView.builder(
           shrinkWrap: true,
@@ -245,21 +218,23 @@ class _ProfileState extends State<Profile> {
 
             // Create a function that takes in a loading signal to create the button
             button(loading) => Padding(
-                  padding: EdgeInsets.only(
-                      top: index == 0
-                          ? 0
-                          : action.category
-                              ? defaultSpacing
-                              : elementSpacing),
-                  child: ProfileButton(
-                    icon: action.icon,
-                    label: action.label,
-                    onTap: () => action.onTap.call(widget.friend, loading),
-                    loading: action.loading,
-                    color: action.color,
-                    iconColor: action.iconColor,
-                  ),
-                );
+              padding: EdgeInsets.only(
+                top:
+                    index == 0
+                        ? 0
+                        : action.category
+                        ? defaultSpacing
+                        : elementSpacing,
+              ),
+              child: ProfileButton(
+                icon: action.icon,
+                label: action.label,
+                onTap: () => action.onTap.call(widget.friend, loading),
+                loading: action.loading,
+                color: action.color,
+                iconColor: action.iconColor,
+              ),
+            );
 
             // Make sure to manually add the loading state in case not there
             if (action.loading == null) {

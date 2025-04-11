@@ -80,7 +80,7 @@ class _FJTextFieldState extends State<FJTextField> with SignalsMixin {
           builder: (context, value, child) {
             return Padding(padding: EdgeInsets.symmetric(horizontal: defaultSpacing * value), child: child);
           },
-        )
+        ),
       ],
       target: _focus.value && widget.animation ? 1 : 0,
       child: Material(

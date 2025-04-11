@@ -37,28 +37,25 @@ class CardObject extends TableObject {
     // Make size fit with canvas standards (900x900 in this case)
     final size = Size(container.width!.toDouble(), container.height!.toDouble());
     final normalized = normalizeSize(size, cardNormalizer);
-    final obj = CardObject(
-      id,
-      0,
-      location,
-      normalized,
-    );
+    final obj = CardObject(id, 0, location, normalized);
     obj.container = container;
     obj.imageSize = size;
 
     // Download the file
-    unawaited(AttachmentController.downloadAttachment(container).then((success) async {
-      if (success) {
-        // Get the actual image and add it to the object
-        final buffer = await ui.ImmutableBuffer.fromUint8List(await container.file!.readAsBytes());
-        final descriptor = await ui.ImageDescriptor.encoded(buffer);
-        final codec = await descriptor.instantiateCodec();
-        obj.image = (await codec.getNextFrame()).image;
-        obj.downloaded = true;
-      } else {
-        obj.error = true;
-      }
-    }));
+    unawaited(
+      AttachmentController.downloadAttachment(container).then((success) async {
+        if (success) {
+          // Get the actual image and add it to the object
+          final buffer = await ui.ImmutableBuffer.fromUint8List(await container.file!.readAsBytes());
+          final descriptor = await ui.ImageDescriptor.encoded(buffer);
+          final codec = await descriptor.instantiateCodec();
+          obj.image = (await codec.getNextFrame()).image;
+          obj.downloaded = true;
+        } else {
+          obj.error = true;
+        }
+      }),
+    );
 
     return obj;
   }
@@ -149,10 +146,7 @@ class CardObject extends TableObject {
 
       if (image == null) {
         canvas.clipRRect(RRect.fromRectAndRadius(imageRect, Radius.circular(sectionSpacing * 2)));
-        canvas.drawRect(
-          imageRect,
-          Paint()..color = Colors.red,
-        );
+        canvas.drawRect(imageRect, Paint()..color = Colors.red);
       } else {
         // Rotation for the flip animation
         canvas.save();
@@ -161,9 +155,10 @@ class CardObject extends TableObject {
         canvas.translate(focalX, focalY);
         final currentFlip = flipAnimation.value(DateTime.now());
 
-        final Matrix4 matrix = Matrix4.identity()
-          ..setEntry(3, 2, 0) // perspective
-          ..rotateY(math.pi * currentFlip);
+        final Matrix4 matrix =
+            Matrix4.identity()
+              ..setEntry(3, 2, 0) // perspective
+              ..rotateY(math.pi * currentFlip);
 
         canvas.transform(matrix.storage);
         canvas.translate(-focalX, -focalY);
@@ -172,10 +167,7 @@ class CardObject extends TableObject {
 
         // Check if the animation says it's flipped or not
         if (currentFlip > 0.5) {
-          canvas.drawRect(
-            imageRect,
-            Paint()..color = Get.theme.colorScheme.primaryContainer,
-          );
+          canvas.drawRect(imageRect, Paint()..color = Get.theme.colorScheme.primaryContainer);
           renderFlippedDecorations(canvas, imageRect);
         } else {
           canvas.drawImageRect(
