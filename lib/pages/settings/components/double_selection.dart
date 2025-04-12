@@ -51,11 +51,12 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Visibility(
-            visible: widget.description.isNotEmpty,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: elementSpacing),
-              child: Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
-            )),
+          visible: widget.description.isNotEmpty,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: elementSpacing),
+            child: Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
+          ),
+        ),
         Watch((ctx) {
           final value = _current.value;
           final roundedCurrent = widget.rounded ? value.toStringAsFixed(0) : value.toStringAsFixed(1);

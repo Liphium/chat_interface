@@ -26,18 +26,15 @@ class _ErrorPageState extends State<ErrorPage> with SignalsMixin {
   void initState() {
     int duration = 10;
 
-    _timer = Timer.periodic(
-      duration.ms,
-      (timer) {
-        if (_start <= 0) {
-          timer.cancel();
-          setupManager.retry();
-        } else {
-          _start -= duration / 1000;
-          _progress.value = _start / 30;
-        }
-      },
-    );
+    _timer = Timer.periodic(duration.ms, (timer) {
+      if (_start <= 0) {
+        timer.cancel();
+        setupManager.retry();
+      } else {
+        _start -= duration / 1000;
+        _progress.value = _start / 30;
+      }
+    });
 
     super.initState();
   }
@@ -55,10 +52,7 @@ class _ErrorPageState extends State<ErrorPage> with SignalsMixin {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          widget.title.tr,
-          style: Get.textTheme.headlineMedium,
-        ),
+        Text(widget.title.tr, style: Get.textTheme.headlineMedium),
         verticalSpacing(sectionSpacing),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -84,10 +78,7 @@ class _ErrorPageState extends State<ErrorPage> with SignalsMixin {
           ],
         ),
         verticalSpacing(defaultSpacing),
-        FJElevatedButton(
-          onTap: () => setupManager.retry(),
-          child: Center(child: Text('retry'.tr, style: Get.textTheme.labelLarge)),
-        ),
+        FJElevatedButton(onTap: () => setupManager.retry(), child: Center(child: Text('retry'.tr, style: Get.textTheme.labelLarge))),
       ],
     );
   }

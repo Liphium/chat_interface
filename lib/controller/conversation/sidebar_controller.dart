@@ -72,11 +72,7 @@ class SidebarController {
   }
 }
 
-enum SidebarTabType {
-  none,
-  conversation,
-  space;
-}
+enum SidebarTabType { none, conversation, space }
 
 abstract class SidebarTab {
   final SidebarTabType type;

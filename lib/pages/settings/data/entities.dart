@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/account/invites_page.dart';
+import 'package:chat_interface/pages/settings/app/audio_settings.dart';
 import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/town/admin_accounts_page.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
@@ -37,6 +38,7 @@ enum SettingLabel {
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
     SettingCategory("general", Icons.dashboard, GeneralSettingsPage()),
+    SettingCategory("audio", Icons.volume_up, AudioSettingsPage()),
     //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("logging", Icons.insights, LogSettingsPage()),
   ]),
@@ -48,9 +50,7 @@ enum SettingLabel {
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 
-  privacy("settings.tab.security", [
-    SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage()),
-  ]);
+  privacy("settings.tab.security", [SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage())]);
 
   final String _label;
   final List<SettingCategory> categories;

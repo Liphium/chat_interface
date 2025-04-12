@@ -16,12 +16,7 @@ class SSRRenderer extends StatefulWidget {
   final String path;
   final List<dynamic> json;
 
-  const SSRRenderer({
-    super.key,
-    required this.ssr,
-    required this.json,
-    required this.path,
-  });
+  const SSRRenderer({super.key, required this.ssr, required this.json, required this.path});
 
   @override
   State<SSRRenderer> createState() => _SSRRendererState();
@@ -59,36 +54,14 @@ class _SSRRendererState extends State<SSRRenderer> {
   Widget _renderText(Map<String, dynamic> json, bool last) {
     switch (json["style"]) {
       case 0:
-        return Padding(
-          padding: EdgeInsets.only(bottom: last ? 0 : sectionSpacing),
-          child: Text(
-            json["text"],
-            style: Get.textTheme.headlineMedium,
-          ),
-        );
+        return Padding(padding: EdgeInsets.only(bottom: last ? 0 : sectionSpacing), child: Text(json["text"], style: Get.textTheme.headlineMedium));
       case 1:
         return Padding(
-          padding: EdgeInsets.only(
-            top: defaultSpacing,
-            bottom: last ? 0 : defaultSpacing,
-          ),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              json["text"],
-              style: Get.textTheme.titleMedium,
-              textAlign: TextAlign.start,
-            ),
-          ),
+          padding: EdgeInsets.only(top: defaultSpacing, bottom: last ? 0 : defaultSpacing),
+          child: Align(alignment: Alignment.centerLeft, child: Text(json["text"], style: Get.textTheme.titleMedium, textAlign: TextAlign.start)),
         );
       case 2:
-        return Padding(
-          padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
-          child: Text(
-            json["text"],
-            style: Get.textTheme.bodyMedium,
-          ),
-        );
+        return Padding(padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing), child: Text(json["text"], style: Get.textTheme.bodyMedium));
     }
 
     return _renderError("text-style-${json["style"]}", last);
@@ -102,9 +75,7 @@ class _SSRRendererState extends State<SSRRenderer> {
     toDispose.add(controller); // Make sure the thing is disposed
 
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: last ? 0 : defaultSpacing,
-      ),
+      padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
       child: FJTextField(
         controller: controller,
         obscureText: json["hidden"],
@@ -120,33 +91,22 @@ class _SSRRendererState extends State<SSRRenderer> {
   /// Render a submit button from the element json
   Widget _renderSubmitButton(Map<String, dynamic> json, bool last) {
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: last ? 0 : defaultSpacing,
-      ),
+      padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
       child: Column(
         children: [
-          AnimatedErrorContainer(
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            message: widget.ssr.error,
-            expand: true,
-          ),
+          AnimatedErrorContainer(padding: const EdgeInsets.only(bottom: defaultSpacing), message: widget.ssr.error, expand: true),
           _renderButton(json, true), // Last = true for no padding
           Watch(
             (ctx) => Animate(
-              effects: [
-                ExpandEffect(
-                  duration: 250.ms,
-                  axis: Axis.vertical,
-                  alignment: Alignment.bottomCenter,
-                )
-              ],
+              effects: [ExpandEffect(duration: 250.ms, axis: Axis.vertical, alignment: Alignment.bottomCenter)],
               target: widget.ssr.error.value == "" ? 0 : 1,
-              child: widget.ssr.suggestButton != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: defaultSpacing),
-                      child: _renderButton(widget.ssr.suggestButton!, true), // Last = true for no padding
-                    )
-                  : const SizedBox(),
+              child:
+                  widget.ssr.suggestButton != null
+                      ? Padding(
+                        padding: const EdgeInsets.only(top: defaultSpacing),
+                        child: _renderButton(widget.ssr.suggestButton!, true), // Last = true for no padding
+                      )
+                      : const SizedBox(),
             ),
           ),
         ],
@@ -188,12 +148,7 @@ class _SSRRendererState extends State<SSRRenderer> {
   Widget _renderFetcher(Map<String, dynamic> json, bool last) {
     return Padding(
       padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
-      child: SSRFetcher(
-        label: json["label"] ?? "",
-        ssr: widget.ssr,
-        frequency: json["frequency"] ?? 5,
-        path: json["path"],
-      ),
+      child: SSRFetcher(label: json["label"] ?? "", ssr: widget.ssr, frequency: json["frequency"] ?? 5, path: json["path"]),
     );
   }
 
@@ -201,12 +156,7 @@ class _SSRRendererState extends State<SSRRenderer> {
   Widget _renderError(String type, bool last) {
     return Padding(
       padding: EdgeInsets.only(bottom: last ? 0 : defaultSpacing),
-      child: ErrorContainer(
-        message: "render.error".trParams({
-          "type": type,
-        }),
-        expand: true,
-      ),
+      child: ErrorContainer(message: "render.error".trParams({"type": type}), expand: true),
     );
   }
 
@@ -222,13 +172,11 @@ class _SSRRendererState extends State<SSRRenderer> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: widgets +
+      children:
+          widgets +
           [
             if (widget.ssr.extra?[widget.path] != null)
-              Padding(
-                padding: const EdgeInsets.only(top: defaultSpacing),
-                child: widget.ssr.extra?[widget.path],
-              ),
+              Padding(padding: const EdgeInsets.only(top: defaultSpacing), child: widget.ssr.extra?[widget.path]),
           ],
     );
   }

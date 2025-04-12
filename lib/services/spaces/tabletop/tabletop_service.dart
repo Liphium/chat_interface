@@ -13,15 +13,17 @@ class TabletopService {
   static void setupTabletopListeners(Connector connector) {
     connector.listen("table_obj", (event) {
       for (var obj in event.data["obj"]) {
-        TabletopController.addObject(newObject(
-          TableObjectType.values[obj["t"]],
-          obj["id"] as String,
-          obj["o"] as int,
-          Offset((obj["x"] as num).toDouble(), (obj["y"] as num).toDouble()),
-          Size((obj["w"] as num).toDouble(), (obj["h"] as num).toDouble()),
-          (obj["r"] as num).toDouble(),
-          obj["d"],
-        ));
+        TabletopController.addObject(
+          newObject(
+            TableObjectType.values[obj["t"]],
+            obj["id"] as String,
+            obj["o"] as int,
+            Offset((obj["x"] as num).toDouble(), (obj["y"] as num).toDouble()),
+            Size((obj["w"] as num).toDouble(), (obj["h"] as num).toDouble()),
+            (obj["r"] as num).toDouble(),
+            obj["d"],
+          ),
+        );
       }
     });
 
@@ -31,26 +33,25 @@ class TabletopService {
         return;
       }
 
-      TabletopController.addObject(newObject(
-        TableObjectType.values[event.data["type"]],
-        event.data["id"],
-        event.data["o"],
-        Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
-        Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble()),
-        (event.data["r"] as num).toDouble(),
-        event.data["data"],
-      ));
+      TabletopController.addObject(
+        newObject(
+          TableObjectType.values[event.data["type"]],
+          event.data["id"],
+          event.data["o"],
+          Offset((event.data["x"] as num).toDouble(), (event.data["y"] as num).toDouble()),
+          Size((event.data["w"] as num).toDouble(), (event.data["h"] as num).toDouble()),
+          (event.data["r"] as num).toDouble(),
+          event.data["data"],
+        ),
+      );
     });
 
     // Listen for a new order of an object
-    connector.listen(
-      "tobj_order",
-      (event) {
-        var objectId = event.data["o"];
-        var newOrder = (event.data["or"] as num).toInt();
-        TabletopController.setOrder(objectId, newOrder);
-      },
-    );
+    connector.listen("tobj_order", (event) {
+      var objectId = event.data["o"];
+      var newOrder = (event.data["or"] as num).toInt();
+      TabletopController.setOrder(objectId, newOrder);
+    });
 
     // Listen for cursor movements
     connector.listen("tc_moved", (event) {

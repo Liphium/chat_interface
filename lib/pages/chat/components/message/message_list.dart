@@ -10,12 +10,7 @@ class MessageList extends StatefulWidget {
   final double? overwritePadding;
   final double heightMultiplier;
 
-  const MessageList({
-    super.key,
-    required this.provider,
-    this.overwritePadding,
-    this.heightMultiplier = 1,
-  });
+  const MessageList({super.key, required this.provider, this.overwritePadding, this.heightMultiplier = 1});
 
   @override
   State<MessageList> createState() => _MessageListState();
@@ -42,9 +37,7 @@ class _MessageListState extends State<MessageList> {
           return ScrollConfiguration(
             behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.overwritePadding ?? (constraints.maxWidth <= 800 ? defaultSpacing : sectionSpacing),
-              ),
+              padding: EdgeInsets.symmetric(horizontal: widget.overwritePadding ?? (constraints.maxWidth <= 800 ? defaultSpacing : sectionSpacing)),
               child: ListView.builder(
                 itemCount: widget.provider.messages.length + 2,
                 reverse: true,

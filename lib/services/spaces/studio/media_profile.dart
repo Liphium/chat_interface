@@ -21,11 +21,7 @@ class MediaProfile {
   MediaProfile(this.type, this.width, this.height, this.framerate, this.bitrate);
 
   /// Convert the media profile to a constraints map readable by the getUserMedia function
-  Map<String, dynamic> toConstraints() => {
-        "width": width,
-        "height": height,
-        "maxFrameRate": framerate,
-      };
+  Map<String, dynamic> toConstraints() => {"width": width, "height": height, "maxFrameRate": framerate};
 
   @override
   String toString() {

@@ -43,6 +43,14 @@ class SpaceMemberController {
           members[clientId]!.verifySignature(member["sign"]);
         }
 
+        // Update their state
+        members[clientId]!.connectedToStudio.value = member["st"];
+        members[clientId]!.isMuted.value = member["mute"];
+        members[clientId]!.isDeafened.value = member["deaf"];
+        if (member["mute"] || member["deaf"] || !member["st"]) {
+          members[clientId]!.talking.value = false;
+        }
+
         // Cache the account id
         memberIds[clientId] = address;
       }
@@ -55,6 +63,11 @@ class SpaceMemberController {
     });
   }
 
+  /// Handle a change in talking state for a member
+  static void handleTalkingState(String id, bool talking) {
+    members[id]?.talking.value = talking;
+  }
+
   /// Get the id of the current client
   static String getOwnId() {
     return _ownId;
@@ -62,7 +75,7 @@ class SpaceMemberController {
 
   /// Get the Space member for a client id
   static SpaceMember? getMember(String clientId) {
-    return members.peek()[clientId];
+    return members[clientId];
   }
 
   static void onDisconnect() {
@@ -75,8 +88,10 @@ class SpaceMember {
   final String id;
   final Friend friend;
 
-  // We'll just keep this here for when Lightwire is finished
-  final isSpeaking = signal(false);
+  // Lightwire and Studio state
+  final talking = signal(false);
+  DateTime? lastPacket;
+  final connectedToStudio = signal(false);
   final isMuted = signal(false);
   final isDeafened = signal(false);
   final verified = signal(true);

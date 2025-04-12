@@ -14,10 +14,7 @@ import 'package:signals/signals_flutter.dart';
 class AdminAccountProfile extends StatefulWidget {
   final AccountData account;
 
-  const AdminAccountProfile({
-    super.key,
-    required this.account,
-  });
+  const AdminAccountProfile({super.key, required this.account});
 
   @override
   State<AdminAccountProfile> createState() => _AdminAccountProfileState();
@@ -38,7 +35,8 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
   @override
   void initState() {
     _tabs = <String, Widget Function()>{
-      "settings.acc_profile.tab.info".tr: () => Column(
+      "settings.acc_profile.tab.info".tr:
+          () => Column(
             children: [
               // Fields for copying all the account data
               LPHCopyField(label: "settings.acc_profile.info.id".tr, value: widget.account.id),
@@ -55,7 +53,8 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
               ),
             ],
           ),
-      "settings.acc_profile.tab.actions".tr: () => Column(
+      "settings.acc_profile.tab.actions".tr:
+          () => Column(
             children: [
               LPHActionField(
                 primary: "rank".tr,
@@ -64,11 +63,8 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
                   LPHActionData(
                     icon: Icons.edit,
                     tooltip: "edit".tr,
-                    onClick: () => Get.dialog(ChangeRankWindow(
-                      data: widget.account,
-                      onUpdate: acceptUpdate,
-                    )),
-                  )
+                    onClick: () => Get.dialog(ChangeRankWindow(data: widget.account, onUpdate: acceptUpdate)),
+                  ),
                 ],
               ),
             ],
@@ -88,30 +84,23 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
     return DialogBase(
       title: [
         Text(
-          "settings.acc_profile.title".trParams({
-            "name": "${widget.account.displayName} (${widget.account.username})",
-          }),
+          "settings.acc_profile.title".trParams({"name": "${widget.account.displayName} (${widget.account.username})"}),
           style: Get.textTheme.labelLarge,
-        )
+        ),
       ],
       maxWidth: 500,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LPHTabElement(
-            tabs: [
-              "settings.acc_profile.tab.info".tr,
-              "settings.acc_profile.tab.actions".tr,
-            ],
+            tabs: ["settings.acc_profile.tab.info".tr, "settings.acc_profile.tab.actions".tr],
             onTabSwitch: (tab) {
               _currentTab.value = tab;
               _controller.transitionToContinuos(_tabs[tab]!());
             },
           ),
           verticalSpacing(defaultSpacing),
-          SmoothBox(
-            controller: _controller,
-          ),
+          SmoothBox(controller: _controller),
         ],
       ),
     );
@@ -132,9 +121,7 @@ class _ChangeRankWindowState extends State<ChangeRankWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text("rank".tr, style: Get.textTheme.labelLarge),
-      ],
+      title: [Text("rank".tr, style: Get.textTheme.labelLarge)],
       child: Column(
         children: [
           Text("settings.rank_change.desc".tr, style: Get.textTheme.bodyMedium),
@@ -146,50 +133,44 @@ class _ChangeRankWindowState extends State<ChangeRankWindow> {
           verticalSpacing(elementSpacing),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              StatusController.ranks.length,
-              (index) {
-                final rank = StatusController.ranks[index];
+            children: List.generate(StatusController.ranks.length, (index) {
+              final rank = StatusController.ranks[index];
 
-                return Padding(
-                  padding: const EdgeInsets.only(top: defaultSpacing),
-                  child: Material(
-                    color: Get.theme.colorScheme.inverseSurface,
+              return Padding(
+                padding: const EdgeInsets.only(top: defaultSpacing),
+                child: Material(
+                  color: Get.theme.colorScheme.inverseSurface,
+                  borderRadius: BorderRadius.circular(defaultSpacing),
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(defaultSpacing),
-                      onTap: () async {
-                        final json = await postAuthorizedJSON("/townhall/accounts/change_rank", {
-                          "account": widget.data.id,
-                          "rank": rank.id,
-                        });
+                    onTap: () async {
+                      final json = await postAuthorizedJSON("/townhall/accounts/change_rank", {"account": widget.data.id, "rank": rank.id});
 
-                        if (!json["success"]) {
-                          showErrorPopup("error", json["error"]);
-                          return;
-                        }
+                      if (!json["success"]) {
+                        showErrorPopup("error", json["error"]);
+                        return;
+                      }
 
-                        // Update the rank in the UI
-                        widget.data.rankID = rank.id;
-                        widget.onUpdate(widget.data);
+                      // Update the rank in the UI
+                      widget.data.rankID = rank.id;
+                      widget.onUpdate(widget.data);
 
-                        Get.back();
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(defaultSpacing),
-                        child: Row(
-                          children: [
-                            Icon(Icons.military_tech, color: Get.theme.colorScheme.onPrimary),
-                            horizontalSpacing(defaultSpacing),
-                            Text("${rank.name} (${rank.level})", style: Get.textTheme.labelLarge),
-                          ],
-                        ),
+                      Get.back();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(defaultSpacing),
+                      child: Row(
+                        children: [
+                          Icon(Icons.military_tech, color: Get.theme.colorScheme.onPrimary),
+                          horizontalSpacing(defaultSpacing),
+                          Text("${rank.name} (${rank.level})", style: Get.textTheme.labelLarge),
+                        ],
                       ),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            }),
           ),
         ],
       ),

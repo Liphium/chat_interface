@@ -45,16 +45,9 @@ class WarpSharedList extends StatelessWidget {
                         children: [
                           Icon(Icons.cyclone, color: Get.theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
-                          Text(
-                            warp.port.toString(),
-                            style: Get.textTheme.labelMedium,
-                          ),
+                          Text(warp.port.toString(), style: Get.textTheme.labelMedium),
                           const Spacer(),
-                          LoadingIconButton(
-                            onTap: () => WarpController.stopWarp(warp),
-                            extra: 5,
-                            icon: Icons.stop_circle,
-                          ),
+                          LoadingIconButton(onTap: () => WarpController.stopWarp(warp), extra: 5, icon: Icons.stop_circle),
                         ],
                       ),
                     ),

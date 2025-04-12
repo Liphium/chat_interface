@@ -110,9 +110,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
               padding: const EdgeInsets.only(top: defaultSpacing),
               child: Padding(
                 padding: const EdgeInsets.all(defaultSpacing),
-                child: Center(
-                  child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
-                ),
+                child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
               ),
             );
           }
@@ -123,10 +121,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
           }
 
           // Render the tab overview
-          return LPHTabElement(
-            tabs: _categories.map((c) => c.name).toList(),
-            onTabSwitch: (tab) => fetchSettings(tab),
-          );
+          return LPHTabElement(tabs: _categories.map((c) => c.name).toList(), onTabSwitch: (tab) => fetchSettings(tab));
         }),
         verticalSpacing(defaultSpacing),
         Watch((ctx) {
@@ -136,85 +131,79 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
           }
 
           return Column(
-            children: List.generate(
-              _currentTab.value.length,
-              (index) {
-                final setting = _currentTab.value[index]!;
-                if (setting["visible"] != null && !setting["visible"]) {
-                  return const SizedBox();
-                }
+            children: List.generate(_currentTab.value.length, (index) {
+              final setting = _currentTab.value[index]!;
+              if (setting["visible"] != null && !setting["visible"]) {
+                return const SizedBox();
+              }
 
-                Widget? settingsWidget;
-                if (setting["value"] is num) {
-                  final devider = (setting["dev"] as num).toDouble();
-                  final currentValue = signal((setting["value"] as num).toDouble());
-                  settingsWidget = DisposeHook(
-                    dispose: () => currentValue.dispose(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(setting["label"], style: Get.textTheme.bodyMedium),
-                        Watch(
-                          (ctx) => FJSliderWithInput(
-                            secondaryColor: true,
-                            min: (setting["min"] as num).toDouble() / devider,
-                            value: currentValue.value / devider,
-                            max: (setting["max"] as num).toDouble() / devider,
-                            onChanged: (val) {
-                              currentValue.value = val * devider;
-                            },
+              Widget? settingsWidget;
+              if (setting["value"] is num) {
+                final devider = (setting["dev"] as num).toDouble();
+                final currentValue = signal((setting["value"] as num).toDouble());
+                settingsWidget = DisposeHook(
+                  dispose: () => currentValue.dispose(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(setting["label"], style: Get.textTheme.bodyMedium),
+                      Watch(
+                        (ctx) => FJSliderWithInput(
+                          secondaryColor: true,
+                          min: (setting["min"] as num).toDouble() / devider,
+                          value: currentValue.value / devider,
+                          max: (setting["max"] as num).toDouble() / devider,
+                          onChanged: (val) {
+                            currentValue.value = val * devider;
+                          },
 
-                            // Update the value on the server
-                            onChangeEnd: (val) async {
-                              final json = await postAuthorizedJSON("/townhall/settings/set_int", {
-                                "name": setting["name"] as String,
-                                "value": "${currentValue.value.toInt()}",
-                              });
-                              if (!json["success"]) {
-                                showErrorPopup("error", json["error"]);
-                                return;
-                              }
-                            },
-                          ),
+                          // Update the value on the server
+                          onChangeEnd: (val) async {
+                            final json = await postAuthorizedJSON("/townhall/settings/set_int", {
+                              "name": setting["name"] as String,
+                              "value": "${currentValue.value.toInt()}",
+                            });
+                            if (!json["success"]) {
+                              showErrorPopup("error", json["error"]);
+                              return;
+                            }
+                          },
                         ),
-                      ],
-                    ),
-                  );
-                } else if (setting["value"] is bool) {
-                  final currentValue = signal((setting["value"] as bool));
-                  settingsWidget = DisposeHook(
-                    dispose: () => currentValue.dispose(),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(setting["label"], style: Get.textTheme.bodyMedium),
-                        Watch(
-                          (ctx) => FJSwitch(
-                            value: currentValue.value,
-                            onChanged: (val) async {
-                              currentValue.value = val;
-                              final json = await postAuthorizedJSON("/townhall/settings/set_bool", {
-                                "name": setting["name"] as String,
-                                "value": "${currentValue.value}",
-                              });
-                              if (!json["success"]) {
-                                showErrorPopup("error", json["error"]);
-                                return;
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing),
-                  child: settingsWidget,
+                      ),
+                    ],
+                  ),
                 );
-              },
-            ),
+              } else if (setting["value"] is bool) {
+                final currentValue = signal((setting["value"] as bool));
+                settingsWidget = DisposeHook(
+                  dispose: () => currentValue.dispose(),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(setting["label"], style: Get.textTheme.bodyMedium),
+                      Watch(
+                        (ctx) => FJSwitch(
+                          value: currentValue.value,
+                          onChanged: (val) async {
+                            currentValue.value = val;
+                            final json = await postAuthorizedJSON("/townhall/settings/set_bool", {
+                              "name": setting["name"] as String,
+                              "value": "${currentValue.value}",
+                            });
+                            if (!json["success"]) {
+                              showErrorPopup("error", json["error"]);
+                              return;
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Padding(padding: const EdgeInsets.only(bottom: defaultSpacing), child: settingsWidget);
+            }),
           );
         }),
       ],

@@ -62,7 +62,7 @@ class AttachmentController {
       "name": name,
       "tag": tag,
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
-      "extension": path.extension(data.file.path).substring(1)
+      "extension": path.extension(data.file.path).substring(1),
     });
 
     // Upload the file to the server
@@ -70,10 +70,7 @@ class AttachmentController {
       ownServer("/account/files/upload"),
       data: formData,
       options: dio_rs.Options(
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "Authorization": "Bearer $sessionToken",
-        },
+        headers: {"Content-Type": "multipart/form-data", "Authorization": "Bearer $sessionToken"},
         validateStatus: (status) => true,
       ),
       onSendProgress: (count, total) {
@@ -149,9 +146,7 @@ class AttachmentController {
     final maxSize = SettingController.settings[FileSettings.maxFileSize]!.getValue();
 
     // Check the file size to make sure it isn't over the limit
-    final json = await postAddress(container.url, "/account/file_info/info", {
-      "id": container.id,
-    });
+    final json = await postAddress(container.url, "/account/file_info/info", {"id": container.id});
 
     if (!json["success"]) {
       if (popups) {
@@ -183,10 +178,7 @@ class AttachmentController {
     // Download and show progress
     final res = await dio.get<Uint8List>(
       serverPath(container.url, "/account/files_unencrypted/download/${container.id}").toString(),
-      options: dio_rs.Options(
-        responseType: dio_rs.ResponseType.bytes,
-        validateStatus: (status) => true,
-      ),
+      options: dio_rs.Options(responseType: dio_rs.ResponseType.bytes, validateStatus: (status) => true),
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
       },
@@ -241,9 +233,7 @@ class AttachmentController {
     attachments.remove(id);
 
     // Delete from server
-    final json = await postAuthorizedJSON("/account/files/delete", {
-      "id": id,
-    });
+    final json = await postAuthorizedJSON("/account/files/delete", {"id": id});
     if (!json["success"]) {
       if (popup) {
         showErrorPopup("error", json["error"]);
@@ -522,15 +512,7 @@ class AttachmentContainer {
     return size;
   }
 
-  AttachmentContainer.remoteImage(String url)
-      : this(
-          storageType: StorageType.cache,
-          id: "",
-          fileName: "",
-          size: 0,
-          url: url,
-          key: null,
-        );
+  AttachmentContainer.remoteImage(String url) : this(storageType: StorageType.cache, id: "", fileName: "", size: 0, url: url, key: null);
 
   String toAttachment() {
     switch (attachmentType) {

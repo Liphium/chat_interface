@@ -32,10 +32,7 @@ class ConversationMembers extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
                 child: Watch(
-                  (ctx) => Text(
-                    'chat.members'.trParams({"count": conversation.members.length.toString()}),
-                    style: Get.theme.textTheme.titleMedium,
-                  ),
+                  (ctx) => Text('chat.members'.trParams({"count": conversation.members.length.toString()}), style: Get.theme.textTheme.titleMedium),
                 ),
               ),
               LoadingIconButton(
@@ -167,11 +164,7 @@ class ConversationMembers extends StatelessWidget {
                           padding: const EdgeInsets.all(elementSpacing),
                           child: Row(
                             children: [
-                              Expanded(
-                                child: UserRenderer(
-                                  id: member.address,
-                                ),
-                              ),
+                              Expanded(child: UserRenderer(id: member.address)),
                               horizontalSpacing(elementSpacing),
                               if (member.role != MemberRole.user)
                                 Padding(

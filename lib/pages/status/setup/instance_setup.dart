@@ -20,9 +20,7 @@ import '../../../main.dart';
 import '../../../util/vertical_spacing.dart';
 import 'setup_manager.dart';
 
-const secureStorage = FlutterSecureStorage(
-  aOptions: AndroidOptions(encryptedSharedPreferences: true),
-);
+const secureStorage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
 
 class InstanceSetup extends Setup {
   InstanceSetup() : super('loading.instance', false);
@@ -186,11 +184,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'setup.choose.instance'.tr,
-          style: Get.textTheme.headlineMedium,
-          textAlign: TextAlign.center,
-        ),
+        Text('setup.choose.instance'.tr, style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
         verticalSpacing(sectionSpacing),
         Text("If you don't know what this is, just click on default and you'll be fine.", style: Get.textTheme.bodyMedium),
         verticalSpacing(sectionSpacing),
@@ -231,10 +225,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
           },
         ),
         verticalSpacing(sectionSpacing),
-        FJTextField(
-          controller: _controller,
-          hintText: 'setup.instance.name'.tr,
-        ),
+        FJTextField(controller: _controller, hintText: 'setup.instance.name'.tr),
         verticalSpacing(defaultSpacing),
         FJElevatedButton(
           onTap: () => setupInstance(_controller.text, next: true),

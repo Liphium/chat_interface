@@ -37,9 +37,7 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> with SignalsMix
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text("password".tr, style: Get.theme.textTheme.labelLarge),
-      ],
+      title: [Text("password".tr, style: Get.theme.textTheme.labelLarge)],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,34 +48,18 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> with SignalsMix
           // Current password
           Text("password.current".tr, textAlign: TextAlign.left, style: Get.theme.textTheme.labelMedium),
           verticalSpacing(elementSpacing),
-          FJTextField(
-            hintText: 'placeholder.password'.tr,
-            obscureText: true,
-            controller: _currentPasswordController,
-          ),
+          FJTextField(hintText: 'placeholder.password'.tr, obscureText: true, controller: _currentPasswordController),
           verticalSpacing(defaultSpacing),
 
           // Password
           Text("password".tr, textAlign: TextAlign.left, style: Get.theme.textTheme.labelMedium),
           verticalSpacing(elementSpacing),
-          FJTextField(
-            hintText: 'placeholder.password'.tr,
-            obscureText: true,
-            controller: _passwordController,
-          ),
+          FJTextField(hintText: 'placeholder.password'.tr, obscureText: true, controller: _passwordController),
           verticalSpacing(defaultSpacing),
-          FJTextField(
-            hintText: 'placeholder.password'.tr,
-            obscureText: true,
-            controller: _confirmPasswordController,
-          ),
+          FJTextField(hintText: 'placeholder.password'.tr, obscureText: true, controller: _confirmPasswordController),
 
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(
-            message: _errorText,
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            expand: true,
-          ),
+          AnimatedErrorContainer(message: _errorText, padding: const EdgeInsets.only(bottom: defaultSpacing), expand: true),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
             onTap: () async {
@@ -112,7 +94,7 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> with SignalsMix
               await StatusService.logOut();
             },
             child: Center(child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
-          )
+          ),
         ],
       ),
     );

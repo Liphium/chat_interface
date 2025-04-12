@@ -34,9 +34,7 @@ class _SidebarState extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Get.theme.colorScheme.onInverseSurface,
-      ),
+      decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface),
 
       //* Sidebar content
       child: DevicePadding(
@@ -55,11 +53,7 @@ class _SidebarState extends State<Sidebar> {
               top: false,
               bottom: false,
               child: AnimatedErrorContainer(
-                padding: const EdgeInsets.only(
-                  bottom: defaultSpacing,
-                  right: defaultSpacing,
-                  left: defaultSpacing,
-                ),
+                padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing, left: defaultSpacing),
                 message: ConnectionController.error,
               ),
             ),
@@ -133,16 +127,21 @@ class _SidebarState extends State<Sidebar> {
                                         final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
 
                                         // Open conversation add window
-                                        showModal(ConversationAddWindow(
-                                          position:
-                                              ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
-                                        ));
+                                        showModal(
+                                          ConversationAddWindow(
+                                            position: ContextMenuData(
+                                              box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))),
+                                              true,
+                                              true,
+                                            ),
+                                          ),
+                                        );
                                       },
                                       icon: Icon(Icons.chat_bubble, color: Get.theme.colorScheme.onPrimary),
                                     ),
                                   ],
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -158,13 +157,10 @@ class _SidebarState extends State<Sidebar> {
               child: SafeArea(
                 top: false,
                 bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                  child: SidebarConversationList(query: _query),
-                ),
+                child: Padding(padding: const EdgeInsets.symmetric(horizontal: defaultSpacing), child: SidebarConversationList(query: _query)),
               ),
             ),
-            if (!isMobileMode()) const SidebarProfile()
+            if (!isMobileMode()) const SidebarProfile(),
           ],
         ),
       ),

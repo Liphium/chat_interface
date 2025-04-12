@@ -33,10 +33,7 @@ class RingingManager {
     });
 
     // Wait for the dialog to be closed and potentially stop the ringtone after that
-    await Get.dialog(ConversationRingingWindow(
-      conversation: conversation,
-      container: container,
-    ));
+    await Get.dialog(ConversationRingingWindow(conversation: conversation, container: container));
     await stopRingtone();
   }
 

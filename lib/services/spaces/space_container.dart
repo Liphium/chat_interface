@@ -21,7 +21,7 @@ class SpaceConnectionContainer extends ShareContainer {
 
   SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
   SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
-      : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
+    : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
   @override
   Map<String, dynamic> toMap() {
@@ -41,9 +41,7 @@ class SpaceConnectionContainer extends ShareContainer {
     try {
       req = await http.post(
         Uri.parse("${nodeProtocol()}$node/info"),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
+        headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode({"room": roomId}),
       );
     } catch (e) {

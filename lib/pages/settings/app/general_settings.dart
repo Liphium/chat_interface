@@ -104,10 +104,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
             ],
           ),
           verticalSpacing(defaultSpacing),
-          InfoContainer(
-            message: "settings.general.ringtone.disabled".tr,
-            expand: true,
-          ),
+          InfoContainer(message: "settings.general.ringtone.disabled".tr, expand: true),
           verticalSpacing(defaultSpacing),
           Text("ring.desc".tr, style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
@@ -121,7 +118,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
           verticalSpacing(defaultSpacing),
 
           ListSelectionSetting(
-            settingName: "language",
+            setting: SettingController.settings[GeneralSettings.language]! as Setting<int>,
             items: GeneralSettings.languages,
             callback: (language) {
               Get.updateLocale((language as LanguageSelection).locale);

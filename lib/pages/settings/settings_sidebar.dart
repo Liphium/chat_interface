@@ -33,25 +33,13 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: widget.sidebarWidth),
       child: Padding(
-        padding: const EdgeInsets.only(
-          top: defaultSpacing * 1.5,
-          bottom: defaultSpacing * 1.5,
-          right: defaultSpacing,
-          left: defaultSpacing * 1.5,
-        ),
+        padding: const EdgeInsets.only(top: defaultSpacing * 1.5, bottom: defaultSpacing * 1.5, right: defaultSpacing, left: defaultSpacing * 1.5),
         child: Container(
-          decoration: BoxDecoration(
-            color: Get.theme.colorScheme.onInverseSurface,
-            borderRadius: BorderRadius.circular(sectionSpacing),
-          ),
+          decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                  top: sectionSpacing,
-                  right: sectionSpacing,
-                  left: sectionSpacing,
-                ),
+                padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
                 child: FJElevatedButton(
                   onTap: () => Get.back(),
                   child: Padding(
@@ -91,61 +79,60 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                             verticalSpacing(defaultSpacing * 0.5),
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
-                              children: current.categories.map((element) {
-                                if (!element.mobile && GetPlatform.isMobile) {
-                                  return const SizedBox();
-                                }
-                                if (!element.web && isWeb) {
-                                  return const SizedBox();
-                                }
-                                if (!StatusController.permissions.contains("admin") && element.admin) {
-                                  return const SizedBox();
-                                }
+                              children:
+                                  current.categories.map((element) {
+                                    if (!element.mobile && GetPlatform.isMobile) {
+                                      return const SizedBox();
+                                    }
+                                    if (!element.web && isWeb) {
+                                      return const SizedBox();
+                                    }
+                                    if (!StatusController.permissions.contains("admin") && element.admin) {
+                                      return const SizedBox();
+                                    }
 
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: defaultSpacing),
-                                  child: Material(
-                                    color: widget.currentCategory == element.label
-                                        ? Get.theme.colorScheme.primary
-                                        : Get.theme.colorScheme.inverseSurface,
-                                    borderRadius: BorderRadius.circular(defaultSpacing),
-                                    child: InkWell(
-                                      onTap: () {
-                                        if (widget.category != null) {
-                                          widget.category!.value = element;
-                                        } else {
-                                          Get.to(
-                                            element.widget,
-                                            transition: Transition.fadeIn,
-                                          );
-                                        }
-                                      },
-                                      borderRadius: BorderRadius.circular(defaultSpacing),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(defaultSpacing),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              element.icon,
-                                              color: Theme.of(context).colorScheme.onPrimary,
-                                              size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: defaultSpacing),
+                                      child: Material(
+                                        color:
+                                            widget.currentCategory == element.label
+                                                ? Get.theme.colorScheme.primary
+                                                : Get.theme.colorScheme.inverseSurface,
+                                        borderRadius: BorderRadius.circular(defaultSpacing),
+                                        child: InkWell(
+                                          onTap: () {
+                                            if (widget.category != null) {
+                                              widget.category!.value = element;
+                                            } else {
+                                              Get.to(element.widget, transition: Transition.fadeIn);
+                                            }
+                                          },
+                                          borderRadius: BorderRadius.circular(defaultSpacing),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(defaultSpacing),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  element.icon,
+                                                  color: Theme.of(context).colorScheme.onPrimary,
+                                                  size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
+                                                ),
+                                                horizontalSpacing(defaultSpacing),
+                                                Expanded(
+                                                  child: Text(
+                                                    "settings.${element.label}".tr,
+                                                    style: Theme.of(context).textTheme.labelLarge!,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            horizontalSpacing(defaultSpacing),
-                                            Expanded(
-                                              child: Text(
-                                                "settings.${element.label}".tr,
-                                                style: Theme.of(context).textTheme.labelLarge!,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            )
+                                    );
+                                  }).toList(),
+                            ),
                           ],
                         ),
                       );

@@ -50,12 +50,7 @@ class MessageController {
   /// Add a message to the cache.
   ///
   /// [simple] can be set to [true] in case you want to only add the message (no extra fancy stuff).
-  static Future<bool> addMessage(
-    Message message,
-    Conversation conversation, {
-    bool simple = false,
-    (String, String)? part,
-  }) async {
+  static Future<bool> addMessage(Message message, Conversation conversation, {bool simple = false, (String, String)? part}) async {
     // Make sure there even is a conversation
     var tab = SidebarController.currentOpenTab.peek();
     if (tab is! ConversationSidebarTab) {

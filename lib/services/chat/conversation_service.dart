@@ -49,9 +49,7 @@ class ConversationToken {
   final String token;
 
   ConversationToken(this.id, this.token);
-  ConversationToken.fromJson(Map<String, dynamic> json)
-      : id = LPHAddress.from(json["id"]),
-        token = json["token"];
+  ConversationToken.fromJson(Map<String, dynamic> json) : id = LPHAddress.from(json["id"]), token = json["token"];
 
   String toJson() => jsonEncode(toMap());
   Map<String, dynamic> toMap() => <String, dynamic>{"id": id.encode(), "token": token};
@@ -123,8 +121,17 @@ class ConversationService extends VaultTarget {
     // Check if the conversation already exists
     final conversation = ConversationController.conversations.values.firstWhere(
       (element) => element.type == model.ConversationType.directMessage && element.members.values.any((element) => element.address == friend.id),
-      orElse: () => Conversation(LPHAddress.error(), "", model.ConversationType.directMessage, ConversationToken(LPHAddress.error(), ""),
-          ConversationContainer(""), "", 0, 0),
+      orElse:
+          () => Conversation(
+            LPHAddress.error(),
+            "",
+            model.ConversationType.directMessage,
+            ConversationToken(LPHAddress.error(), ""),
+            ConversationContainer(""),
+            "",
+            0,
+            0,
+          ),
     );
     if (!conversation.id.isError()) {
       return (conversation, null);
@@ -145,9 +152,7 @@ class ConversationService extends VaultTarget {
   static Future<String?> _openConversation(model.ConversationType type, List<Friend> friends, String name) async {
     // Make sure the name of the conversation matches the requirements
     if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]!) {
-      return "conversations.name.length".trParams({
-        "length": specialConstants[Constants.specialConstantMaxConversationNameLength].toString(),
-      });
+      return "conversations.name.length".trParams({"length": specialConstants[Constants.specialConstantMaxConversationNameLength].toString()});
     }
 
     // Prepare the conversation
@@ -174,8 +179,16 @@ class ConversationService extends VaultTarget {
     // Put together the information all other members need
     final packagedKey = packageSymmetricKey(conversationKey);
     final convId = LPHAddress.from(body["conversation"]);
-    final conversation = Conversation(convId, "", model.ConversationType.values[body["type"]], ConversationToken.fromJson(body["admin_token"]),
-        conversationContainer, packagedKey, 0, DateTime.now().millisecondsSinceEpoch);
+    final conversation = Conversation(
+      convId,
+      "",
+      model.ConversationType.values[body["type"]],
+      ConversationToken.fromJson(body["admin_token"]),
+      conversationContainer,
+      packagedKey,
+      0,
+      DateTime.now().millisecondsSinceEpoch,
+    );
 
     // Send all other members their information and credentials
     for (var friend in friends) {
@@ -217,9 +230,7 @@ class ConversationService extends VaultTarget {
 
     // Send a removal request to the server (if desired)
     if (token != null) {
-      final json = await postNodeJSON("/conversations/leave", {
-        "token": token.toMap(),
-      });
+      final json = await postNodeJSON("/conversations/leave", {"token": token.toMap()});
 
       if (!json["success"]) {
         sendLog("Error deleting conversation on the server, ignoring though: ${json["error"]}");
@@ -252,19 +263,16 @@ class ConversationService extends VaultTarget {
 
     // Send the friend the invite to the conversation
     final result = await sendAuthenticatedStoredAction(
-        friend, _conversationPayload(conv.id, ConversationToken.fromJson(json), packageSymmetricKey(conv.key), friend));
+      friend,
+      _conversationPayload(conv.id, ConversationToken.fromJson(json), packageSymmetricKey(conv.key), friend),
+    );
     return result;
   }
 
   /// Create the stored action for a conversation invite.
   static Map<String, dynamic> _conversationPayload(LPHAddress id, ConversationToken token, String packagedKey, Friend friend) {
     final signature = signMessage(signatureKeyPair.secretKey, "$id${friend.id}");
-    return authenticatedStoredAction("conv", {
-      "id": id.encode(),
-      "sg": signature,
-      "token": token.toJson(),
-      "key": packagedKey,
-    });
+    return authenticatedStoredAction("conv", {"id": id.encode(), "sg": signature, "token": token.toJson(), "key": packagedKey});
   }
 
   /// Ask the server to subscribe to all conversations.
@@ -300,12 +308,9 @@ class ConversationService extends VaultTarget {
     final maxValue = await query.map((row) => row.read(max)).getSingleOrNull();
 
     // Send the subscription request
-    final event = await connector.sendActionAndWait(ServerAction("conv_sub", <String, dynamic>{
-      "tokens": tokens,
-      "status": status,
-      "sync": maxValue?.toInt() ?? 0,
-      "data": statusData,
-    }));
+    final event = await connector.sendActionAndWait(
+      ServerAction("conv_sub", <String, dynamic>{"tokens": tokens, "status": status, "sync": maxValue?.toInt() ?? 0, "data": statusData}),
+    );
     if (event == null) {
       return "server.error".tr;
     }
@@ -313,12 +318,7 @@ class ConversationService extends VaultTarget {
       sendLog("ERROR WHILE SUBSCRIBING: ${event.data["message"]}");
       return event.data["message"];
     }
-    await ConversationController.finishedLoading(
-      basePath,
-      event.data["info"],
-      deletions ? (event.data["missing"] ?? []) : [],
-      false,
-    );
+    await ConversationController.finishedLoading(basePath, event.data["info"], deletions ? (event.data["missing"] ?? []) : [], false);
 
     return null;
   }
@@ -351,9 +351,7 @@ class ConversationService extends VaultTarget {
 
     // Get the data from the server
     conversation.membersLoading.value = true;
-    final json = await postNodeJSON("/conversations/data", {
-      "token": conversation.token.toMap(),
-    });
+    final json = await postNodeJSON("/conversations/data", {"token": conversation.token.toMap()});
 
     if (!json["success"]) {
       sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING ${json["error"]}");
@@ -418,8 +416,9 @@ class ConversationService extends VaultTarget {
   /// Also calls the same method in the controller.
   static void updateLastMessage(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
     // Save the new update time in the local database
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode())))
-        .write(ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))));
+    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode()))).write(
+      ConversationCompanion(updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch))),
+    );
 
     // Update it in the UI
     ConversationController.updateLastMessageTime(conversation, increment: increment, messageSendTime: messageSendTime);
@@ -428,9 +427,7 @@ class ConversationService extends VaultTarget {
   /// Mark the conversation as read for the current time.
   static Future<void> overwriteRead(Conversation conversation) async {
     // Send new read state to the server
-    final json = await postNodeJSON("/conversations/read", {
-      "token": conversation.token.toMap(),
-    });
+    final json = await postNodeJSON("/conversations/read", {"token": conversation.token.toMap()});
     if (json["success"]) {
       conversation.notificationCount.value = 0;
       conversation.readAt.value = json["time"];

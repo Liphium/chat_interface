@@ -44,30 +44,22 @@ class _VideoPreviewState extends State<VideoPreview> with SignalsMixin {
   Map<String, dynamic> _getMediaConstraints({bool audio = true, bool video = true}) {
     return {
       'audio': audio ? true : false,
-      'video': video
-          ? {
-              'mandatory': {
-                'minWidth': '1920',
-                'minHeight': '1080',
-                'width': '1920',
-                'height': '1080',
-                'minFrameRate': '24',
-                'frameRate': '30',
-              },
-              'facingMode': 'user',
-              'optional': [],
-            }
-          : false,
+      'video':
+          video
+              ? {
+                'mandatory': {'minWidth': '1920', 'minHeight': '1080', 'width': '1920', 'height': '1080', 'minFrameRate': '24', 'frameRate': '30'},
+                'facingMode': 'user',
+                'optional': [],
+              }
+              : false,
     };
   }
 
   @override
   void dispose() {
-    _mediaStream!.getTracks().forEach(
-      (element) {
-        element.stop();
-      },
-    );
+    _mediaStream!.getTracks().forEach((element) {
+      element.stop();
+    });
     super.dispose();
   }
 

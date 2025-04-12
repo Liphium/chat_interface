@@ -42,29 +42,30 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
             ),
           ),
           Row(
-              children: List.generate(3, (index) {
-            return Padding(
-              padding: const EdgeInsets.only(right: defaultSpacing),
-              child: Material(
-                borderRadius: BorderRadius.circular(defaultSpacing),
-                color: Get.theme.colorScheme.inverseSurface,
-                child: InkWell(
-                  onTap: () => rotateTable(math.pi / 2 * (index + 1)),
+            children: List.generate(3, (index) {
+              return Padding(
+                padding: const EdgeInsets.only(right: defaultSpacing),
+                child: Material(
                   borderRadius: BorderRadius.circular(defaultSpacing),
-                  child: Padding(
-                    padding: const EdgeInsets.all(defaultSpacing),
-                    child: Row(
-                      children: [
-                        Icon(Icons.rotate_left, color: Get.theme.colorScheme.onPrimary),
-                        horizontalSpacing(elementSpacing),
-                        Text("${90 * (index + 1)}", style: Get.theme.textTheme.labelMedium),
-                      ],
+                  color: Get.theme.colorScheme.inverseSurface,
+                  child: InkWell(
+                    onTap: () => rotateTable(math.pi / 2 * (index + 1)),
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    child: Padding(
+                      padding: const EdgeInsets.all(defaultSpacing),
+                      child: Row(
+                        children: [
+                          Icon(Icons.rotate_left, color: Get.theme.colorScheme.onPrimary),
+                          horizontalSpacing(elementSpacing),
+                          Text("${90 * (index + 1)}", style: Get.theme.textTheme.labelMedium),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }))
+              );
+            }),
+          ),
         ],
       ),
     );
@@ -74,17 +75,9 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
     final canvasWidth = Get.width - TabletopController.globalCanvasPosition.dx;
     final canvasHeight = Get.height - TabletopController.globalCanvasPosition.dy;
     final center = Offset(canvasWidth / 2, canvasHeight / 2);
-    final focalPoint = TabletopView.localToWorldPos(
-      center,
-      TabletopController.canvasZoom,
-      TabletopController.canvasOffset,
-    );
+    final focalPoint = TabletopView.localToWorldPos(center, TabletopController.canvasZoom, TabletopController.canvasOffset);
     TabletopController.canvasRotation.value = value;
-    final newFocalPoint = TabletopView.localToWorldPos(
-      center,
-      TabletopController.canvasZoom,
-      TabletopController.canvasOffset,
-    );
+    final newFocalPoint = TabletopView.localToWorldPos(center, TabletopController.canvasZoom, TabletopController.canvasOffset);
 
     TabletopController.canvasOffset -= focalPoint - newFocalPoint;
   }

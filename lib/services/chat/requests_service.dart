@@ -68,19 +68,12 @@ class RequestsService {
         account.name,
         account.displayName,
         "",
-        KeyStorage(
-          account.publicKey,
-          account.signatureKey,
-          profileKey,
-          "",
-        ),
+        KeyStorage(account.publicKey, account.signatureKey, profileKey, ""),
         DateTime.now().millisecondsSinceEpoch,
       );
 
       // Store the request in the friends vault
-      final error = await FriendsVault.storeSentRequest(
-        request,
-      );
+      final error = await FriendsVault.storeSentRequest(request);
       if (error != null) {
         RequestController.requestsLoading.value = false;
         return (error, null);

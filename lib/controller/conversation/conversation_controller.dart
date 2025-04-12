@@ -49,20 +49,11 @@ class ConversationController {
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date.
   ///
   /// Called later for all conversations from other servers since they are streamed in after.
-  static Future<void> finishedLoading(
-    String server,
-    Map<String, dynamic> conversationInfo,
-    List<dynamic> deleted,
-    bool error,
-  ) async {
+  static Future<void> finishedLoading(String server, Map<String, dynamic> conversationInfo, List<dynamic> deleted, bool error) async {
     // Delete all the conversations that should be deleted
     for (var conversation in conversations.values) {
       if (deleted.contains(conversation.token.id.encode())) {
-        unawaited(ConversationService.delete(
-          conversation.id,
-          vaultId: conversation.vaultId,
-          token: conversation.token,
-        ));
+        unawaited(ConversationService.delete(conversation.id, vaultId: conversation.vaultId, token: conversation.token));
       }
     }
 
@@ -143,27 +134,27 @@ class Conversation {
     this.updatedAt.value = updatedAt;
   }
   Conversation.fromJson(Map<String, dynamic> json, String vaultId)
-      : this(
-          LPHAddress.from(json["id"]),
-          vaultId,
-          model.ConversationType.values[json["type"]],
-          ConversationToken.fromJson(json["token"]),
-          ConversationContainer.fromJson(json["data"]),
-          json["key"],
-          json["update"] ?? DateTime.now().millisecondsSinceEpoch,
-          0, // This shouldn't matter, just makes sure the data is fetched
-        );
+    : this(
+        LPHAddress.from(json["id"]),
+        vaultId,
+        model.ConversationType.values[json["type"]],
+        ConversationToken.fromJson(json["token"]),
+        ConversationContainer.fromJson(json["data"]),
+        json["key"],
+        json["update"] ?? DateTime.now().millisecondsSinceEpoch,
+        0, // This shouldn't matter, just makes sure the data is fetched
+      );
   Conversation.fromData(ConversationData data)
-      : this(
-          LPHAddress.from(data.id),
-          fromDbEncrypted(data.vaultId),
-          data.type,
-          ConversationToken.fromJson(jsonDecode(fromDbEncrypted(data.token))),
-          ConversationContainer.fromJson(jsonDecode(fromDbEncrypted(data.data))),
-          fromDbEncrypted(data.key),
-          data.lastVersion.toInt(),
-          data.updatedAt.toInt(),
-        );
+    : this(
+        LPHAddress.from(data.id),
+        fromDbEncrypted(data.vaultId),
+        data.type,
+        ConversationToken.fromJson(jsonDecode(fromDbEncrypted(data.token))),
+        ConversationContainer.fromJson(jsonDecode(fromDbEncrypted(data.data))),
+        fromDbEncrypted(data.key),
+        data.lastVersion.toInt(),
+        data.updatedAt.toInt(),
+      );
 
   /// Copy a conversation without the `key`.
   ///
@@ -197,11 +188,7 @@ class Conversation {
   String get dmName {
     final member = members.values.firstWhere(
       (element) => element.address != StatusController.ownAddress,
-      orElse: () => Member(
-        LPHAddress.error(),
-        LPHAddress.error(),
-        MemberRole.user,
-      ),
+      orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
     );
     return FriendController.friends[member.address]?.displayName.value ?? container.name;
   }
@@ -210,11 +197,7 @@ class Conversation {
   Friend get otherMember {
     final member = members.values.firstWhere(
       (element) => element.address != StatusController.ownAddress,
-      orElse: () => Member(
-        LPHAddress.error(),
-        LPHAddress.error(),
-        MemberRole.user,
-      ),
+      orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
     );
     return FriendController.friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
   }
@@ -223,8 +206,10 @@ class Conversation {
   bool get borked =>
       !isGroup &&
       FriendController.friends[members.values
-              .firstWhere((element) => element.address != StatusController.ownAddress,
-                  orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user))
+              .firstWhere(
+                (element) => element.address != StatusController.ownAddress,
+                orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
+              )
               .address] ==
           null;
 
@@ -243,13 +228,13 @@ class Conversation {
   }
 
   String toJson() => jsonEncode(<String, dynamic>{
-        "id": id.encode(),
-        "type": type.index,
-        "token": token.toMap(),
-        "key": packageSymmetricKey(key),
-        "update": updatedAt.value.toInt(),
-        "data": container.toJson(),
-      });
+    "id": id.encode(),
+    "type": type.index,
+    "token": token.toMap(),
+    "key": packageSymmetricKey(key),
+    "update": updatedAt.value.toInt(),
+    "data": container.toJson(),
+  });
 
   /// Delete conversation from vault and database.
   ///

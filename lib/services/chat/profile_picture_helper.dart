@@ -27,9 +27,7 @@ class ProfileHelper {
     // Get old profile picture
     final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id.encode()))).getSingleOrNull();
 
-    final json = await postAddress(friend.id.server, "/account/profile/get", <String, dynamic>{
-      "id": friend.id.id,
-    });
+    final json = await postAddress(friend.id.server, "/account/profile/get", <String, dynamic>{"id": friend.id.id});
 
     if (!json["success"]) {
       sendLog("ERROR WHILE GETTING PROFILE: ${json["error"]}");
@@ -98,12 +96,7 @@ class ProfileHelper {
   /// Upload a profile picture to the server and set it as the current profile picture
   static Future<bool> uploadProfilePicture(XFile file, String originalName, {Uint8List? bytes}) async {
     // Upload the file
-    final response = await AttachmentController.uploadFile(
-      UploadData(file),
-      StorageType.permanent,
-      Constants.fileAppDataTag,
-      bytes: bytes,
-    );
+    final response = await AttachmentController.uploadFile(UploadData(file), StorageType.permanent, Constants.fileAppDataTag, bytes: bytes);
     if (response.container == null) {
       showErrorPopup("error", response.message);
       return false;

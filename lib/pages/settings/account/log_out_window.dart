@@ -31,12 +31,7 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("log_out.delete_files".tr, style: Get.theme.textTheme.bodyMedium),
-              Watch(
-                (ctx) => FJSwitch(
-                  value: _deleteFiles.value,
-                  onChanged: (value) => _deleteFiles.value = value,
-                ),
-              ),
+              Watch((ctx) => FJSwitch(value: _deleteFiles.value, onChanged: (value) => _deleteFiles.value = value)),
             ],
           ),
           verticalSpacing(defaultSpacing),
@@ -51,14 +46,9 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
                 ),
               ),
               horizontalSpacing(defaultSpacing),
-              Expanded(
-                child: FJElevatedButton(
-                  onTap: () => Get.back(),
-                  child: Center(child: Text("no".tr, style: Get.theme.textTheme.labelLarge)),
-                ),
-              ),
+              Expanded(child: FJElevatedButton(onTap: () => Get.back(), child: Center(child: Text("no".tr, style: Get.theme.textTheme.labelLarge)))),
             ],
-          )
+          ),
         ],
       ),
     );

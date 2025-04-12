@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/controller_manager.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
+import 'package:chat_interface/src/rust/api/engine.dart';
+import 'package:chat_interface/src/rust/api/general.dart';
+import 'package:chat_interface/src/rust/frb_generated.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -37,6 +40,15 @@ Future<bool> initSodium() async {
 var executableArguments = <String>[];
 
 void main(List<String> args) async {
+  // Initialize libspaceship
+  await RustLib.init();
+  await stopAllEngines();
+
+  // Create a log stream for communication with libspaceship
+  createLogStream().listen((log) {
+    sendLog("rust: $log");
+  });
+
   // Handle errors from flutter
   final originalFunction = FlutterError.onError!;
   FlutterError.onError = (details) {
@@ -49,20 +61,22 @@ void main(List<String> args) async {
     unawaited(initApp(args));
   } else {
     // Run everything in a zone for error collection
-    unawaited(runZonedGuarded(
-      () async {
-        unawaited(initApp(args));
-      },
-      (error, stack) {
-        LogManager.addError(error, stack);
-      },
-      zoneSpecification: ZoneSpecification(
-        print: (self, parent, zone, line) async {
-          await LogManager.addLog(line);
-          parent.print(zone, line);
+    unawaited(
+      runZonedGuarded(
+        () async {
+          unawaited(initApp(args));
         },
+        (error, stack) {
+          LogManager.addError(error, stack);
+        },
+        zoneSpecification: ZoneSpecification(
+          print: (self, parent, zone, line) async {
+            await LogManager.addLog(line);
+            parent.print(zone, line);
+          },
+        ),
       ),
-    ));
+    );
   }
 }
 

@@ -35,93 +35,79 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
               Get.off(const ChatPageMobile(selected: 3));
             }
           },
-          child: LayoutBuilder(builder: (context, constraints) {
-            const sidebarWidth = 300.0;
-            final biggestWidth = constraints.biggest.width;
-            var containerWidth = 0.0;
-            var pageWidth = 1000.0;
-            if (biggestWidth > 1000 + sidebarWidth + 24) {
-              containerWidth = (biggestWidth - 1000 - sidebarWidth) / 2;
-            } else {
-              pageWidth = biggestWidth - sidebarWidth - defaultSpacing * 1.5;
-            }
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const sidebarWidth = 300.0;
+              final biggestWidth = constraints.biggest.width;
+              var containerWidth = 0.0;
+              var pageWidth = 1000.0;
+              if (biggestWidth > 1000 + sidebarWidth + 24) {
+                containerWidth = (biggestWidth - 1000 - sidebarWidth) / 2;
+              } else {
+                pageWidth = biggestWidth - sidebarWidth - defaultSpacing * 1.5;
+              }
 
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: containerWidth,
-                ),
-                Watch(
-                  (ctx) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(width: containerWidth),
+                  Watch((ctx) {
                     return SettingsSidebar(
                       sidebarWidth: sidebarWidth,
                       currentCategory: SettingController.currentCategory.value?.label,
                       category: SettingController.currentCategory,
                     );
-                  },
-                ),
+                  }),
 
-                //* Content
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: defaultSpacing),
-                    child: SingleChildScrollView(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: pageWidth),
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Watch(
-                                    (ctx) {
+                  //* Content
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: defaultSpacing),
+                      child: SingleChildScrollView(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: pageWidth),
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Watch((ctx) {
                                       final category = SettingController.currentCategory;
                                       if (category.value != null && category.value!.displayTitle) {
                                         return Padding(
                                           padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
-                                          child: Text(
-                                            "settings.${category.value!.label}".tr,
-                                            style: Get.theme.textTheme.headlineMedium,
-                                          ),
+                                          child: Text("settings.${category.value!.label}".tr, style: Get.theme.textTheme.headlineMedium),
                                         );
                                       }
 
                                       return const SizedBox();
-                                    },
-                                  ),
-                                  Watch(
-                                    (ctx) {
+                                    }),
+                                    Watch((ctx) {
                                       final category = SettingController.currentCategory;
                                       if (category.value == null) {
-                                        return SettingSelectionMobile(
-                                          category: category,
-                                          desktop: true,
-                                        );
+                                        return SettingSelectionMobile(category: category, desktop: true);
                                       }
 
                                       return category.value!.widget ?? const Placeholder();
-                                    },
-                                  ),
-                                ],
+                                    }),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            width: max(containerWidth, 8) - 8,
-                          ),
-                        ],
+                            SizedBox(width: max(containerWidth, 8) - 8),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

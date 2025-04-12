@@ -41,9 +41,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
 
     if (FriendController.friends.length == 1) {
       return SlidingWindowBase(
-        title: [
-          Text("chat.space.add".tr, style: theme.textTheme.titleMedium),
-        ],
+        title: [Text("chat.space.add".tr, style: theme.textTheme.titleMedium)],
         position: ContextMenuData(widget.position, true, true),
         child: Column(
           children: [
@@ -54,9 +52,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
                 Get.back();
                 showModal(const FriendsPage());
               },
-              child: Center(
-                child: Text("open.friends".tr, style: theme.textTheme.labelLarge),
-              ),
+              child: Center(child: Text("open.friends".tr, style: theme.textTheme.labelLarge)),
             ),
           ],
         ),
@@ -64,9 +60,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
     }
 
     return SlidingWindowBase(
-      title: [
-        Text("chat.space.add".tr, style: theme.textTheme.titleMedium),
-      ],
+      title: [Text("chat.space.add".tr, style: theme.textTheme.titleMedium)],
       position: ContextMenuData(widget.position, true, true),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +97,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
             },
             label: "create".tr,
             loading: _conversationLoading,
-          )
+          ),
         ],
       ),
     );

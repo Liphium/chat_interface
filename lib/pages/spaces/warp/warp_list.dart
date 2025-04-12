@@ -15,10 +15,7 @@ class WarpList extends StatelessWidget {
     return Watch((context) {
       if (WarpController.warps.isEmpty) {
         return Padding(
-          padding: const EdgeInsets.only(
-            top: sectionSpacing,
-            bottom: defaultSpacing,
-          ),
+          padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
           child: Text("warp.list.empty".tr, style: Get.textTheme.labelMedium),
         );
       }
@@ -50,19 +47,11 @@ class WarpList extends StatelessWidget {
                     children: [
                       Icon(Icons.cyclone, color: Get.theme.colorScheme.onPrimary),
                       horizontalSpacing(defaultSpacing),
-                      Text(
-                        warp.port.toString(),
-                        style: Get.textTheme.labelMedium,
-                      ),
+                      Text(warp.port.toString(), style: Get.textTheme.labelMedium),
                       const Spacer(),
                       Visibility(
                         visible: warp.account.id != StatusController.ownAddress,
-                        child: LoadingIconButton(
-                          loading: warp.loading,
-                          onTap: () => WarpController.connectToWarp(warp),
-                          extra: 5,
-                          icon: Icons.add,
-                        ),
+                        child: LoadingIconButton(loading: warp.loading, onTap: () => WarpController.connectToWarp(warp), extra: 5, icon: Icons.add),
                       ),
                     ],
                   ),
@@ -86,12 +75,8 @@ class WarpList extends StatelessWidget {
                     UserAvatar(id: warp.account.id, size: 35),
                     horizontalSpacing(defaultSpacing),
                     Watch(
-                      (context) => Text(
-                        "warp.list.sharing".trParams({
-                          "name": warp.account.displayName.value,
-                        }),
-                        style: Get.theme.textTheme.labelMedium,
-                      ),
+                      (context) =>
+                          Text("warp.list.sharing".trParams({"name": warp.account.displayName.value}), style: Get.theme.textTheme.labelMedium),
                     ),
                   ],
                 ),

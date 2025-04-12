@@ -11,11 +11,7 @@ class ZapShareWindow extends StatelessWidget {
   final Conversation conversation;
   final ContextMenuData data;
 
-  const ZapShareWindow({
-    super.key,
-    required this.data,
-    required this.conversation,
-  });
+  const ZapShareWindow({super.key, required this.data, required this.conversation});
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +29,10 @@ class ZapShareWindow extends StatelessWidget {
                   Row(
                     children: [
                       Watch((ctx) => Text("${ZapShareController.step.value} ", style: Get.theme.textTheme.labelLarge)),
-                      Watch((ctx) =>
-                          Text("(${ZapShareController.currentPart.value}/${ZapShareController.endPart})", style: Get.theme.textTheme.bodyLarge)),
+                      Watch(
+                        (ctx) =>
+                            Text("(${ZapShareController.currentPart.value}/${ZapShareController.endPart})", style: Get.theme.textTheme.bodyLarge),
+                      ),
                     ],
                   ),
                   verticalSpacing(defaultSpacing),
@@ -51,7 +49,7 @@ class ZapShareWindow extends StatelessWidget {
                         Text("Stop file transfer", style: Get.theme.textTheme.labelLarge),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
               const Spacer(),

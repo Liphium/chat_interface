@@ -33,16 +33,12 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
   }
 
   void _init() {
-    _player.positionStream.listen(
-      (duration) {
-        _currentDuration.value = duration;
-      },
-    );
-    _player.durationStream.listen(
-      (max) {
-        _currentMax.value = max;
-      },
-    );
+    _player.positionStream.listen((duration) {
+      _currentDuration.value = duration;
+    });
+    _player.durationStream.listen((max) {
+      _currentMax.value = max;
+    });
   }
 
   @override
@@ -54,15 +50,10 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: 350,
-      ),
+      constraints: BoxConstraints(maxWidth: 350),
       child: Container(
         padding: const EdgeInsets.all(defaultSpacing),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(defaultSpacing),
-          color: Get.theme.colorScheme.primaryContainer,
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.primaryContainer),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -72,23 +63,14 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.library_music,
-                      size: sectionSpacing * 2,
-                      color: Get.theme.colorScheme.onPrimary,
-                    ),
+                    Icon(Icons.library_music, size: sectionSpacing * 2, color: Get.theme.colorScheme.onPrimary),
                     horizontalSpacing(defaultSpacing),
                     Flexible(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Flexible(
-                            child: Text(
-                              widget.container.name,
-                              style: Get.theme.textTheme.labelMedium,
-                            ),
-                          ),
+                          Flexible(child: Text(widget.container.name, style: Get.theme.textTheme.labelMedium)),
                           Flexible(
                             child: Watch(
                               (ctx) => Text(
@@ -110,10 +92,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                     return SizedBox(
                       width: 30,
                       height: 30,
-                      child: CircularProgressIndicator(
-                        color: Get.theme.colorScheme.onPrimary,
-                        value: widget.container.percentage.value,
-                      ),
+                      child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, value: widget.container.percentage.value),
                     );
                   }
 
@@ -164,58 +143,52 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
               ],
             ),
             verticalSpacing(defaultSpacing),
-            LayoutBuilder(builder: (context, constraints) {
-              if (_currentDuration.value == null || _currentMax.value == null) {
-                return Container(
-                  height: 10,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(defaultSpacing),
-                    color: Get.theme.colorScheme.primary,
-                  ),
-                );
-              }
+            LayoutBuilder(
+              builder: (context, constraints) {
+                if (_currentDuration.value == null || _currentMax.value == null) {
+                  return Container(
+                    height: 10,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.primary),
+                  );
+                }
 
-              // Render the current duration
-              return MouseRegion(
-                cursor: SystemMouseCursors.click,
-                onHover: (event) {
-                  _hoverPosition.value = event.localPosition.dx;
-                },
-                onExit: (event) => _hoverPosition.value = null,
-                child: GestureDetector(
-                  onTap: () {
-                    final percentage = (_hoverPosition.value! / constraints.maxWidth);
-                    _player.seek(Duration(milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt()));
+                // Render the current duration
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  onHover: (event) {
+                    _hoverPosition.value = event.localPosition.dx;
                   },
-                  child: Stack(
-                    children: [
-                      Container(
-                        height: 10,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          color: Get.theme.colorScheme.primary,
-                        ),
-                      ),
-                      Watch(
-                        (ctx) => AnimatedContainer(
-                          duration: Duration(milliseconds: 100),
+                  onExit: (event) => _hoverPosition.value = null,
+                  child: GestureDetector(
+                    onTap: () {
+                      final percentage = (_hoverPosition.value! / constraints.maxWidth);
+                      _player.seek(Duration(milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt()));
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
                           height: 10,
-                          width: constraints.maxWidth *
-                              (_hoverPosition.value == null
-                                      ? (_currentDuration.value!.inMilliseconds / _currentMax.value!.inMilliseconds)
-                                      : (_hoverPosition.value! / constraints.maxWidth))
-                                  .clamp(0, 1),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(defaultSpacing),
-                            color: Get.theme.colorScheme.onPrimary,
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.primary),
+                        ),
+                        Watch(
+                          (ctx) => AnimatedContainer(
+                            duration: Duration(milliseconds: 100),
+                            height: 10,
+                            width:
+                                constraints.maxWidth *
+                                (_hoverPosition.value == null
+                                        ? (_currentDuration.value!.inMilliseconds / _currentMax.value!.inMilliseconds)
+                                        : (_hoverPosition.value! / constraints.maxWidth))
+                                    .clamp(0, 1),
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.onPrimary),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            })
+                );
+              },
+            ),
           ],
         ),
       ),

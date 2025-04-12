@@ -233,12 +233,7 @@ abstract class MessageProvider {
   /// The files will be uploaded to the server automatically.
   ///
   /// Returns an error or null if successful.
-  Future<String?> sendTextMessageWithFiles(
-    Signal<bool> loading,
-    String message,
-    List<UploadData> files,
-    String answer,
-  ) async {
+  Future<String?> sendTextMessageWithFiles(Signal<bool> loading, String message, List<UploadData> files, String answer) async {
     if (loading.value) {
       return "error.message.loading";
     }
@@ -262,13 +257,7 @@ abstract class MessageProvider {
   /// Send a message into the channel of the message provider.
   ///
   /// Returns an error or null if successful.
-  Future<String?> sendMessage(
-    Signal<bool> loading,
-    MessageType type,
-    List<String> attachments,
-    String message,
-    String answer,
-  ) async {
+  Future<String?> sendMessage(Signal<bool> loading, MessageType type, List<String> attachments, String message, String answer) async {
     // Check if there is a connection before doing this
     if (!ConnectionController.connected.value) {
       return "error.no_connection".tr;
@@ -317,12 +306,7 @@ abstract class MessageProvider {
 
     // Use the timestamp from the json (to prevent desynchronization and stuff)
     final (timeToken, stamp) = obj;
-    final content = Message.buildContentJson(
-      content: message,
-      type: type,
-      attachments: attachments,
-      answerId: answer,
-    );
+    final content = Message.buildContentJson(content: message, type: type, attachments: attachments, answerId: answer);
 
     // Encrypt message with signature
     final info = SymmetricSequencedInfo.builder(content, stamp).finish(encryptionKey());
@@ -502,12 +486,7 @@ class Message {
   }
 
   /// Convert content to a message content json
-  static String buildContentJson({
-    required String content,
-    required MessageType type,
-    required List<String> attachments,
-    required String answerId,
-  }) {
+  static String buildContentJson({required String content, required MessageType type, required List<String> attachments, required String answerId}) {
     return jsonEncode(<String, dynamic>{
       "c": content,
       "t": type.index,
@@ -551,9 +530,4 @@ class Message {
   }
 }
 
-enum MessageType {
-  text,
-  system,
-  call,
-  liveshare;
-}
+enum MessageType { text, system, call, liveshare }

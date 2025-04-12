@@ -33,7 +33,7 @@ class BoolSettingSmall extends StatelessWidget {
               SettingController.settings[settingName]!.setValue(value);
               onChanged?.call(value);
             },
-          )
+          ),
         ],
       ),
     );

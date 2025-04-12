@@ -46,9 +46,7 @@ class AccountStep extends ConnectionStep {
       await setEncryptedValue("cache_account_dname", account["display_name"]);
 
       // Restart to migrate to the new account id
-      return SetupResponse(
-        restart: true,
-      );
+      return SetupResponse(restart: true);
     }
 
     // Set all permissions
@@ -68,8 +66,9 @@ class AccountStep extends ConnectionStep {
     storedActionKey = body["actions"];
 
     // Set own key pair as cached (in the friend that represents this account)
-    FriendController.friends[StatusController.ownAddress]!
-        .setKeyStorage(KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""));
+    FriendController.friends[StatusController.ownAddress]!.setKeyStorage(
+      KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+    );
 
     // Tell the completer that the keys of the own friend have been set
     keyCompleter?.complete();

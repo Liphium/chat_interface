@@ -37,71 +37,69 @@ class _FriendButtonState extends State<FriendButton> {
           //* Friend info
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Row(
-                children: [
-                  Icon(Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
-                  horizontalSpacing(defaultSpacing),
-                  Text(
-                    widget.friend.displayName.value,
-                    style: Get.theme.textTheme.labelMedium,
-                  ),
-                  if (widget.friend.id.server != basePath)
-                    Padding(
-                      padding: const EdgeInsets.only(left: defaultSpacing),
-                      child: Tooltip(
-                        message: "friends.different_town".trParams({
-                          "town": widget.friend.id.server,
-                        }),
-                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                    horizontalSpacing(defaultSpacing),
+                    Text(widget.friend.displayName.value, style: Get.theme.textTheme.labelMedium),
+                    if (widget.friend.id.server != basePath)
+                      Padding(
+                        padding: const EdgeInsets.only(left: defaultSpacing),
+                        child: Tooltip(
+                          message: "friends.different_town".trParams({"town": widget.friend.id.server}),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
+                        ),
                       ),
-                    ),
-                ],
-              ),
+                  ],
+                ),
 
-              // All the things that can be done with the friend
-              Watch((context) {
-                // If connected to a Space, add a button to send them an invite
-                if (SpaceController.connected.value) {
+                // All the things that can be done with the friend
+                Watch((context) {
+                  // If connected to a Space, add a button to send them an invite
+                  if (SpaceController.connected.value) {
+                    return IconButton(
+                      icon: Icon(Icons.forward_to_inbox, color: Theme.of(context).colorScheme.onPrimary),
+                      onPressed: () {
+                        // Check if there even is a conversation with the guy
+                        final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
+                          (c) => c.members.values.any((m) => m.address == widget.friend.id),
+                        );
+                        if (conversation == null) {
+                          showErrorPopup("error", "profile.conversation_not_found".tr);
+                          return;
+                        }
+
+                        // Invite the user to the current space
+                        SpaceController.inviteToCall(ConversationMessageProvider(conversation));
+                        Get.back();
+                      },
+                    );
+                  }
+
+                  // Otherwise just add a call button
                   return IconButton(
-                    icon: Icon(Icons.forward_to_inbox, color: Theme.of(context).colorScheme.onPrimary),
+                    icon: Icon(Icons.rocket_launch, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: () {
                       // Check if there even is a conversation with the guy
                       final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
-                            (c) => c.members.values.any((m) => m.address == widget.friend.id),
-                          );
+                        (c) => c.members.values.any((m) => m.address == widget.friend.id),
+                      );
                       if (conversation == null) {
                         showErrorPopup("error", "profile.conversation_not_found".tr);
                         return;
                       }
 
                       // Invite the user to the current space
-                      SpaceController.inviteToCall(ConversationMessageProvider(conversation));
+                      SpaceController.createAndConnect(ConversationMessageProvider(conversation));
                       Get.back();
                     },
                   );
-                }
-
-                // Otherwise just add a call button
-                return IconButton(
-                  icon: Icon(Icons.rocket_launch, color: Theme.of(context).colorScheme.onPrimary),
-                  onPressed: () {
-                    // Check if there even is a conversation with the guy
-                    final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
-                          (c) => c.members.values.any((m) => m.address == widget.friend.id),
-                        );
-                    if (conversation == null) {
-                      showErrorPopup("error", "profile.conversation_not_found".tr);
-                      return;
-                    }
-
-                    // Invite the user to the current space
-                    SpaceController.createAndConnect(ConversationMessageProvider(conversation));
-                    Get.back();
-                  },
-                );
-              }),
-            ]),
+                }),
+              ],
+            ),
           ),
         ),
       ),

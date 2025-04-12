@@ -14,13 +14,14 @@ class StatusService {
   /// Returns an error if there was one.
   static Future<String?> sendStatus({String? message, int? type}) async {
     // Validate the status to make sure everything is fine
-    final event = await connector.sendActionAndWait(ServerAction("st_validate", <String, dynamic>{
-      "status": StatusController.statusPacket(StatusController.newStatusJson(
-        message ?? StatusController.status.peek(),
-        type ?? StatusController.type.peek(),
-      )),
-      "data": StatusController.sharedContentPacket(),
-    }));
+    final event = await connector.sendActionAndWait(
+      ServerAction("st_validate", <String, dynamic>{
+        "status": StatusController.statusPacket(
+          StatusController.newStatusJson(message ?? StatusController.status.peek(), type ?? StatusController.type.peek()),
+        ),
+        "data": StatusController.sharedContentPacket(),
+      }),
+    );
     if (event == null) {
       return "server.error".tr;
     }

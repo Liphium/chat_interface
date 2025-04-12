@@ -125,9 +125,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
     if (FriendController.friends.length == 1) {
       return SlidingWindowBase(
-        title: [
-          Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
-        ],
+        title: [Text(widget.title.tr, style: Get.theme.textTheme.labelLarge)],
         position: widget.position,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,9 +137,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 Get.back();
                 showModal(const FriendsPage());
               },
-              child: Center(
-                child: Text("open.friends".tr, style: theme.textTheme.labelLarge),
-              ),
+              child: Center(child: Text("open.friends".tr, style: theme.textTheme.labelLarge)),
             ),
           ],
         ),
@@ -160,10 +156,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
         children: [
           //* Input
           Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.inverseSurface,
-              borderRadius: BorderRadius.circular(defaultSpacing),
-            ),
+            decoration: BoxDecoration(color: theme.colorScheme.inverseSurface, borderRadius: BorderRadius.circular(defaultSpacing)),
             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             child: Row(
               children: [
@@ -171,11 +164,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 horizontalSpacing(defaultSpacing),
                 Expanded(
                   child: TextField(
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'search'.tr,
-                      hintStyle: Get.textTheme.bodyLarge,
-                    ),
+                    decoration: InputDecoration(border: InputBorder.none, hintText: 'search'.tr, hintStyle: Get.textTheme.bodyLarge),
                     cursorColor: theme.colorScheme.onPrimary,
                     style: theme.textTheme.labelLarge,
                     onChanged: (value) => _search.value = value,
@@ -259,10 +248,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                               padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
                               child: Row(
                                 children: [
-                                  UserAvatar(
-                                    id: friend.id,
-                                    size: 35,
-                                  ),
+                                  UserAvatar(id: friend.id, size: 35),
                                   horizontalSpacing(defaultSpacing),
                                   Watch((ctx) => Text(friend.displayName.value, style: theme.textTheme.labelLarge)),
                                 ],
@@ -288,35 +274,19 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                   child: Watch(
                     (ctx) => Animate(
                       effects: [
-                        ExpandEffect(
-                          alignment: Alignment.topCenter,
-                          duration: 250.ms,
-                          curve: Curves.ease,
-                          axis: Axis.vertical,
-                        ),
-                        FadeEffect(
-                          begin: 0,
-                          end: 1,
-                          duration: 250.ms,
-                        ),
+                        ExpandEffect(alignment: Alignment.topCenter, duration: 250.ms, curve: Curves.ease, axis: Axis.vertical),
+                        FadeEffect(begin: 0, end: 1, duration: 250.ms),
                       ],
                       target: _length.value > 1 ? 1 : 0,
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: defaultSpacing),
-                        child: FJTextField(
-                          controller: _controller,
-                          hintText: "conversations.name".tr,
-                        ),
+                        child: FJTextField(controller: _controller, hintText: "conversations.name".tr),
                       ),
                     ),
                   ),
                 ),
               ),
-              AnimatedErrorContainer(
-                expand: true,
-                padding: const EdgeInsets.only(bottom: defaultSpacing),
-                message: _errorText,
-              ),
+              AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _errorText),
               FJElevatedLoadingButton(
                 onTap: () async {
                   _conversationLoading.value = true;
@@ -342,7 +312,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 loading: _conversationLoading,
               ),
             ],
-          )
+          ),
         ],
       ),
     );

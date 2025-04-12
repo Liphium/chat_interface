@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/spaces/spaces_member_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_track_controller.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
@@ -33,41 +34,36 @@ class StudioService {
     final peer = await createPeerConnection({
       "iceServers": [
         {
-          "urls": [
-            "stun:${event.data["stun"]}",
-          ]
-        }
+          "urls": ["stun:${event.data["stun"]}"],
+        },
+        if ((event.data["turn"] ?? "") != "")
+          {
+            "urls": ["turn:${event.data["turn"]}"],
+            "username": event.data["turn_user"] ?? "",
+            "credential": event.data["turn_pass"] ?? "",
+          },
       ],
     });
 
     // Create a data channel for pipes
     final studioConn = StudioConnection(peer);
-    await studioConn.createPipesChannel();
+    await studioConn.createLightwireChannel();
 
     // Create an offer for the server
     final offer = await peer.createOffer({
-      "offerToReceiveAudio": true,
-      "offerToReceiveVideo": true,
+      // TODO: Uncomment when video implementation is done
+      // "offerToReceiveVideo": true,
     });
     await peer.setLocalDescription(offer);
 
-    // Wait for one candidate to be gathered and then generate an offer
-    // TODO: Improve the handling of this in the future using trickle-ice
-    final completer = Completer<bool>();
-    peer.onIceCandidate = (candidate) {
-      if (candidate.candidate != null && !completer.isCompleted) {
-        completer.complete(true);
+    // Send all the ice candidates to the server
+    final completer = Completer<void>();
+    peer.onIceCandidate = (candidate) async {
+      if (candidate.candidate != null) {
+        await completer.future; // Make sure to not send ice candidates before the client is registered
+        SpaceConnection.spaceConnector!.sendAction(ServerAction("st_ice", candidate.toMap()));
       }
     };
-
-    // Cancel the connection attempt in case it can't be completed quickly enough
-    final success = await completer.future.timeout(
-      Duration(seconds: 10),
-      onTimeout: () => false,
-    );
-    if (!success) {
-      return (null, "error.studio.rtc".trParams({"code": "100"}));
-    }
 
     // Send the offer to the server
     event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_join", offer.toMap()));
@@ -77,6 +73,7 @@ class StudioService {
     if (!event.data["success"]) {
       return (null, event.data["message"] as String);
     }
+    completer.complete();
 
     // Accept the offer from the server
     await peer.setRemoteDescription(RTCSessionDescription(event.data["answer"]["sdp"], event.data["answer"]["type"]));
@@ -108,5 +105,35 @@ class StudioService {
       // Tell the controller about the deleted track
       StudioTrackController.deleteTrack(event.data["track"]);
     });
+
+    // Handle ice candidates for studio
+    connector.listen("st_ice", (event) {
+      // Pass the candidate to the current connection
+      final candidate = event.data["candidate"];
+      StudioController.getConnection()?.handleIceCandidate(RTCIceCandidate(candidate["candidate"], candidate["sdpMid"], candidate["sdpMLineIndex"]));
+    });
+  }
+
+  /// Update your audio state on the server. Set muted and deafened only when changed.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> updateAudioState({bool? muted, bool? deafened}) async {
+    assert(muted != null || deafened != null);
+
+    // Send the new audio state to the server
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("set_audio_state", {if (muted != null) "muted": muted, if (deafened != null) "deafened": deafened}),
+    );
+    if (event == null) {
+      return "server.error".tr;
+    }
+    if (!event.data["success"]) {
+      return event.data["message"];
+    }
+
+    // Update the audio state on the underlying connection
+    unawaited(StudioController.getConnection()?.handleAudioState(muted: muted, deafened: deafened));
+
+    return null;
   }
 }

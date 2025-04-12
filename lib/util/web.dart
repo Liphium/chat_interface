@@ -24,10 +24,7 @@ void loadTokensFromPayload(Map<String, dynamic> payload) {
 }
 
 String tokensToPayload() {
-  Map<String, String> payload = {
-    'token': sessionToken,
-    'refresh_token': refreshToken,
-  };
+  Map<String, String> payload = {'token': sessionToken, 'refresh_token': refreshToken};
 
   return jsonEncode(payload);
 }
@@ -157,8 +154,13 @@ Future<Map<String, dynamic>> postJSON(
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, dynamic> body,
-    {String defaultError = "server.error", String? token}) async {
+Future<Map<String, dynamic>> _postTCP(
+  RSAPublicKey key,
+  String url,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+  String? token,
+}) async {
   final aesKey = randomAESKey();
   final aesBase64 = base64Encode(aesKey);
   Response? res;
@@ -193,22 +195,31 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body,
-    {String defaultError = "server.error", String? token, bool noApiVersion = false, bool checkProtocol = true}) async {
+Future<Map<String, dynamic>> postAddress(
+  String server,
+  String path,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+  String? token,
+  bool noApiVersion = false,
+  bool checkProtocol = true,
+}) async {
   // Try to get the server public key
   if (serverPublicKeys[server] == null) {
     final result = await grabServerPublicURL(server, checkProtocol: checkProtocol);
     if (result != null) {
-      return {
-        "success": false,
-        "error": result,
-      };
+      return {"success": false, "error": result};
     }
   }
 
   // Do the request
-  return _postTCP(serverPublicKeys[server]!, serverPath(server, path, noApiVersion: noApiVersion).toString(), body,
-      defaultError: defaultError, token: token);
+  return _postTCP(
+    serverPublicKeys[server]!,
+    serverPath(server, path, noApiVersion: noApiVersion).toString(),
+    body,
+    defaultError: defaultError,
+    token: token,
+  );
 }
 
 // Post request to node-backend with any token (new)
@@ -239,13 +250,7 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
 // Post request to any domain
 Future<Map<String, dynamic>> postAny(String url, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
   try {
-    final res = await dio.post(
-      url,
-      data: jsonEncode(body),
-      options: d.Options(
-        validateStatus: (status) => true,
-      ),
-    );
+    final res = await dio.post(url, data: jsonEncode(body), options: d.Options(validateStatus: (status) => true));
     if (res.statusCode != 200) {
       return <String, dynamic>{"success": false, "error": defaultError.tr};
     }
@@ -271,9 +276,7 @@ String getSessionFromJWT(String token) {
 
 // Creates a stored action with the given name and payload
 String storedAction(String name, Map<String, dynamic> payload) {
-  final prefixJson = <String, dynamic>{
-    "a": name,
-  };
+  final prefixJson = <String, dynamic>{"a": name};
   prefixJson.addAll(payload);
 
   return jsonEncode(prefixJson);
@@ -281,9 +284,7 @@ String storedAction(String name, Map<String, dynamic> payload) {
 
 // Creates an authenticated stored action with the given name and payload
 Map<String, dynamic> authenticatedStoredAction(String name, Map<String, dynamic> payload) {
-  final prefixJson = <String, dynamic>{
-    "a": name,
-  };
+  final prefixJson = <String, dynamic>{"a": name};
   prefixJson.addAll(payload);
 
   return prefixJson;

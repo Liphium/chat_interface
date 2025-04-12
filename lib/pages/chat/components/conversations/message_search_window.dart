@@ -47,11 +47,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.only(
-              top: elementSpacing,
-              right: defaultSpacing + elementSpacing,
-              left: defaultSpacing + elementSpacing,
-            ),
+            padding: EdgeInsets.only(top: elementSpacing, right: defaultSpacing + elementSpacing, left: defaultSpacing + elementSpacing),
             child: FJTextField(
               focusNode: _focus,
               prefixIcon: Icons.search,
@@ -61,10 +57,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                 if (provider == null) {
                   return;
                 }
-                MessageSearchController.filters.value = [
-                  ConversationFilter(provider.conversation.id.encode()),
-                  ContentFilter(query),
-                ];
+                MessageSearchController.filters.value = [ConversationFilter(provider.conversation.id.encode()), ContentFilter(query)];
                 MessageSearchController.search();
               },
             ),
@@ -124,7 +117,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                               ),
                             ),
                           ),
-                          if (index == MessageSearchController.results.length - 1) verticalSpacing(elementSpacing)
+                          if (index == MessageSearchController.results.length - 1) verticalSpacing(elementSpacing),
                         ],
                       ),
                     );
@@ -132,7 +125,7 @@ class _MessageSearchWindowState extends State<MessageSearchWindow> {
                 ),
               );
             }),
-          )
+          ),
         ],
       ),
     );

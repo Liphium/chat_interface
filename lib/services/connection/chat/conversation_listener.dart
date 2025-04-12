@@ -11,12 +11,7 @@ class ConversationListener {
       if (event.data["error"]) {
         ConversationController.finishedLoading(server, {}, [], true);
       } else {
-        ConversationController.finishedLoading(
-          server,
-          event.data["info"],
-          event.data["missing"],
-          false,
-        );
+        ConversationController.finishedLoading(server, event.data["info"], event.data["missing"], false);
       }
     });
   }

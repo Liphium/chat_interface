@@ -78,9 +78,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
             padding: const EdgeInsets.only(top: defaultSpacing),
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
-              child: Center(
-                child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
-              ),
+              child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
             ),
           );
         }
@@ -137,14 +135,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
                 children: [
                   for (final invite in invites)
                     Animate(
-                      effects: [
-                        ExpandEffect(
-                          alignment: Alignment.center,
-                          duration: 250.ms,
-                          curve: scaleAnimationCurve,
-                          axis: Axis.vertical,
-                        ),
-                      ],
+                      effects: [ExpandEffect(alignment: Alignment.center, duration: 250.ms, curve: scaleAnimationCurve, axis: Axis.vertical)],
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: elementSpacing),
                         child: Container(
@@ -161,12 +152,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
                                   onEnter: (_) => hovering.value = invite,
                                   onExit: (_) => hovering.value = "",
                                   child: Animate(
-                                    effects: [
-                                      BlurEffect(
-                                        end: const Offset(5, 5),
-                                        duration: 100.ms,
-                                      )
-                                    ],
+                                    effects: [BlurEffect(end: const Offset(5, 5), duration: 100.ms)],
                                     onInit: (controller) {
                                       controller.value = 1.0;
                                     },
@@ -180,7 +166,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
                                   Clipboard.setData(ClipboardData(text: invite));
                                 },
                                 icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary),
-                              )
+                              ),
                             ],
                           ),
                         ),

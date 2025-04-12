@@ -37,32 +37,21 @@ class _WarpCreateWindowState extends State<WarpCreateWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text("warp.create.title".tr, style: Get.textTheme.labelLarge),
-      ],
+      title: [Text("warp.create.title".tr, style: Get.textTheme.labelLarge)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            "warp.create.desc".tr,
-            style: Get.theme.textTheme.bodyMedium,
-            textAlign: TextAlign.start,
-          ),
+          Text("warp.create.desc".tr, style: Get.theme.textTheme.bodyMedium, textAlign: TextAlign.start),
           verticalSpacing(defaultSpacing),
           FJTextField(
             maxLength: 5,
             controller: _port,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             hintText: 'warp.port.placeholder'.tr,
           ),
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            message: _error,
-          ),
+          AnimatedErrorContainer(padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
           FJElevatedLoadingButton(
             onTap: () async {
               _loading.value = true;
@@ -95,7 +84,7 @@ class _WarpCreateWindowState extends State<WarpCreateWindow> {
             },
             label: 'warp.create.button'.tr,
             loading: _loading,
-          )
+          ),
         ],
       ),
     );

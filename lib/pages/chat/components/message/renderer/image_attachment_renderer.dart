@@ -12,11 +12,7 @@ class ImageAttachmentRenderer extends StatefulWidget {
   final bool hoverCheck;
   final AttachmentContainer image;
 
-  const ImageAttachmentRenderer({
-    super.key,
-    required this.image,
-    this.hoverCheck = false,
-  });
+  const ImageAttachmentRenderer({super.key, required this.image, this.hoverCheck = false});
 
   @override
   State<ImageAttachmentRenderer> createState() => _ImageAttachmentRendererState();
@@ -29,9 +25,7 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
     final height = widget.image.height!.toDouble();
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxHeight: 350,
-      ),
+      constraints: const BoxConstraints(maxHeight: 350),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(defaultSpacing),
         child: AspectRatio(
@@ -46,11 +40,7 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                   child: SizedBox(
                     width: 40,
                     height: 40,
-                    child: CircularProgressIndicator(
-                      color: Get.theme.colorScheme.onPrimary,
-                      value: widget.image.percentage.value,
-                      strokeWidth: 5,
-                    ),
+                    child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, value: widget.image.percentage.value, strokeWidth: 5),
                   ),
                 ),
               );
@@ -105,12 +95,7 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () => Get.dialog(ImagePreviewWindow(file: widget.image.file!)),
-                    child: XImage(
-                      file: widget.image.file!,
-                      fit: BoxFit.fill,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
+                    child: XImage(file: widget.image.file!, fit: BoxFit.fill, width: double.infinity, height: double.infinity),
                   ),
                 ),
               ),

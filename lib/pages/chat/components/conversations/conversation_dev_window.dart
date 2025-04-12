@@ -31,12 +31,7 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "conversation.info.id".trParams({
-              "id": widget.conversation.id.toString(),
-            }),
-            style: Get.textTheme.bodyMedium,
-          ),
+          Text("conversation.info.id".trParams({"id": widget.conversation.id.toString()}), style: Get.textTheme.bodyMedium),
           verticalSpacing(elementSpacing),
           Text(
             "conversation.info.read".trParams({
@@ -68,19 +63,9 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
             style: Get.textTheme.bodyMedium,
           ),
           verticalSpacing(elementSpacing),
-          Text(
-            "conversation.info.members".trParams({
-              "count": widget.conversation.members.length.toString(),
-            }),
-            style: Get.textTheme.bodyMedium,
-          ),
+          Text("conversation.info.members".trParams({"count": widget.conversation.members.length.toString()}), style: Get.textTheme.bodyMedium),
           verticalSpacing(elementSpacing),
-          Text(
-            "conversation.info.version".trParams({
-              "version": widget.conversation.lastVersion.toString(),
-            }),
-            style: Get.textTheme.bodyMedium,
-          ),
+          Text("conversation.info.version".trParams({"version": widget.conversation.lastVersion.toString()}), style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           ProfileButton(
             icon: Icons.copy,

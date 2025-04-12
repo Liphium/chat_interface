@@ -30,22 +30,20 @@ class _JoinSpaceDialogState extends State<JoinSpaceDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               FJElevatedButton(
-                  onTap: () {
-                    SpaceController.join(widget.container);
-                    Get.back();
-                  },
-                  smallCorners: true,
-                  child: Center(
-                    child: Text("yeah".tr, style: Get.theme.textTheme.labelMedium),
-                  )),
+                onTap: () {
+                  SpaceController.join(widget.container);
+                  Get.back();
+                },
+                smallCorners: true,
+                child: Center(child: Text("yeah".tr, style: Get.theme.textTheme.labelMedium)),
+              ),
               FJElevatedButton(
-                  onTap: () => Get.back(),
-                  smallCorners: true,
-                  child: Center(
-                    child: Text("no.got".tr, style: Get.theme.textTheme.labelMedium),
-                  ))
+                onTap: () => Get.back(),
+                smallCorners: true,
+                child: Center(child: Text("no.got".tr, style: Get.theme.textTheme.labelMedium)),
+              ),
             ],
-          )
+          ),
         ],
       ),
     );

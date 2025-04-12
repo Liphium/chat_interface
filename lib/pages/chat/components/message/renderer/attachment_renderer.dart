@@ -26,13 +26,7 @@ class AttachmentRenderer extends StatefulWidget {
   final ConversationMessageProvider? provider;
   final AttachmentContainer container;
 
-  const AttachmentRenderer({
-    super.key,
-    required this.container,
-    required this.self,
-    this.message,
-    this.provider,
-  });
+  const AttachmentRenderer({super.key, required this.container, required this.self, this.message, this.provider});
 
   @override
   State<AttachmentRenderer> createState() => _AttachmentRendererState();
@@ -58,18 +52,12 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
       _networkImage = Image.network(
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null || loadingProgress.expectedTotalBytes == null) {
-            return const SizedBox(
-              width: 60,
-              height: 60,
-              child: CircularProgressIndicator(),
-            );
+            return const SizedBox(width: 60, height: 60, child: CircularProgressIndicator());
           }
           return SizedBox(
             width: 60,
             height: 60,
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes! / loadingProgress.cumulativeBytesLoaded,
-            ),
+            child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes! / loadingProgress.cumulativeBytesLoaded),
           );
         },
         widget.container.url,
@@ -117,11 +105,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
   @override
   Widget build(BuildContext context) {
     if (widget.container.attachmentType == AttachmentContainerType.link) {
-      return Row(
-        children: [
-          ErrorContainer(message: "under_dev".tr),
-        ],
-      );
+      return Row(children: [ErrorContainer(message: "under_dev".tr)]);
     }
 
     //* Remote images
@@ -140,25 +124,18 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.public_off,
-                  color: Get.theme.colorScheme.error,
-                  size: Get.theme.textTheme.bodyMedium!.fontSize! * 1.5,
-                ),
+                Icon(Icons.public_off, color: Get.theme.colorScheme.error, size: Get.theme.textTheme.bodyMedium!.fontSize! * 1.5),
                 horizontalSpacing(elementSpacing),
-                Flexible(
-                  child: Text("file.unsafe".trParams({"domain": domain})),
-                ),
+                Flexible(child: Text("file.unsafe".trParams({"domain": domain}))),
                 horizontalSpacing(elementSpacing),
                 LoadingIconButton(
                   iconSize: 22,
                   extra: 4,
                   padding: 4,
                   onTap: () async {
-                    final result = await showConfirmPopup(ConfirmWindow(
-                      title: "file.images.trust.title".tr,
-                      text: "file.images.trust.description".trParams({"domain": domain}),
-                    ));
+                    final result = await showConfirmPopup(
+                      ConfirmWindow(title: "file.images.trust.title".tr, text: "file.images.trust.description".trParams({"domain": domain})),
+                    );
 
                     if (result) {
                       await TrustedLinkHelper.addToTrustedLinks(domain);
@@ -186,12 +163,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxHeight: 350,
-                      ),
-                      child: _networkImage,
-                    ),
+                    child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 350), child: _networkImage),
                   ),
                 ),
               ),
@@ -216,24 +188,14 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            getIconForFileName(widget.container.name),
-            size: sectionSpacing * 2,
-            color: Get.theme.colorScheme.onPrimary,
-          ),
+          Icon(getIconForFileName(widget.container.name), size: sectionSpacing * 2, color: Get.theme.colorScheme.onPrimary),
           horizontalSpacing(defaultSpacing),
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Flexible(
-                  child: Text(
-                    widget.container.name,
-                    style: Get.theme.textTheme.labelMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+                Flexible(child: Text(widget.container.name, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis)),
                 Flexible(
                   child: Watch(
                     (ctx) => Text(
@@ -253,10 +215,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               return SizedBox(
                 width: 30,
                 height: 30,
-                child: CircularProgressIndicator(
-                  color: Get.theme.colorScheme.onPrimary,
-                  value: widget.container.percentage.value,
-                ),
+                child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, value: widget.container.percentage.value),
               );
             }
 

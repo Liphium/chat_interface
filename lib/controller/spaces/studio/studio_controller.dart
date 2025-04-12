@@ -7,36 +7,90 @@ class StudioController {
   static StudioConnection? _connection;
 
   // State for the UI
+  static final connecting = signal(false);
+  static final connectionError = signal("");
   static final connected = signal(false);
 
   // Media controls
   static final videoEnabled = signal(false);
 
+  // Lightwire / audio state
+  static final audioStateLoading = signal(false);
+  static final audioMuted = signal(true);
+  static final audioDeafened = signal(false);
+
   /// Connect to Studio.
   ///
   /// Returns an error if there was one.
   static Future<void> connectToStudio() async {
+    connecting.value = true;
+
     // Connect to Studio using the service
     final (connection, error) = await StudioService.connectToStudio();
     if (error != null) {
-      showErrorPopup("error", error);
+      batch(() {
+        connectionError.value = error;
+        connecting.value = false;
+      });
       return;
     }
 
     // Set all the state
     _connection = connection;
-    connected.value = true;
+    batch(() {
+      connecting.value = false;
+      connected.value = true;
+    });
   }
 
   static void resetControllerState() {
+    _connection?.close();
     _connection = null;
-    connected.value = false;
-    videoEnabled.value = false;
+    batch(() {
+      connected.value = false;
+      connecting.value = false;
+      videoEnabled.value = false;
+      audioMuted.value = true;
+      audioStateLoading.value = false;
+      audioDeafened.value = false;
+    });
   }
 
   /// Called by the service when Studio gets disconnected.
   static void handleDisconnect() {
     resetControllerState();
+  }
+
+  /// Toggle the audio mute state
+  static Future<void> toggleMute() async {
+    await _updateAudioState(muted: !audioMuted.peek());
+  }
+
+  /// Toggle the audio deafened state
+  static Future<void> toggleDeafened() async {
+    await _updateAudioState(deafened: !audioDeafened.peek());
+  }
+
+  /// Update the current audio state on the server.
+  static Future<void> _updateAudioState({bool? muted, bool? deafened}) async {
+    if (audioStateLoading.peek()) {
+      return;
+    }
+    audioStateLoading.value = true;
+
+    // Send the action
+    final error = await StudioService.updateAudioState(muted: muted, deafened: deafened);
+    if (error != null) {
+      showErrorPopup("error", error);
+      return;
+    }
+
+    // Update the states locally
+    batch(() {
+      audioMuted.value = muted ?? audioMuted.peek();
+      audioDeafened.value = deafened ?? audioDeafened.peek();
+      audioStateLoading.value = false;
+    });
   }
 
   /// Get the connection to Studio.

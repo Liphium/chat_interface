@@ -18,11 +18,7 @@ class LibraryTab extends StatefulWidget {
   final model.LibraryEntryType? filter;
   final MessageProvider provider;
 
-  const LibraryTab({
-    super.key,
-    this.filter,
-    required this.provider,
-  });
+  const LibraryTab({super.key, this.filter, required this.provider});
 
   @override
   State<LibraryTab> createState() => _LibraryTabState();
@@ -50,18 +46,20 @@ class _LibraryTabState extends State<LibraryTab> {
     // Get all the library entries that match the current filter
     List<LibraryEntryData> entries;
     if (widget.filter != null) {
-      entries = await (db.libraryEntry.select()
-            ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
-            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(_lastDate)))
-            ..where((tbl) => tbl.type.equals(widget.filter!.index))
-            ..limit(30))
-          .get();
+      entries =
+          await (db.libraryEntry.select()
+                ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
+                ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(_lastDate)))
+                ..where((tbl) => tbl.type.equals(widget.filter!.index))
+                ..limit(30))
+              .get();
     } else {
-      entries = await (db.libraryEntry.select()
-            ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
-            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(_lastDate)))
-            ..limit(30))
-          .get();
+      entries =
+          await (db.libraryEntry.select()
+                ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
+                ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(_lastDate)))
+                ..limit(30))
+              .get();
     }
     if (entries.isNotEmpty) {
       _lastDate = entries.last.createdAt;
@@ -97,10 +95,7 @@ class _LibraryTabState extends State<LibraryTab> {
       }
 
       if (_entryList.isEmpty) {
-        return InfoContainer(
-          message: "library.empty".tr,
-          expand: true,
-        );
+        return InfoContainer(message: "library.empty".tr, expand: true);
       }
 
       return GridView.builder(
@@ -118,15 +113,9 @@ class _LibraryTabState extends State<LibraryTab> {
           // Render attachment container
           Widget image;
           if (entry.container!.attachmentType == AttachmentContainerType.remoteImage) {
-            image = Image.network(
-              entry.container!.url,
-              fit: BoxFit.cover,
-            );
+            image = Image.network(entry.container!.url, fit: BoxFit.cover);
           } else {
-            image = XImage(
-              file: entry.container!.file!,
-              fit: BoxFit.cover,
-            );
+            image = XImage(file: entry.container!.file!, fit: BoxFit.cover);
           }
           return Material(
             key: ValueKey(entry.container!.id),
@@ -145,11 +134,7 @@ class _LibraryTabState extends State<LibraryTab> {
                     return LibraryFavoriteButton(
                       callback: () => _entryList.removeAt(index),
                       container: entry.container!,
-                      child: SizedBox(
-                        width: constraints.biggest.width,
-                        height: constraints.biggest.height,
-                        child: image,
-                      ),
+                      child: SizedBox(width: constraints.biggest.width, height: constraints.biggest.height, child: image),
                     );
                   },
                 ),

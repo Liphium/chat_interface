@@ -14,11 +14,7 @@ class UpgradeWindow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Upgrade to a better Liphium.",
-            style: Get.textTheme.headlineMedium,
-            textAlign: TextAlign.center,
-          ),
+          Text("Upgrade to a better Liphium.", style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
           verticalSpacing(sectionSpacing),
           Text(
             "Liphium Web has a lot of limitations. If you want a better experience, Liphium is available as a native app on all major platforms.",
@@ -26,10 +22,7 @@ class UpgradeWindow extends StatelessWidget {
           ),
           verticalSpacing(defaultSpacing),
           Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(defaultSpacing),
-              color: Get.theme.colorScheme.inverseSurface,
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.inverseSurface),
             padding: const EdgeInsets.all(defaultSpacing),
             child: Row(
               children: [
@@ -41,10 +34,7 @@ class UpgradeWindow extends StatelessWidget {
           ),
           verticalSpacing(defaultSpacing),
           Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(defaultSpacing),
-              color: Get.theme.colorScheme.inverseSurface,
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.inverseSurface),
             padding: const EdgeInsets.all(defaultSpacing),
             child: Row(
               children: [
@@ -56,10 +46,7 @@ class UpgradeWindow extends StatelessWidget {
           ),
           verticalSpacing(defaultSpacing),
           Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(defaultSpacing),
-              color: Get.theme.colorScheme.inverseSurface,
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.inverseSurface),
             padding: const EdgeInsets.all(defaultSpacing),
             child: Row(
               children: [
@@ -71,10 +58,7 @@ class UpgradeWindow extends StatelessWidget {
           ),
           verticalSpacing(defaultSpacing),
           Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(defaultSpacing),
-              color: Get.theme.colorScheme.inverseSurface,
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.inverseSurface),
             padding: const EdgeInsets.all(defaultSpacing),
             child: Row(
               children: [
@@ -87,9 +71,7 @@ class UpgradeWindow extends StatelessWidget {
           verticalSpacing(defaultSpacing),
           FJElevatedButton(
             onTap: () => launchUrlString("https://liphium.com/"),
-            child: Center(
-              child: Text("Visit the website", style: Get.textTheme.labelLarge),
-            ),
+            child: Center(child: Text("Visit the website", style: Get.textTheme.labelLarge)),
           ),
         ],
       ),

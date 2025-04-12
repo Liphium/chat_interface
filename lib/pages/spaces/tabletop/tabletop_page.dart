@@ -100,157 +100,150 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
     return Scaffold(
       body: RepaintBoundary(
-        child: Watch(
-          (context) {
-            _updated.value;
-            return Listener(
-              onPointerHover: (event) {
-                TabletopController.mousePosUnmodified = event.localPosition;
-                TabletopController.mousePos = TabletopView.localToWorldPos(
-                  event.localPosition,
-                  TabletopController.canvasZoom,
-                  TabletopController.canvasOffset,
-                );
-              },
-              onPointerDown: (event) {
-                if (event.buttons == 2) {
-                  if (TabletopController.hoveringObjects.isNotEmpty) {
-                    Get.dialog(ObjectContextMenu(
+        child: Watch((context) {
+          _updated.value;
+          return Listener(
+            onPointerHover: (event) {
+              TabletopController.mousePosUnmodified = event.localPosition;
+              TabletopController.mousePos = TabletopView.localToWorldPos(
+                event.localPosition,
+                TabletopController.canvasZoom,
+                TabletopController.canvasOffset,
+              );
+            },
+            onPointerDown: (event) {
+              if (event.buttons == 2) {
+                if (TabletopController.hoveringObjects.isNotEmpty) {
+                  Get.dialog(
+                    ObjectContextMenu(
                       data: ContextMenuData.fromPosition(Offset(event.position.dx, event.position.dy)),
                       object: TabletopController.hoveringObjects.first,
-                    ));
-                    _moved = true;
-                    return;
-                  }
-
-                  Get.dialog(ObjectCreateMenu(
-                      location: TabletopView.localToWorldPos(
-                    event.localPosition,
-                    TabletopController.canvasZoom,
-                    TabletopController.canvasOffset,
-                  )));
-                } else if (event.buttons == 1) {
-                  _moved = false;
-                }
-              },
-
-              //* Handle the mouse movements
-              onPointerMove: (event) {
-                // Calculate the new position of the mouse
-                final added = event.localPosition + event.delta;
-
-                // Make sure the mouse isn't anywhere out of bounds
-                if (added.dx <= 0 || added.dy <= 0 || event.localPosition.dx <= 0 || event.localPosition.dy <= 0) return;
-
-                // Move the canvas when the mouse wheel is pressed
-                if (event.buttons == 4) {
-                  final old = TabletopView.localToWorldPos(
-                    event.localPosition,
-                    TabletopController.canvasZoom,
-                    TabletopController.canvasOffset,
+                    ),
                   );
-                  final newPos = TabletopView.localToWorldPos(
-                    event.localPosition + event.delta,
-                    TabletopController.canvasZoom,
-                    TabletopController.canvasOffset,
-                  );
-                  TabletopController.canvasOffset += newPos - old;
-                }
-
-                // Move the currently held object when the mouse is clicked
-                if (event.buttons == 1) {
-                  if (TabletopController.hoveringObjects.isNotEmpty && !TabletopController.cancelledHolding) {
-                    // If there is a held object, move it, if not, add a new held object from the hovering objects list
-                    if (TabletopController.heldObject != null) {
-                      // Move the object
-                      final old = TabletopView.localToWorldPos(
-                        event.localPosition,
-                        TabletopController.canvasZoom,
-                        TabletopController.canvasOffset,
-                      );
-                      final newPos = TabletopView.localToWorldPos(
-                        event.localPosition + event.delta,
-                        TabletopController.canvasZoom,
-                        TabletopController.canvasOffset,
-                      );
-                      TabletopController.heldObject!.location += newPos - old;
-                    } else {
-                      _moved = true;
-
-                      // Start holding the object
-                      TabletopController.startHoldingObject(TabletopController.hoveringObjects.last);
-                    }
-                  }
-                }
-
-                // Update the mouse position in the controller
-                TabletopController.mousePosUnmodified = event.localPosition;
-                TabletopController.mousePos = TabletopView.localToWorldPos(
-                  event.localPosition,
-                  TabletopController.canvasZoom,
-                  TabletopController.canvasOffset,
-                );
-              },
-
-              //* Handle when a mouse button is no longer pressed
-              onPointerUp: (event) {
-                TabletopController.cancelledHolding = false;
-                if (TabletopController.hoveringObjects.isNotEmpty && !_moved && TabletopController.heldObject == null && event.buttons == 0) {
-                  TabletopController.hoveringObjects.first.runAction();
+                  _moved = true;
                   return;
                 }
 
-                final obj = TabletopController.heldObject;
-                if (obj != null && obj is CardObject) {
-                  if (TabletopController.inventory != null && TabletopController.inventory?.inventoryHoverIndex != -1) {
-                    obj.intoInventory(index: TabletopController.inventory?.inventoryHoverIndex);
-                  } else if (TabletopController.hoveringObjects.any((element) => element is DeckObject)) {
-                    final deck = TabletopController.hoveringObjects.firstWhere((element) => element is DeckObject) as DeckObject;
-                    deck.addCard(obj);
+                Get.dialog(
+                  ObjectCreateMenu(
+                    location: TabletopView.localToWorldPos(event.localPosition, TabletopController.canvasZoom, TabletopController.canvasOffset),
+                  ),
+                );
+              } else if (event.buttons == 1) {
+                _moved = false;
+              }
+            },
+
+            //* Handle the mouse movements
+            onPointerMove: (event) {
+              // Calculate the new position of the mouse
+              final added = event.localPosition + event.delta;
+
+              // Make sure the mouse isn't anywhere out of bounds
+              if (added.dx <= 0 || added.dy <= 0 || event.localPosition.dx <= 0 || event.localPosition.dy <= 0) return;
+
+              // Move the canvas when the mouse wheel is pressed
+              if (event.buttons == 4) {
+                final old = TabletopView.localToWorldPos(event.localPosition, TabletopController.canvasZoom, TabletopController.canvasOffset);
+                final newPos = TabletopView.localToWorldPos(
+                  event.localPosition + event.delta,
+                  TabletopController.canvasZoom,
+                  TabletopController.canvasOffset,
+                );
+                TabletopController.canvasOffset += newPos - old;
+              }
+
+              // Move the currently held object when the mouse is clicked
+              if (event.buttons == 1) {
+                if (TabletopController.hoveringObjects.isNotEmpty && !TabletopController.cancelledHolding) {
+                  // If there is a held object, move it, if not, add a new held object from the hovering objects list
+                  if (TabletopController.heldObject != null) {
+                    // Move the object
+                    final old = TabletopView.localToWorldPos(event.localPosition, TabletopController.canvasZoom, TabletopController.canvasOffset);
+                    final newPos = TabletopView.localToWorldPos(
+                      event.localPosition + event.delta,
+                      TabletopController.canvasZoom,
+                      TabletopController.canvasOffset,
+                    );
+                    TabletopController.heldObject!.location += newPos - old;
+                  } else {
+                    _moved = true;
+
+                    // Start holding the object
+                    TabletopController.startHoldingObject(TabletopController.hoveringObjects.last);
                   }
                 }
+              }
 
-                // Stop the selection
-                TabletopController.stopHoldingObject(error: TabletopController.cancelledHolding);
-              },
-              onPointerSignal: (event) {
-                if (event is PointerScrollEvent) {
-                  final scrollDelta = event.scrollDelta.dy / 500 * -1;
-                  if (TabletopController.canvasZoom + scrollDelta < 0.1) {
-                    return;
-                  }
-                  if (TabletopController.canvasZoom + scrollDelta > 5) return;
+              // Update the mouse position in the controller
+              TabletopController.mousePosUnmodified = event.localPosition;
+              TabletopController.mousePos = TabletopView.localToWorldPos(
+                event.localPosition,
+                TabletopController.canvasZoom,
+                TabletopController.canvasOffset,
+              );
+            },
 
-                  final zoomFactor = (TabletopController.canvasZoom + scrollDelta) / TabletopController.canvasZoom;
-                  final focalPoint =
-                      TabletopView.localToWorldPos(event.localPosition, TabletopController.canvasZoom, TabletopController.canvasOffset);
-                  final newFocalPoint =
-                      TabletopView.localToWorldPos(event.localPosition, TabletopController.canvasZoom + scrollDelta, TabletopController.canvasOffset);
+            //* Handle when a mouse button is no longer pressed
+            onPointerUp: (event) {
+              TabletopController.cancelledHolding = false;
+              if (TabletopController.hoveringObjects.isNotEmpty && !_moved && TabletopController.heldObject == null && event.buttons == 0) {
+                TabletopController.hoveringObjects.first.runAction();
+                return;
+              }
 
-                  TabletopController.canvasOffset -= focalPoint - newFocalPoint;
-                  TabletopController.canvasZoom *= zoomFactor;
-                  TabletopController.mousePosUnmodified = event.localPosition;
+              final obj = TabletopController.heldObject;
+              if (obj != null && obj is CardObject) {
+                if (TabletopController.inventory != null && TabletopController.inventory?.inventoryHoverIndex != -1) {
+                  obj.intoInventory(index: TabletopController.inventory?.inventoryHoverIndex);
+                } else if (TabletopController.hoveringObjects.any((element) => element is DeckObject)) {
+                  final deck = TabletopController.hoveringObjects.firstWhere((element) => element is DeckObject) as DeckObject;
+                  deck.addCard(obj);
                 }
-              },
-              child: SizedBox.expand(
-                child: ClipRRect(
-                  child: CustomPaint(
-                    key: _key,
-                    willChange: true,
-                    isComplex: true,
-                    painter: TabletopPainter(
-                      mousePosition: TabletopController.mousePos,
-                      mousePositionUnmodified: TabletopController.mousePosUnmodified,
-                      offset: TabletopController.canvasOffset,
-                      scale: TabletopController.canvasZoom,
-                      rotation: TabletopController.canvasRotation.value,
-                    ),
+              }
+
+              // Stop the selection
+              TabletopController.stopHoldingObject(error: TabletopController.cancelledHolding);
+            },
+            onPointerSignal: (event) {
+              if (event is PointerScrollEvent) {
+                final scrollDelta = event.scrollDelta.dy / 500 * -1;
+                if (TabletopController.canvasZoom + scrollDelta < 0.1) {
+                  return;
+                }
+                if (TabletopController.canvasZoom + scrollDelta > 5) return;
+
+                final zoomFactor = (TabletopController.canvasZoom + scrollDelta) / TabletopController.canvasZoom;
+                final focalPoint = TabletopView.localToWorldPos(event.localPosition, TabletopController.canvasZoom, TabletopController.canvasOffset);
+                final newFocalPoint = TabletopView.localToWorldPos(
+                  event.localPosition,
+                  TabletopController.canvasZoom + scrollDelta,
+                  TabletopController.canvasOffset,
+                );
+
+                TabletopController.canvasOffset -= focalPoint - newFocalPoint;
+                TabletopController.canvasZoom *= zoomFactor;
+                TabletopController.mousePosUnmodified = event.localPosition;
+              }
+            },
+            child: SizedBox.expand(
+              child: ClipRRect(
+                child: CustomPaint(
+                  key: _key,
+                  willChange: true,
+                  isComplex: true,
+                  painter: TabletopPainter(
+                    mousePosition: TabletopController.mousePos,
+                    mousePositionUnmodified: TabletopController.mousePosUnmodified,
+                    offset: TabletopController.canvasOffset,
+                    scale: TabletopController.canvasZoom,
+                    rotation: TabletopController.canvasRotation.value,
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        }),
       ),
     );
   }

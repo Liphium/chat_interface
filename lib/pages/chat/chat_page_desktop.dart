@@ -66,32 +66,18 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                   child: Watch(
                     (ctx) => Animate(
                       effects: [
-                        ExpandEffect(
-                          curve: Curves.easeInOut,
-                          duration: 250.ms,
-                          axis: Axis.horizontal,
-                          alignment: Alignment.centerRight,
-                        ),
-                        FadeEffect(
-                          duration: 250.ms,
-                        )
+                        ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.horizontal, alignment: Alignment.centerRight),
+                        FadeEffect(duration: 250.ms),
                       ],
                       onInit: (ac) => ac.value = SidebarController.hideSidebar.value ? 0 : 1,
                       target: SidebarController.hideSidebar.value ? 0 : 1,
-                      child: SizedBox(
-                        width: 350,
-                        child: Sidebar(),
-                      ),
+                      child: SizedBox(width: 350, child: Sidebar()),
                     ),
                   ),
                 ),
 
                 // Render the current sidebar tab
-                Expanded(
-                  child: Watch(
-                    (ctx) => SidebarController.currentOpenTab.value.build(ctx),
-                  ),
-                ),
+                Expanded(child: Watch((ctx) => SidebarController.currentOpenTab.value.build(ctx))),
               ],
             ),
           ),
@@ -131,45 +117,26 @@ class ConversationSidebarTab extends SidebarTab {
     return Column(
       children: [
         // Render the message bar for desktop
-        DevicePadding(
-          top: true,
-          padding: const EdgeInsets.all(0),
-          child: MessageBar(
-            conversation: provider.conversation,
-            provider: provider,
-          ),
-        ),
+        DevicePadding(top: true, padding: const EdgeInsets.all(0), child: MessageBar(conversation: provider.conversation, provider: provider)),
 
         // Render the message feed + search sidebar
         Expanded(
           child: Row(
             children: [
               // Render the chat messages
-              Expanded(
-                child: MessageFeed(),
-              ),
+              Expanded(child: MessageFeed()),
 
               // Render the search window
               SelectionContainer.disabled(
                 child: Watch(
                   (ctx) => Animate(
                     effects: [
-                      ExpandEffect(
-                        curve: Curves.easeInOut,
-                        duration: 250.ms,
-                        axis: Axis.horizontal,
-                        alignment: Alignment.centerLeft,
-                      ),
-                      FadeEffect(
-                        duration: 250.ms,
-                      )
+                      ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.horizontal, alignment: Alignment.centerLeft),
+                      FadeEffect(duration: 250.ms),
                     ],
                     onInit: (ac) => ac.value = SidebarController.showSearch.value ? 1 : 0,
                     target: SidebarController.showSearch.value ? 1 : 0,
-                    child: SizedBox(
-                      width: 350,
-                      child: MessageSearchWindow(),
-                    ),
+                    child: SizedBox(width: 350, child: MessageSearchWindow()),
                   ),
                 ),
               ),

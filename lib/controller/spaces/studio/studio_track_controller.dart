@@ -12,11 +12,7 @@ class StudioTrackController {
   static void updateOrRegisterTrack(StudioTrack track) {
     // If the track is already registed, update it.
     if (tracks[track.id] != null) {
-      tracks[track.id]!.takeUpdate(
-        paused: track.paused.peek(),
-        channels: track.channels.peek(),
-        subscribers: track.channels.peek(),
-      );
+      tracks[track.id]!.takeUpdate(paused: track.paused.peek(), channels: track.channels.peek(), subscribers: track.channels.peek());
       return;
     }
 
@@ -31,7 +27,7 @@ class StudioTrackController {
     tracks.remove(id);
   }
 
-  /// Reset all of the controller state
+  /// Reset all of the controller state (when the user disconnects from the Space)
   static void handleDisconnect() {
     tracks.clear();
   }
@@ -45,13 +41,7 @@ class StudioTrack {
   final channels = listSignal(<String>[]);
   final subscribers = listSignal(<String>[]);
 
-  StudioTrack({
-    required this.id,
-    required this.publisher,
-    required bool paused,
-    required List<String> channels,
-    required List<String> subscribers,
-  }) {
+  StudioTrack({required this.id, required this.publisher, required bool paused, required List<String> channels, required List<String> subscribers}) {
     this.paused.value = paused;
   }
 

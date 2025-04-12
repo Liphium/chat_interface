@@ -36,25 +36,14 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text("friends.add".tr, style: Get.textTheme.labelLarge),
-      ],
+      title: [Text("friends.add".tr, style: Get.textTheme.labelLarge)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            "friends.add.desc".tr,
-            style: Get.theme.textTheme.bodyMedium,
-            textAlign: TextAlign.start,
-          ),
+          Text("friends.add.desc".tr, style: Get.theme.textTheme.bodyMedium, textAlign: TextAlign.start),
           verticalSpacing(defaultSpacing),
-          FJTextField(
-            controller: _name,
-            hintText: 'friends.name_placeholder'.tr,
-            autofocus: true,
-            onSubmitted: (t) => sendRequest(),
-          ),
+          FJTextField(controller: _name, hintText: 'friends.name_placeholder'.tr, autofocus: true, onSubmitted: (t) => sendRequest()),
           verticalSpacing(defaultSpacing),
           Watch(
             (ctx) => FJElevatedLoadingButton(

@@ -11,13 +11,14 @@ class SidebarIconButton extends StatefulWidget {
   final ReadonlySignal<int> selected;
   final BorderRadius radius;
 
-  const SidebarIconButton(
-      {super.key,
-      required this.onTap,
-      required this.icon,
-      this.radius = const BorderRadius.all(Radius.circular(defaultSpacing)),
-      required this.index,
-      required this.selected});
+  const SidebarIconButton({
+    super.key,
+    required this.onTap,
+    required this.icon,
+    this.radius = const BorderRadius.all(Radius.circular(defaultSpacing)),
+    required this.index,
+    required this.selected,
+  });
 
   @override
   State<SidebarIconButton> createState() => _SidebarButtonState();
@@ -34,9 +35,7 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
 
   @override
   void initState() {
-    _controller = AnimationController(
-      vsync: this,
-    );
+    _controller = AnimationController(vsync: this);
     super.initState();
   }
 
@@ -60,16 +59,10 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
       effects: [ScaleEffect(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), curve: Curves.easeOut, duration: 120.ms)],
       child: Watch(
         (ctx) => Material(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(defaultSpacing),
-            topRight: Radius.circular(defaultSpacing),
-          ),
+          borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(defaultSpacing), topRight: Radius.circular(defaultSpacing)),
           color: widget.selected.value == widget.index ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.inverseSurface,
           child: InkWell(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(defaultSpacing),
-              topRight: Radius.circular(defaultSpacing),
-            ),
+            borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(defaultSpacing), topRight: Radius.circular(defaultSpacing)),
             onTap: () {
               widget.onTap();
             },

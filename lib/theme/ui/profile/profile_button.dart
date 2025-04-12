@@ -47,19 +47,19 @@ class _ProfileButtonState extends State<ProfileButton> with SignalsMixin {
           child: Row(
             children: [
               //* Loading indicator
-              Watch((ctx) => _loading.value
-                  ? SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: Padding(
-                        padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: widget.iconColor ?? theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                    )
-                  : Icon(widget.icon, size: 25, color: widget.iconColor ?? theme.colorScheme.onPrimary)),
+              Watch(
+                (ctx) =>
+                    _loading.value
+                        ? SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: Padding(
+                            padding: const EdgeInsets.all(defaultSpacing * 0.25),
+                            child: CircularProgressIndicator(strokeWidth: 2, color: widget.iconColor ?? theme.colorScheme.onPrimary),
+                          ),
+                        )
+                        : Icon(widget.icon, size: 25, color: widget.iconColor ?? theme.colorScheme.onPrimary),
+              ),
 
               //* Label
               horizontalSpacing(defaultSpacing),
@@ -69,7 +69,7 @@ class _ProfileButtonState extends State<ProfileButton> with SignalsMixin {
                   style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
                   overflow: TextOverflow.ellipsis,
                 ),
-              )
+              ),
             ],
           ),
         ),

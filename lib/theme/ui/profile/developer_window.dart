@@ -37,9 +37,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
     final json = await postAddress(server, "/node/actions/send", {
       "app_tag": appTag,
       "action": "ping",
-      "data": {
-        "echo": "hello world",
-      }
+      "data": {"echo": "hello world"},
     });
     _remoteActionTesting.value = false;
 
@@ -62,9 +60,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text("Developer info", style: Get.theme.textTheme.labelLarge),
-      ],
+      title: [Text("Developer info", style: Get.theme.textTheme.labelLarge)],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,11 +98,7 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             },
           ),
           verticalSpacing(elementSpacing),
-          ProfileButton(
-            icon: Icons.delete,
-            label: "Delete all messages (local)",
-            onTap: () => db.message.deleteAll(),
-          ),
+          ProfileButton(icon: Icons.delete, label: "Delete all messages (local)", onTap: () => db.message.deleteAll()),
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.delete,
@@ -117,25 +109,21 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             },
           ),
           verticalSpacing(elementSpacing),
-          ProfileButton(
-            icon: Icons.hardware,
-            label: "Test remote actions",
-            onTap: () => remoteActionTest(basePath),
-            loading: _remoteActionTesting,
-          ),
+          ProfileButton(icon: Icons.hardware, label: "Test remote actions", onTap: () => remoteActionTest(basePath), loading: _remoteActionTesting),
           Column(
-            children: FriendController.friends.values.where((friend) => friend.id.server != basePath).map((friend) {
-              return Padding(
-                padding: const EdgeInsets.only(top: elementSpacing),
-                child: ProfileButton(
-                  icon: Icons.hardware,
-                  label: "Test remote actions (${friend.id.server})",
-                  onTap: () => remoteActionTest(friend.id.server),
-                  loading: _remoteActionTesting,
-                ),
-              );
-            }).toList(),
-          )
+            children:
+                FriendController.friends.values.where((friend) => friend.id.server != basePath).map((friend) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: elementSpacing),
+                    child: ProfileButton(
+                      icon: Icons.hardware,
+                      label: "Test remote actions (${friend.id.server})",
+                      onTap: () => remoteActionTest(friend.id.server),
+                      loading: _remoteActionTesting,
+                    ),
+                  );
+                }).toList(),
+          ),
         ],
       ),
     );

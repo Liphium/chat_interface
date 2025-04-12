@@ -19,15 +19,7 @@ class _WarpManagerWindowState extends State<WarpManagerWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Expanded(
-          child: Text(
-            "warp.title".tr,
-            style: Get.theme.textTheme.labelLarge,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
+      title: [Expanded(child: Text("warp.title".tr, style: Get.theme.textTheme.labelLarge, overflow: TextOverflow.ellipsis))],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

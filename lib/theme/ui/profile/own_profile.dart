@@ -80,11 +80,7 @@ class _ProfileState extends State<OwnProfile> {
                 children: [
                   Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
                   horizontalSpacing(defaultSpacing),
-                  Text(
-                    StatusController.displayName.value,
-                    style: theme.textTheme.titleMedium,
-                    textHeightBehavior: noTextHeight,
-                  ),
+                  Text(StatusController.displayName.value, style: theme.textTheme.titleMedium, textHeightBehavior: noTextHeight),
                 ],
               ),
 
@@ -98,7 +94,7 @@ class _ProfileState extends State<OwnProfile> {
                   Clipboard.setData(ClipboardData(text: StatusController.name.value));
                 },
                 icon: Icons.copy,
-              )
+              ),
             ],
           ),
           verticalSpacing(defaultSpacing),
@@ -108,11 +104,7 @@ class _ProfileState extends State<OwnProfile> {
             if (StatusController.ownContainer.value != null) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
-                child: ProfileButton(
-                  icon: Icons.stop,
-                  label: 'profile.stop_sharing'.tr,
-                  onTap: () => StatusController.stopSharing(),
-                ),
+                child: ProfileButton(icon: Icons.stop, label: 'profile.stop_sharing'.tr, onTap: () => StatusController.stopSharing()),
               );
             }
 
@@ -206,11 +198,7 @@ class _ProfileState extends State<OwnProfile> {
                       child: TextField(
                         focusNode: _statusFocus,
                         onChanged: (value) => _statusMessage.value = value,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintStyle: theme.textTheme.bodyMedium!,
-                          hintText: 'status.message'.tr,
-                        ),
+                        decoration: InputDecoration(border: InputBorder.none, hintStyle: theme.textTheme.bodyMedium!, hintText: 'status.message'.tr),
                         style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
 
                         // Save status
@@ -224,9 +212,7 @@ class _ProfileState extends State<OwnProfile> {
                           _edit.value = false;
                         },
 
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(70),
-                        ],
+                        inputFormatters: [LengthLimitingTextInputFormatter(70)],
                         controller: _status,
                       ),
                     ),
@@ -264,32 +250,25 @@ class _ProfileState extends State<OwnProfile> {
                     _edit.value = false;
                     _statusFocus.unfocus();
                   },
-                  icon: _statusMessage.value == ""
-                      ? Icons.add
-                      : _edit.value
+                  icon:
+                      _statusMessage.value == ""
+                          ? Icons.add
+                          : _edit.value
                           ? Icons.done
                           : Icons.close,
                   color: theme.colorScheme.onPrimary,
                 ),
-              )
+              ),
             ],
           ),
           verticalSpacing(defaultSpacing),
 
           // Profile settings
-          ProfileButton(
-            icon: Icons.settings,
-            label: 'profile.settings'.tr,
-            onTap: () => SettingController.openSettingsPage(),
-          ),
+          ProfileButton(icon: Icons.settings, label: 'profile.settings'.tr, onTap: () => SettingController.openSettingsPage()),
           verticalSpacing(elementSpacing),
 
           // Friends page
-          ProfileButton(
-            icon: Icons.group,
-            label: 'profile.friends'.tr,
-            onTap: () => showModal(const FriendsPage()),
-          ),
+          ProfileButton(icon: Icons.group, label: 'profile.friends'.tr, onTap: () => showModal(const FriendsPage())),
           verticalSpacing(elementSpacing),
 
           // For debug only database viewer
@@ -323,11 +302,7 @@ class _ProfileState extends State<OwnProfile> {
             ),
 
           // Help & resources button
-          ProfileButton(
-            icon: Icons.launch,
-            label: 'help'.tr,
-            onTap: () => launchUrlString(Constants.docsBase),
-          ),
+          ProfileButton(icon: Icons.launch, label: 'help'.tr, onTap: () => launchUrlString(Constants.docsBase)),
         ],
       ),
     );

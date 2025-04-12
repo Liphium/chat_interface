@@ -46,18 +46,11 @@ class WarpConnectedList extends StatelessWidget {
                           Icon(Icons.cyclone, color: Get.theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
                           Text(
-                            "warp.connected.item".trParams({
-                              "origin": warp.originPort.toString(),
-                              "goal": warp.goalPort.toString(),
-                            }),
+                            "warp.connected.item".trParams({"origin": warp.originPort.toString(), "goal": warp.goalPort.toString()}),
                             style: Get.textTheme.labelMedium,
                           ),
                           const Spacer(),
-                          LoadingIconButton(
-                            onTap: () => WarpController.disconnectWarp(warp),
-                            extra: 5,
-                            icon: Icons.logout,
-                          ),
+                          LoadingIconButton(onTap: () => WarpController.disconnectWarp(warp), extra: 5, icon: Icons.logout),
                         ],
                       ),
                     ),

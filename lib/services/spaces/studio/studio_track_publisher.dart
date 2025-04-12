@@ -52,36 +52,17 @@ class StudioTrackPublisher {
     // Add the video track
     final videoTrack = media.getVideoTracks()[0];
     final encodings = [
-      RTCRtpEncoding(
-        active: true,
-        rid: "f",
-        maxBitrate: profile.bitrate,
-        scaleResolutionDownBy: 1,
-      ),
-      RTCRtpEncoding(
-        active: false,
-        rid: "h",
-        maxBitrate: (profile.bitrate / 2).toInt(),
-        scaleResolutionDownBy: 2,
-      ),
-      RTCRtpEncoding(
-        active: false,
-        rid: "q",
-        maxBitrate: (profile.bitrate / 4).toInt(),
-        scaleResolutionDownBy: 4,
-      ),
+      RTCRtpEncoding(active: true, rid: "f", maxBitrate: profile.bitrate, scaleResolutionDownBy: 1),
+      RTCRtpEncoding(active: false, rid: "h", maxBitrate: (profile.bitrate / 2).toInt(), scaleResolutionDownBy: 2),
+      RTCRtpEncoding(active: false, rid: "q", maxBitrate: (profile.bitrate / 4).toInt(), scaleResolutionDownBy: 4),
     ];
 
     // Create the transceiver for simulcasting
     final transceiver = await _connection.getPeer().addTransceiver(
-          track: videoTrack,
-          kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
-          init: RTCRtpTransceiverInit(
-            direction: TransceiverDirection.SendOnly,
-            streams: [media],
-            sendEncodings: encodings,
-          ),
-        );
+      track: videoTrack,
+      kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+      init: RTCRtpTransceiverInit(direction: TransceiverDirection.SendOnly, streams: [media], sendEncodings: encodings),
+    );
     transceivers.add(transceiver);
   }
 
@@ -89,12 +70,7 @@ class StudioTrackPublisher {
   Map<String, dynamic> _getMediaConstraints({bool audio = false, MediaProfile? video}) {
     return {
       'audio': audio ? true : false,
-      'video': video != null
-          ? {
-              'mandatory': video.toConstraints(),
-              'facingMode': 'user',
-            }
-          : false,
+      'video': video != null ? {'mandatory': video.toConstraints(), 'facingMode': 'user'} : false,
     };
   }
 

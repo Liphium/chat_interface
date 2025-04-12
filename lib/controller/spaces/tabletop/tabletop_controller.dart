@@ -121,11 +121,7 @@ class TabletopController {
     if (heldObject != null) {
       if (movingAllowed) {
         SpaceConnection.spaceConnector!.sendAction(
-          ServerAction("tobj_move", <String, dynamic>{
-            "id": heldObject!.id,
-            "x": heldObject!.location.dx,
-            "y": heldObject!.location.dy,
-          }),
+          ServerAction("tobj_move", <String, dynamic>{"id": heldObject!.id, "x": heldObject!.location.dx, "y": heldObject!.location.dy}),
           handler: (event) {
             if (!event.data["success"]) {
               sendLog("movement not successful");
@@ -138,11 +134,9 @@ class TabletopController {
 
     // Send mouse position if available
     if (_lastMousePos != mousePos && !disableCursorSending.value) {
-      SpaceConnection.spaceConnector!.sendAction(ServerAction("tc_move", <String, dynamic>{
-        "x": mousePos.dx,
-        "y": mousePos.dy,
-        "c": TabletopSettings.getHue(),
-      }));
+      SpaceConnection.spaceConnector!.sendAction(
+        ServerAction("tc_move", <String, dynamic>{"x": mousePos.dx, "y": mousePos.dy, "c": TabletopSettings.getHue()}),
+      );
     }
 
     _lastMousePos = mousePos;

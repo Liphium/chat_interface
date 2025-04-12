@@ -73,9 +73,7 @@ class ZapShareController {
       return;
     }
     if (uploading) {
-      connector.sendAction(
-        ServerAction("cancel_transaction", <String, dynamic>{}),
-      );
+      connector.sendAction(ServerAction("cancel_transaction", <String, dynamic>{}));
     } else {
       partSubscription?.cancel();
     }
@@ -136,10 +134,7 @@ class ZapShareController {
     endPart = (fileSize.toDouble() / chunkSize.toDouble()).ceil();
     step.value = "chat.zapshare.waiting".tr;
     connector.sendAction(
-      ServerAction("create_transaction", <String, dynamic>{
-        "name": fileName,
-        "size": fileSize,
-      }),
+      ServerAction("create_transaction", <String, dynamic>{"name": fileName, "size": fileSize}),
       handler: (event) {
         if (!event.data["success"]) {
           sendLog("creating transaction failed");
@@ -260,12 +255,7 @@ class ZapShareController {
         final res = await dio.post(
           nodePath("/auth/liveshare/upload"),
           data: formData,
-          options: d.Options(
-            validateStatus: (status) => true,
-            headers: {
-              authorizationHeader: authorizationValue(),
-            },
-          ),
+          options: d.Options(validateStatus: (status) => true, headers: {authorizationHeader: authorizationValue()}),
         );
 
         // Could've been stopped at this point
@@ -348,10 +338,7 @@ class ZapShareController {
     step.value = "preparing".tr;
 
     // Get info about the file
-    final json = await postAny(
-      "${nodeProtocol()}${container.url}/liveshare/info",
-      {"id": container.id, "token": container.token},
-    );
+    final json = await postAny("${nodeProtocol()}${container.url}/liveshare/info", {"id": container.id, "token": container.token});
     if (!json["success"]) {
       showErrorPopup("error", "chat.zapshare.not_found".tr);
       return;
@@ -378,19 +365,14 @@ class ZapShareController {
     currentReceiver.value = friendAddress;
 
     // Subscribe to byte stream
-    final formData = d.FormData.fromMap({
-      "id": container.id,
-      "token": container.token,
-    });
+    final formData = d.FormData.fromMap({"id": container.id, "token": container.token});
     final res = await dio.post(
       "${nodeProtocol()}${container.url}/liveshare/subscribe",
       data: formData,
       options: d.Options(
         validateStatus: (status) => status != 404,
         responseType: d.ResponseType.stream,
-        headers: {
-          authorizationHeader: authorizationValue(),
-        },
+        headers: {authorizationHeader: authorizationValue()},
       ),
     );
     final body = res.data as d.ResponseBody;
@@ -446,18 +428,11 @@ class ZapShareController {
             }
 
             // Download stuff
-            final formData = d.FormData.fromMap({
-              "id": container.id,
-              "token": container.token,
-              "chunk": currentChunk,
-            });
+            final formData = d.FormData.fromMap({"id": container.id, "token": container.token, "chunk": currentChunk});
             final res = await dio.get<Uint8List>(
               "${nodeProtocol()}${container.url}/liveshare/download",
               data: formData,
-              options: d.Options(
-                responseType: d.ResponseType.bytes,
-                validateStatus: (status) => true,
-              ),
+              options: d.Options(responseType: d.ResponseType.bytes, validateStatus: (status) => true),
             );
 
             if (res.statusCode != 200) {
@@ -482,21 +457,23 @@ class ZapShareController {
             }
 
             // Tell the server the part was successfully received
-            unawaited(_tellReceived(
-              container.url,
-              container.id,
-              container.token,
-              receiverId,
-              callback: (complete) async {
-                completed = complete;
-                if (completed) {
-                  sendLog("download with zap completed, opening final folder..");
-                  unawaited(OpenFile.open(path.dirname(receiveFile.path)));
-                  await partSubscription?.cancel();
-                }
-              },
-              onError: () => sendLog("error"),
-            ));
+            unawaited(
+              _tellReceived(
+                container.url,
+                container.id,
+                container.token,
+                receiverId,
+                callback: (complete) async {
+                  completed = complete;
+                  if (completed) {
+                    sendLog("download with zap completed, opening final folder..");
+                    unawaited(OpenFile.open(path.dirname(receiveFile.path)));
+                    await partSubscription?.cancel();
+                  }
+                },
+                onError: () => sendLog("error"),
+              ),
+            );
           }
         }
       },
@@ -514,14 +491,8 @@ class ZapShareController {
     // Send receive confirmation
     final res = await dio.post(
       "${nodeProtocol()}$url/liveshare/received",
-      data: jsonEncode({
-        "id": id,
-        "token": token,
-        "receiver": receiverId,
-      }),
-      options: d.Options(
-        validateStatus: (status) => true,
-      ),
+      data: jsonEncode({"id": id, "token": token, "receiver": receiverId}),
+      options: d.Options(validateStatus: (status) => true),
     );
 
     if (res.statusCode != 200) {
@@ -549,22 +520,10 @@ class LiveshareInviteContainer {
 
   factory LiveshareInviteContainer.fromJson(String json) {
     final data = jsonDecode(json);
-    return LiveshareInviteContainer(
-      data["url"],
-      data["id"],
-      data["token"],
-      data["name"],
-      unpackageSymmetricKey(data["key"]),
-    );
+    return LiveshareInviteContainer(data["url"], data["id"], data["token"], data["name"], unpackageSymmetricKey(data["key"]));
   }
 
   String toJson() {
-    return jsonEncode({
-      "url": url,
-      "id": id,
-      "token": token,
-      "name": fileName,
-      "key": packageSymmetricKey(key),
-    });
+    return jsonEncode({"url": url, "id": id, "token": token, "name": fileName, "key": packageSymmetricKey(key)});
   }
 }

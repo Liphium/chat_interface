@@ -12,11 +12,7 @@ class SettingsPageBase extends StatelessWidget {
   final String label;
   final Widget child;
 
-  const SettingsPageBase({
-    super.key,
-    required this.child,
-    required this.label,
-  });
+  const SettingsPageBase({super.key, required this.child, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +40,7 @@ class SettingsPageBase extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inverseSurface,
         body: Column(
           children: [
-            UniversalAppBar(
-              label: "settings.$label".tr,
-              applyPadding: true,
-            ),
+            UniversalAppBar(label: "settings.$label".tr, applyPadding: true),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(left: sectionSpacing),
@@ -58,14 +51,7 @@ class SettingsPageBase extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: defaultSpacing,
-                            bottom: defaultSpacing,
-                            right: sectionSpacing,
-                          ),
-                          child: child,
-                        ),
+                        Padding(padding: const EdgeInsets.only(top: defaultSpacing, bottom: defaultSpacing, right: sectionSpacing), child: child),
                       ],
                     ),
                   ),

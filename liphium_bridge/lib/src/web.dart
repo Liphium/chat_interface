@@ -83,7 +83,8 @@ class XFileImage extends ImageProvider<XFileImage> {
   final double scale;
 
   @override
-  Future<XFileImage> obtainKey(final ImageConfiguration configuration) => SynchronousFuture<XFileImage>(this);
+  Future<XFileImage> obtainKey(final ImageConfiguration configuration) =>
+      SynchronousFuture<XFileImage>(this);
 
   @override
   ImageStreamCompleter loadImage(

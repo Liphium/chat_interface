@@ -20,9 +20,7 @@ class UnknownService {
     }
 
     // Get account
-    final json = await postAuthorizedJSON("/account/get_name", {
-      "name": name,
-    });
+    final json = await postAuthorizedJSON("/account/get_name", {"name": name});
 
     // Check if it was successful
     if (!json["success"]) {
@@ -61,17 +59,16 @@ class UnknownService {
     }
 
     // Check if there is a cached version of the unknown account in the local database
-    final query = db.unknownProfile.select()
-      ..where((tbl) => tbl.id.equals(address.encode()) & tbl.lastFetched.isBiggerThanValue(DateTime.now().subtract(Duration(hours: 2))));
+    final query =
+        db.unknownProfile.select()
+          ..where((tbl) => tbl.id.equals(address.encode()) & tbl.lastFetched.isBiggerThanValue(DateTime.now().subtract(Duration(hours: 2))));
     final result = await query.getSingleOrNull();
     if (result != null) {
       return UnknownAccount.fromData(result);
     }
 
     // Get account
-    final json = await postAddress(address.server, "/account/get", {
-      "id": address.id,
-    });
+    final json = await postAddress(address.server, "/account/get", {"id": address.id});
 
     // Check if it was successful
     if (!json["success"]) {
@@ -80,13 +77,7 @@ class UnknownService {
     }
 
     // Parse the response into an unknown account
-    final profile = UnknownAccount(
-      address,
-      json["name"],
-      json["display_name"],
-      unpackagePublicKey(json["sg"]),
-      unpackagePublicKey(json["pub"]),
-    );
+    final profile = UnknownAccount(address, json["name"], json["display_name"], unpackagePublicKey(json["sg"]), unpackagePublicKey(json["pub"]));
 
     // Add the unknown profile to the database
     await db.unknownProfile.insertOnConflictUpdate(profile.toData(DateTime.now()));
@@ -120,23 +111,14 @@ class UnknownAccount {
 
   static Future<UnknownAccount> fromFriend(Friend friend) async {
     final keys = await friend.getKeys();
-    return UnknownAccount(
-      friend.id,
-      friend.name,
-      friend.displayName.value,
-      keys.signatureKey,
-      keys.publicKey,
-    );
+    return UnknownAccount(friend.id, friend.name, friend.displayName.value, keys.signatureKey, keys.publicKey);
   }
 
   UnknownProfileData toData(DateTime lastFetched) => UnknownProfileData(
-        id: id.encode(),
-        name: dbEncrypted(name),
-        displayName: dbEncrypted(displayName),
-        keys: dbEncrypted(jsonEncode({
-          "sg": packagePublicKey(signatureKey),
-          "pub": packagePublicKey(publicKey),
-        })),
-        lastFetched: lastFetched,
-      );
+    id: id.encode(),
+    name: dbEncrypted(name),
+    displayName: dbEncrypted(displayName),
+    keys: dbEncrypted(jsonEncode({"sg": packagePublicKey(signatureKey), "pub": packagePublicKey(publicKey)})),
+    lastFetched: lastFetched,
+  );
 }

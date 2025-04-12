@@ -40,38 +40,31 @@ class _UserAvatarState extends State<UserAvatar> {
     return SizedBox(
       width: widget.size ?? 45,
       height: widget.size ?? 45,
-      child: Watch(
-        (ctx) {
-          if (friend.profilePictureImage.value != null) {
-            final image = friend.profilePictureImage.value!;
-            return ClipOval(
-              child: RawImage(
-                fit: BoxFit.contain,
-                image: image,
-              ),
-            );
-          }
+      child: Watch((ctx) {
+        if (friend.profilePictureImage.value != null) {
+          final image = friend.profilePictureImage.value!;
+          return ClipOval(child: RawImage(fit: BoxFit.contain, image: image));
+        }
 
-          final cuttedDisplayName = friend.displayName.value.substring(0, 1);
-          return ClipOval(
-            child: Container(
-              color: Get.theme.colorScheme.primaryContainer,
-              child: SelectionContainer.disabled(
-                child: Center(
-                  child: Text(
-                    cuttedDisplayName,
-                    style: Get.theme.textTheme.labelMedium!.copyWith(
-                      fontSize: (widget.size ?? 45) * 0.5,
-                      fontWeight: FontWeight.bold,
-                      color: widget.id == StatusController.ownAddress ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary,
-                    ),
+        final cuttedDisplayName = friend.displayName.value.substring(0, 1);
+        return ClipOval(
+          child: Container(
+            color: Get.theme.colorScheme.primaryContainer,
+            child: SelectionContainer.disabled(
+              child: Center(
+                child: Text(
+                  cuttedDisplayName,
+                  style: Get.theme.textTheme.labelMedium!.copyWith(
+                    fontSize: (widget.size ?? 45) * 0.5,
+                    fontWeight: FontWeight.bold,
+                    color: widget.id == StatusController.ownAddress ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary,
                   ),
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      }),
     );
   }
 }
@@ -107,14 +100,8 @@ class UserRenderer extends StatelessWidget {
                       padding: const EdgeInsets.only(left: defaultSpacing),
                       child: Tooltip(
                         waitDuration: const Duration(milliseconds: 500),
-                        message: "friends.different_town".trParams({
-                          "town": friend.id.server,
-                        }),
-                        child: Icon(
-                          Icons.sensors,
-                          color: Get.theme.colorScheme.onPrimary,
-                          size: 21,
-                        ),
+                        message: "friends.different_town".trParams({"town": friend.id.server}),
+                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                       ),
                     ),
                   horizontalSpacing(defaultSpacing),
@@ -130,10 +117,10 @@ class UserRenderer extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              )
+              ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

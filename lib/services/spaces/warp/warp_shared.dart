@@ -138,13 +138,15 @@ class SharedWarp {
 
   /// Send a packet to a client through the server.
   Future<void> sendPacketToClient(String id, int connId, Uint8List bytes, int seq) async {
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("wp_send_back", {
-      "w": this.id, // The parameter called "id" almost got me here xd
-      "t": id,
-      "c": connId,
-      "s": seq,
-      "p": base64Encode(encryptSymmetricBytes(bytes, SpaceController.key!)),
-    }));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("wp_send_back", {
+        "w": this.id, // The parameter called "id" almost got me here xd
+        "t": id,
+        "c": connId,
+        "s": seq,
+        "p": base64Encode(encryptSymmetricBytes(bytes, SpaceController.key!)),
+      }),
+    );
 
     // Remove the client from the warp in case the response from the server is invalid (or there was an error)
     if (event == null || !event.data["success"]) {
@@ -158,10 +160,7 @@ class SharedWarp {
   /// This kicks them and blocks packets on the server side.
   void removeClientFromWarp(String id) {
     // Tell the server to kick the client
-    SpaceConnection.spaceConnector!.sendAction(ServerAction("wp_kick", {
-      "w": this.id,
-      "t": id,
-    }));
+    SpaceConnection.spaceConnector!.sendAction(ServerAction("wp_kick", {"w": this.id, "t": id}));
 
     // Disconnect them from the local server
     handleDisconnect(id);

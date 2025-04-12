@@ -142,9 +142,5 @@ class WarpShareContainer {
 
   final loading = signal(false);
 
-  WarpShareContainer({
-    required this.id,
-    required this.account,
-    required this.port,
-  });
+  WarpShareContainer({required this.id, required this.account, required this.port});
 }

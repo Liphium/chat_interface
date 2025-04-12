@@ -13,19 +13,14 @@ class SpaceGridRenderer extends StatelessWidget {
   /// The padding between the rectangles
   final double padding;
 
-  const SpaceGridRenderer({
-    super.key,
-    required this.amount,
-    this.padding = defaultSpacing,
-    required this.renderer,
-  });
+  const SpaceGridRenderer({super.key, required this.amount, this.padding = defaultSpacing, required this.renderer});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final ratio = 16 / 9;
-        final maxWidth = constraints.maxWidth - padding;
+        final maxWidth = min(constraints.maxWidth - padding, 500);
         final maxHeight = constraints.maxHeight - padding;
         double bestSize = 0;
 
@@ -48,20 +43,13 @@ class SpaceGridRenderer extends StatelessWidget {
               padding: EdgeInsets.all(padding / 2),
               child: Wrap(
                 alignment: WrapAlignment.center,
-                children: List.generate(
-                  amount,
-                  (index) {
-                    if (index >= amount) return const SizedBox();
-                    return Padding(
-                      padding: EdgeInsets.all(padding / 2),
-                      child: SizedBox(
-                        width: childWidth - padding * 2,
-                        height: (childWidth - padding * 2) / ratio,
-                        child: renderer.call(index),
-                      ),
-                    );
-                  },
-                ),
+                children: List.generate(amount, (index) {
+                  if (index >= amount) return const SizedBox();
+                  return Padding(
+                    padding: EdgeInsets.all(padding / 2),
+                    child: SizedBox(width: childWidth - padding * 2, height: (childWidth - padding * 2) / ratio, child: renderer.call(index)),
+                  );
+                }),
               ),
             ),
           ),

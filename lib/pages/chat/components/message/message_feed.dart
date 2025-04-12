@@ -6,7 +6,6 @@ import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/chat/messages/message_input.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,11 +15,7 @@ class MessageFeed extends StatefulWidget {
   final double? overwritePadding;
   final bool rectInput;
 
-  const MessageFeed({
-    super.key,
-    this.overwritePadding,
-    this.rectInput = false,
-  });
+  const MessageFeed({super.key, this.overwritePadding, this.rectInput = false});
 
   @override
   State<MessageFeed> createState() => _MessageFeedState();
@@ -46,16 +41,9 @@ class _MessageFeedState extends State<MessageFeed> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "conversation.error".tr,
-                  style: Get.textTheme.titleMedium,
-                ),
+                Text("conversation.error".tr, style: Get.textTheme.titleMedium),
                 verticalSpacing(defaultSpacing),
-                Text(
-                  provider.conversation.error.value!,
-                  style: Get.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
+                Text(provider.conversation.error.value!, style: Get.textTheme.bodyMedium, textAlign: TextAlign.center),
               ],
             ),
           ),
@@ -79,19 +67,17 @@ class _MessageFeedState extends State<MessageFeed> {
                             constraints: BoxConstraints(
                               maxWidth: (SettingController.settings[ChatSettings.chatTheme]!.value.value ?? 1) == 0 ? double.infinity : 1200,
                             ),
-                            child: Watch(
-                              (ctx) {
-                                if (!MessageController.loaded.value) {
-                                  return const SizedBox();
-                                }
+                            child: Watch((ctx) {
+                              if (!MessageController.loaded.value) {
+                                return const SizedBox();
+                              }
 
-                                return MessageList(
-                                  key: ValueKey(provider.conversation.id),
-                                  provider: provider,
-                                  overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
-                                );
-                              },
-                            ),
+                              return MessageList(
+                                key: ValueKey(provider.conversation.id),
+                                provider: provider,
+                                overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
+                              );
+                            }),
                           ),
                         ),
 
@@ -99,7 +85,6 @@ class _MessageFeedState extends State<MessageFeed> {
                         Align(
                           alignment: Alignment.topCenter,
                           child: Watch(key: ValueKey(provider.conversation.id), (ctx) {
-                            sendLog("re-render loading thingy: ${provider.newMessagesLoading.value} ${provider.hashCode}");
                             return Visibility(
                               visible: provider.newMessagesLoading.value,
                               child: Padding(
@@ -116,10 +101,7 @@ class _MessageFeedState extends State<MessageFeed> {
                                         SizedBox(
                                           width: Get.textTheme.labelMedium!.fontSize! * 1.5,
                                           height: Get.textTheme.labelMedium!.fontSize! * 1.5,
-                                          child: CircularProgressIndicator(
-                                            color: Get.theme.colorScheme.onPrimary,
-                                            strokeWidth: 3,
-                                          ),
+                                          child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, strokeWidth: 3),
                                         ),
                                         horizontalSpacing(defaultSpacing),
                                         Text("loading".tr, style: Get.textTheme.labelMedium),
@@ -137,14 +119,11 @@ class _MessageFeedState extends State<MessageFeed> {
 
                   //* Message input
                   SelectionContainer.disabled(
-                    child: provider.conversation.borked
-                        ? const SizedBox.shrink()
-                        : MessageInput(
-                            rectangle: widget.rectInput,
-                            draft: provider.conversation.id.encode(),
-                            provider: provider,
-                          ),
-                  )
+                    child:
+                        provider.conversation.borked
+                            ? const SizedBox.shrink()
+                            : MessageInput(rectangle: widget.rectInput, draft: provider.conversation.id.encode(), provider: provider),
+                  ),
                 ],
               ),
             ),
@@ -156,12 +135,10 @@ class _MessageFeedState extends State<MessageFeed> {
               child: Container(
                 color: Get.theme.colorScheme.onInverseSurface,
                 width: 300,
-                child: ConversationMembers(
-                  conversation: provider.conversation,
-                ),
+                child: ConversationMembers(conversation: provider.conversation),
               ),
             );
-          })
+          }),
         ],
       );
     });

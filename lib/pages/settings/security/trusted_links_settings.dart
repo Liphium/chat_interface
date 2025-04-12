@@ -63,10 +63,7 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InfoContainer(
-            message: "links.warning".tr,
-            expand: true,
-          ),
+          InfoContainer(message: "links.warning".tr, expand: true),
           verticalSpacing(sectionSpacing),
 
           //* Location trust types
@@ -74,9 +71,7 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
           verticalSpacing(defaultSpacing),
 
           // Unsafe locations
-          const BoolSettingSmall(
-            settingName: TrustedLinkSettings.unsafeSources,
-          ),
+          const BoolSettingSmall(settingName: TrustedLinkSettings.unsafeSources),
           verticalSpacing(sectionSpacing),
 
           Text("links.trusted_domains".tr, style: Get.theme.textTheme.labelLarge),
@@ -85,8 +80,8 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
           // Trust mode
           Text("links.trust_mode".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
-          const ListSelectionSetting(
-            settingName: TrustedLinkSettings.trustMode,
+          ListSelectionSetting(
+            setting: SettingController.settings[TrustedLinkSettings.trustMode]! as Setting<int>,
             items: TrustedLinkSettings.trustModes,
           ),
           verticalSpacing(sectionSpacing),
@@ -109,47 +104,36 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
             }
 
             return Column(
-              children: List.generate(
-                _trusted.length,
-                (index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: elementSpacing),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
-                      decoration: BoxDecoration(
-                        color: Get.theme.colorScheme.onInverseSurface,
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Row(
-                              children: [
-                                Icon(Icons.done_all, color: Get.theme.colorScheme.onPrimary),
-                                horizontalSpacing(defaultSpacing),
-                                Flexible(
-                                  child: Text(
-                                    _trusted[index].domain,
-                                    style: Get.theme.textTheme.labelMedium,
-                                  ),
-                                ),
-                              ],
-                            ),
+              children: List.generate(_trusted.length, (index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: elementSpacing),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
+                    decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(defaultSpacing)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Row(
+                            children: [
+                              Icon(Icons.done_all, color: Get.theme.colorScheme.onPrimary),
+                              horizontalSpacing(defaultSpacing),
+                              Flexible(child: Text(_trusted[index].domain, style: Get.theme.textTheme.labelMedium)),
+                            ],
                           ),
-                          IconButton(
-                            onPressed: () {
-                              db.trustedLink.deleteWhere((tbl) => tbl.domain.equals(_trusted[index].domain));
-                              _trusted.removeAt(index);
-                            },
-                            icon: const Icon(Icons.delete),
-                          ),
-                        ],
-                      ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            db.trustedLink.deleteWhere((tbl) => tbl.domain.equals(_trusted[index].domain));
+                            _trusted.removeAt(index);
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              }),
             );
           }),
         ],
@@ -177,23 +161,16 @@ class _TrustedLinkCreationWindowState extends State<TrustedLinkCreationWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text("links.trusted_list.add".tr, style: Get.theme.textTheme.titleMedium),
-      ],
+      title: [Text("links.trusted_list.add".tr, style: Get.theme.textTheme.titleMedium)],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FJTextField(
-            controller: _controller,
-            hintText: "links.trusted_list.placeholder".tr,
-          ),
+          FJTextField(controller: _controller, hintText: "links.trusted_list.placeholder".tr),
           verticalSpacing(defaultSpacing),
           FJElevatedButton(
             onTap: () => Get.back(result: _controller.text),
-            child: Center(
-              child: Text("add".tr, style: Get.theme.textTheme.labelLarge),
-            ),
-          )
+            child: Center(child: Text("add".tr, style: Get.theme.textTheme.labelLarge)),
+          ),
         ],
       ),
     );

@@ -55,15 +55,11 @@ class PolicySetup extends Setup {
     // Check if the agreements file has already been created and contains the latest date
     file = File(path.join(supportDir.path, agreeFile));
     if (!file.existsSync()) {
-      return PolicyAcceptPage(
-        versionToWrite: uncoveredDate,
-      );
+      return PolicyAcceptPage(versionToWrite: uncoveredDate);
     }
     final content = await file.readAsString();
     if (content.trim() != uncoveredDate) {
-      return PolicyAcceptPage(
-        versionToWrite: uncoveredDate,
-      );
+      return PolicyAcceptPage(versionToWrite: uncoveredDate);
     }
 
     return null;
@@ -90,18 +86,11 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'setup.policy'.tr,
-          style: Get.textTheme.headlineMedium,
-        ),
+        Text('setup.policy'.tr, style: Get.textTheme.headlineMedium),
         verticalSpacing(sectionSpacing),
         Text("setup.policy.text".tr, style: Get.textTheme.bodyMedium),
         verticalSpacing(sectionSpacing),
-        AnimatedErrorContainer(
-          padding: const EdgeInsets.only(bottom: defaultSpacing),
-          message: _error,
-          expand: true,
-        ),
+        AnimatedErrorContainer(padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error, expand: true),
         FJElevatedButton(
           onTap: () async {
             const url = "https://liphium.com/legal/terms";
@@ -114,25 +103,10 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
             }
             _error.value = "setup.policy.error".tr;
           },
-          child: Center(
-            child: Text(
-              "View agreements",
-              style: Get.textTheme.labelLarge,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          child: Center(child: Text("View agreements", style: Get.textTheme.labelLarge, textAlign: TextAlign.center)),
         ),
         Animate(
-          effects: [
-            ExpandEffect(
-              axis: Axis.vertical,
-              curve: scaleAnimationCurve,
-              duration: 500.ms,
-            ),
-            FadeEffect(
-              duration: 500.ms,
-            )
-          ],
+          effects: [ExpandEffect(axis: Axis.vertical, curve: scaleAnimationCurve, duration: 500.ms), FadeEffect(duration: 500.ms)],
           target: _clicked.value ? 1 : 0,
           child: Padding(
             padding: const EdgeInsets.only(top: defaultSpacing),
