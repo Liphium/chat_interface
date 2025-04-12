@@ -36,6 +36,12 @@ class StudioService {
         {
           "urls": ["stun:${event.data["stun"]}"],
         },
+        if ((event.data["turn"] ?? "") != "")
+          {
+            "urls": ["turn:${event.data["turn"]}"],
+            "username": event.data["turn_user"] ?? "",
+            "credential": event.data["turn_pass"] ?? "",
+          },
       ],
     });
 
