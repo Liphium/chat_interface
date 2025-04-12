@@ -7,18 +7,16 @@ import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
 class SidebarController {
-  static final showSearch = signal(false);
+  static final rightSidebar = signal(false);
   static final hideSidebar = signal(false);
   static final loaded = signal(false);
   static final currentOpenTab = signal<SidebarTab>(DefaultSidebarTab());
 
   /// Open the search view on the side of the message feed.
-  ///
-  /// TODO: Consider moving this to local state of the conversation (doesn't make sense here)
-  static void toggleSearchView() {
-    showSearch.value = !showSearch.peek();
+  static void toggleRightSidebar() {
+    rightSidebar.value = !rightSidebar.peek();
     if (Get.width <= 1200) {
-      if (showSearch.value) {
+      if (rightSidebar.value) {
         hideSidebar.value = true;
       } else {
         hideSidebar.value = false;
@@ -29,8 +27,8 @@ class SidebarController {
   /// Toggle the open state of the main sidebar.
   static void toggleSidebar() {
     hideSidebar.value = !hideSidebar.peek();
-    if (Get.width <= 1200 && showSearch.value) {
-      showSearch.value = false;
+    if (Get.width <= 1200 && rightSidebar.value) {
+      rightSidebar.value = false;
     }
   }
 

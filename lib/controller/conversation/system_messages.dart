@@ -145,11 +145,10 @@ class SystemMessages {
     // Called when someone changes something about the conversation
     // Format: [accountId]
     "conv.edited": SystemMessage(
-      Icons.update,
-      store: false,
+      Icons.edit,
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
-          return "chat.edit_data".trParams({"name": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value});
+          return "conv.edit_data".trParams({"name": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value});
         }
 
         return "not.supported".tr;

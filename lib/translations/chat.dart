@@ -61,6 +61,8 @@ class ChatPageTranslations extends Translations {
       'conversation.info.town': 'This conversation is hosted on @town.',
       'conversations.placeholder': 'Search',
       'conversations.create': 'Create conversation',
+      'conversations.name.edit': 'Edit conversation title',
+      'conversations.name.placeholder': 'the gang',
       'conversations.name': 'Conversation name',
       'chat.welcome.title': 'Welcome to this new chat!',
       'chat.welcome.desc':

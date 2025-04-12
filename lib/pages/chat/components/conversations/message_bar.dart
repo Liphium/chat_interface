@@ -215,11 +215,12 @@ class _MessageBarState extends State<MessageBar> {
                       iconSize: 27,
                       icon: Icon(
                         Icons.search,
-                        color: SidebarController.showSearch.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
+                        color:
+                            SidebarController.rightSidebar.value ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
                       ),
                       onPressed: () {
-                        SidebarController.toggleSearchView();
-                        if (SidebarController.showSearch.value) {
+                        SidebarController.toggleRightSidebar();
+                        if (SidebarController.rightSidebar.value) {
                           MessageSearchController.currentFocus!.requestFocus();
                         }
                       },

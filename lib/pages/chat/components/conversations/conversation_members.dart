@@ -77,7 +77,7 @@ class ConversationMembers extends StatelessWidget {
                                             label: "chat.make_moderator".tr,
                                             onTap: (f, loading) async {
                                               loading.value = true;
-                                              final error = await member.promote(conversation.id);
+                                              final error = await member.promote(conversation);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
                                               } else {
@@ -92,7 +92,7 @@ class ConversationMembers extends StatelessWidget {
                                             label: "chat.make_admin".tr,
                                             onTap: (f, loading) async {
                                               loading.value = true;
-                                              final error = await member.promote(conversation.id);
+                                              final error = await member.promote(conversation);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
                                               } else {
@@ -109,7 +109,7 @@ class ConversationMembers extends StatelessWidget {
                                             label: "chat.remove_moderator".tr,
                                             onTap: (f, loading) async {
                                               loading.value = true;
-                                              final error = await member.demote(conversation.id);
+                                              final error = await member.demote(conversation);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
                                               } else {
@@ -124,7 +124,7 @@ class ConversationMembers extends StatelessWidget {
                                             label: "chat.remove_admin".tr,
                                             onTap: (f, loading) async {
                                               loading.value = true;
-                                              final error = await member.demote(conversation.id);
+                                              final error = await member.demote(conversation);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
                                               } else {
@@ -143,7 +143,7 @@ class ConversationMembers extends StatelessWidget {
                                             iconColor: Get.theme.colorScheme.error,
                                             onTap: (f, loading) async {
                                               loading.value = true;
-                                              final error = await member.remove(conversation.id);
+                                              final error = await member.remove(conversation);
                                               if (error != null) {
                                                 showErrorPopup("error", error);
                                               } else {

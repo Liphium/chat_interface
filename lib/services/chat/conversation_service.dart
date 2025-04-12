@@ -198,8 +198,16 @@ class ConversationService extends VaultTarget {
       // Send them an authenticated stored action and add the member to the list
       final error = await sendAuthenticatedStoredAction(friend, _conversationPayload(convId, token, packagedKey, friend));
       if (error != null) {
-        unawaited(delete(convId, token: conversation.token));
-        return error;
+        // Handle invitation failure gracefully
+        if (conversation.type == model.ConversationType.directMessage) {
+          // In case of a direct message, delete it because we don't wanna be in there alone
+          unawaited(delete(convId, token: conversation.token));
+          return error;
+        } else {
+          // In case of a group conversation or square, simply remove the person
+          final member = Member(token.id, friend.id, MemberRole.user);
+          unawaited(member.remove(conversation));
+        }
       }
     }
 
@@ -352,14 +360,15 @@ class ConversationService extends VaultTarget {
     // Get the data from the server
     conversation.membersLoading.value = true;
     final json = await postNodeJSON("/conversations/data", {"token": conversation.token.toMap()});
-
     if (!json["success"]) {
       sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING ${json["error"]}");
+      conversation.membersLoading.value = false;
       return false;
     }
 
     // Make sure there are changes worth pulling
     if (conversation.lastVersion == json["version"]) {
+      conversation.membersLoading.value = false;
       return true;
     }
 
@@ -368,12 +377,10 @@ class ConversationService extends VaultTarget {
 
     // Update the container
     conversation.container = ConversationContainer.decrypt(json["data"], conversation.key);
-    conversation.containerSub.value = conversation.container;
 
     // Update the members
     final members = <LPHAddress, Member>{};
     for (var memberData in json["members"]) {
-      sendLog(memberData);
       final memberContainer = MemberContainer.decrypt(memberData["data"], conversation.key);
       final address = LPHAddress.from(memberData["id"]);
       members[address] = Member(address, memberContainer.id, MemberRole.fromValue(memberData["rank"]));
@@ -390,6 +397,7 @@ class ConversationService extends VaultTarget {
     batch(() {
       conversation.members.value = members;
       conversation.membersLoading.value = false;
+      conversation.containerSub.value = conversation.container;
     });
     saveToDatabase(conversation);
 
@@ -452,5 +460,26 @@ class ConversationService extends VaultTarget {
 
     // Set the members in the conversation
     conv.members.value = map;
+  }
+
+  /// Set the data of a conversation on the server.
+  static Future<String?> setData(Conversation conv, ConversationContainer container) async {
+    final data = container.encrypted(conv.key);
+
+    // Update the conversation on the server
+    final json = await postNodeJSON("/conversations/set_data", {
+      "token": conv.token.toMap(),
+      "data": {"version": conv.lastVersion, "data": data},
+    });
+    if (!json["success"]) {
+      return json["error"];
+    }
+
+    // Update locally
+    conv.lastVersion += 1;
+    conv.container = container;
+    conv.containerSub.value = container;
+
+    return null;
   }
 }

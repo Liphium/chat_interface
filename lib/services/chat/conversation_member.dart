@@ -31,8 +31,7 @@ class Member {
   /// Promote a member to the next available role.
   ///
   /// Returns an error if there was one.
-  Future<String?> promote(LPHAddress conversationId) async {
-    final conversation = ConversationController.conversations[conversationId]!;
+  Future<String?> promote(Conversation conversation) async {
     final json = await postNodeJSON("/conversations/promote_token", {"token": conversation.token.toMap(), "data": tokenId.encode()});
 
     // Check if there was an error
@@ -45,8 +44,7 @@ class Member {
   /// Demote a member to the next available role.
   ///
   /// Returns an error if there was one.
-  Future<String?> demote(LPHAddress conversationId) async {
-    final conversation = ConversationController.conversations[conversationId]!;
+  Future<String?> demote(Conversation conversation) async {
     final json = await postNodeJSON("/conversations/demote_token", {"token": conversation.token.toMap(), "data": tokenId.encode()});
 
     // Check if there was an error
@@ -56,12 +54,11 @@ class Member {
     return null;
   }
 
-  /// Demote a member to the next available role.
+  /// Kick a member from the conversation.
   ///
   /// Returns an error if there was one.
-  Future<String?> remove(LPHAddress conversationId) async {
+  Future<String?> remove(Conversation conversation) async {
     // Kick the member's token out of the conversation
-    final conversation = ConversationController.conversations[conversationId]!;
     final json = await postNodeJSON("/conversations/kick_member", {"token": conversation.token.toMap(), "data": tokenId.encode()});
 
     // Check if there was an error
