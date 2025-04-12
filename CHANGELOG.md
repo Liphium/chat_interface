@@ -6,7 +6,7 @@
 
 - Fixed that you couldn't invite people to a Space
 - Fixed same addresses sometimes not being recognized
-- Rewrote the code behind Spaces to be more readable and maintainable
+- Rewrote the entire code using new state management for a better structure
   - It now uses [signals](https://pub.dev/packages/signals) instead of GetX
   - It's now devided into services and controllers for a better overview
   - Tabletop's architecture still needs to be improved
@@ -18,6 +18,7 @@
   - Regression: Links are no longer clickable (TODO: Fix before 1.0.0 Beta)
 - Fixed cards in rotated inventories having an incorrect rotation
 - Fixed not creating a new inventory when the old one has been deleted
+- Fixed the "Edit title" not actually doing anything
 
 ## 0.6.0
 
