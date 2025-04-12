@@ -57,16 +57,21 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
   }
 
   Future<void> loadState() async {
-    _info.value = await widget.container.getInfo(timer: widget.pollNewData);
+    final info = await widget.container.getInfo(timer: widget.pollNewData);
+    batch(() {
+      _info.value = info;
+      if (_info.value!.exists || _info.value!.error || !widget.pollNewData) {
+        _loading.value = false;
+      }
+    });
+
+    // Subscribe for future changes
     _disposeInfoSub = widget.container.info.subscribe((info) {
       if (widget.container.cancelled) {
         _loading.value = false;
       }
       _info.value = info;
     });
-    if (_info.value!.exists || _info.value!.error || !widget.pollNewData) {
-      _loading.value = false;
-    }
   }
 
   @override
