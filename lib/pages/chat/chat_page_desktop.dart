@@ -1,7 +1,6 @@
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
-import 'package:chat_interface/pages/chat/components/conversations/message_search_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/pages/spaces/space_rectangle.dart';
@@ -89,7 +88,7 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
 
 /// Default sidebar tab when the app is started
 class DefaultSidebarTab extends SidebarTab {
-  DefaultSidebarTab() : super(SidebarTabType.none);
+  DefaultSidebarTab() : super(SidebarTabType.none, "def");
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +109,7 @@ class DefaultSidebarTab extends SidebarTab {
 class ConversationSidebarTab extends SidebarTab {
   final ConversationMessageProvider provider;
 
-  ConversationSidebarTab(this.provider) : super(SidebarTabType.conversation);
+  ConversationSidebarTab(this.provider) : super(SidebarTabType.conversation, "conv-${provider.conversation.id.encode()}");
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +133,9 @@ class ConversationSidebarTab extends SidebarTab {
                       ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.horizontal, alignment: Alignment.centerLeft),
                       FadeEffect(duration: 250.ms),
                     ],
-                    onInit: (ac) => ac.value = SidebarController.rightSidebar.value ? 1 : 0,
-                    target: SidebarController.rightSidebar.value ? 1 : 0,
-                    child: SizedBox(width: 350, child: MessageSearchWindow()),
+                    onInit: (ac) => ac.value = SidebarController.rightSidebar[key] != null ? 1 : 0,
+                    target: SidebarController.rightSidebar[key] != null ? 1 : 0,
+                    child: SizedBox(width: 350, child: SidebarController.rightSidebar[key]?.build(ctx)),
                   ),
                 ),
               ),
@@ -150,7 +149,7 @@ class ConversationSidebarTab extends SidebarTab {
 
 /// Sidebar tab for the Space the user is currently in
 class SpaceSidebarTab extends SidebarTab {
-  SpaceSidebarTab() : super(SidebarTabType.space);
+  SpaceSidebarTab() : super(SidebarTabType.space, "space");
 
   @override
   Widget build(BuildContext context) {

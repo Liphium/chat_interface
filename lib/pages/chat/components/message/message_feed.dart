@@ -1,7 +1,6 @@
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
-import 'package:chat_interface/pages/chat/components/conversations/conversation_members.dart';
 import 'package:chat_interface/pages/chat/components/message/message_list.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -128,17 +127,6 @@ class _MessageFeedState extends State<MessageFeed> {
               ),
             ),
           ),
-          Watch((ctx) {
-            final visible = SettingController.settings[AppSettings.showGroupMembers]!.value.value;
-            return Visibility(
-              visible: provider.conversation.isGroup && visible,
-              child: Container(
-                color: Get.theme.colorScheme.onInverseSurface,
-                width: 300,
-                child: ConversationMembers(conversation: provider.conversation),
-              ),
-            );
-          }),
         ],
       );
     });

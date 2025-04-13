@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
@@ -12,6 +13,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
+/// Right sidebar implementation
+class ConversationMembersRightSidebar extends RightSidebar {
+  final Conversation conversation;
+  ConversationMembersRightSidebar(super.key, this.conversation);
+
+  @override
+  Widget build(BuildContext context) {
+    return ConversationMembers(key: ValueKey(key), conversation: conversation);
+  }
+}
+
+/// The actual widget behind it
 class ConversationMembers extends StatelessWidget {
   final Conversation conversation;
 

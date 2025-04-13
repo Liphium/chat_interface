@@ -9,19 +9,19 @@ import 'package:get/get.dart';
 import 'package:drift/drift.dart';
 import 'package:signals/signals_flutter.dart';
 
-class MessageSearchController {
-  static final filters = listSignal(<MessageFilter>[]);
-  static final results = listSignal(<Message>[]);
-  static FocusNode? currentFocus;
+class MessageSearchQuery {
+  final filters = listSignal(<MessageFilter>[]);
+  final results = listSignal(<Message>[]);
+  FocusNode? currentFocus;
 
   // Data for the message search algorithm
-  static bool _finished = false;
-  static bool _restart = false;
-  static int _lastTime = 0;
-  static Timer? _searchTimer;
-  static int neededMessages = 10;
+  bool _finished = false;
+  bool _restart = false;
+  int _lastTime = 0;
+  Timer? _searchTimer;
+  int neededMessages = 10;
 
-  static void search({bool increment = false}) {
+  void search({bool increment = false}) {
     _searchTimer?.cancel();
     if (increment) {
       if (_finished) {
