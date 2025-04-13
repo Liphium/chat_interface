@@ -129,6 +129,7 @@ class ConversationSidebarTab extends SidebarTab {
               SelectionContainer.disabled(
                 child: Watch(
                   (ctx) => Animate(
+                    key: ValueKey("rsa-${provider.conversation.id.encode()}"),
                     effects: [
                       ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.horizontal, alignment: Alignment.centerLeft),
                       FadeEffect(duration: 250.ms),

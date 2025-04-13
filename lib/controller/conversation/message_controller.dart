@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
+import 'package:chat_interface/pages/chat/components/conversations/conversation_members_bar.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -34,6 +36,11 @@ class MessageController {
     } else {
       // On desktop select the conversation in the sidebar
       SidebarController.openTab(ConversationSidebarTab(provider));
+
+      // Open the member sidebar in case desired
+      if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool && conversation.isGroup) {
+        SidebarController.setRightSidebar(ConversationMembersRightSidebar(conversation));
+      }
     }
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
@@ -45,6 +52,22 @@ class MessageController {
 
     // Show the messages once they are fully loaded
     loaded.value = true;
+  }
+
+  /// Restore the right sidebar to how it was before another sidebar was opened.
+  ///
+  /// Returns the sidebar to the group members overview for example (in case opened).
+  static void restoreRightSidebar() {
+    if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool) {
+      final provider = SidebarController.getCurrentProvider();
+      if (provider != null) {
+        SidebarController.setRightSidebar(ConversationMembersRightSidebar(provider.conversation));
+      } else {
+        SidebarController.setRightSidebar(null);
+      }
+    } else {
+      SidebarController.setRightSidebar(null);
+    }
   }
 
   /// Add a message to the cache.

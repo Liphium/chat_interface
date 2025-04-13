@@ -16,11 +16,11 @@ import 'package:signals/signals_flutter.dart';
 /// Right sidebar implementation
 class ConversationMembersRightSidebar extends RightSidebar {
   final Conversation conversation;
-  ConversationMembersRightSidebar(super.key, this.conversation);
+  ConversationMembersRightSidebar(this.conversation) : super("conv-members");
 
   @override
   Widget build(BuildContext context) {
-    return ConversationMembers(key: ValueKey(key), conversation: conversation);
+    return ConversationMembers(conversation: conversation);
   }
 }
 
@@ -34,173 +34,176 @@ class ConversationMembers extends StatelessWidget {
   Widget build(BuildContext context) {
     final ownRole = conversation.members[conversation.token.id]!.role;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: defaultSpacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
-                child: Watch(
-                  (ctx) => Text('chat.members'.trParams({"count": conversation.members.length.toString()}), style: Get.theme.textTheme.titleMedium),
+    return Container(
+      color: Get.theme.colorScheme.onInverseSurface,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
+                  child: Watch(
+                    (ctx) => Text('chat.members'.trParams({"count": conversation.members.length.toString()}), style: Get.theme.textTheme.titleMedium),
+                  ),
                 ),
-              ),
-              LoadingIconButton(
-                loading: conversation.membersLoading,
-                onTap: () => ConversationService.fetchNewestVersion(conversation),
-                icon: Icons.refresh,
-              ),
-            ],
-          ),
-          verticalSpacing(defaultSpacing),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
-            child: Watch(
-              (ctx) => ListView.builder(
-                shrinkWrap: true,
-                itemCount: conversation.members.length,
-                itemBuilder: (context, index) {
-                  final GlobalKey listKey = GlobalKey();
-                  final member = conversation.members.values.elementAt(index);
-                  return Padding(
-                    key: listKey,
-                    padding: const EdgeInsets.only(bottom: elementSpacing),
-                    child: Material(
-                      color: Get.theme.colorScheme.onInverseSurface,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(defaultSpacing),
-                        onTap: () {
-                          final friend = FriendController.friends[member.address];
-                          if (StatusController.ownAddress != member.address) {
-                            final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
-                            Get.dialog(
-                              Profile(
-                                position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
-                                friend: friend ?? Friend.unknown(member.address),
-                                size: box.size.width.toInt(),
-                                actions: (friend) {
-                                  return [
-                                        //* Promotion actions
-                                        if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
-                                          ProfileAction(
-                                            icon: Icons.add_moderator,
-                                            label: "chat.make_moderator".tr,
-                                            onTap: (f, loading) async {
-                                              loading.value = true;
-                                              final error = await member.promote(conversation);
-                                              if (error != null) {
-                                                showErrorPopup("error", error);
-                                              } else {
-                                                Get.back();
-                                              }
-                                              loading.value = false;
-                                            },
-                                          )
-                                        else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
-                                          ProfileAction(
-                                            icon: Icons.add_moderator,
-                                            label: "chat.make_admin".tr,
-                                            onTap: (f, loading) async {
-                                              loading.value = true;
-                                              final error = await member.promote(conversation);
-                                              if (error != null) {
-                                                showErrorPopup("error", error);
-                                              } else {
-                                                Get.back();
-                                              }
-                                              loading.value = false;
-                                            },
-                                          ),
+                LoadingIconButton(
+                  loading: conversation.membersLoading,
+                  onTap: () => ConversationService.fetchNewestVersion(conversation),
+                  icon: Icons.refresh,
+                ),
+              ],
+            ),
+            verticalSpacing(defaultSpacing),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: elementSpacing),
+              child: Watch(
+                (ctx) => ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: conversation.members.length,
+                  itemBuilder: (context, index) {
+                    final GlobalKey listKey = GlobalKey();
+                    final member = conversation.members.values.elementAt(index);
+                    return Padding(
+                      key: listKey,
+                      padding: const EdgeInsets.only(bottom: elementSpacing),
+                      child: Material(
+                        color: Get.theme.colorScheme.onInverseSurface,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          onTap: () {
+                            final friend = FriendController.friends[member.address];
+                            if (StatusController.ownAddress != member.address) {
+                              final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
+                              Get.dialog(
+                                Profile(
+                                  position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
+                                  friend: friend ?? Friend.unknown(member.address),
+                                  size: box.size.width.toInt(),
+                                  actions: (friend) {
+                                    return [
+                                          //* Promotion actions
+                                          if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
+                                            ProfileAction(
+                                              icon: Icons.add_moderator,
+                                              label: "chat.make_moderator".tr,
+                                              onTap: (f, loading) async {
+                                                loading.value = true;
+                                                final error = await member.promote(conversation);
+                                                if (error != null) {
+                                                  showErrorPopup("error", error);
+                                                } else {
+                                                  Get.back();
+                                                }
+                                                loading.value = false;
+                                              },
+                                            )
+                                          else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
+                                            ProfileAction(
+                                              icon: Icons.add_moderator,
+                                              label: "chat.make_admin".tr,
+                                              onTap: (f, loading) async {
+                                                loading.value = true;
+                                                final error = await member.promote(conversation);
+                                                if (error != null) {
+                                                  showErrorPopup("error", error);
+                                                } else {
+                                                  Get.back();
+                                                }
+                                                loading.value = false;
+                                              },
+                                            ),
 
-                                        //* Demotion actions
-                                        if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
-                                          ProfileAction(
-                                            icon: Icons.remove_moderator,
-                                            label: "chat.remove_moderator".tr,
-                                            onTap: (f, loading) async {
-                                              loading.value = true;
-                                              final error = await member.demote(conversation);
-                                              if (error != null) {
-                                                showErrorPopup("error", error);
-                                              } else {
-                                                Get.back();
-                                              }
-                                              loading.value = false;
-                                            },
-                                          )
-                                        else if (ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
-                                          ProfileAction(
-                                            icon: Icons.remove_moderator,
-                                            label: "chat.remove_admin".tr,
-                                            onTap: (f, loading) async {
-                                              loading.value = true;
-                                              final error = await member.demote(conversation);
-                                              if (error != null) {
-                                                showErrorPopup("error", error);
-                                              } else {
-                                                Get.back();
-                                              }
-                                              loading.value = false;
-                                            },
-                                          ),
+                                          //* Demotion actions
+                                          if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
+                                            ProfileAction(
+                                              icon: Icons.remove_moderator,
+                                              label: "chat.remove_moderator".tr,
+                                              onTap: (f, loading) async {
+                                                loading.value = true;
+                                                final error = await member.demote(conversation);
+                                                if (error != null) {
+                                                  showErrorPopup("error", error);
+                                                } else {
+                                                  Get.back();
+                                                }
+                                                loading.value = false;
+                                              },
+                                            )
+                                          else if (ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
+                                            ProfileAction(
+                                              icon: Icons.remove_moderator,
+                                              label: "chat.remove_admin".tr,
+                                              onTap: (f, loading) async {
+                                                loading.value = true;
+                                                final error = await member.demote(conversation);
+                                                if (error != null) {
+                                                  showErrorPopup("error", error);
+                                                } else {
+                                                  Get.back();
+                                                }
+                                                loading.value = false;
+                                              },
+                                            ),
 
-                                        //* Removal actions
-                                        if (ownRole.higherOrEqual(MemberRole.moderator) && member.role.lowerThan(ownRole))
-                                          ProfileAction(
-                                            icon: Icons.person_remove,
-                                            label: "chat.remove_member".tr,
-                                            color: Get.theme.colorScheme.errorContainer,
-                                            iconColor: Get.theme.colorScheme.error,
-                                            onTap: (f, loading) async {
-                                              loading.value = true;
-                                              final error = await member.remove(conversation);
-                                              if (error != null) {
-                                                showErrorPopup("error", error);
-                                              } else {
-                                                Get.back();
-                                              }
-                                              loading.value = false;
-                                            },
-                                          ),
-                                      ] +
-                                      ProfileDefaults.buildDefaultActions(friend);
-                                },
-                              ),
-                            );
-                          }
-                          return;
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(elementSpacing),
-                          child: Row(
-                            children: [
-                              Expanded(child: UserRenderer(id: member.address)),
-                              horizontalSpacing(elementSpacing),
-                              if (member.role != MemberRole.user)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: defaultSpacing),
-                                  child: Tooltip(
-                                    message: member.role == MemberRole.admin ? "chat.admin".tr : "chat.moderator".tr,
-                                    child: Icon(
-                                      Icons.shield,
-                                      color: member.role == MemberRole.admin ? Get.theme.colorScheme.error : Get.theme.colorScheme.onPrimary,
+                                          //* Removal actions
+                                          if (ownRole.higherOrEqual(MemberRole.moderator) && member.role.lowerThan(ownRole))
+                                            ProfileAction(
+                                              icon: Icons.person_remove,
+                                              label: "chat.remove_member".tr,
+                                              color: Get.theme.colorScheme.errorContainer,
+                                              iconColor: Get.theme.colorScheme.error,
+                                              onTap: (f, loading) async {
+                                                loading.value = true;
+                                                final error = await member.remove(conversation);
+                                                if (error != null) {
+                                                  showErrorPopup("error", error);
+                                                } else {
+                                                  Get.back();
+                                                }
+                                                loading.value = false;
+                                              },
+                                            ),
+                                        ] +
+                                        ProfileDefaults.buildDefaultActions(friend);
+                                  },
+                                ),
+                              );
+                            }
+                            return;
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(elementSpacing),
+                            child: Row(
+                              children: [
+                                Expanded(child: UserRenderer(id: member.address)),
+                                horizontalSpacing(elementSpacing),
+                                if (member.role != MemberRole.user)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: defaultSpacing),
+                                    child: Tooltip(
+                                      message: member.role == MemberRole.admin ? "chat.admin".tr : "chat.moderator".tr,
+                                      child: Icon(
+                                        Icons.shield,
+                                        color: member.role == MemberRole.admin ? Get.theme.colorScheme.error : Get.theme.colorScheme.onPrimary,
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

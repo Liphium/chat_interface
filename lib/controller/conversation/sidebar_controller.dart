@@ -74,7 +74,7 @@ class SidebarController {
 
   /// Helper function to get the current key (for the current open sidebar tab)
   static String getCurrentKey() {
-    return currentOpenTab.peek().key;
+    return currentOpenTab.value.key;
   }
 }
 

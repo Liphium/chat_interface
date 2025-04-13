@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
@@ -7,6 +8,7 @@ import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
+import 'package:chat_interface/pages/chat/components/conversations/conversation_members_bar.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_search_bar.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/status/error/offline_hider.dart';
@@ -193,14 +195,20 @@ class _MessageBarState extends State<MessageBar> {
                               icon: Icon(
                                 Icons.group,
                                 color:
-                                    SettingController.settings[AppSettings.showGroupMembers]!.value.value
+                                    SidebarController.rightSidebar[SidebarController.getCurrentKey()] is ConversationMembersRightSidebar
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSurface,
                               ),
                               onPressed: () {
-                                SettingController.settings[AppSettings.showGroupMembers]!.setValue(
-                                  !SettingController.settings[AppSettings.showGroupMembers]!.value.value,
-                                );
+                                if (SidebarController.rightSidebar[SidebarController.getCurrentKey()] is ConversationMembersRightSidebar) {
+                                  // Hide the sidebar in case it is currently there
+                                  SettingController.settings[AppSettings.showGroupMembers]!.setValue(false);
+                                  SidebarController.setRightSidebar(null);
+                                } else {
+                                  // Show the sidebar
+                                  SettingController.settings[AppSettings.showGroupMembers]!.setValue(true);
+                                  SidebarController.setRightSidebar(ConversationMembersRightSidebar(widget.conversation));
+                                }
                               },
                             ),
                           ),
@@ -216,13 +224,13 @@ class _MessageBarState extends State<MessageBar> {
                       icon: Icon(
                         Icons.search,
                         color:
-                            SidebarController.rightSidebar.value is MessageSearchRightSidebar
+                            SidebarController.rightSidebar[SidebarController.getCurrentKey()] is MessageSearchRightSidebar
                                 ? Theme.of(context).colorScheme.onPrimary
                                 : Theme.of(context).colorScheme.onSurface,
                       ),
                       onPressed: () {
-                        if (SidebarController.rightSidebar.value is MessageSearchRightSidebar) {
-                          SidebarController.setRightSidebar(null);
+                        if (SidebarController.rightSidebar[SidebarController.getCurrentKey()] is MessageSearchRightSidebar) {
+                          MessageController.restoreRightSidebar();
                         } else {
                           SidebarController.setRightSidebar(
                             MessageSearchRightSidebar(SidebarController.getCurrentKey(), widget.conversation.id.encode()),
