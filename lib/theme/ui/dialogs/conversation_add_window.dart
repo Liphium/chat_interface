@@ -25,7 +25,7 @@ class ConversationAddWindow extends StatefulWidget {
   final String action;
   final bool nameField;
   final List<Friend>? initial;
-  final ContextMenuData position;
+  final ContextMenuData? position;
 
   /// Called when clicking the action button (returns error text or closed on null)
   final Future<String?> Function(List<Friend>, String?)? onDone;

@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
 class SmoothDialogController {
+  final Duration duration;
   final widgetOne = signal<Widget?>(null);
   final widgetTwo = signal<Widget?>(null);
   late AnimationController _one, _two;
@@ -18,7 +19,7 @@ class SmoothDialogController {
   var keyTwo = Random().nextDouble();
   bool direction = true;
 
-  SmoothDialogController(Widget child) {
+  SmoothDialogController(Widget child, {this.duration = const Duration(milliseconds: 750)}) {
     widgetTwo.value = child;
   }
 
@@ -39,18 +40,18 @@ class SmoothDialogController {
     direction = !direction;
     if (direction) {
       _two.value = 0;
-      unawaited(_two.animateTo(1, duration: 750.ms, curve: curve));
+      unawaited(_two.animateTo(1, duration: duration, curve: curve));
       _one.value = 1;
-      unawaited(_one.animateBack(0.0, duration: 750.ms, curve: curve));
+      unawaited(_one.animateBack(0.0, duration: duration, curve: curve));
       widgetTwo.value = widget;
     } else {
       _one.value = 0;
-      unawaited(_one.animateTo(1, duration: 750.ms, curve: curve));
+      unawaited(_one.animateTo(1, duration: duration, curve: curve));
       _two.value = 1;
-      unawaited(_two.animateBack(0.0, duration: 750.ms, curve: curve));
+      unawaited(_two.animateBack(0.0, duration: duration, curve: curve));
       widgetOne.value = widget;
     }
-    transitionComplete = Future.delayed(750.ms);
+    transitionComplete = Future.delayed(duration);
   }
 
   Future<void> transitionToContinuos(Widget widget) async {
@@ -60,10 +61,10 @@ class SmoothDialogController {
     widgetOne.value = widgetToClone;
     widgetTwo.value = widget;
     _two.value = 0;
-    unawaited(_two.animateTo(1, duration: 750.ms, curve: curve));
+    unawaited(_two.animateTo(1, duration: duration, curve: curve));
     _one.value = 1;
-    unawaited(_one.animateBack(0.0, duration: 750.ms, curve: curve));
-    transitionComplete = Future.delayed(750.ms);
+    unawaited(_one.animateBack(0.0, duration: duration, curve: curve));
+    transitionComplete = Future.delayed(duration);
   }
 }
 

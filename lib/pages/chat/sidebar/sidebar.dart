@@ -1,14 +1,9 @@
-import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
-import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_conversations.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
 import 'package:chat_interface/pages/chat/sidebar/universal_create_window.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/error/offline_hider.dart';
-import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
-import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
-import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +19,7 @@ class Sidebar extends StatefulWidget {
 
 class _SidebarState extends State<Sidebar> {
   final _query = signal("");
-  final _universalKey = GlobalKey(), _addConvKey = GlobalKey(), _addSpaceKey = GlobalKey();
+  final _universalKey = GlobalKey();
 
   @override
   void dispose() {
@@ -106,84 +101,16 @@ class _SidebarState extends State<Sidebar> {
                               OfflineHider(
                                 axis: Axis.horizontal,
                                 alignment: Alignment.center,
-                                child: Row(
-                                  children: [
-                                    horizontalSpacing(elementSpacing),
-                                    Visibility(
-                                      visible: areSpacesSupported,
-                                      child: IconButton(
-                                        key: _addSpaceKey,
-                                        onPressed: () {
-                                          if (isWeb) {
-                                            Get.dialog(UpgradeWindow());
-                                            return;
-                                          }
-
-                                          //* Open space add window
-                                          final RenderBox box =
-                                              _addSpaceKey.currentContext?.findRenderObject()
-                                                  as RenderBox;
-                                          showModal(
-                                            SpaceAddWindow(
-                                              position: box.localToGlobal(
-                                                box.size.bottomLeft(const Offset(0, 5)),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        icon: Icon(
-                                          Icons.rocket_launch,
-                                          color: Get.theme.colorScheme.onPrimary,
-                                        ),
+                                child: IconButton(
+                                  key: _universalKey,
+                                  onPressed: () {
+                                    showModal(
+                                      UniversalCreateWindow(
+                                        data: ContextMenuData.fromKey(_universalKey, below: true),
                                       ),
-                                    ),
-                                    horizontalSpacing(elementSpacing),
-                                    IconButton(
-                                      key: _universalKey,
-                                      onPressed: () {
-                                        showModal(
-                                          UniversalCreateWindow(
-                                            data: ContextMenuData.fromKey(
-                                              _universalKey,
-                                              below: true,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      icon: Icon(
-                                        Icons.add_circle,
-                                        color: theme.colorScheme.onPrimary,
-                                      ),
-                                    ),
-                                    horizontalSpacing(elementSpacing),
-                                    IconButton(
-                                      key: _addConvKey,
-                                      onPressed: () {
-                                        final RenderBox box =
-                                            _addConvKey.currentContext?.findRenderObject()
-                                                as RenderBox;
-
-                                        // Open conversation add window
-                                        showModal(
-                                          ConversationAddWindow(
-                                            position: ContextMenuData(
-                                              box.localToGlobal(
-                                                box.size.bottomLeft(
-                                                  const Offset(0, elementSpacing),
-                                                ),
-                                              ),
-                                              true,
-                                              true,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      icon: Icon(
-                                        Icons.chat_bubble,
-                                        color: Get.theme.colorScheme.onPrimary,
-                                      ),
-                                    ),
-                                  ],
+                                    );
+                                  },
+                                  icon: Icon(Icons.add_circle, color: theme.colorScheme.onPrimary),
                                 ),
                               ),
                             ],

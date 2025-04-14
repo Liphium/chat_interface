@@ -125,8 +125,8 @@ class DialogBase extends StatelessWidget {
 }
 
 class SlidingWindowBase extends StatelessWidget {
-  final ContextMenuData position;
-  final bool lessPadding;
+  final ContextMenuData? position;
+  final double padding;
   final Widget child;
   final List<Widget> title;
   final double maxSize;
@@ -135,13 +135,29 @@ class SlidingWindowBase extends StatelessWidget {
     super.key,
     required this.title,
     required this.position,
-    this.lessPadding = false,
+    this.padding = dialogPadding,
     required this.child,
     this.maxSize = 350,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Return only the child in case there is no position data
+    if (position == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: elementSpacing),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [...title]),
+            ),
+          if (title.isNotEmpty) verticalSpacing(defaultSpacing),
+          child,
+        ],
+      );
+    }
+
     // Return without animation on mobile
     if (isMobileMode()) {
       return LPHBottomSheet(
@@ -167,15 +183,15 @@ class SlidingWindowBase extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          left: position.fromLeft ? position.start.dx : null,
-          right: position.fromLeft ? null : position.start.dx,
-          top: position.fromTop ? position.start.dy : null,
-          bottom: position.fromTop ? null : position.start.dy,
+          left: position!.fromLeft ? position!.start.dx : null,
+          right: position!.fromLeft ? null : position!.start.dx,
+          top: position!.fromTop ? position!.start.dy : null,
+          bottom: position!.fromTop ? null : position!.start.dy,
           child: Animate(
             effects: [
               MoveEffect(
                 duration: 400.ms,
-                begin: Offset(0, -100 * (position.fromTop ? 1 : -1)),
+                begin: Offset(0, -100 * (position!.fromTop ? 1 : -1)),
                 curve: scaleAnimationCurve,
               ),
               ShakeEffect(
@@ -197,7 +213,7 @@ class SlidingWindowBase extends StatelessWidget {
                 color: Get.theme.colorScheme.onInverseSurface,
                 borderRadius: BorderRadius.circular(dialogBorderRadius),
                 child: Padding(
-                  padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
+                  padding: EdgeInsets.all(padding),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

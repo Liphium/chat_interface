@@ -55,7 +55,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
     final friend = FriendController.friends[widget.message.senderAddress];
 
     return SlidingWindowBase(
-      lessPadding: true,
+      padding: defaultSpacing,
       position: widget.data,
       maxSize: 250,
       title: const [],

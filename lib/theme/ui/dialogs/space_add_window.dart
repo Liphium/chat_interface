@@ -13,9 +13,7 @@ import 'package:signals/signals_flutter.dart';
 import '../../../util/vertical_spacing.dart';
 
 class SpaceAddWindow extends StatefulWidget {
-  final Offset position;
-
-  const SpaceAddWindow({super.key, required this.position});
+  const SpaceAddWindow({super.key});
 
   @override
   State<SpaceAddWindow> createState() => _ConversationAddWindowState();
@@ -42,7 +40,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
     if (FriendController.friends.length == 1) {
       return SlidingWindowBase(
         title: [Text("chat.space.add".tr, style: theme.textTheme.titleMedium)],
-        position: ContextMenuData(widget.position, true, true),
+        position: null,
         child: Column(
           children: [
             Text("no.friends".tr, style: theme.textTheme.bodyMedium),
@@ -61,7 +59,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
 
     return SlidingWindowBase(
       title: [Text("chat.space.add".tr, style: theme.textTheme.titleMedium)],
-      position: ContextMenuData(widget.position, true, true),
+      position: null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
