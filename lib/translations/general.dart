@@ -108,6 +108,14 @@ class GeneralTranslations extends Translations {
       // Tray icon context menu
       'tray.show_window': 'Show window',
       'tray.exit_app': 'Exit app',
+
+      // Features
+      'square': 'Square',
+      'square.desc': 'A place to hang out and chat.',
+      'conversation': 'Conversation',
+      'conversation.desc': 'A regular conversation for chatting.',
+      'space': 'Space',
+      'space.desc': 'Talk to your friends and have fun.',
     },
 
     //* German

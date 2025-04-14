@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChatSettings {
+  static final dotAmount = Setting<double>("appearance.chat.dot_amount", 2);
   static const String chatTheme = "appearance.chat.theme";
 
   static final chatThemes = <SelectableItem>[
@@ -16,6 +18,7 @@ class ChatSettings {
 
   static void addSettings() {
     SettingController.addSetting(Setting<int>(chatTheme, 1));
+    SettingController.addSetting(dotAmount);
   }
 }
 
@@ -34,10 +37,22 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text("appearance.chat.dot_amount.title".tr, style: Get.theme.textTheme.labelLarge),
+          verticalSpacing(defaultSpacing),
+
+          // How many dots appear after Create in the create window (VERY IMPORTANT)
+          DoubleSelectionSetting(
+            settingName: ChatSettings.dotAmount.label,
+            description: "appearance.chat.dot_amount",
+            min: 1,
+            max: 5,
+            rounded: true,
+          ),
+          verticalSpacing(sectionSpacing),
+
           //* Chat theme
           Text("appearance.chat.theme".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
-
           ListSelectionSetting(
             setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>,
             items: ChatSettings.chatThemes,

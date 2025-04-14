@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
@@ -35,20 +36,20 @@ class _UniversalCreateWindowState extends State<UniversalCreateWindow>
   late final _types = <_CreateData>[
     _CreateData(
       icon: Icons.public,
-      title: "Square",
-      description: "A place to hang out and chat.",
-      build: () => ConversationAddWindow(position: null),
+      title: "square".tr,
+      description: "square.desc".tr,
+      build: () => ConversationAddWindow(position: null, title: "squares.create"),
     ),
     _CreateData(
       icon: Icons.chat,
-      title: "Conversation",
-      description: "A regular conversation for chatting.",
+      title: "conversation".tr,
+      description: "conversation.desc".tr,
       build: () => ConversationAddWindow(position: null),
     ),
     _CreateData(
       icon: Icons.rocket_launch,
-      title: "Space",
-      description: "Talk to your friends and have fun.",
+      title: "space".tr,
+      description: "space.desc".tr,
       build: () => SpaceAddWindow(),
     ),
   ];
@@ -63,7 +64,10 @@ class _UniversalCreateWindowState extends State<UniversalCreateWindow>
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("${"create".tr}..", style: theme.textTheme.labelLarge),
+              Text(
+                "${"create".tr}${List.filled(ChatSettings.dotAmount.getValue().toInt(), '.').join('')}",
+                style: theme.textTheme.labelLarge,
+              ),
 
               Column(
                 children: List.generate(_types.length, (index) {

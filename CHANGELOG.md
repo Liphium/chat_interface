@@ -18,10 +18,11 @@
   - Regression: Links are no longer clickable (TODO: Fix before 1.0.0 Beta)
 - Fixed cards in rotated inventories having an incorrect rotation
 - Fixed not creating a new inventory when the old one has been deleted
-- Fixed the "Edit title" not actually doing anything
+- Fixed the "Edit title" button not actually doing anything
 - Changed member and search sidebar to one consistent design
 - Fixed member and search sidebar both being open when searching in group chats
 - Fixed search not being scoped to individual conversations (and basically unusable)
+- You can now choose how many dots appear
 
 ## 0.6.0
 

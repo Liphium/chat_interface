@@ -148,9 +148,11 @@ class ConversationService extends VaultTarget {
     // Open a new conversation with the friend
     return (
       null,
-      await _openConversation(model.ConversationType.directMessage, [
-        friend,
-      ], directMessagePrefix + friend.id.id),
+      await openConversation(
+        model.ConversationType.directMessage,
+        [friend],
+        ConversationContainer(directMessagePrefix + friend.id.id),
+      ),
     );
   }
 
@@ -158,22 +160,15 @@ class ConversationService extends VaultTarget {
   ///
   /// If the returned string is not null, it is an error message.
   static Future<String?> openGroupConversation(List<Friend> friends, String name) {
-    return _openConversation(model.ConversationType.group, friends, name);
+    return openConversation(model.ConversationType.group, friends, ConversationContainer(name));
   }
 
   /// The underlying method for creating a conversation on the server.
-  static Future<String?> _openConversation(
+  static Future<String?> openConversation(
     model.ConversationType type,
     List<Friend> friends,
-    String name,
+    ConversationContainer container,
   ) async {
-    // Make sure the name of the conversation matches the requirements
-    if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]!) {
-      return "conversations.name.length".trParams({
-        "length": specialConstants[Constants.specialConstantMaxConversationNameLength].toString(),
-      });
-    }
-
     // Prepare the conversation
     final conversationKey = randomSymmetricKey();
     final ownMemberContainer = MemberContainer(
@@ -184,8 +179,7 @@ class ConversationService extends VaultTarget {
       final container = MemberContainer(friend.id);
       memberContainers[friend.id] = container.encrypted(conversationKey);
     }
-    final conversationContainer = ConversationContainer(name);
-    final encryptedData = conversationContainer.encrypted(conversationKey);
+    final encryptedData = container.encrypted(conversationKey);
 
     // Create the conversation on the server
     final body = await postNodeJSON("/conversations/open", <String, dynamic>{
@@ -205,7 +199,7 @@ class ConversationService extends VaultTarget {
       "",
       model.ConversationType.values[body["type"]],
       ConversationToken.fromJson(body["admin_token"]),
-      conversationContainer,
+      container,
       packagedKey,
       0,
       DateTime.now().millisecondsSinceEpoch,

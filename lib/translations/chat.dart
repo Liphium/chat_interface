@@ -60,7 +60,7 @@ class ChatPageTranslations extends Translations {
           'This conversation is end-to-end encrypted with the chat history decryptable by all members (both current and past).',
       'conversation.info.town': 'This conversation is hosted on @town.',
       'conversations.placeholder': 'Search',
-      'conversations.create': 'Create conversation',
+      'conversations.create': 'Create Conversation',
       'conversations.name.edit': 'Edit conversation title',
       'conversations.name.placeholder': 'the gang',
       'conversations.name': 'Conversation name',
@@ -78,7 +78,7 @@ class ChatPageTranslations extends Translations {
       'chat.not.signed':
           'This message could have been sent by someone else or modified by the server.',
       'conversations.add': 'Add a member',
-      'conversations.add.create': 'New conversation',
+      'conversations.add.create': 'New Conversation',
       'choose.members': 'Choose more than one member to create a group chat.',
 
       // Conversation members
@@ -167,7 +167,7 @@ class ChatPageTranslations extends Translations {
           'It\'s pretty empty in here. You can add stuff to it by favoriting images or GIFs in conversations.',
 
       // Spaces
-      'chat.space.add': 'New space',
+      'chat.space.add': 'Create Space',
       'join.space': 'Join Space',
       'join.space.popup':
           'Some people click this on accident, so do you really want to join this space?',

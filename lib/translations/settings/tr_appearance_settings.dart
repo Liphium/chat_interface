@@ -26,6 +26,8 @@ class AppearanceSettingsTranslations extends Translations {
       'theme.apply': 'Apply your theme',
 
       // Chat theme settings
+      'appearance.chat.dot_amount.title': 'Choose how many dots appear',
+      'appearance.chat.dot_amount': 'Amount of dots',
       'appearance.chat.theme': 'Chat theme',
       'appearance.chat.theme.material': 'Material',
       'appearance.chat.theme.bubbles': 'Chat bubbles',
